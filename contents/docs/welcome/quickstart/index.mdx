@@ -1,0 +1,49 @@
+---
+title: Quickstart
+---
+
+## Prerequisites
+
+- Docker
+- Node 20+
+
+<Note type="note">
+  <aside>
+    This quickstart uses React, but we also have it available for SolidJS. See: [SolidJS](https://www.notion.so/SolidJS-12b3bed89545819d852ce6ab81b7a295?pvs=21).
+  </aside>
+</Note>
+
+## Run
+
+```bash
+git clone git@github.com:rocicorp/hello-zero.git
+cd hello-zero
+npm install
+npm run docker-up
+
+# in a second terminal
+npx zero-cache
+
+# in yet another terminal
+npm run dev
+```
+
+## Quick Overview
+
+`hello-zero` is a simple spreadsheet-style app that allows querying over a small dataset of fake messages between early Zero users. Here are some things to try:
+
+- Press the **Add Messages** button to add messages to the UI. Any logged-in or anonymous users are allowed to add messages.
+- Press the **Remove Messages** button to remove messages. Only logged-in users are allowed to remove messages. You can **hold shift** to bypass the UI warning and see that write access control is being enforced server-side – the UI flickers as the optimistic write happens instantly and is then reverted by the server. Press **login** to login as a random user, then the remove button will work.
+- Open two different browsers and see how fast sync propagates changes.
+- Add a filter using the **From** and **Contains** controls. Notice that filters are fully dynamic and synced.
+- Edit a message by pressing the **pencil icon**. You can only edit messages from the user you’re logged in as. As before you can attempt to bypass by holding shift.
+- Check out the SQL schema for this database in `seed.sql`.
+- Login to the database with `psql postgresql://user:password@127.0.0.1/postgres` (or any other pg viewer) and delete or alter a row. Observe that it deletes from UI automatically.
+
+## Detailed UI and Code Walkthrough
+
+<Note type="danger">
+  <aside>
+    TO DO: CREATE VIDEO COMPONENT AND ADD ZERO.MP4
+  </aside>
+</Note>

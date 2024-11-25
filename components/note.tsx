@@ -3,15 +3,10 @@ import clsx from "clsx";
 import { PropsWithChildren } from "react";
 
 type NoteProps = PropsWithChildren & {
-  title?: string;
   type?: "note" | "danger" | "warning" | "success";
 };
 
-export default function Note({
-  children,
-  title = "Note",
-  type = "note",
-}: NoteProps) {
+export default function Note({ children, type = "note" }: NoteProps) {
   const noteClassNames = clsx({
     "dark:bg-neutral-900 bg-neutral-100": type == "note",
     "dark:bg-red-950 bg-red-100 border-red-200 dark:border-red-900":
@@ -29,7 +24,7 @@ export default function Note({
         noteClassNames
       )}
     >
-      <p className="font-semibold -mb-3">{title}:</p> {children}
+      {children}
     </div>
   );
 }

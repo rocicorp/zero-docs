@@ -1,0 +1,34 @@
+---
+title: Welcome to Zero Alpha
+---
+
+Zero is a new kind of sync engine powered by queries.
+
+Rather than syncing the entire database, or using rules to carefully specify what to sync, you just write queries. Zero manages its own cache, keeping up to ~20MB of the most commonly used data on the device. Data from prior queries is automatically used to answer new queries when possible.
+
+The result is that almost all queries are answered locally, instantly. It feels like you have access to the entire backend database directly from the client in memory.  Occasionally, when you do a more specific query, Zero falls back to the server. But this happens automatically without any extra work required.
+
+Zero is made possible by a custom streaming query engine we built called [ZQL](https://github.com/rocicorp/mono/tree/main/packages/zql), which uses [Incremental View Maintenance](https://www.vldb.org/pvldb/vol16/p1601-budiu.pdf) on both client and server to efficiently keep large, complex queries up to date.
+
+## Status
+
+We’re approaching a public alpha. There are features missing that would be required for most apps, and Zero is not yet super easy to deploy. That said, Zero is already quite fun to work with – we are using it ourselves to build our very own Linear-style bug tracker. We find it’s much more productive than alternatives, even having to work around a few missing features.
+
+## Access
+
+You’ll need access to:
+
+- [hello-zero repo](https://github.com/rocicorp/hello-zero)
+- [Rocicorp monorepo](https://github.com/rocicorp/my-first-zapp/)
+- [@rocicorp/zero npm package](https://www.npmjs.com/package/@rocicorp/zero)
+- [#zero-users discord chann](https://discord.com/channels/830183651022471199/1288232858795769917)[el](https://discord.com/channels/830183651022471199/1246101458928144434)
+
+If you don’t have access to one of these DM aaron.
+
+## Quickstart
+
+Get up and running in 5 minutes:
+
+[Quickstart](/docs/welcome/quickstart)
+
+Thank you for choosing the Documentation Template for your project. Whether you're documenting software, APIs, or processes, we're here to support you in creating clear and effective documentation. Happy documenting!

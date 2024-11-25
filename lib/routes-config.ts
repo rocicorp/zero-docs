@@ -9,29 +9,34 @@ export type EachRoute = {
 
 export const ROUTES: EachRoute[] = [
   {
-    title: "Getting Started",
-    href: "/getting-started",
+    title: "Welcome",
+    href: "/welcome",
     noLink: true,
     items: [
       { title: "Introduction", href: "/introduction" },
-      {
-        title: "Installation",
-        href: "/installation",
-        items: [
-          { title: "Laravel", href: "/laravel" },
-          { title: "React", href: "/react" },
-          { title: "Gatsby", href: "/gatsby" },
-        ],
-      },
+      { title: "Quickstart", href: "/quickstart" },
     ],
   },
   {
-    title: "Server Actions",
-    href: "/server-actions",
+    title: "Reference",
+    href: "/reference",
     noLink: true,
     items: [
-      { title: "getSession", href: "/getSession" },
-      { title: "getToken", href: "/getToken" },
+      { title: "Samples", href: "/samples" },
+      { title: "Concepts (How Zero Works)", href: "/concepts" },
+      { title: "Reading Data with ZQL", href: "/reading-data-with-zql" },
+      { title: "Writing Data with Mutators", href: "/writing-data-with-mutators" },
+      { title: "Connecting to Postgres", href: "/connecting-to-postgres" },
+      { title: "Supported Postgres Features", href: "/supported-postgres-features" },
+      { title: "Preloading", href: "/preloading" },
+      { title: "Authentication and Permissions", href: "/authentication-and-permissions" },
+      { title: "Schema Management", href: "/schema-management" },
+      { title: "`zero-cache` Config", href: "/zero-cache-config" },
+      { title: "SolidJS", href: "/solidjs" },
+      { title: "Recipes", href: "/recipes" },
+      { title: "Roadmap", href: "/roadmap" },
+      { title: "Reporting Bugs", href: "/reporting-bugs" },
+      { title: "Release Notes", href: "/release-notes" },
     ],
   },
 ];

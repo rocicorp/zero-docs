@@ -7,7 +7,7 @@ import { page_routes } from "@/lib/routes-config";
 
 export const NAVLINKS = [
   {
-    title: "Documentation",
+    title: "Docs",
     href: `/docs${page_routes[0].href}`,
   },
   {
@@ -50,7 +50,7 @@ function Logo() {
   return (
     <Link href="/" className="flex items-center gap-3">
       <HexagonIcon className="w-6 h-6 text-muted-foreground fill-current" />
-      <h2 className="text-md font-bold font-code">AriaDocsLite</h2>
+      <h2 className="text-md font-bold font-code">Zero</h2>
     </Link>
   );
 }

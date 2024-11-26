@@ -12,7 +12,7 @@ export const NAVLINKS = [
   },
   {
     title: "GitHub",
-    href: "https://github.com/nisabmohd/Aria-Docs/tree/minimal-docs",
+    href: "https://github.com/rocicorp/hello-zero",
   },
 ];
 

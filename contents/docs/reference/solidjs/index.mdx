@@ -2,8 +2,25 @@
 title: SolidJS
 ---
 
-<Note type="warning">
-  <aside>
-    TO DO: Copy from Notion
-  </aside>
-</Note>
+Zero has built-in support for Solid. Here’s what basic usage looks like:
+
+```tsx
+import {useQuery} from "@rocicorp/zero/solid";
+
+const issues = useQuery(() => {
+  let issueQuery = z.query.issue
+    .related('creator')
+    .related('labels')
+    .limit(100);
+  const userID = selectedUserID();
+
+  if (userID) {
+    issueQuery = issueQuery.where('creatorID', '=', userID);
+  }
+  return issueQuery;
+});
+```
+
+Complete quickstart here:
+
+https://github.com/rocicorp/hello-zero-solid

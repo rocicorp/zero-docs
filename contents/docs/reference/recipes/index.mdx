@@ -2,9 +2,22 @@
 title: Recipes
 ---
 
-<Note type="warning">
-  <aside>
-    TO DO: Copy from Notion
-  </aside>
-</Note>
+## Debugging Replication
 
+- If zero-cache gets stuck or is acting weird, you can clear its state by deleting its sqlite file (see your `.env` file for its location). But first please take a screenshot and send it to us and let us know what you saw.
+- If you copied your setup from hello-zero or hello-zero-solid, you can also run `npm run clean` which wipes all state from the system.
+- During development it can be useful to run the browser in memory mode if you get tired of clearing browser storage. Use `new Zero({kvStore: "mem"})`.
+- You can explore the sqlite replica that Zero maintains with the builtin `zero-sqlite` binary:
+    
+    ```bash
+    $ npx zero-sqlite3 /tmp/my-zero-replica.db
+    ```
+    
+    This can help to narrow down whether sync made it to sqlite.
+    
+- If you see `FATAL:  sorry, too many clients already` in logs, it’s because you have two zero-cache instances running against dev. One is probably in a background tab somewhere. In production, zero-cache can run horizontally scaled but on dev it doesn’t run in the config that allows that.
+
+## Building with Zero
+
+- You can use any Postgres feature that changes synced tables. Any changes will be synced. For example to create a `lastModified` column  that updates on changes, just do the normal trigger thing. Zero will faithfully sync changed written by the trigger. The change won’t be optimistic, but for many use cases that’s fine. Postgres triggers are useful for all kinds of things – for example zbugs uses them to [denormalize a many-to-many relationship](https://github.com/rocicorp/mono/blob/main/apps/zbugs/docker/init_upstream/init.sql#L28) to temporarily work around a missing feature of zql. And we also plan to use them as part of schema migration.
+- Curious how to do something with Zero? Does [zbugs](https://bugs.rocicorp.dev/) do it? Check [`/apps/zbugs`](https://github.com/rocicorp/mono/tree/main/apps/zbugs) to see how in the Rocicorp monorepo.

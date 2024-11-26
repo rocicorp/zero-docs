@@ -1,0 +1,38 @@
+---
+title: Zero 0.2
+description: Skip Mode and Compound PKs
+---
+
+## Breaking changes
+
+- None
+
+## Features
+
+- “Skip mode”: zero-cache now skips columns with unsupported datatypes. A warning is printed out when this happens:
+    
+  ![CleanShot 2024-10-10 at 21.26.42@2x.png](https://prod-files-secure.s3.us-west-2.amazonaws.com/3d13995e-6073-45d4-874a-7fb5870f04f9/37e13f46-2fe9-4e10-846d-0a22759255a4/CleanShot_2024-10-10_at_21.26.422x.png)
+    
+  This makes it easy to use zero-cache with existing schemas that have columns Zero can’t handle. You can [pair this with Postgres triggers](https://www.notion.so/Welcome-to-Zero-Alpha-1153bed8954580eba9f8e78fcd4f4c8d?pvs=21) to easily translate unsupported types into something Zero can sync.
+    
+- Zero now supports compound primary keys. You no longer need to include an extraneous `id` column on the junction tables.
+
+## Fixes
+
+- Change the way Zero detects unsupported environments to work in One (and any other supported env). Before, Zero was looking for WebSocket and indexedDB early on, but indexedDB won’t be present on RN as SQLite will be used. Instead look for indexedDB only at use.
+- Require Node v20 explicitly in package.json to prevent accidentally compiling better-sqlite3 with different Node version than running with.
+- Ensure error messages early in startup get printed out before shutting down in multiprocess mode.
+
+## Docs
+
+- [Factored out the sample app](https://github.com/rocicorp/my-first-zapp) from the docs into its own Github repo so you can just download it and poke around if you prefer that.
+
+## Source tree fixes
+
+- Run zero-cache from source. You no longer have to build `zero` before running `zbugs`, it picks up the changes automatically.
+
+## zbugs
+
+- Numerous polish/styling fixes
+- Change default to ‘open’ bugs
+- Add ‘assignee’ field

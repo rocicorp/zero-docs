@@ -1,0 +1,55 @@
+---
+title: Zero 0.6
+description: Relationship FIlters
+---
+
+## Install
+
+```bash
+npm install @rocicorp/zero@0.6
+```
+
+## Upgrade Guide
+
+This release is a bit harder to upgrade to than previous alphas. For a step-by-step guide, please refer to the commits that upgrade the React and Solid quickstart apps:
+
+- [Upgrading hello-zero from Zero 0.5 to 0.6](https://github.com/rocicorp/hello-zero/compare/ee837552be8419fbcbe4c5887609c89a7b1c4e07...8a0d29149bac0ab10aa25de3ebdb25ab70bc0d96)
+- [Upgrading hello-zero-solid from Zero 0.5 to 0.6](https://github.com/rocicorp/hello-zero-solid/compare/79405b2da06b059a184abec69fdc20f071c58c4d...f4fed1ab7555bdd3bc131536863d60e799de571a)
+
+## Breaking Changes
+
+- Totally new configuration system.
+    - `zero.config.ts` is no more – config is now via env vars ([documentation](https://www.notion.so/zero-cache-Config-1453bed89545802d9686c0ef84bf2a77?pvs=21)).
+    - Permissions rules moved into schema ([documentation](https://www.notion.so/Authentication-and-Permissions-12b3bed8954581808617e28e98317b74?pvs=21)).
+- Renamed CRUD mutators to be consistent with SQL naming ([bug](https://bugs.rocicorp.dev/issue/3144), [documentation](https://www.notion.so/Writing-Data-with-Mutators-1463bed8954580e3a351fdf0595bec07?pvs=21)).
+    - `z.mutate.<table>.create -> insert`
+    - `z.mutate.<table>.put -> upsert`
+- Removed `select` from ZQL. It wasn’t doing anything ([documentation](https://www.notion.so/Reading-Data-with-ZQL-12b3bed895458114bde7ea73407b6926?pvs=21))
+- Moved batch mutation to its own `mutateBatch` method. Before the `mutate` field also doubled as a method. This made intellisense hard to understand since `z.mutate` had all the tables as fields but also all the fields of a function.
+
+## Features
+
+- Relationship filters. Queries can now include `whereExists` ([bug](https://bugs.rocicorp.dev/issue/3039), [documentation](https://www.notion.so/Reading-Data-with-ZQL-12b3bed895458114bde7ea73407b6926?pvs=21)).
+- Reworked syntax for compound `where` filters, including ergonomically building `or` expressions with dynamic number of clauses ([bug](https://bugs.rocicorp.dev/issue/3104), [documentation](https://www.notion.so/Reading-Data-with-ZQL-12b3bed895458114bde7ea73407b6926?pvs=21)).
+- Support using Postgres databases without superuser access for smaller apps ([documentation](https://www.notion.so/Connecting-to-Postgres-12b3bed8954581db8e05e1ac77c77515?pvs=21)).
+- Support for running `Zero` client under Cloudflare Durable Objects ([documentation](https://www.notion.so/Samples-12b3bed8954580949a55eefd478c7860?pvs=21)).
+- Reworked support for `null` / `undefined` to properly support optional fields ([bug](https://bugs.rocicorp.dev/issue/3114), [documentation](https://www.notion.so/Schema-Management-12b3bed89545815caf3efba824bfec75?pvs=21)).
+- Added `IS` / `IS NOT` to ZQL to support checking for null ([bug](https://bugs.rocicorp.dev/issue/3028), [documentation](https://www.notion.so/Reading-Data-with-ZQL-12b3bed895458114bde7ea73407b6926?pvs=21)).
+- Improved intellisense for mutators.
+- Added `--port` flag and `ZERO_PORT` environment variable ([bug](https://bugs.rocicorp.dev/issue/3031), [documentation](https://www.notion.so/zero-cache-Config-1453bed89545802d9686c0ef84bf2a77?pvs=21)).
+- Default max connections of zero-cache more conservatively so that it should fit with even common small Postgres configurations.
+- `zero-cache` now accepts requests with any base path, not just `/api`. The `server` parameter to the `Zero` client constructor can now be a host ([`https://myapp-myteam.zero.ms`](https://myapp-myteam.zero.ms/)) or a host with a single path component ([`https://myapp-myteam.zero.ms/zero`](https://myapp-myteam.zero.ms/zero)). These two changes together allow hosting `zero-cache` on same domain with an app that already uses the `/api` prefix ([bug](https://bugs.rocicorp.dev/issue/3115)).
+- Allow Postgres columns with default values, but don’t sync them ([documentation](https://www.notion.so/Supported-Postgres-Features-12b3bed8954581d6a002e26bf5d2cf04?pvs=21)).
+- The `npx zero-sqlite` utility now accepts all the same flags and arguments that `sqlite3` does ([documentation](https://www.notion.so/Recipes-12b3bed8954581d292c5fa29af020f23?pvs=21)).
+
+## zbugs
+
+- Added tooltip describing who submitted which emoji reactions
+- Updated implementation of label, assignee, and owner filters to use relationship filters
+- Updated text filter implementation to use `or` to search description and comments too
+
+## Docs
+
+- Added new [ZQL reference](/docs/reference/reading-data-with-zql)
+- Added new [mutators reference](/docs/reference/writing-data-with-mutators)
+- Added new [config reference](/docs/reference/zero-cache-config)

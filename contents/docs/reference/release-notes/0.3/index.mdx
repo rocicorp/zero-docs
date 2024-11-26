@@ -1,0 +1,52 @@
+---
+title: Zero 0.3
+description: Schema Migrations and Write Perms
+---
+
+## Install
+
+```bash
+npm install @rocicorp/zero@0.3
+```
+
+## Breaking changes
+
+- zero.config file is now TypeScript, not JSON. See: https://github.com/rocicorp/hello-zero/blob/main/zero.config.ts.
+
+## Features
+
+- **Schema Migrations:** Zero now has first-class support for schema migration ([documentation](https://www.notion.so/Schema-Management-12b3bed89545815caf3efba824bfec75?pvs=21)).
+- **Write Permissions:** First-class write permissions based on ZQL ([documentation](https://www.notion.so/Authentication-and-Permissions-12b3bed8954581808617e28e98317b74?pvs=21)).
+- **Date/Time related types:** Zero now natively supports the TIMESTAMP and DATE Postgres types ([sample app](https://github.com/rocicorp/hello-zero/blob/main/src/schema.ts), [documentation](https://www.notion.so/Supported-Postgres-Features-12b3bed8954581d6a002e26bf5d2cf04?pvs=21)).
+- **SolidJS:** We now have first-class support for SolidJS ([documentation](https://www.notion.so/SolidJS-12b3bed89545819d852ce6ab81b7a295?pvs=21)).
+- **Intellisense for Schema Definition:** Introduce `createSchema` and `createTableSchema` helper functions to enable intellisense when defining shemas. See [Sample App](https://github.com/rocicorp/hello-zero/blob/main/src/schema.ts#L10).
+- **`escapeLike()` :** Add helper to properly escape strings for use in `LIKE` filters. See [Sample App](https://github.com/rocicorp/hello-zero/blob/main/src/App.tsx#L37).
+- **New QuickStart App:** Entirely rewrote the [setup/sample flow](https://www.notion.so/Quickstart-12b3bed8954581848271f2706e033ae8?pvs=21) to (a) make it much faster to get started playing with Zero, and (b) demonstrate more features.
+
+## Fixes
+
+- The `@rocicorp/zero` package now downloads a prebuilt sqlite instead of compiling it locally. This significantly speeds up install.
+- Support `rds.force_ssl=1` RDS configuration.
+- Fixed bug where sibling subqueries could be lost on edit changes.
+- Fixes to error handling to ensure zero-cache prints errors when crashing in multiprocess mode.
+- If zero-cache hears from a client with an unknown CVR/cookie, zero-cache forces that client to reset itself and reload automatically. Useful during development when server-state is frequently getting cleared.
+
+## Docs
+
+- Started work to make [real docs](https://www.notion.so/Welcome-to-Zero-Alpha-1153bed8954580eba9f8e78fcd4f4c8d?pvs=21). Not quite done yet.
+
+## zbugs
+
+https://bugs.rocicorp.dev/ (pw: zql)
+
+- Improve startup perf: ~3s → ~1.5s Hawaii ↔ US East. More work to do here but good progress.
+- Responsive design for mobile.
+- “Short IDs”: Bugs now have a short numeric ID, not a random hash. See [Demo Video](https://discord.com/channels/830183651022471199/1288232858795769917/1298114323272568852).
+- First-class label picker.
+- Unread indicators.
+- Finish j/k support for paging through issues. It’s now “search-aware”, it pages through issues in order of search you clicked through to detail page in.
+- Text search (slash to activate — needs better discoverability)
+- Emojis on issues and comments
+- Sort controls on list view
+- remove fps meter temporarily
+- numerous other UI polish

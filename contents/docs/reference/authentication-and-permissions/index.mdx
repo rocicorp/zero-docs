@@ -2,9 +2,84 @@
 title: Authentication and Permissions
 ---
 
+## Authentication
+
+Zero uses a JWT-based flow to authenticate connections to zero-cache.
+
+You configure Zero with a `jwtSecret` and then use that secret to encode the userID. This encoded JWT should be sent to your web client and on to Zero, who sends it to zero-cache. 
+
+zero-cache then decodes the JWT to obtain the user’s ID, and uses it as an input to permissions (see next section).
+
 <Note type="warning">
   <aside>
-    TO DO: Copy from Notion
+    TO DO: Add authentication image
   </aside>
 </Note>
 
+## Permissions
+
+Currently, Zero only supports write permissions. Read permissions are coming soon.
+
+Permissions are expressed using *auth rules* - special ZQL queries that are run automatically as part of every read and write operation.
+
+Auth rules are put into [`schema.ts`](https://www.notion.so/Schema-Management-12b3bed89545815caf3efba824bfec75?pvs=21).
+
+Because auth queries are expressed using ZQL, not some special rule language, they are quite flexible and can easily express concepts like “allow if in a group that has access”.
+
+## Examples
+
+```tsx
+import {
+  createSchema,
+  createTableSchema,
+  defineAuthorization,
+} from "@rocicorp/zero";
+
+// The contents of your decoded JWT.
+type AuthData = {
+	// the userID
+  sub: string;
+};
+
+export default defineAuthorization<AuthData, Schema>(schema, (query) => {
+  const allowIfLoggedIn = (authData: AuthData) =>
+    query.user.where("id", "=", authData.sub);
+
+  const allowIfMessageSender = (authData: AuthData, row: Message) => {
+    return query.message
+      .where("id", row.id)
+      .where("senderID", "=", authData.sub);
+  };
+
+  return {
+    // Nobody can write to the medium or user tables -- they are populated
+    // and fixed by seed.sql
+    medium: {
+      row: {
+        insert: [],
+        update: [],
+        delete: [],
+      },
+    },
+    user: {
+      row: {
+        insert: [],
+        update: [],
+        delete: [],
+      },
+    },
+    message: {
+      row: {
+        // anyone can insert
+        insert: undefined,
+        // only sender can edit their own messages
+        update: [allowIfMessageSender],
+        // must be logged in to delete
+        delete: [allowIfLoggedIn],
+      },
+    },
+  };
+});
+```
+
+See [hello-zero](https://github.com/rocicorp/hello-zero/blob/main/zero.config.ts) for a simple example of write auth and [zbugs](https://github.com/rocicorp/mono/blob/main/apps/zbugs/zero.config.ts#L16) for a much more involved one.

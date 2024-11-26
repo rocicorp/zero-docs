@@ -9,9 +9,7 @@ export default function Home() {
         Zero Alpha <span className="text-red-700">Docs</span>{" "}
       </h1>
       <p className="mb-8 sm:text-md max-w-[800px] text-muted-foreground">
-        This feature-packed documentation template, built with Next.js, offers a
-        sleek and responsive design, perfect for all your project documentation
-        needs.
+        (This will be replaced by the content on zero.rocicorp.dev)
       </p>
       <div>
         <Link

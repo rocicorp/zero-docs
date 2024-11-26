@@ -69,7 +69,7 @@ pre {
   overflow-x: auto;
 }
 
-pre>code {
+pre > code {
   display: grid;
   max-width: inherit !important;
   padding: 14px 0 !important;
@@ -89,7 +89,6 @@ pre>code {
   font-size: 13.5px;
   text-align: right;
 }
-
 
 .highlight-line {
   @apply dark:bg-neutral-800/90;
@@ -184,7 +183,6 @@ pre>code {
   /* Soft Orange */
 }
 
-
 .rehype-code-title {
   @apply px-2;
   @apply -mb-8;
@@ -198,6 +196,12 @@ pre>code {
   font-family: var(--font-code) !important;
 }
 
-.highlight-comp>code {
+.highlight-comp > code {
   background-color: transparent !important;
+}
+
+.prose
+  aside
+  :where(h3):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+  margin-top: 0.75rem;
 }

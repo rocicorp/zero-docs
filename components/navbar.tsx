@@ -1,5 +1,5 @@
-import { ModeToggle } from "@/components/theme-toggle";
 import { HexagonIcon } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import Anchor from "./anchor";
 import { SheetLeftbar } from "./leftbar";
@@ -39,8 +39,6 @@ export function Navbar() {
             })}
           </div>
         </div>
-
-        <ModeToggle />
       </div>
     </nav>
   );
@@ -49,8 +47,13 @@ export function Navbar() {
 function Logo() {
   return (
     <Link href="/" className="flex items-center gap-3">
-      <HexagonIcon className="w-6 h-6 text-muted-foreground fill-current" />
-      <h2 className="text-md font-bold font-code">Zero</h2>
+      <Image
+        src="/zero-logo.svg"
+        alt="Zero Logo"
+        width={87}
+        height={24}
+        priority
+      />
     </Link>
   );
 }

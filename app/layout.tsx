@@ -1,21 +1,19 @@
 import type { Metadata } from "next";
-import { ThemeProvider } from "@/components/theme-provider";
+import localFont from "next/font/local";
 import { Navbar } from "@/components/navbar";
-import { Space_Mono, Space_Grotesk } from "next/font/google";
+import { Space_Mono } from "next/font/google";
 import "./globals.css";
 
-const regularFont = Space_Grotesk({
-  subsets: ["latin"],
+const muoto = localFont({
+  src: "./fonts/muoto-var.ttf",
   variable: "--font-regular",
-  display: "swap",
-  weight: "400",
+  weight: "100 900",
 });
 
-const codeFont = Space_Mono({
-  subsets: ["latin"],
+const codeFont = localFont({
+  src: "./fonts/fira-var.woff2",
   variable: "--font-code",
-  display: "swap",
-  weight: "400",
+  weight: "100 900",
 });
 
 export const metadata: Metadata = {
@@ -30,22 +28,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html
+      lang="en"
+      className="dark"
+      style={{ colorScheme: "dark" }}
+      suppressHydrationWarning
+    >
       <body
-        className={`${regularFont.variable} ${codeFont.variable} font-regular`}
+        className={`${muoto.variable} ${codeFont.variable} font-regular`}
         suppressHydrationWarning
       >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <Navbar />
-          <main className="sm:container mx-auto w-[88vw] h-auto">
-            {children}
-          </main>
-        </ThemeProvider>
+        <Navbar />
+        <main className="sm:container mx-auto w-[88vw] h-auto">{children}</main>
       </body>
     </html>
   );

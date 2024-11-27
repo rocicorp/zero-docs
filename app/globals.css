@@ -4,26 +4,25 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
-    --primary: 240 5.9% 10%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
-    --accent: 240 4.8% 95.9%;
-    --accent-foreground: 240 5.9% 10%;
-    --destructive: 0 84.2% 60.2%;
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 240 5.9% 10%;
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 240 5.9% 10%;
-    --radius: 0.5rem;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 240 4.9% 83.9%;
   }
 
   .dark {
@@ -56,11 +55,75 @@
 
   body {
     @apply bg-background text-foreground;
+    font-variant-ligatures: none;
+    font-feature-settings: "liga" 0, "clig" 0, "calt" 0;
+    -webkit-font-smoothing: antialiased; /* macOS and iOS (WebKit) smoothing */
+    -moz-osx-font-smoothing: grayscale; /* macOS (Firefox) smoothing */
+    font-smooth: always; /* fallback smoothing */
+    font-smooth: antialiased; /* fallback smoothing */
   }
 }
 
 .prose {
   margin: 0 !important;
+}
+
+.prose
+  aside
+  :where(h3):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+  margin-top: 0.75rem;
+}
+
+code {
+  color: #27fcae !important;
+  border-radius: 0.5rem !important;
+  padding-left: 0.5rem !important;
+  padding-right: 0.5rem !important;
+}
+
+pre code {
+  color: unset !important;
+  border-radius: unset !important;
+  padding-left: unset !important;
+  padding-right: unset !important;
+}
+
+/* Syntax highlighting */
+
+/* Dark Mode */
+.keyword {
+  color: #ff79c6;
+}
+
+.function {
+  color: #27fcae;
+  /* Sky Blue */
+}
+
+.string,
+.constant,
+.annotation {
+  color: #f1fa8c;
+}
+
+.boolean {
+  color: #bd93f9;
+}
+
+.number {
+  color: #ffb86c;
+}
+
+.tag {
+  color: #bd93f9;
+}
+
+.attr-name {
+  color: #8be9fd;
+}
+
+.attr-value {
+  color: #ffb86c;
 }
 
 pre {
@@ -73,6 +136,8 @@ pre > code {
   display: grid;
   max-width: inherit !important;
   padding: 14px 0 !important;
+  font-variant-ligatures: none;
+  font-feature-settings: "liga" 0, "clig" 0, "calt" 0;
 }
 
 .code-line {
@@ -96,91 +161,11 @@ pre > code {
 }
 
 .punctuation {
-  color: gray;
+  color: #6272a4;
 }
 
 .comment {
-  color: gray;
-}
-
-/* Light Mode */
-.keyword {
-  color: #e53e3e;
-  /* Red */
-}
-
-.function {
-  color: #c53030;
-  /* Darker Red */
-}
-
-.punctuation {
-  color: #718096;
-  /* Light Gray */
-}
-
-.comment {
-  color: #a0aec0;
-  /* Gray */
-}
-
-.string,
-.constant,
-.annotation,
-.boolean,
-.number {
-  color: #f56565;
-  /* Soft Red */
-}
-
-.tag {
-  color: #fc8181;
-  /* Light Red */
-}
-
-.attr-name {
-  color: #e53e3e;
-  /* Red */
-}
-
-.attr-value {
-  color: #f6ad55;
-  /* Soft Orange */
-}
-
-/* Dark Mode */
-.dark .keyword {
-  color: #fc8181;
-  /* Light Red */
-}
-
-.dark .function {
-  color: #e53e3e;
-  /* Red */
-}
-
-.dark .string,
-.dark .constant,
-.dark .annotation,
-.dark .boolean,
-.dark .number {
-  color: #f56565;
-  /* Soft Red */
-}
-
-.dark .tag {
-  color: #fbb6ce;
-  /* Soft Pink */
-}
-
-.dark .attr-name {
-  color: #e53e3e;
-  /* Red */
-}
-
-.dark .attr-value {
-  color: #f6ad55;
-  /* Soft Orange */
+  color: #6272a4;
 }
 
 .rehype-code-title {
@@ -200,8 +185,34 @@ pre > code {
   background-color: transparent !important;
 }
 
-.prose
-  aside
-  :where(h3):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
-  margin-top: 0.75rem;
+pre .copy-button {
+  opacity: 0;
+}
+
+pre:hover .copy-button {
+  opacity: 0.8;
+}
+
+.copy-button {
+  position: absolute;
+  top: 0.8rem;
+  right: 0.8rem;
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: none;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
+}
+
+pre .copy-button:hover {
+  opacity: 1;
+}
+
+.has-copy-button {
+  position: relative;
+  padding-top: 2rem; /* Ensure space for the button */
 }

@@ -30,7 +30,7 @@ To enable support for these databases, use the [`auto-reset`](https://www.notion
 The Postgres `wal_level` config parameter has to be set to `logical`. You can check what level your pg has with this command:
 
 ```bash
- psql -c 'SHOW wal_level'
+psql -c 'SHOW wal_level'
 ```
 
 If it doesn’t output `logical` then you need to change the wal level. To do this, run:
@@ -49,5 +49,5 @@ pg_ctl -D "$data_dir" restart
 After your server restarts, show the `wal_level` again to ensure it has changed:
 
 ```bash
- psql -c 'SHOW wal_level'
+psql -c 'SHOW wal_level'
 ```

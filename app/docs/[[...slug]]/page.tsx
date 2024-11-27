@@ -3,6 +3,7 @@ import { page_routes } from "@/lib/routes-config";
 import { notFound } from "next/navigation";
 import { getDocsForSlug } from "@/lib/markdown";
 import { Typography } from "@/components/typography";
+import CopyContent from "@/components/ui/copy-content";
 
 type PageProps = {
   params: { slug: string[] };
@@ -13,6 +14,7 @@ export default async function DocsPage({ params: { slug = [] } }: PageProps) {
   const res = await getDocsForSlug(pathName);
 
   if (!res) notFound();
+
   return (
     <div className="flex items-start gap-14">
       <div className="flex-[3] py-10">
@@ -21,7 +23,8 @@ export default async function DocsPage({ params: { slug = [] } }: PageProps) {
           <p className="-mt-4 text-muted-foreground text-[16.5px]">
             {res.frontmatter.description}
           </p>
-          <div>{res.content}</div>
+          {/* Wrap content with CopyableContent */}
+          <CopyContent content={res.content} />
         </Typography>
       </div>
       <Toc path={pathName} />

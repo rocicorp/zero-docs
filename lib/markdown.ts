@@ -6,6 +6,7 @@ import rehypePrism from "rehype-prism-plus";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import rehypeSlug from "rehype-slug";
 import rehypeCodeTitles from "rehype-code-titles";
+import rehypeAddCopyButton from "@/lib/rehype-add-copy-button";
 
 // custom components imports
 import Note from "@/components/note";
@@ -27,6 +28,7 @@ async function parseMdx<Frontmatter>(rawMdx: string) {
           rehypePrism,
           rehypeSlug,
           rehypeAutolinkHeadings,
+          rehypeAddCopyButton,
         ],
         remarkPlugins: [remarkGfm],
       },

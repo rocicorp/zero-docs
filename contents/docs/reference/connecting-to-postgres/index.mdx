@@ -23,7 +23,7 @@ Hosted Postgres provides like Supabase and Neon don’t provide superuser access
 
 Zero can still works without Event Triggers, but for correctness, any schema change triggers a full rebuild of all server-side and client-side state. For small databases (< 1GB) this can be OK, but for bigger databases we recommend choosing a provider that grants access to Event Triggers.
 
-To enable support for these databases, use the [`auto-reset`](https://www.notion.so/zero-cache-Config-1453bed89545802d9686c0ef84bf2a77?pvs=21) flag.
+To enable support for these databases, use the [`auto-reset`](/docs/reference/zero-cache-config) flag.
 
 ## Configuration
 

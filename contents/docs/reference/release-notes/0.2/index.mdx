@@ -13,7 +13,7 @@ description: Skip Mode and Compound PKs
     
   ![CleanShot 2024-10-10 at 21.26.42@2x.png](https://prod-files-secure.s3.us-west-2.amazonaws.com/3d13995e-6073-45d4-874a-7fb5870f04f9/37e13f46-2fe9-4e10-846d-0a22759255a4/CleanShot_2024-10-10_at_21.26.422x.png)
     
-  This makes it easy to use zero-cache with existing schemas that have columns Zero can’t handle. You can [pair this with Postgres triggers](https://www.notion.so/Welcome-to-Zero-Alpha-1153bed8954580eba9f8e78fcd4f4c8d?pvs=21) to easily translate unsupported types into something Zero can sync.
+  This makes it easy to use zero-cache with existing schemas that have columns Zero can’t handle. You can [pair this with Postgres triggers](/docs/reference/supported-postgres-features#column-types) to easily translate unsupported types into something Zero can sync.
     
 - Zero now supports compound primary keys. You no longer need to include an extraneous `id` column on the junction tables.
 

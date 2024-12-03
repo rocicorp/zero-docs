@@ -100,7 +100,7 @@ if (!result) {
 
 ## Relationships
 
-You can query related rows using *relationships* that are defined in your client-side [schema](https://www.notion.so/Schema-Management-12b3bed89545815caf3efba824bfec75?pvs=21).
+You can query related rows using *relationships* that are defined in your client-side [schema](/docs/reference/schema-management).
 
 ```tsx
 // Get all issues and their related comments
@@ -155,7 +155,7 @@ You can filter a query with `where()`:
 z.query.issue.where('priority', '=', 'high');
 ```
 
-The first parameter is always a column name from the table being queried. Intellisense will offer available options (sourced from your [Client-Side Schema](https://www.notion.so/Schema-Management-12b3bed89545815caf3efba824bfec75?pvs=21)).
+The first parameter is always a column name from the table being queried. Intellisense will offer available options (sourced from your [Client-Side Schema](/docs/reference/schema-management)).
 
 ### Comparison Operators
 
@@ -276,6 +276,6 @@ const results = z.query.issue.where('foo', 'bar').run();
 
 <Note type="note">
   <aside>
-    Zero does not currently have a way to wait for authoritative results. Because of this, this feature will most likely be useful when the data you’re querying has already been preloaded. See also [Ability to wait for authoritative results](https://www.notion.so/Ability-to-wait-for-authoritative-results-12f3bed8954580d4b7f8f883f5130c33?pvs=21).
+    Zero does not currently have a way to wait for authoritative results. Because of this, this feature will most likely be useful when the data you’re querying has already been preloaded. See also [Ability to wait for authoritative results](/docs/reference/roadmap).
   </aside>
 </Note>

@@ -69,7 +69,7 @@ Multi-column primary keys are supported (as is common in many:many relationships
 
 ## Limiting Replication
 
-You can use [Permissions](https://www.notion.so/12b3bed8954580a89a6fcce72ab4c26a?pvs=21) to limit tables from replicating to Zero. In the near future you’ll also be able to use Permissions to limit individual columns.
+You can use [Permissions](/docs/reference/authentication-and-permissions#permissions) to limit tables from replicating to Zero. In the near future you’ll also be able to use Permissions to limit individual columns.
 
 Until then, a workaround is to use the Postgres [*publication*](https://www.postgresql.org/docs/current/sql-createpublication.html) feature to control the tables and columns that are replicated into `zero-cache`.
 

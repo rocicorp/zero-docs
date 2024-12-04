@@ -35,6 +35,7 @@ export const ROUTES: EachRoute[] = [
       {title: 'Schema Migrations', href: '/migrations'},
       {title: 'Deployment', href: '/deployment'},
       {title: '`zero-cache` Config', href: '/zero-cache-config'},
+      {title: 'React', href: '/react'},
       {title: 'SolidJS', href: '/solidjs'},
       {title: 'Recipes', href: '/recipes'},
     ],

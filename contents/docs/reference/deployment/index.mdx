@@ -10,37 +10,50 @@ To deploy a Zero app, you need to:
 
 ## Scalability
 
-Currently `zero-cache` is single-node. This pains us as much as it does you 😅.
+<Note type="info">
+  <aside>
+    Currently `zero-cache` is single-node. This pains us as much as it does you 🤕.
 
-A single node can handle a fairly large number of concurrent users – hundreds to thousands depending on what they're doing. But it's not infinitely scalable and updating `zero-cache` will take down your service for a minute or so while the Docker container restarts.
+    In the near future, Zero will be horizontally scalable, with features like rolling upates, sharding different subsets of data into different instances, and geographic replication.
+    
+    See [Roadmap](roadmap) for more information.
+  </aside>
+</Note>
 
-In the near future, Zero will be horizontally scalable, with features like rolling upates, sharding different subsets of data into different `zero-cache` instances, and geographic replication. See [Roadmap](roadmap) for more information.
+
+
+A single `zero-cache` node can handle a fairly large number of users – hundreds to thousands of concurrents, depending on what they're doing.
+
+But it's not infinitely scalable and updating `zero-cache` today will take down your service for a minute or so while the Docker container restarts.
+
 
 ## Topology
 
 While `zero-cache` is single-node, you should deploy it close to your database to minimize sync latency. In the future, you will be able to deploy `zero-cache` in multiple regions to provide low-latency access to users around the world.
 
-## Configuring `zero-cache`
+## Configuration
 
 The `zero-cache` image is configured via environment variables. See [zero-cache Config](./zero-cache-config) for available options.
 
-## Deploying `zero-schema.json`
+## Schema Deployment
 
-`zero-cache` must know about your [Client-Side Schema](schema-management) because it is used to enforce permissions. You can deploy it as a plain file, using `ZERO_SCHEMA_FILE`. For convenience, we also support deploying it as an environment variable, using `ZERO_SCHEMA_JSON`.
+`zero-cache` needs a copy of your [`zero-schema.json`](./schema-management) because it is used to enforce permissions.
 
-## Example – Deploying to Fly.io
+You can deploy it as a plain file, using the `ZERO_SCHEMA_FILE` env var. For convenience, we also support deploying it as an environment variable, using `ZERO_SCHEMA_JSON`.
 
-In this example, we'll deploy the [Quickstart](../welcome/quickstart) app to Fly.io. We'll use Fly.io for both the database and `zero-cache`.
+## Example: Deploying to Fly.io
 
-### 1. Setup Quickstart
+In this example, we'll deploy the [Quickstart](../welcome/quickstart) app to [Fly.io](https://fly.io). We'll use Fly.io for both the database and `zero-cache`.
+
+### Setup Quickstart
 
 Go through the [Quickstart](../welcome/quickstart) guide to get the app running locally.
 
-### 2. Setup Fly.io
+### Setup Fly.io
 
-Create an account on Fly.io and [install the Fly CLI](https://fly.io/docs/flyctl/install/).
+Create an account on [Fly.io](https://fly.io) and [install the Fly CLI](https://fly.io/docs/flyctl/install/).
 
-### 3. Create Fly.io apps
+### Create Fly.io app for Postgres
 
 <Note type="warning">
   <aside>
@@ -48,15 +61,10 @@ Create an account on Fly.io and [install the Fly CLI](https://fly.io/docs/flyctl
   </aside>
 </Note>
 
-Create app for Postgres:
-
 ```bash
-# Set this to your own initials or something unique to avoid conflicts with
-# others following these instructions.
 INITIALS=aa
 PG_APP_NAME=$INITIALS-zstart-pg
 
-# Generates a random password
 PG_PASSWORD=$(head -c 1024 /dev/urandom | sha1sum | head -c 16)
 
 fly postgres create \
@@ -78,23 +86,23 @@ fly ips allocate-v4 --app $PG_APP_NAME
 
 ### Seed Upstream database
 
+Populate the database with initial data and set its `wal_level` to `logical` to support replication to `zero-cache`. Then restart the database to apply the changes.
+
+<Note type="warning">
+  <aside>
+    **Note:** You may have to wait a few minutes for the IP change from the last command to propagate to your machine before this works.
+  </aside>
+</Note>
+
 ```bash
 CONNECTION_STRING="postgres://postgres:$PG_PASSWORD@$PG_APP_NAME.fly.dev:5432"
 
-# Seed database
 psql -f docker/seed.sql $CONNECTION_STRING
-
-# Set wal_level to logical to support replication to zero-cache
 psql -c "ALTER SYSTEM SET wal_level = logical;" $CONNECTION_STRING
-
-# Restart Postgres to apply change to wal_level
 fly postgres restart --app $PG_APP_NAME
-
-# Ensure wal level was changed - should output `logical`
-psql -c "show wal_level;" $CONNECTION_STRING
 ```
 
-### Run local zero-cache against remote Postgres
+### Run Local `zero-cache` Against Remote Postgres
 
 Update the `.env` file with the remote Postgres on Fly.io.
 
@@ -108,12 +116,11 @@ ZERO_REPLICA_FILE=/tmp/zstart_replica.db
 EOF
 ```
 
-Restart zero-cache:
+Kill any existing zero-cache process, clear its state, and restart with:
 
 ```bash
-# Clear the replica since we're changing the upstream database.
+ps | grep zero-cache | grep node | cut -d' ' -f1 | xargs kill
 rm /tmp/zstart_replica.db*
-
 npx zero-cache
 ```
 
@@ -136,7 +143,7 @@ app = "$CACHE_APP_NAME"
 primary_region = 'lax'
 
 [build]
-image = "registry.hub.docker.com/rocicorp/zero:latest"
+image = "registry.hub.docker.com/rocicorp/zero:canary"
 
 [http_service]
 internal_port = 4848
@@ -187,3 +194,8 @@ EOF
 
 Now refresh the app and it should be fast again. Open the web inspector to verify the app is talking to the remote `zero-cache`!
 
+<Note type="warning">
+  <aside>
+    **Note:** You may have to again wait for DNS change to propagate before app will work. You can check it via `ping $CACHE_APP_NAME.fly.dev`. Sigh.
+  </aside>
+</Note>

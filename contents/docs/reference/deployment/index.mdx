@@ -50,7 +50,7 @@ Go through the [Quickstart](../welcome/quickstart) guide to get the app running 
 
 Create an account on [Fly.io](https://fly.io) and [install the Fly CLI](https://fly.io/docs/flyctl/install/).
 
-### Create Fly.io app for Postgres
+### Create Postgres app
 
 <Note type="warning">
   <aside>
@@ -73,7 +73,7 @@ fly postgres create \
   --password=$PG_PASSWORD
 ```
 
-### Assign a V4 IP Address to the Database
+### Assign a V4 IP Address
 
 This isn't strictly necessary, and costs a small amount of money, but it makes it easier to test because you can connect from your local machine.
 
@@ -130,7 +130,7 @@ CACHE_APP_NAME=$INITIALS-zstart-cache
 fly app create $CACHE_APP_NAME
 ```
 
-### Publish zero-cache
+### Publish `zero-cache`
 
 Create a `fly.toml` file. We'll copy the `zero-schema.json` into the toml file to pass it to the server as an environment variable.
 
@@ -181,7 +181,7 @@ Then publish `zero-cache`:
 fly deploy
 ```
 
-### Update App to Connect to Remote `zero-cache`
+### Use Remote `zero-cache`
 
 ```bash
 cat <<EOF > .env.local

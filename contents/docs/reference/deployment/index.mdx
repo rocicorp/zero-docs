@@ -14,18 +14,15 @@ To deploy a Zero app, you need to:
   <aside>
     Currently `zero-cache` is single-node. This pains us as much as it does you 🤕.
 
-    In the near future, Zero will be horizontally scalable, with features like rolling upates, sharding different subsets of data into different instances, and geographic replication.
+    In the near future, Zero will be horizontally scalable, with features like rolling updates, sharding different subsets of data into different instances, and geographic replication.
     
     See [Roadmap](roadmap) for more information.
   </aside>
 </Note>
 
+A single beefy `zero-cache` node can handle a fairly large number of users – hundreds to thousands of concurrents, depending on what they're doing.
 
-
-A single `zero-cache` node can handle a fairly large number of users – hundreds to thousands of concurrents, depending on what they're doing.
-
-But it's not infinitely scalable and updating `zero-cache` today will take down your service for a minute or so while the Docker container restarts.
-
+But it's not infinitely scalable, and updating `zero-cache` will take down your service for a minute or so while the Docker container restarts.
 
 ## Topology
 
@@ -199,3 +196,7 @@ Now refresh the app and it should be fast again. Open the web inspector to verif
     **Note:** You may have to again wait for DNS change to propagate before app will work. You can check it via `ping $CACHE_APP_NAME.fly.dev`. Sigh.
   </aside>
 </Note>
+
+## Example: $PLATFORM
+
+Where should we deploy Zero to next? Let us know at [zero.rocicorp.dev/discord](https://zero.rocicorp.dev/discord)!

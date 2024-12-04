@@ -14,9 +14,7 @@ title: Supported Postgres Features
 Currently Zero syncs column names exactly as they appear in Postgres. There is no ability to map column names from i.e., `FULL_NAME` in Postgres to `fullName` in TypeScript.
 
 <Note type="warning">
-  <aside>
-    Another important caveat to be aware of is that in Postgres, column names are by default implicitly folded to lowercase. So if you do `CREATE TABLE person (fullName TEXT)` the actual column name in the database will end up as `fullname`. To avoid this terrible behavior you need to wrap your column names in double quotes when you define them, like `CREATE TABLE person ("fullName" TEXT)`.
-  </aside>
+  Another important caveat to be aware of is that in Postgres, column names are by default implicitly folded to lowercase. So if you do `CREATE TABLE person (fullName TEXT)` the actual column name in the database will end up as `fullname`. To avoid this terrible behavior you need to wrap your column names in double quotes when you define them, like `CREATE TABLE person ("fullName" TEXT)`.
 </Note>
 
 We will add column name mapping to Zero soon. See https://bugs.rocicorp.dev/issue/3106.
@@ -50,7 +48,6 @@ It is strongly recommended that primary keys be client-generated GUID-style valu
 This makes optimistic creation and updates much easier. We most often use [`nanoid`](https://github.com/ai/nanoid) in our own applications.
 
 <Note type="note">
-  <aside>
     <h3>Why are GUID-style IDs easier?</h3>
 
     Imagine that the PK of your table is an auto-incrementing integer. If you optimistically create an entity of this type, you will have to give it some ID – the type will require it locally, but also if you want to optimistically creation relations against this row you’ll need an ID.
@@ -60,7 +57,6 @@ This makes optimistic creation and updates much easier. We most often use [`nano
     GUIDs makes a lot more sense in local-first applications.
 
     If your table has a natural key you can use that and it has less problems. But there is still the chance for a conflict. Imagine you are modeling orgs and you choose domainName as the natural key. It is possible for a race to happen and when the creation gets to the server, somebody has already chosen that domain name. In that case, the best thing to do is reject the write and show the user an error.
-  </aside>
 </Note>
 
 If you want to have a short auto-incrementing numeric ID for ux reasons (ie, a bug number), that is possible – See [Demo Video](https://discord.com/channels/830183651022471199/1288232858795769917/1298114323272568852)!

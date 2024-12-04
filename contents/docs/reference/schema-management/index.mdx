@@ -43,9 +43,7 @@ const userSchema = createTableSchema({
 Columns can have the types `boolean`, `number`, `string`, `null`, `json`. See [Column Types](/docs/reference/supported-postgres-features#column-types) for how database types are mapped to these types.
 
 <Note type="warning">
-  <aside>
-    Currently, if the database type doesn’t map correctly to the Zero type, replication will continue and silently be wrong. This is a bug – in the future, this will be an error. See https://bugs.rocicorp.dev/issue/3112.
-  </aside>
+  Currently, if the database type doesn’t map correctly to the Zero type, replication will continue and silently be wrong. This is a bug – in the future, this will be an error. See https://bugs.rocicorp.dev/issue/3112.
 </Note>
 
 ### Optional Columns
@@ -68,13 +66,11 @@ const userSchema = createTableSchema({
 An optional column can have a value of the specified type or `null` to mean *no value*.
 
 <Note type="note">
-  <aside>
     Note that `null` and `undefined` mean different things when working with Zero rows.
 
     - When reading, if a column is `optional`, Zero can return `null` for that field. `undefined` is not used at all when Reading from Zero.
     - When writing, you can specify `null` for an optional field to explicitly write `null` to the datastore, unsetting any previous value.
     - For `create` and `upsert` you can set optional fields to `undefined` (or leave the field off completely) to take the default value as specified by backend schema for that column. For `update` you can set any non-PK field to `undefined` to leave the previous value unmodified.
-  </aside>
 </Note>
 
 ### Database Schemas

@@ -5,24 +5,24 @@ title: Deploying Zero
 To deploy a Zero app, you need to:
 
 1. Deploy your backend database. Most standard Postgres hosts [can be used with Zero](connecting-to-postgres).
-1. Deploy `zero-cache`. We provide a [Docker image](https://hub.docker.com/r/rocicorp/zero) for this that can be deployed to any standard Docker host.
+1. Deploy `zero-cache`. We provide a [Docker image](https://hub.docker.com/r/rocicorp/zero) that should work with any Docker host.
 1. Deploy your frontend. You can use any hosting service like Vercel or Netlify.
 
 ## Scalability
 
-<Note type="info">
+<Note type="note">
   <aside>
     Currently `zero-cache` is single-node. This pains us as much as it does you 🤕.
-
-    In the near future, Zero will be horizontally scalable, with features like rolling updates, sharding different subsets of data into different instances, and geographic replication.
-    
-    See [Roadmap](roadmap) for more information.
   </aside>
 </Note>
 
 A single beefy `zero-cache` node can handle a fairly large number of users – hundreds to thousands of concurrents, depending on what they're doing.
 
 But it's not infinitely scalable, and updating `zero-cache` will take down your service for a minute or so while the Docker container restarts.
+
+In the near future, Zero will be horizontally scalable, with features like rolling updates, sharding different subsets of data into different instances, and geographic replication.
+
+See [Roadmap](roadmap) for more information.
 
 ## Topology
 

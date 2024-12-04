@@ -48,7 +48,7 @@ function Logo() {
   return (
     <Link href="/" className="flex items-center gap-3">
       <Image
-        src="/zero-logo.svg"
+        src="/images/zero-logo.svg"
         alt="Zero Logo"
         width={87}
         height={24}

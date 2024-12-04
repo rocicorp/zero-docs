@@ -16,7 +16,7 @@ To deploy a Zero app, you need to:
   </aside>
 </Note>
 
-A single beefy `zero-cache` node can handle a fairly large number of users – hundreds to thousands of concurrents, depending on what they're doing.
+A single reasonably-sized `zero-cache` node can handle a fairly large number of users – hundreds to thousands depending on what they are doing. We run [zbugs](samples) on a single `m5.4xlarge` instance and have load tested it up to 4k concurrent users.
 
 But it's not infinitely scalable, and updating `zero-cache` will take down your service for a minute or so while the Docker container restarts.
 

@@ -2,66 +2,172 @@
 title: Permissions
 ---
 
-Permissions are expressed using *rules* - special ZQL queries that are run automatically as part of every read and write operation.
+Permissions are expressed using ZQL queries and are run automatically as part of every read and write operation.
 
-Rules are defined in your [`schema.ts`](/docs/zero-schema) file.
+Because permissions are ZQL, and not some other special rule language, they are quite flexible and can easily express concepts like “allow if in a group that has access”.
 
-Because permissions are expressed using ZQL, not some special rule language, they are quite flexible and can easily express concepts like “allow if in a group that has access”.
+## Define Permissions
 
-## Examples
+Permissions are defined in [`schema.ts`](/docs/zero-schema) using the `definePermissions` function. The passed callback returns an object which can have a _policy_ for each table in your schema.
 
-```tsx
-import {
-  createSchema,
-  createTableSchema,
-  defineAuthorization,
-} from "@rocicorp/zero";
+Here's a simple example of returning a policy for an `issue` table that restricts deletes to the issue's creator:
 
-// The contents of your decoded JWT.
+```ts
 type AuthData = {
-	// the userID
   sub: string;
+  role: 'admin' | 'user';
 };
 
-export default defineAuthorization<AuthData, Schema>(schema, (query) => {
-  const allowIfLoggedIn = (authData: AuthData) =>
-    query.user.where("id", "=", authData.sub);
-
-  const allowIfMessageSender = (authData: AuthData, row: Message) => {
-    return query.message
-      .where("id", row.id)
-      .where("senderID", "=", authData.sub);
-  };
+export const permissions = definePermissions<AuthData, Schema>(schema, () => {
+  const allowIfIssueCreator = (
+    authData: AuthData,
+    {cmp}: ExpressionBuilder<typeof issueSchema>,
+  ) => cmp('creatorID', '=', authData.sub);
 
   return {
-    // Nobody can write to the medium or user tables -- they are populated
-    // and fixed by seed.sql
-    medium: {
+    issue: {
       row: {
-        insert: [],
-        update: [],
-        delete: [],
+        delete: [allowIfIssueCreator],
       },
     },
-    user: {
-      row: {
-        insert: [],
-        update: [],
-        delete: [],
-      },
-    },
-    message: {
-      row: {
-        // anyone can insert
-        insert: undefined,
-        // only sender can edit their own messages
-        update: [allowIfMessageSender],
-        // must be logged in to delete
-        delete: [allowIfLoggedIn],
-      },
+  };
+});
+
+return {
+  schema,
+  permissions,
+}
+```
+
+<Note type="danger">
+If a policy is not defined for a table or operation, Zero currently ***allows*** the operation. This is not a very safe default, but it is productive. We will likely flip this default in the future.
+</Note>
+
+## Rules
+
+Each operation on a policy has a _ruleset_ containing zero or more _rules_.
+
+A rule is just a TypeScript function that receives the logged in user's `AuthData` and generates a ZQL [where expression](reading-data#compound-filters). At least one rule in a ruleset must return a row for the operation to be allowed.
+
+## Select Permissions
+
+You can limit the data a user can read by specifying a `select` ruleset.
+
+Select permissions act like filters. If a user does not have permission to read a row, it will be filtered out of the result set. It will not generate an error.
+
+For example, imagine a select permission that restricts reads to only issues created by the user:
+
+```ts
+const definePermissions<AuthData, Schema>(schema, () => {
+  const allowIfIssueCreator = (
+    authData: AuthData,
+    {cmp}: ExpressionBuilder<typeof issueSchema>,
+  ) => cmp('creatorID', '=', authData.sub);
+
+  return {
+    issue: {
+      select: [allowIfIssueCreator],
     },
   };
 });
 ```
 
-See [hello-zero](https://github.com/rocicorp/hello-zero/blob/main/zero.config.ts) for a simple example of write auth and [zbugs](https://github.com/rocicorp/mono/blob/main/apps/zbugs/zero.config.ts#L16) for a much more involved one.
+If the issue table has two rows, one created by the user and one by someone else, the user will only see the row they created in any queries.
+
+## Insert Permissions
+
+You can limit what rows can be inserted and by whom by specifying an `insert` ruleset.
+
+Insert rules are evaluated after the issue is insert. So if they query the database, they will see that the inserted row is present. If any rule in the insert ruleset returns a row, the insert is allowed.
+
+Here's an example of an insert rule that disallows inserting users that with role 'admin'.
+
+```ts
+const definePermissions<AuthData, Schema>(schema, () => {
+  const allowIfNonAdmin = (
+    authData: AuthData,
+    {cmp}: ExpressionBuilder<typeof userSchema>,
+  ) => cmp('role', '!=', 'admin');
+
+  return {
+    issue: {
+      insert: [allowIfAdmin],
+    },
+  };
+});
+```
+
+## Update Permissions
+
+There are two types of update rulesets: `preMutation` and `postMutation`.
+
+`preMutation` rules are evaluated before the mutation is applied. This is useful for things like checking whether a user owns an entity before editing it. `postMutation` rules are evaluated after the mutation is applied. This is useful for things like restricting the kinds of changes a user is allowed to make.
+
+Both the `preMutation` and `postMutation` rulesets must allow an update. But note that as with other rulesets, if either `preMutation` or `postMutation` ruleset is undefined, it defaults to ***allow***.
+
+So this allows an edit if the user is the creator of the issue:
+
+```ts
+const definePermissions<AuthData, Schema>(schema, () => {
+  const allowIfIssueCreator = (
+    authData: AuthData,
+    {cmp}: ExpressionBuilder<typeof issueSchema>,
+  ) => cmp('creatorID', '=', authData.sub);
+
+  return {
+    issue: {
+      preMutation: [allowIfIssueCreator],
+      // postMutation defaults to _allow_.
+    },
+  };
+});
+```
+
+And this allows an edit if the the loggged in user is the creator after the edit:
+
+```ts
+const definePermissions<AuthData, Schema>(schema, () => {
+  const allowIfIssueCreator = (
+    authData: AuthData,
+    {cmp}: ExpressionBuilder<typeof issueSchema>,
+  ) => cmp('creatorID', '=', authData.sub);
+
+  return {
+    issue: {
+      // preMutation defaults to _allow_.
+      postMutation: [allowIfIssueCreator],
+    },
+  };
+});
+```
+
+But this policy will never allow an edit, because the two rulesets can't be true at the same time:
+
+```ts
+const definePermissions<AuthData, Schema>(schema, () => {
+  const allowIfIssueCreator = (
+    authData: AuthData,
+    {cmp}: ExpressionBuilder<typeof issueSchema>,
+  ) => cmp('creatorID', '=', authData.sub);
+
+  const allowIfNotIssueCreator = (
+    authData: AuthData,
+    {cmp}: ExpressionBuilder<typeof issueSchema>,
+  ) => cmp('creatorID', '!=', authData.sub);
+
+return {
+    issue: {
+      preMutation: [allowIfIssueCreator],
+      postMutation: [allowIfNotIssueCreator],
+    },
+  };
+});
+```
+
+## Delete Permissions
+
+Delete permissions work in the same way as `insert` positions except they run _before_ the delete is applied. So if a delete rule queries the database, it will see that the deleted row is present. If any rule in the ruleset returns a row, the delete is allowed.
+
+## Examples
+
+See [hello-zero](https://github.com/rocicorp/hello-zero/blob/main/schema.ts) for a simple example of write auth and [zbugs](https://github.com/rocicorp/mono/blob/main/apps/zbugs/schema.ts#L16) for a much more involved one.

@@ -11,9 +11,7 @@ To deploy a Zero app, you need to:
 ## Scalability
 
 <Note type="note">
-  <aside>
-    Currently `zero-cache` is single-node. This pains us as much as it does you 🤕.
-  </aside>
+  Currently `zero-cache` is single-node. This pains us as much as it does you 🤕.
 </Note>
 
 A single reasonably-sized `zero-cache` node can handle a fairly large number of users – hundreds to thousands depending on what they are doing. We run [zbugs](samples) on a single `m5.4xlarge` instance and have load tested it up to 4k concurrent users.
@@ -53,9 +51,7 @@ Create an account on [Fly.io](https://fly.io) and [install the Fly CLI](https://
 ### Create Postgres app
 
 <Note type="warning">
-  <aside>
-    **Note:** Fly.io requires app names to be unique across all Fly.io users. Change the `INITIALS` environment variable below to something unique.
-  </aside>
+  **Note:** Fly.io requires app names to be unique across all Fly.io users. Change the `INITIALS` environment variable below to something unique.
 </Note>
 
 ```bash
@@ -86,9 +82,7 @@ fly ips allocate-v4 --app $PG_APP_NAME
 Populate the database with initial data and set its `wal_level` to `logical` to support replication to `zero-cache`. Then restart the database to apply the changes.
 
 <Note type="warning">
-  <aside>
-    **Note:** You may have to wait a few minutes for the IP change from the last command to propagate to your machine before this works.
-  </aside>
+  **Note:** You may have to wait a few minutes for the IP change from the last command to propagate to your machine before this works.
 </Note>
 
 ```bash
@@ -192,9 +186,7 @@ EOF
 Now refresh the app and it should be fast again. Open the web inspector to verify the app is talking to the remote `zero-cache`!
 
 <Note type="warning">
-  <aside>
-    **Note:** You may have to again wait for DNS change to propagate before app will work. You can check it via `ping $CACHE_APP_NAME.fly.dev`. Sigh.
-  </aside>
+  **Note:** You may have to again wait for DNS change to propagate before app will work. You can check it via `ping $CACHE_APP_NAME.fly.dev`. Sigh.
 </Note>
 
 ## Example: $PLATFORM

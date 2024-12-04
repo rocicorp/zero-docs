@@ -4,14 +4,20 @@ import { PropsWithChildren } from "react";
 
 type NoteProps = PropsWithChildren & {
   type?: "note" | "danger" | "warning";
-  emoji?: string; // Optional emoji override
+  emoji?: string;
+  heading?: string;
 };
 
-export default function Note({ children, type = "note", emoji }: NoteProps) {
+export default function Note({
+  children,
+  type = "note",
+  emoji,
+  heading,
+}: NoteProps) {
   const noteClassNames = clsx({
     "bg-gray-900 border-gray-800": type === "note",
     "bg-yellow-950 border-yellow-900": type === "warning",
-    "bg-red-100 border-red-200": type === "danger",
+    "bg-red-950 border-red-900": type === "danger",
   });
 
   // Default emojis by note type
@@ -21,17 +27,30 @@ export default function Note({ children, type = "note", emoji }: NoteProps) {
     danger: "😱",
   };
 
+  // Default headings by note type
+  const defaultHeadings: Record<"note" | "warning" | "danger", string> = {
+    note: "Note",
+    warning: "Warning",
+    danger: "Danger",
+  };
+
   // Use the overridden emoji if provided; otherwise, use the default
   const displayedEmoji = emoji || typeEmojis[type];
+
+  // Use the overridden heading if provided; otherwise, use the default
+  const displayedHeading = heading || defaultHeadings[type];
 
   return (
     <div
       className={cn(
-        "note-container border rounded-md p-3.5 text-sm tracking-wide flex items-start",
+        "note-container border rounded-md p-3.5 text-sm tracking-wide items-start",
         noteClassNames
       )}
     >
-      <span className="note-emoji">{displayedEmoji}</span>
+      <div className="note-heading-container flex items-center mb-2">
+        <span className="note-emoji">{displayedEmoji}</span>
+        <span className="note-heading">{displayedHeading}</span>
+      </div>
       <aside className="note-aside">{children}</aside>
     </div>
   );

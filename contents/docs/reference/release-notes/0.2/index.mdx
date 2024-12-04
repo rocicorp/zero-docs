@@ -11,7 +11,7 @@ description: Skip Mode and Compound PKs
 
 - “Skip mode”: zero-cache now skips columns with unsupported datatypes. A warning is printed out when this happens:
     
-  ![CleanShot 2024-10-10 at 21.26.42@2x.png](https://prod-files-secure.s3.us-west-2.amazonaws.com/3d13995e-6073-45d4-874a-7fb5870f04f9/37e13f46-2fe9-4e10-846d-0a22759255a4/CleanShot_2024-10-10_at_21.26.422x.png)
+  <ImageLightbox src="/images/release-notes/0.2/skip-mode.png" alt="Skip mode warning" />
     
   This makes it easy to use zero-cache with existing schemas that have columns Zero can’t handle. You can [pair this with Postgres triggers](/docs/reference/supported-postgres-features#column-types) to easily translate unsupported types into something Zero can sync.
     

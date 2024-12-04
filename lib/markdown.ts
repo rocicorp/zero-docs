@@ -10,10 +10,12 @@ import rehypeAddCopyButton from "@/lib/rehype-add-copy-button";
 
 // custom components imports
 import Note from "@/components/note";
+import ImageLightbox from "@/components/ui/ImageLightbox"
 
 // add custom components
 const components = {
   Note,
+  ImageLightbox,
 };
 
 // can be used for other pages like blogs, Guides etc

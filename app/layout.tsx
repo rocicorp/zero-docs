@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import { Navbar } from "@/components/navbar";
-import { Space_Mono } from "next/font/google";
 import "./globals.css";
 
 const muoto = localFont({

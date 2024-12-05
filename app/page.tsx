@@ -57,16 +57,17 @@ export default function Home() {
       {/* Intro */}
       <p>Developing web applications has gotten insanely complex.</p>
       <p>
-        You need a tall pile of tech to build a "modern" web app: client-side
-        code, server-side code, APIs to tie them together, data fetching, state
-        management, hydration, websockets for reactivity, and a whole lot more.
-        And once you're done, the resulting app still isn't very good.
+        You need a tall pile of tech to build a &quot;modern&quot; web app:
+        client-side code, server-side code, APIs to tie them together, data
+        fetching, state management, hydration, websockets for reactivity, and a
+        whole lot more. And once you&apos;re done, the resulting app still
+        isn&apos;t very good.
       </p>
-      <p>It's time for a rethink.</p>
+      <p>It&apos;s time for a rethink.</p>
       <p>
-        We’re building a general-purpose sync engine for the web. You put Zero
-        in front of your existing database or web service, and we distribute
-        your backend all the way to main thread of the UI.
+        We&apos;re building a general-purpose sync engine for the web. You put
+        Zero in front of your existing database or web service, and we
+        distribute your backend all the way to main thread of the UI.
       </p>
 
       {/* Zero Diagram */}

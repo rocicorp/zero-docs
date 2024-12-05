@@ -218,6 +218,10 @@
   background-color: transparent !important;
 }
 
+.prose a.button-link {
+  text-decoration: none;
+}
+
 pre .copy-button {
   opacity: 0;
 }

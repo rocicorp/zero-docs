@@ -111,9 +111,10 @@ export default function Home() {
         </li>
         <li>
           <strong>Scalability</strong> &ndash; Zero can work with any amount of
-          backend data. It doesn't require syncing all data to the client
-          up-front, or knowing which data you'll need ahead of time. If the app
-          needs data which hasn't already been synced, it is synced on demand.
+          backend data. It doesn&apos;t require syncing all data to the client
+          up-front, or knowing which data you&apos;ll need ahead of time. If the
+          app needs data which hasn&apos;t already been synced, it is synced on
+          demand.
         </li>
       </ul>
 
@@ -132,9 +133,9 @@ export default function Home() {
         the benefits once migrated to be dramatic.
       </p>
       <p>
-        Zero is the culmination of everything we've done with sync over the past
-        five years. We are working toward a source release in fall 2024 and an
-        open beta Q1 2025.
+        Zero is the culmination of everything we&apos;ve done with sync over the
+        past five years. We are working toward a source release in fall 2024 and
+        an open beta Q1 2025.
       </p>
 
       <div className={styles.footer}>

@@ -223,21 +223,21 @@ pre .copy-button {
 }
 
 pre:hover .copy-button {
-  opacity: 0.8;
+  opacity: 1;
 }
 
 .copy-button {
   position: absolute;
   top: 0.8rem;
   right: 0.8rem;
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(60, 60, 60, 1);
   color: white;
   border: none;
   padding: 0.25rem 0.5rem;
   border-radius: 4px;
   font-size: 0.75rem;
   cursor: pointer;
-  opacity: 0.8;
+  opacity: 1;
   transition: opacity 0.2s ease;
 }
 

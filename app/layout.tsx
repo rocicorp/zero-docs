@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
-import { Navbar } from "@/components/navbar";
+import ClientBoundary from "@/components/ClientBoundary"; // Add a wrapper for client components
 import "./globals.css";
 
 const muoto = localFont({
@@ -37,7 +37,7 @@ export default function RootLayout({
         className={`${muoto.variable} ${codeFont.variable} font-regular`}
         suppressHydrationWarning
       >
-        <Navbar />
+        <ClientBoundary />
         <main className="sm:container mx-auto w-[88vw] h-auto">{children}</main>
       </body>
     </html>

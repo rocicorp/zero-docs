@@ -1,0 +1,188 @@
+.main {
+  display: flex;
+  flex-direction: column;
+  justify-content: initial;
+  align-items: flex-start;
+  padding: 4rem 2rem;
+  min-height: 100vh;
+  max-width: 48rem;
+  margin: 0 auto;
+  line-height: 1rem;
+}
+
+.mainHeader {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  margin: 0 0 3rem;
+}
+
+.main a.docsLink:hover {
+  background: transparent;
+  outline: none;
+}
+
+.docsButton {
+  padding: 0.75rem 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 0.5rem;
+}
+
+.main h1 {
+  font-size: 2rem;
+  text-align: left;
+  line-height: 1.2;
+  font-weight: 700;
+  margin: 4rem 0 2rem;
+}
+
+.main a {
+  text-decoration: underline;
+  color: rgba(255, 255, 255, 1);
+}
+
+.main a:hover {
+  background: hsla(0, 0%, 100%, 0.3);
+  outline: 2px solid hsla(0, 0%, 100%, 0.3);
+}
+
+.highlight {
+  color: rgb(var(--primary-accent));
+}
+
+.main h2 {
+  font-size: 2rem;
+  margin: 4rem 0 1rem;
+  text-align: left;
+}
+
+.main h3 {
+  font-size: 1.5rem;
+  margin: 2rem 0 1rem;
+  text-align: left;
+}
+
+.main p,
+.main ul,
+.main ol {
+  font-size: 1rem;
+  color: var(--paragraph-color);
+  line-height: 2;
+}
+
+.main p {
+  text-align: left;
+  margin-bottom: 1rem;
+}
+
+.main ul,
+.main ol {
+  list-style-position: outside;
+  list-style-type: disc;
+  padding-left: 2rem;
+  margin: 0 0 2rem;
+}
+
+.main li {
+  padding: 0.25rem 0;
+}
+
+/* Code block */
+
+.main pre {
+  background: #1a1b26;
+  width: 100%;
+  padding: 1.5rem;
+  box-sizing: border-box;
+  overflow-x: auto;
+  border-radius: 0.5rem;
+  margin: 1rem 0 2rem;
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+
+.main code {
+  background: none;
+  white-space: pre;
+  width: 100%;
+  display: block;
+}
+
+.main strong {
+  color: rgb(var(--foreground-rgb));
+}
+
+.main span.logoName {
+  text-align: right;
+  align-self: end;
+  opacity: 0.3;
+  position: absolute;
+}
+
+.main p code {
+  font-size: 0.8rem;
+  color: var(--inline-code-foreground);
+  background-color: var(--inline-code-background);
+  border-radius: 0.25rem;
+  padding: 3px 5px;
+  white-space: nowrap;
+  width: auto;
+  display: inline;
+}
+
+.main figcaption {
+  margin-top: 1rem;
+  color: var(--paragraph-color);
+  font-size: 0.75rem;
+  text-align: center;
+}
+
+.footer {
+  margin: 8rem 0 0;
+  align-self: center;
+}
+
+.footer a:hover {
+  background: none;
+  outline: none;
+}
+
+.rociLogo {
+  margin-top: 2rem;
+  opacity: 0.95;
+  transition: opacity 0.1s;
+}
+
+.rociLogo:hover {
+  opacity: 1;
+}
+
+p.footerText {
+  margin-top: 1rem;
+  text-align: center;
+  font-size: 0.75rem;
+  color: rgb(var(--foreground-rgb));
+}
+
+@media (max-width: 909px) {
+  .main h1 {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+  }
+  .main h2 {
+    font-size: 2rem;
+  }
+  .main ul,
+  .main ol {
+    padding-left: 1.2rem;
+  }
+}
+
+@media (max-width: 420px) {
+  .main h1 {
+    font-size: 14.5vw;
+  }
+  .main h2 {
+    font-size: 8vw;
+  }
+}

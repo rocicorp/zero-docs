@@ -4,7 +4,7 @@
 
 @layer base {
   :root {
-    --background: 240 10% 3.9%;
+    --background: 0 0% 0%;
     --foreground: 0 0% 98%;
     --card: 240 10% 3.9%;
     --card-foreground: 0 0% 98%;
@@ -24,10 +24,17 @@
     --input: 240 3.7% 15.9%;
     --ring: 240 4.9% 83.9%;
     --radius: 0.5rem;
+
+    /* Root page */
+    --foreground-rgb: 255, 255, 255;
+    --paragraph-color: rgb(212, 212, 216);
+    --primary-accent: 39, 252, 174;
+    --inline-code-foreground: rgb(39, 252, 174);
+    --inline-code-background: rgb(26, 27, 38);
   }
 
   .dark {
-    --background: 240 10% 3.9%;
+    --background: 0 0% 0%;
     --foreground: 0 0% 98%;
     --card: 240 10% 3.9%;
     --card-foreground: 0 0% 98%;
@@ -75,14 +82,14 @@
   margin-top: 0.75rem;
 }
 
-code {
+.prose code {
   color: #27fcae !important;
   border-radius: 0.5rem !important;
   padding-left: 0.5rem !important;
   padding-right: 0.5rem !important;
 }
 
-pre code {
+.prose pre code {
   color: unset !important;
   border-radius: unset !important;
   padding-left: unset !important;
@@ -152,13 +159,13 @@ pre code {
   color: #ffb86c;
 }
 
-pre {
+.prose pre {
   padding: 0 !important;
   width: inherit !important;
   overflow-x: auto;
 }
 
-pre > code {
+.prose pre > code {
   display: grid;
   max-width: inherit !important;
   padding: 14px 0 !important;
@@ -241,4 +248,71 @@ pre .copy-button:hover {
 .has-copy-button {
   position: relative;
   padding-top: 2rem; /* Ensure space for the button */
+}
+
+/* Home code block */
+.hljs-keyword {
+  color: rgb(255, 121, 198);
+  font-weight: 700;
+}
+
+.hljs-title {
+  color: rgb(39, 252, 174);
+  font-weight: 700;
+}
+
+.hljs-built_in {
+  color: rgb(139, 233, 253);
+}
+
+.hljs-comment {
+  color: rgb(98, 114, 164);
+}
+
+.hljs-string {
+  color: rgb(241, 250, 140);
+}
+
+.hljs-number {
+  color: rgb(189, 147, 249);
+}
+
+.hljs-name {
+  color: rgb(241, 250, 140);
+  font-weight: 700;
+}
+
+.hljs-attr {
+  color: rgb(39, 252, 174);
+}
+
+/* Home fullscreen image container */
+.fullscreenContainer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  padding: 1rem;
+  background-color: rgba(0, 0, 0, 0.96);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  cursor: pointer;
+}
+
+@media (max-width: 1036px) {
+  .fullscreenContainer {
+    justify-content: flex-start;
+    overflow-y: auto;
+  }
+}
+
+@media (max-width: 768px) {
+  .inner-nav-items {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+  }
 }

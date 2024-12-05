@@ -31,10 +31,10 @@ export function SheetLeftbar() {
       <SheetContent className="flex flex-col gap-4 px-0" side="left">
         <SheetTitle className="sr-only">Menu</SheetTitle>
         <SheetHeader>
-          <h2 className="font-extrabold text-start px-8">Menu</h2>
+          <h2 className="font-extrabold text-start px-8">Docs</h2>
         </SheetHeader>
         <ScrollArea className="flex flex-col gap-4">
-          <div className="mx-2 px-5">
+          <div className=" px-8">
             <DocsMenu isSheet />
           </div>
         </ScrollArea>

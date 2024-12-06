@@ -39,18 +39,16 @@ Let us know if the lack of a particular column type is hindering your use of Zer
 
 ## Column Defaults
 
-Column defaults are allowed but are not replicated to the client. Nullable columns with a default will have the default `null` on the client instead. When the write makes it to the server, the default will be applied and the client will see it.
-
-The combined effect is essentially that column defaults work but are non-optimistic.
+Default values are allowed in the Postgres schema but there currently is no way to use them from a Zero app. The create mutation requires all columns to be specified, except when columns are nullable (in which case,they default to null). Since there is no way to leave non-nullable columns off the insert, there is no way for PG to apply the default. This is a known issue and will be fixed in the future.
 
 ## Primary Keys
 
 It is strongly recommended that primary keys be client-generated random strings like [uuid](https://www.npmjs.com/package/uuid), [ulid](https://www.npmjs.com/package/ulid), [nanoid](https://www.npmjs.com/package/nanoid), etc. This makes optimistic creation and updates much easier.
 
 <Note type="note" heading="Why are client-generated IDs easier?">
-    Imagine that the PK of your table is an auto-incrementing integer. If you optimistically create an entity of this type, you will have to give it some ID – the type will require it locally, but also if you want to optimistically creation relations against this row you’ll need an ID.
+    Imagine that the PK of your table is an auto-incrementing integer. If you optimistically create an entity of this type, you will have to give it some ID – the type will require it locally, but also if you want to optimistically create relationships to this row you’ll need an ID.
 
-    You could sync the highest value seen for that table, but in race conditions it is possible for that ID to be taken by the time the creation makes it to the server. Your database can resolve this and assign the next ID, but now the relations you created optimistically will be against the wrong row. Blech.
+    You could sync the highest value seen for that table, but there are race conditions and it is possible for that ID to be taken by the time the creation makes it to the server. Your database can resolve this and assign the next ID, but now the relationships you created optimistically will be against the wrong row. Blech.
 
     GUIDs makes a lot more sense in local-first applications.
 
@@ -68,6 +66,8 @@ You can use [Permissions](permissions) to limit tables and rows from replicating
 Until then, a workaround is to use the Postgres [*publication*](https://www.postgresql.org/docs/current/sql-createpublication.html) feature to control the tables and columns that are replicated into `zero-cache`.
 
 In your pg schema setup, create a Postgres `publication` with the tables and columns you want: `CREATE PUBLICATION zero_data FOR TABLE users (col1, col2, col3, ...), issues, comments` . If no such publication is present, Zero defaults to creating a publication that publishes the entire public schema.
+
+To limit what is synced from the `zero-cache` replica to actual clients (e.g., web browsers) you can use [read permissions](/docs/reference/authentication-and-permissions#permissions).
 
 ## Self-Referential Relationships
 

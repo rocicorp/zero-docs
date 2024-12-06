@@ -9,10 +9,10 @@ title: Roadmap
 - ~~Solid support~~
 - ~~Replica sqlite files not browsable with standard sqlite3 program~~
 - ~~Relationship filters - currently you can put relationships in the ‘select’ part of the query, but not the ‘where’ part. Relationship filters commonly needed to, i.e., find all issues with particular label.~~
-- Multi-column primary keys
-- Read permissions
-- Docs for easily deploying Zero on your own AWS or Fly.io account
-- Up to 20MB client-side and 1GB server-side per-replica
+- ~~Multi-column primary keys~~
+- ~~Read permissions~~
+- ~~Docs for easily deploying Zero on your own AWS or Fly.io account~~
+- ~~Up to 20MB client-side and 1GB server-side per-replica~~
 
 ## Beta (Q2 ‘25)
 
@@ -22,7 +22,7 @@ title: Roadmap
 - Ability to wait for authoritative results
 - Aggregations (count, sum, min, max, group-by, etc)
 - Consistency.
-  - See: [Consistency](/docs/reference/preloading#consistency).
+  - See: [Consistency](/docs/preloading#consistency).
   - This will also improve startup perf since apps won’t have to be so conservative in what they preload:
 - Cache size management: evict things from client-side cache to stay under size
 - Reduce zero client bundle size to < 40KB

@@ -8,13 +8,12 @@ import rehypeSlug from "rehype-slug";
 import rehypeCodeTitles from "rehype-code-titles";
 import rehypeAddCopyButton from "@/lib/rehype-add-copy-button";
 
-// custom components imports
+// Custom components for MDX
 import Note from "@/components/note";
 import ImageLightbox from "@/components/ui/ImageLightbox";
 import Video from "@/components/ui/Video";
 import { Button } from "@/components/ui/button";
 
-// add custom components
 const components = {
   Note,
   ImageLightbox,
@@ -22,7 +21,13 @@ const components = {
   Button,
 };
 
-// can be used for other pages like blogs, Guides etc
+// Define the structure of the frontmatter
+type BaseMdxFrontmatter = {
+  title: string;
+  description: string;
+};
+
+// Parse MDX content with the given plugins
 async function parseMdx<Frontmatter>(rawMdx: string) {
   return await compileMDX<Frontmatter>({
     source: rawMdx,
@@ -30,41 +35,44 @@ async function parseMdx<Frontmatter>(rawMdx: string) {
       parseFrontmatter: true,
       mdxOptions: {
         rehypePlugins: [
-          rehypeCodeTitles,
-          rehypePrism,
-          rehypeSlug,
-          rehypeAutolinkHeadings,
-          rehypeAddCopyButton,
+          rehypeCodeTitles, // Adds titles to code blocks
+          rehypePrism, // Adds syntax highlighting
+          rehypeSlug, // Adds slugs to headings
+          [
+            rehypeAutolinkHeadings, // Makes headings clickable
+            {
+              behavior: "wrap", // Wrap the heading with a clickable anchor
+              properties: {
+                className: "heading-link", // Add a class for styling
+              },
+            },
+          ],
+          rehypeAddCopyButton, // Adds "copy" buttons to code blocks
         ],
-        remarkPlugins: [remarkGfm],
+        remarkPlugins: [remarkGfm], // Enables GitHub-flavored markdown
       },
     },
     components,
   });
 }
 
-// logic for docs
-
-type BaseMdxFrontmatter = {
-  title: string;
-  description: string;
-};
-
+// Fetch and parse MDX content for a given slug
 export async function getDocsForSlug(slug: string) {
   try {
     const contentPath = getDocsContentPath(slug);
     const rawMdx = await fs.readFile(contentPath, "utf-8");
     return await parseMdx<BaseMdxFrontmatter>(rawMdx);
   } catch (err) {
-    console.log(err);
+    console.error(`Error fetching docs for slug "${slug}":`, err);
+    throw err;
   }
 }
 
+// Generate a Table of Contents (TOC) from markdown headings
 export async function getDocsTocs(slug: string) {
   const contentPath = getDocsContentPath(slug);
   const rawMdx = await fs.readFile(contentPath, "utf-8");
-  // captures between ## - #### can modify accordingly
-  const headingsRegex = /^(#{2,4})\s(.+)$/gm;
+  const headingsRegex = /^(#{2,4})\s(.+)$/gm; // Matches headings ## to ####
   let match;
   const extractedHeadings = [];
   while ((match = headingsRegex.exec(rawMdx)) !== null) {
@@ -74,17 +82,21 @@ export async function getDocsTocs(slug: string) {
     extractedHeadings.push({
       level: headingLevel,
       text: headingText,
-      href: `#${slug}`,
+      href: `#${slug}`, // Create anchor links
     });
   }
   return extractedHeadings;
 }
 
+// Utility function to create slugs from text
 function sluggify(text: string) {
-  const slug = text.toLowerCase().replace(/\s+/g, "-");
-  return slug.replace(/[^a-z0-9-]/g, "");
+  return text
+    .toLowerCase()
+    .replace(/\s+/g, "-") // Replace spaces with dashes
+    .replace(/[^a-z0-9-]/g, ""); // Remove non-alphanumeric characters
 }
 
+// Get the file path for the docs based on the slug
 function getDocsContentPath(slug: string) {
   return path.join(process.cwd(), "/contents/docs/", `${slug}/index.mdx`);
 }

@@ -1,0 +1,67 @@
+---
+title: Permissions
+---
+
+Permissions are expressed using *rules* - special ZQL queries that are run automatically as part of every read and write operation.
+
+Rules are defined in your [`schema.ts`](/docs/zero-schema) file.
+
+Because permissions are expressed using ZQL, not some special rule language, they are quite flexible and can easily express concepts like “allow if in a group that has access”.
+
+## Examples
+
+```tsx
+import {
+  createSchema,
+  createTableSchema,
+  defineAuthorization,
+} from "@rocicorp/zero";
+
+// The contents of your decoded JWT.
+type AuthData = {
+	// the userID
+  sub: string;
+};
+
+export default defineAuthorization<AuthData, Schema>(schema, (query) => {
+  const allowIfLoggedIn = (authData: AuthData) =>
+    query.user.where("id", "=", authData.sub);
+
+  const allowIfMessageSender = (authData: AuthData, row: Message) => {
+    return query.message
+      .where("id", row.id)
+      .where("senderID", "=", authData.sub);
+  };
+
+  return {
+    // Nobody can write to the medium or user tables -- they are populated
+    // and fixed by seed.sql
+    medium: {
+      row: {
+        insert: [],
+        update: [],
+        delete: [],
+      },
+    },
+    user: {
+      row: {
+        insert: [],
+        update: [],
+        delete: [],
+      },
+    },
+    message: {
+      row: {
+        // anyone can insert
+        insert: undefined,
+        // only sender can edit their own messages
+        update: [allowIfMessageSender],
+        // must be logged in to delete
+        delete: [allowIfLoggedIn],
+      },
+    },
+  };
+});
+```
+
+See [hello-zero](https://github.com/rocicorp/hello-zero/blob/main/zero.config.ts) for a simple example of write auth and [zbugs](https://github.com/rocicorp/mono/blob/main/apps/zbugs/zero.config.ts#L16) for a much more involved one.

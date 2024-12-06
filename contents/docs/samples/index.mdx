@@ -1,0 +1,60 @@
+---
+title: Samples
+---
+
+## zbugs
+
+zbugs is a complete issue tracker in the style of Linear built with Zero.
+
+Not just a demo app, this is the Rocicorp’s actual issue tracker. We use it everyday and depend on it. When Zero launches publicly this will be our public issue tracker, not GitHub.
+
+<ImageLightbox src="/images/samples/zbugs.png" alt="zbugs" />
+
+**Stack:** Vite/Fastify/React<br/>
+**Live demo:** https://bugs.rocicorp.dev/ (password: `zql`)<br/>
+**Source:** https://github.com/rocicorp/mono/tree/main/apps/zbugs
+
+### Features
+
+- Instant reads and writes with realtime updates throughout
+- Github auth
+- Write permissions (anyone can create a bug, but only creator can edit their own bug, etc)
+- Complex filters
+- Unread indicators
+- Basic text search
+- Emojis
+- Short numeric bug IDs rather than cryptic hashes
+
+## hello-zero
+
+A quickstart showing off the key features of Zero.
+
+<ImageLightbox src="/images/samples/quickstart.png" alt="Quickstart" />
+
+**Stack:** Vite/Hono/React<br/>
+**Source:** https://github.com/rocicorp/hello-zero<br/>
+**Docs:** [Quickstart](/docs/quickstart)
+
+### Features
+
+- Instant reads and writes with realtime updates throughout
+- 60fps (ish) mutations and sync
+- Hard-coded auth + write permissions
+- Write permissions (only logged in users can remove messages, only creating user can edit a message)
+- Complex filters
+- Basic text search
+
+## hello-zero-solid
+
+Same as `hello-zero`, but in Solid. See @SolidJS.
+
+## hello-zero-do
+
+<Video src="https://d2nzlypqdo5xbb.cloudfront.net/video/hello-zero-do.mp4" alt="hello-zero-do demo" />
+
+Same as `zero-hello` and `zero-hello-solid` above, but demonstrates Cloudflare Durable Objects integration.
+
+This sample runs `zero-client` within a Durable Object and monitors changes to a Zero query. This can be used to do things like send notifications, update external services, etc.
+
+**Stack:** Vite/Hono/React/Cloudflare Workers<br/>
+**Source:** [https://github.com/rocicorp/hello-zero-do](https://github.com/rocicorp/hello-zero)

@@ -1,0 +1,55 @@
+---
+title: Zero 0.6
+description: Relationship FIlters
+---
+
+## Install
+
+```bash
+npm install @rocicorp/zero@0.6
+```
+
+## Upgrade Guide
+
+This release is a bit harder to upgrade to than previous alphas. For a step-by-step guide, please refer to the commits that upgrade the React and Solid quickstart apps:
+
+- [Upgrading hello-zero from Zero 0.5 to 0.6](https://github.com/rocicorp/hello-zero/compare/ee837552be8419fbcbe4c5887609c89a7b1c4e07...8a0d29149bac0ab10aa25de3ebdb25ab70bc0d96)
+- [Upgrading hello-zero-solid from Zero 0.5 to 0.6](https://github.com/rocicorp/hello-zero-solid/compare/79405b2da06b059a184abec69fdc20f071c58c4d...f4fed1ab7555bdd3bc131536863d60e799de571a)
+
+## Breaking Changes
+
+- Totally new configuration system.
+    - `zero.config.ts` is no more – config is now via env vars ([documentation](/docs/zero-cache-config)).
+    - Permissions rules moved into schema ([documentation](/docs/auth#permissions)).
+- Renamed CRUD mutators to be consistent with SQL naming ([bug](https://bugs.rocicorp.dev/issue/3144), [documentation](/docs/writing-data)).
+    - `z.mutate.<table>.create -> insert`
+    - `z.mutate.<table>.put -> upsert`
+- Removed `select` from ZQL. It wasn’t doing anything ([documentation](/docs/reading-data))
+- Moved batch mutation to its own `mutateBatch` method. Before the `mutate` field also doubled as a method. This made intellisense hard to understand since `z.mutate` had all the tables as fields but also all the fields of a function.
+
+## Features
+
+- Relationship filters. Queries can now include `whereExists` ([bug](https://bugs.rocicorp.dev/issue/3039), [documentation](/docs/reading-data#relationship-filters)).
+- Reworked syntax for compound `where` filters, including ergonomically building `or` expressions with dynamic number of clauses ([bug](https://bugs.rocicorp.dev/issue/3104), [documentation](/docs/reading-data#compound-filters)).
+- Support using Postgres databases without superuser access for smaller apps ([documentation](/docs/connecting-to-postgres)).
+- Support for running `Zero` client under Cloudflare Durable Objects ([documentation](/docs/samples#hello-zero-do)).
+- Reworked support for `null` / `undefined` to properly support optional fields ([bug](https://bugs.rocicorp.dev/issue/3114), [documentation](/docs/zero-schema#optional-columns)).
+- Added `IS` / `IS NOT` to ZQL to support checking for null ([bug](https://bugs.rocicorp.dev/issue/3028), [documentation](/docs/reading-data#comparing-to-null)).
+- Improved intellisense for mutators.
+- Added `--port` flag and `ZERO_PORT` environment variable ([bug](https://bugs.rocicorp.dev/issue/3031), [documentation](/docs/zero-cache-config)).
+- Default max connections of zero-cache more conservatively so that it should fit with even common small Postgres configurations.
+- `zero-cache` now accepts requests with any base path, not just `/api`. The `server` parameter to the `Zero` client constructor can now be a host ([`https://myapp-myteam.zero.ms`](https://myapp-myteam.zero.ms/)) or a host with a single path component ([`https://myapp-myteam.zero.ms/zero`](https://myapp-myteam.zero.ms/zero)). These two changes together allow hosting `zero-cache` on same domain with an app that already uses the `/api` prefix ([bug](https://bugs.rocicorp.dev/issue/3115)).
+- Allow Postgres columns with default values, but don’t sync them ([documentation](/docs/postgres-support#column-defaults)).
+- The `npx zero-sqlite` utility now accepts all the same flags and arguments that `sqlite3` does ([documentation](/docs/recipes#debugging-replication)).
+
+## zbugs
+
+- Added tooltip describing who submitted which emoji reactions
+- Updated implementation of label, assignee, and owner filters to use relationship filters
+- Updated text filter implementation to use `or` to search description and comments too
+
+## Docs
+
+- Added new [ZQL reference](/docs/reading-data)
+- Added new [mutators reference](/docs/writing-data)
+- Added new [config reference](/docs/zero-cache-config)

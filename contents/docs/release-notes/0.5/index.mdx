@@ -1,0 +1,39 @@
+---
+title: Zero 0.5
+description: JSON Columns
+---
+
+## Install
+
+```bash
+npm install @rocicorp/zero@0.5
+```
+
+## Breaking changes
+
+- `createTableSchema` and `createSchema` moved to `@rocicorp/zero/schema` subpackage. This is in preparation to moving authorization into the schema file.
+- `SchemaToRow` helper type was renamed `TableSchemaToRow` and moved into `@rocicorp/zero/schema`.
+
+Basically:
+
+```diff
+- import { createSchema, createTableSchema, SchemaToRow } from "@rocicorp/zero";
++ import { createSchema, createTableSchema, TableSchemaToRow } from "@rocicorp/zero/schema";
+```
+
+## Features
+
+- Added support for JSON columns in Postgres ([documentation](/docs/postgres-support)).
+- Zero pacakage now includes `zero-sqlite3`, which can be used to explore our sqlite files ([documentation](/docs/recipes)).
+
+## Fixes
+
+- We were not correctly replicating the `char(n)` type, despite documenting that we were.
+
+## Docs
+
+*nothing notable*
+
+## zbugs
+
+*nothing notable*

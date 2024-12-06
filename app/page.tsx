@@ -49,7 +49,7 @@ export default function Home() {
           height={32}
         />
 
-        <Link href="/docs/welcome/introduction" className={styles.docsLink}>
+        <Link href="/docs/introduction" className={styles.docsLink}>
           <button className={styles.docsButton}>Docs</button>
         </Link>
       </div>

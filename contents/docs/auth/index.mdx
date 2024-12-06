@@ -1,0 +1,11 @@
+---
+title: Authentication
+---
+
+Zero uses a JWT-based flow to authenticate connections to zero-cache.
+
+You configure Zero with a `jwtSecret` and then use that secret to encode the userID. This encoded JWT should be sent to your web client and on to Zero, who sends it to zero-cache. 
+
+zero-cache then decodes the JWT to obtain the user’s ID, and uses it as an input to [permission rules](permissions).
+
+<ImageLightbox src="/images/auth/authentication.png" alt="Authentication" />

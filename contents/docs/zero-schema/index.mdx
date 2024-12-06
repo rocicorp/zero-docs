@@ -1,0 +1,185 @@
+---
+title: Zero Schema
+---
+
+Zero applications have both a *database schema* (the normal backend database schema that all web apps have) and a *Zero schema*. The two schemas are related, but not the same:
+
+- The Zero schema is usually a subset of the server-side schema. It only needs to includes the tables and columns that the Zero client uses.
+- The Zero schema includes *authorization rules* that control access to the database.
+- The Zero schema includes *relationships* that explicitly define how entities are related to each other.
+- In order to support smooth schema migration, the two schemas don’t change in lockstep. Typically the database schema is changed first, then the Zero schema is changed later.
+
+This page describes the core Zero schema which defines the tables, column, and relationships your Zero app can access. For information on permissions, see [Authentication and Permissions](../auth/). For information on migration see [Schema Migration](/docs/schema-migration).
+
+## Defining the Zero Schema
+
+The Zero schema is encoded in a TypeScript file that is conventionally called `schema.ts` file. For example, see [the schema file for`hello-zero`](https://github.com/rocicorp/hello-zero/blob/main/src/schema.ts).
+
+## Table Schemas
+
+Use the `createTableSchema` helper to define each table in your Zero schema:
+
+```tsx
+import { createTableSchema, } from "@rocicorp/zero";
+
+const userSchema = createTableSchema({
+  tableName: "user",
+  columns: {
+    id: "string",
+    name: "string",
+    partner: "boolean",
+  },
+  primaryKey: "id",
+});
+```
+
+Columns can have the types `boolean`, `number`, `string`, `null`, `json`. See [Column Types](/docs/postgres-support#column-types) for how database types are mapped to these types.
+
+<Note type="warning">
+  Currently, if the database type doesn’t map correctly to the Zero type, replication will continue and silently be wrong. This is a bug – in the future, this will be an error. See https://bugs.rocicorp.dev/issue/3112.
+</Note>
+
+## Optional Columns
+
+Columns can be marked *optional*. This corresponds to the SQL concept `nullable`.
+
+```tsx
+const userSchema = createTableSchema({
+  tableName: "user",
+  columns: {
+    id: "string",
+    name: "string",
+    nickName: { type: "string", optional: true },
+  },
+  primaryKey: "id",
+});
+```
+
+An optional column can have a value of the specified type or `null` to mean *no value*.
+
+<Note type="note">
+    Note that `null` and `undefined` mean different things when working with Zero rows.
+
+    - When reading, if a column is `optional`, Zero can return `null` for that field. `undefined` is not used at all when Reading from Zero.
+    - When writing, you can specify `null` for an optional field to explicitly write `null` to the datastore, unsetting any previous value.
+    - For `create` and `upsert` you can set optional fields to `undefined` (or leave the field off completely) to take the default value as specified by backend schema for that column. For `update` you can set any non-PK field to `undefined` to leave the previous value unmodified.
+</Note>
+
+## Compound Primary Keys
+
+Use an array for compound primary keys:
+
+```ts
+const userSchema = createTableSchema({
+  tableName: "user",
+  columns: {
+    orgID: "string",
+    userID: "string",
+    name: "string",
+  },
+  primaryKey: ["orgID", "userID"],
+});
+```
+
+## Relationships
+
+Use the `relationships` field to define relationships between tables:
+
+```ts
+const messageSchema = createTableSchema({
+  tableName: "message",
+  columns: {
+    id: "string",
+    senderID: "string",
+  },
+  primaryKey: "id",
+  relationships: {
+    sender: {
+      sourceField: "senderID",
+      destSchema: userSchema,
+      destField: "id",
+    },
+  },
+});
+```
+
+This creates a "sender" relationship that can later be queried with the [`related` ZQL clause](../reading-data#related):
+
+```ts
+const messagesWithSener = z.query.messages.related('sender');
+```
+
+## Many-to-Many Relationships
+
+You can create many-to-many relationships by chaining the relationship definitions. Assuming a `label` table and an `issueLabel` junction table, you can define a `labels` relationship like this:
+
+```ts
+const issueSchema = {
+  tableName: 'issue',
+  columns: {
+    id: 'string',
+    title: 'string',
+  },
+  primaryKey: 'id',
+  relationships: {
+    labels: [
+      {
+        sourceField: 'id',
+        destField: 'issueID',
+        destSchema: issueLabelSchema,
+      },
+      {
+        sourceField: 'labelID',
+        destField: 'id',
+        destSchema: labelSchema,
+      },
+    ],
+  }
+};
+```
+
+<Note>
+  Currently only two levels of chaining are supported for `relationships`. [Let us know](https://zero.rocicorp.dev/contact) if you can think of a use case for more!
+</Note>
+
+## Relationships and Compound Keys
+
+Relationships can traverse compound keys. Imagine a `user` table with a compound primary key of `orgID` and `userID`, and a `message` table with a related `senderOrgID` and `senderUserID`. This can be represented in your schema with:
+
+```ts
+const messageSchema = createTableSchema({
+  tableName: "message",
+  columns: {
+    id: "string",
+    senderOrgID: "string",
+    senderUserID: "string",
+  },
+  primaryKey: "id",
+  relationships: {
+    sender: {
+      sourceField: ["senderOrgID", "senderUserID"],
+      destSchema: userSchema,
+      destField: ["orgID", "userID"],
+    },
+  },
+});
+```
+
+## Database Schemas
+
+Use `createSchema` to define the entire Zero schema:
+
+```tsx
+import { createSchema } from "@rocicorp/zero";
+
+export const schema = createSchema({
+  version: 1,
+  tables: {
+    user: userSchema,
+    medium: mediumSchema,
+    message: messageSchema,
+  },
+});
+```
+
+The `version` field is used as part of [schema migration](../schema-migration/).

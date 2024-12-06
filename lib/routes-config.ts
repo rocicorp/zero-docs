@@ -10,40 +10,41 @@ export type EachRoute = {
 export const ROUTES: EachRoute[] = [
   {
     title: 'Welcome',
-    href: '/welcome',
+    href: '',
     noLink: true,
     items: [
       {title: 'Introduction', href: '/introduction'},
       {title: 'Quickstart', href: '/quickstart'},
+      {title: 'Samples', href: '/samples'},
     ],
   },
   {
-    title: 'Reference',
-    href: '/reference',
+    title: 'Guides',
+    href: '',
     noLink: true,
     items: [
-      {title: 'Samples', href: '/samples'},
-      {title: 'Concepts (How Zero Works)', href: '/concepts'},
+      {title: 'How Zero Works', href: '/overview'},
       {title: 'Connecting to Postgres', href: '/connecting-to-postgres'},
-      {
-        title: 'Supported Postgres Features',
-        href: '/supported-postgres-features',
-      },
-      {title: 'Reading Data with ZQL', href: '/reading-data-with-zql'},
-      {
-        title: 'Writing Data with Mutators',
-        href: '/writing-data-with-mutators',
-      },
-      {title: 'Deploying Zero', href: '/deployment'},
+      {title: 'Supported Postgres Features', href: '/postgres-support'},
+      {title: 'Zero Schema', href: '/zero-schema'},
+      {title: 'Reading Data with ZQL', href: '/reading-data'},
+      {title: 'Writing Data with Mutators', href: '/writing-data'},
+      {title: 'Authentication', href: '/auth'},
+      {title: 'Permissions', href: '/permissions'},
       {title: 'Preloading', href: '/preloading'},
-      {
-        title: 'Authentication and Permissions',
-        href: '/authentication-and-permissions',
-      },
-      {title: 'Schema Management', href: '/schema-management'},
+      {title: 'Schema Migrations', href: '/migrations'},
+      {title: 'Deployment', href: '/deployment'},
       {title: '`zero-cache` Config', href: '/zero-cache-config'},
       {title: 'SolidJS', href: '/solidjs'},
       {title: 'Recipes', href: '/recipes'},
+    ],
+  },
+
+  {
+    title: 'Meta',
+    href: '',
+    noLink: true,
+    items: [
       {title: 'Roadmap', href: '/roadmap'},
       {title: 'Reporting Bugs', href: '/reporting-bugs'},
       {

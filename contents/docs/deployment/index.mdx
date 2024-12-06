@@ -1,0 +1,194 @@
+---
+title: Deploying Zero
+---
+
+To deploy a Zero app, you need to:
+
+1. Deploy your backend database. Most standard Postgres hosts [can be used with Zero](connecting-to-postgres).
+1. Deploy `zero-cache`. We provide a [Docker image](https://hub.docker.com/r/rocicorp/zero) that should work with any Docker host.
+1. Deploy your frontend. You can use any hosting service like Vercel or Netlify.
+
+## Scalability
+
+<Note>
+  Currently `zero-cache` is single-node. This pains us as much as it does you.
+</Note>
+
+A single reasonably-sized `zero-cache` node can handle a fairly large number of users – hundreds to thousands depending on what they are doing. We run [zbugs](../../samples) on a single `m5.4xlarge` instance and have load tested it up to 4k concurrent users.
+
+But it's not infinitely scalable, and updating `zero-cache` will take down your service for a minute or so while the Docker container restarts.
+
+In the near future, Zero will be horizontally scalable, with features like rolling updates, sharding different subsets of data into different instances, and geographic replication.
+
+See [Roadmap](roadmap) for more information.
+
+## Topology
+
+While `zero-cache` is single-node, you should deploy it close to your database to minimize sync latency. In the future, you will be able to deploy `zero-cache` in multiple regions to provide low-latency access to users around the world.
+
+## Configuration
+
+The `zero-cache` image is configured via environment variables. See [zero-cache Config](./zero-cache-config) for available options.
+
+## Schema Deployment
+
+`zero-cache` needs a copy of your [`zero-schema.json`](./zero-schema) because it is used to enforce permissions.
+
+You can deploy it as a plain file, using the `ZERO_SCHEMA_FILE` env var. For convenience, we also support deploying it as an environment variable, using `ZERO_SCHEMA_JSON`.
+
+## Example: Deploying to Fly.io
+
+Let's deploy the [Quickstart](../quickstart) app to [Fly.io](https://fly.io). We'll use Fly.io for both the database and `zero-cache`.
+
+### Setup Quickstart
+
+Go through the [Quickstart](../quickstart) guide to get the app running locally.
+
+### Setup Fly.io
+
+Create an account on [Fly.io](https://fly.io) and [install the Fly CLI](https://fly.io/docs/flyctl/install/).
+
+### Create Postgres app
+
+<Note type="warning">
+  **Note:** Fly.io requires app names to be unique across all Fly.io users. Change the `INITIALS` environment variable below to something unique.
+</Note>
+
+```bash
+INITIALS=aa
+PG_APP_NAME=$INITIALS-zstart-pg
+
+PG_PASSWORD=$(head -c 1024 /dev/urandom | sha1sum | head -c 16)
+
+fly postgres create \
+  --name $PG_APP_NAME \
+  --region lax \
+  --initial-cluster-size 1 \
+  --vm-size shared-cpu-2x \
+  --volume-size 40 \
+  --password=$PG_PASSWORD
+```
+
+### Assign a V4 IP Address
+
+This isn't strictly necessary, and costs a small amount of money, but it makes it easier to test because you can connect from your local machine.
+
+```bash
+fly ips allocate-v4 --app $PG_APP_NAME
+```
+
+### Seed Upstream database
+
+Populate the database with initial data and set its `wal_level` to `logical` to support replication to `zero-cache`. Then restart the database to apply the changes.
+
+<Note type="warning">
+  **Note:** You may have to wait a few minutes for the IP change from the last command to propagate to your machine before this works.
+</Note>
+
+```bash
+CONNECTION_STRING="postgres://postgres:$PG_PASSWORD@$PG_APP_NAME.fly.dev:5432"
+
+psql -f docker/seed.sql $CONNECTION_STRING
+psql -c "ALTER SYSTEM SET wal_level = logical;" $CONNECTION_STRING
+fly postgres restart --app $PG_APP_NAME
+```
+
+### Run Local `zero-cache` Against Remote Postgres
+
+Update the `.env` file with the remote Postgres on Fly.io.
+
+```bash
+cat <<EOF > .env
+ZERO_UPSTREAM_DB="${CONNECTION_STRING}/zstart"
+ZERO_CVR_DB="${CONNECTION_STRING}/zstart_cvr"
+ZERO_CHANGE_DB="${CONNECTION_STRING}/zstart_cdb"
+ZERO_JWT_SECRET=secretkey
+ZERO_REPLICA_FILE=/tmp/zstart_replica.db
+EOF
+```
+
+Kill any existing zero-cache process, clear its state, and restart with:
+
+```bash
+ps | grep zero-cache | grep node | cut -d' ' -f1 | xargs kill
+rm /tmp/zstart_replica.db*
+npx zero-cache
+```
+
+The app should run again, but sync will be much slower because zero-cache and Postgres are far from each other. Let's fix that by deploying `zero-cache` to Fly.io too.
+
+### Create `zero-cache` Fly.io app
+
+```bash
+CACHE_APP_NAME=$INITIALS-zstart-cache
+fly app create $CACHE_APP_NAME
+```
+
+### Publish `zero-cache`
+
+Create a `fly.toml` file. We'll copy the `zero-schema.json` into the toml file to pass it to the server as an environment variable.
+
+```bash
+cat <<EOF > fly.toml
+app = "$CACHE_APP_NAME"
+primary_region = 'lax'
+
+[build]
+image = "registry.hub.docker.com/rocicorp/zero:canary"
+
+[http_service]
+internal_port = 4848
+force_https = true
+auto_stop_machines = 'off'
+min_machines_running = 1
+
+[[http_service.checks]]
+grace_period = "10s"
+interval = "30s"
+method = "GET"
+timeout = "5s"
+path = "/"
+
+[[vm]]
+memory = '2gb'
+cpu_kind = 'shared'
+cpus = 2
+
+[mounts]
+source = "sqlite_db"
+destination = "/data"
+
+[env]
+ZERO_REPLICA_FILE = "/data/sync-replica.db"
+ZERO_UPSTREAM_DB="${CONNECTION_STRING}/zstart"
+ZERO_CVR_DB="${CONNECTION_STRING}/zstart_cvr"
+ZERO_CHANGE_DB="${CONNECTION_STRING}/zstart_cdb"
+ZERO_JWT_SECRET="secretkey"
+LOG_LEVEL = "debug"
+ZERO_SCHEMA_JSON = """$(cat zero-schema.json)"""
+EOF
+```
+
+Then publish `zero-cache`:
+
+```bash
+fly deploy
+```
+
+### Use Remote `zero-cache`
+
+```bash
+cat <<EOF > .env.local
+VITE_PUBLIC_SERVER='https://${CACHE_APP_NAME}.fly.dev/'
+EOF
+```
+
+Now refresh the app and it should be fast again. Open the web inspector to verify the app is talking to the remote `zero-cache`!
+
+<Note type="warning">
+  **Note:** You may have to again wait for DNS change to propagate before app will work. You can check it via `ping $CACHE_APP_NAME.fly.dev`. Sigh.
+</Note>
+
+## Example: $PLATFORM
+
+Where should we deploy Zero next?? Let us know at [zero.rocicorp.dev/discord](https://zero.rocicorp.dev/discord)!

@@ -218,8 +218,27 @@
   background-color: transparent !important;
 }
 
-.prose a.button-link {
+.prose a.button-link,
+.prose a.heading-link {
   text-decoration: none;
+}
+
+.heading-link {
+  position: relative;
+  text-decoration: none;
+  color: inherit;
+}
+
+.heading-link::after {
+  content: "🔗";
+  font-size: 1rem;
+  margin-left: 0.5em;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.heading-link:hover::after {
+  opacity: 1;
 }
 
 pre .copy-button {

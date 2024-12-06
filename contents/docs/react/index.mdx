@@ -1,5 +1,30 @@
 ---
 title: React
-description: Coming soon!
 ---
 
+Zero has built-in support for React. Here’s what basic usage looks like:
+
+```tsx
+import {useQuery} from "@rocicorp/zero/react";
+
+function IssueList() {
+  const z = useZero();
+  let issueQuery = z.query.issue
+    .related('creator')
+    .related('labels')
+    .limit(100);
+
+  const userID = selectedUserID();
+
+  if (userID) {
+    issueQuery = issueQuery.where('creatorID', '=', userID);
+  }
+
+  const issues = useQuery(issueQuery);
+  return <div>{issues.map(issue => <IssueRow issue={issue} />)}</div>
+}
+```
+
+Complete quickstart here:
+
+https://github.com/rocicorp/hello-zero

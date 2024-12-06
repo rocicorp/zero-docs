@@ -18,8 +18,9 @@ export const ROUTES: EachRoute[] = [
       {title: 'Samples', href: '/samples'},
     ],
   },
+
   {
-    title: 'Guides',
+    title: 'Using Zero',
     href: '',
     noLink: true,
     items: [
@@ -35,9 +36,17 @@ export const ROUTES: EachRoute[] = [
       {title: 'Schema Migrations', href: '/migrations'},
       {title: 'Deployment', href: '/deployment'},
       {title: '`zero-cache` Config', href: '/zero-cache-config'},
+      {title: 'Recipes', href: '/recipes'},
+    ],
+  },
+
+  {
+    title: 'Integrations',
+    href: '',
+    noLink: true,
+    items: [
       {title: 'React', href: '/react'},
       {title: 'SolidJS', href: '/solidjs'},
-      {title: 'Recipes', href: '/recipes'},
     ],
   },
 

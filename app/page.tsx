@@ -12,14 +12,12 @@ export default function Home() {
   // as server data changes. Just wire it directly to your UI –
   // no HTTP APIs, no state management no realtime goop.
   const tracks = useQuery(
-    zero.playlistTrack.join(zero.track).select(
-      'track.*',
-      ['album', track => track.queryAlbum().select('name')],
-      ['artists', track => track.queryArtists().select('name')],
-    )
-    .where('playlistTrack.playlistID', '=', id)
-    .orderBy('playlistTrack.order', 'asc')
-    .limit(1000)
+    zero.query.playlist
+      .related('tracks', track => track
+        .related('album')
+        .related('artist')
+        .orderBy('playcount', 'asc')
+      .where('id', id)
   );
 
   const onStar = (id: string, starred: boolean) => {
@@ -66,7 +64,7 @@ export default function Home() {
       <p>It&apos;s time for a rethink.</p>
       <p>
         We&apos;re building a general-purpose sync engine for the web. You put
-        Zero in front of your existing database or web service, and we
+        Zero in front of your database or web service, and we
         distribute your backend all the way to main thread of the UI.
       </p>
 
@@ -84,7 +82,7 @@ export default function Home() {
         database, including the server.
       </p>
       <p>
-        Behind the scenes, we synchronize the most frequently used 100MB of data
+        Behind the scenes, we synchronize the most frequently used 25MB of data
         to a client-side persistent cache. This cache is used automatically to
         the maximum extent possible for all queries.
       </p>
@@ -101,7 +99,7 @@ export default function Home() {
           updates, in the next frame.
         </li>
         <li>
-          <strong>Automatic</strong> reactive queries &ndash; a user changes
+          <strong>Automatic reactivity</strong> &ndash; a user changes
           something and all other users see the change live.
         </li>
         <li>
@@ -126,7 +124,7 @@ export default function Home() {
         even an old-fashioned server-rendered web app.
       </p>
       <p>
-        We will be open sourcing{" "}
+        We have open sourced{" "}
         <Link href="https://replicache.dev">Replicache</Link> and{" "}
         <Link href="https://reflect.net">Reflect</Link>. Once Zero is ready, we
         will encourage users to move. We expect the migration to be easy, and
@@ -134,8 +132,10 @@ export default function Home() {
       </p>
       <p>
         Zero is the culmination of everything we&apos;ve done with sync over the
-        past five years. We are working toward a source release in fall 2024 and
-        an open beta Q1 2025.
+        past five years. Ready to dive in?
+      </p>
+      <p>
+        <button>Get Started</button>
       </p>
 
       <div className={styles.footer}>

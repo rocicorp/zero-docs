@@ -3,7 +3,7 @@ import clsx from "clsx";
 import { PropsWithChildren } from "react";
 
 type NoteProps = PropsWithChildren & {
-  type?: "note" | "danger" | "warning";
+  type?: "note" | "danger" | "warning" | "todo";
   emoji?: string;
   heading?: string;
 };
@@ -16,22 +16,24 @@ export default function Note({
 }: NoteProps) {
   const noteClassNames = clsx({
     "bg-gray-900 border-gray-800": type === "note",
-    "bg-yellow-950 border-yellow-900": type === "warning",
+    "bg-yellow-950 border-yellow-900": type === "warning" || type === "todo",
     "bg-red-950 border-red-900": type === "danger",
   });
 
   // Default emojis by note type
-  const typeEmojis: Record<"note" | "warning" | "danger", string> = {
+  const typeEmojis: Record<"note" | "warning" | "danger" | "todo", string> = {
     note: "🤔",
     warning: "😬",
     danger: "😱",
+    todo: "😅"
   };
 
   // Default headings by note type
-  const defaultHeadings: Record<"note" | "warning" | "danger", string> = {
+  const defaultHeadings: Record<"note" | "warning" | "danger" | "todo", string> = {
     note: "Note",
     warning: "Warning",
     danger: "Danger",
+    todo: "TODO"
   };
 
   // Use the overridden emoji if provided; otherwise, use the default

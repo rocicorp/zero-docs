@@ -2,26 +2,26 @@
 title: Permissions
 ---
 
-Permissions are expressed using ZQL queries and are run automatically as part of every read and write operation.
-
-Because permissions are ZQL, and not some other special rule language, they are quite flexible and can easily express concepts like “allow if in a group that has access”.
+Permissions are expressed using [ZQL](reading-data) and run automatically with every read and write.
 
 ## Define Permissions
 
-Permissions are defined in [`schema.ts`](/docs/zero-schema) using the `definePermissions` function. The passed callback returns an object which can have a _policy_ for each table in your schema.
+Permissions are defined in [`schema.ts`](/docs/zero-schema) using the `definePermissions` function.
 
-Here's a simple example of returning a policy for an `issue` table that restricts deletes to the issue's creator:
+Here's an example of limiting deletes to only the creator of an issue:
 
 ```ts
+// The decoded value of your JWT.
 type AuthData = {
+  // The logged-in user.
   sub: string;
-  role: 'admin' | 'user';
 };
 
-export const permissions = definePermissions<AuthData, Schema>(schema, () => {
+export const permissions = definePermissions<AuthData, Schema>(
+    schema, () => {
   const allowIfIssueCreator = (
     authData: AuthData,
-    {cmp}: ExpressionBuilder<typeof issueSchema>,
+    {cmp}: ExpressionBuilder<IssueSchema>,
   ) => cmp('creatorID', '=', authData.sub);
 
   return {
@@ -32,15 +32,14 @@ export const permissions = definePermissions<AuthData, Schema>(schema, () => {
     },
   };
 });
-
-return {
-  schema,
-  permissions,
-}
 ```
 
+`definePermission` returns a _policy_ object for each table in the schema. Each policy defines a *ruleset* for the _operations_ that are possible on a table: `select`, `insert`, `update`, and `delete`.
+
 <Note type="danger">
-If a policy is not defined for a table or operation, Zero currently ***allows*** the operation. This is not a very safe default, but it is productive. We will likely flip this default in the future.
+If a policy is not defined for a table or operation, Zero currently ***allows*** the operation. 
+
+This is not a very safe default, but it is productive. We will likely flip this default in the future.
 </Note>
 
 ## Rules

@@ -11,12 +11,12 @@ npm install @rocicorp/zero@0.7
 
 ## Features
 
-- **Read permissions.** You can now control read access to data using ZQL ([docs](../permissions)).
+- **Read permissions.** You can now control read access to data using ZQL ([docs](../permissions#select-permissions)).
 - **Deployment.** We now have a single-node Docker container ([docs](../deployment/)). Future work will add multinode support.
 - **Compound FKs.** Zero already supported compound *primary* keys, but now it also supports compound *foreign* keys ([docs](../zero-schema#relationships-and-compound-keys)).
 - **Minor DX stuff** in schema.ts:
-    - Columns types can use bare strings now if `optional` is not needed ([example](TODO)).
-    - PK can be a single string in the common case where it’s non-compound ([example](TODO)).
+    - Columns types can use bare strings now if `optional` is not needed ([example](https://github.com/rocicorp/mono/commit/212379241e27e717f1237946f3384127d06661c3#diff-01e627d4886ffc106a9f60c5ea65f35b3868ad4de898cecf7ae60329b11c22e7R13)).
+    - PK can be a single string in the common case where it’s non-compound ([example](https://github.com/rocicorp/mono/commit/212379241e27e717f1237946f3384127d06661c3#diff-01e627d4886ffc106a9f60c5ea65f35b3868ad4de898cecf7ae60329b11c22e7R19)).
 
 ## Breaking Changes
 
@@ -37,7 +37,7 @@ npm install @rocicorp/zero@0.7
 
 ## zbugs
 
-- Comments [now have permalinks](TODO). Implementing permalinks in an SPA with local-first [is fun](TODO)!
+- Comments [now have permalinks](https://bugs.rocicorp.dev/issue/3067#comment-qt7YPQxXsBMBqcOkkO1pY). Implementing permalinks in an SPA with local-first [is fun](https://github.com/rocicorp/mono/commit/384d0955a3998d68d293985b0de89c5302076ec5)!
 - Private issues. Zbugs now supports private (to team only) issues. I wonder what’s in them … 👀.
 
 ## Docs

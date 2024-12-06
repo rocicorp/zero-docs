@@ -113,8 +113,12 @@
 }
 
 .note-aside p {
-  margin: 0;
+  margin: 0 0 1.25rem;
   line-height: 1.5;
+}
+
+.note-aside p:last-child {
+  margin-bottom: 0;
 }
 
 .note-aside h3 {

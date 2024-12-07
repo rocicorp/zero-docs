@@ -4,7 +4,7 @@ title: Deploying Zero
 
 To deploy a Zero app, you need to:
 
-1. Deploy your backend database. Most standard Postgres hosts [can be used with Zero](connecting-to-postgres).
+1. Deploy your backend database. Most standard Postgres hosts [work with Zero](connecting-to-postgres).
 1. Deploy `zero-cache`. We provide a [Docker image](https://hub.docker.com/r/rocicorp/zero) that should work with any Docker host.
 1. Deploy your frontend. You can use any hosting service like Vercel or Netlify.
 
@@ -71,51 +71,23 @@ fly postgres create \
 
 ### Assign a V4 IP Address
 
-This isn't strictly necessary, and costs a small amount of money, but it makes it easier to test because you can connect from your local machine.
-
 ```bash
 fly ips allocate-v4 --app $PG_APP_NAME
 ```
+
+<Note type="note">
+  This is only needed temporarily, because Fly.io doesn't support TLS internally within its network and zero-cache requires it. This will be fixed soon.
+</Note>
 
 ### Seed Upstream database
 
 Populate the database with initial data and set its `wal_level` to `logical` to support replication to `zero-cache`. Then restart the database to apply the changes.
 
-<Note type="warning">
-  **Note:** You may have to wait a few minutes for the IP change from the last command to propagate to your machine before this works.
-</Note>
-
 ```bash
-CONNECTION_STRING="postgres://postgres:$PG_PASSWORD@$PG_APP_NAME.fly.dev:5432"
-
-psql -f docker/seed.sql $CONNECTION_STRING
-psql -c "ALTER SYSTEM SET wal_level = logical;" $CONNECTION_STRING
+(cat ./docker/seed.sql; echo "\q") | fly pg connect -a $PG_APP_NAME
+echo "ALTER SYSTEM SET wal_level = logical; \q" | fly pg connect -a $PG_APP_NAME
 fly postgres restart --app $PG_APP_NAME
 ```
-
-### Run Local `zero-cache` Against Remote Postgres
-
-Update the `.env` file with the remote Postgres on Fly.io.
-
-```bash
-cat <<EOF > .env
-ZERO_UPSTREAM_DB="${CONNECTION_STRING}/zstart"
-ZERO_CVR_DB="${CONNECTION_STRING}/zstart_cvr"
-ZERO_CHANGE_DB="${CONNECTION_STRING}/zstart_cdb"
-ZERO_JWT_SECRET=secretkey
-ZERO_REPLICA_FILE=/tmp/zstart_replica.db
-EOF
-```
-
-Kill any existing zero-cache process, clear its state, and restart with:
-
-```bash
-ps | grep zero-cache | grep node | cut -d' ' -f1 | xargs kill
-rm /tmp/zstart_replica.db*
-npx zero-cache
-```
-
-The app should run again, but sync will be much slower because zero-cache and Postgres are far from each other. Let's fix that by deploying `zero-cache` to Fly.io too.
 
 ### Create `zero-cache` Fly.io app
 
@@ -129,6 +101,8 @@ fly app create $CACHE_APP_NAME
 Create a `fly.toml` file. We'll copy the `zero-schema.json` into the toml file to pass it to the server as an environment variable.
 
 ```bash
+CONNECTION_STRING="postgres://postgres:$PG_PASSWORD@$PG_APP_NAME.fly.dev:5432"
+
 cat <<EOF > fly.toml
 app = "$CACHE_APP_NAME"
 primary_region = 'lax'
@@ -178,7 +152,7 @@ fly deploy
 ### Use Remote `zero-cache`
 
 ```bash
-cat <<EOF > .env.local
+cat <<EOF > .env
 VITE_PUBLIC_SERVER='https://${CACHE_APP_NAME}.fly.dev/'
 EOF
 ```

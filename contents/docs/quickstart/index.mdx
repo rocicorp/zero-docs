@@ -17,11 +17,12 @@ title: Quickstart
 git clone git@github.com:rocicorp/hello-zero.git
 cd hello-zero
 npm install
-npm run docker-up
 
 # Generate zero-schema.json
 # You should do this each time that src/schema.ts changes
 npx zero-build-schema -p "src/schema.ts"
+
+npm run docker-up
 
 # in a second terminal
 npx zero-cache

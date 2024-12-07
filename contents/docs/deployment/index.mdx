@@ -34,7 +34,7 @@ The `zero-cache` image is configured via environment variables. See [zero-cache 
 
 `zero-cache` needs a copy of your [`zero-schema.json`](./zero-schema) because it is used to enforce permissions.
 
-You can deploy it as a plain file, using the `ZERO_SCHEMA_FILE` env var. For convenience, we also support deploying it as an environment variable, using `ZERO_SCHEMA_JSON`.
+You can deploy it as a plain file, using the `ZERO_SCHEMA_FILE` env var. For convenience, we also support putting the schema string itself directly in an env var, using `ZERO_SCHEMA_JSON`.
 
 ## Example: Deploying to Fly.io
 

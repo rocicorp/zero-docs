@@ -157,11 +157,9 @@ VITE_PUBLIC_SERVER='https://${CACHE_APP_NAME}.fly.dev/'
 EOF
 ```
 
-Now refresh the app and it should be fast again. Open the web inspector to verify the app is talking to the remote `zero-cache`!
+Now restart the frontend to pick up the env change, and refresh the app. You can stop your local database and `zero-cache` as we're not using them anymore. Open the web inspector to verify the app is talking to the remote `zero-cache`!
 
-<Note type="warning">
-  **Note:** You may have to again wait for DNS change to propagate before app will work. You can check it via `ping $CACHE_APP_NAME.fly.dev`. Sigh.
-</Note>
+You can deploy the frontend to any standard hosting service like Vercel or Netlify, or even to Fly.io!
 
 ## Example: $PLATFORM
 

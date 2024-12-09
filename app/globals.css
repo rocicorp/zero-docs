@@ -24,6 +24,7 @@
     --input: 240 3.7% 15.9%;
     --ring: 240 4.9% 83.9%;
     --radius: 0.5rem;
+    --primary-highlight: #27fcae;
 
     /* Root page */
     --foreground-rgb: 255, 255, 255;
@@ -83,7 +84,7 @@
 }
 
 .prose code {
-  color: #27fcae !important;
+  color: var(--primary-highlight) !important;
   border-radius: 0.5rem !important;
   padding-left: 0.5rem !important;
   padding-right: 0.5rem !important;

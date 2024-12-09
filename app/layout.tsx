@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import ClientBoundary from "@/components/ClientBoundary"; // Add a wrapper for client components
+import ColorTester from '@/components/ColorTester'; // Import the ColorTester component
 import "./globals.css";
 import Script from "next/script";
 
@@ -39,6 +40,8 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         <ClientBoundary />
+        {/* Add the ColorTester component here */}
+        <ColorTester />
         <main className="sm:container mx-auto w-[88vw] h-auto">{children}</main>
         <Script
           src="/um.js"

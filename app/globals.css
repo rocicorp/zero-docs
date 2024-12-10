@@ -24,6 +24,7 @@
     --input: 240 3.7% 15.9%;
     --ring: 240 4.9% 83.9%;
     --radius: 0.5rem;
+    --primary-highlight: rgba(252, 33, 138, 1);
 
     /* Root page */
     --foreground-rgb: 255, 255, 255;
@@ -83,10 +84,11 @@
 }
 
 .prose code {
-  color: #27fcae !important;
+  color: var(--primary-highlight) !important;
+  font-weight: 400;
   border-radius: 0.5rem !important;
-  padding-left: 0.5rem !important;
-  padding-right: 0.5rem !important;
+  padding-left: 0.3rem !important;
+  padding-right: 0.3rem !important;
 }
 
 .prose pre code {
@@ -222,6 +224,10 @@
   background-color: transparent !important;
 }
 
+.prose a {
+  font-weight: 400;
+}
+
 .prose a.button-link,
 .prose a.heading-link {
   text-decoration: none;
@@ -234,10 +240,15 @@
 }
 
 .heading-link::after {
-  content: "🔗";
-  font-size: 1rem;
-  margin-left: 0.5em;
+  content: "";
+  position: absolute;
+  right: -1.3rem;
+  top: 0.5rem;
+  display: block;
+  height: 0.875rem;
+  width: 0.875rem;
   opacity: 0;
+  background: transparent url(/images/heading-link.svg) no-repeat 50% center;
   transition: opacity 0.2s;
 }
 

@@ -20,8 +20,10 @@ function IssueList() {
     issueQuery = issueQuery.where('creatorID', '=', userID);
   }
 
-  const issues = useQuery(issueQuery);
-  return <div>{issues.map(issue => <IssueRow issue={issue} />)}</div>
+  const [issues, issuesDetail] = useQuery(issueQuery);
+  
+  return <div>{issuesDetail.type === 'complete' ? 'Final results' : 'Optimistic results'}</div>
+  <div>{issues.map(issue => <IssueRow issue={issue} />)}</div>
 }
 ```
 

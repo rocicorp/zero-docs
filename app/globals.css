@@ -242,6 +242,17 @@
 
 .button-link.pagination-button {
   transition: all 0.3s ease;
+  white-space: normal;
+  height: fit-content;
+  padding: 1rem;
+}
+
+.button-link.pagination-button-prev {
+  text-align: left;
+}
+
+.button-link.pagination-button-next {
+  text-align: right;
 }
 
 .button-link.pagination-button:hover {

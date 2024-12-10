@@ -73,6 +73,10 @@
   }
 }
 
+.top-nav {
+  height: 4.5rem;
+}
+
 .prose {
   margin: 0 !important;
 }

@@ -13,7 +13,7 @@ export const NAVLINKS = [
 
 export function Navbar() {
   return (
-    <nav className="w-full h-14 sticky top-0 z-50 lg:px-4 backdrop-filter backdrop-blur-xl bg-opacity-5">
+    <nav className="top-nav w-full sticky top-0 z-50 lg:px-4 backdrop-filter backdrop-blur-xl bg-opacity-5">
       <div className="sm:container h-full max-sm:px-3 flex items-center justify-between">
         <SheetLeftbar />
         <div className="inner-nav-items flex items-center gap-9">
@@ -45,8 +45,8 @@ function Logo() {
       <Image
         src="/images/zero-logo-alpha.svg"
         alt="Zero Alpha Logo"
-        width={129.75}
-        height={24}
+        width={173}
+        height={32}
         priority
       />
     </Link>

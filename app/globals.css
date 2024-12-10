@@ -73,6 +73,10 @@
   }
 }
 
+.top-nav {
+  height: 4.5rem;
+}
+
 .prose {
   margin: 0 !important;
 }
@@ -226,6 +230,10 @@
 
 .prose a {
   font-weight: 400;
+}
+
+.button-link:hover {
+  background-color: var(--primary-highlight) !important;
 }
 
 .prose a.button-link,

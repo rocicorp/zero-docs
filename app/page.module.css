@@ -17,17 +17,6 @@
   margin: 0 0 3rem;
 }
 
-.main a.docsLink:hover {
-  background: transparent;
-  outline: none;
-}
-
-.docsButton {
-  padding: 0.75rem 1.5rem;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 0.5rem;
-}
-
 .main h1 {
   font-size: 2rem;
   text-align: left;
@@ -44,6 +33,22 @@
 .main a:hover {
   background: hsla(0, 0%, 100%, 0.3);
   outline: 2px solid hsla(0, 0%, 100%, 0.3);
+}
+
+.main a.primaryButton {
+  text-decoration: none;
+  color: inherit;
+}
+
+.main a.primaryButton:hover {
+  background: hsl(var(--accent));
+  outline: none;
+}
+
+.ctaContainer {
+  display: flex;
+  width: 100%;
+  justify-content: center;
 }
 
 .highlight {

@@ -232,6 +232,10 @@
   font-weight: 400;
 }
 
+.button-link:hover {
+  background-color: var(--primary-highlight) !important;
+}
+
 .prose a.button-link,
 .prose a.heading-link {
   text-decoration: none;

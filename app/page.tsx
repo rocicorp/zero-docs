@@ -3,6 +3,7 @@ import Image from "next/image";
 import styles from "./page.module.css";
 import ResponsiveImage from "@/components/ui/responsive-image";
 import CodeBlock from "@/components/CodeBlock";
+import { Button } from "@/components/ui/button";
 
 export default function Home() {
   // Code block
@@ -47,9 +48,11 @@ export default function Home() {
           height={32}
         />
 
-        <Link href="/docs/introduction" className={styles.docsLink}>
-          <button className={styles.docsButton}>Docs</button>
-        </Link>
+
+
+        <Button variant="outline" className={styles.primaryButton} size="default" asChild>
+          <a href="/docs/introduction">Docs</a>
+        </Button>
       </div>
 
       {/* Intro */}
@@ -134,8 +137,10 @@ export default function Home() {
         Zero is the culmination of everything we&apos;ve done with sync over the
         past five years. Ready to dive in?
       </p>
-      <p>
-        <button>Get Started</button>
+      <p className={styles.ctaContainer}>
+        <Button variant="outline" className={styles.primaryButton} size="default" asChild>
+          <a href="/docs/introduction">Get Started</a>
+        </Button>
       </p>
 
       <div className={styles.footer}>

@@ -17,9 +17,21 @@ const codeFont = localFont({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://zero.rocicorp.dev'),
+  openGraph: {
+    title: 'Zero Docs',
+    description: 'The official documentation for Zero by Rocicorp.',
+    images: '/opengraph-image.jpg',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Zero Docs',
+    description: 'The official documentation for Zero by Rocicorp.',
+    images: '/opengraph-image.jpg',
+  },
   title: "Zero Docs",
   description:
-    "This comprehensive documentation template, crafted with Next.js and available as open-source, delivers a sleek and responsive design, tailored to meet all your project documentation requirements.",
+    "The official documentation for Zero by Rocicorp.",
 };
 
 export default function RootLayout({

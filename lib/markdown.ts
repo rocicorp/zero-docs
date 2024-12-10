@@ -1,6 +1,7 @@
 import path from "path";
 import { promises as fs } from "fs";
 import { compileMDX } from "next-mdx-remote/rsc";
+import { page_routes, ROUTES } from "./routes-config";
 import remarkGfm from "remark-gfm";
 import rehypePrism from "rehype-prism-plus";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
@@ -86,6 +87,14 @@ export async function getDocsTocs(slug: string) {
     });
   }
   return extractedHeadings;
+}
+
+export function getPreviousNext(path: string) {
+  const index = page_routes.findIndex(({ href }) => href == `/${path}`);
+  return {
+    prev: page_routes[index - 1],
+    next: page_routes[index + 1],
+  };
 }
 
 // Utility function to create slugs from text

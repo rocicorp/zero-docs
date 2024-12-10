@@ -66,7 +66,7 @@ let start: IssueRow | undefined;
 while (true) {
 	let q = z.query.issue.orderBy('created', 'desc').limit(100);
 	if (start) {
-		q.start(start);
+		q = q.start(start);
 	}
 	const batch = q.run();
 	console.log("got batch", batch);

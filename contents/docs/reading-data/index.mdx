@@ -187,7 +187,7 @@ z.query.issue.where('priority', 'high');
 
 As in SQL, ZQL’s `null` is not equal to itself (`null ≠ null`).
 
-This is required to make join semantics work: if you’re joining `employee.orgID` on [`org.id`](http://org.id) you do **not** want an employee in no organization to match an org that hasn’t yet been assigned an ID.
+This is required to make join semantics work: if you’re joining `employee.orgID` on `org.id` you do **not** want an employee in no organization to match an org that hasn’t yet been assigned an ID.
 
 When you purposely want to compare to `null` ZQL supports `IS` and `IS NOT` operators that work just like in SQL:
 

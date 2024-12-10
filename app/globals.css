@@ -248,8 +248,12 @@
   height: 0.875rem;
   width: 0.875rem;
   opacity: 0;
-  background: transparent url(/images/heading-link.svg) no-repeat 50% center;
+  background: transparent url(/images/heading-link.svg) no-repeat center center;
   transition: opacity 0.2s;
+}
+
+h3 .heading-link::after {
+  top: 0.32rem;
 }
 
 .heading-link:hover::after {

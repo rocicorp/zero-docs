@@ -40,10 +40,10 @@ export default function Home() {
     <div className={styles.main}>
       <div className={styles.mainHeader}>
         <Image
-          src="/images/zero-logo.svg"
+          src="/images/zero-logo-alpha.svg"
           alt="Zero logo"
           className={styles.logo}
-          width={117}
+          width={173}
           height={32}
         />
 

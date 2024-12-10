@@ -1,4 +1,5 @@
 import Toc from "@/components/toc";
+import Pagination from "@/components/Pagination";
 import { page_routes } from "@/lib/routes-config";
 import { notFound } from "next/navigation";
 import { getDocsForSlug } from "@/lib/markdown";
@@ -25,6 +26,7 @@ export default async function DocsPage({ params: { slug = [] } }: PageProps) {
           </p>
           {/* Wrap content with CopyableContent */}
           <CopyContent content={res.content} />
+          <Pagination pathname={pathName} />
         </Typography>
       </div>
       <Toc path={pathName} />

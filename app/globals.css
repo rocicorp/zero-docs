@@ -95,6 +95,10 @@
   padding-right: 0.3rem !important;
 }
 
+.prose .note-container code {
+  color: rgba(255, 255, 255, 1) !important;
+}
+
 .prose pre code {
   color: unset !important;
   border-radius: unset !important;
@@ -234,6 +238,15 @@
 
 .button-link:hover {
   background-color: var(--primary-highlight) !important;
+}
+
+.button-link.pagination-button {
+  transition: all 0.3s ease;
+}
+
+.button-link.pagination-button:hover {
+  background-color: inherit !important;
+  border-color: rgba(255, 255, 255, 0.4);
 }
 
 .prose a.button-link,

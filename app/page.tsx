@@ -1,9 +1,9 @@
-import Link from "next/link";
-import Image from "next/image";
-import styles from "./page.module.css";
-import ResponsiveImage from "@/components/ui/responsive-image";
-import CodeBlock from "@/components/CodeBlock";
-import { Button } from "@/components/ui/button";
+import Link from 'next/link';
+import Image from 'next/image';
+import styles from './page.module.css';
+import ResponsiveImage from '@/components/ui/responsive-image';
+import CodeBlock from '@/components/CodeBlock';
+import {Button} from '@/components/ui/button';
 
 export default function Home() {
   // Code block
@@ -48,9 +48,12 @@ export default function Home() {
           height={32}
         />
 
-
-
-        <Button variant="outline" className={styles.primaryButton} size="default" asChild>
+        <Button
+          variant="outline"
+          className={styles.primaryButton}
+          size="default"
+          asChild
+        >
           <a href="/docs/introduction">Docs</a>
         </Button>
       </div>
@@ -67,8 +70,8 @@ export default function Home() {
       <p>It&apos;s time for a rethink.</p>
       <p>
         We&apos;re building a general-purpose sync engine for the web. You put
-        Zero in front of your database or web service, and we
-        distribute your backend all the way to main thread of the UI.
+        Zero in front of your database or web service, and we distribute your
+        backend all the way to main thread of the UI.
       </p>
 
       {/* Zero Diagram */}
@@ -102,8 +105,8 @@ export default function Home() {
           updates, in the next frame.
         </li>
         <li>
-          <strong>Automatic reactivity</strong> &ndash; a user changes
-          something and all other users see the change live.
+          <strong>Automatic reactivity</strong> &ndash; a user changes something
+          and all other users see the change live.
         </li>
         <li>
           <strong>Dramatically faster</strong> development velocity &ndash;
@@ -127,8 +130,8 @@ export default function Home() {
         even an old-fashioned server-rendered web app.
       </p>
       <p>
-        We have open sourced{" "}
-        <Link href="https://replicache.dev">Replicache</Link> and{" "}
+        We have open sourced{' '}
+        <Link href="https://replicache.dev">Replicache</Link> and{' '}
         <Link href="https://reflect.net">Reflect</Link>. Once Zero is ready, we
         will encourage users to move. We expect the migration to be easy, and
         the benefits once migrated to be dramatic.
@@ -138,7 +141,12 @@ export default function Home() {
         past five years. Ready to dive in?
       </p>
       <p className={styles.ctaContainer}>
-        <Button variant="outline" className={styles.primaryButton} size="default" asChild>
+        <Button
+          variant="outline"
+          className={styles.primaryButton}
+          size="default"
+          asChild
+        >
           <a href="/docs/introduction">Get Started</a>
         </Button>
       </p>

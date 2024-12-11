@@ -1,19 +1,19 @@
-import type { Metadata } from "next";
-import localFont from "next/font/local";
-import ClientBoundary from "@/components/ClientBoundary"; // Add a wrapper for client components
-import "./globals.css";
-import Script from "next/script";
+import type {Metadata} from 'next';
+import localFont from 'next/font/local';
+import ClientBoundary from '@/components/ClientBoundary'; // Add a wrapper for client components
+import './globals.css';
+import Script from 'next/script';
 
 const muoto = localFont({
-  src: "./fonts/muoto-var.ttf",
-  variable: "--font-regular",
-  weight: "100 900",
+  src: './fonts/muoto-var.ttf',
+  variable: '--font-regular',
+  weight: '100 900',
 });
 
 const codeFont = localFont({
-  src: "./fonts/fira-var.woff2",
-  variable: "--font-code",
-  weight: "100 900",
+  src: './fonts/fira-var.woff2',
+  variable: '--font-code',
+  weight: '100 900',
 });
 
 export const metadata: Metadata = {
@@ -29,9 +29,8 @@ export const metadata: Metadata = {
     description: 'The official documentation for Zero by Rocicorp.',
     images: '/opengraph-image.jpg',
   },
-  title: "Zero Docs",
-  description:
-    "The official documentation for Zero by Rocicorp.",
+  title: 'Zero Docs',
+  description: 'The official documentation for Zero by Rocicorp.',
 };
 
 export default function RootLayout({
@@ -43,7 +42,7 @@ export default function RootLayout({
     <html
       lang="en"
       className="dark"
-      style={{ colorScheme: "dark" }}
+      style={{colorScheme: 'dark'}}
       suppressHydrationWarning
     >
       <body

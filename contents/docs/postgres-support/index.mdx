@@ -9,28 +9,33 @@ Postgres has a massive featureset, of which Zero supports a growings subset.
 - Tables are synced
 - Views are not synced
 - Generated columns are not synced
-- Indexes aren’t *synced* per-se but we do implicitly add indexes to the replica that match the upstream indexes. In the future this will be customizable.
+- Indexes aren’t _synced_ per-se but we do implicitly add indexes to the replica that match the upstream indexes. In the future this will be customizable.
 
 ## Column Names
 
 Currently Zero syncs column names exactly as they appear in Postgres. There is no ability to map column names from i.e., `FULL_NAME` in Postgres to `fullName` in TypeScript.
 
 <Note type="warning">
-  Another important caveat to be aware of is that in Postgres, column names are by default implicitly folded to lowercase. So if you do `CREATE TABLE person (fullName TEXT)` the actual column name in the database will end up as `fullname`. To avoid this terrible behavior you need to wrap your column names in double quotes when you define them, like `CREATE TABLE person ("fullName" TEXT)`.
+  Another important caveat to be aware of is that in Postgres, column names are
+  by default implicitly folded to lowercase. So if you do `CREATE TABLE person
+  (fullName TEXT)` the actual column name in the database will end up as
+  `fullname`. To avoid this terrible behavior you need to wrap your column names
+  in double quotes when you define them, like `CREATE TABLE person ("fullName"
+  TEXT)`.
 </Note>
 
 We will add column name mapping to Zero soon. See https://bugs.rocicorp.dev/issue/3106.
 
 ## Column Types
 
-| Postgres Type | Type to put in `schema.ts` | Resulting JS/TS Type |
-| --- | --- | --- |
-| All numeric types | `number` | `number` |
-| `char`, `varchar`, `text` | `string` | `string` |
-| `bool` | `boolean` | `boolean` |
-| `date`, `timestamp`, `timestampz` | `number` | `number` |
-| `json`, `jsonb` | `json` | `JSONValue` |
-| `enum` | `string` | `string` |
+| Postgres Type                     | Type to put in `schema.ts` | Resulting JS/TS Type |
+| --------------------------------- | -------------------------- | -------------------- |
+| All numeric types                 | `number`                   | `number`             |
+| `char`, `varchar`, `text`         | `string`                   | `string`             |
+| `bool`                            | `boolean`                  | `boolean`            |
+| `date`, `timestamp`, `timestampz` | `number`                   | `number`             |
+| `json`, `jsonb`                   | `json`                     | `JSONValue`          |
+| `enum`                            | `string`                   | `string`             |
 
 Other Postgres column types aren’t supported. They will be ignored when replicating (the synced data will be missing that column) and you will get a warning when `zero-cache` starts up.
 
@@ -54,6 +59,7 @@ It is strongly recommended that primary keys be client-generated random strings 
     GUIDs makes a lot more sense in local-first applications.
 
     If your table has a natural key you can use that and it has less problems. But there is still the chance for a conflict. Imagine you are modeling orgs and you choose domainName as the natural key. It is possible for a race to happen and when the creation gets to the server, somebody has already chosen that domain name. In that case, the best thing to do is reject the write and show the user an error.
+
 </Note>
 
 If you want to have a short auto-incrementing numeric ID for ux reasons (ie, a bug number), that is possible – See [Demo Video](https://discord.com/channels/830183651022471199/1288232858795769917/1298114323272568852)!
@@ -64,7 +70,7 @@ Multi-column primary and foreign keys are supported.
 
 You can use [Permissions](permissions) to limit tables and rows from replicating to Zero. In the near future you’ll also be able to use Permissions to limit individual columns.
 
-Until then, a workaround is to use the Postgres [*publication*](https://www.postgresql.org/docs/current/sql-createpublication.html) feature to control the tables and columns that are replicated into `zero-cache`.
+Until then, a workaround is to use the Postgres [_publication_](https://www.postgresql.org/docs/current/sql-createpublication.html) feature to control the tables and columns that are replicated into `zero-cache`.
 
 In your pg schema setup, create a Postgres `publication` with the tables and columns you want: `CREATE PUBLICATION zero_data FOR TABLE users (col1, col2, col3, ...), issues, comments` . If no such publication is present, Zero defaults to creating a publication that publishes the entire public schema.
 
@@ -76,26 +82,26 @@ Tables with relationships to themselves (i.e., `comment` that can have a parent 
 
 1. Our `related` syntax has no sense of recursion, so you need to define your query manually to whatever level of depth you want. This actually ends up often being what you want – to get just a few levels of the tree at a time.
 2. Our `createTableSchema` helper can’t deal with recursive types, so you have to first define the object outside `createTableSchema` then pass it as an arg, like so:
-    
-    ```tsx
-    const foo = {
-      tableName: 'issue',
-      columns: {
-        id: {type: 'string'},
-        title: {type: 'string'},
-      },
-      primaryKey: ['id'],
-      relationships: {
-        self: {
-          source: 'id',
-          dest: {
-            field: 'id',
-            schema: () => issueSchema,
-          },
-        },
-      },
-    } as const;
-    const issueSchema = createTableSchema(foo);
-    ```
-    
-    See also https://bugs.rocicorp.dev/issue/3103.
+
+   ```tsx
+   const foo = {
+     tableName: 'issue',
+     columns: {
+       id: {type: 'string'},
+       title: {type: 'string'},
+     },
+     primaryKey: ['id'],
+     relationships: {
+       self: {
+         source: 'id',
+         dest: {
+           field: 'id',
+           schema: () => issueSchema,
+         },
+       },
+     },
+   } as const;
+   const issueSchema = createTableSchema(foo);
+   ```
+
+   See also https://bugs.rocicorp.dev/issue/3103.

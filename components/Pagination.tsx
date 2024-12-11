@@ -1,9 +1,9 @@
-import { getPreviousNext } from "@/lib/markdown";
-import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
-import Link from "next/link";
-import { buttonVariants } from "./ui/button";
+import {getPreviousNext} from '@/lib/markdown';
+import {ChevronLeftIcon, ChevronRightIcon} from 'lucide-react';
+import Link from 'next/link';
+import {buttonVariants} from './ui/button';
 
-export default function Pagination({ pathname }: { pathname: string }) {
+export default function Pagination({pathname}: {pathname: string}) {
   const res = getPreviousNext(pathname);
 
   return (
@@ -12,9 +12,9 @@ export default function Pagination({ pathname }: { pathname: string }) {
         {res.prev && (
           <Link
             className={buttonVariants({
-              variant: "outline",
+              variant: 'outline',
               className:
-                "pagination-button pagination-button-prev no-underline w-full flex flex-col pl-3 !items-start",
+                'pagination-button pagination-button-prev no-underline w-full flex flex-col pl-3 !items-start',
             })}
             href={`/docs${res.prev.href}`}
           >
@@ -30,9 +30,9 @@ export default function Pagination({ pathname }: { pathname: string }) {
         {res.next && (
           <Link
             className={buttonVariants({
-              variant: "outline",
+              variant: 'outline',
               className:
-                "pagination-button pagination-button-next no-underline w-full flex flex-col pr-3 !items-end",
+                'pagination-button pagination-button-next no-underline w-full flex flex-col pr-3 !items-end',
             })}
             href={`/docs${res.next.href}`}
           >

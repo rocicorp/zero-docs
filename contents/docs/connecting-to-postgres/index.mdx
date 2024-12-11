@@ -6,14 +6,14 @@ In the future, Zero will work with many different backend databases. Today only 
 
 Here are some common Postgres options and what we know about their support level:
 
-| Postgres | Support Status |
-| --- | --- |
-| Postgres.app | ✅ |
-| AWS RDS | ✅ |
-| postgres:16.2-alpine docker image | ✅ |
-| [Fly.io](http://Fly.io) Postgres | ✅ |
-| Supabase, Neon, Render, Heroku | 🤷‍♂️ Partial support with the `auto-reset` flag. Schema changes trigger full resync. See “Schema Changes”, below. |
-| AWS Aurora | ❌ Unsupported due to SQL differences. Let us know if you need this – we can likely figure it out. |
+| Postgres                          | Support Status                                                                                                  |
+| --------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| Postgres.app                      | ✅                                                                                                              |
+| AWS RDS                           | ✅                                                                                                              |
+| postgres:16.2-alpine docker image | ✅                                                                                                              |
+| [Fly.io](http://Fly.io) Postgres  | ✅                                                                                                              |
+| Supabase, Neon, Render, Heroku    | 🤷‍♂️ Partial support with the `auto-reset` flag. Schema changes trigger full resync. See “Schema Changes”, below. |
+| AWS Aurora                        | ❌ Unsupported due to SQL differences. Let us know if you need this – we can likely figure it out.              |
 
 ## Schema Changes
 

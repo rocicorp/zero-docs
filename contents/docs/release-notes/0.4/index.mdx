@@ -14,18 +14,19 @@ npm install @rocicorp/zero@0.4
 The `or` changes modified the client/server protocol. You’ll need to restart zero-cache and clear browser data after updating.
 
 ## Added `or` , `and` , and `not` to ZQL ([documentation](/docs/reading-data)).
+
 - Added `query.run()` method ([documentation](/docs/reading-data#running-queries-once)).
 
 ## Fixes
 
-- Use `batch()` method in zero-solid to improve performance when multiple updates happen in same frame.  To take advantage of this you must use the `createZero` helper from `@rocicorp/zero/solid`, instead of instantiating Zero directly.  See the solid [sample app](https://github.com/rocicorp/hello-zero-solid/blob/main/src/main.tsx#L16).
+- Use `batch()` method in zero-solid to improve performance when multiple updates happen in same frame. To take advantage of this you must use the `createZero` helper from `@rocicorp/zero/solid`, instead of instantiating Zero directly. See the solid [sample app](https://github.com/rocicorp/hello-zero-solid/blob/main/src/main.tsx#L16).
 - Postgres tables that were reserved words in SQLite but not Postgres caused crash during replication.
 - `LIKE` was not matching correctly in the case of multiline subjects.
 - Upstream database and zero database can now be same Postgres db (don’t need separate ports).
 
 ## Docs
 
-*nothing notable*
+_nothing notable_
 
 ## zbugs
 

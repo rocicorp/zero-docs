@@ -1,9 +1,9 @@
-import { getDocsTocs } from "@/lib/markdown";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import Link from "next/link";
-import clsx from "clsx";
+import {getDocsTocs} from '@/lib/markdown';
+import {ScrollArea} from '@/components/ui/scroll-area';
+import Link from 'next/link';
+import clsx from 'clsx';
 
-export default async function Toc({ path }: { path: string }) {
+export default async function Toc({path}: {path: string}) {
   const tocs = await getDocsTocs(path);
 
   return (
@@ -14,14 +14,14 @@ export default async function Toc({ path }: { path: string }) {
             <h3 className="font-semibold text-sm">On this page</h3>
             <ScrollArea className="pb-4 pt-0.5">
               <div className="flex flex-col gap-2.5 text-sm dark:text-neutral-300/85 text-neutral-800 ml-0.5">
-                {tocs.map(({ href, level, text }) => (
+                {tocs.map(({href, level, text}) => (
                   <Link
                     key={href}
                     href={href}
                     className={clsx({
-                      "pl-0": level == 2,
-                      "pl-4": level == 3,
-                      "pl-8 ": level == 4,
+                      'pl-0': level == 2,
+                      'pl-4': level == 3,
+                      'pl-8 ': level == 4,
                     })}
                   >
                     {text}

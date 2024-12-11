@@ -2,13 +2,13 @@
 title: Reading Data with ZQL
 ---
 
-ZQL is Zero’s query language. 
+ZQL is Zero’s query language.
 
 Inspired by SQL, ZQL is expressed in TypeScript with heavy use of the builder pattern. If you have used [Drizzle](https://orm.drizzle.team/) or [Kysley](https://kysely.dev/), ZQL will feel familiar.
 
-ZQL queries are composed of one or more *clauses* that are chained together into a *query*.
+ZQL queries are composed of one or more _clauses_ that are chained together into a _query_.
 
-Unlike queries in classic databases, the result of a ZQL query is a *view* that updates automatically and efficiently as the underlying data changes. You can call a query’s `materialize()` method to get a view, but more typically you run queries via some framework-specific bindings. For example see `useQuery` for [React](react) or [SolidJS](solidjs).
+Unlike queries in classic databases, the result of a ZQL query is a _view_ that updates automatically and efficiently as the underlying data changes. You can call a query’s `materialize()` method to get a view, but more typically you run queries via some framework-specific bindings. For example see `useQuery` for [React](react) or [SolidJS](solidjs).
 
 ## Select
 
@@ -64,22 +64,21 @@ You can start the results at or after a particular row with `start()`:
 ```tsx
 let start: IssueRow | undefined;
 while (true) {
-	let q = z.query.issue.orderBy('created', 'desc').limit(100);
-	if (start) {
-		q = q.start(start);
-	}
-	const batch = q.run();
-	console.log("got batch", batch);
+  let q = z.query.issue.orderBy('created', 'desc').limit(100);
+  if (start) {
+    q = q.start(start);
+  }
+  const batch = q.run();
+  console.log('got batch', batch);
 
-	if (batch.length < 100) {
-		break;
-	}
-	start = batch[batch.length - 1];
+  if (batch.length < 100) {
+    break;
+  }
+  start = batch[batch.length - 1];
 }
-
 ```
 
-By default `start()` is *exclusive* - it returns rows starting **after** the supplied reference row. This is what you usually want for paging. If you want *inclusive* results, you can do:
+By default `start()` is _exclusive_ - it returns rows starting **after** the supplied reference row. This is what you usually want for paging. If you want _inclusive_ results, you can do:
 
 ```tsx
 z.query.issue.start(row, {inclusive: true});
@@ -92,7 +91,7 @@ If you want exactly zero or one results, use the `one()` clause. This causes ZQL
 ```tsx
 const result = z.query.issue.where('id', 42).one();
 if (!result) {
-	console.error("not found");
+  console.error('not found');
 }
 ```
 
@@ -100,7 +99,7 @@ if (!result) {
 
 ## Relationships
 
-You can query related rows using *relationships* that are defined in your [Zero schema](/docs/zero-schema).
+You can query related rows using _relationships_ that are defined in your [Zero schema](/docs/zero-schema).
 
 ```tsx
 // Get all issues and their related comments
@@ -112,10 +111,7 @@ Relationships are returned as hierarchical data. In the above example, each row 
 You can fetch multiple relationships in a single query:
 
 ```tsx
-z.query.issue
-	.related('comments')
-	.related('reactions')
-	.related('assignees');
+z.query.issue.related('comments').related('reactions').related('assignees');
 ```
 
 ### Refining Relationships
@@ -123,15 +119,16 @@ z.query.issue
 By default all matching relationship rows are returned, but this can be refined. The `related` method accepts an optional second function which is itself a query.
 
 ```tsx
-z.query.issue.related('comments',
-	// It is common to use the 'q' shorthand variable for this parameter,
-	// but it is a _comment_ query in particular here, exactly as if you
-	// had done z.query.comment.
-	q => q.orderBy('modified', 'desc').limit(100).start(lastSeenComment)
+z.query.issue.related(
+  'comments',
+  // It is common to use the 'q' shorthand variable for this parameter,
+  // but it is a _comment_ query in particular here, exactly as if you
+  // had done z.query.comment.
+  q => q.orderBy('modified', 'desc').limit(100).start(lastSeenComment),
 );
 ```
 
-This *relationship query* can have all the same clauses that top-level queries can have.
+This _relationship query_ can have all the same clauses that top-level queries can have.
 
 ### Nested Relationships
 
@@ -161,18 +158,19 @@ The first parameter is always a column name from the table being queried. Intell
 
 Where supports the following comparison operators:
 
-| Operator | Allowed Operand Types | Description |
-| --- | --- | --- |
-| `=` , `!=` | boolean, number, string | JS strict equal (===) semantics |
-| `<` , `<=`, `>`, `>=`  | number | JS number compare semantics |
-| `LIKE`, `NOT LIKE`, `ILIKE`, `NOT ILIKE`  | string | SQL-compatible `LIKE` / `ILIKE` |
-| `IN` , `NOT IN` | boolean, number, string | RHS must be array. Returns true if rhs contains lhs by JS strict equals. |
-| `IS` , `IS NOT` | boolean, number, string, json, null | Same as `=` but also works for `null` |
+| Operator                                 | Allowed Operand Types               | Description                                                              |
+| ---------------------------------------- | ----------------------------------- | ------------------------------------------------------------------------ |
+| `=` , `!=`                               | boolean, number, string             | JS strict equal (===) semantics                                          |
+| `<` , `<=`, `>`, `>=`                    | number                              | JS number compare semantics                                              |
+| `LIKE`, `NOT LIKE`, `ILIKE`, `NOT ILIKE` | string                              | SQL-compatible `LIKE` / `ILIKE`                                          |
+| `IN` , `NOT IN`                          | boolean, number, string             | RHS must be array. Returns true if rhs contains lhs by JS strict equals. |
+| `IS` , `IS NOT`                          | boolean, number, string, json, null | Same as `=` but also works for `null`                                    |
 
 TypeScript will restrict you from using operators with types that don’t make sense – you can’t use `>` with `boolean` for example.
 
 <Note type="note">
-  If you don’t see the comparison operator you need, let us know, many are easy to add.
+  If you don’t see the comparison operator you need, let us know, many are easy
+  to add.
 </Note>
 
 ### Equals is the Default Comparison Operator
@@ -213,7 +211,7 @@ z.query.issue.where({cmp, and, or, not} =>
 );
 ```
 
-`cmp` is short for *compare* and works the same as `where` at the top-level except that it can’t be chained and it only accepts comparison operators (no relationship filters – see below).
+`cmp` is short for _compare_ and works the same as `where` at the top-level except that it can’t be chained and it only accepts comparison operators (no relationship filters – see below).
 
 Note that chaining `where()` is also a one-level `and`:
 
@@ -235,8 +233,9 @@ The argument to `whereExists` is a relationship, so just like other relationship
 
 ```tsx
 // Find all orgs that have at least one cool employee
-z.query.organization.whereExists('employees',
-	q => q.where('location', 'Hawaii'));
+z.query.organization.whereExists('employees', q =>
+  q.where('location', 'Hawaii'),
+);
 ```
 
 As with querying relationships, relationship filters can be arbitrarily nested:
@@ -273,5 +272,8 @@ const results = z.query.issue.where('foo', 'bar').run();
 ```
 
 <Note type="note">
-  Zero does not currently have a way to wait for authoritative results. Because of this, this feature will most likely be useful when the data you’re querying has already been preloaded. See also [Ability to wait for authoritative results](/docs/roadmap).
+  Zero does not currently have a way to wait for authoritative results. Because
+  of this, this feature will most likely be useful when the data you’re querying
+  has already been preloaded. See also [Ability to wait for authoritative
+  results](/docs/roadmap).
 </Note>

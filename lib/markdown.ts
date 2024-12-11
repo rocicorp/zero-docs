@@ -1,19 +1,19 @@
-import path from "path";
-import { promises as fs } from "fs";
-import { compileMDX } from "next-mdx-remote/rsc";
-import { page_routes, ROUTES } from "./routes-config";
-import remarkGfm from "remark-gfm";
-import rehypePrism from "rehype-prism-plus";
-import rehypeAutolinkHeadings from "rehype-autolink-headings";
-import rehypeSlug from "rehype-slug";
-import rehypeCodeTitles from "rehype-code-titles";
-import rehypeAddCopyButton from "@/lib/rehype-add-copy-button";
+import path from 'path';
+import {promises as fs} from 'fs';
+import {compileMDX} from 'next-mdx-remote/rsc';
+import {page_routes, ROUTES} from './routes-config';
+import remarkGfm from 'remark-gfm';
+import rehypePrism from 'rehype-prism-plus';
+import rehypeAutolinkHeadings from 'rehype-autolink-headings';
+import rehypeSlug from 'rehype-slug';
+import rehypeCodeTitles from 'rehype-code-titles';
+import rehypeAddCopyButton from '@/lib/rehype-add-copy-button';
 
 // Custom components for MDX
-import Note from "@/components/note";
-import ImageLightbox from "@/components/ui/ImageLightbox";
-import Video from "@/components/ui/Video";
-import { Button } from "@/components/ui/button";
+import Note from '@/components/note';
+import ImageLightbox from '@/components/ui/ImageLightbox';
+import Video from '@/components/ui/Video';
+import {Button} from '@/components/ui/button';
 
 const components = {
   Note,
@@ -42,9 +42,9 @@ async function parseMdx<Frontmatter>(rawMdx: string) {
           [
             rehypeAutolinkHeadings, // Makes headings clickable
             {
-              behavior: "wrap", // Wrap the heading with a clickable anchor
+              behavior: 'wrap', // Wrap the heading with a clickable anchor
               properties: {
-                className: "heading-link", // Add a class for styling
+                className: 'heading-link', // Add a class for styling
               },
             },
           ],
@@ -61,7 +61,7 @@ async function parseMdx<Frontmatter>(rawMdx: string) {
 export async function getDocsForSlug(slug: string) {
   try {
     const contentPath = getDocsContentPath(slug);
-    const rawMdx = await fs.readFile(contentPath, "utf-8");
+    const rawMdx = await fs.readFile(contentPath, 'utf-8');
     return await parseMdx<BaseMdxFrontmatter>(rawMdx);
   } catch (err) {
     console.error(`Error fetching docs for slug "${slug}":`, err);
@@ -72,7 +72,7 @@ export async function getDocsForSlug(slug: string) {
 // Generate a Table of Contents (TOC) from markdown headings
 export async function getDocsTocs(slug: string) {
   const contentPath = getDocsContentPath(slug);
-  const rawMdx = await fs.readFile(contentPath, "utf-8");
+  const rawMdx = await fs.readFile(contentPath, 'utf-8');
   const headingsRegex = /^(#{2,4})\s(.+)$/gm; // Matches headings ## to ####
   let match;
   const extractedHeadings = [];
@@ -90,7 +90,7 @@ export async function getDocsTocs(slug: string) {
 }
 
 export function getPreviousNext(path: string) {
-  const index = page_routes.findIndex(({ href }) => href == `/${path}`);
+  const index = page_routes.findIndex(({href}) => href == `/${path}`);
   return {
     prev: page_routes[index - 1],
     next: page_routes[index + 1],
@@ -101,11 +101,11 @@ export function getPreviousNext(path: string) {
 function sluggify(text: string) {
   return text
     .toLowerCase()
-    .replace(/\s+/g, "-") // Replace spaces with dashes
-    .replace(/[^a-z0-9-]/g, ""); // Remove non-alphanumeric characters
+    .replace(/\s+/g, '-') // Replace spaces with dashes
+    .replace(/[^a-z0-9-]/g, ''); // Remove non-alphanumeric characters
 }
 
 // Get the file path for the docs based on the slug
 function getDocsContentPath(slug: string) {
-  return path.join(process.cwd(), "/contents/docs/", `${slug}/index.mdx`);
+  return path.join(process.cwd(), '/contents/docs/', `${slug}/index.mdx`);
 }

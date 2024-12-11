@@ -65,7 +65,10 @@
   body {
     @apply bg-background text-foreground;
     font-variant-ligatures: none;
-    font-feature-settings: "liga" 0, "clig" 0, "calt" 0;
+    font-feature-settings:
+      'liga' 0,
+      'clig' 0,
+      'calt' 0;
     -webkit-font-smoothing: antialiased; /* macOS and iOS (WebKit) smoothing */
     -moz-osx-font-smoothing: grayscale; /* macOS (Firefox) smoothing */
     font-smooth: always; /* fallback smoothing */
@@ -83,7 +86,7 @@
 
 .prose
   aside
-  :where(h3):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+  :where(h3):not(:where([class~='not-prose'], [class~='not-prose'] *)) {
   margin-top: 0.75rem;
 }
 
@@ -184,7 +187,10 @@
   max-width: inherit !important;
   padding: 14px 0 !important;
   font-variant-ligatures: none;
-  font-feature-settings: "liga" 0, "clig" 0, "calt" 0;
+  font-feature-settings:
+    'liga' 0,
+    'clig' 0,
+    'calt' 0;
 }
 
 .code-line {
@@ -272,7 +278,7 @@
 }
 
 .heading-link::after {
-  content: "";
+  content: '';
   position: absolute;
   right: -1.3rem;
   top: 0.5rem;

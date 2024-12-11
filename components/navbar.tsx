@@ -1,12 +1,12 @@
-import Image from "next/image";
-import Link from "next/link";
-import Anchor from "./anchor";
-import { SheetLeftbar } from "./leftbar";
-import { page_routes } from "@/lib/routes-config";
+import Image from 'next/image';
+import Link from 'next/link';
+import Anchor from './anchor';
+import {SheetLeftbar} from './leftbar';
+import {page_routes} from '@/lib/routes-config';
 
 export const NAVLINKS = [
   {
-    title: "Docs",
+    title: 'Docs',
     href: `/docs${page_routes[0].href}`,
   },
 ];

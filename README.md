@@ -6,7 +6,6 @@ This feature-packed documentation template, built with Next.js, offers a sleek a
 
 <img src="./public/public-og.png" />
 
-
 <br/>
 
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
@@ -49,9 +48,6 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/deploym
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/nisabmohd/Aria-Docs)
 
 Got it! Here's a way to present the features in a more structured and visually appealing way using a table:
-
-
-
 
 ## Features
 

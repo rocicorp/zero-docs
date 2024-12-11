@@ -1,17 +1,17 @@
-import Toc from "@/components/toc";
-import Pagination from "@/components/Pagination";
-import { page_routes } from "@/lib/routes-config";
-import { notFound } from "next/navigation";
-import { getDocsForSlug } from "@/lib/markdown";
-import { Typography } from "@/components/typography";
-import CopyContent from "@/components/ui/copy-content";
+import Toc from '@/components/toc';
+import Pagination from '@/components/Pagination';
+import {page_routes} from '@/lib/routes-config';
+import {notFound} from 'next/navigation';
+import {getDocsForSlug} from '@/lib/markdown';
+import {Typography} from '@/components/typography';
+import CopyContent from '@/components/ui/copy-content';
 
 type PageProps = {
-  params: { slug: string[] };
+  params: {slug: string[]};
 };
 
-export default async function DocsPage({ params: { slug = [] } }: PageProps) {
-  const pathName = slug.join("/");
+export default async function DocsPage({params: {slug = []}}: PageProps) {
+  const pathName = slug.join('/');
   const res = await getDocsForSlug(pathName);
 
   if (!res) notFound();
@@ -34,11 +34,11 @@ export default async function DocsPage({ params: { slug = [] } }: PageProps) {
   );
 }
 
-export async function generateMetadata({ params: { slug = [] } }: PageProps) {
-  const pathName = slug.join("/");
+export async function generateMetadata({params: {slug = []}}: PageProps) {
+  const pathName = slug.join('/');
   const res = await getDocsForSlug(pathName);
   if (!res) return null;
-  const { frontmatter } = res;
+  const {frontmatter} = res;
   return {
     title: frontmatter.title,
     description: frontmatter.description,
@@ -46,7 +46,7 @@ export async function generateMetadata({ params: { slug = [] } }: PageProps) {
 }
 
 export function generateStaticParams() {
-  return page_routes.map((item) => ({
-    slug: item.href.split("/").slice(1),
+  return page_routes.map(item => ({
+    slug: item.href.split('/').slice(1),
   }));
 }

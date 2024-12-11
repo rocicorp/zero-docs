@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import Image from "next/image";
-import { FC } from "react";
-import React, { useState } from "react";
+import Image from 'next/image';
+import {FC} from 'react';
+import React, {useState} from 'react';
 
 type ResponsiveImageProps = {
   src: string;
@@ -22,10 +22,10 @@ const ResponsiveImage: FC<ResponsiveImageProps> = ({
   const aspectRatio = `${width} / ${height}`;
 
   const containerStyle = {
-    width: "100%",
-    height: "auto",
+    width: '100%',
+    height: 'auto',
     aspectRatio: aspectRatio,
-    margin: "3rem auto 4rem",
+    margin: '3rem auto 4rem',
   };
 
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -42,7 +42,7 @@ const ResponsiveImage: FC<ResponsiveImageProps> = ({
           alt={alt}
           width={width}
           height={height}
-          style={{ cursor: "pointer", width: "100%", height: "auto" }}
+          style={{cursor: 'pointer', width: '100%', height: 'auto'}}
           onClick={handleClick}
         />
         {isFullscreen && (
@@ -52,7 +52,7 @@ const ResponsiveImage: FC<ResponsiveImageProps> = ({
               alt={alt}
               width={width}
               height={height}
-              style={{ width: "auto", height: "100px" }}
+              style={{width: 'auto', height: '100px'}}
             />
           </div>
         )}

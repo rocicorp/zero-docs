@@ -17,8 +17,7 @@ type AuthData = {
   sub: string;
 };
 
-export const permissions = definePermissions<AuthData, Schema>(
-    schema, () => {
+export const permissions = definePermissions<AuthData, Schema>(schema, () => {
   const allowIfIssueCreator = (
     authData: AuthData,
     {cmp}: ExpressionBuilder<IssueSchema>,
@@ -34,12 +33,13 @@ export const permissions = definePermissions<AuthData, Schema>(
 });
 ```
 
-`definePermission` returns a _policy_ object for each table in the schema. Each policy defines a *ruleset* for the _operations_ that are possible on a table: `select`, `insert`, `update`, and `delete`.
+`definePermission` returns a _policy_ object for each table in the schema. Each policy defines a _ruleset_ for the _operations_ that are possible on a table: `select`, `insert`, `update`, and `delete`.
 
 <Note type="danger">
-If a policy is not defined for a table or operation, Zero currently ***allows*** the operation. 
+If a policy is not defined for a table or operation, Zero currently ***allows*** the operation.
 
 This is not a very safe default, but it is productive. We will likely flip this default in the future.
+
 </Note>
 
 ## Rules
@@ -102,7 +102,7 @@ There are two types of update rulesets: `preMutation` and `postMutation`.
 
 `preMutation` rules are evaluated before the mutation is applied. This is useful for things like checking whether a user owns an entity before editing it. `postMutation` rules are evaluated after the mutation is applied. This is useful for things like restricting the kinds of changes a user is allowed to make.
 
-Both the `preMutation` and `postMutation` rulesets must allow an update. But note that as with other rulesets, if either `preMutation` or `postMutation` ruleset is undefined, it defaults to ***allow***.
+Both the `preMutation` and `postMutation` rulesets must allow an update. But note that as with other rulesets, if either `preMutation` or `postMutation` ruleset is undefined, it defaults to **_allow_**.
 
 So this allows an edit if the user is the creator of the issue:
 

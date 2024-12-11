@@ -1,14 +1,14 @@
-import { ScrollArea } from "@/components/ui/scroll-area";
+import {ScrollArea} from '@/components/ui/scroll-area';
 import {
   Sheet,
   SheetContent,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from "@/components/ui/sheet";
-import { Button } from "./ui/button";
-import { AlignLeftIcon } from "lucide-react";
-import DocsMenu from "./docs-menu";
+} from '@/components/ui/sheet';
+import {Button} from './ui/button';
+import {AlignLeftIcon} from 'lucide-react';
+import DocsMenu from './docs-menu';
 
 export function Leftbar() {
   return (

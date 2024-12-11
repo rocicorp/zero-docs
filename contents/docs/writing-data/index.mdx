@@ -14,7 +14,8 @@ z.mutate.user.insert({
 ```
 
 <Note type="note">
-  Transactional custom mutators that allow complex logic and server-side specific behavior are coming in beta.
+  Transactional custom mutators that allow complex logic and server-side
+  specific behavior are coming in beta.
 </Note>
 
 ## Insert
@@ -23,9 +24,9 @@ Create new records with `insert`:
 
 ```tsx
 z.mutate.user.insert({
-	id: nanoid(),
-	username: 'sam',
-	language: 'js',
+  id: nanoid(),
+  username: 'sam',
+  language: 'js',
 });
 ```
 
@@ -33,16 +34,16 @@ Optional fields can be set to `null` to explicitly set the new field to `null`. 
 
 ```tsx
 // schema.ts
-import { createTableSchema } from "@rocicorp/zero";
+import {createTableSchema} from '@rocicorp/zero';
 
 const userSchema = createTableSchema({
-  tableName: "user",
+  tableName: 'user',
   columns: {
-    id: { type: "string" },
-    name: { type: "string" },
-    language: { type: "string", optional: true },
+    id: {type: 'string'},
+    name: {type: 'string'},
+    language: {type: 'string', optional: true},
   },
-  primaryKey: ["id"],
+  primaryKey: ['id'],
   relationships: {},
 });
 
@@ -50,9 +51,9 @@ const userSchema = createTableSchema({
 
 // Sets nickname to `null` specifically
 z.mutate.user.insert({
-	id: nanoid(),
-	username: 'sam',
-	language: null,
+  id: nanoid(),
+  username: 'sam',
+  language: null,
 });
 
 // Sets nickname to the default server-side value. Could be null, or some
@@ -76,9 +77,9 @@ Create new records or update existing ones with `upsert`:
 
 ```tsx
 z.mutate.user.upsert({
-	id: samID,
-	username: 'sam',
-	language: 'ts',
+  id: samID,
+  username: 'sam',
+  language: 'ts',
 });
 ```
 
@@ -93,21 +94,21 @@ You can pass a partial, leaving fields out that you don’t want to change. For 
 ```tsx
 // Leaves username field to previous value.
 z.mutate.user.update({
-	id: samID,
-	language: 'golang',
+  id: samID,
+  language: 'golang',
 });
 
 // Same as above
 z.mutate.user.update({
-	id: samID,
-	username: undefined,
-	language: 'haskell',
+  id: samID,
+  username: undefined,
+  language: 'haskell',
 });
 
 // Reset language field to `null`
 z.mutate.user.update({
-	id: samID,
-	language: null,
+  id: samID,
+  language: null,
 });
 ```
 
@@ -117,27 +118,27 @@ Delete an existing record. Does nothing if specified record does not exist.
 
 ```tsx
 z.mutate.user.delete({
-	id: samID,
+  id: samID,
 });
 ```
 
 ## Batch Mutate
 
-You can do multiple CRUD mutates in a single *batch*. If any of the mutations fails, all will. They also all appear together atomically in a single transaction to other clients.
+You can do multiple CRUD mutates in a single _batch_. If any of the mutations fails, all will. They also all appear together atomically in a single transaction to other clients.
 
 ```tsx
 z.mutateBatch(async tx => {
-	const samID = nanoid();
-	tx.user.create({
-		id: samID,
-		username: 'sam',
-	});
-	
-	const langID = nanoid();
-	tx.language.create({
-		id: langID,
-		userID: samID,
-		name: 'js',
-	});
+  const samID = nanoid();
+  tx.user.create({
+    id: samID,
+    username: 'sam',
+  });
+
+  const langID = nanoid();
+  tx.language.create({
+    id: langID,
+    userID: samID,
+    name: 'js',
+  });
 });
 ```

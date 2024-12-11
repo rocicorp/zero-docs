@@ -19,11 +19,11 @@ This release is a bit harder to upgrade to than previous alphas. For a step-by-s
 ## Breaking Changes
 
 - Totally new configuration system.
-    - `zero.config.ts` is no more – config is now via env vars ([documentation](/docs/zero-cache-config)).
-    - Permissions rules moved into schema ([documentation](/docs/auth#permissions)).
+  - `zero.config.ts` is no more – config is now via env vars ([documentation](/docs/zero-cache-config)).
+  - Permissions rules moved into schema ([documentation](/docs/auth#permissions)).
 - Renamed CRUD mutators to be consistent with SQL naming ([bug](https://bugs.rocicorp.dev/issue/3144), [documentation](/docs/writing-data)).
-    - `z.mutate.<table>.create -> insert`
-    - `z.mutate.<table>.put -> upsert`
+  - `z.mutate.<table>.create -> insert`
+  - `z.mutate.<table>.put -> upsert`
 - Removed `select` from ZQL. It wasn’t doing anything ([documentation](/docs/reading-data))
 - Moved batch mutation to its own `mutateBatch` method. Before the `mutate` field also doubled as a method. This made intellisense hard to understand since `z.mutate` had all the tables as fields but also all the fields of a function.
 

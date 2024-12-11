@@ -21,7 +21,7 @@ function IssueList() {
   }
 
   const [issues, issuesDetail] = useQuery(issueQuery);
-  
+
   return <div>{issuesDetail.type === 'complete' ? 'Final results' : 'Optimistic results'}</div>
   <div>{issues.map(issue => <IssueRow issue={issue} />)}</div>
 }

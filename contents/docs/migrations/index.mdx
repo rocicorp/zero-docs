@@ -6,7 +6,10 @@ Zero has first-class support for robust schema migrations.
 
 ## Demo
 
-<Video src="https://d2nzlypqdo5xbb.cloudfront.net/video/migrations.mp4" alt="Migrations demo" />
+<Video
+  src="https://d2nzlypqdo5xbb.cloudfront.net/video/migrations.mp4"
+  alt="Migrations demo"
+/>
 
 ## Overview
 
@@ -50,8 +53,8 @@ The `zero.schemaVersions` table is intended to be updated as part of your existi
 Like other database-backed applications, Zero schema migration generally follow an “expand/migrate/contract” pattern:
 
 - Determine the `schemaVersion` to use for this schema change, lets call it `N`.
-- Implement and run an “expand” migration on the backend that is backwards compatible with existing schemas.  Add new rows, tables, as well as any defaults and triggers needed for backwards compatibility.  At the same time update the `maxSupportedVersion` to `N`.
+- Implement and run an “expand” migration on the backend that is backwards compatible with existing schemas. Add new rows, tables, as well as any defaults and triggers needed for backwards compatibility. At the same time update the `maxSupportedVersion` to `N`.
 - Update and deploy the client app.
-    - Update its `schema` and `schemaVersion.`
-    - Update app to use new `schema`.
+  - Update its `schema` and `schemaVersion.`
+  - Update app to use new `schema`.
 - Optionally, after some grace period, implement and run a “contract” migration on the backend, deleting any obsolete rows/tables, at the same time update the `minSupportedVersion` to `N`.

@@ -24,7 +24,8 @@ export const ROUTES: EachRoute[] = [
     href: '',
     noLink: true,
     items: [
-      {title: 'How Zero Works', href: '/overview'},
+      //TODO
+      //{title: 'How Zero Works', href: '/overview'},
       {title: 'Connecting to Postgres', href: '/connecting-to-postgres'},
       {title: 'Supported Postgres Features', href: '/postgres-support'},
       {title: 'Zero Schema', href: '/zero-schema'},

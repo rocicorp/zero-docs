@@ -51,3 +51,15 @@ After your server restarts, show the `wal_level` again to ensure it has changed:
 ```bash
 psql -c 'SHOW wal_level'
 ```
+
+## Supabase-Specific Notes
+
+In order to connect to Supabase you must use the "Direct Connection" style connection string, not the pooler:
+
+<ImageLightbox src="/images/connecting-to-postgres/direct.png" alt="Screenshot of UI to get correct connection string" />
+
+This is because Zero sets up a logical replication slot, which is only supported with a direct connection.
+
+Additionally, you'll likely need to assign a IPv4 address to your Supabase instance. This is not supported on the free Supabase tier, and is an extra $4/mo fee.
+
+<ImageLightbox src="/images/connecting-to-postgres/ipv4.png" alt="Screenshot of where to assign ipv4 address" />

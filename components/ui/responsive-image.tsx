@@ -29,7 +29,7 @@ const ResponsiveImage: FC<ResponsiveImageProps> = ({
       style={{
         position: 'relative',
         width: '100%',
-        margin: '3rem auto',
+        margin: '3rem auto 4rem',
         overflow: 'hidden',
         aspectRatio: `${width} / ${height}`,
       }}

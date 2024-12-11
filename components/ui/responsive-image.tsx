@@ -55,7 +55,7 @@ const ResponsiveImage: FC<ResponsiveImageProps> = ({
             left: 0,
             width: '100vw',
             height: '100vh',
-            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+            backgroundColor: 'rgba(0, 0, 0, 0.93)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -66,11 +66,14 @@ const ResponsiveImage: FC<ResponsiveImageProps> = ({
           <Image
             src={src}
             alt={alt}
+            layout="intrinsic" // Intrinsic layout to allow natural sizing
             width={width}
             height={height}
             style={{
-              maxWidth: '90%',
-              maxHeight: '90%',
+              width: '90vw',
+              height: 'auto',
+              maxWidth: '100%',
+              maxHeight: '100%',
               objectFit: 'contain',
             }}
           />

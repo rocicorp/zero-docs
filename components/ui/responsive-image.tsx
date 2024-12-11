@@ -1,8 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import {FC} from 'react';
-import React, {useState} from 'react';
+import {FC, useState} from 'react';
 
 type ResponsiveImageProps = {
   src: string;
@@ -19,15 +18,6 @@ const ResponsiveImage: FC<ResponsiveImageProps> = ({
   height,
   caption,
 }) => {
-  const aspectRatio = `${width} / ${height}`;
-
-  const containerStyle = {
-    width: '100%',
-    height: 'auto',
-    aspectRatio: aspectRatio,
-    margin: '3rem auto 4rem',
-  };
-
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   const handleClick = () => {
@@ -35,29 +25,64 @@ const ResponsiveImage: FC<ResponsiveImageProps> = ({
   };
 
   return (
-    <div style={containerStyle}>
-      <figure>
-        <Image
-          src={src}
-          alt={alt}
-          width={width}
-          height={height}
-          style={{cursor: 'pointer', width: '100%', height: 'auto'}}
+    <div
+      style={{
+        position: 'relative',
+        width: '100%',
+        margin: '3rem auto',
+        overflow: 'hidden',
+        aspectRatio: `${width} / ${height}`,
+      }}
+    >
+      <Image
+        src={src}
+        alt={alt}
+        layout="fill"
+        objectFit="cover"
+        priority
+        style={{
+          cursor: 'pointer',
+        }}
+        onClick={handleClick}
+      />
+
+      {/* Fullscreen Lightbox */}
+      {isFullscreen && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100vw',
+            height: '100vh',
+            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 9999,
+          }}
           onClick={handleClick}
-        />
-        {isFullscreen && (
-          <div className="fullscreenContainer" onClick={handleClick}>
-            <Image
-              src={src}
-              alt={alt}
-              width={width}
-              height={height}
-              style={{width: 'auto', height: '100px'}}
-            />
-          </div>
-        )}
-        <figcaption>{caption}</figcaption>
-      </figure>
+        >
+          <Image
+            src={src}
+            alt={alt}
+            width={width}
+            height={height}
+            style={{
+              maxWidth: '90%',
+              maxHeight: '90%',
+              objectFit: 'contain',
+            }}
+          />
+        </div>
+      )}
+
+      {/* Caption */}
+      {caption && (
+        <figcaption style={{textAlign: 'center', marginTop: '1rem'}}>
+          {caption}
+        </figcaption>
+      )}
     </div>
   );
 };

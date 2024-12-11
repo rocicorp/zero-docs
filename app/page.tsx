@@ -79,7 +79,7 @@ export default function Home() {
         src="/images/how-it-works.svg"
         alt="How Zero Works"
         width={732}
-        height={43}
+        height={73}
       />
 
       <p>

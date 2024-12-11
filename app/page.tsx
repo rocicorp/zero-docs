@@ -83,14 +83,14 @@ export default function Home() {
       />
 
       <p>
-        You get a client-side API that looks like an embedded db, but to which
+        You get a client-side API that <em>looks</em> like an embedded db, but to which
         you can issue arbitrary <em>hybrid queries</em> that span the entire
         database, including the server.
       </p>
       <p>
-        Behind the scenes, we synchronize the most frequently used 25MB of data
-        to a client-side persistent cache. This cache is used automatically to
-        the maximum extent possible for all queries.
+        Behind the scenes, we synchronize queries results continuously
+        to a client-side persistent cache. This cache is used automatically for future
+        queries whenever possible.
       </p>
 
       {/* Code Block */}
@@ -123,31 +123,26 @@ export default function Home() {
       </ul>
 
       <p>
-        You can use Zero to build all kinds of web apps, from blogs to
-        collaborative spreadsheets. But where Zero really shines is
+        Where Zero really shines is complex, highly-interactive
         “local-first” style applications like Linear and Superhuman. With Zero,
         these apps can be built in a fraction of the time it would take to build
         even an old-fashioned server-rendered web app.
       </p>
       <p>
-        We have open sourced{' '}
-        <Link href="https://replicache.dev">Replicache</Link> and{' '}
-        <Link href="https://reflect.net">Reflect</Link>. Once Zero is ready, we
-        will encourage users to move. We expect the migration to be easy, and
-        the benefits once migrated to be dramatic.
+        Zero is currently in public alpha. It's got a few rough edges, and you have to deploy it yourself, but it's already remarkably fun. We&apos;re using it ourselves for Zero's <a href="https://bugs.rocicorp.dev/">official bug tracker</a> and we find it much more productive than the alternatives.
       </p>
       <p>
-        Zero is the culmination of everything we&apos;ve done with sync over the
-        past five years. Ready to dive in?
+        Ready to start? You can have your first app in production on AWS in about 20 minutes.
       </p>
+      <br/>
       <p className={styles.ctaContainer}>
         <Button
-          variant="outline"
-          className={styles.primaryButton}
-          size="default"
-          asChild
-        >
-          <a href="/docs/introduction">Get Started</a>
+            variant="outline"
+            className={styles.primaryButton}
+            size="default"
+            asChild
+          >
+          <a href="/docs/introduction">Get Started Now</a>
         </Button>
       </p>
 

@@ -4,29 +4,18 @@ title: Welcome to Zero Alpha
 
 Zero is a new kind of sync engine powered by queries.
 
-Rather than syncing the entire database, or using rules to carefully specify what to sync, you just write queries. Zero manages its own cache, keeping up to ~20MB of the most commonly used data on the device. Data from prior queries is automatically used to answer new queries when possible.
+Rather than syncing entire tables to the client, or using static rules to carefully specify what to sync, you just write queries directly in your client code. Queries can access the entire backend database.
 
-The result is that almost all queries are answered locally, instantly. It feels like you have access to the entire backend database directly from the client in memory. Occasionally, when you do a more specific query, Zero falls back to the server. But this happens automatically without any extra work required.
+Zero caches the data for queries locally on the device, and reuses that data automatically to answer future queries whenever possible.
 
-Zero is made possible by a custom streaming query engine we built called [ZQL](8a6aefd4491db3f44ba32a9c17f0b59c4e69e1ce), which uses [Incremental View Maintenance](https://www.vldb.org/pvldb/vol16/p1601-budiu.pdf) on both client and server to efficiently keep large, complex queries up to date.
+For typical applications, the result is that almost all queries are answered locally, instantly. It feels like you have access to the entire backend database directly from the client in memory.  Occasionally, when you do a more specific query, Zero falls back to the server. But this happens automatically without any extra work required.
+
+Zero is made possible by a custom streaming query engine we built called [ZQL](reading-data), which uses [Incremental View Maintenance](https://www.vldb.org/pvldb/vol16/p1601-budiu.pdf) on both client and server to efficiently keep large, complex queries up to date.
 
 ## Status
 
-We’re approaching a public alpha. There are features missing that would be required for most apps, and Zero is not yet super easy to deploy. That said, Zero is already quite fun to work with – we are using it ourselves to build our very own Linear-style bug tracker: [zbugs](https://bugs.rocicorp.dev/). We find it’s much more productive than alternatives, even having to work around a few missing features.
+Zero is in alpha. There are still some rough edges, and to run it, you need to [deploy it yourself](deployment) to AWS or similar.
 
-## Access
+Even so, Zero is already quite fun to work with. We are using it ourselves to build our very own [Linear-style bug tracker](https://bugs.rocicorp.dev/). We find that Zero is already much more productive than alternatives, even having to ocassionally work around a missing features.
 
-You’ll need access to:
-
-- [hello-zero repo](https://github.com/rocicorp/hello-zero)
-- [Rocicorp monorepo](https://github.com/rocicorp/my-first-zapp/)
-- [@rocicorp/zero npm package](https://www.npmjs.com/package/@rocicorp/zero)
-- [#zero-users discord chann](https://discord.com/channels/830183651022471199/1288232858795769917)[el](https://discord.com/channels/830183651022471199/1246101458928144434)
-
-If you don’t have access to one of these DM aaron.
-
-## Quickstart
-
-Get up and running in 5 minutes:
-
-[Quickstart](/docs/quickstart)
+If you are building a new web app that needs to be fast and reactive, and can do the deployment yourself, it's a great time to get started with Zero. We're working toward a [beta release and full production readiness](roadmap) next year.

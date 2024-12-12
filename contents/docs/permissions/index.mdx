@@ -167,6 +167,25 @@ return {
 
 Delete permissions work in the same way as `insert` positions except they run _before_ the delete is applied. So if a delete rule queries the database, it will see that the deleted row is present. If any rule in the ruleset returns a row, the delete is allowed.
 
+## Helpers
+
+Zero defines the `ANYONE_CAN` and `NOBODY_CAN` helpers to make these common cases more readable. They are just named constants for `undefined` (anyone) and `[]` (nobody).
+
+```ts
+export const permissions = definePermissions<AuthData, Schema>(schema, () => {
+  return {
+    issue: {
+      row: {
+        // anyone can insert issues
+        insert: ANYONE_CAN,
+        // nobody can delete issues
+        delete: NOBODY_CAN,
+      },
+    },
+  };
+});
+```
+
 ## Examples
 
 See [hello-zero](https://github.com/rocicorp/hello-zero/blob/main/src/schema.ts) for a simple example of write auth and [zbugs](https://github.com/rocicorp/mono/blob/main/apps/zbugs/schema.ts#L16) for a much more involved one.

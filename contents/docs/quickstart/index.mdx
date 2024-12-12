@@ -14,22 +14,26 @@ title: Quickstart
 
 ## Run
 
+In one terminal, install and start the database:
+
 ```bash
 git clone git@github.com:rocicorp/hello-zero.git
 cd hello-zero
 npm install
 
-# Generate zero-schema.json
-# You should do this each time that src/schema.ts changes
-npx zero-build-schema -p "src/schema.ts"
+npm run dev:db-up
+```
 
-npm run docker-up
+In a second terminal, start `zero-cache`:
 
-# in a second terminal
-npx zero-cache
+```bash
+npm run dev:zero-cache
+```
 
-# in yet another terminal
-npm run dev
+In a final terminal, start the UI:
+
+```bash
+npm run dev:ui
 ```
 
 ## Quick Overview

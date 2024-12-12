@@ -259,9 +259,32 @@ z.query.issue.where({cmp, or, exists} =>
 );
 ```
 
-## Preloading Queries
+## Completeness
+
+Zero returns whatever data it has in its cache immediately for a query, then falls back to the server for any missing data. Sometimes it's useful to know the difference between these two types of results. To do so, use the `result` from `useQuery`:
+
+```tsx
+const [issues, issuesResult] = useQuery(z.query.issue);
+if (issueResult.type === 'complete') {
+  console.log('All data is present');
+} else {
+  console.log('Some data is missing');
+}
+```
+
+<Note type="warning" heading="`resultType` is only implemented for React.">
+   Sorry about that. Ping us in Discord if you need this in SolidJS.
+</Note>
+
+The possible values of `result.type` are currently `complete` and `unknown`.
+
+The `complete` value is currently only returned when Zero has received the server result. But in the future, Zero will be able to return this result type when it _knows_ that all possible data for this query is already available locally. Additionally, we plan to add a `prefix` result for when the data is known to be a prefix of the complete result. See [Consistency](/docs/preloading#consistency) for more information.
+
+## Preloading
 
 See [Preloading](/docs/preloading).
+
+```tsx
 
 ## Running Queries Once
 

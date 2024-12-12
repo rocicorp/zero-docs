@@ -52,6 +52,11 @@ After your server restarts, show the `wal_level` again to ensure it has changed:
 psql -c 'SHOW wal_level'
 ```
 
+## SSL Mode
+
+Some Postgres providers (notably Fly.io, so far) do not support TLS on their internal networks. You can disable
+attempting to use it by adding the `sslmode=disable` query parameter to your connection strings from `zero-cache`.
+
 ## Supabase-Specific Notes
 
 In order to connect to Supabase you must use the "Direct Connection" style connection string, not the pooler:

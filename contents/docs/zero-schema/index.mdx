@@ -13,7 +13,11 @@ This page describes the core Zero schema which defines the tables, column, and r
 
 ## Defining the Zero Schema
 
-The Zero schema is encoded in a TypeScript file that is conventionally called `schema.ts` file. For example, see [the schema file for`hello-zero`](https://github.com/rocicorp/hello-zero/blob/main/src/schema.ts).
+The Zero schema is encoded in a Type Script file that is conventionally called `schema.ts` file. For example, see [the schema file for`hello-zero`](https://github.com/rocicorp/hello-zero/blob/main/src/schema.ts).
+
+## Building the Zero Schema
+
+The schema is defined in TypeScript for convenience, but what `zero-cache` actually uses is a JSON encoding of it. During development, `zero-schema.json` is generated automatically by the `zero-cache-dev` when needed. For production, you should run `zero-build-schema` to generate the JSON file explicitly.
 
 ## Table Schemas
 
@@ -37,7 +41,7 @@ Columns can have the types `boolean`, `number`, `string`, `null`, `json`. See [C
 
 <Note type="warning">
   Currently, if the database type doesn’t map correctly to the Zero type,
-  replication will continue and silently be wrong. This is a bug – in the
+  replication will continue and succeed but the data won't match the TypeScript type. This is a bug – in the
   future, this will be an error. See https://bugs.rocicorp.dev/issue/3112.
 </Note>
 
@@ -67,6 +71,44 @@ An optional column can have a value of the specified type or `null` to mean _no 
     - For `create` and `upsert` you can set optional fields to `undefined` (or leave the field off completely) to take the default value as specified by backend schema for that column. For `update` you can set any non-PK field to `undefined` to leave the previous value unmodified.
 
 </Note>
+
+## Enumerations
+
+Use the `enumeration` helper to define a column that can only take on a specific set of values. This is most often used along side an [`enum` Postgres column type](postgres-support#column-types).
+
+```tsx
+import {column} from '@rocicorp/zero';
+
+const {enumeration} = column;
+const userSchema = createTableSchema({
+  tableName: 'user',
+  columns: {
+    id: 'string',
+    name: 'string',
+    mood: enumeration<'happy', 'sad', 'ok'>(),
+  },
+  primaryKey: 'id',
+});
+```
+
+## Custom JSON Types
+
+Use the `json` helper to define a column that only store a specific subtype of `json`:
+
+```tsx
+import {column} from '@rocicorp/zero';
+
+const {json} = column;
+const userSchema = createTableSchema({
+  tableName: 'user',
+  columns: {
+    id: 'string',
+    name: 'string',
+    settings: json<{theme: 'light' | 'dark'}>(),
+  },
+  primaryKey: 'id',
+});
+```
 
 ## Compound Primary Keys
 

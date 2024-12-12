@@ -35,7 +35,7 @@ We will add column name mapping to Zero soon. See https://bugs.rocicorp.dev/issu
 | `bool`                            | `boolean`                  | `boolean`            |
 | `date`, `timestamp`, `timestampz` | `number`                   | `number`             |
 | `json`, `jsonb`                   | `json`                     | `JSONValue`          |
-| `enum`                            | `string`                   | `string`             |
+| `enum`                            | `enumeration`              | `string`             |
 
 Other Postgres column types aren’t supported. They will be ignored when replicating (the synced data will be missing that column) and you will get a warning when `zero-cache` starts up.
 

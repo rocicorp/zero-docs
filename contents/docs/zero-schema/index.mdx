@@ -17,7 +17,11 @@ The Zero schema is encoded in a Type Script file that is conventionally called `
 
 ## Building the Zero Schema
 
-The schema is defined in TypeScript for convenience, but what `zero-cache` actually uses is a JSON encoding of it. During development, `zero-schema.json` is generated automatically by the `zero-cache-dev` when needed. For production, you should run `zero-build-schema` to generate the JSON file explicitly.
+The schema is defined in TypeScript for convenience, but what `zero-cache` actually uses is a JSON encoding of it.
+
+During development, start `zero-cache` with the `zero-cache-dev` script. This script watches for changes to `schema.ts` and automatically rebuilds the JSON schema and restarts `zero-cache` when it changes.
+
+For production, you should run the `zero-build-schema` explicitly to generate the JSON file.
 
 ## Table Schemas
 

@@ -7,8 +7,11 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet';
 import {Button} from './ui/button';
+import {buttonVariants} from './ui/button';
 import {AlignLeftIcon} from 'lucide-react';
 import DocsMenu from './docs-menu';
+import Image from 'next/image';
+import Link from 'next/link';
 
 export function Leftbar() {
   return (
@@ -31,7 +34,37 @@ export function SheetLeftbar() {
       <SheetContent className="flex flex-col gap-4 px-0" side="left">
         <SheetTitle className="sr-only">Menu</SheetTitle>
         <SheetHeader>
-          <h2 className="font-extrabold text-start px-8">Docs</h2>
+          <div className="mobile-menu-social-links">
+            <h2 className="mobile-menu-header font-extrabold text-start px-8">
+              Docs
+            </h2>
+            <div className="github-discord-mobile">
+              <Link
+                href="https://github.com/rocicorp/hello-zero"
+                className={buttonVariants({variant: 'ghost', size: 'icon'})}
+              >
+                <Image
+                  src="/images/icons/github.svg"
+                  alt="Github logo"
+                  width={36}
+                  height={36}
+                  priority
+                />
+              </Link>
+              <Link
+                href="https://zero.rocicorp.dev/discord"
+                className={buttonVariants({variant: 'ghost', size: 'icon'})}
+              >
+                <Image
+                  src="/images/icons/discord.svg"
+                  alt="Discord logo"
+                  width={36}
+                  height={36}
+                  priority
+                />
+              </Link>
+            </div>
+          </div>
         </SheetHeader>
         <ScrollArea className="flex flex-col gap-4">
           <div className=" px-8">

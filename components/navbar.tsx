@@ -3,6 +3,7 @@ import Link from 'next/link';
 import Anchor from './anchor';
 import {SheetLeftbar} from './leftbar';
 import {page_routes} from '@/lib/routes-config';
+import {buttonVariants} from './ui/button';
 
 export const NAVLINKS = [
   {
@@ -33,6 +34,32 @@ export function Navbar() {
               );
             })} */}
           </div>
+          <div className="navbar-right">
+            <Link
+              href="https://github.com/rocicorp/hello-zero"
+              className={buttonVariants({variant: 'ghost', size: 'icon'})}
+            >
+              <Image
+                src="/images/icons/github.svg"
+                alt="Github logo"
+                width={36}
+                height={36}
+                priority
+              />
+            </Link>
+            <Link
+              href="https://zero.rocicorp.dev/discord"
+              className={buttonVariants({variant: 'ghost', size: 'icon'})}
+            >
+              <Image
+                src="/images/icons/discord.svg"
+                alt="Discord logo"
+                width={36}
+                height={36}
+                priority
+              />
+            </Link>
+          </div>
         </div>
       </div>
     </nav>
@@ -41,7 +68,7 @@ export function Navbar() {
 
 function Logo() {
   return (
-    <Link href="/" className="flex items-center gap-3">
+    <Link href="/" className="flex items-center gap-3 logo-link">
       <Image
         src="/images/zero-logo-alpha.svg"
         alt="Zero Alpha Logo"

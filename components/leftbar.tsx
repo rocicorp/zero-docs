@@ -52,7 +52,7 @@ export function SheetLeftbar() {
                 />
               </Link>
               <Link
-                href="https://zero.rocicorp.dev/discord"
+                href="https://discord.gg/XHAezvqKk5"
                 className={buttonVariants({variant: 'ghost', size: 'icon'})}
               >
                 <Image

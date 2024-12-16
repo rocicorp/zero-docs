@@ -80,6 +80,11 @@
   height: 4.5rem;
 }
 
+div.inner-nav-container {
+  padding-left: 0;
+  padding-right: 0;
+}
+
 .inner-nav-items {
   width: 100%;
 }
@@ -426,5 +431,32 @@ pre .copy-button:hover {
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
+  }
+}
+
+@media (min-width: 640px) {
+  nav.top-nav {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+@media (min-width: 1250px) {
+  nav.top-nav {
+    padding: 0;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  div.inner-nav-container {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+@media (max-width: 640px) {
+  nav.top-nav {
+    width: 88vw;
+    margin-left: auto;
+    margin-right: auto;
   }
 }

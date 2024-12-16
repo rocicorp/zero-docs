@@ -2,15 +2,46 @@
 title: Authentication
 ---
 
-Zero uses a JWT-based flow to authenticate connections to zero-cache.
+Zero uses a [JWT](https://jwt.io/)-based flow to authenticate connections to zero-cache.
 
-You configure `zero-cache` with a `ZERO_JWT_SECRET` environment variable. During login, your API server encodes the userID and any other useful information into a JWT and signs it with this secret.
+## Frontend
 
-The JWT should be sent to your web client and then into the `Zero` client using the `jwtSecret` option.
+During login:
 
-`Zero` sends the JWT to `zero-cache` during connection, who decodes it to use as an input to [permission rules](permissions).
+1. Your API server creates a `JWT` and sends it to your client.
+2. Your client constructs a `Zero` instance with this token by passing it to the `auth` option.
 
-<Note type="todo">Diagram needed here.</Note>
+<Note type="note">
+  When you set the `auth` option you must set the `userID` option to the same
+  value that is present in the `sub` field of the token.
+</Note>
+
+```ts
+const zero = new Zero({
+  ...,
+  auth: token, // your JWT
+  userID, // this must match the `sub` field from `token`
+});
+```
+
+## Zero-Cache
+
+For `zero-cache` to be able to verify the JWT, one of the following environment variables needs to be set:
+
+1. `ZERO_AUTH_SECRET` - If your API server uses a symmetric key (secret) to create JWTs then this is that same key.
+2. `ZERO_AUTH_JWK` - If your API server uses a private key to create JWTs then this is the corresponding public key, in [JWK](https://datatracker.ietf.org/doc/html/rfc7517) format.
+3. `ZERO_AUTH_JWKS_URL` - Many auth providers host the public keys used to verify the JWTs they create at a public URL. If you use a provider that does this, or you publish your own keys publicly, set this to that URL.
+
+## Permissions
+
+Any data placed into your JWT (claims) can be used by permission rules on the backend.
+
+```ts
+const isAdminRule =
+  (decodedJWT, {cmp}) => cmp(decodedJWT.role, '=', 'admin');
+```
+
+See the [permissions](permissions) section for more details.
 
 ## Examples
 

@@ -38,10 +38,11 @@ export function Navbar() {
             <Link
               href="https://github.com/rocicorp/hello-zero"
               className={buttonVariants({variant: 'ghost', size: 'icon'})}
+              title="GitHub"
             >
               <Image
                 src="/images/icons/github.svg"
-                alt="Github logo"
+                alt="GitHub logo"
                 width={36}
                 height={36}
                 priority
@@ -50,6 +51,7 @@ export function Navbar() {
             <Link
               href="https://discord.gg/XHAezvqKk5"
               className={buttonVariants({variant: 'ghost', size: 'icon'})}
+              title="Discord"
             >
               <Image
                 src="/images/icons/discord.svg"

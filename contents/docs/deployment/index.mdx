@@ -153,6 +153,23 @@ Now restart the frontend to pick up the env change, and refresh the app. You can
 
 You can deploy the frontend to any standard hosting service like Vercel or Netlify, or even to Fly.io!
 
+### Deploy Frontend to Vercel
+
+If you've followed the above guide and deployed `zero-cache` to fly, you can simply run:
+
+```sh
+vercel deploy --prod \
+  -e ZERO_JWT_SECRET="secretkey" \
+  -e VITE_PUBLIC_SERVER='https://${CACHE_APP_NAME}.fly.dev/'
+```
+
+to deploy your frontend to Vercel.
+
+Explaining the arguments above --
+
+- `ZERO_JWT_SECRET` - The secret to create and verify JWTs. This is the same secret that was used when deploying zero-cache to fly.
+- `VITE_PUBLIC_SERVER` - The URL the frontend will call to talk to the zero-cache server. This is the URL of the fly app.
+
 ## Example: $PLATFORM
 
 Where should we deploy Zero next?? Let us know on [Discord](https://discord.gg/XHAezvqKk5)!

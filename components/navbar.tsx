@@ -34,34 +34,6 @@ export function Navbar() {
               );
             })} */}
           </div>
-          <div className="navbar-right">
-            <Link
-              href="https://github.com/rocicorp/hello-zero"
-              className={buttonVariants({variant: 'ghost', size: 'icon'})}
-              title="GitHub"
-            >
-              <Image
-                src="/images/icons/github.svg"
-                alt="GitHub logo"
-                width={36}
-                height={36}
-                priority
-              />
-            </Link>
-            <Link
-              href="https://discord.gg/XHAezvqKk5"
-              className={buttonVariants({variant: 'ghost', size: 'icon'})}
-              title="Discord"
-            >
-              <Image
-                src="/images/icons/discord.svg"
-                alt="Discord logo"
-                width={36}
-                height={36}
-                priority
-              />
-            </Link>
-          </div>
         </div>
       </div>
     </nav>

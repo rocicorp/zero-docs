@@ -38,32 +38,6 @@ export function SheetLeftbar() {
             <h2 className="mobile-menu-header font-extrabold text-start px-8">
               Docs
             </h2>
-            <div className="github-discord-mobile">
-              <Link
-                href="https://github.com/rocicorp/hello-zero"
-                className={buttonVariants({variant: 'ghost', size: 'icon'})}
-              >
-                <Image
-                  src="/images/icons/github.svg"
-                  alt="Github logo"
-                  width={36}
-                  height={36}
-                  priority
-                />
-              </Link>
-              <Link
-                href="https://discord.gg/XHAezvqKk5"
-                className={buttonVariants({variant: 'ghost', size: 'icon'})}
-              >
-                <Image
-                  src="/images/icons/discord.svg"
-                  alt="Discord logo"
-                  width={36}
-                  height={36}
-                  priority
-                />
-              </Link>
-            </div>
           </div>
         </SheetHeader>
         <ScrollArea className="flex flex-col gap-4">

@@ -1,5 +1,6 @@
 import {ROUTES} from '@/lib/routes-config';
 import SubLink from './sublink';
+import Link from 'next/link';
 
 export default function DocsMenu({isSheet = false}) {
   return (
@@ -13,6 +14,33 @@ export default function DocsMenu({isSheet = false}) {
         };
         return <SubLink key={item.title + index} {...modifiedItems} />;
       })}
+
+      <div className="footer-container">
+        <p className="copyright">
+          Made by{' '}
+          <Link href="https://rocicorp.dev" className="footer-text-link">
+            Rocicorp
+          </Link>
+        </p>
+        <div className="social-links">
+          <Link
+            href="https://github.com/rocicorp/hello-zero"
+            className="link-github"
+          ></Link>
+          <Link
+            href="https://discord.rocicorp.dev"
+            className="link-discord"
+          ></Link>
+          <Link
+            href="https://bsky.app/profile/zero.rocicorp.dev"
+            className="link-bluesky"
+          ></Link>
+          <Link
+            href="https://x.com/rocicorp_zero"
+            className="link-twitter"
+          ></Link>
+        </div>
+      </div>
     </div>
   );
 }

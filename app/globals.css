@@ -95,6 +95,51 @@ div.inner-nav-container {
   gap: 1rem;
 }
 
+.footer-container {
+  color: rgb(212 212 212 / 0.6);
+  font-size: 0.875rem;
+}
+
+.footer-container .copyright {
+  margin-bottom: 1rem;
+}
+
+.footer-container .footer-text-link:hover {
+  color: rgba(255, 255, 255, 1);
+}
+
+.social-links {
+  display: flex;
+  gap: 1rem;
+}
+
+.social-links a {
+  display: block;
+  height: 1rem;
+  width: 1rem;
+  opacity: 0.5;
+}
+
+.social-links a:hover {
+  opacity: 1;
+}
+
+.social-links .link-github {
+  background: transparent url(/images/icons/github.svg) no-repeat;
+}
+
+.social-links .link-discord {
+  background: transparent url(/images/icons/discord.svg) no-repeat;
+}
+
+.social-links .link-bluesky {
+  background: transparent url(/images/icons/bluesky.svg) no-repeat;
+}
+
+.social-links .link-twitter {
+  background: transparent url(/images/icons/twitter.svg) no-repeat;
+}
+
 .mobile-menu-social-links {
   display: flex;
   gap: 1rem;

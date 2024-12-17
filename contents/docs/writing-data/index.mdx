@@ -135,7 +135,7 @@ z.mutateBatch(async tx => {
   });
 
   const langID = nanoid();
-  tx.language.create({
+  tx.language.insert({
     id: langID,
     userID: samID,
     name: 'js',

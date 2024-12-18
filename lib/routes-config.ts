@@ -38,6 +38,7 @@ export const ROUTES: EachRoute[] = [
       {title: 'Deployment', href: '/deployment'},
       {title: '`zero-cache` Config', href: '/zero-cache-config'},
       {title: 'Recipes', href: '/recipes'},
+      {title: 'Cleanup', href: '/cleanup'},
     ],
   },
 

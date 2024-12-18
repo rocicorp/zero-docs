@@ -1,0 +1,79 @@
+---
+title: Cleanup
+---
+
+## Removing Zero from your project
+
+You may want to remove Zero from your project for a variety of reasons - regardless, there are a few things you can do to completely remove Zero from your project.
+
+### Schemas
+
+Zero makes all its data changes to your database in its own postgres "schemas".
+
+
+To list all schemas when using `psql`, you can use the following command:
+
+```bash
+psql -c "\dN"
+```
+
+There are two schemas used
+
+`zero`
+
+This schema is for tracking zero-related data unrelated to a replica (shared amongst all replicas). Currently there is just one table - the schema version used for migration.
+
+`zero_0`
+
+This schema is used for tracking zero-related data that is per-replica. In the screenshot, I have just one replica but there can be more, zero_1, zero_2, etc when you have zero running multi-node in production.
+
+First, double check for all Zero associated schemas:
+
+
+```bash
+psql -c "/dt zero.*"
+```
+
+```bash
+psql -c "/dt zero_0.*"
+```
+
+Which should show something like this:
+
+<ImageLightbox src="/images/cleanup/drop-schema-1.png" alt="Example of console window showing Zero associated schemas" />
+
+and also:
+
+<ImageLightbox src="/images/cleanup/drop-schema-2.png" alt="Example of console window showing Zero associated schemas" />
+
+
+You can then drop these individually with the `DROP SCHEMA` command.
+
+As an example, to drop the `zero` schema, you can use the following command:
+
+```bash
+psql -c "DROP SCHEMA zero CASCADE;"
+```
+
+<Note type="warning">
+  **Note:** We reccomend you do these individually to avoid any mistakes.
+</Note>
+
+### Event Triggers
+
+Zero also installs some event triggers related to schema management. These postgres features are global and can't be associated w/ schemas. To find them: 
+
+```bash
+psql -c "SELECT * FROM pg_event_trigger;"
+```
+<ImageLightbox src="/images/cleanup/pg-triggers.png" alt="" />
+
+You can drop each of these with the `DROP EVENT TRIGGER` command.
+
+For example:
+
+```bash
+psql -c "DROP EVENT TRIGGER zero_dd1_start_0 ON pg_event_trigger;"
+```
+
+You would need repeat this command for each trigger associated with Zero

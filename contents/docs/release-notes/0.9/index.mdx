@@ -1,0 +1,26 @@
+---
+title: Zero 0.9
+description: JWK Support
+---
+
+## Install
+
+```bash
+npm install @rocicorp/zero@0.9
+```
+
+See the changes to [hello-zero](https://github.com/rocicorp/hello-zero/pull/8) or [hello-zero-solid](https://github.com/rocicorp/hello-zero-solid/pull/5) for example updates.
+
+## Features
+
+- **JWK Support**. For auth, you can now specify a JWK containing a public key, or a JWKS url to support autodiscovery of keys. ([docs](../auth/))
+- **UUID column**. Zero now supports the `uuid` Postgres column type. ([docs](../postgres-support#column-types))
+
+## Fixes
+
+- **Readonly Values**. Type of values returned from Zero queries are marked `readonly`. The system always considered them readonly, but now the types reflect that. ([docs](../reading-data/))
+
+## Breaking Changes
+
+- The `zero-cache` config `ZERO_JWT_SECRET` has been renamed to `ZERO_AUTH_SECRET` for consistency with the new JWK-related keys. If you were using the old name, you'll need to update your `.env` file.
+- All values returned by Zero are now `readonly`. You'll probably have to add this TS modifier various places. If you find yourself casting away `readonly` you probably should be cloing the value instead.

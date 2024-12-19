@@ -60,7 +60,7 @@ Create an account on [Fly.io](https://fly.io) and [install the Fly CLI](https://
 INITIALS=aa
 PG_APP_NAME=$INITIALS-zstart-pg
 
-PG_PASSWORD="$(dd if=/dev/urandom count=1 2> /dev/null | uuencode -m - | sed -ne 2p | cut -c-16)"
+PG_PASSWORD="$(dd if=/dev/urandom count=1 2>/dev/null | uuencode -m - | tr -cd '[:alpha:]' | cut -c-16)"
 
 fly postgres create \
   --name $PG_APP_NAME \

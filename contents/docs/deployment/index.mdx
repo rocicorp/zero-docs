@@ -129,7 +129,7 @@ ZERO_REPLICA_FILE = "/data/sync-replica.db"
 ZERO_UPSTREAM_DB="${CONNECTION_STRING}/zstart?sslmode=disable"
 ZERO_CVR_DB="${CONNECTION_STRING}/zstart_cvr?sslmode=disable"
 ZERO_CHANGE_DB="${CONNECTION_STRING}/zstart_cdb?sslmode=disable"
-ZERO_JWT_SECRET="secretkey"
+ZERO_AUTH_SECRET="secretkey"
 LOG_LEVEL = "debug"
 ZERO_SCHEMA_JSON = """$(cat zero-schema.json)"""
 EOF
@@ -159,7 +159,7 @@ If you've followed the above guide and deployed `zero-cache` to fly, you can sim
 
 ```sh
 vercel deploy --prod \
-  -e ZERO_JWT_SECRET="secretkey" \
+  -e ZERO_AUTH_SECRET="secretkey" \
   -e VITE_PUBLIC_SERVER='https://${CACHE_APP_NAME}.fly.dev/'
 ```
 
@@ -167,7 +167,7 @@ to deploy your frontend to Vercel.
 
 Explaining the arguments above --
 
-- `ZERO_JWT_SECRET` - The secret to create and verify JWTs. This is the same secret that was used when deploying zero-cache to fly.
+- `ZERO_AUTH_SECRET` - The secret to create and verify JWTs. This is the same secret that was used when deploying zero-cache to fly.
 - `VITE_PUBLIC_SERVER` - The URL the frontend will call to talk to the zero-cache server. This is the URL of the fly app.
 
 ## Example: $PLATFORM

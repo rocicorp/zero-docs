@@ -92,24 +92,36 @@ Tables with relationships to themselves (i.e., `comment` that can have a parent 
 2. Our `createTableSchema` helper can’t deal with recursive types, so you have to first define the object outside `createTableSchema` then pass it as an arg, like so:
 
    ```tsx
-   const foo = {
-     tableName: 'issue',
+   import { TableSchema } from '@rocicorp/zero';
+
+   const comment = {
+     tableName: 'comment',
      columns: {
        id: {type: 'string'},
        title: {type: 'string'},
+       parentID: {type: 'string', optional: true},
      },
      primaryKey: ['id'],
      relationships: {
-       self: {
-         source: 'id',
-         dest: {
-           field: 'id',
-           schema: () => issueSchema,
-         },
+       parent: {
+         sourceField: 'parentID',
+         destField: 'id',
+         // without the any the whole table definition would also be any
+         destSchema: (): any => commentSchema,
+       },
+       children: {
+         sourceField: 'id',
+         destField: 'parentID',
+         destSchema: (): any => commentSchema,
        },
      },
-   } as const;
-   const issueSchema = createTableSchema(foo);
+   } as const satisfies TableSchema;
+   const commentSchema = createTableSchema(comment);
+
+   // get comment by id with comments 2 levels up
+   z.query.comment
+   .where('id', '=', '*id*')
+   .related('parent', (q) => q.related('parent'));
    ```
 
    See also https://bugs.rocicorp.dev/issue/3103.

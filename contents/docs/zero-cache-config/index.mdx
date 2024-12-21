@@ -146,12 +146,28 @@ flag: `--heartbeat-monitor-port`<br/>
 env: `ZERO_HEARTBEAT_MONITOR_PORT`<br/>
 optional: `true`
 
-## JWT Secret
+## Auth JWK
 
-JWT secret for verifying authentication tokens.
+A public key in JWK format used to verify JWTs. Only one of `auth-jwk`, `auth-jwks-url` and `auth-secret` may be set.
 
-flag: `--jwt-secret`<br/>
-env: `ZERO_JWT_SECRET`<br/>
+flag: ` --auth-jwk`<br/>
+env: `ZERO_AUTH_JWK`<br/>
+optional: `true`
+
+## Auth JWKS URL
+
+A URL that returns a JWK set used to verify JWTs. Only one of `auth-jwk`, `auth-jwks-url` and `auth-secret` may be set.
+
+flag: ` --auth-jwks-url`<br/>
+env: `ZERO_AUTH_JWKS_URL`<br/>
+optional: `true`
+
+## Auth Secret
+
+ A symmetric key used to verify JWTs. Only one of `auth-jwk`, `auth-jwks-url` and `auth-secret` may be set.
+
+flag: ` --auth-secret`<br/>
+env: `ZERO_AUTH_SECRET`<br/>
 optional: `true`
 
 ## Task ID

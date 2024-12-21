@@ -5,7 +5,7 @@ title: Recipes
 ## Debugging Replication
 
 - If zero-cache gets stuck or is acting weird, you can clear its state by deleting its sqlite file (see your `.env` file for its location). But first please take a screenshot and send it to us and let us know what you saw.
-- If you copied your setup from hello-zero or hello-zero-solid, you can also run `npm run clean` which wipes all state from the system.
+- If you copied your setup from hello-zero or hello-zero-solid, you can also run `npm run dev:clean` which wipes all state from the system.
 - During development it can be useful to run the browser in memory mode if you get tired of clearing browser storage. Use `new Zero({kvStore: "mem"})`.
 - You can explore the sqlite replica that Zero maintains with the builtin `zero-sqlite` binary:
   ```bash

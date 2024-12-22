@@ -132,7 +132,7 @@ export default function Home() {
         Zero is currently in public alpha. It's got a few rough edges, and you have to deploy it yourself, but it's already remarkably fun. We&apos;re using it ourselves for Zero's <a href="https://bugs.rocicorp.dev/">official bug tracker</a> and we find it much more productive than the alternatives.
       </p>
       <p>
-        Ready to start? You can have your first app in production on AWS in about 20 minutes.
+        Ready to start? You can have your first app in production in about 20 minutes.
       </p>
       <br/>
       <p className={styles.ctaContainer}>

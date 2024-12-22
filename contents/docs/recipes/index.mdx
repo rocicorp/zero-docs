@@ -16,5 +16,5 @@ title: Recipes
 
 ## Building with Zero
 
-- You can use any Postgres feature that changes synced tables. Any changes will be synced. For example to create a `lastModified` column that updates on changes, just do the normal trigger thing. Zero will faithfully sync changed written by the trigger. The change won’t be optimistic, but for many use cases that’s fine. Postgres triggers are useful for all kinds of things – for example zbugs uses them to [denormalize a many-to-many relationship](https://github.com/rocicorp/mono/blob/main/apps/zbugs/docker/init_upstream/init.sql#L28) to temporarily work around a missing feature of zql. And we also plan to use them as part of schema migration.
+- You can use any Postgres feature that changes synced tables. Any changes will be synced. For example to create a `lastModified` column that updates on changes, just do the normal trigger thing. Zero will faithfully sync changed written by the trigger.
 - Curious how to do something with Zero? Does [zbugs](https://bugs.rocicorp.dev/) do it? Check [`/apps/zbugs`](https://github.com/rocicorp/mono/tree/main/apps/zbugs) to see how in the Rocicorp monorepo.

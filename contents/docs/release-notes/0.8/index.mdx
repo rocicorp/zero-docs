@@ -21,7 +21,7 @@ See the changes to [hello-zero](https://github.com/rocicorp/hello-zero/pull/8) o
 - **timestampz.** Add support for `timestampz` Postgres column type. ([docs](../postgres-support#column-types))
 - **SSLMode**. You can disable TLS when `zero-cache` connects to DB with `sslmode=disable`. ([docs](../connecting-to-postgres#ssl-mode))
 - **Permission Helpers**. `ANYONE_CAN` and `NOBODY_CAN` helpers were added to make these cases more readable. ([docs](../permissions#helpers))
-- **Multitenant Support**. A single `zero-cache` can now front separate Postgres databases. This is useful for customers that have one "dev" database in production per-developer. ([docs](../zero-cache-config#multitenant))
+- **Multitenant Support**. A single `zero-cache` can now front separate Postgres databases. This is useful for customers that have one "dev" database in production per-developer. ([docs](../zero-cache-config#tenants-json))
 
 ## Fixes
 

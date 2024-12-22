@@ -16,5 +16,5 @@ title: Recipes
 
 ## Building with Zero
 
-- You can use any Postgres feature that changes synced tables. Any changes will be synced. For example to create a `lastModified` column that updates on changes, just do the normal trigger thing. Zero will faithfully sync changed written by the trigger.
+- You can use any Postgres feature that changes synced tables. Any changes will be synced. For example to create a `lastModified` column that updates on changes, just do the normal trigger thing. Zero will faithfully sync changed written by the trigger. To create an autoincrementing short ID for an entity, just use the [normal Postgres feature](https://github.com/rocicorp/mono/blob/2e9c198486d3abd4280e9595acc71cb42c01e8be/apps/zbugs/docker/init_upstream/init.sql#L28).
 - Curious how to do something with Zero? Does [zbugs](https://bugs.rocicorp.dev/) do it? Check [`/apps/zbugs`](https://github.com/rocicorp/mono/tree/main/apps/zbugs) to see how in the Rocicorp monorepo.

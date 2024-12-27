@@ -88,7 +88,7 @@ CREATE PUBLICATION zero_data FOR TABLE users (col1, col2, col3, ...), issues, co
 
 Then, specify this publication in the [Shard Publications](/docs/zero-cache-config#shard-publications) `zero-cache` option. (By default, Zero creates a publication that publishes the entire public schema.)
 
-To limit what is synced from the `zero-cache` replica to actual clients (e.g., web browsers) you can use [read permissions](/docs/reference/authentication-and-permissions#permissions).
+To limit what is synced from the `zero-cache` replica to actual clients (e.g., web browsers) you can use [read permissions](/docs/permissions#select-permissions).
 
 ## Self-Referential Relationships
 

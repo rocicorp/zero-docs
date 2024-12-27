@@ -77,9 +77,9 @@ If the issue table has two rows, one created by the user and one by someone else
 
 You can limit what rows can be inserted and by whom by specifying an `insert` ruleset.
 
-Insert rules are evaluated after the issue is insert. So if they query the database, they will see that the inserted row is present. If any rule in the insert ruleset returns a row, the insert is allowed.
+Insert rules are evaluated after the entity is inserted. So if they query the database, they will see the inserted row present. If any rule in the insert ruleset returns a row, the insert is allowed.
 
-Here's an example of an insert rule that disallows inserting users that with role 'admin'.
+Here's an example of an insert rule that disallows inserting users that have the role 'admin'.
 
 ```ts
 const definePermissions<AuthData, Schema>(schema, () => {
@@ -89,8 +89,8 @@ const definePermissions<AuthData, Schema>(schema, () => {
   ) => cmp('role', '!=', 'admin');
 
   return {
-    issue: {
-      insert: [allowIfAdmin],
+    user: {
+      insert: [allowIfNonAdmin],
     },
   };
 });

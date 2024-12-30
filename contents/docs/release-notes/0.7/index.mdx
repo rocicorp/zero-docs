@@ -27,7 +27,7 @@ npm install @rocicorp/zero@0.7
     - Now rules return an _expression_ instead of full query. This was required to make read permissions work and we did it for write permissions for consitency (see example).
     - The `update` policy now has two child policies: `preMutation` and `postMutation`. The rules we used to have were `preMutation`. They run before a change and can be used to validate a user has permission to change a row. The `postMutation` rules run after and can be used to limit the changes a user is allowed to make.
   - The `schema.ts` file should export an object having two fields: `schema` and `permissions`.
-- The way that `schema.ts` is consumed has also changed. Rather than `zero-cache` directly reading the typescript source, we compile it to JSON and read that. ([example](TODO)).
+- The way that `schema.ts` is consumed has also changed. Rather than `zero-cache` directly reading the typescript source, we compile it to JSON and read that.
   - `ZERO_SCHEMA_FILE` should now point to a JSON file, not `.ts`. It defaults to `./zero-schema.json` which we’ve found to be pretty useful so you’ll probably just remove this key from your `.env` entirely.
   - Use `npx zero-build-schema` to generate the JSON. You must currently do this manually each time you change the schema, we will automate it soon.
 

@@ -45,8 +45,9 @@ Columns can have the types `boolean`, `number`, `string`, `null`, `json`. See [C
 
 <Note type="warning">
   Currently, if the database type doesn’t map correctly to the Zero type,
-  replication will continue and succeed but the data won't match the TypeScript type. This is a bug – in the
-  future, this will be an error. See https://bugs.rocicorp.dev/issue/3112.
+  replication will continue and succeed but the data won't match the TypeScript
+  type. This is a bug – in the future, this will be an error. See
+  https://bugs.rocicorp.dev/issue/3112.
 </Note>
 
 ## Optional Columns
@@ -152,7 +153,7 @@ const messageSchema = createTableSchema({
 });
 ```
 
-This creates a "sender" relationship that can later be queried with the [`related` ZQL clause](../reading-data#related):
+This creates a "sender" relationship that can later be queried with the [`related` ZQL clause](./reading-data#relationships):
 
 ```ts
 const messagesWithSener = z.query.messages.related('sender');

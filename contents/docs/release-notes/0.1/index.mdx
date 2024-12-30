@@ -10,12 +10,12 @@ description: First Release
   - `cvrDbUri` → `cvrDBConnStr`
   - `changeDbUri` → `changeDBConnStr`
   - `replicaDbFile` → `replicaDBFile`
-- Changed default port of `zero-cache` to `4848` . So your app startup should look like `VITE_PUBLIC_SERVER="[http://localhost:](http://localhost:3000/)4848"`.
+- Changed default port of `zero-cache` to `4848` . So your app startup should look like `VITE_PUBLIC_SERVER="http://localhost:4848"`.
 
 ## Features
 
 - Print a warning to js console when Zero constructor `server` param is `null` or `undefined`
-- zero-cache should now correctly bind to both ipv4 and ipv6 loopback addresses. This should fix the issue where using [`localhost`](http://localhost) to connect to zero-cache on some systems did not work.
+- zero-cache should now correctly bind to both ipv4 and ipv6 loopback addresses. This should fix the issue where using `localhost` to connect to zero-cache on some systems did not work.
 - Check for presence of `WebSocket` early in startup of `Zero`. Print a clear error to catch people accidentally running Zero under SSR.
 - Fix annoying error in js console in React strict mode from constructing and closing Replicache in quick succession.
 

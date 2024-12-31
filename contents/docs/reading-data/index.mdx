@@ -301,10 +301,3 @@ Usually subscribing to a query is what you want in a reactive UI but every so of
 ```tsx
 const results = z.query.issue.where('foo', 'bar').run();
 ```
-
-<Note type="note">
-  Zero does not currently have a way to wait for authoritative results. Because
-  of this, this feature will most likely be useful when the data you’re querying
-  has already been preloaded. See also [Ability to wait for authoritative
-  results](/docs/roadmap).
-</Note>

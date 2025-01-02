@@ -156,7 +156,7 @@ const messageSchema = createTableSchema({
 This creates a "sender" relationship that can later be queried with the [`related` ZQL clause](./reading-data#relationships):
 
 ```ts
-const messagesWithSener = z.query.messages.related('sender');
+const messagesWithSender = z.query.messages.related('sender');
 ```
 
 ## Many-to-Many Relationships

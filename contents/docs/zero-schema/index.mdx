@@ -90,7 +90,7 @@ const userSchema = createTableSchema({
   columns: {
     id: 'string',
     name: 'string',
-    mood: enumeration<'happy', 'sad', 'ok'>(),
+    mood: enumeration<'happy' | 'sad' | 'ok'>(),
   },
   primaryKey: 'id',
 });

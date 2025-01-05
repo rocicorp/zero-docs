@@ -69,9 +69,13 @@ If you want to have a short auto-incrementing numeric ID for ux reasons (ie, a b
 Multi-column primary and foreign keys are supported.
 
 <Note type="warning" heading='Prisma "implicit relations" lack primary keys'>
-  If you are using Prisma, be aware that Prisma’s "[implicit many-to-many relations](https://www.prisma.io/docs/orm/prisma-schema/data-model/relations/many-to-many-relations#implicit-many-to-many-relations)" feature generates tables without a primary key. These tables won't work with Zero as-is.
-  
-  If you have such tables, you'll need to either manually add a primary key to them (just having the two foreign key columns), or else use [explicit many-to-many relations instead](https://www.prisma.io/docs/orm/prisma-schema/data-model/relations/many-to-many-relations#implicit-many-to-many-relations).
+  If you are using Prisma, be aware that Prisma’s "[implicit many-to-many
+  relations](https://www.prisma.io/docs/orm/prisma-schema/data-model/relations/many-to-many-relations#implicit-many-to-many-relations)"
+  feature generates tables without a primary key. These tables won't work with
+  Zero as-is. If you have such tables, you'll need to either manually add a
+  primary key to them (just having the two foreign key columns), or else use
+  [explicit many-to-many relations
+  instead](https://www.prisma.io/docs/orm/prisma-schema/data-model/relations/many-to-many-relations#implicit-many-to-many-relations).
 </Note>
 
 ## Limiting Replication
@@ -80,7 +84,7 @@ You can use [Permissions](permissions) to limit tables and rows from replicating
 
 Until then, a workaround is to use the Postgres [_publication_](https://www.postgresql.org/docs/current/sql-createpublication.html) feature to control the tables and columns that are replicated into `zero-cache`.
 
-In your pg schema setup, create a Postgres `publication` with the tables and columns you want: 
+In your pg schema setup, create a Postgres `publication` with the tables and columns you want:
 
 ```sql
 CREATE PUBLICATION zero_data FOR TABLE users (col1, col2, col3, ...), issues, comments;
@@ -92,51 +96,4 @@ To limit what is synced from the `zero-cache` replica to actual clients (e.g., w
 
 ## Self-Referential Relationships
 
-Tables with relationships to themselves (i.e., `comment` that can have a parent `comment` ) are supported with two caveats:
-
-1. Our `related` syntax has no sense of recursion, so you need to define your query manually to whatever level of depth you want. This actually ends up often being what you want – to get just a few levels of the tree at a time.
-2. Our `createTableSchema` helper can’t deal with recursive types, so you have to first define the object outside `createTableSchema` then pass it as an arg, like so:
-
-   ```tsx
-   import { createSchema, Zero } from '@rocicorp/zero';
-
-   const comment = {
-     tableName: 'comment',
-     columns: {
-       id: {type: 'string'},
-       title: {type: 'string'},
-       parentID: {type: 'string', optional: true},
-     },
-     primaryKey: ['id'],
-     relationships: {
-       parent: {
-         sourceField: 'parentID',
-         destField: 'id',
-         destSchema: () => commentSchema,
-       },
-       children: {
-         sourceField: 'id',
-         destField: 'parentID',
-         destSchema: () => commentSchema,
-       },
-     },
-   } as const;
-
-   const zero = new Zero({
-     userID: 'anon',
-     schema: createSchema({
-       version: 1,
-       tables: {
-         comment: commentSchema,
-       },
-     }),
-   });
-
-   // get comment by id with comments 2 levels up
-   const id = 'some-id';
-   z.query.comment
-     .where('id', '=', id)
-     .related('parent', (q) => q.related('parent'));
-   ```
-
-   See also https://bugs.rocicorp.dev/issue/3103.
+See [zero-schema](/docs/zero-schema#self-referential-relationships)

@@ -217,6 +217,59 @@ const messageSchema = createTableSchema({
 });
 ```
 
+## Self-Referential Relationships
+
+Tables with relationships to themselves (i.e., `comment` that can have a parent `comment` ) are supported with two caveats:
+
+1. Our `related` syntax has no sense of recursion, so you need to define your query manually to whatever level of depth you want. This actually ends up often being what you want – to get just a few levels of the tree at a time.
+2. Our `createTableSchema` helper can’t deal with recursive types so you have to define the object `as const` rather than call `createTableSchema`. `createTableSchema` is technically a no-op function that only helps with types so it is ok not to call it.
+
+See the example below of a self-referencing schema:
+
+```tsx
+import {createSchema, Zero} from '@rocicorp/zero';
+
+const comment = {
+  tableName: 'comment',
+  columns: {
+    id: {type: 'string'},
+    title: {type: 'string'},
+    parentID: {type: 'string', optional: true},
+  },
+  primaryKey: ['id'],
+  relationships: {
+    parent: {
+      sourceField: 'parentID',
+      destField: 'id',
+      destSchema: () => commentSchema,
+    },
+    children: {
+      sourceField: 'id',
+      destField: 'parentID',
+      destSchema: () => commentSchema,
+    },
+  },
+} as const;
+
+const zero = new Zero({
+  userID: 'anon',
+  schema: createSchema({
+    version: 1,
+    tables: {
+      comment,
+    },
+  }),
+});
+
+// get comment by id with comments 2 levels up
+const id = 'some-id';
+z.query.comment
+  .where('id', '=', id)
+  .related('parent', q => q.related('parent'));
+```
+
+See also https://bugs.rocicorp.dev/issue/3103.
+
 ## Database Schemas
 
 Use `createSchema` to define the entire Zero schema:

@@ -48,6 +48,7 @@ export const ROUTES: EachRoute[] = [
     items: [
       {title: 'React', href: '/react'},
       {title: 'SolidJS', href: '/solidjs'},
+      {title: 'Community', href: '/community'},
     ],
   },
 

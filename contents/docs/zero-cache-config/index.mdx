@@ -234,6 +234,22 @@ flag: `--storage-db-tmp-dir`<br/>
 env: `ZERO_STORAGE_DB_TMP_DIR`<br/>
 optional: `true`
 
+## Initial Sync Table Copy Workers
+
+The number of parallel workers used to copy tables during initial sync. Each worker copies a single table at a time, fetching rows in batches of `initial-sync-row-batch-size`.
+
+flag: `--initial-sync-table-copy-workers`<br/>
+env: `ZERO_INITIAL_SYNC_TABLE_COPY_WORKERS`<br/>
+default: `5`
+
+## Initial Sync Row Batch Size
+
+The number of rows each table copy worker fetches at a time during initial sync. This can be increased to speed up initial sync, or decreased to reduce the amount of heap memory used during initial sync (e.g. for tables with large rows).
+
+flag: `--initial-sync-row-batch-size`<br/>
+env: `ZERO_INITIAL_SYNC_ROW_BATCH_SIZE`<br/>
+default: `10000`
+
 ## Tenants JSON
 
 JSON encoding of per-tenant configs for running the server in multi-tenant mode:

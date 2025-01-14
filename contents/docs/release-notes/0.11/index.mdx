@@ -1,0 +1,34 @@
+---
+title: Zero 0.11
+description: Windows
+---
+
+## Install
+
+```bash
+npm install @rocicorp/zero@0.11
+```
+
+## Features
+
+- Windows should work a lot better now. Thank you very much to [aexylus](https://aexylus.com/) and [Sergio Leon](https://www.cbnsndwch.io/) for the testing and contributions here.
+- Support nested property access in JWT auth tokens ([docs](/docs/permissions#rules)). 
+- Make initial sync configurable ([docs](/docs/zero-cache-config#initial-sync-table-copy-workers)).
+- Add query result type to SolidJS ([docs](/docs/reading-data#completeness))
+- Docker image now contains native amd64 and arm64 binaries.
+- Add `storageKey` constructor parameter to enable multiple `Zero` instances for same `userID`.
+
+## Fixes
+
+Many, many fixes, including:
+
+- Fix downstream replication of primitive values
+- Fix replication of `TRUNCATE` messages
+- Fix large storage use for idle pg instances
+- Add runtime sanity checks for when a table is referenced but not synced
+- Fix `zero-cache-dev` for multitenant
+
+
+## Breaking Changes
+
+- The addition of result types to SolidJS is a breaking API change on SolidJS only. See the changes to [`hello-zero-solid`](https://github.com/rocicorp/hello-zero-solid/commit/7c6c3a47479f037f8323b102013244881c74fe9e) for upgrade example.

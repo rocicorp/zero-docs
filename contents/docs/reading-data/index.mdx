@@ -282,10 +282,6 @@ if (issueResult.type === 'complete') {
 }
 ```
 
-<Note type="warning" heading="`resultType` is only implemented for React.">
-   Sorry about that. Ping us in Discord if you need this in SolidJS.
-</Note>
-
 The possible values of `result.type` are currently `complete` and `unknown`.
 
 The `complete` value is currently only returned when Zero has received the server result. But in the future, Zero will be able to return this result type when it _knows_ that all possible data for this query is already available locally. Additionally, we plan to add a `prefix` result for when the data is known to be a prefix of the complete result. See [Consistency](/docs/preloading#consistency) for more information.

@@ -49,18 +49,18 @@ Each operation on a policy has a _ruleset_ containing zero or more _rules_.
 A rule is just a TypeScript function that receives the logged in user's `AuthData` and generates a ZQL [where expression](reading-data#compound-filters). At least one rule in a ruleset must return a row for the operation to be allowed.
 
 <Note type="warning">
-Although they look like normal TypeScript functions, permission rules are "compiled" into a [JSON/ZQL format](zero-cache-config#schema-file) at compile-time. Those JSON rules are uploaded to zero-cache and *that's* what is evaluated.
+Although they look like normal TypeScript functions, permission rules are "compiled" into a [JSON/ZQL format](zero-cache-config#schema-file) at build-time. Those JSON rules are uploaded to zero-cache and *that's* what is evaluated.
 
-These functions aren't really ever run against a real auth token. They are instead run against a "placeholder" auth token at compile time. We track which fields are accessed and create a ZQL expression that extracts the right fields out of the real auth token at runtime.
+Despite receiving an `AuthData` parameter, these functions aren't really ever run against a real `AuthData` value. They are instead run against a "placeholder" `AuthData` at build time. We track which fields of this placeholder are accessed and construct a ZQL expression that accesses the right field of `AuthData` at runtime.
 
 This is confusing and we will be reworking it to make what's really happening more clear.
 
 In the meantime, what you need to understand is that the only JS that is supported in these rules is accessing fields and subfields.
 
-Specifically:
+Specifically you cannot:
 
 * Iterate over properties or array elements in the auth token
-* Use any JS features beyond property access
+* Use any JS features beyond property access of `AuthData`
 * Use any conditional or global state
 </Note>
 

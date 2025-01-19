@@ -116,7 +116,9 @@ const definePermissions<AuthData, Schema>(schema, () => {
 
 There are two types of update rulesets: `preMutation` and `postMutation`.
 
-`preMutation` rules are evaluated before the mutation is applied. This is useful for things like checking whether a user owns an entity before editing it. `postMutation` rules are evaluated after the mutation is applied. This is useful for things like restricting the kinds of changes a user is allowed to make.
+`preMutation` rules see the version of a row _before_ the mutation is applied. This is useful for things like checking whether a user owns an entity before editing it.
+
+`postMutation` rules see the version of a row _after_ the mutation is applied. This is useful for things like ensuring a user can only mark themselves as the creator of an entity and not other users.
 
 Both the `preMutation` and `postMutation` rulesets must allow an update. But note that as with other rulesets, if either `preMutation` or `postMutation` ruleset is undefined, it defaults to **_allow_**.
 
@@ -151,29 +153,6 @@ const definePermissions<AuthData, Schema>(schema, () => {
     issue: {
       // preMutation defaults to _allow_.
       postMutation: [allowIfIssueCreator],
-    },
-  };
-});
-```
-
-But this policy will never allow an edit, because the two rulesets can't be true at the same time:
-
-```ts
-const definePermissions<AuthData, Schema>(schema, () => {
-  const allowIfIssueCreator = (
-    authData: AuthData,
-    {cmp}: ExpressionBuilder<typeof issueSchema>,
-  ) => cmp('creatorID', '=', authData.sub);
-
-  const allowIfNotIssueCreator = (
-    authData: AuthData,
-    {cmp}: ExpressionBuilder<typeof issueSchema>,
-  ) => cmp('creatorID', '!=', authData.sub);
-
-return {
-    issue: {
-      preMutation: [allowIfIssueCreator],
-      postMutation: [allowIfNotIssueCreator],
     },
   };
 });

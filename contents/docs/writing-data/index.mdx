@@ -49,14 +49,14 @@ const userSchema = createTableSchema({
 
 // app.tsx
 
-// Sets nickname to `null` specifically
+// Sets language to `null` specifically
 z.mutate.user.insert({
   id: nanoid(),
   username: 'sam',
   language: null,
 });
 
-// Sets nickname to the default server-side value. Could be null, or some
+// Sets language to the default server-side value. Could be null, or some
 // generated or constant default value too.
 z.mutate.user.insert({
   id: nanoid(),

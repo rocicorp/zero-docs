@@ -299,5 +299,5 @@ const results = z.query.issue.where('foo', 'bar').run();
 ```
 
 <Note type="note">
-The `run()` method [does not yet expose `resultType`](#completeness) in any way. See [bug 3243](https://bugs.rocicorp.dev/issue/3243) for a workaround.
+The `run()` method does not yet expose [`resultType`](#completeness) in any way, so you can't use this method to wait for an authoritative result from the server. See [bug 3243](https://bugs.rocicorp.dev/issue/3243) for a workaround.
 </Note>

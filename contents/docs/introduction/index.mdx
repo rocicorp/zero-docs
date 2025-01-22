@@ -8,7 +8,16 @@ Rather than syncing entire tables to the client, or using static rules to carefu
 
 Zero caches the data for queries locally on the device, and reuses that data automatically to answer future queries whenever possible.
 
-For typical applications, the result is that almost all queries are answered locally, instantly. It feels like you have access to the entire backend database directly from the client in memory.  Occasionally, when you do a more specific query, Zero falls back to the server. But this happens automatically without any extra work required.
+<Note type="note" emoji="🧑‍🏫" heading="Keeping data on device">
+  What data is stored on device is controlled by what queries are active. If the
+  client has no active queries then no data will be stored on the device. To
+  keep data permanently on the device you can create preload queries that are
+  never destroyed, or use regular queries high enough up in your component tree
+  that they do not unmount except on page unload. See
+  [Preloading](/docs/preloading).
+</Note>
+
+For typical applications, the result is that almost all queries are answered locally, instantly. It feels like you have access to the entire backend database directly from the client in memory. Occasionally, when you do a more specific query, Zero falls back to the server. But this happens automatically without any extra work required.
 
 Zero is made possible by a custom streaming query engine we built called [ZQL](reading-data), which uses [Incremental View Maintenance](https://www.vldb.org/pvldb/vol16/p1601-budiu.pdf) on both client and server to efficiently keep large, complex queries up to date.
 

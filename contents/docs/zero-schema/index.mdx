@@ -25,48 +25,44 @@ For production, you should run the `zero-build-schema` explicitly to generate th
 
 ## Table Schemas
 
-Use the `createTableSchema` helper to define each table in your Zero schema:
+Use the `table` function to define each table in your Zero schema:
 
 ```tsx
-import {createTableSchema} from '@rocicorp/zero';
+import {table, string, boolean} from '@rocicorp/zero';
 
-const userSchema = createTableSchema({
-  tableName: 'user',
-  columns: {
-    id: 'string',
-    name: 'string',
-    partner: 'boolean',
-  },
-  primaryKey: 'id',
-});
+const user = table("user")
+  .columns({
+    id: string(),
+    name: string(),
+    partner: boolean(),
+  })
+  .primaryKey("id");
 ```
 
-Columns can have the types `boolean`, `number`, `string`, `null`, `json`. See [Column Types](/docs/postgres-support#column-types) for how database types are mapped to these types.
+Column types are defined with the `boolean()`, `number()`, `string()`, `json()`, and `enumeration()` helpers. See [Column Types](/docs/postgres-support#column-types) for how database types are mapped to these types.
 
 <Note type="warning">
-  Currently, if the database type doesn’t map correctly to the Zero type,
-  replication will continue and succeed but the data won't match the TypeScript
-  type. This is a bug – in the future, this will be an error. See
-  https://bugs.rocicorp.dev/issue/3112.
+    Currently, if the database type doesn’t map correctly to the Zero type,
+    replication will continue and succeed but the data won't match the TypeScript
+    type. This is a bug – in the future, this will be an error. See
+    https://bugs.rocicorp.dev/issue/3112.
 </Note>
 
-## Optional Columns
+### Optional Columns
 
 Columns can be marked _optional_. This corresponds to the SQL concept `nullable`.
 
 ```tsx
-const userSchema = createTableSchema({
-  tableName: 'user',
-  columns: {
-    id: 'string',
-    name: 'string',
-    nickName: {type: 'string', optional: true},
-  },
-  primaryKey: 'id',
-});
+const user = table("user")
+  .columns({
+    id: string(),
+    name: string(),
+    nickName: string().optional(),
+  })
+  .primaryKey("id");
 ```
 
-An optional column can have a value of the specified type or `null` to mean _no value_.
+An optional column can store a value of the specified type or `null` to mean _no value_.
 
 <Note type="note">
     Note that `null` and `undefined` mean different things when working with Zero rows.
@@ -74,201 +70,133 @@ An optional column can have a value of the specified type or `null` to mean _no 
     - When reading, if a column is `optional`, Zero can return `null` for that field. `undefined` is not used at all when Reading from Zero.
     - When writing, you can specify `null` for an optional field to explicitly write `null` to the datastore, unsetting any previous value.
     - For `create` and `upsert` you can set optional fields to `undefined` (or leave the field off completely) to take the default value as specified by backend schema for that column. For `update` you can set any non-PK field to `undefined` to leave the previous value unmodified.
-
 </Note>
 
-## Enumerations
+### Enumerations
 
-Use the `enumeration` helper to define a column that can only take on a specific set of values. This is most often used along side an [`enum` Postgres column type](postgres-support#column-types).
+Use the `enumeration` helper to define a column that can only take on a specific set of values. This is most often used alongside an [`enum` Postgres column type](postgres-support#column-types).
 
 ```tsx
-import {column} from '@rocicorp/zero';
+import {table, string, enumeration} from '@rocicorp/zero';
 
-const {enumeration} = column;
-const userSchema = createTableSchema({
-  tableName: 'user',
-  columns: {
-    id: 'string',
-    name: 'string',
-    mood: enumeration<'happy' | 'sad' | 'ok'>(),
-  },
-  primaryKey: 'id',
-});
+const user = table("user")
+  .columns({
+    id: string(),
+    name: string(),
+    mood: enumeration<'happy' | 'sad' | 'taco'>(),
+  })
+  .primaryKey("id");
 ```
 
-## Custom JSON Types
+### Custom JSON Types
 
-Use the `json` helper to define a column that only store a specific subtype of `json`:
+Use the `json` helper to define a column that stores a JSON-compatible value:
 
 ```tsx
-import {column} from '@rocicorp/zero';
+import {table, string, json} from '@rocicorp/zero';
 
-const {json} = column;
-const userSchema = createTableSchema({
-  tableName: 'user',
-  columns: {
-    id: 'string',
-    name: 'string',
+const user = table("user")
+  .columns({
+    id: string(),
+    name: string(),
     settings: json<{theme: 'light' | 'dark'}>(),
-  },
-  primaryKey: 'id',
-});
+  })
+  .primaryKey("id");
 ```
 
-## Compound Primary Keys
+### Compound Primary Keys
 
-Use an array for compound primary keys:
+Pass multiple columns to `primaryKey` to define a compound primary key:
 
 ```ts
-const userSchema = createTableSchema({
-  tableName: 'user',
-  columns: {
-    orgID: 'string',
-    userID: 'string',
-    name: 'string',
-  },
-  primaryKey: ['orgID', 'userID'],
-});
+const user = table("user")
+  .columns({
+    orgID: string(),
+    userID: string(),
+    name: string(),
+  })
+  .primaryKey("orgID", "userID");
 ```
 
 ## Relationships
 
-Use the `relationships` field to define relationships between tables:
+Use the `relationships` function to define relationships between tables. Use the `one` and `many` helpers to define singular and plural relationships, respectively:
 
 ```ts
-const messageSchema = createTableSchema({
-  tableName: 'message',
-  columns: {
-    id: 'string',
-    senderID: 'string',
-  },
-  primaryKey: 'id',
-  relationships: {
-    sender: {
-      sourceField: 'senderID',
-      destSchema: userSchema,
-      destField: 'id',
-    },
-  },
-});
+const messageRelationships = relationships(message, ({ one, many }) => ({
+  sender: one({
+    sourceField: ["senderID"],
+    destField: ["id"],
+    destSchema: user,
+  }),
+  replies: many({
+    sourceField: ["id"],
+    destSchema: message,
+    destField: ["parentMessageID"],
+  }),
+}));
 ```
 
-This creates a "sender" relationship that can later be queried with the [`related` ZQL clause](./reading-data#relationships):
+This creates "sender" and "replies" relationships that can later be queried with the [`related` ZQL clause](./reading-data#relationships):
 
 ```ts
-const messagesWithSender = z.query.messages.related('sender');
+const messagesWithSenderAndReplies = z.query.messages
+  .related('sender')
+  .related("replies");
 ```
 
-## Many-to-Many Relationships
+This will return an object for each message row. Each message will have a `sender` field that is a single `User` object or `null`, and a `replies` field that is an array of `Message` objects.
 
-You can create many-to-many relationships by chaining the relationship definitions. Assuming a `label` table and an `issueLabel` junction table, you can define a `labels` relationship like this:
+### Many-to-Many Relationships
+
+You can create many-to-many relationships by chaining the relationship definitions. Assuming `issue` and `label` tables, along with an `issueLabel` junction table, you can define a `labels` relationship like this:
 
 ```ts
-const issueSchema = {
-  tableName: 'issue',
-  columns: {
-    id: 'string',
-    title: 'string',
-  },
-  primaryKey: 'id',
-  relationships: {
-    labels: [
-      {
-        sourceField: 'id',
-        destField: 'issueID',
-        destSchema: issueLabelSchema,
-      },
-      {
-        sourceField: 'labelID',
-        destField: 'id',
-        destSchema: labelSchema,
-      },
-    ],
-  },
-};
+const issueRelationships = relationships(issue, ({ many }) => ({
+  labels: many({
+    sourceField: ["id"],
+    destSchema: issueLabel,
+    destField: ["issueID"],
+  },{
+    sourceField: ["labelID"],
+    destSchema: label,
+    destField: ["id"],
+  }),
+}));
 ```
 
 <Note>
-  Currently only two levels of chaining are supported for `relationships`. [Let
-  us know](https://discord.rocicorp.dev) if you can think of a use case for
-  more!
+  Currently only two levels of chaining are currently supported for `relationships`.
+  See https://bugs.rocicorp.dev/issue/3454.
 </Note>
 
-## Relationships and Compound Keys
+### Compound Keys Relationships
 
 Relationships can traverse compound keys. Imagine a `user` table with a compound primary key of `orgID` and `userID`, and a `message` table with a related `senderOrgID` and `senderUserID`. This can be represented in your schema with:
 
 ```ts
-const messageSchema = createTableSchema({
-  tableName: 'message',
-  columns: {
-    id: 'string',
-    senderOrgID: 'string',
-    senderUserID: 'string',
-  },
-  primaryKey: 'id',
-  relationships: {
-    sender: {
-      sourceField: ['senderOrgID', 'senderUserID'],
-      destSchema: userSchema,
-      destField: ['orgID', 'userID'],
-    },
-  },
-});
+const messageRelationships = relationships(message, ({ one }) => ({
+  sender: one({
+    sourceField: ["senderOrgID", "senderUserID"],
+    destSchema: user,
+    destField: ["orgID", "userID"],
+  }),
+}));
 ```
 
-## Self-Referential Relationships
+### Circular Relationships
 
-Tables with relationships to themselves (i.e., `comment` that can have a parent `comment` ) are supported with two caveats:
-
-1. Our `related` syntax has no sense of recursion, so you need to define your query manually to whatever level of depth you want. This actually ends up often being what you want – to get just a few levels of the tree at a time.
-2. Our `createTableSchema` helper can’t deal with recursive types so you have to define the object `as const` rather than call `createTableSchema`. `createTableSchema` is technically a no-op function that only helps with types so it is ok not to call it.
-
-See the example below of a self-referencing schema:
+Circular relationships are fully supported:
 
 ```tsx
-import {createSchema, Zero} from '@rocicorp/zero';
-
-const comment = {
-  tableName: 'comment',
-  columns: {
-    id: {type: 'string'},
-    title: {type: 'string'},
-    parentID: {type: 'string', optional: true},
-  },
-  primaryKey: ['id'],
-  relationships: {
-    parent: {
-      sourceField: 'parentID',
-      destField: 'id',
-      destSchema: () => commentSchema,
-    },
-    children: {
-      sourceField: 'id',
-      destField: 'parentID',
-      destSchema: () => commentSchema,
-    },
-  },
-} as const;
-
-const zero = new Zero({
-  userID: 'anon',
-  schema: createSchema({
-    version: 1,
-    tables: {
-      comment,
-    },
+const commentRelationships = relationships(comment, ({ one }) => ({
+  parent: one({
+    sourceField: ["parentID"],
+    destSchema: comment,
+    destField: ["id"],
   }),
-});
-
-// get comment by id with comments 2 levels up
-const id = 'some-id';
-z.query.comment
-  .where('id', '=', id)
-  .related('parent', q => q.related('parent'));
+}));
 ```
-
-See also https://bugs.rocicorp.dev/issue/3103.
 
 ## Database Schemas
 
@@ -277,14 +205,14 @@ Use `createSchema` to define the entire Zero schema:
 ```tsx
 import {createSchema} from '@rocicorp/zero';
 
-export const schema = createSchema({
-  version: 1,
-  tables: {
-    user: userSchema,
-    medium: mediumSchema,
-    message: messageSchema,
-  },
-});
+export const schema = createSchema(
+  1,  // Schema version. See [Schema Migrations](/docs/migrations) for more info.
+  {
+    tables: [user, medium, message],
+    relationships: [
+      userRelationships,
+      mediumRelationships,
+      messageRelationships,
+    ],
+  });
 ```
-
-The `version` field is used as part of [schema migration](/docs/migrations).

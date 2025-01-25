@@ -8,12 +8,13 @@ Here are some common Postgres options and what we know about their support level
 
 | Postgres                          | Support Status                                                                                                  |
 | --------------------------------- | --------------------------------------------------------------------------------------------------------------- |
-| Postgres.app                      | ✅                                                                                                              |
-| AWS RDS                           | ✅                                                                                                              |
-| postgres:16.2-alpine docker image | ✅                                                                                                              |
-| [Fly.io](http://Fly.io) Postgres  | ✅                                                                                                              |
-| Supabase, Neon, Render, Heroku    | 🤷‍♂️ Partial support with the `auto-reset` flag. Schema changes trigger full resync. See “Schema Changes”, below. |
-| AWS Aurora                        | ❌ Unsupported due to SQL differences. Let us know if you need this – we can likely figure it out.              |
+| Postgres.app                      | ✅ |
+| postgres:16.2-alpine docker image | ✅ |
+| AWS RDS                           | ✅ |
+| AWS Aurora                        | ✅ v15.6+ |
+| Google Cloud SQL                  | ✅ See [notes below](#google-cloud-sql) |
+| [Fly.io](http://Fly.io) Postgres  | ✅ |
+| Supabase, Neon, Render, Heroku    | 🤷‍♂️ Partial support with the `auto-reset` flag. See [Schema Changes](#schema-changes), below. See [Supabase notes](#supabase) below. |
 
 ## Schema Changes
 
@@ -57,7 +58,13 @@ psql -c 'SHOW wal_level'
 Some Postgres providers (notably Fly.io, so far) do not support TLS on their internal networks. You can disable
 attempting to use it by adding the `sslmode=disable` query parameter to your connection strings from `zero-cache`.
 
-## Supabase-Specific Notes
+## Provider-Specific Notes
+
+### Google Cloud SQL
+
+You must [manually create a `PUBLICATION`](/docs/postgres-support#limiting-replication). `zero-cache` does not have permission to create a publication on its own.
+
+### Supabase
 
 In order to connect to Supabase you must use the "Direct Connection" style connection string, not the pooler:
 

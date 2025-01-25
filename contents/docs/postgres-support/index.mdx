@@ -47,36 +47,29 @@ Let us know if the lack of a particular column type is hindering your use of Zer
 
 Default values are allowed in the Postgres schema but there currently is no way to use them from a Zero app. The create mutation requires all columns to be specified, except when columns are nullable (in which case,they default to null). Since there is no way to leave non-nullable columns off the insert, there is no way for PG to apply the default. This is a known issue and will be fixed in the future.
 
-## Primary Keys
+## IDs
 
-Primary keys are required on all synced tables.
-
-It is also strongly recommended that primary keys be client-generated random strings like [uuid](https://www.npmjs.com/package/uuid), [ulid](https://www.npmjs.com/package/ulid), [nanoid](https://www.npmjs.com/package/nanoid), etc. This makes optimistic creation and updates much easier.
+It is strongly recommended that primary keys be client-generated random strings like [uuid](https://www.npmjs.com/package/uuid), [ulid](https://www.npmjs.com/package/ulid), [nanoid](https://www.npmjs.com/package/nanoid), etc. This makes optimistic creation and updates much easier.
 
 <Note type="note" heading="Why are client-generated IDs better?">
-    Imagine that the PK of your table is an auto-incrementing integer. If you optimistically create an entity of this type, you will have to give it some ID – the type will require it locally, but also if you want to optimistically create relationships to this row you’ll need an ID.
+  Imagine that the PK of your table is an auto-incrementing integer. If you optimistically create an entity of this type, you will have to give it some ID – the type will require it locally, but also if you want to optimistically create relationships to this row you’ll need an ID.
 
-    You could sync the highest value seen for that table, but there are race conditions and it is possible for that ID to be taken by the time the creation makes it to the server. Your database can resolve this and assign the next ID, but now the relationships you created optimistically will be against the wrong row. Blech.
+  You could sync the highest value seen for that table, but there are race conditions and it is possible for that ID to be taken by the time the creation makes it to the server. Your database can resolve this and assign the next ID, but now the relationships you created optimistically will be against the wrong row. Blech.
 
-    GUIDs makes a lot more sense in local-first applications.
+  GUIDs makes a lot more sense in local-first applications.
 
-    If your table has a natural key you can use that and it has less problems. But there is still the chance for a conflict. Imagine you are modeling orgs and you choose domainName as the natural key. It is possible for a race to happen and when the creation gets to the server, somebody has already chosen that domain name. In that case, the best thing to do is reject the write and show the user an error.
-
+  If your table has a natural key you can use that and it has less problems. But there is still the chance for a conflict. Imagine you are modeling orgs and you choose domainName as the natural key. It is possible for a race to happen and when the creation gets to the server, somebody has already chosen that domain name. In that case, the best thing to do is reject the write and show the user an error.
 </Note>
 
 If you want to have a short auto-incrementing numeric ID for ux reasons (ie, a bug number), that is possible – See [Demo Video](https://discord.com/channels/830183651022471199/1288232858795769917/1298114323272568852)!
 
-Multi-column primary and foreign keys are supported.
+## Primary Keys
 
-<Note type="warning" heading='Prisma "implicit relations" lack primary keys'>
-  If you are using Prisma, be aware that Prisma’s "[implicit many-to-many
-  relations](https://www.prisma.io/docs/orm/prisma-schema/data-model/relations/many-to-many-relations#implicit-many-to-many-relations)"
-  feature generates tables without a primary key. These tables won't work with
-  Zero as-is. If you have such tables, you'll need to either manually add a
-  primary key to them (just having the two foreign key columns), or else use
-  [explicit many-to-many relations
-  instead](https://www.prisma.io/docs/orm/prisma-schema/data-model/relations/many-to-many-relations#implicit-many-to-many-relations).
-</Note>
+Each table synced with Zero must have either a primary key or at least one unique index.
+
+This is needed so that Zero can identify rows during sync, to distinguish between an edit and a remove/add.
+
+Multi-column primary and foreign keys are supported.
 
 ## Limiting Replication
 

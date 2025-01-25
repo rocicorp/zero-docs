@@ -1,0 +1,38 @@
+---
+title: Zero 0.12
+description: Circular Relationships
+---
+
+## Install
+
+```bash
+npm install @rocicorp/zero@0.12
+```
+
+## Features
+
+- Schemas now support circular relationships ([docs](/docs/zero-schema#circular-relationships)).
+- Added `one()` and `many()` schema helpers to default relationship type ([docs](/docs/zero-schema#table-schemas)).
+- Support for syncing tables without a primary key as long as there is a unique index. This enables Prisma's [implicit many-to-many relations](https://www.prisma.io/docs/orm/prisma-schema/data-model/relations/many-to-many-relations#implicit-many-to-many-relations) ([docs](/docs/postgres-support#primary-keys)).
+- Zero has been confirmed to work with Aurora and Google Cloud SQL ([docs](/docs/connecting-to-postgres))
+- Client bundle size reduced from 55kb to 47kb (-15%).
+
+## Fixes
+
+- Windows: `zero-cache` was spawning emptying terminals and leaving listeners connected on exit.
+- Incorrect warning in `zero-cache` about enums not being supported.
+- Failure to handle the primary key of Postgres tables changing.
+- Incorrect results when `whereExists()` is before `where()` in query ([bug](https://bugs.rocicorp.dev/issue/3417)).
+- Error: _The inferred type of '...' cannot be named without a reference to ..._.
+- Error: _insufficient upstream connections_.
+- Several causes of flicker in React.
+- Incorrect values for `ResultType` when unloading and loading a query quickly ([bug](https://bugs.rocicorp.dev/issue/3456)).
+- Error: _Postgres is missing the column '...' but that column was part of a row_.
+- Pointless initial empty render in React when data is already available in memory.
+- Error: _Expected string at ... Got array_ during auth.
+- `where()` incorrectly allows comparing to `null` with the `=` operator ([bug](https://bugs.rocicorp.dev/issue/3426)).
+- SolidJS: Only call `setState` once per transaction.
+
+## Breaking Changes
+
+- The schema definition syntax has changed to support circular relationships. See the changes to [`hello-zero`](TODO) and [`hello-zero-solid`](TODO) for upgrade examples.

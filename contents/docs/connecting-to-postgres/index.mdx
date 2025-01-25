@@ -62,7 +62,11 @@ attempting to use it by adding the `sslmode=disable` query parameter to your con
 
 ### Google Cloud SQL
 
-You must [manually create a `PUBLICATION`](/docs/postgres-support#limiting-replication). `zero-cache` does not have permission to create a publication on its own.
+To use Google Cloud SQL you must [manually create a `PUBLICATION`](/docs/postgres-support#limiting-replication)
+and specify that publication name in the [Shard Publications](/docs/zero-cache-config#shard-publications)
+option when running `zero-cache`.
+
+(Google Cloud SQL does not provide sufficient permissions for `zero-cache` to create its default publication.)
 
 ### Supabase
 

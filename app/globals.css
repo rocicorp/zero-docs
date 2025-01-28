@@ -320,6 +320,10 @@ div.inner-nav-container {
   font-weight: 400;
 }
 
+.prose summary {
+  cursor: pointer;
+}
+
 .button-link:hover {
   background-color: var(--primary-highlight) !important;
 }

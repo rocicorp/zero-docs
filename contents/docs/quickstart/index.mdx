@@ -24,6 +24,43 @@ npm install
 npm run dev:db-up
 ```
 
+<details>
+<summary>Not using npm?</summary>
+
+Zero (the server part) depends on `@rocicorp/zero-sqlite3` which is a binary. Non
+[npm](https://www.npmjs.com/) package managers do not run `postinstall` scripts
+by default. You can enable the install scripts by modifying your `package.json`.
+
+### pnpm
+
+To allow SQLite to be installed correctly for [pnpm](https://pnpm.io/), you need
+to add the
+[pnpm.onlyBuiltDependencies](https://pnpm.io/package_json#pnpmonlybuiltdependencies)
+field to your `package.json`:
+
+```json
+"pnpm": {
+  "onlyBuiltDependencies": [
+    "@rocicorp/zero-sqlite3"
+  ]
+}
+```
+
+### Bun
+
+To allow SQLite to be installed correctly for [Bun](https://bun.sh/), you need
+to add the
+[trustedDependencies](https://bun.sh/guides/install/trusted)
+field to your `package.json`:
+
+```json
+  "trustedDependencies": [
+    "@rocicorp/zero-sqlite3"
+  ],
+```
+
+</details>
+
 In a second terminal, start `zero-cache`:
 
 ```bash

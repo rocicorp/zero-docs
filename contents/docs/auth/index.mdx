@@ -24,13 +24,30 @@ const zero = new Zero({
 });
 ```
 
-## Zero-Cache
+## Server
 
 For `zero-cache` to be able to verify the JWT, one of the following environment variables needs to be set:
 
 1. `ZERO_AUTH_SECRET` - If your API server uses a symmetric key (secret) to create JWTs then this is that same key.
 2. `ZERO_AUTH_JWK` - If your API server uses a private key to create JWTs then this is the corresponding public key, in [JWK](https://datatracker.ietf.org/doc/html/rfc7517) format.
 3. `ZERO_AUTH_JWKS_URL` - Many auth providers host the public keys used to verify the JWTs they create at a public URL. If you use a provider that does this, or you publish your own keys publicly, set this to that URL.
+
+## Refresh
+
+The `auth` parameter to Zero can also be a function:
+
+```ts
+const zero = new Zero({
+  ...,
+  auth: async () => {
+    const token = await fetchNewToken();
+    return token;
+  },
+  userID,
+});
+```
+
+In this case, Zero will call this function to get a new JWT if verification fails.
 
 ## Permissions
 

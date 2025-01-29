@@ -11,13 +11,13 @@ ZQL queries are composed of one or more _clauses_ that are chained together into
 Unlike queries in classic databases, the result of a ZQL query is a _view_ that updates automatically and efficiently as the underlying data changes. You can call a query’s `materialize()` method to get a view, but more typically you run queries via some framework-specific bindings. For example see `useQuery` for [React](react) or [SolidJS](solidjs).
 
 <Note type="note" emoji="🧑‍🏫" heading="Data returned from ZQL should be considered immutable">
-  This means you should not modify the data directly. Instead, clone the data and modify the clone.
+This means you should not modify the data directly. Instead, clone the data and modify the clone.
 
-  ZQL caches values and returns them multiple times. If you modify a value returned from ZQL, you will modify it everywhere it is used. This can lead to subtle bugs.
+ZQL caches values and returns them multiple times. If you modify a value returned from ZQL, you will modify it everywhere it is used. This can lead to subtle bugs.
 
-  JavaScript and TypeScript lack true immutable types so we use `readonly` to help enforce it. But it's easy to cast away the `readonly` accidentally.
+JavaScript and TypeScript lack true immutable types so we use `readonly` to help enforce it. But it's easy to cast away the `readonly` accidentally.
 
-  In the future, we'll [`freeze`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/freeze) all returned data in `dev` mode to help prevent this.
+In the future, we'll [`freeze`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/freeze) all returned data in `dev` mode to help prevent this.
 </Note>
 
 ## Select
@@ -268,6 +268,47 @@ z.query.issue.where({cmp, or, exists} =>
   ),
 );
 ```
+
+## Query and Data Lifetime
+
+ZQL reuses data already synced to the client when possible for instant query results.
+
+But what determines whether such data will be available? Zero tracks which queries return each row, and keeps a row around as long as any query that returns it is still running.
+
+This means that to reason about whether a query will return results locally (without flicker), you should think about what other queries are currently running, not about what data is local. Data exists locally if and only if there is a query running that returns that data.
+
+Zero currently has a number of different features (and one bug) that influence whether a query is running:
+
+### 1. UI Queries
+
+`const myView = myQuery.materialize()` creates a query on both the client and server that lives until you call `myView.destroy()`.
+
+Typically you won't use this API though, you'll use the higher-level `useQuery`. This means that the lifetime of `useQuery` queries is just the lifetime of the component that called them. The data synced by these queries will be deleted when the query unmounts.
+
+### 2. Preload Queries
+
+`const result = myQuery.preload()` creates a query only on the server. The query lives until you call `result.cleanup()`. This is useful when you want to preload a large query, but don't need to display most of it. For example, zbugs currently uses `preload()` to load all issue rows and the first 10 comments from each issue.
+
+### 3. One-Time Queries
+
+`const result = myQuery.run()`. This runs a query exactly once. The query is immediately destroyed implicitly.
+
+### 4. Open Queries are Leaked on Page Unload
+
+[An open bug](https://bugs.rocicorp.dev/issue/3476) results in any queries open on page unload staying open forever for the browser profile.
+
+### Putting it All Together
+
+Putting these four mechanisms together, the current behavior is something like:
+
+- The lifetime of `useQuery` queries is component lifetime.
+- The lifetime of `preload` queries is forever (unless you call `cleanup()`, which almost nobody does).
+
+### Future Behavior
+
+This is kind of crazy, but works surprisingly well for zbugs. Anyway, we're working on cleaning it up.
+
+We will be adding an LRU cache for queries, so that they aren't removed from the server when the client stops listening. This means that if you do a query, then the same query a little later, it will typically resolve instantly automatically.
 
 ## Completeness
 

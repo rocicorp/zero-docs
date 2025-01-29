@@ -18,6 +18,7 @@ ZQL caches values and returns them multiple times. If you modify a value returne
 JavaScript and TypeScript lack true immutable types so we use `readonly` to help enforce it. But it's easy to cast away the `readonly` accidentally.
 
 In the future, we'll [`freeze`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/freeze) all returned data in `dev` mode to help prevent this.
+
 </Note>
 
 ## Select
@@ -213,7 +214,7 @@ The argument to `where` can also be a callback that returns a complex expression
 ```tsx
 // Get all issues that have priority 'critical' or else have both
 // priority 'medium' and not more than 100 votes.
-z.query.issue.where({cmp, and, or, not} =>
+z.query.issue.where(({cmp, and, or, not}) =>
   or(
     cmp('priority', 'critical'),
     and(cmp('priority', 'medium'), not(cmp('numVotes', '>', 100))),
@@ -340,5 +341,7 @@ const results = z.query.issue.where('foo', 'bar').run();
 ```
 
 <Note type="note">
-The `run()` method does not yet expose [`resultType`](#completeness) in any way, so you can't use this method to wait for an authoritative result from the server. See [bug 3243](https://bugs.rocicorp.dev/issue/3243) for a workaround.
+  The `run()` method does not yet expose [`resultType`](#completeness) in any
+  way, so you can't use this method to wait for an authoritative result from the
+  server. See [bug 3243](https://bugs.rocicorp.dev/issue/3243) for a workaround.
 </Note>

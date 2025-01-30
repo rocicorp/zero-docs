@@ -12,7 +12,7 @@ To deploy a Zero app, you need to:
 
 `zero-cache` can be run in single-node (good for early experimentation) or multi-node (good for production) modes.
 
-In multinode mode, `zero-cache` can be scaled horizontally to handle more users and to support zero-downtime deployments.
+In multi-node mode, `zero-cache` can be scaled horizontally to handle more users and to support zero-downtime deployments.
 
 ## Topology
 
@@ -187,7 +187,7 @@ Run `zero-cache` as two Fargate services (using the same [rocicorp/zero](https:/
 
 - `zero-cache` config:
   - `ZERO_LITESTREAM_BACKUP_URL=s3://{bucketName}/{generation}`
-  - `ZERO_CHANGE_STREAMER_URI=http://{replication-manager}:4849`
+  - `ZERO_CHANGE_STREAMER_URI=http://{replication-manager}`
 - Task count: **N**
 - Loadbalancing to port **4848** with
   - algorithm: `least_outstanding_requests`
@@ -203,7 +203,7 @@ Run `zero-cache` as two Fargate services (using the same [rocicorp/zero](https:/
   - Set `CVR_MAX_CONNS` and `UPSTREAM_MAX_CONNS` appropriately so that the total connections from both running and updating `view-syncers` (e.g. DesiredCount * MaximumPercent) do not exceed your database’s `max_connections`.
 - The `{generation}` component of the `s3://{bucketName}/{generation}` URL is an arbitrary path component that can be modified to reset the replica (e.g. a date, a number, etc.). Setting this to a new path is the multi-node equivalent of deleting the replica file to resync.
   - Note: `zero-cache` does not manage cleanup of old generations.
-- Routing from the `view-syncer` to the `http://{replication-manager}:4849` can be achieved using the following mechanisms (in order of preference):
+- Routing from the `view-syncer` to the `http://{replication-manager}` can be achieved using the following mechanisms (in order of preference):
   - An internal load balancer
   - [Service Connect](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-connect.html)
   - [Service Discovery](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-discovery.html)

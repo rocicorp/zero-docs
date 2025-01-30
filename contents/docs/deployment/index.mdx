@@ -200,7 +200,7 @@ Run `zero-cache` as two Fargate services (using the same [rocicorp/zero](https:/
 - Standard rolling restarts are fine for both services
 - The `view-syncer` task count is static; update the service to change the count.
   - Support for dynamic resizing (i.e. Auto Scaling) is planned
-  - Set `CVR_MAX_CONNS` and `UPSTREAM_MAX_CONNS` appropriately so that the total connections from both running and updating `view-syncers` (e.g. DesiredCount * MaximumPercent) do not exceed your database’s `max_connections`.
+  - Set `ZERO_CVR_MAX_CONNS` and `ZERO_UPSTREAM_MAX_CONNS` appropriately so that the total connections from both running and updating `view-syncers` (e.g. DesiredCount * MaximumPercent) do not exceed your database’s `max_connections`.
 - The `{generation}` component of the `s3://{bucketName}/{generation}` URL is an arbitrary path component that can be modified to reset the replica (e.g. a date, a number, etc.). Setting this to a new path is the multi-node equivalent of deleting the replica file to resync.
   - Note: `zero-cache` does not manage cleanup of old generations.
 - The `replication-manager` serves requests on port **4849**. Routing from the `view-syncer` to the `http://{replication-manager}` can be achieved using the following mechanisms (in order of preference):

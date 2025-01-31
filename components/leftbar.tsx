@@ -34,10 +34,8 @@ export function SheetLeftbar() {
       <SheetContent className="flex flex-col gap-4 px-0" side="left">
         <SheetTitle className="sr-only">Menu</SheetTitle>
         <SheetHeader>
-          <div className="mobile-menu-social-links">
-            <h2 className="mobile-menu-header font-extrabold text-start px-8">
-              Docs
-            </h2>
+          <div>
+            <h2 className="font-extrabold text-start px-8">Docs</h2>
           </div>
         </SheetHeader>
         <ScrollArea className="flex flex-col gap-4">

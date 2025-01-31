@@ -140,22 +140,15 @@ div.inner-nav-container {
   background: transparent url(/images/icons/twitter.svg) no-repeat;
 }
 
-.mobile-menu-social-links {
-  display: flex;
-  gap: 1rem;
-  padding: 0 2rem;
-  align-items: center;
-}
-
-.mobile-menu-social-links h2 {
-  padding: 0;
-}
-
 .mobile-menu-social-links .github-discord-mobile {
   margin-left: auto;
   margin-right: 1.4rem;
   display: flex;
   gap: 0.5rem;
+}
+
+.mobile-sheet {
+  overflow-y: scroll;
 }
 
 .prose {

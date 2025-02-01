@@ -1,0 +1,31 @@
+---
+title: Zero 0.13
+description: Multinode and SST
+---
+
+<Video src="https://d2nzlypqdo5xbb.cloudfront.net/video/release-notes/zero-releasenotes-0.13.mp4"/>
+
+## Install
+
+```bash
+npm install @rocicorp/zero@0.13
+```
+
+## Features
+
+- Multinode deployment for horizontal scalability and zero-downtime deploys ([docs](/docs/deployment#architecture)).
+- SST Deployment Guide ([docs](/docs/deployment#guide-multi-node-on-sstaws)).
+- Plain AWS Deployment Guide ([docs](/docs/deployment#guide-multi-node-on-raw-aws)).
+- Various exports for external libraries
+- Remove build hash from docker version for consistency with npm ([discussion](https://discord.com/channels/830183651022471199/1325165395015110688/1333906735060226161))
+
+## Fixes
+
+- Move heartbeat monitoring to separate path, not port
+- Type instantiation is excessively deep and possibly infinite ([bug](https://bugs.rocicorp.dev/issue/3477)).
+- 20x improvement to `whereExists` performance ([discussion](https://github.com/rocicorp/mono/pull/3629#issuecomment-2621976119))
+
+## Breaking Changes
+
+- Removing the hash from the version is a breaking change if you had scripts relying on that.
+- Moving the heartbeat monitor to a path is a breaking change for deployments that were using that.

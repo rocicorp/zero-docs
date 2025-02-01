@@ -18,11 +18,11 @@ You don't have to know the details of how `zero-cache` works to run it, but it h
 
 <ImageLightbox src="/images/deployment/arch.png" alt="Network Architecture" />
 
-A running `zero-cache` is composed of a single `replication-manager` node and multiple `view-syncers` nodes. It also depends on Postgres, S3, and attached SSD storage.
+A running `zero-cache` is composed of a single `replication-manager` node and multiple `view-syncer` nodes. It also depends on Postgres, S3, and attached SSD storage.
 
 **Upstream:** Your application's Postgres database.
 
-**Change DB:** A Postgres DB uses by Zero to store a recent subset of the Postgres replication log.
+**Change DB:** A Postgres DB used by Zero to store a recent subset of the Postgres replication log.
 
 **CVR DB:** A Postgres DB used by Zero to store Client View Records (CVRs). CVRs track the state of each synced client.
 
@@ -38,7 +38,7 @@ We allow separate DBs so that they can be scaled and tuned independently if desi
 
 **Replication Manager:** Serves as the single consumer of the Postgres replication log. Stores a recent subset of the Postgres changelog in the *Change DB* for catching up ViewSyncers when they initialize. Also maintains the canonical replica, which ViewSyncers initialize from.
 
-**View Syncers:** Handle WebSocket connections from clients and run ZQL queries. Updates CVR DB with the latest state of each client as queries run. Uses CVR DB on client connection to compute initial diffto catch clients up.
+**View Syncers:** Handle WebSocket connections from clients and run ZQL queries. Updates CVR DB with the latest state of each client as queries run. Uses CVR DB on client connection to compute the initial diff to catch clients up.
 
 ## Topology
 
@@ -49,7 +49,7 @@ When that happens you can deploy `zero-cache` geographically distributed and it 
 
 ## Updating
 
-When run with multiple View Syncer nodes, `zero-cache` supports rolling, downtime-free updates. A new Replication Manager starts up and connections drain from the old View Syncers. When all old View Syncers are gone, the old Replication Manager is shut down.
+When run with multiple View Syncer nodes, `zero-cache` supports rolling, downtime-free updates. A new Replication Manager takes over the replication stream from the old Replication Manager, and connections from the old View Syncers are gradually drained and absorbed by active View Syncers.
 
 ## Configuration
 
@@ -192,6 +192,9 @@ export default $config({
         ],
       },
       transform: {
+        loadBalancer: {
+          idleTimeout: 3600,
+        },
         target: {
           healthCheck: {
             enabled: true,
@@ -268,12 +271,9 @@ export default $config({
           stickiness: {
             enabled: true,
             type: "lb_cookie",
+            cookieDuration: 120,
           },
           loadBalancingAlgorithmType: "least_outstanding_requests",
-        },
-        autoScalingTarget: {
-          minCapacity: 1,
-          maxCapacity: 10,
         },
       },
     });

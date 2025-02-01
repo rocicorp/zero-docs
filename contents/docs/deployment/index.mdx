@@ -81,8 +81,6 @@ Then overwite `/sst.config.ts` with the following code:
 /* eslint-disable */
 /// <reference path="./.sst/platform/config.d.ts" />
 import { readFileSync } from "fs";
-// Load .env file
-require("dotenv").config();
 
 export default $config({
   app(input) {
@@ -139,35 +137,29 @@ export default $config({
       },
     });
 
+    const conn = new sst.Secret("PostgresConnectionString");
+    const zeroAuthSecret = new sst.Secret("ZeroAuthSecret");
+
     // Common environment variables
     const commonEnv = {
-      AWS_REGION: process.env.AWS_REGION!,
-      ZERO_UPSTREAM_DB: process.env.ZERO_UPSTREAM_DB!,
-      ZERO_CVR_DB: process.env.ZERO_CVR_DB!,
-      ZERO_CHANGE_DB: process.env.ZERO_CHANGE_DB!,
-      ZERO_AUTH_SECRET: process.env.ZERO_AUTH_SECRET!,
-      AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID!,
-      AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY!,
+      ZERO_UPSTREAM_DB: conn.value,
+      ZERO_CVR_DB: conn.value,
+      ZERO_CHANGE_DB: conn.value,
       ZERO_SCHEMA_JSON: schemaJson,
-      ZERO_LOG_FORMAT: "json",
+      ZERO_AUTH_SECRET: zeroAuthSecret.value,
       ZERO_REPLICA_FILE: "sync-replica.db",
       ZERO_LITESTREAM_BACKUP_URL: $interpolate`s3://${replicationBucket.name}/backup`,
-      ZERO_IMAGE_URL: process.env.ZERO_IMAGE_URL!,
-      ZERO_CVR_MAX_CONNS: process.env.ZERO_CVR_MAX_CONNS!,
-      ZERO_UPSTREAM_MAX_CONNS: process.env.ZERO_UPSTREAM_MAX_CONNS!,
+      ZERO_IMAGE_URL: "rocicorp/zero:canary",
+      ZERO_CVR_MAX_CONNS: "10",
+      ZERO_UPSTREAM_MAX_CONNS: "10",
     };
-
-    for (const key in commonEnv) {
-      if (!commonEnv[key]) {
-        throw new Error(`Missing required environment variable: ${key}`);
-      }
-    }
 
     // Replication Manager Service
     const replicationManager = cluster.addService(`replication-manager`, {
       cpu: "2 vCPU",
       memory: "8 GB",
       image: commonEnv.ZERO_IMAGE_URL,
+      link: [replicationBucket],
       health: {
         command: ["CMD-SHELL", "curl -f http://localhost:4849/ || exit 1"],
         interval: "5 seconds",
@@ -213,6 +205,7 @@ export default $config({
       cpu: "2 vCPU",
       memory: "8 GB",
       image: commonEnv.ZERO_IMAGE_URL,
+      link: [replicationBucket],
       health: {
         command: ["CMD-SHELL", "curl -f http://localhost:4848/ || exit 1"],
         interval: "5 seconds",
@@ -222,8 +215,6 @@ export default $config({
       environment: {
         ...commonEnv,
         ZERO_CHANGE_STREAMER_URI: replicationManager.url,
-        ZERO_UPSTREAM_MAX_CONNS: "15",
-        ZERO_CVR_MAX_CONNS: "160",
       },
       logging: {
         retention: "1 month",
@@ -281,31 +272,15 @@ export default $config({
 });
 ```
 
-### Setup Environment Variables
+### Set SST Secrets
 
-Add these variables to your environment, for example by editing you `.env` file. Fill in the empty values.
+Configure SST with your Postgres connection string and [Zero Auth Secret](/docs/auth#server).
+
+Note that if you use JWT-based auth, you'll need to change the environment variables in the `sst.config.ts` file above, then set a different secret here.
 
 ```bash
-# Your AWS account ID. Should be a long number.
-AWS_ACCOUNT_ID=""
-
-# Access key and secret access key from your ~/.aws/credentials.
-# Needed by Litestream.
-AWS_ACCESS_KEY_ID=""
-AWS_SECRET_ACCESS_KEY=""
-
-# Connection strings to Postgres databases.
-ZERO_UPSTREAM_DB=""
-ZERO_CVR_DB=""
-ZERO_CHANGE_DB=""
-
-# Customize if desired.
-# Be sure to use an AWS region near your database.
-AWS_REGION="us-east-1"
-ZERO_IMAGE_URL="rocicorp/zero:canary"
-ZERO_REPLICA_FILE="/tmp/zstart_replica.db"
-ZERO_UPSTREAM_MAX_CONNS="10"
-ZERO_CVR_MAX_CONNS="10"
+npx sst secret set PostgresConnectionString "YOUR-PG-CONN-STRING"
+npx sst secret set ZeroAuthSecret "YOUR-ZERO-AUTH-SECRET"
 ```
 
 ### Deploy

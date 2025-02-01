@@ -5,14 +5,40 @@ title: Deploying Zero
 To deploy a Zero app, you need to:
 
 1. Deploy your backend database. Most standard Postgres hosts [work with Zero](connecting-to-postgres).
-1. Deploy `zero-cache`. We provide a [Docker image](https://hub.docker.com/r/rocicorp/zero) that should work with any Docker host.
+1. Deploy `zero-cache`. We provide a [Docker image](https://hub.docker.com/r/rocicorp/zero) that can work with most Docker hosts.
 1. Deploy your frontend. You can use any hosting service like Vercel or Netlify.
 
-## Scalability
+This page described how to deploy `zero-cache`.
 
-`zero-cache` can be run in single-node (good for early experimentation) or multi-node (good for production) modes.
+## Architecture
 
-In multi-node mode, `zero-cache` can be scaled horizontally to handle more users and to support zero-downtime deployments.
+`zero-cache` is a horizontally scalable, stateful web service that maintains a SQLite replica of your Postgres database. It uses this replica to sync ZQL queries to clients over WebSockets.
+
+You don't have to know the details of how `zero-cache` works to run it, but it helps to know the basic structure.
+
+<ImageLightbox src="/images/deployment/arch.png" alt="Network Architecture" />
+
+A running `zero-cache` is composed of a single `replication-manager` node and multiple `view-syncers` nodes. It also depends on Postgres, S3, and attached SSD storage.
+
+**Upstream:** Your application's Postgres database.
+
+**Change DB:** A Postgres DB uses by Zero to store a recent subset of the Postgres replication log.
+
+**CVR DB:** A Postgres DB used by Zero to store Client View Records (CVRs). CVRs track the state of each synced client.
+
+<Note type="note">
+The Change DB and CVR DBs can be the same physical Postgres database as the Upstream DB. Zero stores their tables in separate Postgres schemas so they won't conflict with your application data.
+
+We allow separate DBs so that they can be scaled and tuned independently if desired.
+</Note>
+
+**S3:** Stores a canonical copy of the SQLite replica.
+
+**File System:** Used by both node types to store local copies of the SQLite replica. Can be ephemeral – Zero will re-initialize from S3 on startup. Recommended to use attached SSD storage for best performance.
+
+**Replication Manager:** Serves as the single consumer of the Postgres replication log. Stores a recent subset of the Postgres changelog in the *Change DB* for catching up ViewSyncers when they initialize. Also maintains the canonical replica, which ViewSyncers initialize from.
+
+**View Syncers:** Handle WebSocket connections from clients and run ZQL queries. Updates CVR DB with the latest state of each client as queries run. Uses CVR DB on client connection to compute initial diffto catch clients up.
 
 ## Topology
 
@@ -21,19 +47,278 @@ You should deploy `zero-cache` close to your database because the mutation imple
 In the future, mutations will [move out of `zero-cache`](https://bugs.rocicorp.dev/issue/3045#comment-5a3BKxP8RfJ9njHLgx5e3).
 When that happens you can deploy `zero-cache` geographically distributed and it will double as a read-replica.
 
+## Updating
+
+When run with multiple View Syncer nodes, `zero-cache` supports rolling, downtime-free updates. A new Replication Manager starts up and connections drain from the old View Syncers. When all old View Syncers are gone, the old Replication Manager is shut down.
+
 ## Configuration
 
 The `zero-cache` image is configured via environment variables. See [zero-cache Config](./zero-cache-config) for available options.
 
-## Schema Deployment
+## Guide: Multi-Node on SST+AWS
 
-`zero-cache` needs a copy of your [`zero-schema.json`](./zero-schema) because it is used to enforce permissions.
+[SST](https://sst.dev/) is our recommended way to deploy Zero.
 
-You can deploy it as a plain file, using the `ZERO_SCHEMA_FILE` env var. For convenience, we also support putting the schema string itself directly in an env var, using `ZERO_SCHEMA_JSON`.
+### Setup Upstream
+
+Create an upstream Postgres database server somewhere. See [Connecting to Postgres](connecting-to-postgres) for details. Ensure the upstream, change, and cvr databases are created.
+
+### Setup AWS
+
+See [AWS setup guide](https://v2.sst.dev/setting-up-aws). The end result should be that you have a dev profile and SSO session defined in your `~/.aws/config` file.
+
+### Initialize SST
+
+```bash
+npx sst init --yes
+```
+
+Choose "aws" for where to deploy.
+
+Then overwite `/sst.config.ts` with the following code:
+
+```ts
+/* eslint-disable */
+/// <reference path="./.sst/platform/config.d.ts" />
+import { readFileSync } from "fs";
+// Load .env file
+require("dotenv").config();
+
+export default $config({
+  app(input) {
+    return {
+      name: "hello-zero",
+      removal: input?.stage === "production" ? "retain" : "remove",
+      home: "aws",
+      region: process.env.AWS_REGION || "us-east-1",
+    };
+  },
+  async run() {
+    const loadSchemaJson = () => {
+      if (process.env.ZERO_SCHEMA_JSON) {
+        return process.env.ZERO_SCHEMA_JSON;
+      }
+
+      try {
+        const schema = readFileSync("zero-schema.json", "utf8");
+        // Parse and stringify to ensure single line
+        return JSON.stringify(JSON.parse(schema));
+      } catch (error) {
+        const e = error as Error;
+        console.error(`Failed to read schema file: ${e.message}`);
+        throw new Error(
+          "Schema must be provided via ZERO_SCHEMA_JSON env var or zero-schema.json file"
+        );
+      }
+    };
+
+    const schemaJson = loadSchemaJson();
+
+    // S3 Bucket
+    const replicationBucket = new sst.aws.Bucket(`replication-bucket`, {
+      public: false,
+    });
+
+    // VPC Configuration
+    const vpc = new sst.aws.Vpc(`vpc`, {
+      az: 2,
+    });
+
+    // ECS Cluster
+    const cluster = new sst.aws.Cluster(`cluster`, {
+      vpc,
+      transform: {
+        cluster: {
+          settings: [
+            {
+              name: "containerInsights",
+              value: "enhanced",
+            },
+          ],
+        },
+      },
+    });
+
+    // Common environment variables
+    const commonEnv = {
+      AWS_REGION: process.env.AWS_REGION!,
+      ZERO_UPSTREAM_DB: process.env.ZERO_UPSTREAM_DB!,
+      ZERO_CVR_DB: process.env.ZERO_CVR_DB!,
+      ZERO_CHANGE_DB: process.env.ZERO_CHANGE_DB!,
+      ZERO_AUTH_SECRET: process.env.ZERO_AUTH_SECRET!,
+      AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID!,
+      AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY!,
+      ZERO_SCHEMA_JSON: schemaJson,
+      ZERO_LOG_FORMAT: "json",
+      ZERO_REPLICA_FILE: "sync-replica.db",
+      ZERO_LITESTREAM_BACKUP_URL: $interpolate`s3://${replicationBucket.name}/backup`,
+      ZERO_IMAGE_URL: process.env.ZERO_IMAGE_URL!,
+      ZERO_CVR_MAX_CONNS: process.env.ZERO_CVR_MAX_CONNS!,
+      ZERO_UPSTREAM_MAX_CONNS: process.env.ZERO_UPSTREAM_MAX_CONNS!,
+    };
+
+    for (const key in commonEnv) {
+      if (!commonEnv[key]) {
+        throw new Error(`Missing required environment variable: ${key}`);
+      }
+    }
+
+    // Replication Manager Service
+    const replicationManager = cluster.addService(`replication-manager`, {
+      cpu: "2 vCPU",
+      memory: "8 GB",
+      image: commonEnv.ZERO_IMAGE_URL,
+      health: {
+        command: ["CMD-SHELL", "curl -f http://localhost:4849/ || exit 1"],
+        interval: "5 seconds",
+        retries: 3,
+        startPeriod: "300 seconds",
+      },
+      environment: {
+        ...commonEnv,
+        ZERO_CHANGE_MAX_CONNS: "3",
+        ZERO_NUM_SYNC_WORKERS: "0",
+      },
+      logging: {
+        retention: "1 month",
+      },
+      loadBalancer: {
+        public: false,
+        ports: [
+          {
+            listen: "80/http",
+            forward: "4849/http",
+          },
+        ],
+      },
+      transform: {
+        target: {
+          healthCheck: {
+            enabled: true,
+            path: "/keepalive",
+            protocol: "HTTP",
+            interval: 5,
+            healthyThreshold: 2,
+            timeout: 3,
+          },
+        },
+      },
+    });
+
+    // View Syncer Service
+    cluster.addService(`view-syncer`, {
+      cpu: "2 vCPU",
+      memory: "8 GB",
+      image: commonEnv.ZERO_IMAGE_URL,
+      health: {
+        command: ["CMD-SHELL", "curl -f http://localhost:4848/ || exit 1"],
+        interval: "5 seconds",
+        retries: 3,
+        startPeriod: "300 seconds",
+      },
+      environment: {
+        ...commonEnv,
+        ZERO_CHANGE_STREAMER_URI: replicationManager.url,
+        ZERO_UPSTREAM_MAX_CONNS: "15",
+        ZERO_CVR_MAX_CONNS: "160",
+      },
+      logging: {
+        retention: "1 month",
+      },
+      loadBalancer: {
+        public: true,
+        //only set domain if both are provided
+        ...(process.env.DOMAIN_NAME && process.env.DOMAIN_CERT
+          ? {
+              domain: {
+                name: process.env.DOMAIN_NAME,
+                dns: false,
+                cert: process.env.DOMAIN_CERT,
+              },
+              ports: [
+                {
+                  listen: "80/http",
+                  forward: "4848/http",
+                },
+                {
+                  listen: "443/https",
+                  forward: "4848/http",
+                },
+              ],
+            }
+          : {
+              ports: [
+                {
+                  listen: "80/http",
+                  forward: "4848/http",
+                },
+              ],
+            }),
+      },
+      transform: {
+        target: {
+          healthCheck: {
+            enabled: true,
+            path: "/keepalive",
+            protocol: "HTTP",
+            interval: 5,
+            healthyThreshold: 2,
+            timeout: 3,
+          },
+          stickiness: {
+            enabled: true,
+            type: "lb_cookie",
+          },
+          loadBalancingAlgorithmType: "least_outstanding_requests",
+        },
+        autoScalingTarget: {
+          minCapacity: 1,
+          maxCapacity: 10,
+        },
+      },
+    });
+  },
+});
+```
+
+### Setup Environment Variables
+
+Add these variables to your environment, for example by editing you `.env` file. Fill in the empty values.
+
+```bash
+# Your AWS account ID. Should be a long number.
+AWS_ACCOUNT_ID=""
+
+# Access key and secret access key from your ~/.aws/credentials.
+# Needed by Litestream.
+AWS_ACCESS_KEY_ID=""
+AWS_SECRET_ACCESS_KEY=""
+
+# Connection strings to Postgres databases.
+ZERO_UPSTREAM_DB=""
+ZERO_CVR_DB=""
+ZERO_CHANGE_DB=""
+
+# Customize if desired.
+# Be sure to use an AWS region near your database.
+AWS_REGION="us-east-1"
+ZERO_IMAGE_URL="rocicorp/zero:canary"
+ZERO_REPLICA_FILE="/tmp/zstart_replica.db"
+ZERO_UPSTREAM_MAX_CONNS="10"
+ZERO_CVR_MAX_CONNS="10"
+```
+
+### Deploy
+
+```bash
+npx sst deploy
+```
+
+This takes about 5-10 minutes.
+
+If successful, you should see a URL for the `view-syncer` service. This is the URL to pass to the `server` parameter of the `Zero` constructor on the client.
 
 ## Guide: Single-Node on Fly.io
-
-Tools are coming soon
 
 Let's deploy the [Quickstart](quickstart) app to [Fly.io](https://fly.io). We'll use Fly.io for both the database and `zero-cache`.
 
@@ -166,7 +451,7 @@ Explaining the arguments above --
 - `ZERO_AUTH_SECRET` - The secret to create and verify JWTs. This is the same secret that was used when deploying zero-cache to fly.
 - `VITE_PUBLIC_SERVER` - The URL the frontend will call to talk to the zero-cache server. This is the URL of the fly app.
 
-## Guide: Multi-Node on AWS
+## Guide: Multi-Node on Raw AWS
 
 ### S3 Bucket
 

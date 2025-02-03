@@ -87,6 +87,7 @@ div.inner-nav-container {
 
 .inner-nav-items {
   width: 100%;
+  justify-content: space-between;
 }
 
 .navbar-right {

@@ -2,6 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import Anchor from './anchor';
 import {SheetLeftbar} from './leftbar';
+import Search from './search';
 import {page_routes} from '@/lib/routes-config';
 import {buttonVariants} from './ui/button';
 
@@ -33,6 +34,7 @@ export function Navbar() {
                 </Anchor>
               );
             })} */}
+            <Search />
           </div>
         </div>
       </div>

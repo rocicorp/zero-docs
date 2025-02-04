@@ -148,6 +148,12 @@ export default $config({
       memory: "8 GB",
       image: commonEnv.ZERO_IMAGE_URL,
       link: [replicationBucket],
+      health: {
+        command: ["CMD-SHELL", "curl -f http://localhost:4849/ || exit 1"],
+        interval: "5 seconds",
+        retries: 3,
+        startPeriod: "300 seconds",
+      },
       environment: {
         ...commonEnv,
         ZERO_CHANGE_MAX_CONNS: "3",
@@ -162,6 +168,21 @@ export default $config({
           },
         ],
       },
+      transform: {
+        loadBalancer: {
+          idleTimeout: 3600,
+        },
+        target: {
+          healthCheck: {
+            enabled: true,
+            path: "/keepalive",
+            protocol: "HTTP",
+            interval: 5,
+            healthyThreshold: 2,
+            timeout: 3,
+          },
+        },
+      },
     });
 
     // View Syncer Service
@@ -170,6 +191,12 @@ export default $config({
       memory: "8 GB",
       image: commonEnv.ZERO_IMAGE_URL,
       link: [replicationBucket],
+      health: {
+        command: ["CMD-SHELL", "curl -f http://localhost:4848/ || exit 1"],
+        interval: "5 seconds",
+        retries: 3,
+        startPeriod: "300 seconds",
+      },
       environment: {
         ...commonEnv,
         ZERO_CHANGE_STREAMER_URI: replicationManager.url,
@@ -183,6 +210,14 @@ export default $config({
       },
       transform: {
         target: {
+          healthCheck: {
+            enabled: true,
+            path: "/keepalive",
+            protocol: "HTTP",
+            interval: 5,
+            healthyThreshold: 2,
+            timeout: 3,
+          },
           stickiness: {
             enabled: true,
             type: "lb_cookie",

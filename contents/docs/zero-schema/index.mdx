@@ -53,9 +53,9 @@ Column types are defined with the `boolean()`, `number()`, `string()`, `json()`,
 Use `from()` to map a TypeScript table or column name to a different database name:
 
 ```ts
-const user = table("user")
+const userPref = table("userPref")
   // Map TS "userPref" to DB name "user_pref"
-  .from("userPref")
+  .from("user_pref")
   .columns({
     id: string(),
     // Map TS "orgID" to DB name "org_id"

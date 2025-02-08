@@ -1,0 +1,28 @@
+---
+title: Zero 0.14
+description: Name Mapping and Multiple Schemas
+---
+
+<Video src="https://d2nzlypqdo5xbb.cloudfront.net/video/release-notes/zero-release-0.14-call-me-al-v6.mp4"/>
+
+## Install
+
+```bash
+npm install @rocicorp/zero@0.14
+```
+
+## Features
+
+- Use `from()` to map column or tables to a different name ([docs](../zero-schema#name-mapping)).
+- Sync from muliple Postgres schemas ([docs](../zero-schema#multiple-schemas))
+
+## Fixes
+
+- `useQuery` not working when `server` unset ([bug](https://bugs.rocicorp.dev/issue/3497))
+- Error: "single output already exists" in hello-zero-solid ([bug](https://bugs.rocicorp.dev/issue/3488))
+- `Row` helper doesn't work with query having `one()` ([bug](https://bugs.rocicorp.dev/issue/3503))
+- Partitioned Postgres tables not replicating
+
+## Breaking Changes
+
+None.

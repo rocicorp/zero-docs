@@ -48,6 +48,31 @@ Column types are defined with the `boolean()`, `number()`, `string()`, `json()`,
     https://bugs.rocicorp.dev/issue/3112.
 </Note>
 
+### Name Mapping
+
+Use `from()` to map a TypeScript table or column name to a different database name:
+
+```ts
+const user = table("user")
+  // Map TS "userPref" to DB name "user_pref"
+  .from("userPref")
+  .columns({
+    id: string(),
+    // Map TS "orgID" to DB name "org_id"
+    orgID: string().from("org_id"),
+  });
+```
+
+### Multiple Schemas
+
+You can also use `from()` to access other Postgres schemas:
+
+```ts
+// Sync the "event" table from the "analytics" schema.
+const event = table("event")
+    .from("analytics.event");
+```
+
 ### Optional Columns
 
 Columns can be marked _optional_. This corresponds to the SQL concept `nullable`.

@@ -81,7 +81,9 @@ const definePermissions<AuthData, Schema>(schema, () => {
 
   return {
     issue: {
-      select: [allowIfIssueCreator],
+      row: {
+        select: [allowIfIssueCreator],
+      },
     },
   };
 });
@@ -106,7 +108,9 @@ const definePermissions<AuthData, Schema>(schema, () => {
 
   return {
     user: {
-      insert: [allowIfNonAdmin],
+      row: {
+        insert: [allowIfNonAdmin],
+      },
     },
   };
 });
@@ -133,8 +137,12 @@ const definePermissions<AuthData, Schema>(schema, () => {
 
   return {
     issue: {
-      preMutation: [allowIfIssueCreator],
-      // postMutation defaults to _allow_.
+      row: {
+        update: {
+          preMutation: [allowIfIssueCreator],
+          // postMutation defaults to _allow_.
+        },
+      },
     },
   };
 });
@@ -151,8 +159,12 @@ const definePermissions<AuthData, Schema>(schema, () => {
 
   return {
     issue: {
-      // preMutation defaults to _allow_.
-      postMutation: [allowIfIssueCreator],
+      row: {
+        update: {
+          // preMutation defaults to _allow_.
+          postMutation: [allowIfIssueCreator],
+        },
+      },
     },
   };
 });

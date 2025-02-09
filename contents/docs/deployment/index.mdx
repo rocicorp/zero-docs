@@ -309,13 +309,14 @@ Create a `fly.toml` file. We'll copy the `zero-schema.json` into the toml file t
 
 ```bash
 CONNECTION_STRING="postgres://postgres:$PG_PASSWORD@$PG_APP_NAME.flycast:5432"
+ZERO_VERSION=$(npm list @rocicorp/zero | grep @rocicorp/zero | cut -f 3 -d @)
 
 cat <<EOF > fly.toml
 app = "$CACHE_APP_NAME"
 primary_region = 'lax'
 
 [build]
-image = "registry.hub.docker.com/rocicorp/zero:latest"
+image = "registry.hub.docker.com/rocicorp/zero:${ZERO_VERSION}"
 
 [http_service]
 internal_port = 4848

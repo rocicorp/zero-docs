@@ -411,6 +411,7 @@ Run `zero-cache` as two Fargate services (using the same [rocicorp/zero](https:/
 - Task count: **N**
 - Loadbalancing to port **4848** with
   - algorithm: `least_outstanding_requests`
+  - health check path: `/keepalive`
   - health check interval: 5 seconds
   - stickiness: `lb_cookie`
   - stickiness duration: 3 minutes

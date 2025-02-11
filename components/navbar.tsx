@@ -2,6 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import Anchor from './anchor';
 import {SheetLeftbar} from './leftbar';
+import Search from './search';
 import {page_routes} from '@/lib/routes-config';
 import {buttonVariants} from './ui/button';
 
@@ -19,8 +20,7 @@ export function Navbar() {
         <SheetLeftbar />
         <div className="inner-nav-items flex items-center gap-9">
           <Logo />
-          <div className="md:flex hidden items-center gap-5 text-sm font-medium text-muted-foreground">
-            {/* {NAVLINKS.map((item) => {
+          {/* {NAVLINKS.map((item) => {
               return (
                 <Anchor
                   key={item.title + item.href}
@@ -33,7 +33,7 @@ export function Navbar() {
                 </Anchor>
               );
             })} */}
-          </div>
+          <Search />
         </div>
       </div>
     </nav>

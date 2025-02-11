@@ -20,8 +20,7 @@ export function Navbar() {
         <SheetLeftbar />
         <div className="inner-nav-items flex items-center gap-9">
           <Logo />
-          <div className="md:flex hidden items-center gap-5 text-sm font-medium text-muted-foreground">
-            {/* {NAVLINKS.map((item) => {
+          {/* {NAVLINKS.map((item) => {
               return (
                 <Anchor
                   key={item.title + item.href}
@@ -34,8 +33,7 @@ export function Navbar() {
                 </Anchor>
               );
             })} */}
-            <Search />
-          </div>
+          <Search />
         </div>
       </div>
     </nav>

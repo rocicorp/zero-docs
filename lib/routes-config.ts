@@ -60,6 +60,7 @@ export const ROUTES: EachRoute[] = [
       {title: 'Roadmap', href: '/roadmap'},
       {title: 'Reporting Bugs', href: '/reporting-bugs'},
       {title: 'Release Notes', href: '/release-notes'},
+      {title: 'Open Source', href: '/open-source'},
     ],
   },
 ];

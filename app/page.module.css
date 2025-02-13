@@ -158,6 +158,11 @@
   transition: opacity 0.1s;
 }
 
+.navLinks {
+  display: flex;
+  gap: 1rem;
+}
+
 .rociLogo:hover {
   opacity: 1;
 }
@@ -180,6 +185,18 @@ p.footerText {
   .main ul,
   .main ol {
     padding-left: 1.2rem;
+  }
+}
+
+@media (max-width: 486px) {
+  .mainHeader {
+    flex-direction: column;
+  }
+  .logo {
+    margin: 0 auto 2rem;
+  }
+  .navLinks {
+    margin: 0 auto;
   }
 }
 

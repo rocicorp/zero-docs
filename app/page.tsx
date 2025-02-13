@@ -48,14 +48,25 @@ export default function Home() {
           height={32}
         />
 
-        <Button
-          variant="outline"
-          className={styles.primaryButton}
-          size="default"
-          asChild
-        >
-          <a href="/docs/introduction">Docs</a>
-        </Button>
+        <div className={styles.navLinks}>
+          <Button
+            variant="outline"
+            className={styles.primaryButton}
+            size="default"
+            asChild
+          >
+            <a href="https://github.com/rocicorp/mono">GitHub</a>
+          </Button>
+
+          <Button
+            variant="outline"
+            className={styles.primaryButton}
+            size="default"
+            asChild
+          >
+            <a href="/docs/introduction">Docs</a>
+          </Button>
+        </div>
       </div>
 
       {/* Intro */}
@@ -69,9 +80,9 @@ export default function Home() {
       </p>
       <p>It&apos;s time for a rethink.</p>
       <p>
-        We&apos;re building a general-purpose sync engine for the web. You put
-        Zero in front of your database or web service, and we distribute your
-        backend all the way to main thread of the UI.
+        We&apos;re building an open-source, general-purpose sync engine for the
+        web. You put Zero in front of your database or web service, and we
+        distribute your backend all the way to main thread of the UI.
       </p>
 
       {/* Zero Diagram */}
@@ -83,14 +94,14 @@ export default function Home() {
       />
 
       <p>
-        You get a client-side API that <em>looks</em> like an embedded db, but to which
-        you can issue arbitrary <em>hybrid queries</em> that span the entire
-        database, including the server.
+        You get a client-side API that <em>looks</em> like an embedded db, but
+        to which you can issue arbitrary <em>hybrid queries</em> that span the
+        entire database, including the server.
       </p>
       <p>
-        Behind the scenes, we synchronize queries results continuously
-        to a client-side persistent cache. This cache is used automatically for future
-        queries whenever possible.
+        Behind the scenes, we synchronize queries results continuously to a
+        client-side persistent cache. This cache is used automatically for
+        future queries whenever possible.
       </p>
 
       {/* Code Block */}
@@ -123,25 +134,30 @@ export default function Home() {
       </ul>
 
       <p>
-        Where Zero really shines is complex, highly-interactive
-        “local-first” style applications like Linear and Superhuman. With Zero,
-        these apps can be built in a fraction of the time it would take to build
-        even an old-fashioned server-rendered web app.
+        Where Zero really shines is complex, highly-interactive “local-first”
+        style applications like Linear and Superhuman. With Zero, these apps can
+        be built in a fraction of the time it would take to build even an
+        old-fashioned server-rendered web app.
       </p>
       <p>
-        Zero is currently in public alpha. It's got a few rough edges, and you have to deploy it yourself, but it's already remarkably fun. We&apos;re using it ourselves for Zero's <a href="https://bugs.rocicorp.dev/">official bug tracker</a> and we find it much more productive than the alternatives.
+        Zero is currently in public alpha. It's got a few rough edges, and you
+        have to deploy it yourself, but it's already remarkably fun. We&apos;re
+        using it ourselves for Zero's{' '}
+        <a href="https://bugs.rocicorp.dev/">official bug tracker</a> and we
+        find it much more productive than the alternatives.
       </p>
       <p>
-        Ready to start? You can have your first app in production in about 20 minutes.
+        Ready to start? You can have your first app in production in about 20
+        minutes.
       </p>
-      <br/>
+      <br />
       <p className={styles.ctaContainer}>
         <Button
-            variant="outline"
-            className={styles.primaryButton}
-            size="default"
-            asChild
-          >
+          variant="outline"
+          className={styles.primaryButton}
+          size="default"
+          asChild
+        >
           <a href="/docs/introduction">Get Started Now</a>
         </Button>
       </p>

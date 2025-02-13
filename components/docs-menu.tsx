@@ -24,7 +24,7 @@ export default function DocsMenu({isSheet = false}) {
         </p>
         <div className="social-links">
           <Link
-            href="https://github.com/rocicorp/hello-zero"
+            href="https://github.com/rocicorp/mono"
             className="link-github"
           ></Link>
           <Link

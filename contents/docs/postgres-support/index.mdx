@@ -8,7 +8,8 @@ Postgres has a massive featureset, of which Zero supports a growings subset.
 
 - Tables are synced
 - Views are not synced
-- Generated columns are not synced (with the exception 
+- `identity` generated columns are synced
+- All other generated columns are not synced
 - Indexes aren’t _synced_ per-se but we do implicitly add indexes to the replica that match the upstream indexes. In the future this will be customizable.
 
 ## Column Types

@@ -1,0 +1,47 @@
+---
+title: Zero 0.15
+description: Live Permission Updates
+---
+
+<Video src="https://d2nzlypqdo5xbb.cloudfront.net/video/release-notes/roci-releasenotes-0.15-be-sweet-v5.mp4"/>
+
+## Install
+
+```bash
+npm install @rocicorp/zero@0.15
+```
+
+## Upgrade Guide
+
+This release changes the way that permissions are deployed. Instead of using an environment variable, permissions are now stored in the upstream database. This allows live permission updates, without restarting the server. It also solves problems with max env var size that users were seeing.
+
+This release also flips the default permission from `allow` to `deny` for all rules.
+
+To upgrade your app:
+
+1. See the changes to [hello-zero](https://github.com/rocicorp/hello-zero/pull/26) or [hello-zero-solid](https://github.com/rocicorp/hello-zero-solid/pull/14) for how to update your permissions.
+2. Remove the `ZERO_SCHEMA_JSON` and `ZERO_SCHEMA_FILE` environment variables from your setup. They aren't used anymore.
+3. Use [`npx zero-deploy-permissions`](/docs/permissions#permission-deployment) to deploy permissions when necessary. You can hook this up to your CI to automate it. See the [zbugs implementation](https://github.com/rocicorp/mono/blob/86ab73122a0532e4ec516badc1d8fb82b3465b49/prod/sst/sst.config.ts#L178) as an example.
+
+## Features
+
+- Live-updating permissions ([docs](/docs/permissions#permission-deployment)).
+- Permissions now default to **deny** rather than **allow** ([docs](/docs/permissions#access-is-denied-by-default)).
+
+## Fixes
+
+- Multiple `whereExists` in same query not working ([PR](https://github.com/rocicorp/mono/pull/3746))
+- Allow overlapped mutators ([bug](https://bugs.rocicorp.dev/issue/3529))
+- "Immutable type too deep" error ([PR](https://github.com/rocicorp/mono/pull/3758))
+- Log server version at startup ([PR](https://github.com/rocicorp/mono/pull/3737))
+- Eliminate quadratic CVR writes ([PR](https://github.com/rocicorp/mono/pull/3736))
+- Handle `numeric` in the replication stream ([PR](https://github.com/rocicorp/mono/pull/3750))
+- Make the auto-reset required error more prominent ([PR](https://github.com/rocicorp/mono/pull/3794))
+- Add `"type":"module"` recommendation when schema load fails ([PR](https://github.com/rocicorp/mono/pull/3797))
+- Throw error if multiple auth options set ([PR](https://github.com/rocicorp/mono/pull/3807))
+- Handle NULL characters in JSON columns ([PR](https://github.com/rocicorp/mono/pull/3810))
+
+## Breaking Changes
+
+- Making permissions deny by default breaks existing apps. To fix add `ANYONE_CAN` or other appropriate permissions for your tables. See [docs](/docs/permissions#access-is-denied-by-default).
+- The `ZERO_SCHEMA_JSON` and `ZERO_SCHEMA_FILE` environment variables are no longer used. Remove them from your setup and use [`npx zero-deploy-permissions`](/docs/permissions#permission-deployment) instead.

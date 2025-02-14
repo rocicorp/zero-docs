@@ -8,23 +8,8 @@ Postgres has a massive featureset, of which Zero supports a growings subset.
 
 - Tables are synced
 - Views are not synced
-- Generated columns are not synced
+- Generated columns are not synced (with the exception 
 - Indexes aren’t _synced_ per-se but we do implicitly add indexes to the replica that match the upstream indexes. In the future this will be customizable.
-
-## Column Names
-
-Currently Zero syncs column names exactly as they appear in Postgres. There is no ability to map column names from i.e., `FULL_NAME` in Postgres to `fullName` in TypeScript.
-
-<Note type="warning">
-  Another important caveat to be aware of is that in Postgres, column names are
-  by default implicitly folded to lowercase. So if you do `CREATE TABLE person
-  (fullName TEXT)` the actual column name in the database will end up as
-  `fullname`. To avoid this terrible behavior you need to wrap your column names
-  in double quotes when you define them, like `CREATE TABLE person ("fullName"
-  TEXT)`.
-</Note>
-
-We will add column name mapping to Zero soon. See https://bugs.rocicorp.dev/issue/3106.
 
 ## Column Types
 

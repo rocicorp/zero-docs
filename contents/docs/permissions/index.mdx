@@ -35,34 +35,85 @@ export const permissions = definePermissions<AuthData, Schema>(schema, () => {
 
 `definePermission` returns a _policy_ object for each table in the schema. Each policy defines a _ruleset_ for the _operations_ that are possible on a table: `select`, `insert`, `update`, and `delete`.
 
-<Note type="danger">
-If a policy is not defined for a table or operation, Zero currently ***allows*** the operation.
+## Access is Denied by Default
 
-This is not a very safe default, but it is productive. We will likely flip this default in the future.
+If you don't specify any rules for an operation, it is denied by default. This is an important safety feature that helps ensure data isn't accidentally exposed.
 
+To enable full access to an action (i.e., during development) use the `ANYONE_CAN` helper:
+
+```ts
+import { ANYONE_CAN } from '@rocicorp/zero';
+
+const permissions = definePermissions<AuthData, Schema>(schema, () => {
+  return {
+    issue: {
+      row: {
+        select: ANYONE_CAN,
+        // Other operations are denied by default.
+      },
+    },
+    // Other tables are denied by default.
+  };
+});
+```
+
+To do this for all actions, use `ANYONE_CAN_DO_ANYTHING`:
+
+```ts
+import { ANYONE_CAN_DO_ANYTHING } from '@rocicorp/zero';
+
+const permissions = definePermissions<AuthData, Schema>(schema, () => {
+  return {
+    // All operations on issue are allowed to all users.
+    issue: ANYONE_CAN_DO_ANYTHING,
+
+    // Other tables are denied by default.
+  };
+});
+```
+
+## Permission Evaluation
+
+Zero permissions are "compiled" into a JSON-based format at build-time. This file is stored in the `zero.permissions` table of your upstream database. Like other tables, it replicates live down to `zero-cache`. `zero-cache` then parses this file, and applies the encoded rules to every read and write operation.
+
+<Note type="warning">
+The compilation process is very simple-minded (read: dumb). Despite looking like normal TypeScript functions that receive an `AuthData` parameter, rule functions are not actually invoked at runtime. Instead, they are invoked with a "placeholder" `AuthData` at build time. We track which fields of this placeholder are accessed and construct a ZQL expression that accesses the right field of `AuthData` at runtime.
+
+The end result is that you can't really use most features of JS in these rules. Specifically you cannot:
+
+* Iterate over properties or array elements in the auth token
+* Use any JS features beyond property access of `AuthData`
+* Use any conditional or global state
+
+Basically only property access is allowed. This is really confusing and we're working on a better solution.
 </Note>
+
+## Permission Deployment
+
+During development, permissions are compiled and uploaded to your database completely automatically as part of the `zero-cache-dev` script.
+
+For production, you need to call `npx zero-deploy-permissions` within your app to update the permissions in the production database whenever they change. You would typically do this as part of your normal schema migration or CI process. For example, the SST deployment script for [zbugs](/docs/samples#zbugs) looks like this:
+
+```ts
+new command.local.Command(
+  "zero-deploy-permissions",
+  {
+    dir: join(process.cwd(), "../../packages/zero/"),
+    create: `npx zero-deploy-permissions --schema-path ../../apps/zbugs/schema.ts`,
+    // Run the Command on every deploy ...
+    triggers: [Date.now()],
+  },
+
+  // after the view-syncer is deployed.
+  { dependsOn: viewSyncer },
+);
+```
 
 ## Rules
 
 Each operation on a policy has a _ruleset_ containing zero or more _rules_.
 
 A rule is just a TypeScript function that receives the logged in user's `AuthData` and generates a ZQL [where expression](reading-data#compound-filters). At least one rule in a ruleset must return a row for the operation to be allowed.
-
-<Note type="warning">
-Although they look like normal TypeScript functions, permission rules are "compiled" into a [JSON/ZQL format](zero-cache-config#schema-file) at build-time. Those JSON rules are uploaded to zero-cache and *that's* what is evaluated.
-
-Despite receiving an `AuthData` parameter, these functions aren't really ever run against a real `AuthData` value. They are instead run against a "placeholder" `AuthData` at build time. We track which fields of this placeholder are accessed and construct a ZQL expression that accesses the right field of `AuthData` at runtime.
-
-This is confusing and we will be reworking it to make what's really happening more clear.
-
-In the meantime, what you need to understand is that the only JS that is supported in these rules is accessing fields and subfields.
-
-Specifically you cannot:
-
-* Iterate over properties or array elements in the auth token
-* Use any JS features beyond property access of `AuthData`
-* Use any conditional or global state
-</Note>
 
 ## Select Permissions
 
@@ -173,25 +224,6 @@ const definePermissions<AuthData, Schema>(schema, () => {
 ## Delete Permissions
 
 Delete permissions work in the same way as `insert` positions except they run _before_ the delete is applied. So if a delete rule queries the database, it will see that the deleted row is present. If any rule in the ruleset returns a row, the delete is allowed.
-
-## Helpers
-
-Zero defines the `ANYONE_CAN` and `NOBODY_CAN` helpers to make these common cases more readable. They are just named constants for `undefined` (anyone) and `[]` (nobody).
-
-```ts
-export const permissions = definePermissions<AuthData, Schema>(schema, () => {
-  return {
-    issue: {
-      row: {
-        // anyone can insert issues
-        insert: ANYONE_CAN,
-        // nobody can delete issues
-        delete: NOBODY_CAN,
-      },
-    },
-  };
-});
-```
 
 ## Examples
 

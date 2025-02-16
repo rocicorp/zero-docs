@@ -99,6 +99,7 @@ new command.local.Command(
   "zero-deploy-permissions",
   {
     dir: join(process.cwd(), "../../packages/zero/"),
+    // Connection string to upstream comes from ZERO_UPSTREAM_DB. See --help.
     create: `npx zero-deploy-permissions --schema-path ../../apps/zbugs/schema.ts`,
     // Run the Command on every deploy ...
     triggers: [Date.now()],

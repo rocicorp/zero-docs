@@ -1,0 +1,87 @@
+---
+title: React Expo
+---
+
+Zero has built-in support for React Expo using the `expo-sqlite` and `op-sqlite` packages.
+
+In your mobile app's layout, wrap your app's root component in the `ZeroProvider` component:
+```tsx
+// apps/my-app/_layout.tsx
+import '../globals.css';
+import { Zero } from '@rocicorp/zero';
+import { ZeroProvider } from '@rocicorp/zero/react';
+import { createExpoSQLiteStore } from '@rocicorp/zero/expo';
+// or if using op-sqlite
+// import { createOPSQLiteStore } from '@rocicorp/zero/op-sqlite';
+
+import { Stack } from 'expo-router';
+import { useMemo } from 'react';
+import { schema } from '../lib/schema'; // or wherever you have your schema
+
+export const unstable_settings = {
+  // Ensure that reloading on `/modal` keeps a back button present.
+  initialRouteName: '(tabs)',
+};
+
+export default function RootLayout() {
+  // Memoize the Zero instance so it's only created once per app lifecycle
+  const zero = useMemo(
+    () =>
+      new Zero({
+        userID: "your-user-id",
+        auth: "your-auth-token",
+        server: process.env.EXPO_PUBLIC_SERVER_URL, // see https://docs.expo.dev/guides/environment-variables/
+        kvStore: createExpoSQLiteStore, // initialize the SQLite store
+        // kvStore: createExpoSQLiteStore, // or if using op-sqlite
+        schema,
+      }),
+    [] 
+  );
+
+  if (!z) {
+    return null;
+  }
+
+  return (
+    <ZeroProvider zero={z}>
+      <Stack>
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
+      </Stack>
+    </ZeroProvider>
+  );
+}
+
+```
+
+Interact with the Zero instance in your components using the `zero/react` package. Please see the [React docs](react) for more details.
+
+```tsx
+import {useQuery, useZero} from "@rocicorp/zero/react";
+
+function IssueList() {
+  const z = useZero();
+
+  let issueQuery = z.query.issue
+    .related('creator')
+    .related('labels')
+    .limit(100);
+
+  const userID = selectedUserID();
+
+  if (userID) {
+    issueQuery = issueQuery.where('creatorID', '=', userID);
+  }
+
+  const [issues, issuesDetail] = useQuery(issueQuery);
+
+  // Your component ReactJSX
+  return (
+    <View>
+        ...
+    </View>
+  )
+}
+```
+
+Complete quickstart here: COMING SOON

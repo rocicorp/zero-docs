@@ -6,9 +6,8 @@ Zero has built-in support for Expo and React Native using the `expo-sqlite` and 
 
 ## Prerequisites
 
-The `crypto.getRandomValues()` API is not available in React Native, so we need to polyfill it.
+The `crypto` API is not available in React Native, so we need to polyfill it.
 
-### Polyfill manually
 
 First, install the `expo-crypto` package. See the [expo-crypto docs](https://docs.expo.dev/versions/latest/sdk/crypto/) for more information.
 
@@ -30,6 +29,10 @@ declare const global: {
 };
 
 export function bootCryptoPolyfill() {
+  if (global.crypto) {
+    return;
+  }
+
   global.crypto = {
     getRandomValues(array: Uint8Array) {
       return Crypto.getRandomValues(array);
@@ -42,7 +45,6 @@ export function bootCryptoPolyfill() {
 ```
 
 This will allow you to use the `crypto` API in your React Native project such as `crypto.getRandomValues()` and `crypto.randomUUID()`.
-
 
 ## Expo SQLite
 
@@ -67,7 +69,7 @@ npx expo prebuild
 
 ## Usage
 
-In your mobile app's layout, wrap your app's root component in the `ZeroProvider` component:
+In your mobile app's root index or layout file, wrap your app's with the `ZeroProvider` component:
 
 ```tsx
 // apps/my-app/_layout.tsx
@@ -88,7 +90,7 @@ export const unstable_settings = {
 };
 
 export default function RootLayout() {
-  // Memoize the Zero instance so it's only created once per app lifecycle
+  // In production, memoize the Zero instance so it's only created once per app lifecycle
   // Note: If you intend to use Expo Web, you should use kvStore: 'mem' or 'idb' with a check like
   // const store = Platform.OS === 'web' ? 'idb' : createExpoSQLiteStore;
   const z = useMemo(
@@ -97,11 +99,11 @@ export default function RootLayout() {
         userID: 'your-user-id',
         auth: 'your-auth-token',
         server: process.env.EXPO_PUBLIC_SERVER_URL, // see https://docs.expo.dev/guides/environment-variables/
-        kvStore: createExpoSQLiteStore, // initialize the SQLite store
+        kvStore: createExpoSQLiteStore,
         // kvStore: createExpoSQLiteStore, // or if using op-sqlite
         schema,
       }),
-    [],
+    [userId, authToken],
   );
 
   if (!z) {
@@ -111,8 +113,8 @@ export default function RootLayout() {
   return (
     <ZeroProvider zero={z}>
       <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="(tabs)" options={{headerShown: false}} />
+        <Stack.Screen name="modal" options={{presentation: 'modal'}} />
       </Stack>
     </ZeroProvider>
   );
@@ -122,7 +124,7 @@ export default function RootLayout() {
 Interact with the Zero instance in your components using the `zero/react` package. Please see the [React docs](react) for more details.
 
 ```tsx
-import { useQuery, useZero } from '@rocicorp/zero/react';
+import {useQuery, useZero} from '@rocicorp/zero/react';
 
 function IssueList() {
   const z = useZero();
@@ -140,7 +142,7 @@ function IssueList() {
 
   const [issues, issuesDetail] = useQuery(issueQuery);
 
-  // Your component ReactJSX
+  // Your component React Native JSX
   return <View>...</View>;
 }
 ```

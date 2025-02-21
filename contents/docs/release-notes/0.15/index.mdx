@@ -13,7 +13,9 @@ npm install @rocicorp/zero@0.15
 
 ## Upgrade Guide
 
-This release changes the way that permissions are deployed. Instead of using an environment variable, permissions are now stored in the upstream database. This allows live permission updates, without restarting the server. It also solves problems with max env var size that users were seeing.
+This release changes the way that permissions are sent to the server. Before, permissions were sent to the server by setting the `ZERO_SCHEMA_JSON` or `ZERO_SCHEMA_FILE` environment variables, which include the permissions.
+
+In 0.15, these variables go away and are replaced by a new command: `npx zero-deploy-permissions`. This command writes the permissions to a new table in the upstream database. This design allows live permission updates, without restarting the server. It also solves problems with max env var size that users were seeing.
 
 This release also flips the default permission from `allow` to `deny` for all rules.
 

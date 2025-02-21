@@ -350,6 +350,8 @@ Then publish `zero-cache`:
 fly deploy
 ```
 
+### Deploy Permissions
+
 Now `zero-cache` is running on Fly.io, but there are no permissions. If you run the app against this `zero-cache`, you'll see that no data is returned from any query. To fix this, deploy your permissions:
 
 ```bash
@@ -363,7 +365,7 @@ CI/CD pipeline.
 ### Use Remote `zero-cache`
 
 ```bash
-VITE_PUBLIC_SERVER='https://${CACHE_APP_NAME}.fly.dev/' npm run dev:ui
+VITE_PUBLIC_SERVER="https://${CACHE_APP_NAME}.fly.dev/" npm run dev:ui
 ```
 
 Now restart the frontend to pick up the env change, and refresh the app. You can stop your local database and `zero-cache` as we're not using them anymore. Open the web inspector to verify the app is talking to the remote `zero-cache`!

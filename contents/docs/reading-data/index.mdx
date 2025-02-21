@@ -175,7 +175,7 @@ Where supports the following comparison operators:
 | `<` , `<=`, `>`, `>=`                    | number                              | JS number compare semantics                                              |
 | `LIKE`, `NOT LIKE`, `ILIKE`, `NOT ILIKE` | string                              | SQL-compatible `LIKE` / `ILIKE`                                          |
 | `IN` , `NOT IN`                          | boolean, number, string             | RHS must be array. Returns true if rhs contains lhs by JS strict equals. |
-| `IS` , `IS NOT`                          | boolean, number, string, json, null | Same as `=` but also works for `null`                                    |
+| `IS` , `IS NOT`                          | boolean, number, string, null       | Same as `=` but also works for `null`                                    |
 
 TypeScript will restrict you from using operators with types that don’t make sense – you can’t use `>` with `boolean` for example.
 

@@ -20,7 +20,7 @@ Here are some common Postgres options and what we know about their support level
 
 Zero uses Postgres “[Event Triggers](https://www.postgresql.org/docs/current/sql-createeventtrigger.html)” to implement high-quality, efficient [schema migration](migrations). Event Triggers typically requires superuser access to Postgres.
 
-Hosted Postgres providers like Supabase and Neon don’t provide superuser access.
+Hosted Postgres providers like Neon don’t provide superuser access.
 
 Zero can still works without Event Triggers, but for correctness, any schema change triggers a full rebuild of all server-side and client-side state. For small databases (< 1GB) this can be OK, but for bigger databases we recommend choosing a provider that grants access to Event Triggers.
 

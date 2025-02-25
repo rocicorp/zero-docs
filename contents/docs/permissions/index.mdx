@@ -164,29 +164,29 @@ const definePermissions<AuthData, Schema>(schema, () => {
 
 ## Update Permissions
 
-There are two types of update rulesets: `preMutation` and `postMutation`.
+There are two types of update rulesets: `preMutation` and `postMutation`. Both rulesets must pass for an update to be allowed.
 
 `preMutation` rules see the version of a row _before_ the mutation is applied. This is useful for things like checking whether a user owns an entity before editing it.
 
 `postMutation` rules see the version of a row _after_ the mutation is applied. This is useful for things like ensuring a user can only mark themselves as the creator of an entity and not other users.
 
-Both the `preMutation` and `postMutation` rulesets must allow an update. But note that as with other rulesets, if either `preMutation` or `postMutation` ruleset is undefined, it defaults to **_allow_**.
+Like other rulesets, `preMutation` and `postMutation` default to `NOBODY_CAN`. This means that every table must define both these rulesets in order for any updates to be allowed.
 
-So this allows an edit if the user is the creator of the issue:
+For example, the following ruleset allows an issue's owner to edit, but **not** re-assign the issue. The `postMutation` rule enforces that the current user still own the issue after edit.
 
 ```ts
 const definePermissions<AuthData, Schema>(schema, () => {
-  const allowIfIssueCreator = (
+  const allowIfIssueOwner = (
     authData: AuthData,
     {cmp}: ExpressionBuilder<typeof issueSchema>,
-  ) => cmp('creatorID', '=', authData.sub);
+  ) => cmp('ownerID', '=', authData.sub);
 
   return {
     issue: {
       row: {
         update: {
-          preMutation: [allowIfIssueCreator],
-          // postMutation defaults to _allow_.
+          preMutation: [allowIfIssueOwner],
+          postMutation: [allowIfIssueOwner],
         },
       },
     },
@@ -194,27 +194,50 @@ const definePermissions<AuthData, Schema>(schema, () => {
 });
 ```
 
-And this allows an edit if the the logged in user is the creator after the edit:
+This ruleset allows an issue's owner to edit and re-assign the issue:
 
 ```ts
 const definePermissions<AuthData, Schema>(schema, () => {
-  const allowIfIssueCreator = (
+  const allowIfIssueOwner = (
     authData: AuthData,
     {cmp}: ExpressionBuilder<typeof issueSchema>,
-  ) => cmp('creatorID', '=', authData.sub);
+  ) => cmp('ownerID', '=', authData.sub);
 
   return {
     issue: {
       row: {
         update: {
-          // preMutation defaults to _allow_.
-          postMutation: [allowIfIssueCreator],
+          preMutation: [allowIfIssueOwner],
+          postMutation: ANYONE_CAN,
         },
       },
     },
   };
 });
 ```
+
+And this allows anyone to edit an issue, but only if they also assign it to themselves. Useful for enforcing *"patches welcome"*? 🙃
+
+```ts
+const definePermissions<AuthData, Schema>(schema, () => {
+  const allowIfIssueOwner = (
+    authData: AuthData,
+    {cmp}: ExpressionBuilder<typeof issueSchema>,
+  ) => cmp('ownerID', '=', authData.sub);
+
+  return {
+    issue: {
+      row: {
+        update: {
+          preMutation: ANYONE_CAN,
+          postMutation: [allowIfIssueOwner],
+        },
+      },
+    },
+  };
+});
+```
+
 
 ## Delete Permissions
 

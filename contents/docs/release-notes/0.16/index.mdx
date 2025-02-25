@@ -1,0 +1,36 @@
+---
+title: Zero 0.16
+description: Lambda-Based Permission Deployment
+---
+
+## Install
+
+```bash
+npm install @rocicorp/zero@0.16
+```
+
+## Upgrading
+
+See the upgrade from [hello-zero](https://github.com/rocicorp/hello-zero/pull/28) or [hello-zero-solid](https://github.com/rocicorp/hello-zero-solid/pull/15) for an example.
+
+## Features
+
+- Documented how to use lambdas to deploy permissions in SST, rather than needing CI/CD to have access to Postgres. ([doc](/docs/deployment#initialize-sst)).
+- Added simple debugging logs for read and write permissions ([doc](/docs/permissions#debugging-permissions)).
+
+## Fixes
+
+- Improve performance of initial sync about 2x ([PR 1](https://github.com/rocicorp/mono/pull/3836), [PR 2](https://github.com/rocicorp/mono/pull/3835)).
+- `IN` should allow `readonly` array arguments ([Report](https://discord.com/channels/830183651022471199/1288232858795769917/1340464538704937082), [PR](https://github.com/rocicorp/mono/pull/3819)).
+- Export `ANYONE_CAN_DO_ANYTHING` ([Report](https://discord.com/channels/830183651022471199/1340088459544756276/1340674831347355711)).
+- Fix false-positive in schema change detection ([Report](https://discord.com/channels/830183651022471199/1288232858795769917/1341135548944744448), [PR](https://github.com/rocicorp/mono/pull/3828)).
+- Fix writes of numeric types ([Report](https://discord.com/channels/830183651022471199/1288232858795769917/1341076949749071955), [PR](https://github.com/rocicorp/mono/pull/3750))
+- Fix bug where litestream was creating way too many files in s3 ([PR](https://github.com/rocicorp/mono/pull/3839))
+- Fix memory leak in change-streamer noticeable under high write load ([PR](https://github.com/rocicorp/mono/pull/3859))
+- Fix `query already registered` error ([PR](https://github.com/rocicorp/mono/pull/3840))
+- Correctly handle optional booleans ([PR](https://github.com/rocicorp/mono/pull/3863))
+- Ignore indexes with unpublished columns ([PR](https://github.com/rocicorp/mono/pull/3862))
+
+## Breaking Changes
+
+None.

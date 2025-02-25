@@ -92,23 +92,17 @@ Basically only property access is allowed. This is really confusing and we're wo
 
 During development, permissions are compiled and uploaded to your database completely automatically as part of the `zero-cache-dev` script.
 
-For production, you need to call `npx zero-deploy-permissions` within your app to update the permissions in the production database whenever they change. You would typically do this as part of your normal schema migration or CI process. For example, the SST deployment script for [zbugs](/docs/samples#zbugs) looks like this:
+For production, you need to call `npx zero-deploy-permissions` within your app to update the permissions in the production database whenever they change. You would typically do this as part of your normal schema migration or CI process. For example, the SST deployment script for [zbugs](/docs/samples#zbugs) does this as part of a serverless function that is invoked on every deploy:
 
 ```ts
-new command.local.Command(
-  "zero-deploy-permissions",
-  {
-    dir: join(process.cwd(), "../../packages/zero/"),
-    // Connection string to upstream comes from ZERO_UPSTREAM_DB. See --help.
-    create: `npx zero-deploy-permissions --schema-path ../../apps/zbugs/schema.ts`,
-    // Run the Command on every deploy ...
-    triggers: [Date.now()],
-  },
+// permissions.ts
+import { execSync } from "node:child_process";
 
-  // after the view-syncer is deployed.
-  { dependsOn: viewSyncer },
-);
+export const deploy = () =>
+  execSync("npx zero-deploy-permissions", { stdio: "inherit" });
 ```
+
+See the [SST Deployment Guide](deployment#guide-multi-node-on-sstaws) for more details.
 
 ## Rules
 
@@ -225,6 +219,22 @@ const definePermissions<AuthData, Schema>(schema, () => {
 ## Delete Permissions
 
 Delete permissions work in the same way as `insert` positions except they run _before_ the delete is applied. So if a delete rule queries the database, it will see that the deleted row is present. If any rule in the ruleset returns a row, the delete is allowed.
+
+## Debugging Permissions
+
+To debug read permissions, you can set the `zero-cache` [log level](./zero-cache-config#log-level) to `debug`. Zero prints out the full query for each read with permissions applied.
+
+To debug write permissions, look for a `WARN` level log in the output from `zero-cache` like this:
+
+```
+Permission check failed for {"op":"update","tableName":"message",...}, action update, phase preMutation, authData: {...}, rowPolicies: [...], cellPolicies: []
+```
+
+Zero prints the row, auth data, and permission policies that was applied to any failed writes.
+
+<Note>
+For both types of permissions, the ZQL query is printed in Zero's internal JSON-based AST format. This is a little harder to read than the ZQL you write, but should help you understand what is going on. We'll improve this over time.
+</Note>
 
 ## Examples
 

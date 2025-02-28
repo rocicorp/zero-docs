@@ -67,6 +67,21 @@ Create an upstream Postgres database server somewhere. See [Connecting to Postgr
 
 See [AWS setup guide](https://v2.sst.dev/setting-up-aws). The end result should be that you have a dev profile and SSO session defined in your `~/.aws/config` file.
 
+### Add Permission Deployer
+
+Copy the `functions` directory from [hello-zero](https://github.com/rocicorp/hello-zero/tree/main/functions) into your project. Adjust `tsconfig.json` as necessary for your project.
+
+<Note type="warning">
+The version of `@rocicorp/zero` in `functions/package.json` should match the version of `@rocicorp/zero` in your app.
+
+Sorry, we're working on making this less annoying.
+</Note>
+
+This small function runs inside your VPC to [deploy permission changes](./permissions#permission-deployment). There are other ways to do this, but this way is nice because:
+
+1. Permission changes are automatically deployed as part of deploying your app.
+2. Your CI/CD pipeline doesn't need direct access to your database.
+
 ### Initialize SST
 
 ```bash
@@ -212,10 +227,7 @@ export default $config({
       },
     });
 
-    // Deploys permissions automatically as part of CI.
-    // Requires @rocicorp/zero to be installed in the Lambda.
-    // See https://github.com/rocicorp/hello-zero/blob/main/functions/package.json
-    // for details.
+    // Permissions deployment
     const permissionsDeployer = new sst.aws.Function(
       "zero-permissions-deployer",
       {
@@ -260,6 +272,8 @@ npx sst deploy
 This takes about 5-10 minutes.
 
 If successful, you should see a URL for the `view-syncer` service. This is the URL to pass to the `server` parameter of the `Zero` constructor on the client.
+
+If unsuccessful, you can get detailed logs with `npx sst deploy --verbose`. [Come find us on Discord](https://discord.rocicorp.dev/) and we'll help get you sorted out.
 
 ## Guide: Single-Node on Fly.io
 

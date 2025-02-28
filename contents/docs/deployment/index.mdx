@@ -102,6 +102,7 @@ export default $config({
     // VPC Configuration
     const vpc = new sst.aws.Vpc(`vpc`, {
       az: 2,
+      nat: "ec2",
     });
 
     // ECS Cluster

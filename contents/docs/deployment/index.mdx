@@ -63,7 +63,7 @@ The setup below costs about $35/month. You can scale it up or down as needed by 
 
 ### Setup Upstream
 
-Create an upstream Postgres database server somewhere. See [Connecting to Postgres](connecting-to-postgres) for details. Ensure the upstream, change, and cvr databases are created.
+Create an upstream Postgres database server somewhere. See [Connecting to Postgres](connecting-to-postgres) for details. Populate the schema and any initial data for your application.
 
 ### Setup AWS
 
@@ -223,8 +223,8 @@ export default $config({
     // Postgres database. If you do not want to do this, you can also use
     // `npx zero-deploy-permissions --output-format=sql` during build to
     // generate a permissions.sql file, then run that file as part of your
-    // deployment within your VPC. Come find us on Discord if you need help
-    // with this.
+    // deployment within your VPC. See hello-zero-solid for an example:
+    // https://github.com/rocicorp/hello-zero-solid/blob/main/sst.config.ts#L141
     new command.local.Command(
       "zero-deploy-permissions",
       {

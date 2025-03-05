@@ -92,14 +92,22 @@ Basically only property access is allowed. This is really confusing and we're wo
 
 During development, permissions are compiled and uploaded to your database completely automatically as part of the `zero-cache-dev` script.
 
-For production, you need to call `npx zero-deploy-permissions` within your app to update the permissions in the production database whenever they change. You would typically do this as part of your normal schema migration or CI process. For example, the SST deployment script for [zbugs](/docs/samples#zbugs) does this as part of a serverless function that is invoked on every deploy:
+For production, you need to call `npx zero-deploy-permissions` within your app to update the permissions in the production database whenever they change. You would typically do this as part of your normal schema migration or CI process. For example, the SST deployment script for [zbugs](/docs/samples#zbugs) looks like this:
 
 ```ts
-// permissions.ts
-import { execSync } from "node:child_process";
-
-export const deploy = () =>
-  execSync("npx zero-deploy-permissions", { stdio: "inherit" });
+new command.local.Command(
+  "zero-deploy-permissions",
+  {
+    create: `npx zero-deploy-permissions -p ../../src/schema.ts`,
+    // Run the Command on every deploy ...
+    triggers: [Date.now()],
+    environment: {
+      ZERO_UPSTREAM_DB: commonEnv.ZERO_UPSTREAM_DB,
+    },
+  },
+  // after the view-syncer is deployed.
+  { dependsOn: viewSyncer }
+);
 ```
 
 See the [SST Deployment Guide](deployment#guide-multi-node-on-sstaws) for more details.

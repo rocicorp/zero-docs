@@ -59,6 +59,8 @@ The `zero-cache` image is configured via environment variables. See [zero-cache 
 
 [SST](https://sst.dev/) is our recommended way to deploy Zero.
 
+The setup below costs about $35/month. You can scale it up or down as needed by adjusting the amount of vCPUs and memory in each task.
+
 ### Setup Upstream
 
 Create an upstream Postgres database server somewhere. See [Connecting to Postgres](connecting-to-postgres) for details. Ensure the upstream, change, and cvr databases are created.
@@ -66,21 +68,6 @@ Create an upstream Postgres database server somewhere. See [Connecting to Postgr
 ### Setup AWS
 
 See [AWS setup guide](https://v2.sst.dev/setting-up-aws). The end result should be that you have a dev profile and SSO session defined in your `~/.aws/config` file.
-
-### Add Permission Deployer
-
-Copy the `functions` directory from [hello-zero](https://github.com/rocicorp/hello-zero/tree/main/functions) into your project. Adjust `tsconfig.json` as necessary for your project.
-
-<Note type="warning">
-The version of `@rocicorp/zero` in `functions/package.json` should match the version of `@rocicorp/zero` in your app.
-
-Sorry, we're working on making this less annoying.
-</Note>
-
-This small function runs inside your VPC to [deploy permission changes](./permissions#permission-deployment). There are other ways to do this, but this way is nice because:
-
-1. Permission changes are automatically deployed as part of deploying your app.
-2. Your CI/CD pipeline doesn't need direct access to your database.
 
 ### Initialize SST
 
@@ -104,6 +91,9 @@ export default $config({
       removal: input?.stage === "production" ? "retain" : "remove",
       home: "aws",
       region: process.env.AWS_REGION || "us-east-1",
+      providers: {
+        command: true,
+      },
     };
   },
   async run() {
@@ -117,7 +107,6 @@ export default $config({
     // VPC Configuration
     const vpc = new sst.aws.Vpc(`vpc`, {
       az: 2,
-      nat: "ec2",
     });
 
     // ECS Cluster
@@ -143,8 +132,8 @@ export default $config({
 
     // Replication Manager Service
     const replicationManager = cluster.addService(`replication-manager`, {
-      cpu: "2 vCPU",
-      memory: "8 GB",
+      cpu: "0.5 vCPU",
+      memory: "1 GB",
       image: commonEnv.ZERO_IMAGE_URL,
       link: [replicationBucket],
       health: {
@@ -186,8 +175,8 @@ export default $config({
 
     // View Syncer Service
     const viewSyncer = cluster.addService(`view-syncer`, {
-      cpu: "2 vCPU",
-      memory: "8 GB",
+      cpu: "1 vCPU",
+      memory: "2 GB",
       image: commonEnv.ZERO_IMAGE_URL,
       link: [replicationBucket],
       health: {
@@ -228,24 +217,23 @@ export default $config({
     });
 
     // Permissions deployment
-    const permissionsDeployer = new sst.aws.Function(
-      "zero-permissions-deployer",
+    // Note: this setup requires your CI/CD pipeline to have access to your
+    // Postgres database. If you do not want to do this, you can also use
+    // `npx zero-deploy-permissions --output-format=sql` during build to
+    // generate a permissions.sql file, then run that file as part of your
+    // deployment within your VPC. Come find us on Discord if you need help
+    // with this.
+    new command.local.Command(
+      "zero-deploy-permissions",
       {
-        handler: "./functions/src/permissions.deploy",
-        vpc,
-        environment: { ["ZERO_UPSTREAM_DB"]: conn.value },
-        copyFiles: [{ from: "./src/schema.ts", to: "./schema.ts" }],
-        nodejs: { install: [`@rocicorp/zero`] },
-      }
-    );
-
-    new aws.lambda.Invocation(
-      "invoke-zero-permissions-deployer",
-      {
-        // Invoke the Lambda on every deploy.
-        input: Date.now().toString(),
-        functionName: permissionsDeployer.name,
+        create: `npx zero-deploy-permissions -p ../../src/schema.ts`,
+        // Run the Command on every deploy ...
+        triggers: [Date.now()],
+        environment: {
+          ZERO_UPSTREAM_DB: commonEnv.ZERO_UPSTREAM_DB,
+        },
       },
+      // after the view-syncer is deployed.
       { dependsOn: viewSyncer }
     );
   },

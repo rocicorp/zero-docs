@@ -134,6 +134,7 @@ export default $config({
     const replicationManager = cluster.addService(`replication-manager`, {
       cpu: "0.5 vCPU",
       memory: "1 GB",
+      architecture: "arm64",
       image: commonEnv.ZERO_IMAGE_URL,
       link: [replicationBucket],
       health: {
@@ -177,6 +178,7 @@ export default $config({
     const viewSyncer = cluster.addService(`view-syncer`, {
       cpu: "1 vCPU",
       memory: "2 GB",
+      architecture: "arm64",
       image: commonEnv.ZERO_IMAGE_URL,
       link: [replicationBucket],
       health: {

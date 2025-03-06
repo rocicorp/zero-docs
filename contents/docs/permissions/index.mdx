@@ -20,8 +20,8 @@ type AuthData = {
 export const permissions = definePermissions<AuthData, Schema>(schema, () => {
   const allowIfIssueCreator = (
     authData: AuthData,
-    {cmp}: ExpressionBuilder<IssueSchema>,
-  ) => cmp('creatorID', '=', authData.sub);
+    {cmp}: ExpressionBuilder<Schema, "issue">,
+  ) => cmp('creatorID', authData.sub);
 
   return {
     issue: {
@@ -29,7 +29,7 @@ export const permissions = definePermissions<AuthData, Schema>(schema, () => {
         delete: [allowIfIssueCreator],
       },
     },
-  };
+  } satisfies PermissionsConfig<AuthData, Schema>;
 });
 ```
 
@@ -53,7 +53,7 @@ const permissions = definePermissions<AuthData, Schema>(schema, () => {
       },
     },
     // Other tables are denied by default.
-  };
+  } satisfies PermissionsConfig<AuthData, Schema>;
 });
 ```
 
@@ -68,7 +68,7 @@ const permissions = definePermissions<AuthData, Schema>(schema, () => {
     issue: ANYONE_CAN_DO_ANYTHING,
 
     // Other tables are denied by default.
-  };
+  } satisfies PermissionsConfig<AuthData, Schema>;
 });
 ```
 
@@ -127,11 +127,11 @@ Select permissions act like filters. If a user does not have permission to read 
 For example, imagine a select permission that restricts reads to only issues created by the user:
 
 ```ts
-const definePermissions<AuthData, Schema>(schema, () => {
+definePermissions<AuthData, Schema>(schema, () => {
   const allowIfIssueCreator = (
     authData: AuthData,
-    {cmp}: ExpressionBuilder<typeof issueSchema>,
-  ) => cmp('creatorID', '=', authData.sub);
+    { cmp }: ExpressionBuilder<Schema, "issue">
+  ) => cmp("creatorID", authData.sub);
 
   return {
     issue: {
@@ -139,7 +139,7 @@ const definePermissions<AuthData, Schema>(schema, () => {
         select: [allowIfIssueCreator],
       },
     },
-  };
+  } satisfies PermissionsConfig<AuthData, Schema>;
 });
 ```
 
@@ -154,10 +154,10 @@ Insert rules are evaluated after the entity is inserted. So if they query the da
 Here's an example of an insert rule that disallows inserting users that have the role 'admin'.
 
 ```ts
-const definePermissions<AuthData, Schema>(schema, () => {
+definePermissions<AuthData, Schema>(schema, () => {
   const allowIfNonAdmin = (
     authData: AuthData,
-    {cmp}: ExpressionBuilder<typeof userSchema>,
+    {cmp}: ExpressionBuilder<Schema, 'user'>,
   ) => cmp('role', '!=', 'admin');
 
   return {
@@ -166,7 +166,7 @@ const definePermissions<AuthData, Schema>(schema, () => {
         insert: [allowIfNonAdmin],
       },
     },
-  };
+  } satisfies PermissionsConfig<AuthData, Schema>;
 });
 ```
 
@@ -183,11 +183,11 @@ Like other rulesets, `preMutation` and `postMutation` default to `NOBODY_CAN`. T
 For example, the following ruleset allows an issue's owner to edit, but **not** re-assign the issue. The `postMutation` rule enforces that the current user still own the issue after edit.
 
 ```ts
-const definePermissions<AuthData, Schema>(schema, () => {
+definePermissions<AuthData, Schema>(schema, () => {
   const allowIfIssueOwner = (
     authData: AuthData,
-    {cmp}: ExpressionBuilder<typeof issueSchema>,
-  ) => cmp('ownerID', '=', authData.sub);
+    {cmp}: ExpressionBuilder<Schema, "issue">,
+  ) => cmp('ownerID', authData.sub);
 
   return {
     issue: {
@@ -198,18 +198,18 @@ const definePermissions<AuthData, Schema>(schema, () => {
         },
       },
     },
-  };
+  } satisfies PermissionsConfig<AuthData, Schema>;
 });
 ```
 
 This ruleset allows an issue's owner to edit and re-assign the issue:
 
 ```ts
-const definePermissions<AuthData, Schema>(schema, () => {
+definePermissions<AuthData, Schema>(schema, () => {
   const allowIfIssueOwner = (
     authData: AuthData,
-    {cmp}: ExpressionBuilder<typeof issueSchema>,
-  ) => cmp('ownerID', '=', authData.sub);
+    {cmp}: ExpressionBuilder<Schema, "issue">,
+  ) => cmp('ownerID', authData.sub);
 
   return {
     issue: {
@@ -220,18 +220,18 @@ const definePermissions<AuthData, Schema>(schema, () => {
         },
       },
     },
-  };
+  } satisfies PermissionsConfig<AuthData, Schema>;
 });
 ```
 
 And this allows anyone to edit an issue, but only if they also assign it to themselves. Useful for enforcing *"patches welcome"*? 🙃
 
 ```ts
-const definePermissions<AuthData, Schema>(schema, () => {
+definePermissions<AuthData, Schema>(schema, () => {
   const allowIfIssueOwner = (
     authData: AuthData,
-    {cmp}: ExpressionBuilder<typeof issueSchema>,
-  ) => cmp('ownerID', '=', authData.sub);
+    {cmp}: ExpressionBuilder<Schema, "issue">,
+  ) => cmp('ownerID', authData.sub);
 
   return {
     issue: {
@@ -242,7 +242,7 @@ const definePermissions<AuthData, Schema>(schema, () => {
         },
       },
     },
-  };
+  } satisfies PermissionsConfig<AuthData, Schema>;
 });
 ```
 

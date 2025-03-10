@@ -185,6 +185,21 @@ export default function Search() {
           };
         });
 
+        // Add an extra result if the search term exactly matches a document title
+        const exactMatch = searchDocs.find(
+          doc =>
+            doc.title.toLowerCase() === sanitizedInput.toLowerCase() ||
+            doc.folderName.toLowerCase() === sanitizedInput.toLowerCase(),
+        );
+
+        if (exactMatch) {
+          results.unshift({
+            ...exactMatch,
+            snippet: '',
+            snippetId: ' ', // Ensures no hash fragment is appended for exact document match
+          });
+        }
+
         setSearchResults(results.filter(Boolean) as SearchResult[]);
       } catch (error) {
         console.error('Lunr.js Query Error:', error);
@@ -321,7 +336,11 @@ export default function Search() {
                       resultRefs.current[index] = el;
                     }}
                     className={`w-full ${index === highlightIndex ? 'bg-gray-200 dark:bg-gray-700 search-selected' : ''}`}
-                    href={`${item.url}#${item.snippetId || item.headings[0]?.id}`}
+                    href={
+                      item.snippetId
+                        ? `${item.url}#${item.snippetId}`
+                        : item.url
+                    }
                     onClick={() => setIsOpen(false)} // Close the search dialog
                   >
                     <div className="flex items-center w-fit h-full py-3 gap-1.5 px-2">

@@ -76,6 +76,20 @@
   }
 }
 
+.search-snippet {
+  padding: 0.5rem;
+}
+
+.search-selected {
+  border-radius: 0.25rem;
+}
+
+mark {
+  color: rgb(var(--foreground-rgb));
+  padding: 0.25rem 0.1rem;
+  background-color: var(--primary-highlight);
+}
+
 .top-nav {
   height: 4.5rem;
 }

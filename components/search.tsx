@@ -1,6 +1,6 @@
 'use client';
 
-import {useEffect, useMemo, useState} from 'react';
+import {useEffect, useMemo, useRef, useState} from 'react';
 import lunr from 'lunr';
 import {CommandIcon, FileIcon, SearchIcon} from 'lucide-react';
 import {Input} from '@/components/ui/input';
@@ -65,6 +65,8 @@ export default function Search() {
   const [isOpen, setIsOpen] = useState(false);
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [highlightIndex, setHighlightIndex] = useState(0);
+  const resultRefs = useRef<(HTMLAnchorElement | null)[]>([]);
+  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
 
   // Load search index on component mount
   useEffect(() => {
@@ -78,12 +80,14 @@ export default function Search() {
         this.field('title', {boost: 10}); // Prioritize document title
         this.field('folderName', {boost: 8}); // Prioritize folder name
         this.field('content');
+        this.field('headings', {boost: 9}); // Prioritize headings
 
         searchDocs.forEach(doc => {
           this.add({
             ...doc,
             title: doc.title ? doc.title.toLowerCase() : '',
             folderName: doc.folderName ? doc.folderName.toLowerCase() : '', // Ensure folder name is indexed
+            headings: doc.headings.map(h => h.text.toLowerCase()).join(' '), // Convert headings to searchable string
           });
         });
       });
@@ -92,7 +96,7 @@ export default function Search() {
     if (!lunrIndex) {
       loadSearchIndex();
     }
-  }, []);
+  }, [isOpen, highlightIndex, searchResults]);
 
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
@@ -126,36 +130,48 @@ export default function Search() {
 
           let snippet = extractSnippet(doc.content, sanitizedInput);
 
-          const snippetIndex = doc.content.indexOf(snippet);
+          const snippetIndex = doc.content
+            .toLowerCase()
+            .indexOf(sanitizedInput.toLowerCase());
 
-          // Find the heading closest to or after the snippet position
-          const closestHeading =
-            doc.headings.length > 0
-              ? doc.headings
-                  .map(heading => ({
-                    text: heading.text,
-                    id: heading.id,
-                    index: doc.content.indexOf(heading.text),
-                  }))
-                  .filter(heading => heading.index !== -1) // Remove invalid headings
-                  .sort((a, b) => a.index - b.index) // Sort headings in document order
-                  .reduce(
-                    (closest, heading) => {
-                      if (!closest || heading.index >= snippetIndex)
-                        return heading; // Prefer heading after snippet
-                      return heading.index > closest.index ? heading : closest; // Otherwise, get nearest before
-                    },
-                    {
-                      ...doc.headings[0],
-                      index: doc.content.indexOf(doc.headings[0].text),
-                    },
-                  )
-              : null;
+          // Ensure a valid snippet index is found
+          if (snippetIndex === -1) {
+            return {
+              ...doc,
+              snippet,
+              snippetId: doc.headings.length > 0 ? doc.headings[0].id : '',
+            };
+          }
+
+          // Find the closest heading before or at the snippet position
+          const validHeadings = doc.headings
+            .map(heading => ({
+              ...heading,
+              index: doc.content.indexOf(heading.text),
+            }))
+            .filter(heading => heading.index !== -1) // Ensure valid headings
+            .sort((a, b) => a.index - b.index); // Sort headings in document order
+
+          let closestHeading = null;
+
+          // Iterate through the headings and find the best match
+          for (let i = 0; i < validHeadings.length; i++) {
+            if (validHeadings[i].index > snippetIndex) {
+              break; // Stop at the first heading after the snippet
+            }
+            closestHeading = validHeadings[i]; // Keep updating until we reach the last valid one
+          }
+
+          // If no heading before, pick the first heading after the snippet
+          const finalHeading =
+            closestHeading ??
+            validHeadings.find(h => h.index > snippetIndex) ??
+            doc.headings[0];
 
           return {
             ...doc,
             snippet,
-            snippetId: closestHeading?.id || '',
+            snippetId: finalHeading?.id || '',
           };
         });
 
@@ -169,20 +185,60 @@ export default function Search() {
     return () => clearTimeout(delayDebounce);
   }, [searchedInput]);
 
+  // Reset highlight index on new search
+  useEffect(() => {
+    setHighlightIndex(0);
+  }, [searchedInput]);
+
+  // Ensure the active search result scrolls into view when highlighted
+  useEffect(() => {
+    if (
+      isOpen &&
+      resultRefs.current[highlightIndex] &&
+      scrollContainerRef.current
+    ) {
+      const selectedItem = resultRefs.current[highlightIndex];
+      const container = scrollContainerRef.current;
+
+      if (selectedItem && container) {
+        const itemTop = selectedItem.offsetTop;
+        const itemHeight = selectedItem.offsetHeight;
+        const containerScrollTop = container.scrollTop;
+        const containerHeight = container.clientHeight;
+
+        // If the selected item is above the visible area, scroll up
+        if (itemTop < containerScrollTop) {
+          container.scrollTo({top: itemTop, behavior: 'smooth'});
+        }
+        // If the selected item is below the visible area, scroll down
+        else if (itemTop + itemHeight > containerScrollTop + containerHeight) {
+          container.scrollTo({
+            top: itemTop + itemHeight - containerHeight,
+            behavior: 'smooth',
+          });
+        }
+      }
+    }
+  }, [highlightIndex, isOpen]);
+
   // Listen for CMD+K (Mac) or CTRL+K (Windows) and keyboard navigation when search dialog is open
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
       if (isOpen) {
         if (event.key === 'ArrowDown') {
           event.preventDefault();
-          setHighlightIndex(prev =>
-            Math.min(prev + 1, searchResults.length - 1),
-          );
+          setHighlightIndex(prev => (prev + 1) % searchResults.length);
         } else if (event.key === 'ArrowUp') {
           event.preventDefault();
-          setHighlightIndex(prev => Math.max(prev - 1, 0));
-        } else if (event.key === 'Enter' && searchResults[highlightIndex]) {
+          setHighlightIndex(prev =>
+            prev > 0 ? prev - 1 : searchResults.length - 1,
+          );
+        } else if (
+          event.key === 'Enter' &&
+          searchResults[highlightIndex] != null
+        ) {
           event.preventDefault();
+          setIsOpen(false); // Close search dialog
           window.location.href = `${searchResults[highlightIndex].url}#${searchResults[highlightIndex].snippetId || searchResults[highlightIndex].headings[0]?.id}`;
         }
       }
@@ -243,13 +299,20 @@ export default function Search() {
             </p>
           )}
 
-          <ScrollArea className="max-h-[400px] overflow-y-auto">
+          <ScrollArea
+            ref={scrollContainerRef}
+            className="max-h-[400px] overflow-y-auto"
+          >
             <div className="flex flex-col items-start overflow-y-auto sm:px-2 px-1 pb-4">
               {searchResults.map((item, index) => (
                 <DialogClose key={item.id} asChild>
                   <Anchor
-                    className={`w-full ${index === highlightIndex ? 'bg-gray-200 dark:bg-gray-700' : ''}`}
+                    ref={(el: HTMLAnchorElement | null) => {
+                      resultRefs.current[index] = el;
+                    }}
+                    className={`w-full ${index === highlightIndex ? 'bg-gray-200 dark:bg-gray-700 search-selected' : ''}`}
                     href={`${item.url}#${item.snippetId || item.headings[0]?.id}`}
+                    onClick={() => setIsOpen(false)} // Close the search dialog
                   >
                     <div className="flex items-center w-fit h-full py-3 gap-1.5 px-2">
                       <FileIcon className="h-[1.1rem] w-[1.1rem] mr-1" />{' '}

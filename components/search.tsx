@@ -12,7 +12,17 @@ import {
   DialogClose,
   DialogTitle,
 } from '@/components/ui/dialog';
-import Anchor from './anchor';
+import React from 'react';
+const Anchor = React.forwardRef<HTMLAnchorElement, React.ComponentProps<'a'>>(
+  ({children, ...props}, ref) => {
+    return (
+      <a ref={ref} {...props}>
+        {children}
+      </a>
+    );
+  },
+);
+Anchor.displayName = 'Anchor';
 import {ScrollArea} from '@/components/ui/scroll-area';
 
 // Define the type for a search document

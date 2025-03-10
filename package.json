@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "npm run build:search && next build",
     "build:search": "tsx lib/generateSearchIndex.ts",
-    "start": "next start",
+    "start": "npm run build:search && next start",
     "lint": "next lint",
     "format": "prettier --write .",
     "links": "blc http://localhost:3000/ -ro --exclude 'https://discord.rocicorp.dev/' --exclude 'https://bsky.app/profile/zero.rocicorp.dev' --exclude 'https://x.com/rocicorp_zero'"

@@ -1,0 +1,150 @@
+---
+title: Expo
+---
+
+Zero has built-in support for Expo and React Native using the `expo-sqlite` and `op-sqlite` packages.
+
+## Prerequisites
+
+The `crypto` API is not available in React Native, so we need to polyfill it.
+
+
+First, install the `expo-crypto` package. See the [expo-crypto docs](https://docs.expo.dev/versions/latest/sdk/crypto/) for more information.
+
+```bash
+npx expo install expo-crypto
+```
+
+Then create a new file in your project, e.g. `lib/crypto.ts`, and add the following code:
+
+```tsx
+// lib/crypto.ts
+import * as Crypto from 'expo-crypto';
+
+declare const global: {
+  crypto: {
+    getRandomValues(array: Uint8Array): Uint8Array;
+    randomUUID(): string;
+  };
+};
+
+export function bootCryptoPolyfill() {
+  if (global.crypto) {
+    return;
+  }
+
+  global.crypto = {
+    getRandomValues(array: Uint8Array) {
+      return Crypto.getRandomValues(array);
+    },
+    randomUUID() {
+      return Crypto.randomUUID();
+    },
+  };
+}
+```
+
+This will allow you to use the `crypto` API in your React Native project such as `crypto.getRandomValues()` and `crypto.randomUUID()`.
+
+## Expo SQLite
+
+For more information on how to use the `expo-sqlite` package, see the [expo-sqlite docs](https://docs.expo.dev/versions/latest/sdk/sqlite/).
+
+Remember to install the dependencies:
+
+```bash
+npx expo install expo-sqlite
+```
+
+## OP-SQLite
+
+For more information on how to use the `op-sqlite` package, see the [op-sqlite docs](https://github.com/OP-Engineering/op-sqlite).
+
+Per the docs, if you are using Expo, you cannot add this library on a expo-go app, you need to pre-build your app.
+
+```bash
+npx expo install @op-engineering/op-sqlite
+npx expo prebuild
+```
+
+## Usage
+
+In your mobile app's root index or layout file, wrap your app's with the `ZeroProvider` component:
+
+```tsx
+// apps/my-app/_layout.tsx
+import '../globals.css';
+import {Zero} from '@rocicorp/zero';
+import {ZeroProvider} from '@rocicorp/zero/react';
+import {createExpoSQLiteStore} from '@rocicorp/zero/expo';
+// or if using op-sqlite
+// import { createOPSQLiteStore } from '@rocicorp/zero/op-sqlite';
+
+import {Stack} from 'expo-router';
+import {useMemo} from 'react';
+import {schema} from '../lib/schema'; // or wherever you have your schema
+
+export const unstable_settings = {
+  // Ensure that reloading on `/modal` keeps a back button present.
+  initialRouteName: '(tabs)',
+};
+
+export default function RootLayout() {
+  // In production, memoize the Zero instance so it's only created once per app lifecycle
+  // Note: If you intend to use Expo Web, you should use kvStore: 'mem' or 'idb' with a check like
+  // const store = Platform.OS === 'web' ? 'idb' : createExpoSQLiteStore;
+  const z = useMemo(
+    () =>
+      new Zero({
+        userID: 'your-user-id',
+        auth: 'your-auth-token',
+        server: process.env.EXPO_PUBLIC_SERVER_URL, // see https://docs.expo.dev/guides/environment-variables/
+        kvStore: createExpoSQLiteStore,
+        // kvStore: createExpoSQLiteStore, // or if using op-sqlite
+        schema,
+      }),
+    [userId, authToken],
+  );
+
+  if (!z) {
+    return null;
+  }
+
+  return (
+    <ZeroProvider zero={z}>
+      <Stack>
+        <Stack.Screen name="(tabs)" options={{headerShown: false}} />
+        <Stack.Screen name="modal" options={{presentation: 'modal'}} />
+      </Stack>
+    </ZeroProvider>
+  );
+}
+```
+
+Interact with the Zero instance in your components using the `zero/react` package. Please see the [React docs](react) for more details.
+
+```tsx
+import {useQuery, useZero} from '@rocicorp/zero/react';
+
+function IssueList() {
+  const z = useZero();
+
+  let issueQuery = z.query.issue
+    .related('creator')
+    .related('labels')
+    .limit(100);
+
+  const userID = selectedUserID();
+
+  if (userID) {
+    issueQuery = issueQuery.where('creatorID', '=', userID);
+  }
+
+  const [issues, issuesDetail] = useQuery(issueQuery);
+
+  // Your component React Native JSX
+  return <View>...</View>;
+}
+```
+
+Complete quickstart here: COMING SOON

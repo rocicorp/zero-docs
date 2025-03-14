@@ -27,7 +27,7 @@ A running `zero-cache` is composed of a single `replication-manager` node and mu
 **CVR DB:** A Postgres DB used by Zero to store Client View Records (CVRs). CVRs track the state of each synced client.
 
 <Note type="note">
-The Change DB and CVR DBs can be the same physical Postgres database as the Upstream DB. Zero stores their tables in separate Postgres schemas so they won't conflict with your application data.
+The Change DB and CVR DBs are typically the same physical Postgres database as the Upstream DB. Zero stores their tables in separate Postgres schemas so they won't conflict with your application data.
 
 We allow separate DBs so that they can be scaled and tuned independently if desired.
 </Note>

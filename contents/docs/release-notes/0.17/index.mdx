@@ -1,0 +1,39 @@
+---
+title: Zero 0.17
+description: Background Queries
+---
+
+## Install
+
+```bash
+npm install @rocicorp/zero@0.17
+```
+
+## Upgrading
+
+See the upgrade from [hello-zero](https://github.com/rocicorp/hello-zero/pull/31) or [hello-zero-solid](https://github.com/rocicorp/hello-zero-solid/pull/16) for an example.
+
+## Features
+
+- Queries now take an optional `ttl` argument. This argument _backgrounds_ queries for some time after the app stops using them. Background queries continue syncing so they are instantly ready if the UI re-requests them. The data from background queries is also available to be used by new queries where possible ([doc](/docs/reading-data#query-lifecycle)).
+- Structural schema versioning. This is TypeScript, why are we versioning with numbers like cave-people?? We got rid of `schemaVersion` concept entirely and now determine schema compatibility completely automatically, TS-stylie ([doc](/docs/zero-schema/#migrations)).
+- Permissions now scoped to _"apps"_. You can now have different Zero "apps" talking to the same upstream database. Each app gets completely separate configuration and permissions. This should also enable previewing `zero-cache` (each preview would be its own app). Apps replace the existing "shard" concept ([doc](/docs/zero-cache-config#app-id)).
+- Initial replication is over 5x faster, up to about 50MB/second or 15k row/second in our tests.
+- Added warnings for slow hydration in both client and server ([doc](/docs/reading-data#thinking-in-queries)).
+- `auto-reset` is now enabled by default for databases that don't support event triggers ([doc](/docs/connecting-to-postgres#schema-changes)).
+- Default `cvr` and `change` databases to `upstream`, so that you don't have to specify them in the common case where they are the same as upstream.
+- This docs site now has search!
+
+## Fixes
+
+- Certain kinds of many:many joins were causing `node already exists` assertions
+- Certain kinds of `or` queries were causing consistency issues
+- Support `replica identity full` for PostgreSQL tables
+- We now print a stack trace during close  at `debug` level to enable debugging errors where Zero is accessed after close.
+- We now print a warning when `IndexedDB` is missing rather than throwing. This makes it a little easier to use Zero in SSR setups.
+- We now reset `zero-cache` implicitly in a few edge cases rather than halting replication.
+- Fixed a deadlock in `change-streamer`.
+
+## Breaking Changes
+
+- `query.run()` now returns its result via promise. This is required for compatibility with upcoming custom mutators, but also will allow us to wait for server results in the future (though that (still 😢) doesn't exist yet).

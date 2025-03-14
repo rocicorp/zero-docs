@@ -14,17 +14,15 @@ Here are some common Postgres options and what we know about their support level
 | AWS Aurora                        | ✅ v15.6+ |
 | Google Cloud SQL                  | ✅ See [notes below](#google-cloud-sql) |
 | [Fly.io](http://Fly.io) Postgres  | ✅ |
-| Supabase, Neon, Render, Heroku    | 🤷‍♂️ Partial support with the `auto-reset` flag. See [Schema Changes](#schema-changes), below. See [Supabase notes](#supabase) below. |
+| Supabase, Neon, Render, Heroku    | 🤷‍♂️ Partial support with autoreset. See [Schema Changes](#schema-changes) and provider-specific notes below. |
 
 ## Schema Changes
 
-Zero uses Postgres “[Event Triggers](https://www.postgresql.org/docs/current/sql-createeventtrigger.html)” to implement high-quality, efficient [schema migration](migrations). Event Triggers typically requires superuser access to Postgres.
+Zero uses Postgres “[Event Triggers](https://www.postgresql.org/docs/current/sql-createeventtrigger.html)” when possible to implement high-quality, efficient [schema migration](zero-schema/#migrations).
 
-Hosted Postgres providers like Supabase and Neon don’t provide superuser access.
+Some hosted Postgres providers don’t provide access to Event Triggers.
 
-Zero can still works without Event Triggers, but for correctness, any schema change triggers a full rebuild of all server-side and client-side state. For small databases (< 1GB) this can be OK, but for bigger databases we recommend choosing a provider that grants access to Event Triggers.
-
-To enable support for these databases, use the [`auto-reset`](/docs/zero-cache-config) flag.
+Zero still works out of the box with these providers, but for correctness, any schema change triggers a full reset of all server-side and client-side state. For small databases (< 1GB) this can be OK, but for bigger databases we recommend choosing a provider that grants access to Event Triggers.
 
 ## Configuration
 

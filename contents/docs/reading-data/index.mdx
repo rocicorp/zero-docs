@@ -270,50 +270,100 @@ z.query.issue.where({cmp, or, exists} =>
 );
 ```
 
-## Query and Data Lifetime
+## Data Lifetime and Reuse
 
-ZQL reuses data already synced to the client when possible for instant query results.
+Zero reuses data synced from prior queries to answer new queries when possible. This is what enables instant UI transitions.
 
-But what determines whether such data will be available? Zero tracks which queries return each row, and keeps a row around as long as any query that returns it is still running.
+But what controls the lifetime of this client-side data? How can you know whether any partiular query will return instant results? How can you know whether those results will be up to date or stale?
 
-This means that to reason about whether a query will return results locally (without flicker), you should think about what other queries are currently running, not about what data is local. Data exists locally if and only if there is a query running that returns that data.
+The answer is that the data on the client is simply the union of rows returned from queries which are currently syncing. Once a row is no longer returned by any syncing query, it is removed from the client. Thus, there is never any stale data in Zero.
 
-Zero currently has a number of different features (and one bug) that influence whether a query is running:
+So when you are thinking about whether a query is going to return results instantly, you should think about _what other queries are syncing_, not about what data is local. Data exists locally if and only if there is a query syncing that returns that data.
 
-### 1. UI Queries
+<Note type="note" heading="Caches vs Replicas">
+  This is why we often say that despite the name `zero-cache`, Zero is not technically a cache. It's a *replica*.
 
-`const myView = myQuery.materialize()` creates a query on both the client and server that lives until you call `myView.destroy()`.
+  A cache has a random set of rows with a random set of versions. There is no expectation that the cache any particular rows, or that the rows' have matching versions. Rows are simply updated as they are fetched.
+  
+  A replica by contrast is eagerly updated, whether or not any client has requested a row. A replica is always very close to up-to-date, and always self-consistent.
 
-Typically you won't use this API though, you'll use the higher-level `useQuery`. This means that the lifetime of `useQuery` queries is just the lifetime of the component that called them. The data synced by these queries will be deleted when the query unmounts.
+  Zero is a *partial* replica because it only replicates rows that are returned by syncing queries.
+</Note>
 
-### 2. Preload Queries
+## Query Lifecycle
 
-`const result = myQuery.preload()` creates a query only on the server. The query lives until you call `result.cleanup()`. This is useful when you want to preload a large query, but don't need to display most of it. For example, zbugs currently uses `preload()` to load all issue rows and the first 10 comments from each issue.
+<ImageLightbox src="/images/reading-data/query-lifecycle.png" alt="Diagram of query lifecycle" />
 
-### 3. One-Time Queries
+Queries can be either _active_ or _backgrounded_. An active query is one that is currently being used by the application. Backgrounded queries are not currently in use, but continue syncing in case they are needed again soon.
 
-`const result = myQuery.run()`. This runs a query exactly once. The query is immediately destroyed implicitly.
+Active queries are created one of three ways:
 
-### 4. Open Queries are Leaked on Page Unload
+1. The app calls `q.materialize()` to get a `View`.
+2. The app uses a platform binding like React's `useQuery(q)`.
+3. The app calls [`preload()`](#preloading) to sync larger queries without a view.
 
-[An open bug](https://bugs.rocicorp.dev/issue/3476) results in any queries open on page unload staying open forever for the browser profile.
+Active queries sync until they are _deactivated_. The way this happens depends on how the query was created:
 
-### Putting it All Together
+1. For `materialize()` queries, the UI calls `destroy()` on the view.
+2. For `useQuery()`, the UI unmounts the component (which calls `destroy()` under the covers).
+3. For `preload()`, the UI calls `cleanup()` on the return value of `preload()`.
 
-Putting these four mechanisms together, the current behavior is something like:
+### Background Queries
 
-- The lifetime of `useQuery` queries is component lifetime.
-- The lifetime of `preload` queries is forever (unless you call `cleanup()`, which almost nobody does).
+By default a deactivated query stops syncing immediately.
 
-This is pretty bad, but still somehow works surprisingly well for zbugs.
+But it's often useful to keep queries syncing beyond deactivation in case the UI needs the same or a similar query in the near future. This is accomplished with the `ttl` parameter:
 
-### Future Behavior
+```ts
+const [user] = useQuery(
+  z.query.user.where('id', userId),
+  {ttl: '1d'}
+);
+```
 
-We are working on adding an LRU cache for queries, so that they aren't removed from the server when the client stops listening. This means that if you do a query, then the same query a little later, it will typically resolve instantly automatically.
+The `ttl` paramater specifies how long the app developer wishes the query to run inthe background. The following formats are allowed (where `%d` is a positive integer):
+
+| Format | Meaning |
+| ------ | ------- |
+| `none` | No backgrounding. Query will immediately stop when deactivated. This is the default. |
+| `%ds`  | Number of seconds. |
+| `%dm`  | Number of minutes. |
+| `%dh`  | Number of hours. |
+| `%dd`  | Number of days. |
+| `%dy`  | Number of years. |
+| `forever` | Query will never be stopped. |
+
+If the UI re-requests a background query, it becomes an active query again. Since the query was syncing in the background, the very first synchronous result that the UI receives after reactivation will be up-to-date with the server (i.e., it will have `resultType` of `complete`).
+
+Just like other types of queries, the data from background queries is available for use by new queries. A common pattern in to [preload](#preloading) a subset of most commonly needed data with `{ttl: 'forever'}` and then do more specific queries from the UI with, e.g., `{ttl: '1d'}`. Most often the preloaded data will be able to answer user queries, but if not, the new query will be answered by the server and backgrounded for a day in case the user revisits it.
+
+### Client Capacity Management
+
+Zero has a soft limit of 20,000 rows on the client-side, or about 20MB of data assuming 1KB rows.
+
+Here is how this limit is managed:
+
+1. Active queries are never destroyed, even if the limit is exceeded. Developers are expected to keep active queries well under the limit.
+2. The `ttl` value counts from the moment a query deactivates. Backgrounded queries are destroyed immediately when the `ttl` is reached, even if the limit hasn't been reached.
+3. If the client exceeds its limit, Zero will destroy backgrounded queries, least-recently-used first, until the store is under the limit again.
+
+### Thinking in Queries
+
+Although IVM is a very efficient way to keep queries up to date relative to re-running them, it isn't free. You still need to think about how many queries you are creating, how long they are kept alive, and how expensive they are.
+
+This is why Zero defaults to *not* backgrounding queries and doesn't try to aggressively fill its client datastore to capacity. You should put some thought into what queries you want to run in the background, and for how long.
+
+Zero currently provides a few basic tools to understand the cost of your queries:
+
+* The client logs a warning for slow query materializations. Look for `Slow query materialization` in your logs. The default threshold is `5s` (including network) but this is configurable with the `slowMaterializeThreshold` parameter.
+* The client logs the materialization time of all queries at the `debug` level. Look for `Materialized query` in your logs.
+* The server logs a warning for slow query materializations. Look for `Slow query materialization` in your logs. The default threshold is `5s` but this is configurable with the `log-slow-materialize-threshold` configuration parameter.
+
+We will be adding more tools over time.
 
 ## Completeness
 
-Zero returns whatever data it has in its cache immediately for a query, then falls back to the server for any missing data. Sometimes it's useful to know the difference between these two types of results. To do so, use the `result` from `useQuery`:
+Zero returns whatever data it has on the client immediately for a query, then falls back to the server for any missing data. Sometimes it's useful to know the difference between these two types of results. To do so, use the `result` from `useQuery`:
 
 ```tsx
 const [issues, issuesResult] = useQuery(z.query.issue);
@@ -326,11 +376,31 @@ if (issueResult.type === 'complete') {
 
 The possible values of `result.type` are currently `complete` and `unknown`.
 
-The `complete` value is currently only returned when Zero has received the server result. But in the future, Zero will be able to return this result type when it _knows_ that all possible data for this query is already available locally. Additionally, we plan to add a `prefix` result for when the data is known to be a prefix of the complete result. See [Consistency](/docs/preloading#consistency) for more information.
+The `complete` value is currently only returned when Zero has received the server result. But in the future, Zero will be able to return this result type when it _knows_ that all possible data for this query is already available locally. Additionally, we plan to add a `prefix` result for when the data is known to be a prefix of the complete result. See [Consistency](#consistency) for more information.
 
 ## Preloading
 
-See [Preloading](/docs/preloading).
+Almost all Zero apps will want to preload some data in order to maximize the “local-first” feel of instantaneous UI transitions.
+
+In Zero, preloading is done via queries – the same queries you use in the UI and for auth.
+
+However, because preload queries are usually much larger than a screenful of UI, Zero provides a special `preload()` helper to avoid the overhead of materializing the result into JS objects:
+
+```tsx
+// Preload the first 1k issues + their creator, assignee, labels, and
+// the view state for the active user.
+//
+// There's no need to render this data, so we don't use `useQuery()`:
+// this avoids the overhead of pulling all this data into JS objects.
+z.query.issue
+  .related('creator')
+  .related('assignee')
+  .related('labels')
+  .related('viewState', q => q.where('userID', z.userID).one())
+  .orderBy('created', 'desc')
+  .limit(1000)
+  .preload();
+```
 
 ## Running Queries Once
 
@@ -345,3 +415,20 @@ const results = z.query.issue.where('foo', 'bar').run();
   way, so you can't use this method to wait for an authoritative result from the
   server. See [bug 3243](https://bugs.rocicorp.dev/issue/3243) for a workaround.
 </Note>
+
+## Consistency
+
+Currently, Zero does not have any special consistency logic implemented. Each query runs against local data, and in parallel against server data.
+
+Without some care, this can lead to undesirable flickering in the UI.
+
+Imagine that you have a bug database w/ 10k issues. You preload the first 1k issues sorted by created.
+
+The user then does a query of issues assigned to themselves, sorted by created. Among the 1k issues that were preloaded there will be some assigned to the user. Since the data we preloaded is in the same order as this query, we are guaranteed that any local results will be a _prefix_ of the server results. The UX result is that the user will see some data locally instantly. If it’s not a complete screenful of data, then the server result will fill in asynchronously, but any new data from server will be at the _bottom_ of the already displayed results. The user won’t see any weird reshuffling of results when the server result comes in.
+
+Now imagine that the user switches the sort to ‘sort by modified’. This new query will run locally, and will again find some matches. But it is unlikely that the local results are a prefix of the server results. When the server result comes in, it is highly likely the user will see the results shuffle.
+
+To avoid this problem today, what you should do is preload the first `n` results of every query you intend to do in list views of your app. This ensures that when the app goes to do that query there is already a preloaded result for the first bit of it.
+
+In the future, we will be implementing a consistency model that fixes this. We will prevent Zero from returning local data when that data is not known to be a prefix of the server result. Once the consistency model is implemented, preloading can be thought of as purely a performance thing, and not required to avoid unsightly flickering.
+

@@ -33,8 +33,6 @@ export const ROUTES: EachRoute[] = [
       {title: 'Writing Data with Mutators', href: '/writing-data'},
       {title: 'Authentication', href: '/auth'},
       {title: 'Permissions', href: '/permissions'},
-      {title: 'Preloading', href: '/preloading'},
-      {title: 'Schema Migrations', href: '/migrations'},
       {title: 'Deployment', href: '/deployment'},
       {title: '`zero-cache` Config', href: '/zero-cache-config'},
       {title: 'Recipes', href: '/recipes'},

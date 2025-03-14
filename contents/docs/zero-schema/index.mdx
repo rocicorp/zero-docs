@@ -8,9 +8,11 @@ Zero applications have both a _database schema_ (the normal backend database sch
 2. Define first-class relationships between tables
 3. Define permissions for access control
 
-You do not need to define the Zero schema entirely by hand. [Community-contributed converters](./community#database-tools) exist for Prisma and Drizzle that generate the tables and relationships. It is good to know how to write the schema by hand, however, for debugging and conceptual understanding.
+<Note type="note" heading="You do not need to define the Zero schema by hand">
+[Community-contributed converters](./community#database-tools) exist for Prisma and Drizzle that generate the tables and relationships. It is good to know how the underlying Zero schemas work, however, for debugging and conceptual understanding.
+</Note>
 
-This page describes using the schema to define your tables, columns, and relationships. For information on permissions, see [Permissions](/docs/permissions). For information on migration see [Schema Migration](/docs/migrations).
+This page describes using the schema to define your tables, columns, and relationships.
 
 ## Defining the Zero Schema
 
@@ -234,3 +236,45 @@ export const schema = createSchema(
     ],
   });
 ```
+
+## Migrations
+
+Zero uses TypeScript-style structural typing to detect schema changes and implement smooth migrations.
+
+### How it Works
+
+When the Zero client connects to `zero-cache` it sends a copy of the schema it was constructed with. `zero-cache` compares this schema to the one it has, and rejects the connection with a special error code if the schema is incompatible.
+
+By default, The Zero client handles this error code by calling `location.reload()`. The intent is to to get a newer version of the app that has been updated to handle the new server schema.
+
+<Note type="note">
+It's important to update the database schema first, then the app. Otherwise a reload loop will occur.
+
+If a reload loop does occur, Zero uses exponential backoff to avoid overloading the server.
+</Note>
+
+If you want to delay this reload, you can do so by providing the `onUpdateNeeded` constructor parameter:
+
+```ts
+const z = new Zero({
+  onUpdateNeeded: updateReason => {
+    if (reason.type === 'SchemaVersionNotSupported') {
+      // Do something custom here, like show a banner.
+      // When you're ready, call `location.reload()`.      
+    }
+  },
+})
+```
+
+If the schema changes while a client is running in a compatible way, `zero-cache` syncs the schema change to the client so that it's ready when the app reloads and gets new code that needs it. If the schema changes while a client is running in an incompatible way, `zero-cache` will close the client connection with the same error code as above.
+
+### Schema Change Process
+
+Like other database-backed applications, Zero schema migration generally follow an “expand/migrate/contract” pattern:
+
+1. Implement and run an “expand” migration on the backend that is backwards compatible with existing schemas. Add new rows, tables, as well as any defaults and triggers needed for backwards compatibility.
+2. Add any new permissions required for the new tables/columns by running [`zero-deploy-permissions`](/docs/permissions#permission-deployment).
+3. Update and deploy the client app to use the new schema.
+4. Optionally, after some grace period, implement and run a “contract” migration on the backend, deleting any obsolete rows/tables.
+
+Steps 1-3 can generally be done as part of one deploy by your CI pipeline, but step 4 would be weeks later when most open clients have refreshed and gotten new code.

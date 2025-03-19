@@ -144,6 +144,8 @@ The CVR and Change data are managed in schemas named `{app-id}_{shard-num}/cvr` 
 
 Due to constraints on replication slot names, an App ID may only consist of lower-case letters, numbers, and the underscore character.
 
+Note that this option is used by both `zero-cache` and `zero-deploy-permissions`.
+
 flag: `--app-id`<br/>
 env: `ZERO_APP_ID`<br/>
 default: `zero`

@@ -418,17 +418,22 @@ const results = z.query.issue.where('foo', 'bar').run();
 
 ## Consistency
 
-Currently, Zero does not have any special consistency logic implemented. Each query runs against local data, and in parallel against server data.
+Zero always syncs a consistent partial replica of the backend database to the client. This avoids many common consistency issues that come up in classic web applications. But there are still some consistency issues to be aware of when using Zero.
 
-Without some care, this can lead to undesirable flickering in the UI.
+For example, imagine that you have a bug database w/ 10k issues. You preload the first 1k issues sorted by created.
 
-Imagine that you have a bug database w/ 10k issues. You preload the first 1k issues sorted by created.
+The user then does a query of issues assigned to themselves, sorted by created. Among the 1k issues that were preloaded imagine 100 are found that match the query. Since the data we preloaded is in the same order as this query, we are guaranteed that any local results found will be a _prefix_ of the server results.
 
-The user then does a query of issues assigned to themselves, sorted by created. Among the 1k issues that were preloaded there will be some assigned to the user. Since the data we preloaded is in the same order as this query, we are guaranteed that any local results will be a _prefix_ of the server results. The UX result is that the user will see some data locally instantly. If it’s not a complete screenful of data, then the server result will fill in asynchronously, but any new data from server will be at the _bottom_ of the already displayed results. The user won’t see any weird reshuffling of results when the server result comes in.
+The UX that result is nice: the user will see initial results to the query instantly. If more results are found server-side, those results are guaranteed to sort below the local results. There's no shuffling of results when the server response comes in.
 
-Now imagine that the user switches the sort to ‘sort by modified’. This new query will run locally, and will again find some matches. But it is unlikely that the local results are a prefix of the server results. When the server result comes in, it is highly likely the user will see the results shuffle.
+Now imagine that the user switches the sort to ‘sort by modified’. This new query will run locally, and will again find some local matches. But it is now unlikely that the local results found are a prefix of the server results. When the server result comes in, the user will probably see the results shuffle around.
 
-To avoid this problem today, what you should do is preload the first `n` results of every query you intend to do in list views of your app. This ensures that when the app goes to do that query there is already a preloaded result for the first bit of it.
+To avoid this annoying effect, what you should do in this example is also preload the first 1k issues sorted by modified desc. In general for any query shape you intend to do, you should preload the first `n` results for that query shape with no filters, in each sort you intend to use.
 
-In the future, we will be implementing a consistency model that fixes this. We will prevent Zero from returning local data when that data is not known to be a prefix of the server result. Once the consistency model is implemented, preloading can be thought of as purely a performance thing, and not required to avoid unsightly flickering.
+<Note>
+Zero will not sync duplicate copies of rows that show up in multiple queries. Zero syncs the *union* of all active queries' results.
 
+So you don't have to worry about syncing many sorts of the same query when it's likely the results will overlap heavily.
+</Note>
+
+In the future, we will be implementing a consistency model that fixes these issues automatically. We will prevent Zero from returning local data when that data is not known to be a prefix of the server result. Once the consistency model is implemented, preloading can be thought of as purely a performance thing, and not required to avoid unsightly flickering.

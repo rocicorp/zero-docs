@@ -82,12 +82,14 @@ To limit what is synced from the `zero-cache` replica to actual clients (e.g., w
 
 ## Schema changes
 
-Most Postgres schema changes (e.g. `ALTER TABLE ...`, `ALTER PUBLICATION ...`, `ALTER SCHEMA ...`) are supported. There are two special cases which require additional steps:
+Most Postgres schema changes are supported. There are two special cases which require special handling:
 
-### Adding a column with a non-constant DEFAULT value
+### Adding columns
 
-An `ALTER TABLE ... ADD COLUMN ...` statement with a non-constant `DEFAULT` value is not supported. This includes expressions with parenthesis and special functions such as `CURRENT_TIME`, `CURRENT_DATE`, or `CURRENT_TIMESTAMP`.
-(This is due to a [limitation of SQLite[(https://www.sqlite.org/lang_altertable.html#altertabaddcol)]).
+Adding a column (e.g. `ALTER TABLE ... ADD COLUMN ...`) with a non-constant `DEFAULT` value is not supported. 
+
+This includes expressions with parenthesis, as well as special functions such as `CURRENT_TIME`, `CURRENT_DATE`, or `CURRENT_TIMESTAMP`.
+(This is due to a [limitation of SQLite](https://www.sqlite.org/lang_altertable.html#altertabaddcol)]).
 
 However, the `DEFAULT` value of an _existing_ column can be changed to any value, including expressions. So the workaround is to:
 
@@ -103,11 +105,11 @@ ALTER TABLE foo ALTER bar SET DEFAULT ...;
 COMMIT;
 ```
 
-### Adding tables or columns to a `PUBLICATION`
+### Changing publications
 
-Postgres allows you to change the tables and/or columns that are published to the subscriber using an `ALTER PUBLICATION` statement. Zero will automatically adjust the tables and columns on the replica in response to changes in the publication, but it will not receive any of the existing data in those columns.
+Postgres allows you to change the published tables/columns using an `ALTER PUBLICATION` statement. Zero will automatically adjust the tables and columns on the replica in response to these changes, but it will not receive any of the existing data in those tables/columns.
 
-The workaround for this is to "touch" all of the rows in the added table to force postgres to stream the data to Zero:
+The workaround for this is to "touch" all of the rows in the table with an innocuous `UPDATE` to force postgres to stream the data to Zero:
 
 ```sql
 BEGIN;

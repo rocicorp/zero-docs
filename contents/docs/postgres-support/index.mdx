@@ -2,7 +2,14 @@
 title: Supported Postgres Features
 ---
 
-Postgres has a massive featureset, of which Zero supports a growings subset.
+Postgres has a massive feature set, of which Zero supports a growings subset.
+
+## Object Names
+
+- Table and column names must begin with a letter or underscore
+  - This can be followed letters, numbers, underscores, and hyphens
+  - Regex: `/^[A-Za-z_]+[A-Za-z0-9_-]*$/`
+- The column name `_0_version` is reserved for internal use
 
 ## Object Types
 
@@ -72,6 +79,29 @@ CREATE PUBLICATION zero_data FOR TABLE users (col1, col2, col3, ...), issues, co
 Then, specify this publication in the [App Publications](/docs/zero-cache-config#app-publications) `zero-cache` option. (By default, Zero creates a publication that publishes the entire public schema.)
 
 To limit what is synced from the `zero-cache` replica to actual clients (e.g., web browsers) you can use [read permissions](/docs/permissions#select-permissions).
+
+## Schema changes
+
+Most Postgres schema changes (e.g. `ALTER TABLE ...`, `ALTER PUBLICATION ...`, `ALTER SCHEMA ...`) are supported. There are two special cases which require additional steps:
+
+### Adding a column with a non-constant DEFAULT value
+
+`ALTER TABLE ... ADD COLUMN ...` with a non-constant `DEFAULT` value is not supported. This includes expressions with parenthesis and special functions such as `CURRENT_TIME`, `CURRENT_DATE`, or `CURRENT_TIMESTAMP`.
+(This is due to a [limitation of SQLite[(https://www.sqlite.org/lang_altertable.html#altertabaddcol)]).
+
+However, the `DEFAULT` value of an _existing_ column can be changed to any arbitrary expression. So the workaround is to:
+
+* Add the column with no `DEFAULT` value
+* Backfill the column with desired values
+* Set the column's `DEFAULT` value
+
+```sql
+BEGIN;
+ALTER TABLE foo ADD bar ...;  -- without a DEFAULT value
+UPDATE foo SET bar = ...;
+ALTER TABLE foo ALTER bar SET DEFAULT ...;
+COMMIT;
+```
 
 ## Self-Referential Relationships
 

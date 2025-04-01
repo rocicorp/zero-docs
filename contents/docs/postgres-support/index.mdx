@@ -88,10 +88,10 @@ Most Postgres schema changes are supported. There are two special cases which re
 
 Adding a column (e.g. `ALTER TABLE ... ADD COLUMN ...`) with a non-constant `DEFAULT` value is not supported. 
 
-This includes expressions with parenthesis, as well as special functions such as `CURRENT_TIME`, `CURRENT_DATE`, or `CURRENT_TIMESTAMP`.
+This includes any expression with parenthesis, as well as the special functions `CURRENT_TIME`, `CURRENT_DATE`, and `CURRENT_TIMESTAMP`.
 (This is due to a [limitation of SQLite](https://www.sqlite.org/lang_altertable.html#altertabaddcol)).
 
-However, the `DEFAULT` value of an _existing_ column can be changed to any value, including expressions. To achieve the desired column default:
+However, the `DEFAULT` value of an _existing_ column can be changed to any value, including non-constant expressions. To achieve the desired column default:
 
 * Add the column with no `DEFAULT` value
 * Backfill the column with desired values

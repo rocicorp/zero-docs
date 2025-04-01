@@ -111,7 +111,7 @@ COMMIT;
 
 ### Changing publications
 
-Postgres allows you to change published tables/columns with an `ALTER PUBLICATION` statement. Zero automatically adjusts the tables and columns on the replica in response to these changes, but it does not receive the pre-existing data in the tables/columns.
+Postgres allows you to change published tables/columns with an `ALTER PUBLICATION` statement. Zero automatically adjusts the tables and columns on the replica, but it does not receive the pre-existing data in the tables/columns.
 
 To stream the pre-existing data to Zero, make an innocuous `UPDATE` after adding the tables/columns to the publication:
 

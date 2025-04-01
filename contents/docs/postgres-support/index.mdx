@@ -90,8 +90,8 @@ Two cases which require special handling:
 
 Adding a column (e.g. `ALTER TABLE ... ADD COLUMN ...`) with a non-constant `DEFAULT` value is not supported. 
 
-This includes any expression with parenthesis, as well as the special functions `CURRENT_TIME`, `CURRENT_DATE`, and `CURRENT_TIMESTAMP`.
-(This is due to a [limitation of SQLite](https://www.sqlite.org/lang_altertable.html#altertabaddcol)).
+This includes any expression with parenthesis, as well as the special functions `CURRENT_TIME`, `CURRENT_DATE`, and `CURRENT_TIMESTAMP`
+(due to a [constraint of SQLite](https://www.sqlite.org/lang_altertable.html#altertabaddcol)).
 
 However, the `DEFAULT` value of an _existing_ column can be changed to any value, including non-constant expressions. To achieve the desired column default:
 

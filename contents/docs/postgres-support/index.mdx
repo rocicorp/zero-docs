@@ -2,7 +2,14 @@
 title: Supported Postgres Features
 ---
 
-Postgres has a massive featureset, of which Zero supports a growings subset.
+Postgres has a massive feature set, of which Zero supports a growings subset.
+
+## Object Names
+
+- Table and column names must begin with a letter or underscore
+  - This can be followed letters, numbers, underscores, and hyphens
+  - Regex: `/^[A-Za-z_]+[A-Za-z0-9_-]*$/`
+- The column name `_0_version` is reserved for internal use
 
 ## Object Types
 
@@ -72,6 +79,53 @@ CREATE PUBLICATION zero_data FOR TABLE users (col1, col2, col3, ...), issues, co
 Then, specify this publication in the [App Publications](/docs/zero-cache-config#app-publications) `zero-cache` option. (By default, Zero creates a publication that publishes the entire public schema.)
 
 To limit what is synced from the `zero-cache` replica to actual clients (e.g., web browsers) you can use [read permissions](/docs/permissions#select-permissions).
+
+## Schema changes
+
+Most Postgres schema changes are supported as is. 
+
+Two cases which require special handling:
+
+### Adding columns
+
+Adding a column with a non-constant `DEFAULT` value is not supported. 
+
+This includes any expression with parenthesis, as well as the special functions `CURRENT_TIME`, `CURRENT_DATE`, and `CURRENT_TIMESTAMP`
+(due to a [constraint of SQLite](https://www.sqlite.org/lang_altertable.html#altertabaddcol)).
+
+However, the `DEFAULT` value of an _existing_ column can be changed to any value, including non-constant expressions. To achieve the desired column default:
+
+* Add the column with no `DEFAULT` value
+* Backfill the column with desired values
+* Set the column's `DEFAULT` value
+
+```sql
+BEGIN;
+
+ALTER TABLE foo ADD bar ...;  -- without a DEFAULT value
+UPDATE foo SET bar = ...;
+ALTER TABLE foo ALTER bar SET DEFAULT ...;
+
+COMMIT;
+```
+
+### Changing publications
+
+Postgres allows you to change published tables/columns with an `ALTER PUBLICATION` statement. Zero automatically adjusts the table schemas on the replica, but it does not receive the pre-existing data.
+
+To stream the pre-existing data to Zero, make an innocuous `UPDATE` after adding the tables/columns to the publication:
+
+```sql
+BEGIN;
+
+ALTER PUBLICATION zero_data ADD TABLE foo;
+
+ALTER TABLE foo REPLICA IDENTITY FULL;
+UPDATE foo SET id = id;  -- For some column "id" in "foo"
+ALTER TABLE foo REPLICA IDENTITY DEFAULT;
+
+COMMIT;
+```
 
 ## Self-Referential Relationships
 

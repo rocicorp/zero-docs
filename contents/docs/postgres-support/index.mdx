@@ -89,9 +89,9 @@ Most Postgres schema changes are supported. There are two special cases which re
 Adding a column (e.g. `ALTER TABLE ... ADD COLUMN ...`) with a non-constant `DEFAULT` value is not supported. 
 
 This includes expressions with parenthesis, as well as special functions such as `CURRENT_TIME`, `CURRENT_DATE`, or `CURRENT_TIMESTAMP`.
-(This is due to a [limitation of SQLite](https://www.sqlite.org/lang_altertable.html#altertabaddcol)]).
+(This is due to a [limitation of SQLite](https://www.sqlite.org/lang_altertable.html#altertabaddcol)).
 
-However, the `DEFAULT` value of an _existing_ column can be changed to any value, including expressions. So the workaround is to:
+However, the `DEFAULT` value of an _existing_ column can be changed to any value, including expressions. To achieve the desired column default:
 
 * Add the column with no `DEFAULT` value
 * Backfill the column with desired values
@@ -109,7 +109,7 @@ COMMIT;
 
 Postgres allows you to change the published tables/columns using an `ALTER PUBLICATION` statement. Zero will automatically adjust the tables and columns on the replica in response to these changes, but it will not receive any of the existing data in those tables/columns.
 
-The workaround for this is to "touch" all of the rows in the table with an innocuous `UPDATE` to force postgres to stream the data to Zero:
+To stream the table data to Zero, make an innocuous `UPDATE` after adding the table/columns to the publication:
 
 ```sql
 BEGIN;

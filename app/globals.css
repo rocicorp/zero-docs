@@ -90,6 +90,11 @@ mark {
   background-color: var(--primary-highlight);
 }
 
+.new-badge {
+  color: var(--primary-highlight);
+  border-color: var(--primary-highlight);
+}
+
 .top-nav {
   height: 4.5rem;
 }

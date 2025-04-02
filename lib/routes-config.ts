@@ -4,6 +4,7 @@ export type EachRoute = {
   title: string;
   href: string;
   noLink?: true;
+  new?: boolean;
   items?: EachRoute[];
 };
 
@@ -12,6 +13,7 @@ export const ROUTES: EachRoute[] = [
     title: 'Welcome',
     href: '',
     noLink: true,
+    new: false,
     items: [
       {title: 'Introduction', href: '/introduction'},
       {title: 'Quickstart', href: '/quickstart'},

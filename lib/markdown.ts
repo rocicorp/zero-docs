@@ -107,5 +107,8 @@ function sluggify(text: string) {
 
 // Get the file path for the docs based on the slug
 function getDocsContentPath(slug: string) {
+  if (slug.endsWith('.mdx')) {
+    return path.join(process.cwd(), '/contents/docs/', `${slug}`);
+  }
   return path.join(process.cwd(), '/contents/docs/', `${slug}/index.mdx`);
 }

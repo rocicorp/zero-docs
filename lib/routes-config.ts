@@ -51,6 +51,19 @@ export const ROUTES: EachRoute[] = [
   },
 
   {
+    title: 'Debugging',
+    href: '',
+    noLink: true,
+    items: [
+      {title: 'Inspector API', href: '/debug/inspector.mdx'},
+      {title: 'Slow Queries', href: '/debug/slow-queries.mdx'},
+      {title: 'Permissions', href: '/debug/permissions.mdx'},
+      {title: 'Replication', href: '/debug/replication.mdx'},
+      {title: 'Query ASTs', href: '/debug/query-asts.mdx'},
+    ],
+  },
+
+  {
     title: 'Meta',
     href: '',
     noLink: true,

@@ -20,12 +20,18 @@ export default function SubLink({
   noLink,
   level,
   isSheet,
+  new: isNew,
 }: EachRoute & {level: number; isSheet: boolean}) {
   const [isOpen, setIsOpen] = useState(level == 0);
 
   const Comp = (
     <Anchor activeClassName="text-primary font-semibold" href={href}>
       {title}
+      {isNew && (
+        <span className="new-badge ml-2 rounded px-1 py-0.5 text-xs font-semibold border">
+          NEW
+        </span>
+      )}
     </Anchor>
   );
 

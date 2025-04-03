@@ -1,0 +1,19 @@
+---
+title: Debugging Permissions
+---
+
+Given that permissions are defined in their own file and internally applied to queries, it might be hard to figure out if or why a permission check is failing.
+
+The `transform-query` utility is provided to transform a query by applying permissions to it. As of today you'll need to provide the hash of the query you want to transform. You can find this in server logs, websocket network inspector, or in the cvr database. In a future release, you'll be able to write ZQL directly.
+
+```ts
+npx transform-query --hash=2i81bazy03a00 --schema=./shared/schema.ts
+```
+
+The output will be the ZQL query with permissions applied as well as the AST of that query.
+
+<Note type="note">
+  The printed AST is slightly different than the source ZQL string as it
+  leverages internal APIs to prevent syncing rows that are used strictly for
+  permission checks.
+</Note>

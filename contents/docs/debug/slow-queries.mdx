@@ -1,0 +1,69 @@
+---
+title: Slow Queries (zero-cache)
+---
+
+In the `zero-cache` logs, you may see statements like:
+
+```shell
+{
+    "level": "DEBUG",
+    "worker": "syncer",
+    "component": "view-syncer",
+    "hydrationTimeMs": 1339,
+    "message": "Total rows considered: 146"
+  },
+```
+
+or
+
+```shell
+hash=3rhuw19xt9vry transformationHash=1nv7ot74gxfl7 Slow query materialization 325.46865100000286
+```
+
+indicating that a query is slow.
+
+What can you do?
+
+## 1. Check Storage
+
+`zero-cache` is effectively a database. It requires fast (low latency and high bandwidth) disk access to perform well. If you're running on network attached storage with high latency, or on AWS with low IOPS, then this is the most likely culprit.
+
+The default deployment of Zero currently uses Fargate which scales IOPS with vCPU. Increasing the vCPU will increase storage throughput and likely resolve the issue.
+
+Fly.io provides physically attached SSDs, even for their smallest VMs. Deploying zero-cache there (or any other provider that offers physically attached SSDs) is another option.
+
+## 2. Locality
+
+If you see log lines like:
+
+```shell
+flushed cvr ... (124ms)
+```
+
+this indicates that zero-cache is likely deployed too far away from your CVR database. If you did not configure a CVR database URL then this will be your product's Postgres DB. A slow CVR flush can slow down queries as we must complete the flush before we send the query result(s) to the client.
+
+Try moving zero-cache to be deployed as close as possible to the CVR database.
+
+## 3. Query Plan
+
+If neither (1) nor (2) is a problem, then the query itself is the most likely culprit. The `@rocicorp/zero` package ships with a query analyzer to help debug this.
+
+The analyzer should be run in the directory that contains the `.env` file for zero-cache as it will use the `.env` file to find your replica.
+
+Example:
+
+```shell
+npx analyze-query \
+  --schema=./shared/schema.ts \
+  --query='issue.related("comments")'
+```
+
+This will output the query plan and time to execute each phase of that plan.
+
+If you're unsure which query is slow, or you do not know what it looks like after permissions have been applied, you can obtain the query from the hash that is output in the server logs (e.g., `hash=3rhuw19xt9vry`):
+
+```shell
+npx transform-query --hash=2i81bazy03a00 --schema=./shared/schema.ts
+```
+
+This will find the query with that hash in the CVR DB and output the ZQL for that query, with all read permissions applied. You can then feed this output into `analyze-query`.

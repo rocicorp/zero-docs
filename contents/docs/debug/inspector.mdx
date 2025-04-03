@@ -1,0 +1,65 @@
+---
+title: Inspector API
+---
+
+The Zero instance provides an API to gather information about the client's current state, such as:
+
+1. All active queries
+2. Query TTL
+3. Active clients
+4. Client database contents
+
+This can help figuring out why you hit loading states, how many queries are active at a time, if you have any resource leaks due to failing to clean up queries or if expected data is missing on the client.
+
+## Creating an Inspector
+
+Each `Zero` instance has an `inspect` method that will return the inspector.
+
+```ts
+const z = new Zero({
+  /*your zero options*/
+});
+const inspector = await z.inspect();
+```
+
+Once you have an inspector you can inspect the current client and client group.
+
+<Note type="note">
+  The client group represents the web browser. A client represents a tab or
+  window within that browser. If a user has Chrome open with 5 different tabs,
+  there will be 1 client group and 5 clients.
+</Note>
+
+```ts
+for (const query of await inspector.client.queries()) {
+  console.log(query.id); // the hash of the query
+  console.log(query.got); // if the server has returned results
+  console.log(query.zql); // the ZQL representation of the query
+}
+```
+
+To inspect other clients within the group:
+
+```ts
+const allClients = await inspector.clients();
+```
+
+## Dumping Data
+
+In addition to information about queries, you can see the contents of the client side database.
+
+```ts
+const inspector = await zero.inspect();
+const client = inspector.client;
+
+// All raw k/v data currently synced to client
+console.log('client map:');
+console.log(await client.map());
+
+// kv table extracted into tables
+// This is same info that is in z.query[tableName].run()
+for (const tableName of Object.keys(schema.tables)) {
+  console.log(`table ${tableName}:`);
+  console.table(await client.rows(tableName));
+}
+```

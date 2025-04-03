@@ -33,11 +33,11 @@ export const ROUTES: EachRoute[] = [
       {title: 'Zero Schema', href: '/zero-schema'},
       {title: 'Reading Data with ZQL', href: '/reading-data'},
       {title: 'Writing Data with Mutators', href: '/writing-data'},
+      {title: 'Custom Mutators', href: '/custom-mutators', new: true},
       {title: 'Authentication', href: '/auth'},
       {title: 'Permissions', href: '/permissions'},
       {title: 'Deployment', href: '/deployment'},
       {title: '`zero-cache` Config', href: '/zero-cache-config'},
-      {title: 'Recipes', href: '/recipes'},
     ],
   },
 
@@ -49,6 +49,19 @@ export const ROUTES: EachRoute[] = [
       {title: 'React', href: '/react'},
       {title: 'SolidJS', href: '/solidjs'},
       {title: 'Community', href: '/community'},
+    ],
+  },
+
+  {
+    title: 'Debugging',
+    href: '',
+    noLink: true,
+    items: [
+      {title: 'Inspector API', href: '/debug/inspector'},
+      {title: 'Slow Queries', href: '/debug/slow-queries'},
+      {title: 'Permissions', href: '/debug/permissions'},
+      {title: 'Replication', href: '/debug/replication'},
+      {title: 'Query ASTs', href: '/debug/query-asts'},
     ],
   },
 

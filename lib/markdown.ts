@@ -60,7 +60,7 @@ async function parseMdx<Frontmatter>(rawMdx: string) {
 // Fetch and parse MDX content for a given slug
 export async function getDocsForSlug(slug: string) {
   try {
-    const contentPath = getDocsContentPath(slug);
+    const contentPath = await getDocsContentPath(slug);
     const rawMdx = await fs.readFile(contentPath, 'utf-8');
     return await parseMdx<BaseMdxFrontmatter>(rawMdx);
   } catch (err) {
@@ -71,7 +71,7 @@ export async function getDocsForSlug(slug: string) {
 
 // Generate a Table of Contents (TOC) from markdown headings
 export async function getDocsTocs(slug: string) {
-  const contentPath = getDocsContentPath(slug);
+  const contentPath = await getDocsContentPath(slug);
   const rawMdx = await fs.readFile(contentPath, 'utf-8');
   const headingsRegex = /^(#{2,4})\s(.+)$/gm; // Matches headings ## to ####
   let match;
@@ -106,6 +106,17 @@ function sluggify(text: string) {
 }
 
 // Get the file path for the docs based on the slug
-function getDocsContentPath(slug: string) {
-  return path.join(process.cwd(), '/contents/docs/', `${slug}/index.mdx`);
+async function getDocsContentPath(slug: string) {
+  if (slug.endsWith('.mdx')) {
+    return path.join(process.cwd(), '/contents/docs/', `${slug}`);
+  }
+
+  // If the file exists with .mdx extension, return that path
+  const mdxPath = path.join(process.cwd(), '/contents/docs/', `${slug}.mdx`);
+  try {
+    await fs.stat(mdxPath);
+    return mdxPath;
+  } catch {
+    return path.join(process.cwd(), '/contents/docs/', `${slug}/index.mdx`);
+  }
 }

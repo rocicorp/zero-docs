@@ -253,21 +253,9 @@ definePermissions<AuthData, Schema>(schema, () => {
 
 Delete permissions work in the same way as `insert` positions except they run _before_ the delete is applied. So if a delete rule queries the database, it will see that the deleted row is present. If any rule in the ruleset returns a row, the delete is allowed.
 
-## Debugging Permissions
+## Debugging
 
-To debug read permissions, you can set the `zero-cache` [log level](./zero-cache-config#log-level) to `debug`. Zero prints out the full query for each read with permissions applied.
-
-To debug write permissions, look for a `WARN` level log in the output from `zero-cache` like this:
-
-```
-Permission check failed for {"op":"update","tableName":"message",...}, action update, phase preMutation, authData: {...}, rowPolicies: [...], cellPolicies: []
-```
-
-Zero prints the row, auth data, and permission policies that was applied to any failed writes.
-
-<Note>
-For both types of permissions, the ZQL query is printed in Zero's internal JSON-based AST format. This is a little harder to read than the ZQL you write, but should help you understand what is going on. We'll improve this over time.
-</Note>
+See [Debugging Permissions](./debug/permissions).
 
 ## Examples
 

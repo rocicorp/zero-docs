@@ -30,6 +30,14 @@ One of [Auth JWK](#auth-jwk), [Auth JWK URL](#auth-jwk-url), or [Auth Secret](#a
 
 ## Optional Flags
 
+### Push URL
+
+The URL of the API server to which zero-cache will push mutations. Required if you use [custom mutators](/docs/custom-mutators).
+
+flag: `--push-url`<br/>
+env: `ZERO_PUSH_URL`<br/>
+required: `false`
+
 ### Upstream Max Connections
 
 The maximum number of connections to open to the upstream database for committing mutations. This is divided evenly amongst sync workers. In addition to this number, zero-cache uses one connection for the replication stream.
@@ -131,6 +139,14 @@ How often to collect IVM metrics. 1 out of N requests will be sampled where N is
 flag: `--log-ivm-sampling`<br/>
 env: `ZERO_LOG_IVM_SAMPLING`<br/>
 default: `5000`
+
+### Target Client Row Count
+
+A soft limit on the number of rows Zero will keep on the client. 20k is a good default value for most applications, and we do not recommend exceeding 100k. See [Client Capacity Management](/docs/reading-data#client-capacity-management) for more details.
+
+flag: `--target-client-row-count`<br/>
+env: `ZERO_TARGET_CLIENT_ROW_COUNT`<br/>
+default: `20000`
 
 ### App ID
 

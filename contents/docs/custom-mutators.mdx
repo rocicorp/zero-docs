@@ -59,7 +59,7 @@ async function updateIssue(tx: Transaction,
 
 Each custom mutator gets **two implementations**: one on the client and one on the server.
 
-The client implementation must be written in TypeScript against the Zero `Transaction` interface, using [ZQL](#reading-in-client-mutators) for reads and a [CRUD-style API](#writing-in-client-mutators) for writes.
+The client implementation must be written in TypeScript against the Zero `Transaction` interface, using [ZQL](#read-data-on-the-client) for reads and a [CRUD-style API](#write-data-on-the-client) for writes.
 
 The server implementation runs on your server, in your push endpoint, against your database. In principle, it can be written in any language and use any data access library. For example you could have the following Go-based server implementation of the same mutator:
 
@@ -175,7 +175,7 @@ const zero = new Zero({
 
 ### Write Data on the Client
 
-The `Transaction` interface passed to client mutators exposes the same `mutate` API as the existing [CRUD-style mutators](../writing-data):
+The `Transaction` interface passed to client mutators exposes the same `mutate` API as the existing [CRUD-style mutators](./writing-data):
 
 ```ts
 async function myMutator(tx: Transaction) {

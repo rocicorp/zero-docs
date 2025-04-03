@@ -1,0 +1,45 @@
+---
+title: Zero 0.18
+description: Custom Mutators
+---
+
+## Install
+
+```bash
+npm install @rocicorp/zero@0.18
+```
+
+## Upgrading
+
+To try out custom mutators, see the changes to [hello-zero-solid](https://github.com/rocicorp/hello-zero-solid/pull/17).
+
+## Features
+
+- Custom Mutators! Finally! Define arbitrary write operations in code ([doc](/docs/custom-mutators)).
+- Added inspector API for debugging sync, queries, and client storage ([doc](/docs/debug/inspector)).
+- Added `analyze-query` tool to debug query performance ([doc](/docs/debug/slow-queries#query-plan)).
+- Added `transform-query` tool to debug permissions ([doc](/docs/debug/permissions#read-permissions)).
+- Added `ast-to-zql` script to prettify Zero's internal AST format ([doc](/docs/debug/query-asts)).
+
+## Fixes
+
+- Added backpressure to `replication-manager` to protect against Postgres moving faster than we can push to clients ([PR](https://github.com/rocicorp/mono/pull/4089)).
+- `@rocicorp/zero/advanced` has been deprecated. `AdvancedQuery` got folded into `Query` and `ZeroAdvancedOptions` got folded into `ZeroOptions` ([PR](https://github.com/rocicorp/mono/pull/4086)).
+- Support `ALTER SCHEMA` DDL changes ([PR](https://github.com/rocicorp/mono/pull/4098))
+- Allow `replication-manager` to continue running while a new one re-replicates. ([PR](https://github.com/rocicorp/mono/pull/4124)).
+- Improve replication performance for some schema changes ([PR](https://github.com/rocicorp/mono/pull/4151)).
+- Make the log level of `zero-deploy-permissions` configurable ([PR](https://github.com/rocicorp/mono/pull/4002))
+- Bind `exists` to the expression builder ([PR](https://github.com/rocicorp/mono/pull/4010))
+- Fix `single output already exists` error ([PR](https://github.com/rocicorp/mono/pull/4020))
+- Fix `getBrowserGlobal('window')?.addEventListener not a function` in Expo (thanks `@andrewcoelho`!) ([PR](https://github.com/rocicorp/mono/pull/4037)).
+- Fix Vue bindings ref counting bug. Bindings no longer need to pass `RefCountMap` ([PR](https://github.com/rocicorp/mono/pull/4013)).
+- Fix CVR ownership takeover race conditions ([PR](https://github.com/rocicorp/mono/pull/4071)).
+- Support `REPLICA IDENTITY FULL` in degraded-mode pg providers ([PR](https://github.com/rocicorp/mono/pull/4131)).
+- Handle corrupt sqlite db by re-replicating ([PR](https://github.com/rocicorp/mono/pull/4133)).
+- Don't send useless pokes to clients that are unchanged ([PR](https://github.com/rocicorp/mono/pull/4149)).
+- Add `limit(1)` to queries using a relation that is marked `one()` ([PR](https://github.com/rocicorp/mono/pull/4154)).
+- Export `UseQueryOptions`
+
+## Breaking Changes
+
+None.

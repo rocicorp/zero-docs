@@ -40,7 +40,7 @@ This release is a bit harder to upgrade to than previous alphas. For a step-by-s
 - Default max connections of zero-cache more conservatively so that it should fit with even common small Postgres configurations.
 - `zero-cache` now accepts requests with any base path, not just `/api`. The `server` parameter to the `Zero` client constructor can now be a host (`https://myapp-myteam.zero.ms`) or a host with a single path component (`https://myapp-myteam.zero.ms/zero`). These two changes together allow hosting `zero-cache` on same domain with an app that already uses the `/api` prefix ([bug](https://bugs.rocicorp.dev/issue/3115)).
 - Allow Postgres columns with default values, but don’t sync them ([documentation](/docs/postgres-support#column-defaults)).
-- The `npx zero-sqlite` utility now accepts all the same flags and arguments that `sqlite3` does ([documentation](/docs/recipes#debugging-replication)).
+- The `npx zero-sqlite` utility now accepts all the same flags and arguments that `sqlite3` does ([documentation](/docs/debugging/replication)).
 
 ## zbugs
 

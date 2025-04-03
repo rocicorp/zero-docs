@@ -145,7 +145,7 @@ import { schema } from "./schema";
 export function createMutators() {
   return {
     issue: {
-      update: (tx, {id, title}: { id: string; title: string }) => {
+      update: async (tx, {id, title}: { id: string; title: string }) => {
         // Validate title length. Legacy issues are exempt.
         if (e.length > 100) {
           throw new Error(`Title is too long`);
@@ -216,7 +216,7 @@ You can read data within a client mutator using [ZQL](./reading-data):
 export function createMutators() {
   return {
     issue: {
-      update: (tx, {id, title}: { id: string; title: string }) => {
+      update: async (tx, {id, title}: { id: string; title: string }) => {
         // Read existing issue
         const prev = await tx.query.issue.where('id', id).one().run();
 
@@ -331,7 +331,7 @@ export function createMutators(clientMutators: CustomMutatorDefs<typeof schema>)
       // Reuse all issue mutators except `update`
       ...clientMutators.issue,
 
-      update: (tx, {id, title}: { id: string; title: string }) => {
+      update: async (tx, {id, title}: { id: string; title: string }) => {
         // Call the shared mutator first
         await clientMutators.issue.update(tx, args);
 
@@ -382,7 +382,7 @@ type AuthData = {
 export function createMutators(authData: AuthData|undefined) {
   return {
     issue: {
-      launchMissiles: (tx, args: { target: string }) => {
+      launchMissiles: async (tx, args: { target: string }) => {
         if (!authData) {
           throw new Error('Users must be logged in to launch missiles');
         }

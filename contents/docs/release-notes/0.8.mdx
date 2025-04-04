@@ -28,7 +28,6 @@ See the changes to [hello-zero](https://github.com/rocicorp/hello-zero/pull/8) o
 - **Crash with JSON Columns**. Fixed a crash when a JSON column was used in a Zero app with write permissions ([bug](https://bugs.rocicorp.dev/issue/3215))
 - **Better Connection Error Reporting**. Some connection errors would cause `zero-cache` to exit silently. Now they are returned to client and logged.
 
-
 ## Breaking Changes
 
 - `useQuery` in React now returns a 2-tuple of `[rows, result]` where `result` is an object with a `type` field.

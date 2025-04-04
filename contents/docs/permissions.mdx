@@ -20,7 +20,7 @@ type AuthData = {
 export const permissions = definePermissions<AuthData, Schema>(schema, () => {
   const allowIfIssueCreator = (
     authData: AuthData,
-    {cmp}: ExpressionBuilder<Schema, "issue">,
+    {cmp}: ExpressionBuilder<Schema, 'issue'>,
   ) => cmp('creatorID', authData.sub);
 
   return {
@@ -42,7 +42,7 @@ If you don't specify any rules for an operation, it is denied by default. This i
 To enable full access to an action (i.e., during development) use the `ANYONE_CAN` helper:
 
 ```ts
-import { ANYONE_CAN } from '@rocicorp/zero';
+import {ANYONE_CAN} from '@rocicorp/zero';
 
 const permissions = definePermissions<AuthData, Schema>(schema, () => {
   return {
@@ -60,7 +60,7 @@ const permissions = definePermissions<AuthData, Schema>(schema, () => {
 To do this for all actions, use `ANYONE_CAN_DO_ANYTHING`:
 
 ```ts
-import { ANYONE_CAN_DO_ANYTHING } from '@rocicorp/zero';
+import {ANYONE_CAN_DO_ANYTHING} from '@rocicorp/zero';
 
 const permissions = definePermissions<AuthData, Schema>(schema, () => {
   return {
@@ -81,11 +81,12 @@ The compilation process is very simple-minded (read: dumb). Despite looking like
 
 The end result is that you can't really use most features of JS in these rules. Specifically you cannot:
 
-* Iterate over properties or array elements in the auth token
-* Use any JS features beyond property access of `AuthData`
-* Use any conditional or global state
+- Iterate over properties or array elements in the auth token
+- Use any JS features beyond property access of `AuthData`
+- Use any conditional or global state
 
 Basically only property access is allowed. This is really confusing and we're working on a better solution.
+
 </Note>
 
 ## Permission Deployment
@@ -96,7 +97,7 @@ For production, you need to call `npx zero-deploy-permissions` within your app t
 
 ```ts
 new command.local.Command(
-  "zero-deploy-permissions",
+  'zero-deploy-permissions',
   {
     create: `npx zero-deploy-permissions -p ../../src/schema.ts`,
     // Run the Command on every deploy ...
@@ -108,7 +109,7 @@ new command.local.Command(
     },
   },
   // after the view-syncer is deployed.
-  { dependsOn: viewSyncer }
+  {dependsOn: viewSyncer},
 );
 ```
 
@@ -132,8 +133,8 @@ For example, imagine a select permission that restricts reads to only issues cre
 definePermissions<AuthData, Schema>(schema, () => {
   const allowIfIssueCreator = (
     authData: AuthData,
-    { cmp }: ExpressionBuilder<Schema, "issue">
-  ) => cmp("creatorID", authData.sub);
+    {cmp}: ExpressionBuilder<Schema, 'issue'>,
+  ) => cmp('creatorID', authData.sub);
 
   return {
     issue: {
@@ -188,7 +189,7 @@ For example, the following ruleset allows an issue's owner to edit, but **not** 
 definePermissions<AuthData, Schema>(schema, () => {
   const allowIfIssueOwner = (
     authData: AuthData,
-    {cmp}: ExpressionBuilder<Schema, "issue">,
+    {cmp}: ExpressionBuilder<Schema, 'issue'>,
   ) => cmp('ownerID', authData.sub);
 
   return {
@@ -210,7 +211,7 @@ This ruleset allows an issue's owner to edit and re-assign the issue:
 definePermissions<AuthData, Schema>(schema, () => {
   const allowIfIssueOwner = (
     authData: AuthData,
-    {cmp}: ExpressionBuilder<Schema, "issue">,
+    {cmp}: ExpressionBuilder<Schema, 'issue'>,
   ) => cmp('ownerID', authData.sub);
 
   return {
@@ -226,13 +227,13 @@ definePermissions<AuthData, Schema>(schema, () => {
 });
 ```
 
-And this allows anyone to edit an issue, but only if they also assign it to themselves. Useful for enforcing *"patches welcome"*? 🙃
+And this allows anyone to edit an issue, but only if they also assign it to themselves. Useful for enforcing _"patches welcome"_? 🙃
 
 ```ts
 definePermissions<AuthData, Schema>(schema, () => {
   const allowIfIssueOwner = (
     authData: AuthData,
-    {cmp}: ExpressionBuilder<Schema, "issue">,
+    {cmp}: ExpressionBuilder<Schema, 'issue'>,
   ) => cmp('ownerID', authData.sub);
 
   return {
@@ -247,7 +248,6 @@ definePermissions<AuthData, Schema>(schema, () => {
   } satisfies PermissionsConfig<AuthData, Schema>;
 });
 ```
-
 
 ## Delete Permissions
 

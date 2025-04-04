@@ -29,7 +29,7 @@ See the upgrade from [hello-zero](https://github.com/rocicorp/hello-zero/pull/31
 - Certain kinds of many:many joins were causing `node already exists` assertions
 - Certain kinds of `or` queries were causing consistency issues
 - Support `replica identity full` for PostgreSQL tables
-- We now print a stack trace during close  at `debug` level to enable debugging errors where Zero is accessed after close.
+- We now print a stack trace during close at `debug` level to enable debugging errors where Zero is accessed after close.
 - We now print a warning when `IndexedDB` is missing rather than throwing. This makes it a little easier to use Zero in SSR setups.
 - We now reset `zero-cache` implicitly in a few edge cases rather than halting replication.
 - Fixed a deadlock in `change-streamer`.

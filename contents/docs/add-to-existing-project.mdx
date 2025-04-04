@@ -149,7 +149,7 @@ documentation for integration guidance.
 ## Server-Side Rendering (SSR)
 
 Many meta-frameworks like [Next.js](https://nextjs.org/),
-[Solid Start](https://start.solidjs.com/), and
+[SolidStart](https://start.solidjs.com/), and
 [TanStack Start](https://tanstack.com/start/latest) support server-side
 rendering. When using these frameworks, Zero may attempt to instantiate on the
 server, which is not currently supported.
@@ -163,7 +163,7 @@ Use the `use client`
 [directive](https://nextjs.org/docs/app/api-reference/directives/use-client) to
 mark code as client-only.
 
-### Solid Start
+### SolidStart
 
 Wrap components using Zero with the
 [`clientOnly`](https://docs.solidjs.com/solid-start/reference/client/client-only)
@@ -180,7 +180,7 @@ Use [React's `lazy`](https://react.dev/reference/react/lazy) function to load
 components that use Zero. This prevents the code from executing during
 server-side rendering. This approach also works in Next.js.
 
-As with Solid Start, you don't need to implement code splitting if it's not
+As with SolidStart, you don't need to implement code splitting if it's not
 required for your application.
 
 ## Custom Mutators
@@ -236,7 +236,7 @@ export async function POST(request: Request) {
 }
 ```
 
-#### Solid Start
+#### SolidStart
 
 Create an API route in `src/routes/api/push.ts`:
 
@@ -263,3 +263,13 @@ export const APIRoute = createAPIFileRoute('/api/push')({
   },
 });
 ```
+
+## Deployment
+
+When deploying your application, ensure that all the environment variables
+defined in your `.env` file are set in your production environment.
+
+See [Deployment](deployment) for more information on deploying Zero cache.
+
+For deploying your frontend application, refer to the documentation of your chosen
+framework or hosting provider.

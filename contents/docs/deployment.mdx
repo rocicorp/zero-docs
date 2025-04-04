@@ -30,13 +30,14 @@ A running `zero-cache` is composed of a single `replication-manager` node and mu
 The Change DB and CVR DBs are typically the same physical Postgres database as the Upstream DB. Zero stores their tables in separate Postgres schemas so they won't conflict with your application data.
 
 We allow separate DBs so that they can be scaled and tuned independently if desired.
+
 </Note>
 
 **S3:** Stores a canonical copy of the SQLite replica.
 
 **File System:** Used by both node types to store local copies of the SQLite replica. Can be ephemeral – Zero will re-initialize from S3 on startup. Recommended to use attached SSD storage for best performance.
 
-**Replication Manager:** Serves as the single consumer of the Postgres replication log. Stores a recent subset of the Postgres changelog in the *Change DB* for catching up ViewSyncers when they initialize. Also maintains the canonical replica, which ViewSyncers initialize from.
+**Replication Manager:** Serves as the single consumer of the Postgres replication log. Stores a recent subset of the Postgres changelog in the _Change DB_ for catching up ViewSyncers when they initialize. Also maintains the canonical replica, which ViewSyncers initialize from.
 
 **View Syncers:** Handle WebSocket connections from clients and run ZQL queries. Updates CVR DB with the latest state of each client as queries run. Uses CVR DB on client connection to compute the initial diff to catch clients up.
 
@@ -82,15 +83,15 @@ Then overwite `/sst.config.ts` with the following code:
 ```ts
 /* eslint-disable */
 /// <reference path="./.sst/platform/config.d.ts" />
-import { execSync } from "child_process";
+import {execSync} from 'child_process';
 
 export default $config({
   app(input) {
     return {
-      name: "hello-zero",
-      removal: input?.stage === "production" ? "retain" : "remove",
-      home: "aws",
-      region: process.env.AWS_REGION || "us-east-1",
+      name: 'hello-zero',
+      removal: input?.stage === 'production' ? 'retain' : 'remove',
+      home: 'aws',
+      region: process.env.AWS_REGION || 'us-east-1',
       providers: {
         command: true,
       },
@@ -98,8 +99,10 @@ export default $config({
   },
   async run() {
     const zeroVersion = execSync(
-        "npm list @rocicorp/zero | grep @rocicorp/zero | cut -f 3 -d @")
-        .toString().trim();
+      'npm list @rocicorp/zero | grep @rocicorp/zero | cut -f 3 -d @',
+    )
+      .toString()
+      .trim();
 
     // S3 Bucket
     const replicationBucket = new sst.aws.Bucket(`replication-bucket`);
@@ -114,8 +117,8 @@ export default $config({
       vpc,
     });
 
-    const conn = new sst.Secret("PostgresConnectionString");
-    const zeroAuthSecret = new sst.Secret("ZeroAuthSecret");
+    const conn = new sst.Secret('PostgresConnectionString');
+    const zeroAuthSecret = new sst.Secret('ZeroAuthSecret');
 
     // Common environment variables
     const commonEnv = {
@@ -123,37 +126,37 @@ export default $config({
       ZERO_CVR_DB: conn.value,
       ZERO_CHANGE_DB: conn.value,
       ZERO_AUTH_SECRET: zeroAuthSecret.value,
-      ZERO_REPLICA_FILE: "sync-replica.db",
+      ZERO_REPLICA_FILE: 'sync-replica.db',
       ZERO_LITESTREAM_BACKUP_URL: $interpolate`s3://${replicationBucket.name}/backup`,
       ZERO_IMAGE_URL: `rocicorp/zero:${zeroVersion}`,
-      ZERO_CVR_MAX_CONNS: "10",
-      ZERO_UPSTREAM_MAX_CONNS: "10",
+      ZERO_CVR_MAX_CONNS: '10',
+      ZERO_UPSTREAM_MAX_CONNS: '10',
     };
 
     // Replication Manager Service
     const replicationManager = cluster.addService(`replication-manager`, {
-      cpu: "0.5 vCPU",
-      memory: "1 GB",
-      architecture: "arm64",
+      cpu: '0.5 vCPU',
+      memory: '1 GB',
+      architecture: 'arm64',
       image: commonEnv.ZERO_IMAGE_URL,
       link: [replicationBucket],
       health: {
-        command: ["CMD-SHELL", "curl -f http://localhost:4849/ || exit 1"],
-        interval: "5 seconds",
+        command: ['CMD-SHELL', 'curl -f http://localhost:4849/ || exit 1'],
+        interval: '5 seconds',
         retries: 3,
-        startPeriod: "300 seconds",
+        startPeriod: '300 seconds',
       },
       environment: {
         ...commonEnv,
-        ZERO_CHANGE_MAX_CONNS: "3",
-        ZERO_NUM_SYNC_WORKERS: "0",
+        ZERO_CHANGE_MAX_CONNS: '3',
+        ZERO_NUM_SYNC_WORKERS: '0',
       },
       loadBalancer: {
         public: false,
         ports: [
           {
-            listen: "80/http",
-            forward: "4849/http",
+            listen: '80/http',
+            forward: '4849/http',
           },
         ],
       },
@@ -164,8 +167,8 @@ export default $config({
         target: {
           healthCheck: {
             enabled: true,
-            path: "/keepalive",
-            protocol: "HTTP",
+            path: '/keepalive',
+            protocol: 'HTTP',
             interval: 5,
             healthyThreshold: 2,
             timeout: 3,
@@ -176,44 +179,44 @@ export default $config({
 
     // View Syncer Service
     const viewSyncer = cluster.addService(`view-syncer`, {
-      cpu: "1 vCPU",
-      memory: "2 GB",
-      architecture: "arm64",
+      cpu: '1 vCPU',
+      memory: '2 GB',
+      architecture: 'arm64',
       image: commonEnv.ZERO_IMAGE_URL,
       link: [replicationBucket],
       health: {
-        command: ["CMD-SHELL", "curl -f http://localhost:4848/ || exit 1"],
-        interval: "5 seconds",
+        command: ['CMD-SHELL', 'curl -f http://localhost:4848/ || exit 1'],
+        interval: '5 seconds',
         retries: 3,
-        startPeriod: "300 seconds",
+        startPeriod: '300 seconds',
       },
       environment: {
         ...commonEnv,
         ZERO_CHANGE_STREAMER_URI: replicationManager.url,
       },
       logging: {
-        retention: "1 month",
+        retention: '1 month',
       },
       loadBalancer: {
         public: true,
-        rules: [{ listen: "80/http", forward: "4848/http" }],
+        rules: [{listen: '80/http', forward: '4848/http'}],
       },
       transform: {
         target: {
           healthCheck: {
             enabled: true,
-            path: "/keepalive",
-            protocol: "HTTP",
+            path: '/keepalive',
+            protocol: 'HTTP',
             interval: 5,
             healthyThreshold: 2,
             timeout: 3,
           },
           stickiness: {
             enabled: true,
-            type: "lb_cookie",
+            type: 'lb_cookie',
             cookieDuration: 120,
           },
-          loadBalancingAlgorithmType: "least_outstanding_requests",
+          loadBalancingAlgorithmType: 'least_outstanding_requests',
         },
       },
     });
@@ -226,7 +229,7 @@ export default $config({
     // deployment within your VPC. See hello-zero-solid for an example:
     // https://github.com/rocicorp/hello-zero-solid/blob/main/sst.config.ts#L141
     new command.local.Command(
-      "zero-deploy-permissions",
+      'zero-deploy-permissions',
       {
         create: `npx zero-deploy-permissions -p ../../src/schema.ts`,
         // Run the Command on every deploy ...
@@ -236,7 +239,7 @@ export default $config({
         },
       },
       // after the view-syncer is deployed.
-      { dependsOn: viewSyncer }
+      {dependsOn: viewSyncer},
     );
   },
 });
@@ -443,7 +446,7 @@ Run `zero-cache` as two Fargate services (using the same [rocicorp/zero](https:/
 - Standard rolling restarts are fine for both services
 - The `view-syncer` task count is static; update the service to change the count.
   - Support for dynamic resizing (i.e. Auto Scaling) is planned
-  - Set `ZERO_CVR_MAX_CONNS` and `ZERO_UPSTREAM_MAX_CONNS` appropriately so that the total connections from both running and updating `view-syncers` (e.g. DesiredCount * MaximumPercent) do not exceed your database’s `max_connections`.
+  - Set `ZERO_CVR_MAX_CONNS` and `ZERO_UPSTREAM_MAX_CONNS` appropriately so that the total connections from both running and updating `view-syncers` (e.g. DesiredCount \* MaximumPercent) do not exceed your database’s `max_connections`.
 - The `{generation}` component of the `s3://{bucketName}/{generation}` URL is an arbitrary path component that can be modified to reset the replica (e.g. a date, a number, etc.). Setting this to a new path is the multi-node equivalent of deleting the replica file to resync.
   - Note: `zero-cache` does not manage cleanup of old generations.
 - The `replication-manager` serves requests on port **4849**. Routing from the `view-syncer` to the `http://{replication-manager}` can be achieved using the following mechanisms (in order of preference):

@@ -54,8 +54,7 @@ In this case, Zero will call this function to get a new JWT if verification fail
 Any data placed into your JWT (claims) can be used by permission rules on the backend.
 
 ```ts
-const isAdminRule =
-  (decodedJWT, {cmp}) => cmp(decodedJWT.role, '=', 'admin');
+const isAdminRule = (decodedJWT, {cmp}) => cmp(decodedJWT.role, '=', 'admin');
 ```
 
 See the [permissions](permissions) section for more details.

@@ -4,10 +4,10 @@ title: Inspector API
 
 The Zero instance provides an API to gather information about the client's current state, such as:
 
-* All active queries
-* Query TTL
-* Active clients
-* Client database contents
+- All active queries
+- Query TTL
+- Active clients
+- Client database contents
 
 This can help figuring out why you hit loading states, how many queries are active at a time, if you have any resource leaks due to failing to clean up queries or if expected data is missing on the client.
 
@@ -27,8 +27,8 @@ Once you have an inspector you can inspect the current client and client group.
 <Note heading="Clients and Client Groups">
   The client group represents a web browser profile. A client represents an
   instance of `Zero` within that profile. If a user has Chrome open with 5
-  different tabs, each with one `Zero` instance, there will be 1 client
-  group and 5 clients.
+  different tabs, each with one `Zero` instance, there will be 1 client group
+  and 5 clients.
 </Note>
 
 For example to see active queries for the current client:

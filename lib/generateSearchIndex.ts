@@ -1,11 +1,11 @@
 import fs from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
-import { unified } from 'unified';
+import {unified} from 'unified';
 import remarkParse from 'remark-parse';
 import remarkStringify from 'remark-stringify';
 import rehypeSlug from 'rehype-slug';
-import { visit } from 'unist-util-visit';
+import {visit} from 'unist-util-visit';
 
 // Define the root directory where docs are stored
 const DOCS_ROOT = path.join(process.cwd(), 'contents/docs');
@@ -30,7 +30,7 @@ interface SearchDocument {
 function getAllIndexMDXFiles(dir: string): string[] {
   let files: string[] = [];
 
-  fs.readdirSync(dir, { withFileTypes: true }).forEach((entry) => {
+  fs.readdirSync(dir, {withFileTypes: true}).forEach(entry => {
     const fullPath = path.join(dir, entry.name);
 
     if (entry.isDirectory()) {
@@ -48,12 +48,10 @@ function getAllIndexMDXFiles(dir: string): string[] {
 /**
  * Extract headings with IDs from MDX content
  */
-function extractHeadings(content: string): { text: string; id: string }[] {
-  const headings: { text: string; id: string }[] = [];
+function extractHeadings(content: string): {text: string; id: string}[] {
+  const headings: {text: string; id: string}[] = [];
 
-  const tree = unified()
-  .use(remarkParse)
-  .parse(content);
+  const tree = unified().use(remarkParse).parse(content);
 
   visit(tree, 'heading', (node: any) => {
     const text = node.children
@@ -68,7 +66,7 @@ function extractHeadings(content: string): { text: string; id: string }[] {
       .replace(/^-+|-+$/g, '');
 
     if (text && id) {
-      headings.push({ text, id });
+      headings.push({text, id});
     }
   });
 
@@ -80,7 +78,7 @@ function extractHeadings(content: string): { text: string; id: string }[] {
  */
 async function extractTextFromMDX(filePath: string): Promise<SearchDocument> {
   const fileContent = fs.readFileSync(filePath, 'utf-8');
-  const { content, data } = matter(fileContent); // Extract frontmatter
+  const {content, data} = matter(fileContent); // Extract frontmatter
 
   // Convert MDX content to plain text (ignoring JSX)
   const plainText = await unified()
@@ -96,14 +94,14 @@ async function extractTextFromMDX(filePath: string): Promise<SearchDocument> {
   const url = `/docs/${relativePath}`; // Generate URL based on the folder structure
   const folderName = relativePath.split('/').pop() || relativePath; // Extract last folder name
 
-return {
-  id: relativePath, // Use folder name as ID
-  title: data.title || relativePath, // Use frontmatter title or fallback to folder name
-  folderName, // Add folder name as a searchable field
-  content: plainText.toString().replace(/\n+/g, ' ').trim(), // Normalize whitespace
-  url,
-  headings, // Include extracted headings with IDs
-};
+  return {
+    id: relativePath, // Use folder name as ID
+    title: data.title || relativePath, // Use frontmatter title or fallback to folder name
+    folderName, // Add folder name as a searchable field
+    content: plainText.toString().replace(/\n+/g, ' ').trim(), // Normalize whitespace
+    url,
+    headings, // Include extracted headings with IDs
+  };
 }
 
 /**
@@ -112,7 +110,7 @@ return {
 async function generateSearchIndex() {
   const files = getAllIndexMDXFiles(DOCS_ROOT);
   const index: SearchDocument[] = await Promise.all(
-    files.map((file) => extractTextFromMDX(file))
+    files.map(file => extractTextFromMDX(file)),
   );
 
   fs.writeFileSync(OUTPUT_FILE, JSON.stringify(index, null, 2));

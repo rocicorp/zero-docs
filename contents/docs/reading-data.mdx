@@ -169,13 +169,13 @@ The first parameter is always a column name from the table being queried. Intell
 
 Where supports the following comparison operators:
 
-| Operator                                 | Allowed Operand Types               | Description                                                              |
-| ---------------------------------------- | ----------------------------------- | ------------------------------------------------------------------------ |
-| `=` , `!=`                               | boolean, number, string             | JS strict equal (===) semantics                                          |
-| `<` , `<=`, `>`, `>=`                    | number                              | JS number compare semantics                                              |
-| `LIKE`, `NOT LIKE`, `ILIKE`, `NOT ILIKE` | string                              | SQL-compatible `LIKE` / `ILIKE`                                          |
-| `IN` , `NOT IN`                          | boolean, number, string             | RHS must be array. Returns true if rhs contains lhs by JS strict equals. |
-| `IS` , `IS NOT`                          | boolean, number, string, null       | Same as `=` but also works for `null`                                    |
+| Operator                                 | Allowed Operand Types         | Description                                                              |
+| ---------------------------------------- | ----------------------------- | ------------------------------------------------------------------------ |
+| `=` , `!=`                               | boolean, number, string       | JS strict equal (===) semantics                                          |
+| `<` , `<=`, `>`, `>=`                    | number                        | JS number compare semantics                                              |
+| `LIKE`, `NOT LIKE`, `ILIKE`, `NOT ILIKE` | string                        | SQL-compatible `LIKE` / `ILIKE`                                          |
+| `IN` , `NOT IN`                          | boolean, number, string       | RHS must be array. Returns true if rhs contains lhs by JS strict equals. |
+| `IS` , `IS NOT`                          | boolean, number, string, null | Same as `=` but also works for `null`                                    |
 
 TypeScript will restrict you from using operators with types that don’t make sense – you can’t use `>` with `boolean` for example.
 
@@ -283,16 +283,20 @@ So when you are thinking about whether a query is going to return results instan
 <Note type="note" heading="Caches vs Replicas">
   This is why we often say that despite the name `zero-cache`, Zero is not technically a cache. It's a *replica*.
 
-  A cache has a random set of rows with a random set of versions. There is no expectation that the cache any particular rows, or that the rows' have matching versions. Rows are simply updated as they are fetched.
-  
-  A replica by contrast is eagerly updated, whether or not any client has requested a row. A replica is always very close to up-to-date, and always self-consistent.
+A cache has a random set of rows with a random set of versions. There is no expectation that the cache any particular rows, or that the rows' have matching versions. Rows are simply updated as they are fetched.
 
-  Zero is a *partial* replica because it only replicates rows that are returned by syncing queries.
+A replica by contrast is eagerly updated, whether or not any client has requested a row. A replica is always very close to up-to-date, and always self-consistent.
+
+Zero is a _partial_ replica because it only replicates rows that are returned by syncing queries.
+
 </Note>
 
 ## Query Lifecycle
 
-<ImageLightbox src="/images/reading-data/query-lifecycle.png" alt="Diagram of query lifecycle" />
+<ImageLightbox
+  src="/images/reading-data/query-lifecycle.png"
+  alt="Diagram of query lifecycle"
+/>
 
 Queries can be either _active_ or _backgrounded_. An active query is one that is currently being used by the application. Backgrounded queries are not currently in use, but continue syncing in case they are needed again soon.
 
@@ -315,23 +319,20 @@ By default a deactivated query stops syncing immediately.
 But it's often useful to keep queries syncing beyond deactivation in case the UI needs the same or a similar query in the near future. This is accomplished with the `ttl` parameter:
 
 ```ts
-const [user] = useQuery(
-  z.query.user.where('id', userId),
-  {ttl: '1d'}
-);
+const [user] = useQuery(z.query.user.where('id', userId), {ttl: '1d'});
 ```
 
 The `ttl` paramater specifies how long the app developer wishes the query to run inthe background. The following formats are allowed (where `%d` is a positive integer):
 
-| Format | Meaning |
-| ------ | ------- |
-| `none` | No backgrounding. Query will immediately stop when deactivated. This is the default. |
-| `%ds`  | Number of seconds. |
-| `%dm`  | Number of minutes. |
-| `%dh`  | Number of hours. |
-| `%dd`  | Number of days. |
-| `%dy`  | Number of years. |
-| `forever` | Query will never be stopped. |
+| Format    | Meaning                                                                              |
+| --------- | ------------------------------------------------------------------------------------ |
+| `none`    | No backgrounding. Query will immediately stop when deactivated. This is the default. |
+| `%ds`     | Number of seconds.                                                                   |
+| `%dm`     | Number of minutes.                                                                   |
+| `%dh`     | Number of hours.                                                                     |
+| `%dd`     | Number of days.                                                                      |
+| `%dy`     | Number of years.                                                                     |
+| `forever` | Query will never be stopped.                                                         |
 
 If the UI re-requests a background query, it becomes an active query again. Since the query was syncing in the background, the very first synchronous result that the UI receives after reactivation will be up-to-date with the server (i.e., it will have `resultType` of `complete`).
 
@@ -346,18 +347,18 @@ This limit can be increased with the [`--target-client-row-count`](./zero-cache-
 <Note heading="Why does Zero store so little data client-side?">
 Contrary to the design of other sync engines, we believe that storing tons of data client-side doesn't make sense. Here are some reasons why:
 
-* Initial sync will be slow, slowing down initial app load. 
-* Because storage in browser tabs is unreliable, initial sync can occur surprisingly often.
-* We want to answer queries *instantly* as often as possible. This requires client-side data in memory on the main thread. If we have to page to disk, we may as well go to the network and reduce complexity.
-* Even though Zero's queries are very efficient, they do still have some cost, expecially hydration. Massive client-side storage would result in hydrating tons of queries that are unlikely to be used every time the app starts.
+- Initial sync will be slow, slowing down initial app load.
+- Because storage in browser tabs is unreliable, initial sync can occur surprisingly often.
+- We want to answer queries _instantly_ as often as possible. This requires client-side data in memory on the main thread. If we have to page to disk, we may as well go to the network and reduce complexity.
+- Even though Zero's queries are very efficient, they do still have some cost, expecially hydration. Massive client-side storage would result in hydrating tons of queries that are unlikely to be used every time the app starts.
 
 Most importantly, no matter how much data you store on the client, there will be cases where you have to fallback to the server:
 
-* Some users might have huge amounts of data.
-* Some users might have tiny amounts of available client storage.
-* You will likely want the app to start fast and sync in the background.
+- Some users might have huge amounts of data.
+- Some users might have tiny amounts of available client storage.
+- You will likely want the app to start fast and sync in the background.
 
-Because you have to be able to fallback to server the question becomes *what is the **right** amount of data to store on the client?*, not *how can I store the absolute max possible data on the client?*
+Because you have to be able to fallback to server the question becomes _what is the **right** amount of data to store on the client?_, not _how can I store the absolute max possible data on the client?_
 
 The goal with Zero is to answer 99% of queries on the client from memory. The remaining 1% of queries can fallback gracefully to the server. 20,000 rows was chosen somewhat arbitrarily as a number of rows that was likely to be able to do this for many applications.
 
@@ -365,7 +366,7 @@ There is no hard limit at 20,000 or 100,000. Nothing terrible happens if you go 
 
 1. All those queries will revalidate everytime your app boots.
 2. All data synced to the client is in memory in JS.
-</Note>
+   </Note>
 
 Here is how this limit is managed:
 
@@ -377,13 +378,13 @@ Here is how this limit is managed:
 
 Although IVM is a very efficient way to keep queries up to date relative to re-running them, it isn't free. You still need to think about how many queries you are creating, how long they are kept alive, and how expensive they are.
 
-This is why Zero defaults to *not* backgrounding queries and doesn't try to aggressively fill its client datastore to capacity. You should put some thought into what queries you want to run in the background, and for how long.
+This is why Zero defaults to _not_ backgrounding queries and doesn't try to aggressively fill its client datastore to capacity. You should put some thought into what queries you want to run in the background, and for how long.
 
 Zero currently provides a few basic tools to understand the cost of your queries:
 
-* The client logs a warning for slow query materializations. Look for `Slow query materialization` in your logs. The default threshold is `5s` (including network) but this is configurable with the `slowMaterializeThreshold` parameter.
-* The client logs the materialization time of all queries at the `debug` level. Look for `Materialized query` in your logs.
-* The server logs a warning for slow query materializations. Look for `Slow query materialization` in your logs. The default threshold is `5s` but this is configurable with the `log-slow-materialize-threshold` configuration parameter.
+- The client logs a warning for slow query materializations. Look for `Slow query materialization` in your logs. The default threshold is `5s` (including network) but this is configurable with the `slowMaterializeThreshold` parameter.
+- The client logs the materialization time of all queries at the `debug` level. Look for `Materialized query` in your logs.
+- The server logs a warning for slow query materializations. Look for `Slow query materialization` in your logs. The default threshold is `5s` but this is configurable with the `log-slow-materialize-threshold` configuration parameter.
 
 We will be adding more tools over time.
 
@@ -460,6 +461,7 @@ To avoid this annoying effect, what you should do in this example is also preloa
 Zero will not sync duplicate copies of rows that show up in multiple queries. Zero syncs the *union* of all active queries' results.
 
 So you don't have to worry about syncing many sorts of the same query when it's likely the results will overlap heavily.
+
 </Note>
 
 In the future, we will be implementing a consistency model that fixes these issues automatically. We will prevent Zero from returning local data when that data is not known to be a prefix of the server result. Once the consistency model is implemented, preloading can be thought of as purely a performance thing, and not required to avoid unsightly flickering.

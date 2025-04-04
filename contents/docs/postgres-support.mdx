@@ -47,11 +47,12 @@ It is strongly recommended that primary keys be client-generated random strings 
 <Note type="note" heading="Why are client-generated IDs better?">
   Imagine that the PK of your table is an auto-incrementing integer. If you optimistically create an entity of this type, you will have to give it some ID – the type will require it locally, but also if you want to optimistically create relationships to this row you’ll need an ID.
 
-  You could sync the highest value seen for that table, but there are race conditions and it is possible for that ID to be taken by the time the creation makes it to the server. Your database can resolve this and assign the next ID, but now the relationships you created optimistically will be against the wrong row. Blech.
+You could sync the highest value seen for that table, but there are race conditions and it is possible for that ID to be taken by the time the creation makes it to the server. Your database can resolve this and assign the next ID, but now the relationships you created optimistically will be against the wrong row. Blech.
 
-  GUIDs makes a lot more sense in local-first applications.
+GUIDs makes a lot more sense in local-first applications.
 
-  If your table has a natural key you can use that and it has less problems. But there is still the chance for a conflict. Imagine you are modeling orgs and you choose domainName as the natural key. It is possible for a race to happen and when the creation gets to the server, somebody has already chosen that domain name. In that case, the best thing to do is reject the write and show the user an error.
+If your table has a natural key you can use that and it has less problems. But there is still the chance for a conflict. Imagine you are modeling orgs and you choose domainName as the natural key. It is possible for a race to happen and when the creation gets to the server, somebody has already chosen that domain name. In that case, the best thing to do is reject the write and show the user an error.
+
 </Note>
 
 If you want to have a short auto-incrementing numeric ID for ux reasons (ie, a bug number), that is possible – See [Demo Video](https://discord.com/channels/830183651022471199/1288232858795769917/1298114323272568852)!
@@ -82,22 +83,22 @@ To limit what is synced from the `zero-cache` replica to actual clients (e.g., w
 
 ## Schema changes
 
-Most Postgres schema changes are supported as is. 
+Most Postgres schema changes are supported as is.
 
 Two cases require special handling:
 
 ### Adding columns
 
-Adding a column with a non-constant `DEFAULT` value is not supported. 
+Adding a column with a non-constant `DEFAULT` value is not supported.
 
 This includes any expression with parentheses, as well as the special functions `CURRENT_TIME`, `CURRENT_DATE`, and `CURRENT_TIMESTAMP`
 (due to a [constraint of SQLite](https://www.sqlite.org/lang_altertable.html#altertabaddcol)).
 
 However, the `DEFAULT` value of an _existing_ column can be changed to any value, including non-constant expressions. To achieve the desired column default:
 
-* Add the column with no `DEFAULT` value
-* Backfill the column with desired values
-* Set the column's `DEFAULT` value
+- Add the column with no `DEFAULT` value
+- Backfill the column with desired values
+- Set the column's `DEFAULT` value
 
 ```sql
 BEGIN;

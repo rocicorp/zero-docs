@@ -1,0 +1,265 @@
+---
+title: Add to Existing Project
+---
+
+Adding Zero to an existing project is straightforward. You can integrate it with
+any JavaScript or TypeScript client, including React, Vue, Svelte, Solid, and
+even plain JavaScript projects.
+
+## Prerequisites
+
+- PostgreSQL database with Write-Ahead Logging (WAL) enabled
+
+See [Connecting to Postgres](connecting-to-postgres) for more information.
+
+## Installation
+
+Install the `@rocicorp/zero` package:
+
+```bash
+npm install @rocicorp/zero
+```
+
+If you're using [pnpm](https://pnpm.io) or [bun](https://bun.sh), you'll need
+additional steps to properly install the native binary components. By default, these
+package managers don't install binaries in a location where Zero can find them.
+
+See [Not using npm?](quickstart#not-npm) in the quickstart guide for complete
+details on alternative package managers.
+
+## Environment Variables
+
+Zero requires specific [configuration options](zero-cache-config) for the
+server. Create a `.env` file in your project root with the following content:
+
+```bash
+ZERO_UPSTREAM_DB="postgresql://user:password@127.0.0.1/postgres"
+ZERO_REPLICA_FILE="/tmp/sync-replica.db"
+ZERO_AUTH_SECRET="secretkey"
+```
+
+Be sure to update these values to match your database connection details.
+
+## Starting the Server
+
+The `@rocicorp/zero` package includes a command-line tool for starting the
+server:
+
+```bash
+npx zero-cache
+```
+
+This launches the server on port 4848 (by default). Navigate to
+`http://localhost:4848` in your browser, and you should see `OK` displayed.
+
+## Defining Your Schema
+
+Define your schema as described in the [Zero schema](zero-schema) documentation.
+
+Example:
+
+```ts
+// schema.ts
+import {createSchema, table, string} from '@rocicorp/zero';
+
+const message = table('message')
+  .columns({
+    id: string(),
+    body: string(),
+  })
+  .primaryKey('id');
+
+export const schema = createSchema({
+  tables: [message],
+});
+
+export type Schema = typeof schema;
+```
+
+## Defining Custom Mutators
+
+This step is optional. When first integrating Zero, it's often best to start
+with read-only operations until everything is working properly.
+
+For a comprehensive guide, see [Custom Mutators](custom-mutators).
+
+Here's a simple example of a mutator that adds a message to the database (ensure
+this matches your PostgreSQL schema):
+
+```ts
+// mutators.ts
+import type {CustomMutatorDefs} from '@rocicorp/zero';
+import type {Schema} from './schema.ts';
+
+export const mutators = {
+  message: {
+    async create(tx, message: Message) {
+      await tx.mutate.message.insert(message);
+    },
+  },
+} as const satisfies CustomMutatorDefs<Schema>;
+```
+
+## Creating a Zero Instance
+
+To create a Zero client instance:
+
+```js
+import {Zero} from '@rocicorp/zero';
+
+const z = new Zero({
+  userID: 'anon',
+  server: 'http://localhost:4848',
+  schema,
+  // mutators, // Optional
+});
+```
+
+For production environments, replace the hardcoded server URL with an
+environment variable like `import.meta.env.VITE_PUBLIC_SERVER` or
+`process.env.NEXT_PUBLIC_SERVER`, defined in your `.env` file.
+
+### Framework Integration
+
+#### React
+
+For React applications, create a `new Zero(...)` instance directly and optionally
+combine it with a ZeroProvider context. See [Integrations React](react) for
+detailed instructions.
+
+#### SolidJS
+
+For SolidJS applications, use the dedicated `createZero` function:
+
+```js
+import {createZero} from '@rocicorp/zero/solid';
+
+const z = createZero({
+  // same options as the Zero constructor
+});
+```
+
+See [Integrations SolidJS](solidjs) for more details.
+
+#### Other Frameworks
+
+For other [UI frameworks](community#ui-frameworks), consult their respective
+documentation for integration guidance.
+
+## Server-Side Rendering (SSR)
+
+Many meta-frameworks like [Next.js](https://nextjs.org/),
+[Solid Start](https://start.solidjs.com/), and
+[TanStack Start](https://tanstack.com/start/latest) support server-side
+rendering. When using these frameworks, Zero may attempt to instantiate on the
+server, which is not currently supported.
+
+To prevent Zero client code from running on the server, use the following
+framework-specific approaches:
+
+### Next.js
+
+Use the `use client`
+[directive](https://nextjs.org/docs/app/api-reference/directives/use-client) to
+mark code as client-only.
+
+### Solid Start
+
+Wrap components using Zero with the
+[`clientOnly`](https://docs.solidjs.com/solid-start/reference/client/client-only)
+higher-order component.
+
+The standard pattern for `clientOnly` uses dynamic imports, but note that this
+(like [React's `lazy`](https://react.dev/reference/react/lazy)) works with any
+function that returns a `Promise<{default: () => JSX.Element}>`. You don't need
+to use code splitting if it's not desired.
+
+### TanStack Start
+
+Use [React's `lazy`](https://react.dev/reference/react/lazy) function to load
+components that use Zero. This prevents the code from executing during
+server-side rendering. This approach also works in Next.js.
+
+As with Solid Start, you don't need to implement code splitting if it's not
+required for your application.
+
+## Custom Mutators
+
+When using [custom mutators](custom-mutators), you must:
+
+1. Define them in the `Zero` constructor
+2. Implement a push endpoint where the server-side logic resides
+
+This endpoint typically lives on the same frontend server that serves your
+application. Configure the endpoint URL using the `ZERO_PUSH_URL` setting for
+Zero Cache.
+
+For local development, add this to your `.env` file:
+
+```bash
+ZERO_PUSH_URL="http://localhost:3000/api/push"
+```
+
+### PushProcessor
+
+The push endpoint uses the `POST` method and can be implemented with the
+`PushProcessor` class from `@rocicorp/zero/pg`. See the
+[push endpoint documentation](custom-mutators#custom-push-implementation) for
+more details.
+
+Create a `PushProcessor` instance:
+
+```js
+import {PushProcessor, connectionProvider} from '@rocicorp/zero/pg';
+import postgres from 'postgres';
+import {schema} from './schema.ts';
+
+const processor = new PushProcessor(
+  schema,
+  connectionProvider(postgres(process.env.ZERO_UPSTREAM_DB)),
+);
+```
+
+Then implement an API endpoint to handle `POST` requests. The implementation
+varies by framework, but the general pattern remains consistent:
+
+#### Next.js
+
+Create an API route in `app/api/push/route.ts`:
+
+```ts
+export async function POST(request: Request) {
+  const authData = await validateAuthorizationHeader(request.headers);
+  const body = await request.json();
+  const params = Object.fromEntries(new URL(request.url).searchParams);
+  return await processor.process(createMutators(authData), params, body);
+}
+```
+
+#### Solid Start
+
+Create an API route in `src/routes/api/push.ts`:
+
+```ts
+export async function POST({params, request}: APIEvent) {
+  const authData = await validateAuthorizationHeader(request.headers);
+  const body = await request.json();
+  return await processor.process(createMutators(authData), params, body);
+}
+```
+
+#### TanStack Start
+
+Create an API route in `src/routes/api/push.ts`:
+
+```ts
+export const APIRoute = createAPIFileRoute('/api/push')({
+  POST: async ({request, params}) => {
+    const authData = await validateAuthorizationHeader(request.headers);
+    const body = await request.json();
+    return json(
+      await processor.process(createMutators(authData), params, body),
+    );
+  },
+});
+```

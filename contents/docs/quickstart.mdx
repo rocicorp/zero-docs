@@ -25,19 +25,19 @@ npm run dev:db-up
 ```
 
 <details>
-<summary>Not using npm?</summary>
+<summary id="not-npm">Not using npm?</summary>
 
-Zero (the server part) depends on `@rocicorp/zero-sqlite3` which is a binary.
-Non [npm](https://www.npmjs.com/) package managers do not run `postinstall`
-scripts by default. To allow the binary to be correctly installed you can enable
-the install scripts by modifying your `package.json`.
+Zero's server component depends on `@rocicorp/zero-sqlite3`, which contains a
+binary that requires running a postinstall script. Most alternative package
+managers (non-npm) disable these scripts by default for security reasons. Here's
+how to enable installation for common alternatives:
 
 ### pnpm
 
-To allow SQLite to be installed correctly for [pnpm](https://pnpm.io/), you need
-to add the
-[pnpm.onlyBuiltDependencies](https://pnpm.io/package_json#pnpmonlybuiltdependencies)
-field to your `package.json`:
+For [pnpm](https://pnpm.io/), either:
+
+- Run `pnpm approve-builds` to approve all build scripts, or
+- Add the specific dependency to your `package.json`:
 
 ```json
 "pnpm": {
@@ -49,10 +49,8 @@ field to your `package.json`:
 
 ### Bun
 
-To allow SQLite to be installed correctly for [Bun](https://bun.sh/), you need
-to add the
-[trustedDependencies](https://bun.sh/guides/install/trusted)
-field to your `package.json`:
+For [Bun](https://bun.sh/), add the dependency to your trusted dependencies
+list:
 
 ```json
 "trustedDependencies": [

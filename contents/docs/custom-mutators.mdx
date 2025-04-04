@@ -299,7 +299,7 @@ app.post("/push", async (c) => {
   const result = await processor.process(
     createMutators(),
     c.req.query(),
-    c.req.json()
+    await c.req.json()
   );
   return await c.json(result);
 });
@@ -419,7 +419,7 @@ const processor = new PushProcessor(
     postgres(process.env.ZERO_UPSTREAM_DB as string))
 );
 processor.process(
-  createMutators(decodedJWT), c.req.query(), c.req.json());
+  createMutators(decodedJWT), c.req.query(), await c.req.json());
 ```
 
 ### Dropping Down to Raw SQL
@@ -469,7 +469,7 @@ app.post("/push", async (c) => {
   const result = await processor.process(
     createMutators(authData, asyncTasks),
     c.req.query(),
-    c.req.json()
+    await c.req.json()
   );
 
   await Promise.all(asyncTasks.map(task => task()));

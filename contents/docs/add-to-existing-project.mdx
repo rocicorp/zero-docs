@@ -2,35 +2,31 @@
 title: Add to Existing Project
 ---
 
-Adding Zero to an existing project is straightforward. You can integrate it with
-any JavaScript or TypeScript client, including React, Vue, Svelte, Solid, and
-even plain JavaScript projects.
+Zero can be easily integrated into any existing JavaScript or TypeScript
+project, whether you're using React, Vue, Svelte, Solid, or vanilla JavaScript.
 
 ## Prerequisites
 
-- PostgreSQL database with Write-Ahead Logging (WAL) enabled
+- A PostgreSQL database with Write-Ahead Logging (WAL) enabled.
 
-See [Connecting to Postgres](connecting-to-postgres) for more information.
+For database configuration details, see [Connecting to
+Postgres](connecting-to-postgres).
 
 ## Installation
 
-Install the `@rocicorp/zero` package:
+Install the Zero package:
 
 ```bash
 npm install @rocicorp/zero
 ```
 
-If you're using [pnpm](https://pnpm.io) or [bun](https://bun.sh), you'll need
-additional steps to properly install the native binary components. By default, these
-package managers don't install binaries in a location where Zero can find them.
-
-See [Not using npm?](quickstart#not-npm) in the quickstart guide for complete
-details on alternative package managers.
+**Note:** If using [pnpm](https://pnpm.io) or [bun](https://bun.sh), you'll need
+additional steps to install native binaries. See [Not using
+npm?](quickstart#not-npm) for details.
 
 ## Environment Variables
 
-Zero requires specific [configuration options](zero-cache-config) for the
-server. Create a `.env` file in your project root with the following content:
+Configure Zero by creating a `.env` file in your project root:
 
 ```bash
 ZERO_UPSTREAM_DB="postgresql://user:password@127.0.0.1/postgres"
@@ -38,23 +34,24 @@ ZERO_REPLICA_FILE="/tmp/sync-replica.db"
 ZERO_AUTH_SECRET="secretkey"
 ```
 
-Be sure to update these values to match your database connection details.
+Update these values with your actual database connection details and desired
+settings. See [configuration options](zero-cache-config) for more information.
 
 ## Starting the Server
 
-The `@rocicorp/zero` package includes a command-line tool for starting the
-server:
+Launch the Zero server using the included CLI tool:
 
 ```bash
 npx zero-cache
 ```
 
-This launches the server on port 4848 (by default). Navigate to
-`http://localhost:4848` in your browser, and you should see `OK` displayed.
+The server runs on port 4848 by default. Verify it's working by opening
+`http://localhost:4848` in your browser.
 
 ## Defining Your Schema
 
-Define your schema as described in the [Zero schema](zero-schema) documentation.
+Create a schema that describes your data model as detailed in the [Zero schema
+documentation](zero-schema).
 
 Example:
 
@@ -76,10 +73,11 @@ export const schema = createSchema({
 export type Schema = typeof schema;
 ```
 
-## Defining Custom Mutators
+## Custom Mutators (Optional)
 
-This step is optional. When first integrating Zero, it's often best to start
-with read-only operations until everything is working properly.
+Initially, you may want to focus on read-only operations. Once you're ready, you
+can define custom mutators. For a detailed guide, see [Custom
+Mutators](custom-mutators).
 
 For a comprehensive guide, see [Custom Mutators](custom-mutators).
 
@@ -115,21 +113,20 @@ const z = new Zero({
 });
 ```
 
-For production environments, replace the hardcoded server URL with an
-environment variable like `import.meta.env.VITE_PUBLIC_SERVER` or
-`process.env.NEXT_PUBLIC_SERVER`, defined in your `.env` file.
+For production, avoid hardcoding the server URL. Instead, use an environment
+variable like `import.meta.env.VITE_PUBLIC_SERVER` or
+`process.env.NEXT_PUBLIC_SERVER`.
 
 ### Framework Integration
 
 #### React
 
-For React applications, create a `new Zero(...)` instance directly and optionally
-combine it with a `ZeroProvider` context. See [Integrations React](react) for
-detailed instructions.
+In React, you can create a `new Zero(...)` instance and optionally use a
+`ZeroProvider` context. For more details, see [Integrations React](react).
 
 #### SolidJS
 
-For SolidJS applications, use the dedicated `createZero` function:
+For SolidJS, use the `createZero` function:
 
 ```js
 import {createZero} from '@rocicorp/zero/solid';
@@ -139,33 +136,27 @@ const z = createZero({
 });
 ```
 
-See [Integrations SolidJS](solidjs) for more details.
+Refer to [Integrations SolidJS](solidjs) for additional information.
 
 #### Other Frameworks
 
-For other [UI frameworks](community#ui-frameworks), consult their respective
-documentation for integration guidance.
+For other frameworks, consult the [UI frameworks](community#ui-frameworks)
+documentation.
 
 ## Server-Side Rendering (SSR)
 
-Many meta-frameworks like [Next.js](https://nextjs.org/),
-[SolidStart](https://start.solidjs.com/), and
-[TanStack Start](https://tanstack.com/start/latest) support server-side
-rendering. When using these frameworks, Zero may attempt to instantiate on the
-server, which is not currently supported.
-
-To prevent Zero client code from running on the server, use the following
-framework-specific approaches:
+Zero is not designed to run on the server. To prevent client code from executing
+during server-side rendering, use the following approaches:
 
 ### Next.js
 
-Use the `use client`
+Add the `use client`
 [directive](https://nextjs.org/docs/app/api-reference/directives/use-client) to
-mark code as client-only.
+mark client-only code.
 
 ### SolidStart
 
-Wrap components using Zero with the
+Wrap components that use Zero with the
 [`clientOnly`](https://docs.solidjs.com/solid-start/reference/client/client-only)
 higher-order component.
 
@@ -176,23 +167,15 @@ to use code splitting if it's not desired.
 
 ### TanStack Start
 
-Use [React's `lazy`](https://react.dev/reference/react/lazy) function to load
-components that use Zero. This prevents the code from executing during
-server-side rendering. This approach also works in Next.js.
-
-As with SolidStart, you don't need to implement code splitting if it's not
-required for your application.
+Use [React's `lazy`](https://react.dev/reference/react/lazy) to dynamically load
+Zero components. This approach also works in Next.js.
 
 ## Custom Mutators
 
-When using [custom mutators](custom-mutators), you must:
+To use [custom mutators](custom-mutators):
 
-1. Define them in the `Zero` constructor
-2. Implement a push endpoint where the server-side logic resides
-
-This endpoint typically lives on the same frontend server that serves your
-application. Configure the endpoint URL using the `ZERO_PUSH_URL` setting for
-Zero Cache.
+1. Define them in the `Zero` constructor.
+2. Implement a push endpoint for server-side logic.
 
 For local development, add this to your `.env` file:
 
@@ -203,9 +186,8 @@ ZERO_PUSH_URL="http://localhost:3000/api/push"
 ### PushProcessor
 
 The push endpoint uses the `POST` method and can be implemented with the
-`PushProcessor` class from `@rocicorp/zero/pg`. See the
-[push endpoint documentation](custom-mutators#custom-push-implementation) for
-more details.
+`PushProcessor` class from `@rocicorp/zero/pg`. See the [push endpoint
+documentation](custom-mutators#custom-push-implementation) for more details.
 
 Create a `PushProcessor` instance:
 
@@ -271,5 +253,5 @@ defined in your `.env` file are set in your production environment.
 
 See [Deployment](deployment) for more information on deploying Zero cache.
 
-For deploying your frontend application, refer to the documentation of your chosen
-framework or hosting provider.
+For deploying your frontend application, refer to the documentation of your
+chosen framework or hosting provider.

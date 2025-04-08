@@ -79,7 +79,7 @@ while (true) {
   if (start) {
     q = q.start(start);
   }
-  const batch = q.run();
+  const batch = await q.run();
   console.log('got batch', batch);
 
   if (batch.length < 100) {
@@ -100,7 +100,7 @@ z.query.issue.start(row, {inclusive: true});
 If you want exactly zero or one results, use the `one()` clause. This causes ZQL to return `Row|undefined` rather than `Row[]`.
 
 ```tsx
-const result = z.query.issue.where('id', 42).one();
+const result = await z.query.issue.where('id', 42).one().run();
 if (!result) {
   console.error('not found');
 }

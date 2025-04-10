@@ -1,18 +1,18 @@
 'use client';
 
-import {useEffect, useMemo, useRef, useState} from 'react';
-import lunr from 'lunr';
-import {CommandIcon, FileIcon, SearchIcon} from 'lucide-react';
-import {Input} from '@/components/ui/input';
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogHeader,
-  DialogTrigger,
-  DialogClose,
   DialogTitle,
+  DialogTrigger,
 } from '@/components/ui/dialog';
-import React from 'react';
+import {Input} from '@/components/ui/input';
+import {ScrollArea} from '@/components/ui/scroll-area';
+import {CommandIcon, FileIcon, SearchIcon} from 'lucide-react';
+import lunr from 'lunr';
+import React, {useEffect, useRef, useState} from 'react';
 const Anchor = React.forwardRef<HTMLAnchorElement, React.ComponentProps<'a'>>(
   ({children, ...props}, ref) => {
     return (
@@ -23,7 +23,6 @@ const Anchor = React.forwardRef<HTMLAnchorElement, React.ComponentProps<'a'>>(
   },
 );
 Anchor.displayName = 'Anchor';
-import {ScrollArea} from '@/components/ui/scroll-area';
 
 // Define the type for a search document
 interface SearchDocument {
@@ -85,28 +84,28 @@ export default function Search() {
       searchDocs = await response.json();
 
       // Create Lunr index
-      lunrIndex = lunr(function () {
-        this.ref('id');
-        this.field('title', {boost: 10}); // Prioritize document title
-        this.field('folderName', {boost: 8}); // Prioritize folder name
-        this.field('content');
-        this.field('headings', {boost: 9}); // Prioritize headings
+      lunrIndex = lunr(b => {
+        b.ref('id');
+        b.field('title', {boost: 10}); // Prioritize document title
+        b.field('folderName', {boost: 8}); // Prioritize folder name
+        b.field('content');
+        b.field('headings', {boost: 9}); // Prioritize headings
 
-        searchDocs.forEach(doc => {
-          this.add({
+        for (const doc of searchDocs) {
+          b.add({
             ...doc,
-            title: doc.title ? doc.title.toLowerCase() : '',
-            folderName: doc.folderName ? doc.folderName.toLowerCase() : '', // Ensure folder name is indexed
+            title: doc.title?.toLowerCase() ?? '',
+            folderName: doc.folderName?.toLowerCase() ?? '', // Ensure folder name is indexed
             headings: doc.headings.map(h => h.text.toLowerCase()).join(' '), // Convert headings to searchable string
           });
-        });
+        }
       });
     }
 
     if (!lunrIndex) {
       loadSearchIndex();
     }
-  }, [isOpen, highlightIndex, searchResults]);
+  }, []);
 
   useEffect(() => {
     const delayDebounce = setTimeout(() => {

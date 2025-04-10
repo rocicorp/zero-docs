@@ -1,10 +1,9 @@
 import fs from 'fs';
-import path from 'path';
 import matter from 'gray-matter';
-import {unified} from 'unified';
+import path from 'path';
 import remarkParse from 'remark-parse';
 import remarkStringify from 'remark-stringify';
-import rehypeSlug from 'rehype-slug';
+import {unified} from 'unified';
 import {visit} from 'unist-util-visit';
 
 // Define the root directory where docs are stored
@@ -27,7 +26,7 @@ interface SearchDocument {
 /**
  * Recursively find all `index.mdx` files in subdirectories
  */
-function getAllIndexMDXFiles(dir: string): string[] {
+function getAllMDXFiles(dir: string): string[] {
   let files: string[] = [];
 
   fs.readdirSync(dir, {withFileTypes: true}).forEach(entry => {
@@ -35,9 +34,8 @@ function getAllIndexMDXFiles(dir: string): string[] {
 
     if (entry.isDirectory()) {
       // If it's a directory, recurse into it
-      files = files.concat(getAllIndexMDXFiles(fullPath));
-    } else if (entry.isFile() && entry.name === 'index.mdx') {
-      // If it's an index.mdx file, add it to the list
+      files = files.concat(getAllMDXFiles(fullPath));
+    } else if (entry.isFile() && entry.name.endsWith('.mdx')) {
       files.push(fullPath);
     }
   });
@@ -108,7 +106,7 @@ async function extractTextFromMDX(filePath: string): Promise<SearchDocument> {
  * Generates a search index from all found MDX files
  */
 async function generateSearchIndex() {
-  const files = getAllIndexMDXFiles(DOCS_ROOT);
+  const files = getAllMDXFiles(DOCS_ROOT);
   const index: SearchDocument[] = await Promise.all(
     files.map(file => extractTextFromMDX(file)),
   );

@@ -17,7 +17,7 @@ export const ROUTES: EachRoute[] = [
     items: [
       {title: 'Introduction', href: '/introduction'},
       {title: 'Quickstart', href: '/quickstart'},
-      {title: 'Add to Existing Project', href: '/add-to-existing-project'},
+//      {title: 'Add to Existing Project', href: '/add-to-existing-project'},
       {title: 'Samples', href: '/samples'},
     ],
   },

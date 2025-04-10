@@ -6,9 +6,10 @@ Zero has built-in support for React. Here’s what basic usage looks like:
 
 ```tsx
 import {useQuery, useZero} from "@rocicorp/zero/react";
+import {type Schema} from "./schema";
 
 function IssueList() {
-  const z = useZero();
+  const z = useZero<Schema>();
   let issueQuery = z.query.issue
     .related('creator')
     .related('labels')

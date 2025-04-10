@@ -232,7 +232,6 @@ Use `createSchema` to define the entire Zero schema:
 import {createSchema} from '@rocicorp/zero';
 
 export const schema = createSchema(
-  1, // Schema version. See [Schema Migrations](/docs/migrations) for more info.
   {
     tables: [user, medium, message],
     relationships: [

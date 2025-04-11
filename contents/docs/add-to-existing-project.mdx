@@ -114,7 +114,6 @@ To fetch data, use the `query` object available on the `Zero` instance. You can
 retrieve the data once by awaiting the query (in Zero v0.19) or calling `run`:
 
 ```js
-const z = new Zero({...});
 const data = await z.query.message.run();
 ```
 
@@ -138,15 +137,7 @@ React developers can use the `useZero` hook for seamless integration. See
 
 ### SolidJS
 
-For SolidJS, use the `createZero` afunction instead of `new Zero`.
-
-```js
-import {createZero} from '@rocicorp/zero/solid';
-
-const z = createZero({
-  // same options as the Zero constructor
-});
-```
+For SolidJS, use the `createZero` function instead of `new Zero`.
 
 Refer to [Integrations SolidJS](solidjs) for additional information.
 

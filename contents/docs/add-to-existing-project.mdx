@@ -2,15 +2,13 @@
 title: Add to Existing Project
 ---
 
-Zero can be easily integrated into any existing JavaScript or TypeScript
-project, whether you're using React, Vue, Svelte, Solid, or vanilla JavaScript.
+Zero integrates effortlessly into JavaScript or TypeScript projects, whether
+you're using React, Vue, Svelte, Solid, or vanilla JavaScript.
 
 ## Prerequisites
 
-- A PostgreSQL database with Write-Ahead Logging (WAL) enabled.
-
-For database configuration details, see [Connecting to
-Postgres](connecting-to-postgres).
+- A PostgreSQL database with Write-Ahead Logging (WAL) enabled. See [Connecting
+  to Postgres](connecting-to-postgres) for setup instructions.
 
 ## Installation
 
@@ -20,8 +18,8 @@ Install the Zero package:
 npm install @rocicorp/zero
 ```
 
-**Note:** If using [pnpm](https://pnpm.io) or [bun](https://bun.sh), you'll need
-additional steps to install native binaries. See [Not using
+**Note:** If you're using [pnpm](https://pnpm.io) or [bun](https://bun.sh),
+additional steps are required to install native binaries. Refer to [Not using
 npm?](quickstart#not-npm) for details.
 
 ## Environment Variables
@@ -31,26 +29,25 @@ Configure Zero by creating a `.env` file in your project root:
 ```bash
 ZERO_UPSTREAM_DB="postgresql://user:password@127.0.0.1/postgres"
 ZERO_REPLICA_FILE="/tmp/sync-replica.db"
-ZERO_AUTH_SECRET="secretkey"
 ```
 
-Update these values with your actual database connection details and desired
-settings. See [configuration options](zero-cache-config) for more information.
+Replace the placeholders with your database connection details. For more
+options, see [configuration options](zero-cache-config).
 
 ## Starting the Server
 
-Launch the Zero server using the included CLI tool:
+Start the Zero server using the CLI:
 
 ```bash
 npx zero-cache
 ```
 
-The server runs on port 4848 by default. Verify it's working by opening
-`http://localhost:4848` in your browser.
+The server runs on port 4848 by default. To verify, open `http://localhost:4848`
+in your browser. If everything is configured correctly, you'll see "OK".
 
 ## Defining Your Schema
 
-Create a schema that describes your data model as detailed in the [Zero schema
+Define your data model schema as described in the [Zero schema
 documentation](zero-schema).
 
 Example:
@@ -73,30 +70,26 @@ export const schema = createSchema({
 export type Schema = typeof schema;
 ```
 
-## Custom Mutators (Optional)
+If you're using [Prisma](https://www.prisma.io/) or
+[Drizzle](https://orm.drizzle.team/), you can convert their schemas to Zero
+schemas using tools listed in the [community
+section](./community#database-tools).
 
-Initially, you may want to focus on read-only operations. Once you're ready, you
-can define custom mutators. For a detailed guide, see [Custom
-Mutators](custom-mutators).
+### Permissions
 
-For a comprehensive guide, see [Custom Mutators](custom-mutators).
-
-Here's a simple example of a mutator that adds a message to the database (ensure
-this matches your PostgreSQL schema):
+Update `schema.ts` to include permissions for your tables. For example, to allow
+all users to read and write to the `message` table, add the following:
 
 ```ts
-// mutators.ts
-import type {CustomMutatorDefs} from '@rocicorp/zero';
-import type {Schema} from './schema.ts';
+// schema.ts
+import {ANYONE_CAN_DO_ANYTHING, definePermissions} from '@rocicorp/zero';
 
-export const mutators = {
-  message: {
-    async create(tx, message: Message) {
-      await tx.mutate.message.insert(message);
-    },
-  },
-} as const satisfies CustomMutatorDefs<Schema>;
+export const permissions = definePermissions<unknown, Schema>(schema, () => ({
+  message: ANYONE_CAN_DO_ANYTHING,
+}));
 ```
+
+For more details, see [permissions](permissions).
 
 ## Creating a Zero Instance
 
@@ -109,24 +102,43 @@ const z = new Zero({
   userID: 'anon',
   server: 'http://localhost:4848',
   schema,
-  // mutators, // Optional
 });
 ```
 
-For production, avoid hardcoding the server URL. Instead, use an environment
-variable like `import.meta.env.VITE_PUBLIC_SERVER` or
-`process.env.NEXT_PUBLIC_SERVER`.
+In production, avoid hardcoding the server URL. Use environment variables like
+`import.meta.env.VITE_PUBLIC_SERVER` or `process.env.NEXT_PUBLIC_SERVER`.
 
-### Framework Integration
+## Reading Data
 
-#### React
+To fetch data, use the `query` object available on the `Zero` instance. You can
+retrieve the data once by awaiting the query (in Zero v0.19) or calling `run`:
 
-In React, you can create a `new Zero(...)` instance and optionally use a
-`ZeroProvider` context. For more details, see [Integrations React](react).
+```js
+const z = new Zero({...});
+const data = await z.query.message.run();
+```
 
-#### SolidJS
+For real-time updates, materialize the query. This will notify listeners
+whenever the data changes:
 
-For SolidJS, use the `createZero` function:
+```js
+const view = z.query.message.materialize();
+view.addListener(data => console.log('Data updated:', data));
+
+// Clean up by destroying the view when it's no longer needed.
+view.destroy();
+```
+
+For more details, see [Reading Data with ZQL](reading-data).
+
+### React
+
+React developers can use the `useZero` hook for seamless integration. See
+[Integrations React](react) for more details.
+
+### SolidJS
+
+For SolidJS, use the `createZero` afunction instead of `new Zero`.
 
 ```js
 import {createZero} from '@rocicorp/zero/solid';
@@ -138,21 +150,32 @@ const z = createZero({
 
 Refer to [Integrations SolidJS](solidjs) for additional information.
 
-#### Other Frameworks
+### Other Frameworks
 
-For other frameworks, consult the [UI frameworks](community#ui-frameworks)
+For other frameworks, see the [UI frameworks](community#ui-frameworks)
 documentation.
+
+## Writing Data
+
+Zero supports both simple and advanced data mutations. For basic use cases,
+use the [CRUD mutator](writing-data):
+
+```ts
+z.mutate.message.insert({id: nanoid(), body: 'Hello World!'});
+```
+
+For more complex scenarios, such as custom business logic, use
+[custom mutators](custom-mutators) to define tailored mutation behavior.
 
 ## Server-Side Rendering (SSR)
 
-Zero is not designed to run on the server. To prevent client code from executing
-during server-side rendering, use the following approaches:
+Zero does not currently support SSR. Use client-only patterns to prevent SSR
+execution:
 
 ### Next.js
 
 Add the `use client`
-[directive](https://nextjs.org/docs/app/api-reference/directives/use-client) to
-mark client-only code.
+[directive](https://nextjs.org/docs/app/api-reference/directives/use-client).
 
 ### SolidStart
 
@@ -160,98 +183,18 @@ Wrap components that use Zero with the
 [`clientOnly`](https://docs.solidjs.com/solid-start/reference/client/client-only)
 higher-order component.
 
-The standard pattern for `clientOnly` uses dynamic imports, but note that this
-(like [React's `lazy`](https://react.dev/reference/react/lazy)) works with any
-function that returns a `Promise<{default: () => JSX.Element}>`. You don't need
-to use code splitting if it's not desired.
+The standard `clientOnly` pattern uses dynamic imports, but note that this
+approach (similar to [React's `lazy`](https://react.dev/reference/react/lazy))
+works with any function returning a `Promise<{default: () => JSX.Element}>`. If
+code splitting is unnecessary, you can skip the dynamic import.
 
 ### TanStack Start
 
-Use [React's `lazy`](https://react.dev/reference/react/lazy) to dynamically load
-Zero components. This approach also works in Next.js.
-
-## Custom Mutators
-
-To use [custom mutators](custom-mutators):
-
-1. Define them in the `Zero` constructor.
-2. Implement a push endpoint for server-side logic.
-
-For local development, add this to your `.env` file:
-
-```bash
-ZERO_PUSH_URL="http://localhost:3000/api/push"
-```
-
-### PushProcessor
-
-The push endpoint uses the `POST` method and can be implemented with the
-`PushProcessor` class from `@rocicorp/zero/pg`. See the [push endpoint
-documentation](custom-mutators#custom-push-implementation) for more details.
-
-Create a `PushProcessor` instance:
-
-```js
-import {PushProcessor, connectionProvider} from '@rocicorp/zero/pg';
-import postgres from 'postgres';
-import {schema} from './schema.ts';
-
-const processor = new PushProcessor(
-  schema,
-  connectionProvider(postgres(process.env.ZERO_UPSTREAM_DB)),
-);
-```
-
-Then implement an API endpoint to handle `POST` requests. The implementation
-varies by framework, but the general pattern remains consistent:
-
-#### Next.js
-
-Create an API route in `app/api/push/route.ts`:
-
-```ts
-export async function POST(request: Request) {
-  const authData = await validateAuthorizationHeader(request.headers);
-  const body = await request.json();
-  const params = Object.fromEntries(new URL(request.url).searchParams);
-  return await processor.process(createMutators(authData), params, body);
-}
-```
-
-#### SolidStart
-
-Create an API route in `src/routes/api/push.ts`:
-
-```ts
-export async function POST({params, request}: APIEvent) {
-  const authData = await validateAuthorizationHeader(request.headers);
-  const body = await request.json();
-  return await processor.process(createMutators(authData), params, body);
-}
-```
-
-#### TanStack Start
-
-Create an API route in `src/routes/api/push.ts`:
-
-```ts
-export const APIRoute = createAPIFileRoute('/api/push')({
-  POST: async ({request, params}) => {
-    const authData = await validateAuthorizationHeader(request.headers);
-    const body = await request.json();
-    return json(
-      await processor.process(createMutators(authData), params, body),
-    );
-  },
-});
-```
+Use [React's `lazy`](https://react.dev/reference/react/lazy) for dynamic
+imports.
 
 ## Deployment
 
-When deploying your application, ensure that all the environment variables
-defined in your `.env` file are set in your production environment.
-
-See [Deployment](deployment) for more information on deploying Zero cache.
-
-For deploying your frontend application, refer to the documentation of your
-chosen framework or hosting provider.
+Ensure all `.env` variables are set in the production environment. For Zero
+cache deployment, see [Deployment](deployment). For frontend deployment, consult
+your framework's documentation.

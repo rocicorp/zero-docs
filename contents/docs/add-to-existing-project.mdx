@@ -110,21 +110,18 @@ In production, avoid hardcoding the server URL. Use environment variables like
 
 ## Reading Data
 
-To fetch data, use the `query` object available on the `Zero` instance. You can
-retrieve the data once by awaiting the query (in Zero v0.19) or calling `run`:
-
-```js
-const data = await z.query.message.run();
-```
-
-For real-time updates, materialize the query. This will notify listeners
-whenever the data changes:
+To read data, use the `materialize` method on a `Query` from the `Zero`
+instance. This creates a materialized view that listens for real-time updates to
+the data:
 
 ```js
 const view = z.query.message.materialize();
 view.addListener(data => console.log('Data updated:', data));
+```
 
-// Clean up by destroying the view when it's no longer needed.
+When the view is no longer needed, ensure you clean up by destroying it:
+
+```js
 view.destroy();
 ```
 

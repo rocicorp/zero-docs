@@ -7,6 +7,11 @@ const nextConfig = {
         destination: '/docs/release-notes',
         permanent: false,
       },
+      {
+        source: '/docs',
+        destination: '/docs/introduction',
+        permanent: true,
+      },
     ];
   },
 };

@@ -1,5 +1,5 @@
 ---
-title: Slow Queries (zero-cache)
+title: Slow Queries
 ---
 
 In the `zero-cache` logs, you may see statements indicating a query is slow:
@@ -21,7 +21,15 @@ hash=3rhuw19xt9vry transformationHash=1nv7ot74gxfl7
 Slow query materialization 325.46865100000286
 ```
 
+Or, you may just notice queries taking longer than expected in the UI.
+
 Here are some tips to help debug such slow queries.
+
+## Check `ttl`
+
+If you are seeing the UI unexpected flicker when moving between views, it is likely that the queries backing these views have the default `ttl` of `never`. Set the `ttl` to some longer value to [keep data cached across navigations](https://zero.rocicorp.dev/docs/reading-data#background-queries).
+
+You may alternately want to [preload some data](https://zero.rocicorp.dev/docs/reading-data#preloading) at app startup.
 
 ## Check Storage
 

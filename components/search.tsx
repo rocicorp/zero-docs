@@ -28,7 +28,6 @@ Anchor.displayName = 'Anchor';
 interface SearchDocument {
   id: string;
   title: string;
-  folderName: string;
   content: string;
   url: string;
   headings: {
@@ -87,7 +86,6 @@ export default function Search() {
       lunrIndex = lunr(b => {
         b.ref('id');
         b.field('title', {boost: 10}); // Prioritize document title
-        b.field('folderName', {boost: 8}); // Prioritize folder name
         b.field('content');
         b.field('headings', {boost: 9}); // Prioritize headings
 
@@ -95,7 +93,6 @@ export default function Search() {
           b.add({
             ...doc,
             title: doc.title?.toLowerCase() ?? '',
-            folderName: doc.folderName?.toLowerCase() ?? '', // Ensure folder name is indexed
             headings: doc.headings.map(h => h.text.toLowerCase()).join(' '), // Convert headings to searchable string
           });
         }
@@ -186,9 +183,7 @@ export default function Search() {
 
         // Add an extra result if the search term exactly matches a document title
         const exactMatch = searchDocs.find(
-          doc =>
-            doc.title.toLowerCase() === sanitizedInput.toLowerCase() ||
-            doc.folderName.toLowerCase() === sanitizedInput.toLowerCase(),
+          doc => doc.title.toLowerCase() === sanitizedInput.toLowerCase(),
         );
 
         if (exactMatch) {

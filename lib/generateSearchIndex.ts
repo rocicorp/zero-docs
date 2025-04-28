@@ -14,7 +14,6 @@ const OUTPUT_FILE = path.join(process.cwd(), 'public', 'search-index.json');
 interface SearchDocument {
   id: string;
   title: string;
-  folderName: string;
   content: string;
   url: string;
   headings: {
@@ -87,17 +86,17 @@ async function extractTextFromMDX(filePath: string): Promise<SearchDocument> {
   // Extract headings with IDs
   const headings = extractHeadings(content);
 
-  // Derive a URL from the folder structure
-  const relativePath = path.relative(DOCS_ROOT, path.dirname(filePath)); // Get folder name
-  const url = `/docs/${relativePath}`; // Generate URL based on the folder structure
-  const folderName = relativePath.split('/').pop() || relativePath; // Extract last folder name
+  // Derive a URL from the file name
+  const pathWithoutExtension = path
+    .relative(DOCS_ROOT, filePath)
+    .replace(/\.mdx$/, '');
+  const url = `/docs/${pathWithoutExtension}`;
 
   return {
-    id: relativePath, // Use folder name as ID
-    title: data.title || relativePath, // Use frontmatter title or fallback to folder name
-    folderName, // Add folder name as a searchable field
-    content: plainText.toString().replace(/\n+/g, ' ').trim(), // Normalize whitespace
+    id: pathWithoutExtension, // Use file name as ID
+    title: data.title || pathWithoutExtension, // Use frontmatter title or fallback to path
     url,
+    content: plainText.toString().replace(/\n+/g, ' ').trim(),
     headings, // Include extracted headings with IDs
   };
 }

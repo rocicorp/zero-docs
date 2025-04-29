@@ -251,7 +251,7 @@ definePermissions<AuthData, Schema>(schema, () => {
 
 ## Delete Permissions
 
-Delete permissions work in the same way as `insert` positions except they run _before_ the delete is applied. So if a delete rule queries the database, it will see that the deleted row is present. If any rule in the ruleset returns a row, the delete is allowed.
+Delete permissions work in the same way as `insert` permissions except they run _before_ the delete is applied. So if a delete rule queries the database, it will see that the deleted row is present. If any rule in the ruleset returns a row, the delete is allowed.
 
 ## Debugging
 

@@ -129,7 +129,7 @@ You can do multiple CRUD mutates in a single _batch_. If any of the mutations fa
 ```tsx
 z.mutateBatch(async tx => {
   const samID = nanoid();
-  tx.user.create({
+  tx.user.insert({
     id: samID,
     username: 'sam',
   });

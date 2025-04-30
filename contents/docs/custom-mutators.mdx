@@ -35,7 +35,7 @@ Custom mutators introduce a new _server_ component to the Zero architecture.
 
 This server is implemented by you, the developer. It's typically just your existing backend, where you already put auth or other server-side functionality.
 
-The server can be a serverless function, a microservice, or a full stateful server. The only real requirment is that it expose a special _push endpoint_ that `zero-cache` can call to process mutations. This endpoint implements the [push protocol](#custom-push-implementation) and contains your custom logic for each mutation.
+The server can be a serverless function, a microservice, or a full stateful server. The only real requirement is that it expose a special _push endpoint_ that `zero-cache` can call to process mutations. This endpoint implements the [push protocol](#custom-push-implementation) and contains your custom logic for each mutation.
 
 Zero provides utilities in `@rocicorp/zero` that make it really easy implement this endpoint in TypeScript. But you can also implement it yourself if you want. As long as your endpoint fulfills the push protocol, `zero-cache` doesn't care. You can even write it in a different programming language.
 
@@ -163,7 +163,7 @@ export function createMutators() {
     issue: {
       update: async (tx, {id, title}: {id: string; title: string}) => {
         // Validate title length. Legacy issues are exempt.
-        if (e.length > 100) {
+        if (title.length > 100) {
           throw new Error(`Title is too long`);
         }
         await tx.mutate.issue.update({id, title});
@@ -268,7 +268,7 @@ Mutations execute instantly on the client, but it is sometimes useful to know wh
 You can get the server result of a mutation with the `server` property of a mutator's return value:
 
 ```ts
-const serverResult = await zero.mutate.issue.update({
+const { server } = await zero.mutate.issue.update({
   id: 'issue-123',
   title: 'New title',
 }).server;
@@ -343,7 +343,7 @@ import { schema } from "./schema";
 export function createMutators(clientMutators: CustomMutatorDefs<typeof schema>) {
   return {
     // Reuse all client mutators except the ones in `issue`
-    ...clientMutators
+    ...clientMutators,
 
     issue: {
       // Reuse all issue mutators except `update`
@@ -351,14 +351,14 @@ export function createMutators(clientMutators: CustomMutatorDefs<typeof schema>)
 
       update: async (tx, {id, title}: { id: string; title: string }) => {
         // Call the shared mutator first
-        await clientMutators.issue.update(tx, args);
+        await clientMutators.issue.update(tx, {id, title});
 
         // Record a history of this operation happening in an audit
         // log table.
         await tx.mutate.auditLog.insert({
           // Assuming you have an audit log table with fields for
           // `issueId`, `action`, and `timestamp`.
-          issueId: args.id,
+          issueId: id,
           action: 'update-title',
           timestamp: new Date().toISOString(),
         });

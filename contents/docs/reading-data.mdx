@@ -322,7 +322,7 @@ But it's often useful to keep queries syncing beyond deactivation in case the UI
 const [user] = useQuery(z.query.user.where('id', userId), {ttl: '1d'});
 ```
 
-The `ttl` paramater specifies how long the app developer wishes the query to run inthe background. The following formats are allowed (where `%d` is a positive integer):
+The `ttl` parameter specifies how long the app developer wishes the query to run in the background. The following formats are allowed (where `%d` is a positive integer):
 
 | Format    | Meaning                                                                              |
 | --------- | ------------------------------------------------------------------------------------ |
@@ -395,7 +395,7 @@ Zero returns whatever data it has on the client immediately for a query, then fa
 
 ```tsx
 const [issues, issuesResult] = useQuery(z.query.issue);
-if (issueResult.type === 'complete') {
+if (issuesResult.type === 'complete') {
   console.log('All data is present');
 } else {
   console.log('Some data is missing');

@@ -271,7 +271,7 @@ You can get the server result of a mutation with the `server` property of a muta
 const { server } = await zero.mutate.issue.update({
   id: 'issue-123',
   title: 'New title',
-}).server;
+});
 
 if (server.error) {
   console.error('Server mutation went boom', server.error);

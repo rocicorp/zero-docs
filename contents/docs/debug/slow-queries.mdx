@@ -67,10 +67,8 @@ npx analyze-query \
 
 This will output the query plan and time to execute each phase of that plan.
 
-If you're unsure which query is slow, or you do not know what it looks like after permissions have been applied, you can obtain the query from the hash that is output in the server logs (e.g., `hash=3rhuw19xt9vry`):
+Note that query performance can also be affected by read permissions. See [Debugging Permissions](./permissions) for information on how to analyze queries with read permissions applied.
 
-```shell
-npx transform-query --hash=2i81bazy03a00 --schema=./shared/schema.ts
-```
+## /statz
 
-This will find the query with that hash in the CVR DB and output the ZQL for that query, with all read permissions applied. You can then feed this output into `analyze-query`.
+`zero-cache` makes some internal health statistics available via the `/statz` endpoint of `zero-cache`. In order to access this, you must configure an [admin password](/docs/zero-cache-config#admin-password).

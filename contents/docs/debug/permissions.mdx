@@ -6,18 +6,30 @@ Given that permissions are defined in their own file and internally applied to q
 
 ## Read Permissions
 
-The `transform-query` utility is provided to transform a query by applying permissions to it. As of today you'll need to provide the hash of the query you want to transform. You can find this in server logs, websocket network inspector, or in the CVR database. In a future release, you'll be able to write ZQL directly.
+You can use the `analyze-query` utility with the `--apply-permissions` flag to see the complete query Zero runs, including read permissions.
 
-```ts
-npx transform-query --hash=2i81bazy03a00 --schema=./shared/schema.ts
+```bash
+npx analyze-query
+  --schema='./shared/schema.ts'
+  --query='issue.related("comments")'
+  --apply-permissions
+  --auth-data='{"userId":"user-123"}'
 ```
 
-The output will be the ZQL query with permissions applied as well as the AST of that query.
+If the result looks right, the problem may be that Zero is not receiving the `AuthData` that you think it is. You can retrieve a query hash from websocket or server logs, then ask Zero for the details on that specific query.
+
+Run this command with the same environment you run `zero-cache` with. It will use your `upstream` or `cvr` configuration to look up the query hash in the cvr database.
+
+```bash
+npx analyze-query
+  --schema='./shared/schema.ts'
+  --hash='3rhuw19xt9vry'
+  --apply-permissions
+  --auth-data='{"userId":"user-123"}'
+```
 
 <Note type="note">
-  The printed AST is slightly different than the source ZQL string as it
-  leverages internal APIs to prevent syncing rows that are used strictly for
-  permission checks.
+  The printed query can be different than the source ZQL string, because it is rebuilt from the query AST. But it should be logically equivalent to the query you wrote.
 </Note>
 
 ## Write Permissions

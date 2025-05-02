@@ -4,7 +4,7 @@ title: Custom Mutators
 
 _Custom Mutators_ are a new way to write data in Zero that is much more powerful than the original ["CRUD" mutator API](./writing-data).
 
-Instead of having only the few built-in `insert`/`update`/`delete` write operations for each table, custom mutators _allow you to create your own write operations_ using arbitrary code. This makes it possible to do things that are impossible or awkward with other sync engines.
+Instead of having only the few built-in `insert`/`update`/`delete` write operations for each table, custom mutators allow you to _create your own write operations_ using arbitrary code. This makes it possible to do things that are impossible or awkward with other sync engines.
 
 For example, you can create custom mutators that:
 
@@ -47,7 +47,7 @@ Zero's custom mutators are based on [_server reconciliation_](https://www.gabrie
   Our previous sync engine, [Replicache](https://replicache.dev/), also used
   server reconciliation. The ability to implement arbitrary mutators was one of
   Replicache's most popular features. Custom mutators bring this same power to
-  Zero, but with a *much* better developer experience.
+  Zero, but with a much better developer experience.
 </Note>
 
 A custom mutator is just a function that runs within a database transaction, and which can read and write to the database. Here's an example of a very simple custom mutator written in TypeScript:
@@ -102,7 +102,7 @@ async function updateIssueOnServer(
 ```
 
 <Note heading="Code sharing in mutators is optional">
-Even in TypeScript, you can do as little or as much code sharing as you like. In your server mutator, you can [use raw SQL](TODO), any data access libraries you prefer, or add as much extra server-specific logic as you need.
+Even in TypeScript, you can do as little or as much code sharing as you like. In your server mutator, you can [use raw SQL](#dropping-down-to-raw-sql), any data access libraries you prefer, or add as much extra server-specific logic as you need.
 
 Reusing ZQL on the server is a handy – and we expect frequently used – option, but not a requirement.
 
@@ -141,7 +141,7 @@ Now that we understand what client and server mutations are, let's walk through 
 
 1. When you call a custom mutator on the client, Zero runs your client-side mutator immediately on the local device, updating all active queries instantly.
 2. In the background, Zero then sends a _mutation_ (a record of the mutator having run with certain arguments) to your server's push endpoint.
-3. Your push endpoint runs the [push protocol](#custom-push-implementation), executing the server-side mutator in a transaction against your database and recording the fact that the mutation ran.
+3. Your push endpoint runs the [push protocol](#custom-push-implementation), executing the server-side mutator in a transaction against your database and recording the fact that the mutation ran. Optionally, you use our `PushProcessor` class to handle this for you, but you can also implement it yourself.
 4. The changes to the database are replicated to `zero-cache` as normal.
 5. `zero-cache` calculates the updates to active queries and sends rows that have changed to each client. It also sends information about the mutations that have been applied to the database.
 6. Clients receive row updates and apply them to their local cache. Any pending mutations which have been applied to the server have their local effects rolled back.
@@ -234,7 +234,7 @@ export function createMutators() {
     issue: {
       update: async (tx, {id, title}: {id: string; title: string}) => {
         // Read existing issue
-        const prev = await tx.query.issue.where('id', id).one().run();
+        const prev = await tx.query.issue.where('id', id).one();
 
         // Validate title length. Legacy issues are exempt.
         if (!prev.isLegacy && title.length > 100) {
@@ -252,6 +252,16 @@ You have the full power of ZQL at your disposal, including relationships, filter
 
 Reads and writes within a mutator are transactional, meaning that the datastore is guaranteed to not change while your mutator is running. And if the mutator throws, the entire mutation is rolled back.
 
+<Note type="note" heading="No server reads in optimistic mutators">
+Outside of mutators, the `run()` method has a [`type` parameter](reading-data#running-queries-once) that can be used to wait for server results.
+
+This parameter isn't supported within mutators, because waiting for server results makes no sense in an optimistic mutation – it defeats the purpose of running optimistically to begin with.
+
+When a mutator runs on the client (`tx.location === "client"`), ZQL reads only return data already cached on the client. When mutators run on the server (`tx.location === "server"`), ZQL reads always return all data.
+
+You can use `run()` within custom mutators, but the `type` argument does nothing. In the future, passing `type` in this situation will throw an error.
+</Note>
+
 ### Invoking Client Mutators
 
 Once you have registered your client mutators, you can call them from your client-side application:
@@ -263,27 +273,60 @@ zero.mutate.issue.update({
 });
 ```
 
-Mutations execute instantly on the client, but it is sometimes useful to know when the server has applied the mutation (or experienced an error doing so).
+The result of a call to a mutator is a `Promise`. You do not usually need to `await` this promise as Zero mutators run very fast, usually completing in a tiny fraction of one frame.
 
-You can get the server result of a mutation with the `server` property of a mutator's return value:
+However because mutators ocassionally need to access browser storage, they are technically `async`. Reading a row that was written by a mutator immediately after it is written may not return the new data, because the mutator may not have completed writing to storage yet.
+
+### Waiting for Mutator Result
+
+We typically recommend that you "fire and forget" mutators.
+
+Optimistic mutations make sense when the common case is that a mutation succeeds. If a mutation frequently fails, then showing the user an optimistic result doesn't make sense, because it will likely be wrong.
+
+That said there are cases where it is useful to know when a write succeeded on either the client or server.
+
+One example is if you need to read a row directly after writing it. Zero's local writes are very fast (almost always < 1 frame), but because Zero is backed by IndexedDB, writes are still *technically* asynchronous and reads directly after a write may not return the new data.
+
+You can use the `.client` promise in this case to wait for a write to complete on the client side:
 
 ```ts
-const { server } = await zero.mutate.issue.update({
-  id: 'issue-123',
-  title: 'New title',
-}).server;
+try {
+  const write = zero.mutate.issue.update({
+    id: 'issue-123',
+    title: 'New title',
+  });
 
-if (server.error) {
-  console.error('Server mutation went boom', server.error);
-} else {
-  console.log('Server mutation complete');
+  // issue-123 not guaranteed to be present here. read1 may be undefined.
+  const read1 = await zero.query.issue.where('id', 'issue-123').one();
+
+  // Await client write – almost always less than 1 frame, and same
+  // macrotask, so no browser paint will occur here.
+  await write.client;
+
+  // issue-123 definitely can be read now.
+  const read2 = await zero.query.issue.where('id', 'issue-123').one();
+} catch (e) {
+  console.error("Mutator failed on client", e);
+}
+```
+
+You can also wait for the server write to succeed:
+
+```ts
+try {
+  await zero.mutate.issue.update({
+    id: 'issue-123',
+    title: 'New title',
+  }).server;
+
+  // issue-123 is written to server
+} catch (e) {
+  console.error("Mutator failed on server", e);
 }
 ```
 
 <Note heading="Returning data from mutators">
-  You will soon be able to use `server.data` to return data from mutators in the
-  success case. [Let us know](https://discord.rocicorp.dev/) if you need this
-  soon.
+  There is not yet a way to return data from mutators in the success case – the type of `.clent` and `.server` is always `Promise<void>`. [Let us know](https://discord.rocicorp.dev/) if you need this.
 </Note>
 
 ### Setting Up the Server
@@ -299,7 +342,7 @@ If you are implementing your server in TypeScript, you can use the `PushProcesso
 ```ts
 import {Hono} from 'hono';
 import {handle} from 'hono/vercel';
-import {connectionProvider, PushProcessor} from '@rocicorp/zero/pg';
+import {PushProcessor, ZQLDatabase, PostgresJSConnection} from '@rocicorp/zero/pg';
 import postgres from 'postgres';
 import {schema} from '../shared/schema';
 import {createMutators} from '../shared/mutators';
@@ -307,8 +350,12 @@ import {createMutators} from '../shared/mutators';
 // PushProcessor is provided by Zero to encapsulate a standard
 // implementation of the push protocol.
 const processor = new PushProcessor(
-  schema,
-  connectionProvider(postgres(process.env.ZERO_UPSTREAM_DB as string)),
+  new ZQLDatabase(
+    new PostgresJSConnection(
+      postgres(process.env.ZERO_UPSTREAM_DB! as string)
+    ),
+    schema
+  )
 );
 
 export const app = new Hono().basePath('/api');
@@ -316,8 +363,7 @@ export const app = new Hono().basePath('/api');
 app.post('/push', async c => {
   const result = await processor.process(
     createMutators(),
-    c.req.query(),
-    await c.req.json(),
+    c.req.raw,
   );
   return await c.json(result);
 });
@@ -325,7 +371,11 @@ app.post('/push', async c => {
 export default handle(app);
 ```
 
-The `connectionProvider` argument allows `PushProcessor` to create a connection and run transactions against your database. We provide an implementation for the excellent [`postgres.js`](https://www.npmjs.com/package/postgres) library, but you can [implement an adapter](https://github.com/rocicorp/mono/blob/bb9ba1bde0b11689ed3be8814c2acabb145b951b/packages/zql/src/mutate/custom.ts#L67) for a different Postgres library if you prefer.
+`PushProcessor` depends on an abstract `Database`. This allows it to implement the push algorithm against any database.
+
+`@rocicorp/zero/pg` includes a `ZQLDatabase` implementation of this interface backed by Postgres. The implementation allows the same mutator functions to run on client and server, by providing an implementation of the ZQL APIs that custom mutators run on the client.
+
+`ZQLDatabase` in turn relies on an abstract `DBConnection` that provides raw access to a Postgres database. This allows you to use any Postgres library you like, as long as you provide a `DBConnection` implementation for it. The `PostgresJSConnection` class implements `DBConnection` for the excellent [`postgres.js`](https://www.npmjs.com/package/postgres) library to connect to Postgres.
 
 To reuse the client mutators exactly as-is on the server just pass the result of the same `createMutators` function to `PushProcessor`.
 
@@ -409,8 +459,7 @@ export function createMutators(authData: AuthData | undefined) {
         const hasPermission = await tx.query.user
           .where('id', authData.sub)
           .whereExists('permissions', q => q.where('name', 'launch-missiles'))
-          .one()
-          .run();
+          .one();
         if (!hasPermission) {
           throw new Error('User does not have permission to launch missiles');
         }

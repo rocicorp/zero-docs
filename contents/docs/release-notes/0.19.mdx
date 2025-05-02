@@ -1,0 +1,53 @@
+---
+title: Zero 0.19
+description: Many, many bugfixes and cleanups
+---
+
+## Install
+
+```bash
+npm install @rocicorp/zero@0.19
+```
+
+## Upgrading
+
+TODO
+
+## Features
+
+- Add a `type` param to `query.run()` so it can wait for server results ([doc](/docs/reading-data#running-queries-once), [bug](https://bugs.rocicorp.dev/issue/3243))
+- `await z.mutate.foo.bar()` is now `await z.mutate.foo.bar().client` for consistency with `.server`, old API still works but deprecated ([doc](/docs/custom-mutators#waiting-for-mutator-result))
+- Add options to `analyze-query` to apply permissions and auth data ([doc](/docs/debug/permissions#read-permissions)).
+- Add option to `--lazy-startup` to `zero-cache` to delay connecting to upstram until first connection ([doc](/docs/zero-cache-config#lazy-startup))
+- Add `/statz` endpoint for getting some health statistics from a running Zero instance ([doc](/docs/debug/slow-queries#statz))
+- Improve speed of litestream restore by about 7x
+- Increase replication speed when using JSON by about 25%
+
+## Fixes
+
+- Support passing `Request` to `PushProccesor.process()` ([PR](https://github.com/rocicorp/mono/pull/4214))
+- Fix layering in `PushProcessor` to better support custom db implementations (thanks Erik Munson!) ([PR](https://github.com/rocicorp/mono/pull/4251))
+- Fix socket disconnects in GCP ([PR](https://github.com/rocicorp/mono/pull/4173))
+- Quote Postgres enum types to preserve casing ([report](https://discord.com/channels/830183651022471199/1358217995188437074/1358218))
+- `z2s`: Return `undefined` for empty result set when using `query.one()`
+- `z2s`: Allow accessing tables in non-public schemas
+- `z2s`: Allow `tx.foo.update({bar: undefined})` where `bar` is `optional` to match client behavior
+- Fix broken replication when updating a key that is part of a unique (but non-PK) index
+- `solid`: Rename `useQuery` to `createQuery` to fit Solid naming conventions (old name deprecated)
+- Resync when publications are missing ([PR](https://github.com/rocicorp/mono/pull/4205))
+- Fix missing `NOT LIKE` in `query.where()` ([PR](https://github.com/rocicorp/mono/pull/4217))
+- Fix timezone shift when writing to `timestamp`/`timestamptz` and server is non-UTC timezone (thanks Tom Jenkinson!) ([PR](https://github.com/rocicorp/mono/pull/4216))
+- Bound time spent in incremental updates to 1/2 hydration time
+- Fix `ttl` being off by 1000 in some cases 😬 ([PR](https://github.com/rocicorp/mono/pull/4225))
+- `z2s`: Relationships nested in a junction relationship were not working correctly ([PR](https://github.com/rocicorp/mono/pull/4221))
+- Custom mutators: Due to multitab, client can receive multiple responses for same mutation
+- Fix deadlock that could happen when pushing on a closed websocket ([PR](https://github.com/rocicorp/mono/pull/4256))
+- Fix incorrect shutdown under heavy CPU load  (thanks Erik Munson!) ([PR](https://github.com/rocicorp/mono/pull/4252))
+- Fix incorrect suppression of row-del patches ([PR](https://github.com/rocicorp/mono/pull/4282))
+- `z2s`: Incorrect handling of self-join, and not exists
+- `not(exists())` is not supported on the client
+
+## Breaking Changes
+
+- The structure of setting up a `PushProcesor` has changed slightly. See [push endpoint setup](/docs/custom-mutators#setting-up-the-server) or [upgrade guide](#upgrading).
+- Not technically a breaking change from 0.18, but if you were using 0.19 canaries, the `.server` property returns error by rejection again (like 0.18 did) ([doc](/docs/custom-mutators#waiting-for-mutator-result)).

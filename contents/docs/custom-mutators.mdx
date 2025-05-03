@@ -335,7 +335,7 @@ If the client-side mutator fails, the `.server` promise is also rejected with th
 
 You will need a server somewhere you can run an endpoint on. This is typically a serverless function on a platform like Vercel or AWS but can really be anything.
 
-The URL of the endpoint can be anything. You control it with the [push-url](./zero-cache-config#push-url) option to `zero-cache`.
+Tell `zero-cache` the URL of the push endpoint with the [`ZERO_PUSH_URL` env var or the `--push-url` flag](./zero-cache-config#push-url).
 
 The push endpoint receives a `PushRequest` as input describing one or more mutations to apply to the backend, and must return a `PushResponse` describing the results of those mutations.
 

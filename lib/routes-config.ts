@@ -37,6 +37,7 @@ export const ROUTES: EachRoute[] = [
       {title: 'Custom Mutators', href: '/custom-mutators', new: true},
       {title: 'Authentication', href: '/auth'},
       {title: 'Permissions', href: '/permissions'},
+      {title: 'Server-Side Rendering', href: '/ssr'},
       {title: 'Deployment', href: '/deployment'},
       {title: '`zero-cache` Config', href: '/zero-cache-config'},
     ],

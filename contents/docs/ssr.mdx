@@ -1,0 +1,29 @@
+---
+title: Server-Side Rendering (SSR)
+---
+
+Zero does not currently support SSR ([patches welcome though!](https://bugs.rocicorp.dev/issue/3491)).
+
+You should use your framework's recommended pattern to prevent SSR execution.
+
+## Next.js
+
+Add the `use client`
+[directive](https://nextjs.org/docs/app/api-reference/directives/use-client).
+
+## SolidStart
+
+Wrap components that use Zero with the
+[`clientOnly`](https://docs.solidjs.com/solid-start/reference/client/client-only)
+higher-order component.
+
+The standard `clientOnly` pattern uses dynamic imports, but note that this
+approach (similar to [React's `lazy`](https://react.dev/reference/react/lazy))
+works with any function returning a `Promise<{default: () => JSX.Element}>`. If
+code splitting is unnecessary, you can skip the dynamic import.
+
+## TanStack Start
+
+Use [React's `lazy`](https://react.dev/reference/react/lazy) for dynamic
+imports.
+

@@ -2,7 +2,7 @@
 title: Add to Existing Project
 ---
 
-Zero integrates effortlessly into JavaScript or TypeScript projects, whether
+Zero integrates easily into most JavaScript or TypeScript projects, whether
 you're using React, Vue, Svelte, Solid, or vanilla JavaScript.
 
 ## Prerequisites
@@ -157,29 +157,7 @@ For more complex scenarios, such as custom business logic, use
 
 ## Server-Side Rendering (SSR)
 
-Zero does not currently support SSR. Use client-only patterns to prevent SSR
-execution:
-
-### Next.js
-
-Add the `use client`
-[directive](https://nextjs.org/docs/app/api-reference/directives/use-client).
-
-### SolidStart
-
-Wrap components that use Zero with the
-[`clientOnly`](https://docs.solidjs.com/solid-start/reference/client/client-only)
-higher-order component.
-
-The standard `clientOnly` pattern uses dynamic imports, but note that this
-approach (similar to [React's `lazy`](https://react.dev/reference/react/lazy))
-works with any function returning a `Promise<{default: () => JSX.Element}>`. If
-code splitting is unnecessary, you can skip the dynamic import.
-
-### TanStack Start
-
-Use [React's `lazy`](https://react.dev/reference/react/lazy) for dynamic
-imports.
+Zero does not currently support SSR. See [SSR](ssr) for details on disabling SSR for your framework.
 
 ## Deployment
 

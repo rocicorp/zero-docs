@@ -335,7 +335,19 @@ If the client-side mutator fails, the `.server` promise is also rejected with th
 
 You will need a server somewhere you can run an endpoint on. This is typically a serverless function on a platform like Vercel or AWS but can really be anything.
 
-Tell `zero-cache` the URL of the push endpoint with the [`ZERO_PUSH_URL` env var or the `--push-url` flag](./zero-cache-config#push-url).
+Set the push URL with the [`ZERO_PUSH_URL` env var or `--push-url`](./zero-cache-config#push-url).
+
+If there is per-client configuration you need to send to the push endpoint, you can do that with `push.queryParams`:
+
+```ts
+const z = new Zero({
+  push: {
+    queryParams: {
+      workspaceID: "42",
+    },
+  },
+});
+```
 
 The push endpoint receives a `PushRequest` as input describing one or more mutations to apply to the backend, and must return a `PushResponse` describing the results of those mutations.
 

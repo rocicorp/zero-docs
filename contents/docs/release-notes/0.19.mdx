@@ -46,9 +46,11 @@ npm install @rocicorp/zero@0.19
 - Custom mutators: Due to multitab, client can receive multiple responses for same mutation
 - Fix deadlock that could happen when pushing on a closed websocket ([PR](https://github.com/rocicorp/mono/pull/4256))
 - Fix incorrect shutdown under heavy CPU load  (thanks Erik Munson!) ([PR](https://github.com/rocicorp/mono/pull/4252))
-- Fix incorrect suppression of row-del patches ([PR](https://github.com/rocicorp/mono/pull/4282))
+- Fix case where deletes were getting reverted (thanks for reproduction Marc MacLeod!) ([PR](https://github.com/rocicorp/mono/pull/4282))
 - `z2s`: Incorrect handling of self-join, and not exists
 - `not(exists())` is not supported on the client
+- re-auth on 401s returned by push endpoint
+- Added `push.queryParams` constructor parameter to allow passing query params to the push endpoint ([doc](/docs/custom-mutators#setting-up-the-server))
 
 ## Breaking Changes
 

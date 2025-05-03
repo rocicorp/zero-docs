@@ -11,7 +11,7 @@ npm install @rocicorp/zero@0.19
 
 ## Upgrading
 
-* If you use custom mutators, please see [hello-zero-solid](https://github.com/rocicorp/hello-zero-solid/pull/18/files) for how to udpate your push endpoint.
+* If you use custom mutators, please see [hello-zero-solid](https://github.com/rocicorp/hello-zero-solid/pull/18/files) for how to update your push endpoint.
 * If you use SolidJS, please switch to [`createQuery`](https://github.com/rocicorp/hello-zero-solid/pull/18/files).
 * If you are `awaiting z.mutate.foo.bar()`, you should [switch to `await z.mutate.foo.bar().client`](/docs/custom-mutators#waiting-for-mutator-result) to be consistent with `.server`.
 * If you were using a 0.19 canary, the `.server` property [returns error by rejection again](/docs/custom-mutators#waiting-for-mutator-result) (like 0.18 did). Sorry about the thrash here.

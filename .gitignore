@@ -19,6 +19,7 @@
 # misc
 .DS_Store
 *.pem
+/public/llms.txt
 
 # debug
 npm-debug.log*
@@ -34,3 +35,5 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+**/.claude/settings.local.json

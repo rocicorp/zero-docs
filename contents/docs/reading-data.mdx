@@ -432,16 +432,29 @@ z.query.issue
 
 ## Running Queries Once
 
-Usually subscribing to a query is what you want in a reactive UI but every so often running a query once is all that’s needed.
+Usually subscribing to a query is what you want in a reactive UI, but every so often you'll need to run a query just once. To do this, use the `run()` method:
 
 ```tsx
-const results = z.query.issue.where('foo', 'bar').run();
+const results = await z.query.issue.where('foo', 'bar').run();
 ```
 
-<Note type="note">
-  The `run()` method does not yet expose [`resultType`](#completeness) in any
-  way, so you can't use this method to wait for an authoritative result from the
-  server. See [bug 3243](https://bugs.rocicorp.dev/issue/3243) for a workaround.
+By default, `run()` only returns results that are currently available on the client. That is, it returns the data that would be given for [`result.type === 'unknown'`](#completeness).
+
+If you want to wait for the server to return results, pass `{type: 'complete'}` to `run`:
+
+```tsx
+const results = await z.query.issue.where('foo', 'bar').run(
+    {type: 'complete'});
+```
+
+<Note>
+As a convenience you can also directly await queries:
+
+```ts
+await z.query.issue.where('foo','bar');
+```
+
+This is the same as saying `run()` or `run({type: 'unknown'})`.
 </Note>
 
 ## Consistency

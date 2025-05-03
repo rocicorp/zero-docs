@@ -8,13 +8,9 @@ You can also see all available flags by running `zero-cache --help`.
 
 ## Required Flags
 
-### Upstream DB
+### Auth
 
-The "upstream" authoritative postgres database. In the future we will support other types of upstream besides PG.
-
-flag: `--upstream-db`<br/>
-env: `ZERO_UPSTREAM_DB`<br/>
-required: `true`
+One of [Auth JWK](#auth-jwk), [Auth JWK URL](#auth-jwk-url), or [Auth Secret](#auth-secret) must be specified. See [Authentication](/docs/auth/) for more details.
 
 ### Replica File
 
@@ -24,129 +20,23 @@ flag: `--replica-file`<br/>
 env: `ZERO_REPLICA_FILE`<br/>
 required: `true`
 
-### Auth
+### Upstream DB
 
-One of [Auth JWK](#auth-jwk), [Auth JWK URL](#auth-jwk-url), or [Auth Secret](#auth-secret) must be specified. See [Authentication](/docs/auth/) for more details.
+The "upstream" authoritative postgres database. In the future we will support other types of upstream besides PG.
+
+flag: `--upstream-db`<br/>
+env: `ZERO_UPSTREAM_DB`<br/>
+required: `true`
 
 ## Optional Flags
 
-### Push URL
+### Admin Password
 
-The URL of the API server to which zero-cache will push mutations. Required if you use [custom mutators](/docs/custom-mutators).
+A password used to administer zero-cache server, for example to access the `/statz` endpoint.
 
-flag: `--push-url`<br/>
-env: `ZERO_PUSH_URL`<br/>
+flag: `--admin-password`<br/>
+env: `ZERO_ADMIN_PASSWORD`<br/>
 required: `false`
-
-### Upstream Max Connections
-
-The maximum number of connections to open to the upstream database for committing mutations. This is divided evenly amongst sync workers. In addition to this number, zero-cache uses one connection for the replication stream.
-
-Note that this number must allow for at least one connection per sync worker, or zero-cache will fail to start. See num-sync-workers.
-
-flag: `--upstream-max-conns`<br/>
-env: `ZERO_UPSTREAM_MAX_CONNS`<br/>
-default: `20`
-
-### CVR DB
-
-The Postgres database used to store CVRs. CVRs (client view records) keep track of the data synced to clients in order to determine the diff to send on reconnect. If unspecified, the upstream-db will be used.
-
-flag: `--cvr-db`<br/>
-env: `ZERO_CVR_DB`<br/>
-required: `false`
-
-### CVR Max Connections
-
-The maximum number of connections to open to the CVR database. This is divided evenly amongst sync workers.
-
-Note that this number must allow for at least one connection per sync worker, or zero-cache will fail to start. See num-sync-workers.
-
-flag: `--cvr-max-conns`<br/>
-env: `ZERO_CVR_MAX_CONNS`<br/>
-default: `30`
-
-### Change DB
-
-The Postgres database used to store recent replication log entries, in order to sync multiple view-syncers without requiring multiple replication slots on the upstream database. If unspecified, the upstream-db will be used.
-
-flag: `--change-db`<br/>
-env: `ZERO_CHANGE_DB`<br/>
-required: `false`
-
-### Change Max Connections
-
-The maximum number of connections to open to the change database. This is used by the change-streamer for catching up zero-cache replication subscriptions.
-
-flag: `--change-max-conns`<br/>
-env: `ZERO_CHANGE_MAX_CONNS`<br/>
-default: `5`
-
-### Replica Vacuum Interval Hours
-
-Performs a VACUUM at server startup if the specified number of hours has elapsed since the last VACUUM (or initial-sync). The VACUUM operation is heavyweight and requires double the size of the db in disk space. If unspecified, VACUUM operations are not performed.
-
-flag: `--replica-vacuum-interval-hours`<br/>
-env: `ZERO_REPLICA_VACUUM_INTERVAL_HOURS`<br/>
-required: `false`
-
-### Log Level
-
-Sets the logging level for the application.
-
-flag: `--log-level`<br/>
-env: `ZERO_LOG_LEVEL`<br/>
-default: `"info"`<br/>
-values: `debug`, `info`, `warn`, `error`
-
-### Log Format
-
-Use text for developer-friendly console logging and json for consumption by structured-logging services.
-
-flag: `--log-format`<br/>
-env: `ZERO_LOG_FORMAT`<br/>
-default: `"text"`<br/>
-values: `text`, `json`
-
-### Log Trace Collector
-
-The URL of the trace collector to which to send trace data. Traces are sent over http. Port defaults to 4318 for most collectors.
-
-flag: `--log-trace-collector`<br/>
-env: `ZERO_LOG_TRACE_COLLECTOR`<br/>
-required: `false`
-
-### Log Slow Row Threshold
-
-The number of ms a row must take to fetch from table-source before it is considered slow.
-
-flag: `--log-slow-row-threshold`<br/>
-env: `ZERO_LOG_SLOW_ROW_THRESHOLD`<br/>
-default: `2`
-
-### Log Slow Hydrate Threshold
-
-The number of milliseconds a query hydration must take to print a slow warning.
-
-flag: `--log-slow-hydrate-threshold`<br/>
-env: `ZERO_LOG_SLOW_HYDRATE_THRESHOLD`<br/>
-default: `100`
-
-### Log IVM Sampling
-
-How often to collect IVM metrics. 1 out of N requests will be sampled where N is this value.
-
-flag: `--log-ivm-sampling`<br/>
-env: `ZERO_LOG_IVM_SAMPLING`<br/>
-default: `5000`
-
-### Target Client Row Count
-
-A soft limit on the number of rows Zero will keep on the client. 20k is a good default value for most applications, and we do not recommend exceeding 100k. See [Client Capacity Management](/docs/reading-data#client-capacity-management) for more details.
-
-flag: `--target-client-row-count`<br/>
-env: `ZERO_TARGET_CLIENT_ROW_COUNT`<br/>
-default: `20000`
 
 ### App ID
 
@@ -198,6 +88,14 @@ flag: `--auth-jwks-url`<br/>
 env: `ZERO_AUTH_JWKS_URL`<br/>
 required: `false`
 
+### Auto Reset
+
+Automatically wipe and resync the replica when replication is halted. This situation can occur for configurations in which the upstream database provider prohibits event trigger creation, preventing the zero-cache from being able to correctly replicate schema changes. For such configurations, an upstream schema change will instead result in halting replication with an error indicating that the replica needs to be reset. When auto-reset is enabled, zero-cache will respond to such situations by shutting down, and when restarted, resetting the replica and all synced clients. This is a heavy-weight operation and can result in user-visible slowness or downtime if compute resources are scarce.
+
+flag: `--auto-reset`<br/>
+env: `ZERO_AUTO_RESET`<br/>
+default: `true`
+
 ### Auth Secret
 
 A symmetric key used to verify JWTs. Only one of jwk, jwksUrl and secret may be set.
@@ -206,13 +104,21 @@ flag: `--auth-secret`<br/>
 env: `ZERO_AUTH_SECRET`<br/>
 required: `false`
 
-### Port
+### Change DB
 
-The port for sync connections.
+The Postgres database used to store recent replication log entries, in order to sync multiple view-syncers without requiring multiple replication slots on the upstream database. If unspecified, the upstream-db will be used.
 
-flag: `--port`<br/>
-env: `ZERO_PORT`<br/>
-default: `4848`
+flag: `--change-db`<br/>
+env: `ZERO_CHANGE_DB`<br/>
+required: `false`
+
+### Change Max Connections
+
+The maximum number of connections to open to the change database. This is used by the change-streamer for catching up zero-cache replication subscriptions.
+
+flag: `--change-max-conns`<br/>
+env: `ZERO_CHANGE_MAX_CONNS`<br/>
+default: `5`
 
 ### Change Streamer Port
 
@@ -220,38 +126,6 @@ The port on which the change-streamer runs. This is an internal protocol between
 
 flag: `--change-streamer-port`<br/>
 env: `ZERO_CHANGE_STREAMER_PORT`<br/>
-required: `false`
-
-### Task ID
-
-Globally unique identifier for the zero-cache instance. Setting this to a platform specific task identifier can be useful for debugging. If unspecified, zero-cache will attempt to extract the TaskARN if run from within an AWS ECS container, and otherwise use a random string.
-
-flag: `--task-id`<br/>
-env: `ZERO_TASK_ID`<br/>
-required: `false`
-
-### Per User Mutation Limit Max
-
-The maximum mutations per user within the specified windowMs.
-
-flag: `--per-user-mutation-limit-max`<br/>
-env: `ZERO_PER_USER_MUTATION_LIMIT_MAX`<br/>
-required: `false`
-
-### Per User Mutation Limit Window (ms)
-
-The sliding window over which the perUserMutationLimitMax is enforced.
-
-flag: `--per-user-mutation-limit-window-ms`<br/>
-env: `ZERO_PER_USER_MUTATION_LIMIT_WINDOW_MS`<br/>
-default: `60000`
-
-### Number of Sync Workers
-
-The number of processes to use for view syncing. Leave this unset to use the maximum available parallelism. If set to 0, the server runs without sync workers, which is the configuration for running the replication-manager.
-
-flag: `--num-sync-workers`<br/>
-env: `ZERO_NUM_SYNC_WORKERS`<br/>
 required: `false`
 
 ### Change Streamer URI
@@ -262,21 +136,51 @@ flag: `--change-streamer-uri`<br/>
 env: `ZERO_CHANGE_STREAMER_URI`<br/>
 required: `false`
 
-### Auto Reset
+### CVR DB
 
-Automatically wipe and resync the replica when replication is halted. This situation can occur for configurations in which the upstream database provider prohibits event trigger creation, preventing the zero-cache from being able to correctly replicate schema changes. For such configurations, an upstream schema change will instead result in halting replication with an error indicating that the replica needs to be reset. When auto-reset is enabled, zero-cache will respond to such situations by shutting down, and when restarted, resetting the replica and all synced clients. This is a heavy-weight operation and can result in user-visible slowness or downtime if compute resources are scarce.
+The Postgres database used to store CVRs. CVRs (client view records) keep track of the data synced to clients in order to determine the diff to send on reconnect. If unspecified, the upstream-db will be used.
 
-flag: `--auto-reset`<br/>
-env: `ZERO_AUTO_RESET`<br/>
-default: `true`
-
-### Query Hydration Stats
-
-Track and log the number of rows considered by each query in the system. This is useful for debugging and performance tuning.
-
-flag: `--query-hydration-stats`<br/>
-env: `ZERO_QUERY_HYDRATION_STATS`<br/>
+flag: `--cvr-db`<br/>
+env: `ZERO_CVR_DB`<br/>
 required: `false`
+
+### CVR Max Connections
+
+The maximum number of connections to open to the CVR database. This is divided evenly amongst sync workers.
+
+Note that this number must allow for at least one connection per sync worker, or zero-cache will fail to start. See num-sync-workers.
+
+flag: `--cvr-max-conns`<br/>
+env: `ZERO_CVR_MAX_CONNS`<br/>
+default: `30`
+
+### Initial Sync Row Batch Size
+
+The number of rows each table copy worker fetches at a time during initial sync. This can be increased to speed up initial sync, or decreased to reduce the amount of heap memory used during initial sync (e.g. for tables with large rows).
+
+flag: `--initial-sync-row-batch-size`<br/>
+env: `ZERO_INITIAL_SYNC_ROW_BATCH_SIZE`<br/>
+default: `10000`
+
+### Initial Sync Table Copy Workers
+
+The number of parallel workers used to copy tables during initial sync. Each worker copies a single table at a time, fetching rows in batches of `initial-sync-row-batch-size`.
+
+flag: `--initial-sync-table-copy-workers`<br/>
+env: `ZERO_INITIAL_SYNC_TABLE_COPY_WORKERS`<br/>
+default: `5`
+
+### Lazy Startup
+
+Delay starting the majority of zero-cache until first request.
+
+This is mainly intended to avoid connecting to Postgres replication stream until the first request is received, which can be useful i.e., for preview instances.
+
+Currently only supported in single-node mode.
+
+flag: `--lazy-startup`<br/>
+env: `ZERO_LAZY_STARTUP`<br/>
+default: `false`
 
 ### Litestream Executable
 
@@ -346,6 +250,120 @@ flag: `--litestream-restore-parallelism`<br/>
 env: `ZERO_LITESTREAM_RESTORE_PARALLELISM`<br/>
 default: `48`
 
+### Log Format
+
+Use text for developer-friendly console logging and json for consumption by structured-logging services.
+
+flag: `--log-format`<br/>
+env: `ZERO_LOG_FORMAT`<br/>
+default: `"text"`<br/>
+values: `text`, `json`
+
+### Log IVM Sampling
+
+How often to collect IVM metrics. 1 out of N requests will be sampled where N is this value.
+
+flag: `--log-ivm-sampling`<br/>
+env: `ZERO_LOG_IVM_SAMPLING`<br/>
+default: `5000`
+
+### Log Level
+
+Sets the logging level for the application.
+
+flag: `--log-level`<br/>
+env: `ZERO_LOG_LEVEL`<br/>
+default: `"info"`<br/>
+values: `debug`, `info`, `warn`, `error`
+
+### Log Slow Hydrate Threshold
+
+The number of milliseconds a query hydration must take to print a slow warning.
+
+flag: `--log-slow-hydrate-threshold`<br/>
+env: `ZERO_LOG_SLOW_HYDRATE_THRESHOLD`<br/>
+default: `100`
+
+### Log Slow Row Threshold
+
+The number of ms a row must take to fetch from table-source before it is considered slow.
+
+flag: `--log-slow-row-threshold`<br/>
+env: `ZERO_LOG_SLOW_ROW_THRESHOLD`<br/>
+default: `2`
+
+### Log Trace Collector
+
+The URL of the trace collector to which to send trace data. Traces are sent over http. Port defaults to 4318 for most collectors.
+
+flag: `--log-trace-collector`<br/>
+env: `ZERO_LOG_TRACE_COLLECTOR`<br/>
+required: `false`
+
+### Number of Sync Workers
+
+The number of processes to use for view syncing. Leave this unset to use the maximum available parallelism. If set to 0, the server runs without sync workers, which is the configuration for running the replication-manager.
+
+flag: `--num-sync-workers`<br/>
+env: `ZERO_NUM_SYNC_WORKERS`<br/>
+required: `false`
+
+### Per User Mutation Limit Max
+
+The maximum mutations per user within the specified windowMs.
+
+flag: `--per-user-mutation-limit-max`<br/>
+env: `ZERO_PER_USER_MUTATION_LIMIT_MAX`<br/>
+required: `false`
+
+### Per User Mutation Limit Window (ms)
+
+The sliding window over which the perUserMutationLimitMax is enforced.
+
+flag: `--per-user-mutation-limit-window-ms`<br/>
+env: `ZERO_PER_USER_MUTATION_LIMIT_WINDOW_MS`<br/>
+default: `60000`
+
+### Port
+
+The port for sync connections.
+
+flag: `--port`<br/>
+env: `ZERO_PORT`<br/>
+default: `4848`
+
+### Push URL
+
+The URL of the API server to which zero-cache will push mutations. Required if you use [custom mutators](/docs/custom-mutators).
+
+flag: `--push-url`<br/>
+env: `ZERO_PUSH_URL`<br/>
+required: `false`
+
+### Query Hydration Stats
+
+Track and log the number of rows considered by each query in the system. This is useful for debugging and performance tuning.
+
+flag: `--query-hydration-stats`<br/>
+env: `ZERO_QUERY_HYDRATION_STATS`<br/>
+required: `false`
+
+### Replica Vacuum Interval Hours
+
+Performs a VACUUM at server startup if the specified number of hours has elapsed since the last VACUUM (or initial-sync). The VACUUM operation is heavyweight and requires double the size of the db in disk space. If unspecified, VACUUM operations are not performed.
+
+flag: `--replica-vacuum-interval-hours`<br/>
+env: `ZERO_REPLICA_VACUUM_INTERVAL_HOURS`<br/>
+required: `false`
+
+### Server Version
+
+The version string outputted to logs when the server starts up.
+
+flag: `--server-version`<br/>
+env: `ZERO_SERVER_VERSION`<br/>
+required: `false`
+
 ### Storage DB Temp Dir
 
 Temporary directory for IVM operator storage. Leave unset to use `os.tmpdir()`.
@@ -354,28 +372,20 @@ flag: `--storage-db-tmp-dir`<br/>
 env: `ZERO_STORAGE_DB_TMP_DIR`<br/>
 required: `false`
 
-### Initial Sync Table Copy Workers
+### Target Client Row Count
 
-The number of parallel workers used to copy tables during initial sync. Each worker copies a single table at a time, fetching rows in batches of `initial-sync-row-batch-size`.
+A soft limit on the number of rows Zero will keep on the client. 20k is a good default value for most applications, and we do not recommend exceeding 100k. See [Client Capacity Management](/docs/reading-data#client-capacity-management) for more details.
 
-flag: `--initial-sync-table-copy-workers`<br/>
-env: `ZERO_INITIAL_SYNC_TABLE_COPY_WORKERS`<br/>
-default: `5`
+flag: `--target-client-row-count`<br/>
+env: `ZERO_TARGET_CLIENT_ROW_COUNT`<br/>
+default: `20000`
 
-### Initial Sync Row Batch Size
+### Task ID
 
-The number of rows each table copy worker fetches at a time during initial sync. This can be increased to speed up initial sync, or decreased to reduce the amount of heap memory used during initial sync (e.g. for tables with large rows).
+Globally unique identifier for the zero-cache instance. Setting this to a platform specific task identifier can be useful for debugging. If unspecified, zero-cache will attempt to extract the TaskARN if run from within an AWS ECS container, and otherwise use a random string.
 
-flag: `--initial-sync-row-batch-size`<br/>
-env: `ZERO_INITIAL_SYNC_ROW_BATCH_SIZE`<br/>
-default: `10000`
-
-### Server Version
-
-The version string outputted to logs when the server starts up.
-
-flag: `--server-version`<br/>
-env: `ZERO_SERVER_VERSION`<br/>
+flag: `--task-id`<br/>
+env: `ZERO_TASK_ID`<br/>
 required: `false`
 
 ### Tenants JSON
@@ -416,3 +426,13 @@ JSON encoding of per-tenant configs for running the server in multi-tenant mode:
 flag: `--tenants-json`<br/>
 env: `ZERO_TENANTS_JSON`<br/>
 required: `false`<br/>
+
+### Upstream Max Connections
+
+The maximum number of connections to open to the upstream database for committing mutations. This is divided evenly amongst sync workers. In addition to this number, zero-cache uses one connection for the replication stream.
+
+Note that this number must allow for at least one connection per sync worker, or zero-cache will fail to start. See num-sync-workers.
+
+flag: `--upstream-max-conns`<br/>
+env: `ZERO_UPSTREAM_MAX_CONNS`<br/>
+default: `20`

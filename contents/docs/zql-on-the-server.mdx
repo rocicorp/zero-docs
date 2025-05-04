@@ -1,0 +1,85 @@
+---
+title: ZQL on the Server
+---
+
+[Custom Mutators](custom-mutators) use ZQL on the server as an implementation detail, but you can also use ZQL on the server directly, outside of Custom Mutators. 
+
+This is useful for a variety of reasons:
+
+* You can use ZQL to implement standard REST endpoints, allowing you to share code with custom mutators.
+* You can use ZQL as part of schema migrations.
+* In the future ([but not yet implemented](#ssr)), this can support server-side rendering
+
+Here's a basic example:
+
+```ts
+import {
+  PushProcessor,
+  ZQLDatabase,
+  PostgresJSConnection,
+  TransactionProviderInput,
+} from "@rocicorp/zero/pg";
+
+const db = new ZQLDatabase(
+  new PostgresJSConnection(
+    postgres(
+      must(
+        process.env.ZERO_UPSTREAM_DB as string,
+        "required env var ZERO_UPSTREAM_DB"
+      )
+    )
+  ),
+  schema
+);
+
+// This is needed temporarily and will be cleaned up in the future.
+const dummyTransactionInput: TransactionProviderInput = {
+  clientGroupID: "unused",
+  clientID: "unused",
+  mutationID: 42,
+  upstreamSchema: "unused",
+};
+
+db.transaction(
+  async (tx) => {
+    // await tx.mutate...
+    // await tx.query...
+    // await myMutator(tx, ...args);
+  },
+  dummyTransactionInput
+);
+```
+
+If ZQL does not have the featuers you need, you can use `tx.dbTransaction` to [drop down to raw SQL](custom-mutators#dropping-down-to-raw-sql).
+
+<Note type="warning">
+`ZQLDatabase` currently does a read of your postgres schema before every transaction. This is fine for most usages, but for high scale it may become a problem. [Let us know](https://bugs.rocicorp.dev/issue/3799) if you need a fix for this.
+</Note>
+
+## SSR
+
+Although you can run ZQL on the server, Zero does not yet have the wiring setup in its bindings layers to support server-side rendering ([patches welcome though!](https://bugs.rocicorp.dev/issue/3491)).
+
+For now, you should use your framework's recommended pattern to prevent SSR execution.
+
+### Next.js
+
+Add the `use client`
+[directive](https://nextjs.org/docs/app/api-reference/directives/use-client).
+
+### SolidStart
+
+Wrap components that use Zero with the
+[`clientOnly`](https://docs.solidjs.com/solid-start/reference/client/client-only)
+higher-order component.
+
+The standard `clientOnly` pattern uses dynamic imports, but note that this
+approach (similar to [React's `lazy`](https://react.dev/reference/react/lazy))
+works with any function returning a `Promise<{default: () => JSX.Element}>`. If
+code splitting is unnecessary, you can skip the dynamic import.
+
+### TanStack Start
+
+Use [React's `lazy`](https://react.dev/reference/react/lazy) for dynamic
+imports.
+

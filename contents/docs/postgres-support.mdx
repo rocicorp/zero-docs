@@ -49,7 +49,7 @@ It is strongly recommended that primary keys be client-generated random strings 
 
 You could sync the highest value seen for that table, but there are race conditions and it is possible for that ID to be taken by the time the creation makes it to the server. Your database can resolve this and assign the next ID, but now the relationships you created optimistically will be against the wrong row. Blech.
 
-GUIDs makes a lot more sense in local-first applications.
+GUIDs makes a lot more sense in synced applications.
 
 If your table has a natural key you can use that and it has less problems. But there is still the chance for a conflict. Imagine you are modeling orgs and you choose domainName as the natural key. It is possible for a race to happen and when the creation gets to the server, somebody has already chosen that domain name. In that case, the best thing to do is reject the write and show the user an error.
 

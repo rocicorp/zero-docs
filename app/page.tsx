@@ -134,10 +134,10 @@ export default function Home() {
       </ul>
 
       <p>
-        Where Zero really shines is complex, highly-interactive “local-first”
-        style applications like Linear and Superhuman. With Zero, these apps can
-        be built in a fraction of the time it would take to build even an
-        old-fashioned server-rendered web app.
+        Where Zero really shines is complex, highly-interactive applications
+        like Linear and Superhuman. With Zero, these apps can be built in a
+        fraction of the time it would take to build even an old-fashioned
+        server-rendered web app.
       </p>
       <p>
         Zero is currently in public alpha. It's got a few rough edges, and you

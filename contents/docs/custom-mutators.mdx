@@ -507,21 +507,26 @@ processor.process(
 
 ### Dropping Down to Raw SQL
 
-On the server, you can use raw SQL in addition or instead of ZQL. This is useful for complex queries, or for using Postgres features that Zero doesn't support yet:
+The `ServerTransaction` interface has a `dbTransaction` property that exposes the underlying database connection. This allows you to run raw SQL queries directly against the database.
+
+This is useful for complex queries, or for using Postgres features that Zero doesn't support yet:
 
 ```ts
-async function markAllAsRead(tx: Transaction, {userId: string}) {
-  // Narrow `Transaction` interface to `ServerTransaction`
-  assert(tx.location === 'server');
+markAllAsRead: async(tx: Transaction, {userId: string}) {
+  // shared stuff ...
 
-  await tx.dbTransaction.query(
-    `
-    UPDATE notification
-    SET read = true
-    WHERE user_id = $1
-  `,
-    [userId],
-  );
+  if (tx.location === 'server') {
+    // `tx` is now narrowed to `ServerTransaction`.
+    // Do special server-only stuff with raw SQL.
+    await tx.dbTransaction.query(
+      `
+      UPDATE notification
+      SET read = true
+      WHERE user_id = $1
+    `,
+      [userId],
+    );
+  }
 }
 ```
 

@@ -511,6 +511,9 @@ On the server, you can use raw SQL in addition or instead of ZQL. This is useful
 
 ```ts
 async function markAllAsRead(tx: Transaction, {userId: string}) {
+  // Narrow `Transaction` interface to `ServerTransaction`
+  assert(tx.location === 'server');
+
   await tx.dbTransaction.query(
     `
     UPDATE notification
@@ -520,6 +523,47 @@ async function markAllAsRead(tx: Transaction, {userId: string}) {
     [userId],
   );
 }
+```
+
+As a convenience we also expose a special `CustomMutatorDefs` for use with `server-mutators.ts` that
+sets all the mutators to `ServerTransaction` by default:
+
+```ts
+// server-mutators.ts
+import type {
+  CustomMutatorDefs,  // Special server-side CustomMutatorDefs
+  PostgresJSTransaction,
+  ServerTransaction,
+} from '@rocicorp/zero/pg';
+import {Schema} from './schema';
+
+export function createMutators(clientMutators: CustomMutatorDefs<Schema>) {
+  return {
+    // Reuse all client mutators except the ones in `issue`
+    ...clientMutators,
+
+    issue: {
+      // Reuse all issue mutators except `update`
+      ...clientMutators.issue,
+
+      markAllAsRead: async (tx, {userId: string}) {
+        // No narrowing necessary – tx is already a `ServerTransaction`
+        // assert(tx.location === 'server');
+        await tx.dbTransaction.query(
+          `
+          UPDATE notification
+          SET read = true
+          WHERE user_id = $1
+        `,
+          [userId],
+        );
+      },
+    }
+  } as const satisfies CustomMutatorDefs<
+    ServerTransaction<Schema, PostgresJSTransaction>
+  >;
+}
+
 ```
 
 ### Notifications and Async Work

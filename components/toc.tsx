@@ -13,12 +13,12 @@ export default async function Toc({path}: {path: string}) {
           <>
             <h3 className="font-semibold text-sm">On this page</h3>
             <ScrollArea className="pb-4 h-full pt-0.5">
-              <div className="flex flex-col gap-2.5 text-sm dark:text-neutral-300/85 text-neutral-800 ml-0.5">
+              <div className="flex flex-col gap-2.5 text-sm dark:text-neutral-300/85 text-neutral-500/85 ml-0.5">
                 {tocs.map(({href, level, text}) => (
                   <ActiveHashLink
                     key={href}
                     href={href}
-                    activeClassName="text-white"
+                    activeClassName="text-black dark:text-white"
                     className={clsx({
                       'pl-0': level == 2,
                       'pl-4': level == 3,

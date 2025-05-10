@@ -4,6 +4,10 @@ import styles from './page.module.css';
 import ResponsiveImage from '@/components/ui/responsive-image';
 import CodeBlock from '@/components/CodeBlock';
 import {Button} from '@/components/ui/button';
+import {cn} from '@/lib/utils';
+import ZeroAlphaLogo from '@/components/logos/ZeroAlpha';
+import {ModeToggle} from '@/components/theme-toggle';
+import RocicorpLogo from '@/components/logos/Rocicorp';
 
 export default function Home() {
   // Code block
@@ -40,12 +44,10 @@ export default function Home() {
   return (
     <div className={styles.main}>
       <div className={styles.mainHeader}>
-        <Image
-          src="/images/zero-logo-alpha.svg"
-          alt="Zero logo"
-          className={styles.logo}
+        <ZeroAlphaLogo
           width={173}
           height={32}
+          className={cn(styles.logo, 'text-foreground')}
         />
 
         <div className={styles.navLinks}>
@@ -66,6 +68,7 @@ export default function Home() {
           >
             <a href="/docs/introduction">Docs</a>
           </Button>
+          <ModeToggle />
         </div>
       </div>
 
@@ -87,6 +90,7 @@ export default function Home() {
 
       {/* Zero Diagram */}
       <ResponsiveImage
+        className="invert dark:invert-0"
         src="/images/how-it-works.svg"
         alt="How Zero Works"
         width={732}
@@ -164,12 +168,10 @@ export default function Home() {
 
       <div className={styles.footer}>
         <Link href="https://roci.dev">
-          <Image
-            src="/images/roci-logo.svg"
-            className={styles.rociLogo}
-            alt="Rocicorp logo"
+          <RocicorpLogo
             width={86}
             height={116}
+            className={cn(styles.rociLogo, 'text-foreground')}
           />
         </Link>
       </div>

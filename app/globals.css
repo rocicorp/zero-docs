@@ -4,31 +4,30 @@
 
 @layer base {
   :root {
-    --background: 0 0% 0%;
-    --foreground: 0 0% 98%;
-    --card: 240 10% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 240 5.9% 10%;
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
-    --accent: 240 3.7% 15.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+    --primary: 240 5.9% 10%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+    --accent: 240 4.8% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
+    --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 240 4.9% 83.9%;
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
     --radius: 0.5rem;
     --primary-highlight: rgba(252, 33, 138, 1);
 
     /* Root page */
-    --foreground-rgb: 255, 255, 255;
-    --paragraph-color: rgb(212, 212, 216);
+    --foreground-rgb: 0, 0, 0;
+    --paragraph-color: hsl(0, 0%, 15%);
     --primary-accent: 39, 252, 174;
     --inline-code-foreground: rgb(39, 252, 174);
     --inline-code-background: rgb(26, 27, 38);
@@ -54,6 +53,13 @@
     --border: 240 3.7% 15.9%;
     --input: 240 3.7% 15.9%;
     --ring: 240 4.9% 83.9%;
+
+    /* Root page */
+    --foreground-rgb: 255, 255, 255;
+    --paragraph-color: #d4d4d8;
+    --primary-accent: 39, 252, 174;
+    --inline-code-foreground: rgb(39, 252, 174);
+    --inline-code-background: rgb(26, 27, 38);
   }
 }
 
@@ -95,10 +101,6 @@ mark {
   border-color: var(--primary-highlight);
 }
 
-.top-nav {
-  height: 4.5rem;
-}
-
 .search-shortcut {
   display: flex;
 }
@@ -108,24 +110,8 @@ mark {
   top: 4rem !important;
 }
 
-div.inner-nav-container {
-  padding-left: 0;
-  padding-right: 0;
-}
-
-.inner-nav-items {
-  width: 100%;
-  justify-content: space-between;
-}
-
-.navbar-right {
-  margin-left: auto;
-  display: flex;
-  gap: 1rem;
-}
-
 .footer-container {
-  color: rgb(212 212 212 / 0.6);
+  color: hsl(var(--foreground) / 50%);
   font-size: 0.875rem;
 }
 
@@ -134,7 +120,7 @@ div.inner-nav-container {
 }
 
 .footer-container .footer-text-link:hover {
-  color: rgba(255, 255, 255, 1);
+  color: hsl(var(--foreground));
 }
 
 .social-links {
@@ -146,27 +132,11 @@ div.inner-nav-container {
   display: block;
   height: 1rem;
   width: 1rem;
-  opacity: 0.5;
+  color: hsl(var(--foreground) / 50%);
 }
 
 .social-links a:hover {
-  opacity: 1;
-}
-
-.social-links .link-github {
-  background: transparent url(/images/icons/github.svg) no-repeat;
-}
-
-.social-links .link-discord {
-  background: transparent url(/images/icons/discord.svg) no-repeat;
-}
-
-.social-links .link-bluesky {
-  background: transparent url(/images/icons/bluesky.svg) no-repeat;
-}
-
-.social-links .link-twitter {
-  background: transparent url(/images/icons/twitter.svg) no-repeat;
+  color: hsl(var(--foreground));
 }
 
 .mobile-menu-social-links .github-discord-mobile {
@@ -199,7 +169,7 @@ div.inner-nav-container {
 }
 
 .prose .note-container code {
-  color: rgba(255, 255, 255, 1) !important;
+  color: var(--foreground) !important;
 }
 
 .prose pre code {
@@ -241,39 +211,75 @@ div.inner-nav-container {
 /* Syntax highlighting */
 
 /* Dark Mode */
-.keyword {
+:root.dark .keyword {
   color: #ff79c6;
 }
 
-.function {
+:root.dark .function {
   color: #27fcae;
+  /* Sky Blue */
+}
+
+:root.dark .string,
+:root.dark .constant,
+:root.dark .annotation {
+  color: #f1fa8c;
+}
+
+:root.dark .boolean {
+  color: #bd93f9;
+}
+
+:root.dark .number {
+  color: #ffb86c;
+}
+
+:root.dark .tag {
+  color: #bd93f9;
+}
+
+:root.dark .attr-name {
+  color: #8be9fd;
+}
+
+:root.dark .attr-value {
+  color: #ffb86c;
+}
+
+/* Light Mode */
+.keyword {
+  color: #fc218a;
+}
+
+.function {
+  color: #19ad68;
   /* Sky Blue */
 }
 
 .string,
 .constant,
 .annotation {
-  color: #f1fa8c;
+  color: #be9f17;
 }
 
 .boolean {
-  color: #bd93f9;
+  color: #6f42c1;
 }
 
 .number {
-  color: #ffb86c;
+  color: #fd7e14;
 }
 
 .tag {
-  color: #bd93f9;
+  color: #2b3287;
 }
 
 .attr-name {
-  color: #8be9fd;
+  color: #0d6efd;
 }
 
 .attr-value {
-  color: #ffb86c;
+  color: #fd7e14;
 }
 
 .prose pre {
@@ -355,6 +361,7 @@ div.inner-nav-container {
   white-space: normal;
   height: fit-content;
   padding: 1rem;
+  border-color: hsl(var(--border));
 }
 
 .button-link.pagination-button-prev {
@@ -367,7 +374,7 @@ div.inner-nav-container {
 
 .button-link.pagination-button:hover {
   background-color: inherit !important;
-  border-color: rgba(255, 255, 255, 0.4);
+  border-color: hsl(var(--foreground) / 30%);
 }
 
 .prose a.button-link,
@@ -490,67 +497,5 @@ pre .copy-button:hover {
   .fullscreenContainer {
     justify-content: flex-start;
     overflow-y: auto;
-  }
-}
-
-@media (max-width: 768px) {
-  .navbar-right {
-    display: none;
-  }
-
-  .logo-link {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-  }
-
-  .search-icon {
-    position: static;
-    top: 0;
-    height: 1.25rem;
-    width: 1.25rem;
-  }
-
-  .search-container {
-    position: absolute;
-    right: 2rem;
-  }
-
-  .search-input {
-    display: none;
-  }
-
-  .search-shortcut {
-    display: none;
-  }
-}
-
-@media (min-width: 640px) {
-  nav.top-nav {
-    padding-left: 2rem;
-    padding-right: 2rem;
-  }
-}
-
-@media (min-width: 1250px) {
-  nav.top-nav {
-    padding: 0;
-    margin-left: auto;
-    margin-right: auto;
-  }
-  div.inner-nav-container {
-    padding-left: 2rem;
-    padding-right: 2rem;
-  }
-}
-
-@media (max-width: 640px) {
-  nav.top-nav {
-    width: 88vw;
-    margin-left: auto;
-    margin-right: auto;
-  }
-  .search-container {
-    right: 0;
   }
 }

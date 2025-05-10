@@ -3,6 +3,7 @@ import localFont from 'next/font/local';
 import ClientBoundary from '@/components/ClientBoundary'; // Add a wrapper for client components
 import './globals.css';
 import Script from 'next/script';
+import {ThemeProvider} from '@/components/theme-provider';
 
 const muoto = localFont({
   src: './fonts/muoto-var.ttf',
@@ -49,8 +50,12 @@ export default function RootLayout({
         className={`${muoto.variable} ${codeFont.variable} font-regular`}
         suppressHydrationWarning
       >
-        <ClientBoundary />
-        <main className="sm:container mx-auto w-[88vw] h-auto">{children}</main>
+        <ThemeProvider>
+          <ClientBoundary />
+          <main className="sm:container mx-auto w-[88vw] h-auto">
+            {children}
+          </main>
+        </ThemeProvider>
         <Script
           src="/um.js"
           data-website-id="88f5bd98-94e6-4de9-bd7d-1a159e162073"

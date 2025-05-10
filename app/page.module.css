@@ -27,7 +27,7 @@
 
 .main a {
   text-decoration: underline;
-  color: rgba(255, 255, 255, 1);
+  color: var(--foreground-rgb);
 }
 
 .main a:hover {
@@ -37,7 +37,7 @@
 
 .main a.primaryButton {
   text-decoration: none;
-  color: inherit;
+  color: rgb(var(--foreground-rgb));
 }
 
 .main a.primaryButton:hover {

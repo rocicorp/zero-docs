@@ -1,7 +1,10 @@
 import {ROUTES} from '@/lib/routes-config';
 import SubLink from './sublink';
 import Link from 'next/link';
-
+import GithubLogo from './logos/Github';
+import DiscordLogo from './logos/Discord';
+import BlueskyLogo from './logos/Bluesky';
+import TwitterLogo from './logos/Twitter';
 export default function DocsMenu({isSheet = false}) {
   return (
     <div className="flex flex-col gap-12 mt-5 pr-2 pb-6">
@@ -23,22 +26,18 @@ export default function DocsMenu({isSheet = false}) {
           </Link>
         </p>
         <div className="social-links">
-          <Link
-            href="https://github.com/rocicorp/mono"
-            className="link-github"
-          ></Link>
-          <Link
-            href="https://discord.rocicorp.dev"
-            className="link-discord"
-          ></Link>
-          <Link
-            href="https://bsky.app/profile/zero.rocicorp.dev"
-            className="link-bluesky"
-          ></Link>
-          <Link
-            href="https://x.com/rocicorp_zero"
-            className="link-twitter"
-          ></Link>
+          <Link href="https://github.com/rocicorp/mono">
+            <GithubLogo />
+          </Link>
+          <Link href="https://discord.rocicorp.dev">
+            <DiscordLogo />
+          </Link>
+          <Link href="https://bsky.app/profile/zero.rocicorp.dev">
+            <BlueskyLogo />
+          </Link>
+          <Link href="https://x.com/rocicorp_zero">
+            <TwitterLogo />
+          </Link>
         </div>
       </div>
     </div>

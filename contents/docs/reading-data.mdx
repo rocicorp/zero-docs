@@ -95,7 +95,7 @@ By default `start()` is _exclusive_ - it returns rows starting **after** the sup
 z.query.issue.start(row, {inclusive: true});
 ```
 
-## Uniqueness
+## Getting a Single Result
 
 If you want exactly zero or one results, use the `one()` clause. This causes ZQL to return `Row|undefined` rather than `Row[]`.
 

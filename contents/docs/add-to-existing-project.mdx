@@ -9,6 +9,10 @@ you're using React, Vue, Svelte, Solid, or vanilla JavaScript.
 
 - A PostgreSQL database with Write-Ahead Logging (WAL) enabled. See [Connecting
   to Postgres](connecting-to-postgres) for setup instructions.
+- If you are using [TypeScript](https://www.typescriptlang.org/) ensure that
+  [`strictNullChecks`](https://www.typescriptlang.org/tsconfig/#strictNullChecks)
+  is set to `true` in [tsconfig.json](https://www.typescriptlang.org/tsconfig/). If this is not set then the advanced types Zero uses do not work
+  as expected.
 
 ## Installation
 

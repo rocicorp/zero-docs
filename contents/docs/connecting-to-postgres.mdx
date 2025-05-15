@@ -6,15 +6,16 @@ In the future, Zero will work with many different backend databases. Today only 
 
 Here are some common Postgres options and what we know about their support level:
 
-| Postgres                          | Support Status                                                                                              |
-| --------------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| Postgres.app                      | ✅                                                                                                          |
-| postgres:16.2-alpine docker image | ✅                                                                                                          |
-| AWS RDS                           | ✅                                                                                                          |
-| AWS Aurora                        | ✅ v15.6+                                                                                                   |
-| Google Cloud SQL                  | ✅ See [notes below](#google-cloud-sql)                                                                     |
-| [Fly.io](http://Fly.io) Postgres  | ✅                                                                                                          |
-| Supabase, Neon, Render, Heroku    | 🤷‍♂️ Partial support with autoreset. See [Schema Changes](#schema-changes) and provider-specific notes below. |
+| Postgres                          | Support Status                                                                                                |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| AWS RDS                           | ✅                                                                                                            |
+| AWS Aurora                        | ✅ v15.6+                                                                                                     |
+| Google Cloud SQL                  | ✅ See [notes below](#google-cloud-sql)                                                                       |
+| [Fly.io](http://Fly.io) Postgres  | ✅ See [notes below](#flyio)                                                                       |                                                                                                           |
+| Postgres.app                      | ✅                                                                                                            |
+| postgres:16.2-alpine docker image | ✅                                                                                                            |
+| Supabase                          | ✅ See [notes below](#supabase)                                                                               |
+| Neon, Render, Heroku              | 🤷‍♂️ Partial support with `autoreset`. See [Schema Changes](#schema-changes) and provider-specific notes below. |
 
 ## Schema Changes
 
@@ -51,11 +52,6 @@ After your server restarts, show the `wal_level` again to ensure it has changed:
 psql -c 'SHOW wal_level'
 ```
 
-## SSL Mode
-
-Some Postgres providers (notably Fly.io, so far) do not support TLS on their internal networks. You can disable
-attempting to use it by adding the `sslmode=disable` query parameter to your connection strings from `zero-cache`.
-
 ## Provider-Specific Notes
 
 ### Google Cloud SQL
@@ -65,6 +61,12 @@ and specify that publication name in the [App Publications](/docs/zero-cache-con
 option when running `zero-cache`.
 
 (Google Cloud SQL does not provide sufficient permissions for `zero-cache` to create its default publication.)
+
+## Fly.io
+
+Fly does not support TLS on their internal networks. If you run both `zero-cache` and Postgres on Fly, you need
+to stop `zero-cache` from trying to use TLS to talk to Postgres. You can do this by adding the `sslmode=disable`
+query parameter to your connection strings from `zero-cache`.
 
 ### Supabase
 
@@ -77,9 +79,16 @@ In order to connect to Supabase you must use the "Direct Connection" style conne
 
 This is because Zero sets up a logical replication slot, which is only supported with a direct connection.
 
-Additionally, you'll likely need to assign a IPv4 address to your Supabase instance. This is not supported on the free Supabase tier, and is an extra $4/mo fee.
+Additionally, you may need to assign a IPv4 address to your Supabase instance:
 
 <ImageLightbox
   src="/images/connecting-to-postgres/ipv4.png"
   alt="Screenshot of where to assign ipv4 address"
 />
+
+This will be required if you
+cannot use IPv6 from wherever `zero-cache` is running. Most cloud providers
+support IPv6, but some do not. For example, if you are running `zero-cache` in AWS, it is possible to use IPv6 but
+difficult.
+
+IPv4 addresses are only supported on the Pro plan and are an extra $4/month.

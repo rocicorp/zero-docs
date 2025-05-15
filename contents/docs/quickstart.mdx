@@ -24,42 +24,6 @@ npm install
 npm run dev:db-up
 ```
 
-<details>
-<summary id="not-npm">Not using npm?</summary>
-
-Zero's server component depends on `@rocicorp/zero-sqlite3`, which contains a
-binary that requires running a postinstall script. Most alternative package
-managers (non-npm) disable these scripts by default for security reasons. Here's
-how to enable installation for common alternatives:
-
-### pnpm
-
-For [pnpm](https://pnpm.io/), either:
-
-- Run `pnpm approve-builds` to approve all build scripts, or
-- Add the specific dependency to your `package.json`:
-
-```json
-"pnpm": {
-  "onlyBuiltDependencies": [
-    "@rocicorp/zero-sqlite3"
-  ]
-}
-```
-
-### Bun
-
-For [Bun](https://bun.sh/), add the dependency to your trusted dependencies
-list:
-
-```json
-"trustedDependencies": [
-  "@rocicorp/zero-sqlite3"
-],
-```
-
-</details>
-
 In a second terminal, start `zero-cache`:
 
 ```bash

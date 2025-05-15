@@ -56,6 +56,76 @@ If ZQL does not have the featuers you need, you can use `tx.dbTransaction` to [d
 `ZQLDatabase` currently does a read of your postgres schema before every transaction. This is fine for most usages, but for high scale it may become a problem. [Let us know](https://bugs.rocicorp.dev/issue/3799) if you need a fix for this.
 </Note>
 
+## Custom adapters
+
+Zero only provides an adapter for `postgres.js`. It is possible to write your own adatapter by implementing `DBTransaction` and `DBConnection`.
+
+Here is an example for `node-postgres` by Jökull Sólberg ([full example](https://gist.github.com/jokull/68a656b013a14912c1b3a851e3eec117))
+
+```ts
+import { Client, type ClientBase } from "pg";
+
+class PgConnection implements DBConnection<ClientBase> {
+  readonly #client: ClientBase;
+
+  constructor(client: ClientBase) {
+    this.#client = client;
+  }
+
+  async query(sql: string, params: unknown[]): Promise<Row[]> {
+    const result = await this.#client.query<Row>(sql, params as JSONValue[]);
+    return result.rows;
+  }
+
+  async transaction<T>(
+    fn: (tx: DBTransaction<ClientBase>) => Promise<T>,
+  ): Promise<T> {
+    if (!(this.#client instanceof Client)) {
+      throw new Error("Transactions require a non-pooled Client instance");
+    }
+
+    const tx = new PgTransaction(this.#client);
+
+    try {
+      await this.#client.query("BEGIN");
+      const result = await fn(tx);
+      await this.#client.query("COMMIT");
+      return result;
+    } catch (error) {
+      await this.#client.query("ROLLBACK");
+      throw error;
+    }
+  }
+}
+
+class PgTransaction implements DBTransaction<ClientBase> {
+  readonly wrappedTransaction: ClientBase;
+
+  constructor(client: ClientBase) {
+    this.wrappedTransaction = client;
+  }
+
+  async query(sql: string, params: unknown[]): Promise<Row[]> {
+    const result = await this.wrappedTransaction.query<Row>(
+      sql,
+      params as JSONValue[],
+    );
+    return result.rows;
+  }
+}
+
+// Then you can use it just like postgres.js
+const client = new Client({
+  connectionString: process.env.ZERO_UPSTREAM_DB
+})
+await client.connect()
+
+const db = new ZQLDatabase(
+  new PgConnection(client),
+  schema
+)
+```
+
 ## SSR
 
 Although you can run ZQL on the server, Zero does not yet have the wiring setup in its bindings layers to support server-side rendering ([patches welcome though!](https://bugs.rocicorp.dev/issue/3491)).

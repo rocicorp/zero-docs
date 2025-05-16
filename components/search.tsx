@@ -272,88 +272,82 @@ export default function Search() {
   }, [isOpen, highlightIndex, searchResults]);
 
   return (
-    <div>
-      <Dialog
-        open={isOpen}
-        onOpenChange={open => {
-          if (!open) setSearchedInput('');
-          setIsOpen(open);
-        }}
-      >
-        <DialogTrigger asChild>
-          <div className="search-container relative flex-1 max-w-md cursor-pointer">
-            <div className="search-icon-container">
-              <SearchIcon className="search-icon absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-stone-500 dark:text-stone-400" />
-            </div>
-            <Input
-              className="search-input md:w-full rounded-md dark:bg-background/95 bg-background border h-9 pl-10 pr-0 sm:pr-7 text-sm shadow-sm overflow-ellipsis"
-              placeholder="Search docs"
-              type="search"
-              value={searchedInput}
-              onChange={e => setSearchedInput(e.target.value)}
-            />
-            <div className="search-shortcut hidden absolute top-1/2 -translate-y-1/2 right-2 text-xs font-medium font-mono items-center gap-0.5 dark:bg-stone-900 bg-stone-200/65 p-1 rounded-sm">
-              <CommandIcon className="w-3 h-3" />
-              <span>K</span>
-            </div>
+    <Dialog
+      open={isOpen}
+      onOpenChange={open => {
+        if (!open) setSearchedInput('');
+        setIsOpen(open);
+      }}
+    >
+      <DialogTrigger asChild>
+        <div className="relative max-w-56 px-2.5 py-0.5 flex items-center gap-2 md:border rounded-md scursor-pointer h-10 bg-transparent md:bg-background focus-within:ring-2 focus-within:ring-primary hover:bg-accent md:hover:bg-background">
+          <SearchIcon className="h-4 w-5 flex-shrink-0 aspect-square text-foreground" />
+          <Input
+            className="hidden md:block bg-transparent text-sm px-0 overflow-ellipsis border-none shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
+            placeholder="Search docs"
+            type="search"
+            value={searchedInput}
+            onChange={e => setSearchedInput(e.target.value)}
+          />
+          <div className="hidden md:flex flex-shrink-0 text-xs font-medium font-mono items-center gap-0.5 dark:bg-stone-900 bg-stone-200/65 p-1 rounded-sm">
+            <CommandIcon className="w-3 h-3" />
+            <span>K</span>
           </div>
-        </DialogTrigger>
+        </div>
+      </DialogTrigger>
 
-        <DialogContent className="dialog-container p-0 max-w-[650px] sm:top-[38%] top-[45%] !rounded-md">
-          <DialogTitle className="sr-only">Search</DialogTitle>
-          <DialogHeader>
-            <input
-              value={searchedInput}
-              onChange={e => setSearchedInput(e.target.value)}
-              placeholder="Type something to search..."
-              autoFocus
-              className="h-14 px-6 bg-transparent border-b text-[14px] outline-none"
-            />
-          </DialogHeader>
+      <DialogContent className="dialog-container p-0 max-w-[650px] sm:top-[38%] top-[45%] !rounded-md">
+        <DialogTitle className="sr-only">Search</DialogTitle>
+        <DialogHeader>
+          <input
+            value={searchedInput}
+            onChange={e => setSearchedInput(e.target.value)}
+            placeholder="Type something to search..."
+            autoFocus
+            className="h-14 px-6 bg-transparent border-b text-[14px] outline-none"
+          />
+        </DialogHeader>
 
-          {searchResults.length === 0 && searchedInput && (
-            <p className="text-muted-foreground mx-auto mt-2 text-sm">
-              No results found for{' '}
-              <span className="text-primary">"{searchedInput}"</span>
-            </p>
-          )}
+        {searchResults.length === 0 && searchedInput && (
+          <p className="text-muted-foreground mx-auto mt-2 text-sm">
+            No results found for{' '}
+            <span className="text-primary">"{searchedInput}"</span>
+          </p>
+        )}
 
-          <ScrollArea
-            ref={scrollContainerRef}
-            className="max-h-[400px] overflow-y-auto"
-          >
-            <div className="flex flex-col items-start overflow-y-auto sm:px-2 px-1 pb-4">
-              {searchResults.map((item, index) => (
-                <DialogClose key={item.id} asChild>
-                  <Anchor
-                    ref={(el: HTMLAnchorElement | null) => {
-                      resultRefs.current[index] = el;
-                    }}
-                    className={`w-full ${index === highlightIndex ? 'bg-gray-200 dark:bg-gray-700 search-selected' : ''}`}
-                    href={
-                      item.snippetId
-                        ? `${item.url}#${item.snippetId}`
-                        : item.url
-                    }
-                    onClick={() => setIsOpen(false)} // Close the search dialog
-                  >
-                    <div className="flex items-center w-fit h-full py-3 gap-1.5 px-2">
-                      <FileIcon className="h-[1.1rem] w-[1.1rem] mr-1" />{' '}
-                      {item.title}
-                    </div>
-                    {item.snippet && (
-                      <p
-                        className="search-snippet text-xs text-muted-foreground px-3"
-                        dangerouslySetInnerHTML={{__html: item.snippet}}
-                      />
-                    )}
-                  </Anchor>
-                </DialogClose>
-              ))}
-            </div>
-          </ScrollArea>
-        </DialogContent>
-      </Dialog>
-    </div>
+        <ScrollArea
+          ref={scrollContainerRef}
+          className="max-h-[400px] overflow-y-auto"
+        >
+          <div className="flex flex-col items-start overflow-y-auto sm:px-2 px-1 pb-4">
+            {searchResults.map((item, index) => (
+              <DialogClose key={item.id} asChild>
+                <Anchor
+                  ref={(el: HTMLAnchorElement | null) => {
+                    resultRefs.current[index] = el;
+                  }}
+                  className={`w-full ${index === highlightIndex ? 'bg-gray-200 dark:bg-gray-700 search-selected' : ''}`}
+                  href={
+                    item.snippetId ? `${item.url}#${item.snippetId}` : item.url
+                  }
+                  onClick={() => setIsOpen(false)} // Close the search dialog
+                >
+                  <div className="flex items-center w-fit h-full py-3 gap-1.5 px-2">
+                    <FileIcon className="h-[1.1rem] w-[1.1rem] mr-1" />{' '}
+                    {item.title}
+                  </div>
+                  {item.snippet && (
+                    <p
+                      className="search-snippet text-xs text-muted-foreground px-3"
+                      dangerouslySetInnerHTML={{__html: item.snippet}}
+                    />
+                  )}
+                </Anchor>
+              </DialogClose>
+            ))}
+          </div>
+        </ScrollArea>
+      </DialogContent>
+    </Dialog>
   );
 }

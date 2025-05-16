@@ -1,0 +1,62 @@
+---
+title: Zero 0.20
+description: Removal of internal load balancer, performance improvements
+---
+
+## Install
+
+```bash
+npm install @rocicorp/zero@0.20
+```
+
+## Upgrading
+
+This release contains two config changes for multinode deployments.
+
+### 1. Remove internal load balancer
+
+replication-manager no longer requires an internal load balancer. view-syncers instead autodiscover replication-manager using state stored in the Postgres `changedb` database.
+
+To upgrade:
+
+* Remove the `ZERO_CHANGE_STREAMER_URI` env var for `view-syncer` nodes and replace it with `ZERO_CHANGE_STREAMER_MODE: "discover"`.
+* See [instructions in PR](https://github.com/rocicorp/mono/pull/4335) for how to deploy without disruption.
+
+### 2. view-syncer config change
+
+Change the `ZERO_LITESTREAM_BACKUP_URL` env var from being passed to both `replication-manager` and `view-syncer` nodes to being passed only to `replication-manager`. This config is no longer needed by `view-syncer` (and is ignored by it).
+
+### Example upgrade
+
+See [hello-zero](https://github.com/rocicorp/hello-zero/pull/40/files#diff-6ae5efcb80db51f4b137515e1674caaf950405317e84e2961cf38f9d3a1804b9) for an example of both changes.
+
+## Features
+
+- Improve performance of single-key reads on client. Scale depends on size of data but 100x improvement is common ([PR](https://github.com/rocicorp/mono/pull/4327)).
+- Implement short-circuiting for `or` queries. Because of permissions, one or more branches of `or` would often be empty, turning the entire `or` into a full-table scan. 100x improvement on chinook test dataset ([PR](https://github.com/rocicorp/mono/pull/4339)).
+- Remove DNF conversion. This was intended to make consistency easier in the future, but was resulting in some queries exploding in size ([PR](https://github.com/rocicorp/mono/pull/4386), [bug](https://bugs.rocicorp.dev/issue/3569)).
+- Autodiscovery for `replication-manager`. `view-syncer` nodes now find `replication-manager` using the Postgres `changedb` database, and no longer need an internal load balancer. See the new `ZERO_CHANGE_STREAMER_MODE: "discover"` config in the [deployment docs](/docs/deployment) ([PR](https://github.com/rocicorp/mono/pull/4335)).
+- Make `ZERO_LITESTREAM_BACKUP_URL` specific to `replication-manager`. `view-syncer` nodes now ignore this config and learn it from `replication-manager` instead. This makes restarting replication less error-prone ([PR](https://github.com/rocicorp/mono/pull/4344), [discussion](https://discord.com/channels/830183651022471199/1370898291721506876/1371685592152150057)).
+- OpenTelemetry support ([docs](/docs/debug/otel)).
+
+## Fixes
+
+- Initial sync now adapts concurrency to available memory, avoiding OOMs ([PR](https://github.com/rocicorp/mono/pull/4382)).
+- Fix websocket liveness check to avoid false negatives when busy ([PR](https://github.com/rocicorp/mono/pull/4321)).
+- Fix unhandled exception in `zero-cache` when processing query eviction ([PR](https://github.com/rocicorp/mono/pull/4322)).
+- Keep microsecond precision across timezones ([PR](https://github.com/rocicorp/mono/pull/4257)).
+- Fix unhandled exception in `zero-cache` during `handleClose` ([PR](https://github.com/rocicorp/mono/pull/4326)).
+- Fix `NOT IN` in `z2s` ([PR](https://github.com/rocicorp/mono/pull/4329)).
+- Mutators: assert provided columns actually exist ([PR](https://github.com/rocicorp/mono/pull/4337)).
+- Fix ordering of columns in replicated index ([PR](https://github.com/rocicorp/mono/pull/4362)).
+- Use a shorter keepalive for replication stream for compat with Neon ([PR](https://github.com/rocicorp/mono/pull/4363)).
+- Allow destructuring `where` in `query.related` ([PR](https://github.com/rocicorp/mono/pull/4366)).
+- Add flow control for large change DB transactions ([PR](https://github.com/rocicorp/mono/pull/4371)).
+- Fix `z2s` handling of pg types with params (char, varchar, numeric, etc) ([PR](https://github.com/rocicorp/mono/pull/4361)).
+- Support `from` and `--schema-path` in `analyze-query` ([PR](https://github.com/rocicorp/mono/pull/4368)).
+
+## Breaking Changes
+
+- The autodiscovery feature for `replication-manager` is a breaking change for multinode deployments. See the [upgrade instructions](#upgrading) for details.
+- The `ZERO_TENANTS_JSON` config was removed 🫗.
+- The `ZERO_INITIAL_SYNC_ROW_BATCH_SIZE` config was removed. It is no longer needed because initial sync now adapts to available memory automatically.

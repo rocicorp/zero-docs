@@ -1,0 +1,32 @@
+---
+title: OpenTelemetry
+---
+
+The `zero-cache` service embeds the [JavaScript OTLP Exporter](https://opentelemetry.io/docs/languages/js/) and can send logs, traces, and metrics to any [standard otel collector](https://opentelemetry.io/).
+
+To enable otel, set the following environment variables then run `zero-cache` as normal:
+
+```sh
+OTEL_EXPORTER_OTLP_ENDPOINT="<your otel endpoint>"
+OTEL_EXPORTER_OTLP_HEADERS="<auth headers from your otel collector>"
+OTEL_RESOURCE_ATTRIBUTES="<resource attributes from your otel collector>"
+OTEL_NODE_RESOURCE_DETECTORS="env,host,os"
+```
+
+## Grafana Cloud Walkthrough
+
+Here are instructions to setup [Grafana Cloud](https://grafana.com/oss/grafana/), but the setup for other otel collectors should be similar.
+
+1. Sign up for [Grafana Cloud (Free Tier)](https://grafana.com/auth/sign-up/create-user?pg=login)
+2. Click Connections > Add Connection in the left sidebar
+  ![add-connection](/images/debugging/otel/add-connection.png)
+3. Search for "OpenTelemetry" and select it
+4. Click "Quickstart"
+  ![quickstart](/images/debugging/otel/quickstart.png)
+5. Select "JavaScript"
+  ![javascript](/images/debugging/otel/javascript.png)
+6. Create a new token
+7. Copy the environment variables into your `.env` file or similar
+  ![copy-env](/images/debugging/otel/env.png)
+8. Start `zero-cache`
+9. Look for logs under "Drilldown" > "Logs" in left sidebar

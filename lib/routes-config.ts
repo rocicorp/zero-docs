@@ -60,10 +60,11 @@ export const ROUTES: EachRoute[] = [
     noLink: true,
     items: [
       {title: 'Inspector API', href: '/debug/inspector'},
-      {title: 'Slow Queries', href: '/debug/slow-queries'},
       {title: 'Permissions', href: '/debug/permissions'},
+      {title: 'Slow Queries', href: '/debug/slow-queries'},
       {title: 'Replication', href: '/debug/replication'},
       {title: 'Query ASTs', href: '/debug/query-asts'},
+      {title: 'OpenTelemetry', href: '/debug/otel'},
     ],
   },
 

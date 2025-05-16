@@ -1,6 +1,6 @@
 ---
 title: Zero 0.20
-description: Removal of internal load balancer, performance improvements
+description: Full Supabase support, performance improvements
 ---
 
 ## Install
@@ -32,6 +32,7 @@ See [hello-zero](https://github.com/rocicorp/hello-zero/pull/40/files#diff-6ae5e
 
 ## Features
 
+- Supabase is now fully supported. After upgrading, you should see that schema changes are incremental and don't reset the replica ([docs](./connecting-to-postgres)).
 - Improve performance of single-key reads on client. Scale depends on size of data but 100x improvement is common ([PR](https://github.com/rocicorp/mono/pull/4327)).
 - Implement short-circuiting for `or` queries. Because of permissions, one or more branches of `or` would often be empty, turning the entire `or` into a full-table scan. 100x improvement on chinook test dataset ([PR](https://github.com/rocicorp/mono/pull/4339)).
 - Remove DNF conversion. This was intended to make consistency easier in the future, but was resulting in some queries exploding in size ([PR](https://github.com/rocicorp/mono/pull/4386), [bug](https://bugs.rocicorp.dev/issue/3569)).

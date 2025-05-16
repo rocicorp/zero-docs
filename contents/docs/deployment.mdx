@@ -136,7 +136,6 @@ export default $config({
       ZERO_CHANGE_DB: conn.value,
       ZERO_AUTH_SECRET: zeroAuthSecret.value,
       ZERO_REPLICA_FILE: 'sync-replica.db',
-      ZERO_LITESTREAM_BACKUP_URL: $interpolate`s3://${replicationBucket.name}/backup`,
       ZERO_IMAGE_URL: `rocicorp/zero:${zeroVersion}`,
       ZERO_CVR_MAX_CONNS: '10',
       ZERO_UPSTREAM_MAX_CONNS: '10',
@@ -157,22 +156,11 @@ export default $config({
       },
       environment: {
         ...commonEnv,
+        ZERO_LITESTREAM_BACKUP_URL: $interpolate`s3://${replicationBucket.name}/backup`,
         ZERO_CHANGE_MAX_CONNS: '3',
         ZERO_NUM_SYNC_WORKERS: '0',
       },
-      loadBalancer: {
-        public: false,
-        ports: [
-          {
-            listen: '80/http',
-            forward: '4849/http',
-          },
-        ],
-      },
       transform: {
-        loadBalancer: {
-          idleTimeout: 3600,
-        },
         target: {
           healthCheck: {
             enabled: true,
@@ -201,14 +189,10 @@ export default $config({
       },
       environment: {
         ...commonEnv,
-        ZERO_CHANGE_STREAMER_URI: replicationManager.url,
+        ZERO_CHANGE_STREAMER_MODE: "discover",
       },
       logging: {
         retention: '1 month',
-      },
-      loadBalancer: {
-        public: true,
-        rules: [{listen: '80/http', forward: '4848/http'}],
       },
       transform: {
         target: {
@@ -225,7 +209,6 @@ export default $config({
             type: 'lb_cookie',
             cookieDuration: 120,
           },
-          loadBalancingAlgorithmType: 'least_outstanding_requests',
         },
       },
     });
@@ -440,15 +423,8 @@ Run `zero-cache` as two Fargate services (using the same [rocicorp/zero](https:/
 #### view-syncer
 
 - `zero-cache` config:
-  - `ZERO_LITESTREAM_BACKUP_URL=s3://{bucketName}/{generation}`
-  - `ZERO_CHANGE_STREAMER_URI=http://{replication-manager}`
+  - `ZERO_CHANGE_STREAMER_MODE=discover`
 - Task count: **N**
-- Loadbalancing to port **4848** with
-  - algorithm: `least_outstanding_requests`
-  - health check path: `/keepalive`
-  - health check interval: 5 seconds
-  - stickiness: `lb_cookie`
-  - stickiness duration: 3 minutes
 
 ### Notes
 
@@ -458,10 +434,7 @@ Run `zero-cache` as two Fargate services (using the same [rocicorp/zero](https:/
   - Set `ZERO_CVR_MAX_CONNS` and `ZERO_UPSTREAM_MAX_CONNS` appropriately so that the total connections from both running and updating `view-syncers` (e.g. DesiredCount \* MaximumPercent) do not exceed your database’s `max_connections`.
 - The `{generation}` component of the `s3://{bucketName}/{generation}` URL is an arbitrary path component that can be modified to reset the replica (e.g. a date, a number, etc.). Setting this to a new path is the multi-node equivalent of deleting the replica file to resync.
   - Note: `zero-cache` does not manage cleanup of old generations.
-- The `replication-manager` serves requests on port **4849**. Routing from the `view-syncer` to the `http://{replication-manager}` can be achieved using the following mechanisms (in order of preference):
-  - An internal load balancer
-  - [Service Connect](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-connect.html)
-  - [Service Discovery](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-discovery.html)
+- The `replication-manager` serves requests on port **4849**. Routing from the `view-syncer` to the `http://{replication-manager}` is handled internally by storing data in the `changedb`.
 - Fargate ephemeral storage is used for the replica.
   - The default size is 20GB. This can be increased up to 200GB
   - Allocate at least twice the size of the database to support the internal VACUUM operation.

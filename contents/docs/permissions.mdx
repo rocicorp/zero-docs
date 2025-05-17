@@ -8,7 +8,7 @@ Permissions are expressed using [ZQL](reading-data) and run automatically with e
 
 Permissions are defined in [`schema.ts`](/docs/zero-schema) using the `definePermissions` function.
 
-Here's an example of limiting deletes to only the creator of an issue:
+Here's an example of limiting reads to members of an organization and deletes to only the creator of an issue:
 
 ```ts
 // The decoded value of your JWT.
@@ -18,6 +18,16 @@ type AuthData = {
 };
 
 export const permissions = definePermissions<AuthData, Schema>(schema, () => {
+  // Checks if the user exists in a related organization
+  const allowIfInOrganization = (
+    authData: AuthData,
+    eb: ExpressionBuilder<Schema, 'issue'>,
+  ) =>
+    eb.whereExists('organization', q =>
+      q.whereExists('user', q => q.where('id', authData.sub)),
+    );
+
+  // Checks if the user is the creator
   const allowIfIssueCreator = (
     authData: AuthData,
     {cmp}: ExpressionBuilder<Schema, 'issue'>,
@@ -26,6 +36,7 @@ export const permissions = definePermissions<AuthData, Schema>(schema, () => {
   return {
     issue: {
       row: {
+        select: [allowIfInOrganization],
         delete: [allowIfIssueCreator],
       },
     },

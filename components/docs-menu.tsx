@@ -36,7 +36,7 @@ export default function DocsMenu({isSheet = false}) {
             className="link-bluesky"
           ></Link>
           <Link
-            href="https://x.com/rocicorp_zero"
+            href="https://x.com/zero__ms"
             className="link-twitter"
           ></Link>
         </div>

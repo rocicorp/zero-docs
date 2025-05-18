@@ -148,6 +148,7 @@ export default $config({
       architecture: 'arm64',
       image: commonEnv.ZERO_IMAGE_URL,
       link: [replicationBucket],
+      wait: true,
       health: {
         command: ['CMD-SHELL', 'curl -f http://localhost:4849/ || exit 1'],
         interval: '5 seconds',
@@ -157,7 +158,6 @@ export default $config({
       environment: {
         ...commonEnv,
         ZERO_LITESTREAM_BACKUP_URL: $interpolate`s3://${replicationBucket.name}/backup`,
-        ZERO_CHANGE_MAX_CONNS: '3',
         ZERO_NUM_SYNC_WORKERS: '0',
       },
       transform: {
@@ -175,43 +175,49 @@ export default $config({
     });
 
     // View Syncer Service
-    const viewSyncer = cluster.addService(`view-syncer`, {
-      cpu: '1 vCPU',
-      memory: '2 GB',
-      architecture: 'arm64',
-      image: commonEnv.ZERO_IMAGE_URL,
-      link: [replicationBucket],
-      health: {
-        command: ['CMD-SHELL', 'curl -f http://localhost:4848/ || exit 1'],
-        interval: '5 seconds',
-        retries: 3,
-        startPeriod: '300 seconds',
-      },
-      environment: {
-        ...commonEnv,
-        ZERO_CHANGE_STREAMER_MODE: "discover",
-      },
-      logging: {
-        retention: '1 month',
-      },
-      transform: {
-        target: {
-          healthCheck: {
-            enabled: true,
-            path: '/keepalive',
-            protocol: 'HTTP',
-            interval: 5,
-            healthyThreshold: 2,
-            timeout: 3,
-          },
-          stickiness: {
-            enabled: true,
-            type: 'lb_cookie',
-            cookieDuration: 120,
+    const viewSyncer = cluster.addService(`view-syncer`,
+      {
+        cpu: '1 vCPU',
+        memory: '2 GB',
+        architecture: 'arm64',
+        image: commonEnv.ZERO_IMAGE_URL,
+        link: [replicationBucket],
+        health: {
+          command: ['CMD-SHELL', 'curl -f http://localhost:4848/ || exit 1'],
+          interval: '5 seconds',
+          retries: 3,
+          startPeriod: '300 seconds',
+        },
+        environment: {
+          ...commonEnv,
+          ZERO_CHANGE_STREAMER_MODE: "discover",
+        },
+        logging: {
+          retention: '1 month',
+        },
+        transform: {
+          target: {
+            healthCheck: {
+              enabled: true,
+              path: '/keepalive',
+              protocol: 'HTTP',
+              interval: 5,
+              healthyThreshold: 2,
+              timeout: 3,
+            },
+            stickiness: {
+              enabled: true,
+              type: 'lb_cookie',
+              cookieDuration: 120,
+            },
           },
         },
       },
-    });
+      {
+        // Wait for replication-manager to come up first, for breaking changes
+        // to replication-manager interface.
+        dependsOn: [replicationManager],
+      });
 
     // Permissions deployment
     // Note: this setup requires your CI/CD pipeline to have access to your

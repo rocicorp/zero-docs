@@ -8,7 +8,7 @@ Zero applications have both a _database schema_ (the normal backend database sch
 2. Define first-class relationships between tables
 3. Define permissions for access control
 
-<Note type="note" heading="You do not need to define the Zero schema by hand">
+<Note type="note" slug="generating" heading="You do not need to define the Zero schema by hand">
   [Community-contributed converters](./community#database-tools) exist for
   Prisma and Drizzle that generate the tables and relationships. It is good to
   know how the underlying Zero schemas work, however, for debugging and
@@ -86,7 +86,7 @@ const user = table('user')
 
 An optional column can store a value of the specified type or `null` to mean _no value_.
 
-<Note type="note">
+<Note type="note" heading="Null and undefined">
     Note that `null` and `undefined` mean different things when working with Zero rows.
 
     - When reading, if a column is `optional`, Zero can return `null` for that field. `undefined` is not used at all when Reading from Zero.

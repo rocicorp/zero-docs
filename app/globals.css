@@ -211,10 +211,20 @@ div.inner-nav-container {
 
 .note-heading-container {
   display: flex;
-  gap: 0.5rem;
   align-items: center;
   margin-bottom: 1rem;
 }
+
+.note-heading-container>.heading-link {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.note-heading-container>.heading-link::after {
+  position:static;
+}
+
 
 .note-heading {
   font-size: 0.875rem;

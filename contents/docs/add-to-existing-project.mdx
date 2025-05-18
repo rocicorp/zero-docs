@@ -22,9 +22,41 @@ Install the Zero package:
 npm install @rocicorp/zero
 ```
 
-**Note:** If you're using [pnpm](https://pnpm.io) or [bun](https://bun.sh),
-additional steps are required to install native binaries. Refer to [Not using
-npm?](quickstart#not-npm) for details.
+<details>
+<summary id="not-npm">Not using npm?</summary>
+
+Zero's server component depends on `@rocicorp/zero-sqlite3`, which contains a
+binary that requires running a postinstall script. Most alternative package
+managers (non-npm) disable these scripts by default for security reasons. Here's
+how to enable installation for common alternatives:
+
+### pnpm
+
+For [pnpm](https://pnpm.io/), either:
+
+- Run `pnpm approve-builds` to approve all build scripts, or
+- Add the specific dependency to your `package.json`:
+
+```json
+"pnpm": {
+  "onlyBuiltDependencies": [
+    "@rocicorp/zero-sqlite3"
+  ]
+}
+```
+
+### Bun
+
+For [Bun](https://bun.sh/), add the dependency to your trusted dependencies
+list:
+
+```json
+"trustedDependencies": [
+  "@rocicorp/zero-sqlite3"
+],
+```
+
+</details>
 
 ## Environment Variables
 

@@ -16,7 +16,7 @@ It is always safe to wipe the replica. Wiping will have no impact on your upstre
 For data to be synced to the client it must first be replicated to `zero-cache`. You can check the contents of `zero-cache` via:
 
 ```bash
-$ npx zero-sqlite3 /tmp/my-zero-replica.db
+$ npx @rocicorp/zero-sqlite3 /tmp/my-zero-replica.db
 ```
 
 <Note slug="sqlite-version" emoji="💡" heading="Zero uses a the bedrock version of SQLite">
@@ -24,7 +24,7 @@ Zero uses a different version of SQLite that runs in WAL2 mode, which means the 
 
 To inspect your Zero database, you have two options:
 
-1. Use our pre-compiled SQLite build `zero-sqlite3` as described above
+1. Use our pre-compiled SQLite build `@rocicorp/zero-sqlite3` as described above
 2. Build SQLite from the SQLite `bedrock` branch yourself
 </Note>
 

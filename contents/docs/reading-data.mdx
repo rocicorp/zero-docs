@@ -10,7 +10,7 @@ ZQL queries are composed of one or more _clauses_ that are chained together into
 
 Unlike queries in classic databases, the result of a ZQL query is a _view_ that updates automatically and efficiently as the underlying data changes. You can call a query’s `materialize()` method to get a view, but more typically you run queries via some framework-specific bindings. For example see `useQuery` for [React](react) or [SolidJS](solidjs).
 
-<Note type="note" emoji="🧑‍🏫" heading="Data returned from ZQL should be considered immutable">
+<Note type="note" emoji="🧑‍🏫" slug="immutability" heading="Data returned from ZQL should be considered immutable">
 This means you should not modify the data directly. Instead, clone the data and modify the clone.
 
 ZQL caches values and returns them multiple times. If you modify a value returned from ZQL, you will modify it everywhere it is used. This can lead to subtle bugs.
@@ -179,7 +179,7 @@ Where supports the following comparison operators:
 
 TypeScript will restrict you from using operators with types that don’t make sense – you can’t use `>` with `boolean` for example.
 
-<Note type="note">
+<Note type="note" slug="adding-operators">
   If you don’t see the comparison operator you need, let us know, many are easy
   to add.
 </Note>
@@ -344,7 +344,7 @@ Zero has a default soft limit of 20,000 rows on the client-side, or about 20MB o
 
 This limit can be increased with the [`--target-client-row-count`](./zero-cache-config#target-client-row-count) flag, but we do not recommend setting it higher than 100,000.
 
-<Note heading="Why does Zero store so little data client-side?">
+<Note slug="client-capacity" heading="Why does Zero store so little data client-side?">
 Contrary to the design of other sync engines, we believe that storing tons of data client-side doesn't make sense. Here are some reasons why:
 
 - Initial sync will be slow, slowing down initial app load.
@@ -447,7 +447,7 @@ const results = await z.query.issue.where('foo', 'bar').run(
     {type: 'complete'});
 ```
 
-<Note>
+<Note slug="default-run">
 As a convenience you can also directly await queries:
 
 ```ts
@@ -471,10 +471,8 @@ Now imagine that the user switches the sort to ‘sort by modified’. This new 
 
 To avoid this annoying effect, what you should do in this example is also preload the first 1k issues sorted by modified desc. In general for any query shape you intend to do, you should preload the first `n` results for that query shape with no filters, in each sort you intend to use.
 
-<Note>
-Zero will not sync duplicate copies of rows that show up in multiple queries. Zero syncs the *union* of all active queries' results.
-
-So you don't have to worry about syncing many sorts of the same query when it's likely the results will overlap heavily.
+<Note slug="no-duplicate-rows" heading="Zero does not sync duplicate rows">
+Zero syncs the *union* of all active queries' results. You don't have to worry about syncing many sorts of the same query when it's likely the results will overlap heavily.
 
 </Note>
 

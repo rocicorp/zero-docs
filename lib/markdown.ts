@@ -14,6 +14,7 @@ import Note from '@/components/note';
 import ImageLightbox from '@/components/ui/ImageLightbox';
 import Video from '@/components/ui/Video';
 import {Button} from '@/components/ui/button';
+import {sluggify} from './utils';
 
 const components = {
   Note,
@@ -95,14 +96,6 @@ export function getPreviousNext(path: string) {
     prev: page_routes[index - 1],
     next: page_routes[index + 1],
   };
-}
-
-// Utility function to create slugs from text
-function sluggify(text: string) {
-  return text
-    .toLowerCase()
-    .replace(/\s+/g, '-') // Replace spaces with dashes
-    .replace(/[^a-z0-9-]/g, ''); // Remove non-alphanumeric characters
 }
 
 // Get the file path for the docs based on the slug

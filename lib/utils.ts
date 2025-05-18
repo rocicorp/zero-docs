@@ -6,6 +6,14 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+// Utility function to create slugs from text
+export function sluggify(text: string) {
+  return text
+    .toLowerCase()
+    .replace(/\s+/g, '-') // Replace spaces with dashes
+    .replace(/[^a-z0-9-]/g, ''); // Remove non-alphanumeric characters
+}
+
 export function helperSearch(
   query: string,
   node: EachRoute,

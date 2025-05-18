@@ -49,7 +49,7 @@ db.transaction(async tx => {
 
 If ZQL does not have the featuers you need, you can use `tx.dbTransaction` to [drop down to raw SQL](custom-mutators#dropping-down-to-raw-sql).
 
-<Note type="warning">
+<Note type="warning" slug="schema-read">
   `ZQLDatabase` currently does a read of your postgres schema before every
   transaction. This is fine for most usages, but for high scale it may become a
   problem. [Let us know](https://bugs.rocicorp.dev/issue/3799) if you need a fix

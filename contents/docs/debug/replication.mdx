@@ -19,7 +19,7 @@ For data to be synced to the client it must first be replicated to `zero-cache`.
 $ npx zero-sqlite3 /tmp/my-zero-replica.db
 ```
 
-<Note emoji="💡" heading="Zero uses a the bedrock version of SQLite">
+<Note slug="sqlite-version" emoji="💡" heading="Zero uses a the bedrock version of SQLite">
 Zero uses a different version of SQLite that runs in WAL2 mode, which means the database files cannot be opened with standard SQLite tools.
 
 To inspect your Zero database, you have two options:

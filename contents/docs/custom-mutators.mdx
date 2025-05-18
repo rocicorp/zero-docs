@@ -17,7 +17,7 @@ For example, you can create custom mutators that:
 
 Despite their increased power, custom mutators still participate fully in sync. They execute instantly on the local device, immediately updating all active queries. They are then synced in the background to the server and to other clients.
 
-<Note heading="Custom mutators will eventually become Zero's only write API">
+<Note slug="deprecating-crud" heading="Custom mutators will eventually become Zero's only write API">
   We're still refining the design of custom mutators. During this phase, the old
   CRUD mutators will continue to work. But we do want to deprecate CRUD
   mutators, and eventually remove them. So please try out custom mutators and
@@ -101,7 +101,7 @@ async function updateIssueOnServer(
 }
 ```
 
-<Note heading="Code sharing in mutators is optional">
+<Note slug="code-sharing" heading="Code sharing in mutators is optional">
 Even in TypeScript, you can do as little or as much code sharing as you like. In your server mutator, you can [use raw SQL](#dropping-down-to-raw-sql), any data access libraries you prefer, or add as much extra server-specific logic as you need.
 
 Reusing ZQL on the server is a handy – and we expect frequently used – option, but not a requirement.
@@ -252,7 +252,7 @@ You have the full power of ZQL at your disposal, including relationships, filter
 
 Reads and writes within a mutator are transactional, meaning that the datastore is guaranteed to not change while your mutator is running. And if the mutator throws, the entire mutation is rolled back.
 
-<Note type="note" heading="No server reads in optimistic mutators">
+<Note type="note" heading="Run in Custom Mutators">
 Outside of mutators, the `run()` method has a [`type` parameter](reading-data#running-queries-once) that can be used to wait for server results.
 
 This parameter isn't supported within mutators, because waiting for server results makes no sense in an optimistic mutation – it defeats the purpose of running optimistically to begin with.
@@ -327,7 +327,7 @@ try {
 
 If the client-side mutator fails, the `.server` promise is also rejected with the same error. You don't have to listen to both promises, the server promise covers both cases.
 
-<Note heading="Returning data from mutators">
+<Note heading="Returning data from mutators" slug="returning-data">
   There is not yet a way to return data from mutators in the success case – the type of `.clent` and `.server` is always `Promise<void>`. [Let us know](https://discord.rocicorp.dev/) if you need this.
 </Note>
 
@@ -448,7 +448,7 @@ myMutator: (tx) => {
 
 Because custom mutators are just arbitrary TypeScript functions, there is no need for a special permissions system. Therefore, you won't use Zero's [write permissions](./permissions) when you use custom mutators.
 
-<Note emoji="💡" heading="You do still need *read* permissions">
+<Note slug="read-permissions" emoji="💡" heading="You do still need *read* permissions">
   When using custom mutators you will have no [`insert`](permissions#insert-permissions), [`update`](permissions#update-permissions), or [`delete`](permissions#delete-permissions) permissions. You will still have [`select`](permissions#select-permissions) permissions, however.
 
 We hope to build [custom queries](https://bugs.rocicorp.dev/issue/3453) next – a read analog to custom mutators. If we succeed, Zero's permission system will go away completely 🤯.

@@ -26,7 +26,7 @@ A running `zero-cache` is composed of a single `replication-manager` node and mu
 
 **CVR DB:** A Postgres DB used by Zero to store Client View Records (CVRs). CVRs track the state of each synced client.
 
-<Note type="note">
+<Note type="note" slug="pg-dbs">
 The Change DB and CVR DBs are typically the same physical Postgres database as the Upstream DB. Zero stores their tables in separate Postgres schemas so they won't conflict with your application data.
 
 We allow separate DBs so that they can be scaled and tuned independently if desired.
@@ -291,7 +291,7 @@ Create an account on [Fly.io](https://fly.io) and [install the Fly CLI](https://
 
 ### Create Postgres app
 
-<Note type="warning">
+<Note type="warning" slug="fly-app-names">
   **Note:** Fly.io requires app names to be unique across all Fly.io users.
   Change the `INITIALS` environment variable below to something unique.
 </Note>

@@ -11,7 +11,7 @@ During login:
 1. Your API server creates a `JWT` and sends it to your client.
 2. Your client constructs a `Zero` instance with this token by passing it to the `auth` option.
 
-<Note type="note">
+<Note type="note" slug="user-id">
   When you set the `auth` option you must set the `userID` option to the same
   value that is present in the `sub` field of the token.
 </Note>

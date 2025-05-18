@@ -44,7 +44,7 @@ Default values are allowed in the Postgres schema but there currently is no way 
 
 It is strongly recommended that primary keys be client-generated random strings like [uuid](https://www.npmjs.com/package/uuid), [ulid](https://www.npmjs.com/package/ulid), [nanoid](https://www.npmjs.com/package/nanoid), etc. This makes optimistic creation and updates much easier.
 
-<Note type="note" heading="Why are client-generated IDs better?">
+<Note type="note" slug="client-generated-ids" heading="Why are client-generated IDs better?">
   Imagine that the PK of your table is an auto-incrementing integer. If you optimistically create an entity of this type, you will have to give it some ID – the type will require it locally, but also if you want to optimistically create relationships to this row you’ll need an ID.
 
 You could sync the highest value seen for that table, but there are race conditions and it is possible for that ID to be taken by the time the creation makes it to the server. Your database can resolve this and assign the next ID, but now the relationships you created optimistically will be against the wrong row. Blech.

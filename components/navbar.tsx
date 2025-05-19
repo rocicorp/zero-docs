@@ -2,7 +2,6 @@ import Link from 'next/link';
 import {SheetLeftbar} from './leftbar';
 import Search from './search';
 import {page_routes} from '@/lib/routes-config';
-import {ModeToggle} from './theme-toggle';
 import ZeroAlphaLogo from './logos/ZeroAlpha';
 
 export const NAVLINKS = [
@@ -19,7 +18,6 @@ export function Navbar() {
       <Logo />
       <div className="flex items-center justify-end gap-2">
         <Search />
-        <ModeToggle />
       </div>
     </nav>
   );

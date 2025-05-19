@@ -477,6 +477,21 @@ pre .copy-button:hover {
   color: rgb(39, 252, 174);
 }
 
+/* Theme switcher toggle button */
+.theme-toggle-container {
+  display: flex;
+  align-items: center;
+  margin-top: 0.75rem;
+
+  .theme-toggle-label {
+    margin-right: 0.5rem;
+  }
+
+  button {
+    opacity: 0.75;
+  }
+}
+
 /* Home fullscreen image container */
 .fullscreenContainer {
   position: fixed;

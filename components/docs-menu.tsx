@@ -1,6 +1,7 @@
 import {ROUTES} from '@/lib/routes-config';
 import SubLink from './sublink';
 import Link from 'next/link';
+import {ModeToggle} from './theme-toggle';
 import GithubLogo from './logos/Github';
 import DiscordLogo from './logos/Discord';
 import BlueskyLogo from './logos/Bluesky';
@@ -38,6 +39,10 @@ export default function DocsMenu({isSheet = false}) {
           <Link href="https://x.com/rocicorp_zero">
             <TwitterLogo />
           </Link>
+        </div>
+        <div className="theme-toggle-container">
+          <span className="theme-toggle-label">Theme:</span>
+          <ModeToggle />
         </div>
       </div>
     </div>

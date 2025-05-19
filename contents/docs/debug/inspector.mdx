@@ -22,7 +22,7 @@ const z = new Zero({
 const inspector = await z.inspect();
 ```
 
-<Note type="warning">
+<Note type="warning" slug="code-splitting">
   Ensure that code splitting is enabled when bundling your app to prevent
   loading inspect-related code by default. The `inspect` API is intended for
   debugging purposes only and should not be used in production applications. It

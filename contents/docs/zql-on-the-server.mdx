@@ -2,13 +2,13 @@
 title: ZQL on the Server
 ---
 
-[Custom Mutators](custom-mutators) use ZQL on the server as an implementation detail, but you can also use ZQL on the server directly, outside of Custom Mutators. 
+[Custom Mutators](custom-mutators) use ZQL on the server as an implementation detail, but you can also use ZQL on the server directly, outside of Custom Mutators.
 
 This is useful for a variety of reasons:
 
-* You can use ZQL to implement standard REST endpoints, allowing you to share code with custom mutators.
-* You can use ZQL as part of schema migrations.
-* In the future ([but not yet implemented](#ssr)), this can support server-side rendering
+- You can use ZQL to implement standard REST endpoints, allowing you to share code with custom mutators.
+- You can use ZQL as part of schema migrations.
+- In the future ([but not yet implemented](#ssr)), this can support server-side rendering
 
 Here's a basic example:
 
@@ -18,43 +18,173 @@ import {
   ZQLDatabase,
   PostgresJSConnection,
   TransactionProviderInput,
-} from "@rocicorp/zero/pg";
+} from '@rocicorp/zero/pg';
 
 const db = new ZQLDatabase(
   new PostgresJSConnection(
     postgres(
       must(
         process.env.ZERO_UPSTREAM_DB as string,
-        "required env var ZERO_UPSTREAM_DB"
-      )
-    )
+        'required env var ZERO_UPSTREAM_DB',
+      ),
+    ),
   ),
-  schema
+  schema,
 );
 
 // This is needed temporarily and will be cleaned up in the future.
 const dummyTransactionInput: TransactionProviderInput = {
-  clientGroupID: "unused",
-  clientID: "unused",
+  clientGroupID: 'unused',
+  clientID: 'unused',
   mutationID: 42,
-  upstreamSchema: "unused",
+  upstreamSchema: 'unused',
 };
 
-db.transaction(
-  async (tx) => {
-    // await tx.mutate...
-    // await tx.query...
-    // await myMutator(tx, ...args);
-  },
-  dummyTransactionInput
-);
+db.transaction(async tx => {
+  // await tx.mutate...
+  // await tx.query...
+  // await myMutator(tx, ...args);
+}, dummyTransactionInput);
 ```
 
 If ZQL does not have the featuers you need, you can use `tx.dbTransaction` to [drop down to raw SQL](custom-mutators#dropping-down-to-raw-sql).
 
-<Note type="warning">
-`ZQLDatabase` currently does a read of your postgres schema before every transaction. This is fine for most usages, but for high scale it may become a problem. [Let us know](https://bugs.rocicorp.dev/issue/3799) if you need a fix for this.
+<Note type="warning" slug="schema-read">
+  `ZQLDatabase` currently does a read of your postgres schema before every
+  transaction. This is fine for most usages, but for high scale it may become a
+  problem. [Let us know](https://bugs.rocicorp.dev/issue/3799) if you need a fix
+  for this.
 </Note>
+
+## Custom Database Connection
+
+Zero only provides an adapter for `postgres.js`. It is possible to write your own adatapter by implementing `DBTransaction` and `DBConnection`.
+
+### Node Postgres
+
+Here is an example for `node-postgres` by Jökull Sólberg ([full example](https://gist.github.com/jokull/68a656b013a14912c1b3a851e3eec117))
+
+```ts
+import {Client, type ClientBase} from 'pg';
+
+class PgConnection implements DBConnection<ClientBase> {
+  readonly #client: ClientBase;
+
+  constructor(client: ClientBase) {
+    this.#client = client;
+  }
+
+  async query(sql: string, params: unknown[]): Promise<Row[]> {
+    const result = await this.#client.query<Row>(sql, params as JSONValue[]);
+    return result.rows;
+  }
+
+  async transaction<T>(
+    fn: (tx: DBTransaction<ClientBase>) => Promise<T>,
+  ): Promise<T> {
+    if (!(this.#client instanceof Client)) {
+      throw new Error('Transactions require a non-pooled Client instance');
+    }
+
+    const tx = new PgTransaction(this.#client);
+
+    try {
+      await this.#client.query('BEGIN');
+      const result = await fn(tx);
+      await this.#client.query('COMMIT');
+      return result;
+    } catch (error) {
+      await this.#client.query('ROLLBACK');
+      throw error;
+    }
+  }
+}
+
+class PgTransaction implements DBTransaction<ClientBase> {
+  readonly wrappedTransaction: ClientBase;
+
+  constructor(client: ClientBase) {
+    this.wrappedTransaction = client;
+  }
+
+  async query(sql: string, params: unknown[]): Promise<Row[]> {
+    const result = await this.wrappedTransaction.query<Row>(
+      sql,
+      params as JSONValue[],
+    );
+    return result.rows;
+  }
+}
+
+// Then you can use it just like postgres.js
+const client = new Client({
+  connectionString: process.env.ZERO_UPSTREAM_DB,
+});
+await client.connect();
+
+const db = new ZQLDatabase(new PgConnection(client), schema);
+```
+
+### Drizzle ORM
+
+It is also possible to use ORMs like Drizzle. Wrap the drizzle transaction and now you can access drizzle's transaction within custom mutators.
+
+[Blog post and full example](https://www.solberg.is/zero-custom-db-connection) by Jökull Sólberg (again 🙌)
+
+```ts
+// Assuming $client is the raw pg.PoolClient, this type matches how
+// `drizzle()` inits when using `node-postgres`
+type Drizzle = NodePgDatabase<typeof schema> & {$client: PoolClient};
+
+// Extract the Drizzle-specific transaction type
+type DrizzleTransaction = Parameters<Parameters<Drizzle['transaction']>[0]>[0];
+
+class DrizzleConnection implements DBConnection<DrizzleTransaction> {
+  drizzle: Drizzle;
+
+  constructor(drizzle: Drizzle) {
+    this.drizzle = drizzle;
+  }
+
+  // `query` is used by Zero's ZQLDatabase for ZQL reads on the server
+  query(sql: string, params: unknown[]): Promise<Row[]> {
+    return this.drizzle.$client
+      .query<QueryResultRow>(sql, params)
+      .then(({rows}) => rows);
+  }
+
+  // `transaction` wraps Drizzle's transaction
+  transaction<T>(
+    fn: (tx: DBTransaction<DrizzleTransaction>) => Promise<T>,
+  ): Promise<T> {
+    return this.drizzle.transaction(drizzleTx =>
+      // Pass a new Zero DBTransaction wrapper around Drizzle's one
+      fn(new ZeroDrizzleTransaction(drizzleTx)),
+    );
+  }
+}
+
+class ZeroDrizzleTransaction implements DBTransaction<DrizzleTransaction> {
+  readonly wrappedTransaction: DrizzleTransaction;
+
+  constructor(drizzleTx: DrizzleTransaction) {
+    this.wrappedTransaction = drizzleTx;
+  }
+
+  // This `query` method would be used if ZQL reads happen *within*
+  // a custom mutator that is itself running inside this wrapped transaction.
+  query(sql: string, params: unknown[]): Promise<Row[]> {
+    // Drizzle's transaction object might hide the raw client,
+    // this is one way to get at it for `pg` driver. Adjust if needed.
+    const session = this.wrappedTransaction._.session as unknown as {
+      client: Drizzle['$client'];
+    };
+    return session.client
+      .query<QueryResultRow>(sql, params)
+      .then(({rows}) => rows);
+  }
+}
+```
 
 ## SSR
 
@@ -82,4 +212,3 @@ code splitting is unnecessary, you can skip the dynamic import.
 
 Use [React's `lazy`](https://react.dev/reference/react/lazy) for dynamic
 imports.
-

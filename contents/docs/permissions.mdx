@@ -8,7 +8,7 @@ Permissions are expressed using [ZQL](reading-data) and run automatically with e
 
 Permissions are defined in [`schema.ts`](/docs/zero-schema) using the `definePermissions` function.
 
-Here's an example of limiting deletes to only the creator of an issue:
+Here's an example of limiting reads to members of an organization and deletes to only the creator of an issue:
 
 ```ts
 // The decoded value of your JWT.
@@ -18,6 +18,16 @@ type AuthData = {
 };
 
 export const permissions = definePermissions<AuthData, Schema>(schema, () => {
+  // Checks if the user exists in a related organization
+  const allowIfInOrganization = (
+    authData: AuthData,
+    eb: ExpressionBuilder<Schema, 'issue'>,
+  ) =>
+    eb.whereExists('organization', q =>
+      q.whereExists('user', q => q.where('id', authData.sub)),
+    );
+
+  // Checks if the user is the creator
   const allowIfIssueCreator = (
     authData: AuthData,
     {cmp}: ExpressionBuilder<Schema, 'issue'>,
@@ -26,6 +36,7 @@ export const permissions = definePermissions<AuthData, Schema>(schema, () => {
   return {
     issue: {
       row: {
+        select: [allowIfInOrganization],
         delete: [allowIfIssueCreator],
       },
     },
@@ -76,7 +87,7 @@ const permissions = definePermissions<AuthData, Schema>(schema, () => {
 
 Zero permissions are "compiled" into a JSON-based format at build-time. This file is stored in the `{ZERO_APP_ID}.permissions` table of your upstream database. Like other tables, it replicates live down to `zero-cache`. `zero-cache` then parses this file, and applies the encoded rules to every read and write operation.
 
-<Note type="warning">
+<Note type="warning" slug="rule-compilation-is-dumb">
 The compilation process is very simple-minded (read: dumb). Despite looking like normal TypeScript functions that receive an `AuthData` parameter, rule functions are not actually invoked at runtime. Instead, they are invoked with a "placeholder" `AuthData` at build time. We track which fields of this placeholder are accessed and construct a ZQL expression that accesses the right field of `AuthData` at runtime.
 
 The end result is that you can't really use most features of JS in these rules. Specifically you cannot:

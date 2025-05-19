@@ -57,7 +57,7 @@ export default function Home() {
             size="default"
             asChild
           >
-            <a href="https://github.com/rocicorp/mono">GitHub</a>
+            <a href="https://github.com/rocicorp/mono#zero">GitHub</a>
           </Button>
 
           <Button

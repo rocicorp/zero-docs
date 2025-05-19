@@ -27,7 +27,7 @@ export default function DocsMenu({isSheet = false}) {
           </Link>
         </p>
         <div className="social-links">
-          <Link href="https://github.com/rocicorp/mono">
+          <Link href="https://github.com/rocicorp/mono#zero">
             <GithubLogo />
           </Link>
           <Link href="https://discord.rocicorp.dev">
@@ -36,7 +36,7 @@ export default function DocsMenu({isSheet = false}) {
           <Link href="https://bsky.app/profile/zero.rocicorp.dev">
             <BlueskyLogo />
           </Link>
-          <Link href="https://x.com/rocicorp_zero">
+          <Link href="https://x.com/zero__ms">
             <TwitterLogo />
           </Link>
         </div>

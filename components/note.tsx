@@ -1,4 +1,4 @@
-import {cn} from '@/lib/utils';
+import {cn, sluggify} from '@/lib/utils';
 import clsx from 'clsx';
 import {PropsWithChildren} from 'react';
 
@@ -6,6 +6,7 @@ type NoteProps = PropsWithChildren & {
   type?: 'note' | 'danger' | 'warning' | 'todo';
   emoji?: string;
   heading?: string;
+  slug?: string;
 };
 
 export default function Note({
@@ -13,6 +14,7 @@ export default function Note({
   type = 'note',
   emoji,
   heading,
+  slug,
 }: NoteProps) {
   const noteClassNames = clsx({
     'dark:bg-gray-900 dark:border-gray-800 bg-blue-50 border-blue-200':
@@ -48,16 +50,25 @@ export default function Note({
   // Use the overridden heading if provided; otherwise, use the default
   const displayedHeading = heading || defaultHeadings[type];
 
+  if (!slug) {
+    slug = sluggify(displayedHeading);
+  }
+
   return (
     <div
+      id={slug}
       className={cn(
         'note-container border rounded-md p-3.5 text-sm tracking-wide items-start',
         noteClassNames,
       )}
     >
-      <div className="note-heading-container flex items-center mb-2">
-        <span className="note-emoji">{displayedEmoji}</span>
-        <span className="note-heading">{displayedHeading}</span>
+      <div>
+        <div className="note-heading-container">
+          <a className="heading-link" href={`#${slug}`}>
+            <span className="note-emoji">{displayedEmoji}</span>
+            <span className="note-heading">{displayedHeading}</span>
+          </a>
+        </div>
       </div>
       <aside className="note-aside">{children}</aside>
     </div>

@@ -406,6 +406,36 @@ The possible values of `result.type` are currently `complete` and `unknown`.
 
 The `complete` value is currently only returned when Zero has received the server result. But in the future, Zero will be able to return this result type when it _knows_ that all possible data for this query is already available locally. Additionally, we plan to add a `prefix` result for when the data is known to be a prefix of the complete result. See [Consistency](#consistency) for more information.
 
+## Handling missing data
+
+It is inevetable that there will be cases where the requested data cannot be found. Because query results are never immediately populated, a simple existence check will result in flashing of the UI.
+
+To prevent this from happening, the recommended way to handle missing data is to only display the not-found UI when the result type is `complete`. This way the 404 page is slow but pages with data are still just as fast.
+
+```tsx
+const [issue, issuesResult] = useQuery(
+  z.query.issue.where('id', 'some-id').one(),
+);
+
+// ❌ This causes flashing of UI
+if (!issue) {
+  return <div>404 Not Found</div>;
+} else {
+  return <div>{issue}</div>;
+}
+
+// ✅ Recommended way
+if (!issue && issueResult.type === 'complete') {
+  return <div>404 Not Found</div>;
+}
+
+if (!issue) {
+  return null;
+}
+
+return <div>{issue}</div>;
+```
+
 ## Preloading
 
 Almost all Zero apps will want to preload some data in order to maximize the feel of instantaneous UI transitions.
@@ -443,18 +473,18 @@ By default, `run()` only returns results that are currently available on the cli
 If you want to wait for the server to return results, pass `{type: 'complete'}` to `run`:
 
 ```tsx
-const results = await z.query.issue.where('foo', 'bar').run(
-    {type: 'complete'});
+const results = await z.query.issue.where('foo', 'bar').run({type: 'complete'});
 ```
 
 <Note slug="default-run">
 As a convenience you can also directly await queries:
 
 ```ts
-await z.query.issue.where('foo','bar');
+await z.query.issue.where('foo', 'bar');
 ```
 
 This is the same as saying `run()` or `run({type: 'unknown'})`.
+
 </Note>
 
 ## Consistency

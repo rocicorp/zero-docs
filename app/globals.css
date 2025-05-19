@@ -29,8 +29,9 @@
     --foreground-rgb: 0, 0, 0;
     --paragraph-color: hsl(0, 0%, 15%);
     --primary-accent: 39, 252, 174;
+    --code-border: rgba(228, 228, 231, 1);
     --inline-code-foreground: rgb(39, 252, 174);
-    --inline-code-background: rgb(26, 27, 38);
+    --inline-code-background: rgb(245, 245, 245);
   }
 
   .dark {
@@ -58,6 +59,7 @@
     --foreground-rgb: 255, 255, 255;
     --paragraph-color: #d4d4d8;
     --primary-accent: 39, 252, 174;
+    --code-border: rgba(39, 39, 42, 1);
     --inline-code-foreground: rgb(39, 252, 174);
     --inline-code-background: rgb(26, 27, 38);
   }
@@ -442,26 +444,27 @@ pre .copy-button:hover {
 }
 
 /* Home code block */
+
 .hljs-keyword {
-  color: rgb(255, 121, 198);
+  color: #fc218a;
   font-weight: 700;
 }
 
 .hljs-title {
-  color: rgb(39, 252, 174);
+  color: #19ad68;
   font-weight: 700;
 }
 
 .hljs-built_in {
-  color: rgb(139, 233, 253);
+  color: rgb(0, 132, 161);
 }
 
 .hljs-comment {
-  color: rgb(98, 114, 164);
+  color: #6272a4;
 }
 
 .hljs-string {
-  color: rgb(241, 250, 140);
+  color: #be9f17;
 }
 
 .hljs-number {
@@ -469,12 +472,49 @@ pre .copy-button:hover {
 }
 
 .hljs-name {
-  color: rgb(241, 250, 140);
+  color: #be9f17;
   font-weight: 700;
 }
 
 .hljs-attr {
-  color: rgb(39, 252, 174);
+  color: #19ad68;
+}
+
+html.dark {
+  .hljs-keyword {
+    color: rgb(255, 121, 198);
+    font-weight: 700;
+  }
+
+  .hljs-title {
+    color: rgb(39, 252, 174);
+    font-weight: 700;
+  }
+
+  .hljs-built_in {
+    color: rgb(139, 233, 253);
+  }
+
+  .hljs-comment {
+    color: rgb(98, 114, 164);
+  }
+
+  .hljs-string {
+    color: rgb(241, 250, 140);
+  }
+
+  .hljs-number {
+    color: rgb(189, 147, 249);
+  }
+
+  .hljs-name {
+    color: rgb(241, 250, 140);
+    font-weight: 700;
+  }
+
+  .hljs-attr {
+    color: rgb(39, 252, 174);
+  }
 }
 
 /* Theme switcher toggle button */

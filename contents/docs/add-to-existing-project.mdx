@@ -75,11 +75,17 @@ options, see [configuration options](zero-cache-config).
 Start the Zero server using the CLI:
 
 ```bash
-npx zero-cache
+npx zero-cache-dev
 ```
 
 The server runs on port 4848 by default. To verify, open `http://localhost:4848`
 in your browser. If everything is configured correctly, you'll see "OK".
+
+<Note slug="schema-file-location" heading="Schema file location">
+  By default, `zero-cache` looks for a `schema.ts` file in the root of your
+  project. You can change this by setting the `ZERO_SCHEMA_PATH` environment
+  variable or by providing a `-p --schema-path` flag.
+</Note>
 
 ## Defining Your Schema
 

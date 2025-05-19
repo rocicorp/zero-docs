@@ -17,9 +17,12 @@ export default function Note({
   slug,
 }: NoteProps) {
   const noteClassNames = clsx({
-    'bg-gray-900 border-gray-800': type === 'note',
-    'bg-yellow-950 border-yellow-900': type === 'warning' || type === 'todo',
-    'bg-red-950 border-red-900': type === 'danger',
+    'dark:bg-gray-900 dark:border-gray-800 bg-blue-50 border-blue-200':
+      type === 'note',
+    'dark:bg-yellow-950 dark:border-yellow-900 bg-yellow-50 border-yellow-200':
+      type === 'warning' || type === 'todo',
+    'dark:bg-red-950 dark:border-red-900 bg-red-50 border-red-200':
+      type === 'danger',
   });
 
   // Default emojis by note type

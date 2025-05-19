@@ -27,7 +27,7 @@
 
 .main a {
   text-decoration: underline;
-  color: rgba(255, 255, 255, 1);
+  color: var(--foreground-rgb);
 }
 
 .main a:hover {
@@ -37,12 +37,13 @@
 
 .main a.primaryButton {
   text-decoration: none;
-  color: inherit;
+  color: rgb(var(--foreground-rgb));
 }
 
 .main a.primaryButton:hover {
   background: hsl(var(--accent));
   outline: none;
+  color: rgba(255, 255, 255, 1);
 }
 
 .ctaContainer {
@@ -95,7 +96,7 @@
 /* Code block */
 
 .main pre {
-  background: #1a1b26;
+  background: var(--inline-code-background);
   width: 100%;
   padding: 1.5rem;
   box-sizing: border-box;
@@ -104,6 +105,7 @@
   margin: 1rem 0 2rem;
   font-size: 0.8rem;
   line-height: 1.5;
+  border: 1px solid var(--code-border);
 }
 
 .main code {

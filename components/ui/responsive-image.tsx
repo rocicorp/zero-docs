@@ -9,6 +9,7 @@ type ResponsiveImageProps = {
   width: number;
   height: number;
   caption?: string;
+  className?: string;
 };
 
 const ResponsiveImage: FC<ResponsiveImageProps> = ({
@@ -17,6 +18,7 @@ const ResponsiveImage: FC<ResponsiveImageProps> = ({
   width,
   height,
   caption,
+  className,
 }) => {
   const [isFullscreen, setIsFullscreen] = useState(false);
 
@@ -43,6 +45,7 @@ const ResponsiveImage: FC<ResponsiveImageProps> = ({
         style={{
           cursor: 'pointer',
         }}
+        className={className}
         onClick={handleClick}
       />
 

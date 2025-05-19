@@ -50,7 +50,11 @@ export default function RootLayout({
         className={`${muoto.variable} ${codeFont.variable} font-regular`}
         suppressHydrationWarning
       >
-        <ThemeProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem={true}
+        >
           <ClientBoundary />
           <main className="sm:container mx-auto w-[88vw] h-auto">
             {children}

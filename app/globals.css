@@ -127,6 +127,7 @@ mark {
 
 .social-links {
   display: flex;
+  align-items: center;
   gap: 1rem;
 }
 
@@ -533,14 +534,7 @@ html.dark {
 
 /* Theme switcher toggle button */
 .theme-toggle-container {
-  display: flex;
-  align-items: center;
-  margin-top: 0.75rem;
-
-  .theme-toggle-label {
-    margin-right: 0.5rem;
-  }
-
+  margin-left: auto;
   button {
     opacity: 0.75;
   }

@@ -67,6 +67,11 @@ To upgrade Zero to a new major version, first deploy the new zero-cache, then th
 
 The `zero-cache` image is configured via environment variables. See [zero-cache Config](./zero-cache-config) for available options.
 
+<Note heading="Custom mutators" slug="push-url">
+  When using custom mutators, don't forget to set the push api url with
+  `ZERO_PUSH_URL`
+</Note>
+
 ## Guide: Multi-Node on SST+AWS
 
 [SST](https://sst.dev/) is our recommended way to deploy Zero.
@@ -131,6 +136,7 @@ export default $config({
 
     // Common environment variables
     const commonEnv = {
+      ZERO_PUSH_URL: '', // Your push api url when using custom mutators
       ZERO_UPSTREAM_DB: conn.value,
       ZERO_CVR_DB: conn.value,
       ZERO_CHANGE_DB: conn.value,
@@ -175,7 +181,8 @@ export default $config({
     });
 
     // View Syncer Service
-    const viewSyncer = cluster.addService(`view-syncer`,
+    const viewSyncer = cluster.addService(
+      `view-syncer`,
       {
         cpu: '1 vCPU',
         memory: '2 GB',
@@ -190,7 +197,7 @@ export default $config({
         },
         environment: {
           ...commonEnv,
-          ZERO_CHANGE_STREAMER_MODE: "discover",
+          ZERO_CHANGE_STREAMER_MODE: 'discover',
         },
         logging: {
           retention: '1 month',
@@ -217,7 +224,8 @@ export default $config({
         // Wait for replication-manager to come up first, for breaking changes
         // to replication-manager interface.
         dependsOn: [replicationManager],
-      });
+      },
+    );
 
     // Permissions deployment
     // Note: this setup requires your CI/CD pipeline to have access to your
@@ -359,6 +367,7 @@ ZERO_REPLICA_FILE = "/data/sync-replica.db"
 ZERO_UPSTREAM_DB="${CONNECTION_STRING}/zstart?sslmode=disable"
 ZERO_CVR_DB="${CONNECTION_STRING}/zstart_cvr?sslmode=disable"
 ZERO_CHANGE_DB="${CONNECTION_STRING}/zstart_cdb?sslmode=disable"
+ZERO_PUSH_URL=""
 ZERO_AUTH_SECRET="secretkey"
 LOG_LEVEL = "debug"
 EOF

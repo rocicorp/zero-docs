@@ -112,6 +112,11 @@ mark {
   top: 4rem !important;
 }
 
+.leftbar-aside {
+  max-height: calc(100vh - 72px);
+  overflow-y: scroll;
+}
+
 .footer-container {
   color: hsl(var(--foreground) / 50%);
   font-size: 0.875rem;
@@ -192,16 +197,15 @@ mark {
   margin-bottom: 1rem;
 }
 
-.note-heading-container>.heading-link {
+.note-heading-container > .heading-link {
   display: flex;
   gap: 0.5rem;
   align-items: center;
 }
 
-.note-heading-container>.heading-link::after {
-  position:static;
+.note-heading-container > .heading-link::after {
+  position: static;
 }
-
 
 .note-heading {
   font-size: 0.875rem;

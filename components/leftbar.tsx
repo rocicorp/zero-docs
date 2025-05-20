@@ -15,7 +15,7 @@ import Link from 'next/link';
 
 export function Leftbar() {
   return (
-    <aside className="md:flex hidden flex-[1] min-w-[230px] sticky top-16 flex-col py-4">
+    <aside className="leftbar-aside md:flex hidden flex-[1] min-w-[230px] sticky top-16 flex-col py-4">
       <ScrollArea className="h-full pr-2">
         <DocsMenu />
       </ScrollArea>

@@ -21,7 +21,7 @@ export default function Home() {
       .related('tracks', track => track
         .related('album')
         .related('artist')
-        .orderBy('playcount', 'asc')
+        .orderBy('playcount', 'asc'))
       .where('id', id)
   );
 

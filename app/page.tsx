@@ -16,7 +16,7 @@ export default function Home() {
   // This usually resolves *instantly*, and updates reactively
   // as server data changes. Just wire it directly to your UI –
   // no HTTP APIs, no state management no realtime goop.
-  const tracks = useQuery(
+  const [playlist] = useQuery(
     zero.query.playlist
       .related('tracks', track => track
         .related('album')
@@ -26,18 +26,21 @@ export default function Home() {
   );
 
   const onStar = (id: string, starred: boolean) => {
-    zero.track.update({
+    zero.mutate.track.update({
       id,
       starred,
     });
   }
 
   return (
-    <div>
-      {tracks.map(track => (
-        <TrackRow track={track} onStar={onStar}/>
-      ))}
-    </div>
+    <>
+      <div>{playlist.name}</div>
+      <div>
+        {playlist.tracks.map(track => (
+          <TrackRow track={track} onStar={onStar}/>
+        ))}
+      </div>
+    </>
   );
 }`;
 

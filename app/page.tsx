@@ -23,6 +23,7 @@ export default function Home() {
         .related('artist')
         .orderBy('playcount', 'asc'))
       .where('id', id)
+      .one()
   );
 
   const onStar = (id: string, starred: boolean) => {
@@ -32,12 +33,14 @@ export default function Home() {
     });
   }
 
+  if (!playlist) return null;
+
   return (
     <>
       <div>{playlist.name}</div>
       <div>
         {playlist.tracks.map(track => (
-          <TrackRow track={track} onStar={onStar}/>
+          <TrackRow key={track.id} track={track} onStar={onStar}/>
         ))}
       </div>
     </>

@@ -19,6 +19,7 @@ export const ROUTES: EachRoute[] = [
       {title: 'Quickstart', href: '/quickstart'},
       {title: 'Add to Existing Project', href: '/add-to-existing-project'},
       {title: 'Samples', href: '/samples'},
+      {title: 'Release Notes', href: '/release-notes'},
     ],
   },
 
@@ -75,7 +76,6 @@ export const ROUTES: EachRoute[] = [
     items: [
       {title: 'Roadmap', href: '/roadmap'},
       {title: 'Reporting Bugs', href: '/reporting-bugs'},
-      {title: 'Release Notes', href: '/release-notes'},
       {title: 'Open Source', href: '/open-source'},
       {title: 'LLMs', href: '/llms'},
     ],

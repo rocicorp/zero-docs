@@ -406,25 +406,30 @@ The possible values of `result.type` are currently `complete` and `unknown`.
 
 The `complete` value is currently only returned when Zero has received the server result. But in the future, Zero will be able to return this result type when it _knows_ that all possible data for this query is already available locally. Additionally, we plan to add a `prefix` result for when the data is known to be a prefix of the complete result. See [Consistency](#consistency) for more information.
 
-## Handling missing data
+## Handling Missing Data
 
-It is inevetable that there will be cases where the requested data cannot be found. Because query results are never immediately populated, a simple existence check will result in flashing of the UI.
-
-To prevent this from happening, the recommended way to handle missing data is to only display the not-found UI when the result type is `complete`. This way the 404 page is slow but pages with data are still just as fast.
+It is inevetable that there will be cases where the requested data cannot be found. Because Zero returns local results immediately, and server results asynchronously, displaying "not found" / 404 UI can be slightly tricky. If you just use a simple existence check, you will often see the 404 UI flicker while the server result loads:
 
 ```tsx
 const [issue, issuesResult] = useQuery(
   z.query.issue.where('id', 'some-id').one(),
 );
 
-// ❌ This causes flashing of UI
+// ❌ This causes flickering of the UI
 if (!issue) {
   return <div>404 Not Found</div>;
 } else {
   return <div>{issue}</div>;
 }
+```
 
-// ✅ Recommended way
+The way to do this correctly is to only display the "not found" UI when the result type is `complete`. This way the 404 page is slow but pages with data are still just as fast.
+
+```tsx
+const [issue, issuesResult] = useQuery(
+  z.query.issue.where('id', 'some-id').one(),
+);
+
 if (!issue && issueResult.type === 'complete') {
   return <div>404 Not Found</div>;
 }

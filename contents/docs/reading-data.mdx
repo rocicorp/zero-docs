@@ -441,6 +441,45 @@ if (!issue) {
 return <div>{issue}</div>;
 ```
 
+## Listening to Changes
+
+Currently, they way to listen to changes in your query results is not ideal. You can add a listener to a materialized view which has the new data and result as parameters:
+
+```ts
+z.query.issue.materialize().addListener((issues, issuesResult) => {
+  // do stuff...
+});
+```
+
+However, using this method will maintain its own materialized view in memory which is wasteful. It also doesn't allow for granular listening to events like `add` and `remove` of rows.
+
+A better way would be to create your own view without actually storing the data which will also allow you to listen to specific events. Again, the API is not good and will be improved in the future.
+
+```ts
+// Inside the View class
+// Instead of storing the change, we invoke some callback
+push(change: Change): void {
+  switch (change.type) {
+    case 'add':
+      this.#onAdd?.(change)
+      break
+    case 'remove':
+      this.#onRemove?.(change)
+      break
+    case 'edit':
+      this.#onEdit?.(change)
+      break
+    case 'child':
+      this.#onChild?.(change)
+      break
+    default:
+      throw new Error(`Unknown change type: ${change['type']}`)
+  }
+}
+```
+
+(see View implementations in [`zero-vue`](https://github.com/danielroe/zero-vue/blob/f25808d4b7d1ef0b8e01a5670d7e3050d6a64bbf/src/view.ts#L77-L89) or [`zero-solid`](https://github.com/rocicorp/mono/blob/51995101d0657519207f1c4695a8765b9016e07c/packages/zero-solid/src/solid-view.ts#L119-L131))
+
 ## Preloading
 
 Almost all Zero apps will want to preload some data in order to maximize the feel of instantaneous UI transitions.

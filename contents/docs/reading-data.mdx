@@ -443,7 +443,7 @@ return <div>{issue}</div>;
 
 ## Listening to Changes
 
-Currently, they way to listen to changes in your query results is not ideal. You can add a listener to a materialized view which has the new data and result as parameters:
+Currently, the way to listen for changes in query results is not ideal. You can add a listener to a materialized view which has the new data and result as parameters:
 
 ```ts
 z.query.issue.materialize().addListener((issues, issuesResult) => {

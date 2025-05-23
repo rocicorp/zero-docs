@@ -17,7 +17,10 @@ For example, you can create custom mutators that:
 
 Despite their increased power, custom mutators still participate fully in sync. They execute instantly on the local device, immediately updating all active queries. They are then synced in the background to the server and to other clients.
 
-<Note slug="deprecating-crud" heading="Custom mutators will eventually become Zero's only write API">
+<Note
+  slug="deprecating-crud"
+  heading="Custom mutators will eventually become Zero's only write API"
+>
   We're still refining the design of custom mutators. During this phase, the old
   CRUD mutators will continue to work. But we do want to deprecate CRUD
   mutators, and eventually remove them. So please try out custom mutators and
@@ -260,6 +263,7 @@ This parameter isn't supported within mutators, because waiting for server resul
 When a mutator runs on the client (`tx.location === "client"`), ZQL reads only return data already cached on the client. When mutators run on the server (`tx.location === "server"`), ZQL reads always return all data.
 
 You can use `run()` within custom mutators, but the `type` argument does nothing. In the future, passing `type` in this situation will throw an error.
+
 </Note>
 
 ### Invoking Client Mutators
@@ -285,7 +289,7 @@ Optimistic mutations make sense when the common case is that a mutation succeeds
 
 That said there are cases where it is useful to know when a write succeeded on either the client or server.
 
-One example is if you need to read a row directly after writing it. Zero's local writes are very fast (almost always < 1 frame), but because Zero is backed by IndexedDB, writes are still *technically* asynchronous and reads directly after a write may not return the new data.
+One example is if you need to read a row directly after writing it. Zero's local writes are very fast (almost always < 1 frame), but because Zero is backed by IndexedDB, writes are still _technically_ asynchronous and reads directly after a write may not return the new data.
 
 You can use the `.client` promise in this case to wait for a write to complete on the client side:
 
@@ -306,7 +310,7 @@ try {
   // issue-123 definitely can be read now.
   const read2 = await zero.query.issue.where('id', 'issue-123').one();
 } catch (e) {
-  console.error("Mutator failed on client", e);
+  console.error('Mutator failed on client', e);
 }
 ```
 
@@ -321,7 +325,7 @@ try {
 
   // issue-123 is written to server
 } catch (e) {
-  console.error("Mutator failed on client or server", e);
+  console.error('Mutator failed on client or server', e);
 }
 ```
 
@@ -343,7 +347,7 @@ If there is per-client configuration you need to send to the push endpoint, you 
 const z = new Zero({
   push: {
     queryParams: {
-      workspaceID: "42",
+      workspaceID: '42',
     },
   },
 });
@@ -351,12 +355,27 @@ const z = new Zero({
 
 The push endpoint receives a `PushRequest` as input describing one or more mutations to apply to the backend, and must return a `PushResponse` describing the results of those mutations.
 
+<Note type="danger" emoji="⚠️" heading="Not Returning a PushResponse" slug="not-returning-pushresponse">
+  The server <em>must</em> return a `PushResponse` because the client expects
+  one, even if it fails. If no such response is received, Zero will retry
+  indefinitely. Since following mutations can rely on each other, they must be applied in order.
+  So, if one mutation is not acknowledged, no mutation after that can be applied.
+
+Throwing errors inside mutators in the `PushProcessor` will be handled for you.
+However, doing things outside of it that return prematurely or throw errors, such as auth middleware or setup functions, will not.
+
+</Note>
+
 If you are implementing your server in TypeScript, you can use the `PushProcessor` class to trivially implement this endpoint. Here’s an example in a [Hono](https://hono.dev/) app:
 
 ```ts
 import {Hono} from 'hono';
 import {handle} from 'hono/vercel';
-import {PushProcessor, ZQLDatabase, PostgresJSConnection} from '@rocicorp/zero/pg';
+import {
+  PushProcessor,
+  ZQLDatabase,
+  PostgresJSConnection,
+} from '@rocicorp/zero/pg';
 import postgres from 'postgres';
 import {schema} from '../shared/schema';
 import {createMutators} from '../shared/mutators';
@@ -365,20 +384,15 @@ import {createMutators} from '../shared/mutators';
 // implementation of the push protocol.
 const processor = new PushProcessor(
   new ZQLDatabase(
-    new PostgresJSConnection(
-      postgres(process.env.ZERO_UPSTREAM_DB! as string)
-    ),
-    schema
-  )
+    new PostgresJSConnection(postgres(process.env.ZERO_UPSTREAM_DB! as string)),
+    schema,
+  ),
 );
 
 export const app = new Hono().basePath('/api');
 
 app.post('/push', async c => {
-  const result = await processor.process(
-    createMutators(),
-    c.req.raw,
-  );
+  const result = await processor.process(createMutators(), c.req.raw);
   return await c.json(result);
 });
 
@@ -401,10 +415,12 @@ An approach we like is to create a separate `server-mutators.ts` file that wraps
 
 ```ts
 // server-mutators.ts
-import { CustomMutatorDefs } from "@rocicorp/zero";
-import { schema } from "./schema";
+import {CustomMutatorDefs} from '@rocicorp/zero';
+import {schema} from './schema';
 
-export function createMutators(clientMutators: CustomMutatorDefs<typeof schema>) {
+export function createMutators(
+  clientMutators: CustomMutatorDefs<typeof schema>,
+) {
   return {
     // Reuse all client mutators except the ones in `issue`
     ...clientMutators,
@@ -413,7 +429,7 @@ export function createMutators(clientMutators: CustomMutatorDefs<typeof schema>)
       // Reuse all issue mutators except `update`
       ...clientMutators.issue,
 
-      update: async (tx, {id, title}: { id: string; title: string }) => {
+      update: async (tx, {id, title}: {id: string; title: string}) => {
         // Call the shared mutator first
         await clientMutators.issue.update(tx, {id, title});
 
@@ -427,7 +443,7 @@ export function createMutators(clientMutators: CustomMutatorDefs<typeof schema>)
           timestamp: new Date().toISOString(),
         });
       },
-    }
+    },
   } as const satisfies CustomMutatorDefs<typeof schema>;
 }
 ```

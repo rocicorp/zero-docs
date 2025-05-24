@@ -1,21 +1,72 @@
 ---
-title: Offline Support
+title: Offline
 ---
-Zero supports offline *reads*. Any data cached locally continues to be accessible while offline.
+Zero supports offline reads, but not writes.
 
-Currently, Zero also continues to work offline for *writes*, but we do not plan to support this feature and it will be removed before beta. Our plan is that when disconnected, Zero will go into an *offline mode* where all mutations throw and Zero becomes read-only.
+<Note emoji="🤓" type="warning" heading="Well actually…">
+Offline writes *are* currently accepted by Zero, and sent when you come back online. But this is only because we haven't written the code to disable them yet, which we plan to before beta.
 
-Until then, we recommend that you detect when the user is offline using the `onOnlineChange` constructor parameter and disable write functionality in your app manually.
+It's a bug, not a feature.
+</Note>
 
-## More Information
+The lack of offline writes is often surprising to people familiar with sync engines, because offline is usually touted as something that comes for free with these tools.
 
-Offline writes are a very complicated subject.
+This page explains why Zero doesn't support offline writes, why it is hard for *any* software system to automatically support offline writes, how we recommend you handle connectivity loss, and our future plans in this area.
 
-While technically Zero can queue writes and replay them when reconnected (this happens by default in a sync engine), building apps that correctly support offline writes is very difficult.
+## Why Zero Doesn't Support Offline Writes
 
-When offline for long periods, the actual *intent* of users can diverge resulting in complex conflicts that cannot automatically be resolved. Or, the server software and database schema may diverge from client such that offline mutations can no longer be processed. In either of these cases, simply replaying offline writes can result in arbitrarily large amount of user data loss.
+Offline writes are very complicated.
 
-  For these reasons, Zero is currently focused on the benefits that sync provides for the 99% of time most users and most apps are *online*. Specifically: instant user interactions and automatic reactivity. Providing a great *offline* experience is not currently a priority. We may revisit this in the future.
+While Zero can technically queue offline writes and replay them when reconnected (this happens by default in any sync engine, and is what Zero does today), that fact doesn't make supporting offline writes much easier. That's because a really hard part of offline writes is in handling conflicts, and no software tool can make that problem go away.
+
+For example, imagine two users are editing an article about cats. One goes offline and does a bunch of work on the article, while the other decides that the article should actually be about dogs and rewrites it. When the offline user reconnects, there is no way that any software algorithm can automatically resolve their conflict. One or the other of them is going to be upset.
+
+And while the above example may sound extreme, you can construct similar situations with the majority of common applications. Just take your own application and ask yourself what should really happen if one user takes their device offline for a week and makes arbitrarily complex changes while other users are working online.
+
+People who work on sync engines and related tools often say that *offline is just extreme lag*, but that's only true at a technical level. At a human level, being "offline" for a few seconds is very different from being offline for a few hours. The difference is how much knowledge you have about what your collaborators are doing, and how much of your work can be lost.
+
+## Offline Writes are a UX Problem…
+
+The only way to support offline writes in general is to either:
+
+1. Extremely carefully limit the data model so that all possible offline writes make sense when merged.
+2. Support custom UX to allow users to fork and merge conflicts when they occur.
+
+Neither of these is *free*. Buiding a good offline UX is a lot of work, and most of that work is borne by application developers.
+
+## … And a Schema Problem
+
+But it's not just users that can diverge from each other. The server software and database schema can also diverge arbitrarily far from the client while the client is disconnected. When the client comes back online, the changes made may no longer be processable by the application, or may have a different effect than the user intended.
+
+To support arbitrarily long offline periods, the server must also maintain backward compatibility with clients indefinitely.
+
+Similarly, the server can never reject an offline write (i.e., due to validation) because that could lead to a user losing huge amounts of work.
+
+## … And a Sync Engine Problem
+
+Supporting offline writes also requires work in the sync engine.
+
+In Zero, there are a few specific impacts:
+
+1. The Zero client itself can get out of date while offline. On reconnect, the app might reload with a new version of the client. This new version must be able to read and process old data from arbitrarily long ago.
+2. An arbitrarily large number of pending mutations can be built up. These mutations must be replayed on reconnect, which can take a long time.
+3. When processing mutations on server we must consider what should happen if the database or application server are temporarily unavailable. We need to treat that kind of error differently from a validation error.
+
+These problems are surmountable, but significant effort. Their solutions might also be in tension with other goals of the sync engine, like online performance and scalability. These tradeoffs will take time to work through.
+
+## Zero's Position
+
+For all of the above reasons, we plan to disable offline writes in Zero for beta.
+
+When the Zero client loses connection to `zero-cache` for several minutes (or when `zero-cache` cannot reach the customer API server), it will enter a special *offline mode*. In this mode, all writes to Zero will throw.
+
+While we recognize that offline writes would be useful for some applications, the reality is that for most of the apps we want to support, the user is online the vast majority of the time and the cost to support offline is extremely high. There is simply more value in making the online experience great first.
+
+We would like to revisit this in the future and really think through how to design APIs and patterns that allow developers to make successful offline-enabled apps. But it's not our priority right now.
+
+## Dealing with Offline Today
+
+Until Zero disables offline writes automatically, we recomment using the `onOnlineChange` parameter to the `Zero` constructor to detect connection loss and disable writes manually.
 
 ## Even More Information
 

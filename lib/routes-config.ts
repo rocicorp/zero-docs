@@ -39,7 +39,7 @@ export const ROUTES: EachRoute[] = [
       { title: 'Authentication', href: '/auth' },
       { title: 'Permissions', href: '/permissions' },
       { title: 'ZQL on the Server', href: '/zql-on-the-server' },
-      { title: 'Offline Support', href: '/offline' },
+      { title: 'Offline', href: '/offline' },
       { title: 'Deployment', href: '/deployment' },
       { title: '`zero-cache` Config', href: '/zero-cache-config' },
     ],

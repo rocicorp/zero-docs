@@ -13,9 +13,7 @@ The lack of offline writes is often surprising to people familiar with sync engi
 
 This page explains why Zero doesn't support offline writes, why it is hard for *any* software system to automatically support offline writes, how we recommend you handle connectivity loss, and our future plans in this area.
 
-## Why Zero Doesn't Support Offline Writes
-
-Offline writes are very complicated.
+## Offline Writes are a UX Problem
 
 While Zero can technically queue offline writes and replay them when reconnected (this happens by default in any sync engine, and is what Zero does today), that fact doesn't make supporting offline writes much easier. That's because a really hard part of offline writes is in handling conflicts, and no software tool can make that problem go away.
 
@@ -24,8 +22,6 @@ For example, imagine two users are editing an article about cats. One goes offli
 And while the above example may sound extreme, you can construct similar situations with the majority of common applications. Just take your own application and ask yourself what should really happen if one user takes their device offline for a week and makes arbitrarily complex changes while other users are working online.
 
 People who work on sync engines and related tools often say that *offline is just extreme lag*, but that's only true at a technical level. At a human level, being "offline" for a few seconds is very different from being offline for a few hours. The difference is how much knowledge you have about what your collaborators are doing, and how much of your work can be lost.
-
-## Offline Writes are a UX Problem…
 
 The only way to support offline writes in general is to either:
 
@@ -66,7 +62,7 @@ We would like to revisit this in the future and really think through how to desi
 
 ## Dealing with Offline Today
 
-Until Zero disables offline writes automatically, we recomment using the `onOnlineChange` parameter to the `Zero` constructor to detect connection loss and disable writes manually.
+Until Zero disables offline writes automatically, we recomment using the `onOnlineChange` parameter to the `Zero` constructor to detect connection loss and disable editing manually in your UI.
 
 ## Even More Information
 

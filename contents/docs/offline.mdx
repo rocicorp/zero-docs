@@ -34,9 +34,7 @@ Neither of these is *free*. Buiding a good offline UX is a lot of work, and most
 
 But it's not just users that can diverge from each other. The server software and database schema can also diverge arbitrarily far from the client while the client is disconnected. When the client comes back online, the changes made may no longer be processable by the application, or may have a different effect than the user intended.
 
-To support arbitrarily long offline periods, the server must also maintain backward compatibility with clients indefinitely.
-
-Similarly, the server can never reject an offline write (i.e., due to validation) because that could lead to a user losing huge amounts of work.
+So to support long offline periods, the server must also maintain backward compatibility with clients indefinitely. Similarly, the server can never reject an offline write (i.e., due to validation) because that could lead to a user losing huge amounts of work.
 
 ## … And a Sync Engine Problem
 

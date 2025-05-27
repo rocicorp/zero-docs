@@ -15,11 +15,11 @@ export const ROUTES: EachRoute[] = [
     noLink: true,
     new: false,
     items: [
-      { title: 'Introduction', href: '/introduction' },
-      { title: 'Quickstart', href: '/quickstart' },
-      { title: 'Add to Existing Project', href: '/add-to-existing-project' },
-      { title: 'Samples', href: '/samples' },
-      { title: 'Release Notes', href: '/release-notes' },
+      {title: 'Introduction', href: '/introduction'},
+      {title: 'Quickstart', href: '/quickstart'},
+      {title: 'Add to Existing Project', href: '/add-to-existing-project'},
+      {title: 'Samples', href: '/samples'},
+      {title: 'Release Notes', href: '/release-notes'},
     ],
   },
 
@@ -30,29 +30,34 @@ export const ROUTES: EachRoute[] = [
     items: [
       //TODO
       //{title: 'How Zero Works', href: '/overview'},
-      { title: 'Connecting to Postgres', href: '/connecting-to-postgres' },
-      { title: 'Supported Postgres Features', href: '/postgres-support' },
-      { title: 'Zero Schema', href: '/zero-schema' },
-      { title: 'Reading Data with ZQL', href: '/reading-data' },
-      { title: 'Writing Data with Mutators', href: '/writing-data' },
-      { title: 'Custom Mutators', href: '/custom-mutators', new: true },
-      { title: 'Authentication', href: '/auth' },
-      { title: 'Permissions', href: '/permissions' },
-      { title: 'ZQL on the Server', href: '/zql-on-the-server' },
-      { title: 'Offline', href: '/offline' },
-      { title: 'Deployment', href: '/deployment' },
-      { title: '`zero-cache` Config', href: '/zero-cache-config' },
+      {title: 'Connecting to Postgres', href: '/connecting-to-postgres'},
+      {title: 'Supported Postgres Features', href: '/postgres-support'},
+      {title: 'Zero Schema', href: '/zero-schema'},
+      {title: 'Reading Data with ZQL', href: '/reading-data'},
+      {title: 'Writing Data with Mutators', href: '/writing-data'},
+      {title: 'Custom Mutators', href: '/custom-mutators', new: true},
+      {title: 'Authentication', href: '/auth'},
+      {title: 'Permissions', href: '/permissions'},
+      {title: 'ZQL on the Server', href: '/zql-on-the-server'},
+      {title: 'Offline', href: '/offline'},
+      {title: 'Deployment', href: '/deployment'},
+      {title: '`zero-cache` Config', href: '/zero-cache-config'},
     ],
   },
-
+  {
+    title: 'Queries (Reading Data)',
+    href: '',
+    noLink: true,
+    items: [{title: 'ZQL Fundamentals', href: '/zql-fundamentals'}],
+  },
   {
     title: 'Integrations',
     href: '',
     noLink: true,
     items: [
-      { title: 'React', href: '/react' },
-      { title: 'SolidJS', href: '/solidjs' },
-      { title: 'Community', href: '/community' },
+      {title: 'React', href: '/react'},
+      {title: 'SolidJS', href: '/solidjs'},
+      {title: 'Community', href: '/community'},
     ],
   },
 
@@ -61,12 +66,12 @@ export const ROUTES: EachRoute[] = [
     href: '',
     noLink: true,
     items: [
-      { title: 'Inspector API', href: '/debug/inspector' },
-      { title: 'Permissions', href: '/debug/permissions' },
-      { title: 'Slow Queries', href: '/debug/slow-queries' },
-      { title: 'Replication', href: '/debug/replication' },
-      { title: 'Query ASTs', href: '/debug/query-asts' },
-      { title: 'OpenTelemetry', href: '/debug/otel' },
+      {title: 'Inspector API', href: '/debug/inspector'},
+      {title: 'Permissions', href: '/debug/permissions'},
+      {title: 'Slow Queries', href: '/debug/slow-queries'},
+      {title: 'Replication', href: '/debug/replication'},
+      {title: 'Query ASTs', href: '/debug/query-asts'},
+      {title: 'OpenTelemetry', href: '/debug/otel'},
     ],
   },
 
@@ -75,23 +80,23 @@ export const ROUTES: EachRoute[] = [
     href: '',
     noLink: true,
     items: [
-      { title: 'Roadmap', href: '/roadmap' },
-      { title: 'Reporting Bugs', href: '/reporting-bugs' },
-      { title: 'Open Source', href: '/open-source' },
-      { title: 'LLMs', href: '/llms' },
+      {title: 'Roadmap', href: '/roadmap'},
+      {title: 'Reporting Bugs', href: '/reporting-bugs'},
+      {title: 'Open Source', href: '/open-source'},
+      {title: 'LLMs', href: '/llms'},
     ],
   },
 ];
 
-type Page = { title: string; href: string };
+type Page = {title: string; href: string};
 
 function getRecurrsiveAllLinks(node: EachRoute) {
   const ans: Page[] = [];
   if (!node.noLink) {
-    ans.push({ title: node.title, href: node.href });
+    ans.push({title: node.title, href: node.href});
   }
   node.items?.forEach(subNode => {
-    const temp = { ...subNode, href: `${node.href}${subNode.href}` };
+    const temp = {...subNode, href: `${node.href}${subNode.href}`};
     ans.push(...getRecurrsiveAllLinks(temp));
   });
   return ans;

@@ -1,0 +1,198 @@
+---
+title: Query Clauses
+---
+
+Query clauses are the building blocks of ZQL queries. They allow you to refine your data selection by ordering, limiting, paging, and controlling result types. All clauses can be chained together to build complex queries.
+
+## Ordering
+
+You can sort query results by adding an `orderBy` clause:
+
+```tsx
+z.query.issue.orderBy('created', 'desc');
+```
+
+### Multiple Order Clauses
+
+Multiple `orderBy` clauses can be present, in which case the data is sorted by those clauses in order:
+
+```tsx
+// Order by priority descending. For any rows with same priority,
+// then order by created desc.
+z.query.issue.orderBy('priority', 'desc').orderBy('created', 'desc');
+```
+
+### Default Ordering
+
+All queries in ZQL have a default final order of their primary key. Assuming the `issue` table has a primary key on the `id` column, then:
+
+```tsx
+// Actually means: z.query.issue.orderBy('id', 'asc');
+z.query.issue;
+
+// Actually means: z.query.issue.orderBy('priority', 'desc').orderBy('id', 'asc');
+z.query.issue.orderBy('priority', 'desc');
+```
+
+This ensures consistent, deterministic ordering even when your explicit order clauses result in ties.
+
+## Limiting Results
+
+You can limit the number of rows to return with `limit()`:
+
+```tsx
+z.query.issue.orderBy('created', 'desc').limit(100);
+```
+
+The `limit()` clause is particularly useful for:
+
+- **Performance**: Reducing the amount of data transferred and processed
+- **Pagination**: Working with `start()` to implement paging
+- **Top-N queries**: Getting the most recent, highest priority, etc.
+
+```tsx
+// Get the 10 most recent high-priority issues
+z.query.issue.where('priority', 'high').orderBy('created', 'desc').limit(10);
+```
+
+## Paging with Start
+
+You can start the results at or after a particular row with `start()`:
+
+```tsx
+let start: IssueRow | undefined;
+while (true) {
+  let q = z.query.issue.orderBy('created', 'desc').limit(100);
+  if (start) {
+    q = q.start(start);
+  }
+  const batch = await q.run();
+  console.log('got batch', batch);
+
+  if (batch.length < 100) {
+    break;
+  }
+  start = batch[batch.length - 1];
+}
+```
+
+### Exclusive vs Inclusive Start
+
+By default `start()` is _exclusive_ - it returns rows starting **after** the supplied reference row. This is what you usually want for paging:
+
+```tsx
+// Get next page of results after the last row from previous page
+z.query.issue.orderBy('created', 'desc').start(lastRow).limit(50);
+```
+
+If you want _inclusive_ results, you can specify the `inclusive` option:
+
+```tsx
+z.query.issue.start(row, {inclusive: true});
+```
+
+### Cursor-based Pagination Example
+
+Here's a complete example of implementing cursor-based pagination:
+
+```tsx
+function usePaginatedIssues(pageSize = 50) {
+  const [allIssues, setAllIssues] = useState<IssueRow[]>([]);
+  const [cursor, setCursor] = useState<IssueRow | undefined>();
+  const [hasMore, setHasMore] = useState(true);
+
+  const loadMore = async () => {
+    let query = z.query.issue.orderBy('created', 'desc').limit(pageSize);
+
+    if (cursor) {
+      query = query.start(cursor);
+    }
+
+    const newIssues = await query.run({type: 'complete'});
+
+    setAllIssues(prev => [...prev, ...newIssues]);
+    setHasMore(newIssues.length === pageSize);
+
+    if (newIssues.length > 0) {
+      setCursor(newIssues[newIssues.length - 1]);
+    }
+  };
+
+  return {allIssues, loadMore, hasMore};
+}
+```
+
+## Getting a Single Result
+
+If you want exactly zero or one results, use the `one()` clause. This causes ZQL to return `Row|undefined` rather than `Row[]`.
+
+```tsx
+const result = await z.query.issue.where('id', 42).one().run();
+if (!result) {
+  console.error('not found');
+} else {
+  console.log('Found issue:', result.title);
+}
+```
+
+### One() Behavior
+
+- `one()` overrides any `limit()` clause that is also present
+- Returns `Row | undefined` instead of `Row[]`
+- Useful for lookups by unique identifiers
+- Commonly used with `where` clauses for specific records
+
+```tsx
+// Get the current user's profile
+const profile = await z.query.user.where('id', currentUserId).one().run();
+
+// Get the most recent issue
+const latestIssue = await z.query.issue.orderBy('created', 'desc').one().run();
+```
+
+## Combining Clauses
+
+All query clauses can be combined to create sophisticated queries:
+
+```tsx
+// Get the 5 most recent high-priority issues assigned to a specific user,
+// starting after a particular issue
+z.query.issue
+  .where('priority', 'high')
+  .where('assignee', userId)
+  .orderBy('created', 'desc')
+  .start(lastSeenIssue)
+  .limit(5);
+```
+
+### Order of Operations
+
+While you can chain clauses in any order, they are conceptually applied in this sequence:
+
+1. **Selection**: Table selection (`z.query.issue`)
+2. **Filtering**: `where` clauses
+3. **Ordering**: `orderBy` clauses
+4. **Paging**: `start` clause
+5. **Limiting**: `limit` or `one` clause
+
+```tsx
+// These are equivalent:
+z.query.issue.limit(10).where('status', 'open').orderBy('created', 'desc');
+z.query.issue.orderBy('created', 'desc').where('status', 'open').limit(10);
+```
+
+## Performance Considerations
+
+- **Always use `orderBy`** when using `limit()` to ensure consistent results
+- **Combine `orderBy` and `limit`** for efficient top-N queries
+- **Use `start()` instead of `OFFSET`** for better performance in large datasets
+- **Consider indexing** columns used in `orderBy` clauses in your database
+
+## Next Steps
+
+Now that you understand query clauses, explore these related topics:
+
+- [Filtering Data](/filtering-data) - Master the `where` clause and comparison operators
+- [Relationships](/relationships) - Query related data across tables
+- [Query Lifecycle](/query-lifecycle) - Understand performance and caching behavior
+- [ZQL Fundamentals](/zql-fundamentals) - Review the basics if needed

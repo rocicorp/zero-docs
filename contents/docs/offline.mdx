@@ -1,17 +1,15 @@
 ---
 title: Offline
 ---
-Zero supports offline reads, but not writes.
+Zero currently supports offline reads, but not writes. We plan to support offline writes in the future, but we don't have a timeline for that yet.
 
 <Note emoji="🤓" type="warning" heading="Well actually…">
-Offline writes *are* currently accepted by Zero, and sent when you come back online. But this is only because we haven't written the code to disable them yet, which we plan to do before beta.
-
-It's a bug, not a feature.
+Offline writes *are* currently accepted by Zero, and sent when you come back online. But we plan to disable this soon.
 </Note>
 
 The lack of offline writes is often surprising to people familiar with sync engines, because offline is usually touted as something that comes for free with these tools.
 
-This page explains why Zero doesn't support offline writes, why it is hard for *any* software system to automatically support offline writes, how we recommend you handle connectivity loss, and our future plans in this area.
+This page explains why Zero doesn't currently support offline writes, how we recommend you handle connectivity loss, and our future plans in this area.
 
 ## Offline Writes are a UX Problem
 
@@ -25,10 +23,11 @@ People who work on sync engines and related tools often say that *offline is jus
 
 The only way to support offline writes in general is to either:
 
-1. Extremely carefully limit the data model so that all possible offline writes make sense when merged.
+1. Make the logical datamodel append-only (i.e., users can create and mark tasks done, but cannot edit or delete them).
 2. Support custom UX to allow users to fork and merge conflicts when they occur.
+3. Only support editing from a single device.
 
-Neither of these is *free*. Buiding a good offline UX is a lot of work, and most of that work is borne by application developers.
+None of these is *free*. Buiding a good offline UX is a lot of work, and most of that work is borne by application developers.
 
 ## … And a Schema Problem
 

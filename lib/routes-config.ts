@@ -52,6 +52,7 @@ export const ROUTES: EachRoute[] = [
       {title: 'ZQL Fundamentals', href: '/zql-fundamentals'},
       {title: 'Clauses', href: '/query-clauses'},
       {title: 'Filtering', href: '/filtering-data'},
+      {title: 'Relationships', href: '/relationships'},
     ],
   },
   {

@@ -1,0 +1,329 @@
+---
+title: Data Synchronization
+---
+
+Zero's data synchronization model is designed to provide instant UI updates while gracefully handling cases where data isn't immediately available. Understanding how Zero synchronizes data helps you build robust applications that feel fast and reliable.
+
+## How Zero Synchronizes Data
+
+Zero returns whatever data it has on the client immediately for a query, then falls back to the server for any missing data. This two-phase approach enables instant UI updates while ensuring completeness.
+
+### The Synchronization Process
+
+1. **Immediate Response**: Zero first returns any matching data that's already available on the client
+2. **Server Fallback**: If data is missing or potentially incomplete, Zero fetches from the server
+3. **Live Updates**: Once synchronized, the data automatically updates as changes occur on the server
+
+```tsx
+const [issues, issuesResult] = useQuery(
+  z.query.issue.where('priority', 'high'),
+);
+
+// issues contains data immediately (may be partial)
+// issuesResult tells you about completeness
+```
+
+## Completeness
+
+Sometimes it's useful to know the difference between data that's immediately available and data that's been confirmed complete by the server. Zero provides this information through the result type.
+
+### Result Types
+
+```tsx
+const [issues, issuesResult] = useQuery(z.query.issue);
+if (issuesResult.type === 'complete') {
+  console.log('All data is present');
+} else {
+  console.log('Some data may be missing');
+}
+```
+
+The possible values of `result.type` are currently:
+
+- **`complete`**: Zero has received the server result and all data is present
+- **`unknown`**: Zero returned local data but hasn't confirmed completeness with the server
+
+### Future Result Types
+
+The `complete` value is currently only returned when Zero has received the server result. But in the future, Zero will be able to return this result type when it _knows_ that all possible data for this query is already available locally.
+
+Additionally, we plan to add a `prefix` result for when the data is known to be a prefix of the complete result. See [Consistency](#consistency) for more information.
+
+### Using Completeness Information
+
+```tsx
+function IssueList() {
+  const [issues, result] = useQuery(z.query.issue.orderBy('created', 'desc'));
+
+  return (
+    <div>
+      {issues.map(issue => (
+        <IssueCard key={issue.id} issue={issue} />
+      ))}
+
+      {result.type !== 'complete' && (
+        <div className="loading">Loading more issues...</div>
+      )}
+    </div>
+  );
+}
+```
+
+## Handling Missing Data
+
+It is inevitable that there will be cases where the requested data cannot be found. Because Zero returns local results immediately, and server results asynchronously, displaying "not found" / 404 UI can be slightly tricky.
+
+### The Flickering Problem
+
+If you just use a simple existence check, you will often see the 404 UI flicker while the server result loads:
+
+```tsx
+const [issue, issueResult] = useQuery(
+  z.query.issue.where('id', 'some-id').one(),
+);
+
+// ❌ This causes flickering of the UI
+if (!issue) {
+  return <div>404 Not Found</div>;
+} else {
+  return <div>{issue.title}</div>;
+}
+```
+
+### The Correct Approach
+
+The way to do this correctly is to only display the "not found" UI when the result type is `complete`. This way the 404 page is slow but pages with data are still just as fast.
+
+```tsx
+const [issue, issueResult] = useQuery(
+  z.query.issue.where('id', 'some-id').one(),
+);
+
+if (!issue && issueResult.type === 'complete') {
+  return <div>404 Not Found</div>;
+}
+
+if (!issue) {
+  return <div className="loading">Loading...</div>;
+}
+
+return <div>{issue.title}</div>;
+```
+
+### Loading States Pattern
+
+Here's a comprehensive pattern for handling different loading states:
+
+```tsx
+function IssueDetail({issueId}: {issueId: string}) {
+  const [issue, result] = useQuery(z.query.issue.where('id', issueId).one());
+
+  // Show loading while we don't have data and haven't confirmed it's missing
+  if (!issue && result.type !== 'complete') {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <Spinner /> Loading issue...
+      </div>
+    );
+  }
+
+  // Show 404 only when we're sure the data doesn't exist
+  if (!issue && result.type === 'complete') {
+    return (
+      <div className="text-center p-8">
+        <h2>Issue Not Found</h2>
+        <p>The issue you're looking for doesn't exist or has been deleted.</p>
+      </div>
+    );
+  }
+
+  // Render the issue data
+  return (
+    <div>
+      <h1>{issue.title}</h1>
+      <p>{issue.description}</p>
+      {/* Show a subtle indicator if data might not be complete */}
+      {result.type !== 'complete' && (
+        <div className="text-sm text-gray-500">Synchronizing...</div>
+      )}
+    </div>
+  );
+}
+```
+
+## Consistency
+
+Zero always syncs a consistent partial replica of the backend database to the client. This avoids many common consistency issues that come up in classic web applications. But there are still some consistency issues to be aware of when using Zero.
+
+### The Prefix Problem
+
+Consider this example: you have a bug database with 10k issues. You preload the first 1k issues sorted by created date.
+
+The user then does a query of issues assigned to themselves, sorted by created date. Among the 1k issues that were preloaded, imagine 100 are found that match the query. Since the data we preloaded is in the same order as this query, we are guaranteed that any local results found will be a _prefix_ of the server results.
+
+```tsx
+// Preloaded data (sorted by created desc)
+z.query.issue.orderBy('created', 'desc').limit(1000).preload();
+
+// User query (same sort order) - local results will be a prefix
+const [myIssues] = useQuery(
+  z.query.issue.where('assignee', currentUserId).orderBy('created', 'desc'), // Same sort!
+);
+```
+
+**Good UX**: The user will see initial results to the query instantly. If more results are found server-side, those results are guaranteed to sort below the local results. There's no shuffling of results when the server response comes in.
+
+### When Consistency Breaks
+
+Now imagine that the user switches the sort to 'sort by modified'. This new query will run locally, and will again find some local matches. But it is now unlikely that the local results found are a prefix of the server results. When the server result comes in, the user will probably see the results shuffle around.
+
+```tsx
+// Same preloaded data (sorted by created desc)
+z.query.issue.orderBy('created', 'desc').limit(1000).preload();
+
+// User query (different sort order) - local results may not be a prefix
+const [myIssues] = useQuery(
+  z.query.issue.where('assignee', currentUserId).orderBy('modified', 'desc'), // Different sort!
+);
+```
+
+**Poor UX**: Results may shuffle when server data arrives.
+
+### Solving Consistency Issues
+
+To avoid this annoying effect, what you should do in this example is also preload the first 1k issues sorted by modified desc. In general for any query shape you intend to do, you should preload the first `n` results for that query shape with no filters, in each sort you intend to use.
+
+```tsx
+// Preload different sort orders
+z.query.issue.orderBy('created', 'desc').limit(1000).preload({ttl: 'forever'});
+z.query.issue.orderBy('modified', 'desc').limit(1000).preload({ttl: 'forever'});
+z.query.issue.orderBy('priority', 'desc').limit(1000).preload({ttl: 'forever'});
+
+// Now all these queries will have consistent, non-shuffling results
+const [byCreated] = useQuery(
+  z.query.issue.where('assignee', user).orderBy('created', 'desc'),
+);
+const [byModified] = useQuery(
+  z.query.issue.where('assignee', user).orderBy('modified', 'desc'),
+);
+const [byPriority] = useQuery(
+  z.query.issue.where('assignee', user).orderBy('priority', 'desc'),
+);
+```
+
+### No Duplicate Rows
+
+<Note slug="no-duplicate-rows" heading="Zero does not sync duplicate rows">
+  Zero syncs the *union* of all active queries' results. You don't have to worry
+  about syncing many sorts of the same query when it's likely the results will
+  overlap heavily.
+</Note>
+
+### Future Consistency Model
+
+In the future, we will be implementing a consistency model that fixes these issues automatically. We will prevent Zero from returning local data when that data is not known to be a prefix of the server result. Once the consistency model is implemented, preloading can be thought of as purely a performance thing, and not required to avoid unsightly flickering.
+
+## Advanced Synchronization Patterns
+
+### Optimistic Updates
+
+While Zero automatically handles synchronization for reads, you can implement optimistic updates for writes:
+
+```tsx
+function useOptimisticIssueUpdate() {
+  const [issues, setIssues] = useState<Issue[]>([]);
+
+  const updateIssue = async (id: string, updates: Partial<Issue>) => {
+    // Optimistically update the UI
+    setIssues(prev =>
+      prev.map(issue => (issue.id === id ? {...issue, ...updates} : issue)),
+    );
+
+    try {
+      // Sync with server
+      await z.mutate.updateIssue({id, ...updates});
+    } catch (error) {
+      // Revert on error
+      console.error('Update failed:', error);
+      // The actual server state will sync back automatically
+    }
+  };
+
+  return {issues, updateIssue};
+}
+```
+
+### Conditional Rendering Based on Sync State
+
+```tsx
+function DataDrivenUI() {
+  const [issues, result] = useQuery(z.query.issue.limit(50));
+
+  return (
+    <div>
+      {/* Always show available data */}
+      <IssueList issues={issues} />
+
+      {/* Conditional UI based on sync state */}
+      {result.type === 'complete' ? (
+        <div className="text-green-600">
+          ✓ All data loaded ({issues.length} issues)
+        </div>
+      ) : (
+        <div className="text-blue-600">
+          🔄 Synchronizing... ({issues.length} issues so far)
+        </div>
+      )}
+    </div>
+  );
+}
+```
+
+### Progressive Loading
+
+```tsx
+function ProgressiveIssueLoader() {
+  const [limit, setLimit] = useState(20);
+  const [issues, result] = useQuery(
+    z.query.issue.orderBy('created', 'desc').limit(limit),
+  );
+
+  const loadMore = () => {
+    if (result.type === 'complete' && issues.length === limit) {
+      setLimit(prev => prev + 20);
+    }
+  };
+
+  return (
+    <div>
+      <IssueList issues={issues} />
+
+      {result.type === 'complete' && issues.length === limit && (
+        <button onClick={loadMore} className="load-more-btn">
+          Load More Issues
+        </button>
+      )}
+
+      {result.type !== 'complete' && <div className="loading">Loading...</div>}
+    </div>
+  );
+}
+```
+
+## Best Practices
+
+1. **Use completeness information**: Check `result.type` before showing 404 or "no data" states
+2. **Preload consistent sorts**: Preload data in the same sort orders you'll query
+3. **Progressive disclosure**: Show available data immediately, then enhance with complete data
+4. **Graceful degradation**: Design UI to work well with partial data
+5. **Avoid result shuffling**: Match preload and query sort orders for smooth UX
+6. **Communicate sync state**: Let users know when data is still synchronizing
+
+## Next Steps
+
+Now that you understand data synchronization, explore these related topics:
+
+- [Advanced Query Patterns](/advanced-query-patterns) - Master preloading and optimization techniques
+- [Query Lifecycle](/query-lifecycle) - Understand performance and caching behavior
+- [Handling Missing Data Patterns](/handling-missing-data) - Advanced patterns for robust UIs
+- [ZQL Fundamentals](/zql-fundamentals) - Review the basics if needed

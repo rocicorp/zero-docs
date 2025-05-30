@@ -150,6 +150,33 @@ Now that we understand what client and server mutations are, let's walk through 
 6. Clients receive row updates and apply them to their local cache. Any pending mutations which have been applied to the server have their local effects rolled back.
 7. Client-side queries are updated and the user sees the changes.
 
+### Push Protocol Caveat
+
+Since subsequent mutations can rely on each other, they must be applied in order. To keep track of which mutations ran, Zero stores the `lastMutationID` for each client. If a mutation is not acknowledged, i.e. the `lastMutationID` is not updated, Zero will retry indefinitely until it is acknowledged. Therefore, it is important that the push endpoint always processes the mutation.
+
+If the push endpoint fails to process a mutation, the client is not able to perform any other mutation due to their sequential nature. It is therefore important to never throw or return before processing mutations in the push endpoint. Rather, throw inside the mutator itself.
+
+```ts
+app.post('/push', async c => {
+  // ❌ Don't do this
+  // Can throw and prevent processing the mutation
+  await requireUserSession();
+
+  const result = await processor.process({
+    issue: {
+      update: async (tx, data) => {
+        // ✅ Do this instead
+        // If it throws, the mutation is still processed
+        await requireUserSession();
+
+        // ...
+      },
+    },
+  }, ...);
+  return await c.json(result);
+})
+```
+
 ## Using Custom Mutators
 
 ### Registering Client Mutators
@@ -354,17 +381,6 @@ const z = new Zero({
 ```
 
 The push endpoint receives a `PushRequest` as input describing one or more mutations to apply to the backend, and must return a `PushResponse` describing the results of those mutations.
-
-<Note type="danger" emoji="⚠️" heading="Not Returning a PushResponse" slug="not-returning-pushresponse">
-  The server <em>must</em> return a `PushResponse` because the client expects
-  one, even if it fails. If no such response is received, Zero will retry
-  indefinitely. Since following mutations can rely on each other, they must be applied in order.
-  So, if one mutation is not acknowledged, no mutation after that can be applied.
-
-Throwing errors inside mutators in the `PushProcessor` will be handled for you.
-However, doing things outside of it that return prematurely or throw errors, such as auth middleware or setup functions, will not.
-
-</Note>
 
 If you are implementing your server in TypeScript, you can use the `PushProcessor` class to trivially implement this endpoint. Here’s an example in a [Hono](https://hono.dev/) app:
 

@@ -53,6 +53,7 @@ export const ROUTES: EachRoute[] = [
       {title: 'Clauses', href: '/query-clauses'},
       {title: 'Filtering', href: '/filtering-data'},
       {title: 'Relationships', href: '/relationships'},
+      {title: 'Lifecycle & Performance', href: '/query-lifecycle'},
     ],
   },
   {

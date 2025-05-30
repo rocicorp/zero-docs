@@ -56,6 +56,7 @@ export const ROUTES: EachRoute[] = [
       {title: 'Lifecycle & Performance', href: '/query-lifecycle'},
       {title: 'Data Synchronization', href: '/data-synchronization'},
       {title: 'Advanced Patterns', href: '/advanced-query-patterns'},
+      {title: 'ZQL Reference', href: '/zql-reference'},
     ],
   },
   {

@@ -55,6 +55,7 @@ export const ROUTES: EachRoute[] = [
       {title: 'Relationships', href: '/relationships'},
       {title: 'Lifecycle & Performance', href: '/query-lifecycle'},
       {title: 'Data Synchronization', href: '/data-synchronization'},
+      {title: 'Advanced Patterns', href: '/advanced-query-patterns'},
     ],
   },
   {

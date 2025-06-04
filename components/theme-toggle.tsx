@@ -68,7 +68,6 @@ export function ModeToggle() {
     </svg>
   );
 
-  // PullCord SVG (forwardRef so we can attach onAnimationEnd)
   const PullCord = React.forwardRef<
     SVGSVGElement,
     React.SVGProps<SVGSVGElement> & {
@@ -92,29 +91,21 @@ export function ModeToggle() {
   ));
   PullCord.displayName = 'PullCord';
 
-  // next-themes hook:
   const {theme, setTheme} = useTheme();
-
-  // Only render icons client-side:
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // This state drives the .swing-cord class toggle:
   const [isSwinging, setIsSwinging] = useState(false);
 
-  // Called on click:
   const onClick = () => {
-    // 1) Clear any existing swing state (so if still in the middle of an animation, it resets)
     setIsSwinging(false);
 
-    // 2) In the next tick, re-enable it. That forces React to add `.swing-cord` again.
     setTimeout(() => {
       setIsSwinging(true);
     }, 0);
 
-    // 3) Finally toggle theme (this will re-render the bulb icons, but the PullCord stays mounted).
     const themes: Array<'light' | 'dark' | 'system'> = [
       'light',
       'dark',
@@ -127,7 +118,6 @@ export function ModeToggle() {
     setTheme(nextTheme);
   };
 
-  // When the animation ends, clear isSwinging so a future click can restart it:
   const onAnimationEnd = () => {
     setIsSwinging(false);
   };
@@ -144,7 +134,6 @@ export function ModeToggle() {
     }
   };
 
-  // Compute a human-friendly tooltip:
   const tooltip =
     theme === 'light'
       ? 'light mode'
@@ -155,7 +144,6 @@ export function ModeToggle() {
   return (
     <button onClick={onClick} className="lightbulb-toggle" title={tooltip}>
       <PullCord
-        // Always keep the “pull-cord” class
         className={`pull-cord ${isSwinging ? 'swing-cord' : ''}`}
         onAnimationEnd={onAnimationEnd}
       />

@@ -114,13 +114,17 @@ export function ModeToggle() {
 
   const tooltip =
     theme === 'light'
-      ? 'light mode'
+      ? 'Light Mode'
       : theme === 'dark'
-        ? 'dark mode'
-        : 'system mode';
+        ? 'Dark Mode'
+        : 'System Mode';
 
   return (
-    <button onClick={onClick} className="lightbulb-toggle" title={tooltip}>
+    <button
+      onClick={onClick}
+      className="lightbulb-toggle"
+      title={mounted ? tooltip : undefined}
+    >
       <PullCord
         className={`pull-cord ${isSwinging ? 'swing-cord' : ''}`}
         onAnimationEnd={onAnimationEnd}

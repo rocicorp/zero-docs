@@ -98,6 +98,79 @@ mark {
   background-color: var(--primary-highlight);
 }
 
+.lightbulb-toggle {
+  position: relative;
+  top: -4rem;
+  margin-left: 0.3rem;
+  cursor: grab;
+  opacity: 0.6;
+
+  .pull-cord {
+    transform-origin: 50% 0%;
+    position: absolute;
+    top: 76px;
+    left: 12px;
+    cursor: grab;
+  }
+
+  &:active {
+    cursor: grabbing;
+
+    .pull-cord {
+      cursor: grabbing;
+      top: 81px;
+    }
+  }
+}
+
+.inner-docs-nav {
+  .lightbulb-toggle {
+    position: absolute;
+    right: 1rem;
+    top: -48px;
+  }
+}
+
+.swing-cord {
+  animation: pullCordSwingDampen 2s ease-in-out forwards;
+}
+
+@keyframes pullCordSwingDampen {
+  0% {
+    transform: rotate(12deg);
+  }
+  10% {
+    transform: rotate(-10deg);
+  }
+  20% {
+    transform: rotate(8deg);
+  }
+  30% {
+    transform: rotate(-6deg);
+  }
+  40% {
+    transform: rotate(4deg);
+  }
+  50% {
+    transform: rotate(-3deg);
+  }
+  60% {
+    transform: rotate(2deg);
+  }
+  70% {
+    transform: rotate(-1deg);
+  }
+  80% {
+    transform: rotate(0.5deg);
+  }
+  90% {
+    transform: rotate(-0.25deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
 .new-badge {
   color: var(--primary-highlight);
   border-color: var(--primary-highlight);
@@ -536,14 +609,6 @@ html.dark {
   }
 }
 
-/* Theme switcher toggle button */
-.theme-toggle-container {
-  margin-left: auto;
-  button {
-    opacity: 0.75;
-  }
-}
-
 /* Home fullscreen image container */
 .fullscreenContainer {
   position: fixed;
@@ -558,6 +623,14 @@ html.dark {
   align-items: center;
   z-index: 1000;
   cursor: pointer;
+}
+
+@media (max-width: 520px) {
+  .lightbulb-toggle {
+    position: fixed;
+    top: 0;
+    right: 1rem;
+  }
 }
 
 @media (max-width: 1036px) {

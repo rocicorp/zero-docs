@@ -103,6 +103,7 @@ mark {
   top: -4rem;
   margin-left: 0.3rem;
   cursor: grab;
+  opacity: 0.6;
 
   .pull-cord {
     transform-origin: 50% 0%;
@@ -126,7 +127,7 @@ mark {
   .lightbulb-toggle {
     position: absolute;
     right: 1rem;
-    top: -40px;
+    top: -48px;
   }
 }
 

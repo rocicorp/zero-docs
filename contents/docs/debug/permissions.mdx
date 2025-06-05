@@ -10,7 +10,7 @@ You can use the `analyze-query` utility with the `--apply-permissions` flag to s
 
 ```bash
 npx analyze-query
-  --schema='./shared/schema.ts'
+  --schema-path='./shared/schema.ts'
   --query='issue.related("comments")'
   --apply-permissions
   --auth-data='{"userId":"user-123"}'
@@ -22,7 +22,7 @@ Run this command with the same environment you run `zero-cache` with. It will us
 
 ```bash
 npx analyze-query
-  --schema='./shared/schema.ts'
+  --schema-path='./shared/schema.ts'
   --hash='3rhuw19xt9vry'
   --apply-permissions
   --auth-data='{"userId":"user-123"}'

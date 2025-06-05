@@ -39,9 +39,6 @@ export default function DocsMenu({isSheet = false}) {
           <Link href="https://x.com/zero__ms">
             <TwitterLogo />
           </Link>
-          <div className="theme-toggle-container">
-            <ModeToggle />
-          </div>
         </div>
       </div>
     </div>

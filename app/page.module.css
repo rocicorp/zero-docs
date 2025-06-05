@@ -190,7 +190,7 @@ p.footerText {
   }
 }
 
-@media (max-width: 486px) {
+@media (max-width: 520px) {
   .mainHeader {
     flex-direction: column;
   }

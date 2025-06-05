@@ -101,7 +101,7 @@ mark {
 .lightbulb-toggle {
   position: relative;
   top: -4rem;
-  margin-left: 1rem;
+  margin-left: 0.3rem;
   cursor: grab;
 
   .pull-cord {
@@ -119,6 +119,14 @@ mark {
       cursor: grabbing;
       top: 75px;
     }
+  }
+}
+
+.inner-docs-nav {
+  .lightbulb-toggle {
+    position: absolute;
+    right: 1rem;
+    top: -40px;
   }
 }
 
@@ -600,14 +608,6 @@ html.dark {
   }
 }
 
-/* Theme switcher toggle button */
-.theme-toggle-container {
-  margin-left: auto;
-  button {
-    opacity: 0.75;
-  }
-}
-
 /* Home fullscreen image container */
 .fullscreenContainer {
   position: fixed;
@@ -622,6 +622,14 @@ html.dark {
   align-items: center;
   z-index: 1000;
   cursor: pointer;
+}
+
+@media (max-width: 520px) {
+  .lightbulb-toggle {
+    position: fixed;
+    top: 0;
+    right: 1rem;
+  }
 }
 
 @media (max-width: 1036px) {

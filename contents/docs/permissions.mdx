@@ -23,7 +23,7 @@ export const permissions = definePermissions<AuthData, Schema>(schema, () => {
     authData: AuthData,
     eb: ExpressionBuilder<Schema, 'issue'>,
   ) =>
-    eb.whereExists('organization', q =>
+    eb.exists('organization', q =>
       q.whereExists('user', q => q.where('id', authData.sub)),
     );
 

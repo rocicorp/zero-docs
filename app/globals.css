@@ -108,7 +108,7 @@ mark {
   .pull-cord {
     transform-origin: 50% 0%;
     position: absolute;
-    top: 70px;
+    top: 76px;
     left: 12px;
     cursor: grab;
   }
@@ -118,7 +118,7 @@ mark {
 
     .pull-cord {
       cursor: grabbing;
-      top: 75px;
+      top: 81px;
     }
   }
 }

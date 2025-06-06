@@ -206,7 +206,7 @@ mark {
 .social-links {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 1.14rem;
 }
 
 .social-links a {

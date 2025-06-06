@@ -1,0 +1,616 @@
+---
+title: ZQL Reference
+---
+
+This page serves as a comprehensive API reference for ZQL (Zero Query Language). Use it to quickly look up methods, operators, types, and troubleshooting information.
+
+## Query Construction
+
+### Table Selection
+
+```tsx
+z.query.tableName;
+```
+
+Starts a query by selecting a table. Returns all columns and rows (subject to subsequent clauses and permissions).
+
+**Example:**
+
+```tsx
+z.query.issue; // Selects from the 'issue' table
+z.query.user; // Selects from the 'user' table
+```
+
+## Query Clauses
+
+### where(column, operator?, value)
+
+Filters query results based on column values.
+
+```tsx
+.where(column: string, value: any)
+.where(column: string, operator: ComparisonOperator, value: any)
+.where(filterFunction: (helpers: FilterHelpers) => FilterExpression)
+```
+
+**Parameters:**
+
+- `column`: Column name (TypeScript will suggest valid options)
+- `operator`: Comparison operator (optional, defaults to `=`)
+- `value`: Value to compare against
+- `filterFunction`: Function for complex filtering
+
+**Examples:**
+
+```tsx
+// Simple equality (operator defaults to '=')
+.where('status', 'open')
+
+// Explicit operator
+.where('priority', '>', 3)
+
+// Complex filtering
+.where(({cmp, and, or}) =>
+  or(
+    cmp('priority', 'high'),
+    and(cmp('assignee', userId), cmp('status', 'urgent'))
+  )
+)
+```
+
+### orderBy(column, direction?)
+
+Sorts query results by one or more columns.
+
+```tsx
+.orderBy(column: string, direction?: 'asc' | 'desc')
+```
+
+**Parameters:**
+
+- `column`: Column name to sort by
+- `direction`: Sort direction (`'asc'` or `'desc'`, defaults to `'asc'`)
+
+**Examples:**
+
+```tsx
+.orderBy('created')              // Ascending (default)
+.orderBy('created', 'desc')      // Descending
+.orderBy('priority', 'desc').orderBy('created', 'asc')  // Multiple sorts
+```
+
+**Note:** All queries have an implicit final sort by primary key for deterministic ordering.
+
+### limit(count)
+
+Limits the number of rows returned.
+
+```tsx
+.limit(count: number)
+```
+
+**Parameters:**
+
+- `count`: Maximum number of rows to return
+
+**Examples:**
+
+```tsx
+.limit(50)     // Return at most 50 rows
+.limit(1)      // Return at most 1 row
+```
+
+### start(row, options?)
+
+Sets a starting point for pagination (cursor-based).
+
+```tsx
+.start(row: Row, options?: {inclusive?: boolean})
+```
+
+**Parameters:**
+
+- `row`: The row to start from (obtained from a previous query)
+- `options.inclusive`: Whether to include the start row (default: `false`)
+
+**Examples:**
+
+```tsx
+.start(lastRow)                    // Start after lastRow (exclusive)
+.start(startRow, {inclusive: true}) // Start from startRow (inclusive)
+```
+
+### one()
+
+Returns a single row instead of an array. Changes return type from `Row[]` to `Row | undefined`.
+
+```tsx
+.one()
+```
+
+**Examples:**
+
+```tsx
+.where('id', 42).one()  // Returns Issue | undefined
+.orderBy('created', 'desc').one()  // Returns the most recent issue
+```
+
+**Note:** `one()` overrides any `limit()` clause.
+
+### related(relationship, queryFn?)
+
+Includes related data in the query results.
+
+```tsx
+.related(relationship: string, queryFn?: (q: RelatedQuery) => RelatedQuery)
+```
+
+**Parameters:**
+
+- `relationship`: Name of the relationship (defined in your Zero schema)
+- `queryFn`: Optional function to refine the related query
+
+**Examples:**
+
+```tsx
+.related('comments')  // Include all related comments
+
+// Refine related data
+.related('comments', q =>
+  q.where('status', 'active')
+   .orderBy('created', 'desc')
+   .limit(10)
+)
+
+// Nested relationships
+.related('comments', q =>
+  q.related('author')
+   .related('reactions')
+)
+```
+
+### whereExists(relationship, queryFn?)
+
+Filters the main query based on the existence of related data.
+
+```tsx
+.whereExists(relationship: string, queryFn?: (q: RelatedQuery) => RelatedQuery)
+```
+
+**Parameters:**
+
+- `relationship`: Name of the relationship to check
+- `queryFn`: Optional function to refine what constitutes "existence"
+
+**Examples:**
+
+```tsx
+// Issues that have at least one comment
+.whereExists('comments')
+
+// Issues that have recent comments
+.whereExists('comments', q =>
+  q.where('created', '>', lastWeek)
+)
+
+// Issues that have comments with reactions
+.whereExists('comments', q =>
+  q.whereExists('reactions')
+)
+```
+
+## Comparison Operators
+
+| Operator    | Types                   | Description               | Example                                       |
+| ----------- | ----------------------- | ------------------------- | --------------------------------------------- |
+| `=`         | boolean, number, string | Strict equality           | `.where('status', '=', 'open')`               |
+| `!=`        | boolean, number, string | Strict inequality         | `.where('status', '!=', 'closed')`            |
+| `<`         | number                  | Less than                 | `.where('priority', '<', 5)`                  |
+| `<=`        | number                  | Less than or equal        | `.where('votes', '<=', 100)`                  |
+| `>`         | number                  | Greater than              | `.where('priority', '>', 3)`                  |
+| `>=`        | number                  | Greater than or equal     | `.where('created', '>=', startDate)`          |
+| `LIKE`      | string                  | SQL LIKE pattern          | `.where('title', 'LIKE', '%bug%')`            |
+| `NOT LIKE`  | string                  | SQL NOT LIKE pattern      | `.where('title', 'NOT LIKE', '%test%')`       |
+| `ILIKE`     | string                  | Case-insensitive LIKE     | `.where('title', 'ILIKE', '%BUG%')`           |
+| `NOT ILIKE` | string                  | Case-insensitive NOT LIKE | `.where('title', 'NOT ILIKE', '%TEST%')`      |
+| `IN`        | boolean, number, string | Value in array            | `.where('status', 'IN', ['open', 'pending'])` |
+| `NOT IN`    | boolean, number, string | Value not in array        | `.where('priority', 'NOT IN', [1, 2])`        |
+| `IS`        | any, null               | Null-safe equality        | `.where('assignee', 'IS', null)`              |
+| `IS NOT`    | any, null               | Null-safe inequality      | `.where('assignee', 'IS NOT', null)`          |
+
+### LIKE Pattern Syntax
+
+- `%`: Matches any sequence of characters
+- `_`: Matches any single character
+- `\%`: Literal percent sign
+- `\_`: Literal underscore
+
+**Examples:**
+
+```tsx
+.where('title', 'LIKE', 'Bug%')        // Starts with "Bug"
+.where('title', 'LIKE', '%error%')     // Contains "error"
+.where('title', 'LIKE', 'Issue_#%')    // "Issue" + any char + "#" + anything
+```
+
+## Filter Helpers
+
+When using complex filters with `.where()`, these helpers are available:
+
+### cmp(column, operator?, value)
+
+Basic comparison within complex filters.
+
+```tsx
+cmp(column: string, value: any)
+cmp(column: string, operator: ComparisonOperator, value: any)
+```
+
+### and(...expressions)
+
+Logical AND operation.
+
+```tsx
+and(expr1: FilterExpression, expr2: FilterExpression, ...moreExpressions)
+```
+
+### or(...expressions)
+
+Logical OR operation.
+
+```tsx
+or(expr1: FilterExpression, expr2: FilterExpression, ...moreExpressions)
+```
+
+### not(expression)
+
+Logical NOT operation.
+
+```tsx
+not(expr: FilterExpression)
+```
+
+### exists(relationship, queryFn?)
+
+Relationship existence check within complex filters.
+
+```tsx
+exists(relationship: string, queryFn?: (q: RelatedQuery) => RelatedQuery)
+```
+
+**Example:**
+
+```tsx
+.where(({cmp, and, or, not, exists}) =>
+  or(
+    and(
+      cmp('priority', 'high'),
+      not(cmp('status', 'closed'))
+    ),
+    exists('comments', q =>
+      q.where('urgent', true)
+    )
+  )
+)
+```
+
+## Query Execution
+
+### run(options?)
+
+Executes the query once and returns a Promise.
+
+```tsx
+.run(options?: {type?: 'unknown' | 'complete'}): Promise<Row[]>
+```
+
+**Parameters:**
+
+- `options.type`:
+  - `'unknown'` (default): Return immediately with local data
+  - `'complete'`: Wait for server confirmation
+
+**Examples:**
+
+```tsx
+const issues = await z.query.issue.run(); // Local data
+const issues = await z.query.issue.run({type: 'complete'}); // Server-confirmed
+```
+
+### Shorthand Execution
+
+```tsx
+await z.query.issue.where('status', 'open'); // Same as .run()
+```
+
+### materialize()
+
+Creates a materialized view for advanced use cases.
+
+```tsx
+.materialize(): MaterializedView<Row>
+```
+
+**Example:**
+
+```tsx
+const view = z.query.issue.materialize();
+view.addListener((issues, result) => {
+  console.log('Data updated:', issues.length);
+});
+
+// Clean up when done
+view.destroy();
+```
+
+### preload(options?)
+
+Preloads data without materializing it into JavaScript objects.
+
+```tsx
+.preload(options?: {ttl?: TTL}): () => void
+```
+
+**Parameters:**
+
+- `options.ttl`: Time-to-live for background syncing
+
+**Returns:** Cleanup function
+
+**Examples:**
+
+```tsx
+// Preload with default TTL
+z.query.issue.limit(1000).preload();
+
+// Preload with custom TTL
+const cleanup = z.query.issue.limit(500).preload({ttl: '1d'});
+
+// Clean up manually
+cleanup();
+```
+
+## TTL (Time-To-Live) Values
+
+| Format      | Description                     | Example            |
+| ----------- | ------------------------------- | ------------------ |
+| `'none'`    | No background syncing (default) | `{ttl: 'none'}`    |
+| `'Ns'`      | N seconds                       | `{ttl: '30s'}`     |
+| `'Nm'`      | N minutes                       | `{ttl: '10m'}`     |
+| `'Nh'`      | N hours                         | `{ttl: '2h'}`      |
+| `'Nd'`      | N days                          | `{ttl: '7d'}`      |
+| `'Ny'`      | N years                         | `{ttl: '1y'}`      |
+| `'forever'` | Never stop syncing              | `{ttl: 'forever'}` |
+
+## Framework Integration
+
+### React
+
+```tsx
+import { useQuery } from '@rocicorp/zero/react';
+
+function MyComponent() {
+  const [data, result] = useQuery(query, options?);
+
+  // data: Row[] | Row | undefined (depends on query)
+  // result: {type: 'complete' | 'unknown'}
+}
+```
+
+**Options:**
+
+```tsx
+{
+  ttl?: TTL,           // Background sync duration
+  // ... other framework-specific options
+}
+```
+
+### SolidJS
+
+```tsx
+import { createQuery } from '@rocicorp/zero/solid';
+
+function MyComponent() {
+  const data = createQuery(() => query, options?);
+
+  // data(): Row[] | Row | undefined
+}
+```
+
+## TypeScript Types
+
+### Core Types
+
+```tsx
+// Table row type (generated from your schema)
+type IssueRow = {
+  readonly id: string;
+  readonly title: string;
+  readonly status: 'open' | 'closed' | 'pending';
+  readonly priority: number;
+  readonly created: Date;
+  // ... other columns
+};
+
+// Query result information
+type QueryResult = {
+  type: 'complete' | 'unknown';
+};
+
+// Query options
+type QueryOptions = {
+  ttl?: TTL;
+};
+
+// TTL specification
+type TTL = 'none' | 'forever' | `${number}${'s' | 'm' | 'h' | 'd' | 'y'}`;
+```
+
+### Query Types
+
+```tsx
+// Basic query type
+type Query<T> = {
+  where(column: keyof T, value: any): Query<T>;
+  where(column: keyof T, op: ComparisonOperator, value: any): Query<T>;
+  where(fn: FilterFunction): Query<T>;
+  orderBy(column: keyof T, direction?: 'asc' | 'desc'): Query<T>;
+  limit(count: number): Query<T>;
+  start(row: T, options?: {inclusive?: boolean}): Query<T>;
+  one(): Query<T> & {run(): Promise<T | undefined>};
+  related(rel: string, fn?: (q: any) => any): Query<T>;
+  whereExists(rel: string, fn?: (q: any) => any): Query<T>;
+  run(options?: {type?: 'unknown' | 'complete'}): Promise<T[]>;
+  materialize(): MaterializedView<T>;
+  preload(options?: {ttl?: TTL}): () => void;
+};
+```
+
+## Error Handling
+
+### Common Errors
+
+#### Invalid Column Name
+
+```tsx
+// ❌ TypeScript Error
+z.query.issue.where('invalidColumn', 'value');
+// Error: Argument of type '"invalidColumn"' is not assignable to parameter
+```
+
+#### Invalid Operator for Type
+
+```tsx
+// ❌ TypeScript Error
+z.query.issue.where('isActive', '>', true);
+// Error: Operator '>' cannot be used with boolean values
+```
+
+#### Null Comparison with Wrong Operator
+
+```tsx
+// ❌ TypeScript Error
+z.query.issue.where('assignee', '=', null);
+// Error: Use 'IS' or 'IS NOT' for null comparisons
+```
+
+### Runtime Errors
+
+#### Query Execution Errors
+
+```tsx
+try {
+  const issues = await z.query.issue.run({type: 'complete'});
+} catch (error) {
+  if (error.code === 'NETWORK_ERROR') {
+    // Handle network issues
+  } else if (error.code === 'PERMISSION_DENIED') {
+    // Handle permission issues
+  }
+}
+```
+
+#### View Lifecycle Errors
+
+```tsx
+const view = z.query.issue.materialize();
+
+// ❌ Using destroyed view
+view.destroy();
+view.addListener(() => {}); // Error: View has been destroyed
+```
+
+### Debugging Tips
+
+1. **Check Network Tab**: Look for failed requests to Zero's sync endpoint
+2. **Enable Debug Logging**: Set log level to see query materialization times
+3. **Verify Schema**: Ensure relationships and columns exist in your Zero schema
+4. **Check Permissions**: Verify user has access to queried tables and columns
+
+```tsx
+// Enable debug logging
+const z = new Zero({
+  logLevel: 'debug',
+  slowMaterializeThreshold: 1000, // Log slow queries
+});
+```
+
+## Performance Considerations
+
+### Query Optimization
+
+- **Use `limit()`** for large result sets
+- **Add `orderBy()`** when using `limit()` for consistent results
+- **Prefer `start()`** over offset-based pagination
+- **Use appropriate TTLs** for background queries
+- **Preload strategically** based on user patterns
+
+### Memory Management
+
+- **Destroy materialized views** when components unmount
+- **Use framework hooks** instead of manual view management
+- **Set reasonable limits** on preloaded data
+- **Monitor client capacity** (default: 20,000 rows)
+
+### Network Efficiency
+
+- **Batch related queries** when possible
+- **Use relationships** instead of separate queries for related data
+- **Consider data freshness** requirements when setting TTLs
+
+## Best Practices
+
+1. **Type Safety**: Let TypeScript guide you - it knows your schema
+2. **Consistent Patterns**: Use the same query patterns throughout your app
+3. **Error Boundaries**: Wrap query components in error boundaries
+4. **Resource Cleanup**: Always clean up materialized views and preload functions
+5. **Performance Monitoring**: Watch for slow query warnings in your logs
+6. **Schema Design**: Design relationships to match your query patterns
+
+## Migration from Other ORMs
+
+### From Prisma
+
+```tsx
+// Prisma
+const issues = await prisma.issue.findMany({
+  where: {status: 'open'},
+  include: {comments: true},
+  orderBy: {created: 'desc'},
+  take: 10,
+});
+
+// ZQL equivalent
+const [issues] = useQuery(
+  z.query.issue
+    .where('status', 'open')
+    .related('comments')
+    .orderBy('created', 'desc')
+    .limit(10),
+);
+```
+
+### From Drizzle
+
+```tsx
+// Drizzle
+const issues = await db
+  .select()
+  .from(issueTable)
+  .where(eq(issueTable.status, 'open'))
+  .orderBy(desc(issueTable.created))
+  .limit(10);
+
+// ZQL equivalent
+const [issues] = useQuery(
+  z.query.issue.where('status', 'open').orderBy('created', 'desc').limit(10),
+);
+```
+
+## Next Steps
+
+- [ZQL Fundamentals](/zql-fundamentals) - Start with the basics
+- [Query Lifecycle](/query-lifecycle) - Understand performance implications
+- [Data Synchronization](/data-synchronization) - Master completeness and consistency
+- [Zero Schema](/zero-schema) - Learn how to define relationships and permissions

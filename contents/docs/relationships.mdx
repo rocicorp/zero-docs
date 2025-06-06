@@ -1,0 +1,308 @@
+---
+title: Relationships
+---
+
+Relationships allow you to query related data across tables in a single query. ZQL returns relationship data as hierarchical structures, making it easy to work with related data in your application.
+
+## Basic Relationships
+
+You can query related rows using _relationships_ that are defined in your [Zero schema](/zero-schema).
+
+```tsx
+// Get all issues and their related comments
+z.query.issue.related('comments');
+```
+
+Relationships are returned as hierarchical data. In the above example, each issue row will have a `comments` field which is itself an array of the corresponding comment rows.
+
+```tsx
+const [issues] = useQuery(z.query.issue.related('comments'));
+
+issues.forEach(issue => {
+  console.log(`Issue: ${issue.title}`);
+  issue.comments.forEach(comment => {
+    console.log(`  Comment: ${comment.text}`);
+  });
+});
+```
+
+## Multiple Relationships
+
+You can fetch multiple relationships in a single query:
+
+```tsx
+z.query.issue.related('comments').related('reactions').related('assignees');
+```
+
+Each relationship becomes a property on the returned rows:
+
+```tsx
+const [issues] = useQuery(
+  z.query.issue.related('comments').related('assignee').related('labels'),
+);
+
+issues.forEach(issue => {
+  console.log(`Issue: ${issue.title}`);
+  console.log(`Assignee: ${issue.assignee?.name || 'Unassigned'}`);
+  console.log(`Labels: ${issue.labels.map(l => l.name).join(', ')}`);
+  console.log(`Comments: ${issue.comments.length}`);
+});
+```
+
+## Refining Relationships
+
+By default all matching relationship rows are returned, but this can be refined. The `related` method accepts an optional second function which is itself a query.
+
+```tsx
+z.query.issue.related(
+  'comments',
+  // It is common to use the 'q' shorthand variable for this parameter,
+  // but it is a _comment_ query in particular here, exactly as if you
+  // had done z.query.comment.
+  q => q.orderBy('modified', 'desc').limit(100).start(lastSeenComment),
+);
+```
+
+This _relationship query_ can have all the same clauses that top-level queries can have:
+
+### Ordering Related Data
+
+```tsx
+// Get issues with their most recent comments first
+z.query.issue.related('comments', q => q.orderBy('created', 'desc'));
+```
+
+### Limiting Related Data
+
+```tsx
+// Get issues with only their first 5 comments
+z.query.issue.related('comments', q => q.limit(5));
+```
+
+### Filtering Related Data
+
+```tsx
+// Get issues with only their unresolved comments
+z.query.issue.related('comments', q => q.where('status', 'unresolved'));
+
+// Get issues with comments from a specific user
+z.query.issue.related('comments', q => q.where('authorId', specificUserId));
+```
+
+### Combining Relationship Clauses
+
+```tsx
+// Get issues with their 10 most recent comments from active users
+z.query.issue.related('comments', q =>
+  q.where('authorStatus', 'active').orderBy('created', 'desc').limit(10),
+);
+```
+
+## Nested Relationships
+
+You can nest relationships arbitrarily deep:
+
+```tsx
+// Get all issues, first 100 comments for each (ordered by modified desc),
+// and for each comment all of its reactions.
+z.query.issue.related('comments', q =>
+  q.orderBy('modified', 'desc').limit(100).related('reactions'),
+);
+```
+
+### Complex Nested Examples
+
+```tsx
+// Get issues with their comments, comment authors, and comment reactions
+z.query.issue.related('comments', q =>
+  q
+    .related('author')
+    .related('reactions', reactionQ => reactionQ.related('user')),
+);
+
+// Access the nested data
+const [issues] = useQuery(query);
+issues.forEach(issue => {
+  issue.comments.forEach(comment => {
+    console.log(`Comment by: ${comment.author.name}`);
+    comment.reactions.forEach(reaction => {
+      console.log(`  ${reaction.emoji} by ${reaction.user.name}`);
+    });
+  });
+});
+```
+
+### Three-Level Nesting
+
+```tsx
+// Issues -> Comments -> Reactions -> Users
+z.query.issue.related('comments', commentQ =>
+  commentQ.related('reactions', reactionQ => reactionQ.related('user')),
+);
+```
+
+## Relationship Types
+
+### One-to-Many Relationships
+
+Most relationships are one-to-many, where one parent record has multiple child records:
+
+```tsx
+// One issue has many comments
+z.query.issue.related('comments');
+
+// One user has many issues
+z.query.user.related('issues');
+```
+
+### Many-to-One Relationships
+
+You can also query in the reverse direction:
+
+```tsx
+// Each comment belongs to one issue
+z.query.comment.related('issue');
+
+// Each issue has one assignee
+z.query.issue.related('assignee');
+```
+
+### Many-to-Many Relationships
+
+For many-to-many relationships, you typically go through a junction table:
+
+```tsx
+// Issues with their labels (through issue_labels junction)
+z.query.issue.related('labels');
+
+// Users with their roles (through user_roles junction)
+z.query.user.related('roles');
+```
+
+## Performance Considerations
+
+### Relationship Query Efficiency
+
+- **Limit related data**: Always use `limit()` on relationships that could return many rows
+- **Filter early**: Apply `where` clauses to relationships to reduce data transfer
+- **Order thoughtfully**: Only use `orderBy` on relationships when necessary
+
+```tsx
+// ❌ Could return thousands of comments per issue
+z.query.issue.related('comments');
+
+// ✅ Limits to recent comments only
+z.query.issue.related('comments', q => q.orderBy('created', 'desc').limit(20));
+```
+
+### Avoiding N+1 Queries
+
+ZQL relationships help avoid N+1 query problems by fetching related data in a single query:
+
+```tsx
+// ❌ N+1 problem: One query for issues, then one query per issue for comments
+const [issues] = useQuery(z.query.issue);
+issues.forEach(async issue => {
+  const [comments] = useQuery(z.query.comment.where('issueId', issue.id));
+  // Process comments...
+});
+
+// ✅ Single query gets everything
+const [issues] = useQuery(z.query.issue.related('comments'));
+issues.forEach(issue => {
+  issue.comments.forEach(comment => {
+    // Process comments...
+  });
+});
+```
+
+### Memory Usage
+
+Be mindful of memory usage when querying large relationship trees:
+
+```tsx
+// ❌ Could load massive amounts of data
+z.query.issue.related('comments').related('reactions').related('attachments');
+
+// ✅ Limit each relationship appropriately
+z.query.issue
+  .related('comments', q => q.limit(10))
+  .related('reactions', q => q.limit(50))
+  .related('attachments', q => q.limit(5));
+```
+
+## Common Patterns
+
+### Recent Activity Feed
+
+```tsx
+// Get recent issues with their latest comments and reactions
+z.query.issue
+  .orderBy('updated', 'desc')
+  .limit(50)
+  .related('comments', q => q.orderBy('created', 'desc').limit(3))
+  .related('reactions', q => q.orderBy('created', 'desc').limit(10));
+```
+
+### User Dashboard
+
+```tsx
+// Get user with their recent issues and assigned tasks
+z.query.user
+  .where('id', currentUserId)
+  .one()
+  .related('createdIssues', q => q.orderBy('created', 'desc').limit(10))
+  .related('assignedIssues', q => q.where('status', '!=', 'closed').limit(20));
+```
+
+### Hierarchical Data
+
+```tsx
+// Get categories with their subcategories and items
+z.query.category
+  .where('parentId', 'IS', null) // Top-level categories only
+  .related('subcategories', subQ =>
+    subQ.related('items', itemQ => itemQ.where('active', true).limit(100)),
+  );
+```
+
+## Relationship Filtering
+
+You can also filter the parent query based on relationship existence using `whereExists`:
+
+```tsx
+// Get only issues that have comments
+z.query.issue.whereExists('comments');
+
+// Get only issues that have recent comments
+z.query.issue.whereExists('comments', q => q.where('created', '>', recentDate));
+```
+
+For more details on relationship filtering, see [Filtering Data](/filtering-data#relationship-filters).
+
+## TypeScript Support
+
+Relationships are fully typed based on your Zero schema:
+
+```tsx
+// TypeScript knows the shape of related data
+const [issues] = useQuery(
+  z.query.issue.related('comments').related('assignee'),
+);
+
+// Full type safety and IntelliSense
+issues.forEach(issue => {
+  // issue.comments is Comment[]
+  // issue.assignee is User | undefined
+  console.log(issue.assignee?.name); // TypeScript knows this is safe
+});
+```
+
+## Next Steps
+
+Now that you understand relationships, explore these related topics:
+
+- [Query Lifecycle](/query-lifecycle) - Understand performance and caching behavior
+- [Filtering](/filtering-data) - Learn about relationship filters with `whereExists`
+- [Clauses](/query-clauses) - Master ordering, limiting, and paging
+- [ZQL Fundamentals](/zql-fundamentals) - Review the basics if needed

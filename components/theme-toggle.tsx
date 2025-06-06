@@ -9,8 +9,8 @@ export function ModeToggle() {
   const HangingBulbIcon = ({className = ''}) => (
     <svg
       width="19"
-      height="101"
-      viewBox="0 0 19 101"
+      height="114"
+      viewBox="0 0 19 114"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
     >
@@ -25,8 +25,8 @@ export function ModeToggle() {
   const HangingBulbIconSystem = ({className = ''}) => (
     <svg
       width="19"
-      height="101"
-      viewBox="0 0 19 101"
+      height="114"
+      viewBox="0 0 19 114"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
     >

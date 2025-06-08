@@ -5,20 +5,88 @@ title: SolidJS
 Zero has built-in support for Solid. Here’s what basic usage looks like:
 
 ```tsx
-import {createQuery} from '@rocicorp/zero/solid';
+import {useQuery, useZero} from '@rocicorp/zero/solid';
+import {For} from 'solid-js';
+import {type Schema} from './schema.ts';
+import {type Mutators} from './mutators.ts';
 
-const issues = createQuery(() => {
-  let issueQuery = z.query.issue
-    .related('creator')
-    .related('labels')
-    .limit(100);
-  const userID = selectedUserID();
+function IssueList() {
+  const z = useZero<Schema, Mutators>();
 
-  if (userID) {
-    issueQuery = issueQuery.where('creatorID', '=', userID);
-  }
-  return issueQuery;
-});
+  const [issues, issuesDetail] = useQuery(() => {
+    let issueQuery = z().query.issue
+      .related('creator')
+      .related('labels')
+      .limit(100);
+  
+    const userID = selectedUserID();
+  
+    if (userID) {
+      issueQuery = issueQuery.where('creatorID', '=', userID);
+    }
+
+    return issueQuery;
+  });
+
+  return (
+    <>
+      <div>
+        {issuesDetail().type === 'complete' ? 'Complete' : 'Partial'}
+        results
+      </div>
+      <div>
+        <For each={issues()}>
+          {issue => <IssueRow issue={issue} />}
+        </For>
+      </div>
+    </>
+  );
+}
+```
+
+## ZeroProvider
+
+The `useZero` hook must be used within a `ZeroProvider` component. The
+`ZeroProvider` component is responsible for providing the context to your
+components.
+
+```tsx
+import {ZeroProvider} from '@rocicorp/zero/solid';
+
+export function Root() {
+  return (
+    <ZeroProvider options={{...}}>
+      <App />
+    </ZeroProvider>
+  );
+}
+```
+
+## createUseZero
+
+It is often inconvenient to provide the type parameters to `useZero` repeatedly.
+To simplify this, we provide a function that creates a hook with the types you
+want.
+
+```tsx
+import {createUseZero} from '@rocicorp/zero/solid';
+import type {Schema} from './schema.ts';
+import type {Mutators} from './mutators.ts';
+
+export const useZero = createUseZero<Schema, Mutators>();
+```
+
+You can then import this `useZero` hook in your components and use it without
+having to specify the type parameters.
+
+```tsx
+import {useQuery} from "@rocicorp/zero/solid";
+import {useZero} from './hooks/use-zero.ts';
+
+function IssueList() {
+  const z = useZero();
+  ...
+}
 ```
 
 Complete quickstart here:

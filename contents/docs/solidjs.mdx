@@ -31,7 +31,11 @@ function IssueList() {
   return (
     <>
       <div>
-        {issuesDetail().type === 'complete' ? 'Complete' : 'Partial'}
+        {
+          // Complete means the client results match the server results.
+          // Partial means that the query returned an optimistic result directly from the client store.
+          issuesDetail().type === 'complete' ? 'Complete' : 'Partial'
+        }
         results
       </div>
       <div>

@@ -122,6 +122,13 @@ z.mutate.user.delete({
 });
 ```
 
+<Note type="note" slug="clearing-browser-cache">
+If you want to remove cached data from the browser you can call the `dropAllDatabases` function provided by Zero.
+
+You can read more about it in [Authentication](/docs/auth#logging-out).
+
+</Note>
+
 ## Batch Mutate
 
 You can do multiple CRUD mutates in a single _batch_. If any of the mutations fails, all will. They also all appear together atomically in a single transaction to other clients.

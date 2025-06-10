@@ -49,6 +49,14 @@ const zero = new Zero({
 
 In this case, Zero will call this function to get a new JWT if verification fails.
 
+## Logging out
+
+Data is segregated by `userID`. So, when creating a new Zero instance with a different (or anonymous) `userID`, the data is stored in a separate IndexedDB. It is therefore important to know that Zero does not handle clearing chached data on "log out" on its own.
+
+Zero provides the `dropAllDatabases()` function to —as the name suggests— clear all IndexedDB databases from the browser. If it is important to leave no data on device, this function can be called on "log out".
+
+Doing this does require Zero to build up a new cache every time a new instance is created. But because of Zero's architecture this shouldn't be prohibitively expensive.
+
 ## Permissions
 
 Any data placed into your JWT (claims) can be used by permission rules on the backend.

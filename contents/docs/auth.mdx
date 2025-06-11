@@ -49,13 +49,31 @@ const zero = new Zero({
 
 In this case, Zero will call this function to get a new JWT if verification fails.
 
-## Logging out
+## Data Storage
 
-Data is segregated by `userID`. So, when creating a new Zero instance with a different (or anonymous) `userID`, the data is stored in a separate IndexedDB. It is therefore important to know that Zero does not handle clearing chached data on "log out" on its own.
+In essence, Zero creates a partial replication of the database, and stores it in the browser's IndexedDB. Because data is often unique to each user, synced data is segregated. This is done with two values that can be set on the client:
 
-Zero provides the `dropAllDatabases()` function to —as the name suggests— clear all IndexedDB databases from the browser. If it is important to leave no data on device, this function can be called on "log out".
+- `userID`
+- `storageKey`
 
-Doing this does require Zero to build up a new cache every time a new instance is created. But because of Zero's architecture this shouldn't be prohibitively expensive.
+Only `userID` is required and ensures data segregation on the user level. `storageKey`, on the other hand, can be used to segregate data withn a single user—organizations, projects, workspaces, etc.
+
+### Logging In
+
+When a user is authenticated, you create a new Zero instance with the user's `userID`. Then, an IndexedDB is created and data is synced. It works the same when using `storageKey` but instead of creating a new Zero instance on authentication, you do this when switching organization, project, workspace, etc.
+
+### Logging Out
+
+When a user logs out, there are two common scenarios:
+
+1. **No access**: The user has no access to the application, and thus, there is no Zero instance.
+2. **Anonymous access**: You allow anonymous access, and you create a Zero instance with an anonymous `userID` (e.g. `anon`).
+
+It is crucial to understand that, in both cases, **Zero does not automatically clear locally cached data on "logout" by default.** To Zero, changing `userID` or `storageKey` is only about creating or switching between IndexedDB instances. All data can still be read when inspecting the IndexedDB, wether the user is logged in or not.
+
+Zero provides the `dropAllDatabases` function to—as the name suggests—clear all IndexedDB databases from the browser. This function should be called on "log out" when it is essential to leave no cached data on-device.
+
+Doing this does require Zero to build up a new cache every time a new instance is created. But because Zero only does a partial sync, this shouldn't be prohibitively expensive.
 
 ## Permissions
 

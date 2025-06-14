@@ -73,6 +73,15 @@ It is crucial to understand that, in both cases, **Zero does not automatically c
 
 Zero provides the `dropAllDatabases` function to—as the name suggests—clear all IndexedDB databases from the browser. This function should be called on "log out" when it is essential to leave no cached data on-device.
 
+```ts
+import {dropAllDatabases} from '@rocicorp/zero';
+
+// Returns an object with:
+// - The names of the successfully dropped databases
+// - Any errors encountered while dropping
+const {dropped, errors} = await dropAllDatabases();
+```
+
 Doing this does require Zero to build up a new cache every time a new instance is created. But because Zero only does a partial sync, this shouldn't be prohibitively expensive.
 
 ## Permissions

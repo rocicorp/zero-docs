@@ -454,6 +454,12 @@ Run `zero-cache` as two Fargate services (using the same [rocicorp/zero](https:/
   - The default size is 20GB. This can be increased up to 200GB
   - Allocate at least twice the size of the database to support the internal VACUUM operation.
 
+## Guide: Multi-Developer Database
+
+It is possible to share a central development database with multiple developers running their own `zero-cache` locally. By default, if one developer makes changes to permissions, it also changes it for the others which can cause problems.
+
+By setting the `ZERO_APP_ID` environment variable, each instance can be isolated. Instead of storing all the permissions and metadata tables in `zero_{#}`, they are placed in a separate schema named `{app-id}_{#}` ([see App ID](/docs/zero-cache-config#app-id))
+
 ## Guide: $PLATFORM
 
 Where should we deploy Zero next?? Let us know on [Discord](https://discord.rocicorp.dev)!

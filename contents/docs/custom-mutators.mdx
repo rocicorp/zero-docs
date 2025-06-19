@@ -140,7 +140,7 @@ If the server detects that the mutation is spammy, the client will see the error
 
 ### Life of a Mutation
 
-Now that we understand what client and server mutations are, let's walk through they work together with Zero to sync changes from a source client to the server and then other clients:
+Now that we understand what client and server mutations are, let's walk through how they work together with Zero to sync changes from a source client to the server and then other clients:
 
 1. When you call a custom mutator on the client, Zero runs your client-side mutator immediately on the local device, updating all active queries instantly.
 2. In the background, Zero then sends a _mutation_ (a record of the mutator having run with certain arguments) to your server's push endpoint.

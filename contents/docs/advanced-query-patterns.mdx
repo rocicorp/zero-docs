@@ -1,0 +1,437 @@
+---
+title: Advanced Query Patterns
+---
+
+Once you're comfortable with basic ZQL queries, there are several advanced patterns that can help you build more efficient and responsive applications. This page covers preloading strategies, one-time queries, change listeners, and advanced optimization techniques.
+
+## Preloading
+
+Almost all Zero apps will want to preload some data in order to maximize the feel of instantaneous UI transitions. In Zero, preloading is done via queries – the same queries you use in the UI and for auth.
+
+### Basic Preloading
+
+Because preload queries are usually much larger than a screenful of UI, Zero provides a special `preload()` helper to avoid the overhead of materializing the result into JS objects:
+
+```tsx
+// Preload the first 1k issues + their creator, assignee, labels, and
+// the view state for the active user.
+//
+// There's no need to render this data, so we don't use `useQuery()`:
+// this avoids the overhead of pulling all this data into JS objects.
+z.query.issue
+  .related('creator')
+  .related('assignee')
+  .related('labels')
+  .related('viewState', q => q.where('userID', z.userID).one())
+  .orderBy('created', 'desc')
+  .limit(1000)
+  .preload();
+```
+
+### Strategic Preloading Patterns
+
+#### 1. Core Data Pattern
+
+Preload the most essential data that users will need immediately:
+
+```tsx
+// Preload user profile and settings
+z.query.user
+  .where('id', currentUserId)
+  .related('settings')
+  .related('preferences')
+  .preload({ttl: 'forever'});
+
+// Preload user's organizations and roles
+z.query.organization
+  .whereExists('members', q => q.where('userId', currentUserId))
+  .related('roles', q => q.where('userId', currentUserId))
+  .preload({ttl: 'forever'});
+```
+
+#### 2. Multiple Sort Orders Pattern
+
+Preload data in different sort orders to enable instant UI transitions:
+
+```tsx
+// Preload issues in different sort orders
+const commonIssueFields = (q: IssueQuery) =>
+  q.related('creator').related('assignee').related('labels').limit(500);
+
+// Different sort orders for instant switching
+commonIssueFields(z.query.issue.orderBy('created', 'desc')).preload({
+  ttl: '1d',
+});
+commonIssueFields(z.query.issue.orderBy('updated', 'desc')).preload({
+  ttl: '1d',
+});
+commonIssueFields(z.query.issue.orderBy('priority', 'desc')).preload({
+  ttl: '1d',
+});
+```
+
+#### 3. Hierarchical Preloading
+
+Preload nested data structures that users commonly navigate:
+
+```tsx
+// Preload project hierarchy
+z.query.project
+  .where('archived', false)
+  .related('teams', teamQ =>
+    teamQ.related('members', memberQ => memberQ.related('user').limit(50)),
+  )
+  .related('issues', issueQ =>
+    issueQ.where('status', 'IN', ['open', 'in-progress']).limit(100),
+  )
+  .preload({ttl: '1h'});
+```
+
+### Preloading Best Practices
+
+1. **Use appropriate TTLs**: Forever for user data, shorter for dynamic content
+2. **Limit preloaded data**: Don't preload everything, focus on high-probability needs
+3. **Match query patterns**: Preload data in the same shape you'll query
+4. **Consider data overlap**: Zero deduplicates, so overlapping preloads are efficient
+
+```tsx
+// Good: Focused preloading with appropriate limits
+z.query.issue
+  .where('status', '!=', 'archived')
+  .orderBy('updated', 'desc')
+  .limit(200)
+  .preload({ttl: '30m'});
+
+// Avoid: Unlimited preloading
+z.query.issue.preload(); // Could load millions of records
+```
+
+## Running Queries Once
+
+Usually subscribing to a query is what you want in a reactive UI, but every so often you'll need to run a query just once.
+
+### Basic One-time Queries
+
+Use the `run()` method for non-reactive queries:
+
+```tsx
+const results = await z.query.issue.where('foo', 'bar').run();
+```
+
+By default, `run()` only returns results that are currently available on the client. That is, it returns the data that would be given for `result.type === 'unknown'`.
+
+### Waiting for Complete Results
+
+If you want to wait for the server to return results, pass `{type: 'complete'}` to `run`:
+
+```tsx
+const results = await z.query.issue.where('foo', 'bar').run({type: 'complete'});
+```
+
+### Shorthand Syntax
+
+<Note slug="default-run">
+As a convenience you can also directly await queries:
+
+```ts
+await z.query.issue.where('foo', 'bar');
+```
+
+This is the same as saying `run()` or `run({type: 'unknown'})`.
+
+</Note>
+
+### One-time Query Patterns
+
+#### Data Validation
+
+```tsx
+async function validateUniqueEmail(email: string) {
+  const existingUser = await z.query.user
+    .where('email', email)
+    .one()
+    .run({type: 'complete'});
+
+  return !existingUser;
+}
+```
+
+#### Analytics and Reporting
+
+```tsx
+async function generateUserReport(userId: string) {
+  const [user, issues, comments] = await Promise.all([
+    z.query.user.where('id', userId).one().run({type: 'complete'}),
+    z.query.issue.where('creator', userId).run({type: 'complete'}),
+    z.query.comment.where('author', userId).run({type: 'complete'}),
+  ]);
+
+  return {
+    user,
+    totalIssues: issues.length,
+    totalComments: comments.length,
+    // ... more analytics
+  };
+}
+```
+
+#### Background Data Processing
+
+```tsx
+async function syncDataInBackground() {
+  // Get all unsync'd records
+  const unsyncedRecords = await z.query.syncQueue
+    .where('status', 'pending')
+    .run({type: 'complete'});
+
+  // Process each record
+  for (const record of unsyncedRecords) {
+    await processRecord(record);
+  }
+}
+```
+
+## Listening to Changes
+
+For advanced use cases where you need granular control over data changes, you can work directly with materialized views and change listeners.
+
+### Basic Change Listening
+
+Currently, the way to listen for changes in query results is through materialized views:
+
+```ts
+const view = z.query.issue.materialize();
+view.addListener((issues, issuesResult) => {
+  console.log('Issues updated:', issues.length);
+  console.log('Result type:', issuesResult.type);
+});
+
+// Don't forget to clean up
+view.destroy();
+```
+
+### Custom View Implementation
+
+For more granular event handling, you can create custom view implementations. Here's an example pattern:
+
+```tsx
+class CustomIssueView {
+  private view: MaterializedView<Issue>;
+  private listeners: {
+    add?: (issue: Issue) => void;
+    remove?: (issue: Issue) => void;
+    update?: (issue: Issue) => void;
+  } = {};
+
+  constructor(query: IssueQuery) {
+    this.view = query.materialize();
+    this.view.addListener((issues, result) => {
+      // Custom logic to detect what changed
+      this.handleChanges(issues, result);
+    });
+  }
+
+  onAdd(callback: (issue: Issue) => void) {
+    this.listeners.add = callback;
+    return this;
+  }
+
+  onRemove(callback: (issue: Issue) => void) {
+    this.listeners.remove = callback;
+    return this;
+  }
+
+  onUpdate(callback: (issue: Issue) => void) {
+    this.listeners.update = callback;
+    return this;
+  }
+
+  private handleChanges(issues: Issue[], result: QueryResult) {
+    // Implementation would track previous state and detect changes
+    // This is simplified - real implementation would be more complex
+  }
+
+  destroy() {
+    this.view.destroy();
+  }
+}
+
+// Usage
+const issueView = new CustomIssueView(z.query.issue.where('status', 'open'))
+  .onAdd(issue => console.log('New issue:', issue.title))
+  .onRemove(issue => console.log('Issue removed:', issue.title))
+  .onUpdate(issue => console.log('Issue updated:', issue.title));
+```
+
+### Framework-Specific Change Handling
+
+#### React Custom Hook
+
+```tsx
+function useQueryChanges<T>(
+  query: Query<T>,
+  handlers: {
+    onAdd?: (item: T) => void;
+    onRemove?: (item: T) => void;
+    onChange?: (items: T[]) => void;
+  },
+) {
+  const [data, result] = useQuery(query);
+  const previousDataRef = useRef<T[]>([]);
+
+  useEffect(() => {
+    const previous = previousDataRef.current;
+    const current = data;
+
+    // Detect changes (simplified)
+    if (handlers.onChange && previous !== current) {
+      handlers.onChange(current);
+    }
+
+    // Update ref for next comparison
+    previousDataRef.current = current;
+  }, [data, handlers]);
+
+  return [data, result] as const;
+}
+
+// Usage
+function IssueListWithHandlers() {
+  const [issues] = useQueryChanges(z.query.issue.where('status', 'open'), {
+    onAdd: issue => toast.success(`New issue: ${issue.title}`),
+    onRemove: issue => toast.info(`Issue closed: ${issue.title}`),
+    onChange: issues => console.log(`${issues.length} open issues`),
+  });
+
+  return <IssueList issues={issues} />;
+}
+```
+
+## Advanced Optimization Patterns
+
+### Query Deduplication
+
+```tsx
+// Create a query cache to avoid duplicate queries
+const queryCache = new Map<string, Promise<any>>();
+
+function getCachedQuery<T>(key: string, queryFn: () => Promise<T>): Promise<T> {
+  if (!queryCache.has(key)) {
+    const promise = queryFn().finally(() => {
+      // Clean up cache after some time
+      setTimeout(() => queryCache.delete(key), 5000);
+    });
+    queryCache.set(key, promise);
+  }
+  return queryCache.get(key)!;
+}
+
+// Usage
+const getIssues = (status: string) =>
+  getCachedQuery(`issues-${status}`, () =>
+    z.query.issue.where('status', status).run({type: 'complete'}),
+  );
+```
+
+### Conditional Query Loading
+
+```tsx
+function useConditionalQuery<T>(
+  condition: boolean,
+  query: () => Query<T>,
+  options?: QueryOptions,
+) {
+  const conditionalQuery = useMemo(() => {
+    return condition ? query() : null;
+  }, [condition, query]);
+
+  return useQuery(conditionalQuery, options);
+}
+
+// Usage
+function UserDashboard({userId}: {userId?: string}) {
+  // Only load user data when userId is available
+  const [user] = useConditionalQuery(
+    !!userId,
+    () => z.query.user.where('id', userId!).one(),
+    {ttl: '1h'},
+  );
+
+  if (!userId) return <div>Please select a user</div>;
+  if (!user) return <div>Loading user...</div>;
+
+  return <div>Welcome, {user.name}!</div>;
+}
+```
+
+### Batch Query Operations
+
+```tsx
+async function batchQueryOperations() {
+  // Run multiple independent queries in parallel
+  const [users, issues, projects] = await Promise.all([
+    z.query.user.where('active', true).run({type: 'complete'}),
+    z.query.issue.where('status', 'open').run({type: 'complete'}),
+    z.query.project.where('archived', false).run({type: 'complete'}),
+  ]);
+
+  // Process results together
+  return {
+    activeUsers: users.length,
+    openIssues: issues.length,
+    activeProjects: projects.length,
+    summary: generateSummary(users, issues, projects),
+  };
+}
+```
+
+### Intelligent Preloading
+
+```tsx
+function useIntelligentPreloader() {
+  const [userActivity, setUserActivity] = useState<string[]>([]);
+
+  // Track user navigation patterns
+  const trackActivity = useCallback((page: string) => {
+    setUserActivity(prev => [...prev.slice(-10), page]); // Keep last 10 pages
+  }, []);
+
+  // Preload based on activity patterns
+  useEffect(() => {
+    if (userActivity.includes('issues') && userActivity.includes('projects')) {
+      // User frequently views both - preload the connection
+      z.query.issue.related('project').limit(100).preload({ttl: '10m'});
+    }
+
+    if (userActivity.filter(p => p === 'settings').length > 2) {
+      // User is in settings mode - preload all settings
+      z.query.user
+        .where('id', currentUserId)
+        .related('settings')
+        .related('preferences')
+        .related('notifications')
+        .preload({ttl: '5m'});
+    }
+  }, [userActivity]);
+
+  return {trackActivity};
+}
+```
+
+## Best Practices
+
+1. **Preload strategically**: Focus on high-probability user paths, not everything
+2. **Use appropriate query types**: Reactive for UI, one-time for operations
+3. **Clean up resources**: Always destroy views and clear listeners
+4. **Consider data freshness**: Use TTLs that match your data update frequency
+5. **Monitor performance**: Track query performance and adjust preloading accordingly
+6. **Batch related operations**: Group related queries for better performance
+
+## Next Steps
+
+Now that you understand advanced query patterns, explore these related topics:
+
+- [Query Lifecycle](/query-lifecycle) - Deep dive into performance optimization
+- [Data Synchronization](/data-synchronization) - Master completeness and consistency
+- [Custom Mutators](/custom-mutators) - Learn about writing data with advanced patterns
+- [ZQL Reference](/zql-reference) - Complete API reference for all query methods

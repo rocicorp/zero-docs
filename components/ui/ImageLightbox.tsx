@@ -2,7 +2,10 @@
 
 import React, {useState} from 'react';
 
-const ImageLightbox: React.FC<{src: string; alt: string}> = ({src, alt}) => {
+const ImageLightbox: React.FC<{src: string; caption: string}> = ({
+  src,
+  caption,
+}) => {
   const [isOpen, setIsOpen] = useState(false);
 
   if (!src) {
@@ -18,10 +21,22 @@ const ImageLightbox: React.FC<{src: string; alt: string}> = ({src, alt}) => {
     <>
       <img
         src={src}
-        alt={alt || 'Image'}
+        alt={caption || 'Image'}
         style={{cursor: 'pointer', maxWidth: '100%', border: 'none'}}
         onClick={toggleLightbox}
       />
+      {caption && (
+        <p
+          style={{
+            textAlign: 'center',
+            marginTop: '-1.5rem',
+            fontSize: '0.9rem',
+            fontStyle: 'italic',
+          }}
+        >
+          {caption}
+        </p>
+      )}
 
       {isOpen && (
         <div
@@ -43,7 +58,7 @@ const ImageLightbox: React.FC<{src: string; alt: string}> = ({src, alt}) => {
         >
           <img
             src={src}
-            alt={alt || 'Image'}
+            alt={caption || 'Image'}
             style={{
               maxWidth: '90%',
               maxHeight: '90%',

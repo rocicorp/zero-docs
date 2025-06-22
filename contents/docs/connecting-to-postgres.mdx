@@ -74,16 +74,16 @@ In order to connect to Supabase you must use the "Direct Connection" style conne
 
 <ImageLightbox
   src="/images/connecting-to-postgres/direct.png"
-  alt="Screenshot of UI to get correct connection string"
+  caption='Use the "Direct Connection" option to connect zero-cache to your Supabase database.'
 />
 
 This is because Zero sets up a logical replication slot, which is only supported with a direct connection.
 
-Additionally, you may need to assign a IPv4 address to your Supabase instance:
+Additionally, you may need to assign an IPv4 address to your Supabase instance:
 
 <ImageLightbox
   src="/images/connecting-to-postgres/ipv4.png"
-  alt="Screenshot of where to assign ipv4 address"
+  caption="Assign an IPv4 address if you have trouble connecting from residential internet."
 />
 
 This will be required if you

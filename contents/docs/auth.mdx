@@ -49,29 +49,68 @@ const zero = new Zero({
 
 In this case, Zero will call this function to get a new JWT if verification fails.
 
-## Data Storage
+## Client-Side Data Storage
 
-In essence, Zero creates a partial replication of the database, and stores it in the browser's IndexedDB. Because data is often unique to each user, synced data is segregated. This is done with two values that can be set on the client:
+Zero stores client-side data in `IndexedDB` by default, but this is customizable with the `kvStore` parameter:
 
-- `userID`
-- `storageKey`
+```ts
+const zero = new Zero({
+  // Store data in React Native's SQLite database
+  // See https://github.com/Braden1996/react-native-replicache
+  kvStore: createReplicacheReactNativeOPSQLiteKVStore,
+});
 
-Only `userID` is required and ensures data segregation on the user level. `storageKey`, on the other hand, can be used to segregate data withn a single user—organizations, projects, workspaces, etc.
+const zero = new Zero({
+  // Store data in memory, it disappears on refresh
+  kvStore: 'mem',
+});
+```
 
-### Logging In
+Because multiple users can share the same browser, Zero requires that you provide a `userID` parameter on construction:
 
-When a user is authenticated, you create a new Zero instance with the user's `userID`. Then, an IndexedDB is created and data is synced. It works the same when using `storageKey` but instead of creating a new Zero instance on authentication, you do this when switching organization, project, workspace, etc.
+```ts
+const zero = new Zero({
+  ...,
+  userID: "user-123",
+});
+```
 
-### Logging Out
+Zero stores each user's data in a different IndexedDB instance. This allows users to quickly switch between multiple users and accounts without resyncing.
 
-When a user logs out, there are two common scenarios:
+<Note emoji="🧑‍🏫" type="warning" heading="`userID` is not a security boundary" slug="user-id-is-not-a-security-boundary">
+All users that have access to a browser profile have access to the same IndexedDB instances. There is nothing that Zero can do about this – users can just open the folder where the data is stored and look inside it.
+</Note>
 
-1. **No access**: The user has no access to the application, and thus, there is no Zero instance.
-2. **Anonymous access**: You allow anonymous access, and you create a Zero instance with an anonymous `userID` (e.g. `anon`).
+If your application is unauthenticated, or if you don't need fast user switching, you can just set `userID` to a constant like `anon` or `guest`:
 
-It is crucial to understand that, in both cases, **Zero does not automatically clear locally cached data on "logout" by default.** To Zero, changing `userID` or `storageKey` is only about creating or switching between IndexedDB instances. All data can still be read when inspecting the IndexedDB, wether the user is logged in or not.
+```ts
+const zero = new Zero({
+  ...,
+  userID: "anon",
+});
+```
 
-Zero provides the `dropAllDatabases` function to—as the name suggests—clear all IndexedDB databases from the browser. This function should be called on "log out" when it is essential to leave no cached data on-device.
+Alternately, if you have more than one set of Zero data per-user (i.e., for different apps in the same domain), you can additonally use the `storageKey` parameter:
+
+```ts
+const zero = new Zero({
+  ...,
+  userID: "user-123",
+  storageKey: "my-app",
+});
+```
+ 
+If specified, `storageKey` is concatenated along with `userID` and other internal Zero information to form a unique IndexedDB database name.
+
+<ImageLightbox src="/images/auth/indexeddb.png" caption="Zero's IndexedDB databases are prefixed with 'rep' or 'replicache' because ... well because we haven't fixed this yet." />
+
+## Logging Out
+
+When a user logs out, you should consider what should happen to the synced data.
+ 
+If you do nothing, the synced data will be left on the device. The next login will be a little faster because Zero doesn't have to resync that dta from scratch. But also, the data will be left on the device indefinitely which could be undesirable for privacy and security.
+
+ If you instead want to clear data on logout, Zero provides the `dropAllDatabases` function:
 
 ```ts
 import {dropAllDatabases} from '@rocicorp/zero';
@@ -81,8 +120,6 @@ import {dropAllDatabases} from '@rocicorp/zero';
 // - Any errors encountered while dropping
 const {dropped, errors} = await dropAllDatabases();
 ```
-
-Doing this does require Zero to build up a new cache every time a new instance is created. But because Zero only does a partial sync, this shouldn't be prohibitively expensive.
 
 ## Permissions
 

@@ -150,33 +150,6 @@ Now that we understand what client and server mutations are, let's walk through 
 6. Clients receive row updates and apply them to their local cache. Any pending mutations which have been applied to the server have their local effects rolled back.
 7. Client-side queries are updated and the user sees the changes.
 
-### Push Protocol Caveat
-
-Since subsequent mutations can rely on each other, they must be applied in order. To keep track of which mutations ran, Zero stores the `lastMutationID` for each client. If a mutation is not acknowledged, i.e. the `lastMutationID` is not updated, Zero will retry indefinitely until it is acknowledged. Therefore, it is important that the push endpoint always processes the mutation.
-
-If the push endpoint fails to process a mutation, the client is not able to perform any other mutation due to their sequential nature. It is therefore important to never throw or return before processing mutations in the push endpoint. Rather, throw inside the mutator itself.
-
-```ts
-app.post('/push', async c => {
-  // ❌ Don't do this
-  // Can throw and prevent processing the mutation
-  await requireUserSession();
-
-  const result = await processor.process({
-    issue: {
-      update: async (tx, data) => {
-        // ✅ Do this instead
-        // If it throws, the mutation is still processed
-        await requireUserSession();
-
-        // ...
-      },
-    },
-  }, ...);
-  return await c.json(result);
-})
-```
-
 ## Using Custom Mutators
 
 ### Registering Client Mutators
@@ -422,6 +395,45 @@ export default handle(app);
 `ZQLDatabase` in turn relies on an abstract `DBConnection` that provides raw access to a Postgres database. This allows you to use any Postgres library you like, as long as you provide a `DBConnection` implementation for it. The `PostgresJSConnection` class implements `DBConnection` for the excellent [`postgres.js`](https://www.npmjs.com/package/postgres) library to connect to Postgres.
 
 To reuse the client mutators exactly as-is on the server just pass the result of the same `createMutators` function to `PushProcessor`.
+
+### Server Error Handling
+
+The `PushProcessor` in `@rocicorp/zero/pg` skips any mutations that throw:
+
+```ts
+app.post('/push', async c => {
+  const result = await processor.process({
+    issue: {
+      update: async (tx, data) => {
+        // The mutation is skipped and the next mutation runs as normal.
+        throw new Error('bonk');
+      },
+    },
+  }, ...);
+  return await c.json(result);
+})
+```
+
+`PushProcessor` catches such errors and turns them into a structured response that gets sent back to the client. You can [recover the errors](#waiting-for-mutator-result) and show UI if you want.
+
+It is also of course possible for the entire push endpoint to return an HTTP error, or to not reply at all:
+
+```ts
+app.post('/push', async c => {
+  // This will cause the client to resend all queued mutations.
+  throw new Error('zonk');
+  const result = await processor.process({
+    // ...
+  }, ...);
+  return await c.json(result);
+})
+```
+
+If Zero recieves any response from the push endpoint other than HTTP 200, 401, or 403, it will disconnect, wait a few moments, reconnect, and then retry all unprocessed mutations.
+
+If Zero receives HTTP 401 or 403, the client [refreshes the `auth` token](./auth#refresh) if possible, then retries all queued mutations.
+
+If you want a different behavior, it is possible to [implement your own](#custom-push-implementation) `PushProcessor` and handle errors differently.
 
 ### Server-Specific Code
 

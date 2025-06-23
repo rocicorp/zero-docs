@@ -1,0 +1,142 @@
+---
+title: ZQL Fundamentals
+---
+
+ZQL is Zero's query language for reading data from your database.
+
+Inspired by SQL, ZQL is expressed in TypeScript with heavy use of the builder pattern. If you have used [Drizzle](https://orm.drizzle.team/) or [Kysely](https://kysely.dev/), ZQL will feel familiar.
+
+## What Makes ZQL Different
+
+Unlike queries in classic databases, the result of a ZQL query is a _view_ that updates automatically and efficiently as the underlying data changes. You can call a query's `materialize()` method to get a view, but more typically you run queries via some framework-specific bindings. For example see `useQuery` for [React](react) or [SolidJS](solidjs).
+
+ZQL queries are composed of one or more _clauses_ that are chained together into a _query_.
+
+## Basic Query Structure
+
+ZQL queries start by selecting a table. There is no way to select a subset of columns; ZQL queries always return the entire row (modulo column permissions).
+
+```tsx
+const z = new Zero(...);
+
+// Returns a query that selects all rows and columns from the issue table.
+z.query.issue;
+```
+
+This is a design tradeoff that allows Zero to better reuse the row locally for future queries. This also makes it easier to share types between different parts of the code.
+
+You can then chain additional clauses to refine your query:
+
+```tsx
+// Get the 10 most recently created issues
+z.query.issue.orderBy('created', 'desc').limit(10);
+
+// Get a specific issue by ID
+z.query.issue.where('id', 42).one();
+```
+
+## Data Immutability
+
+<Note type="note" emoji="🧑‍🏫" slug="immutability" heading="Data returned from ZQL should be considered immutable">
+This means you should not modify the data directly. Instead, clone the data and modify the clone.
+
+ZQL caches values and returns them multiple times. If you modify a value returned from ZQL, you will modify it everywhere it is used. This can lead to subtle bugs.
+
+JavaScript and TypeScript lack true immutable types so we use `readonly` to help enforce it. But it's easy to cast away the `readonly` accidentally.
+
+In the future, we'll [`freeze`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/freeze) all returned data in `dev` mode to help prevent this.
+
+</Note>
+
+## TypeScript Integration
+
+ZQL is designed to work seamlessly with TypeScript. Column names, table names, and data types are all inferred from your [Zero Schema](/zero-schema), providing full type safety and IntelliSense support.
+
+```tsx
+// TypeScript knows 'priority' is a valid column and suggests available values
+z.query.issue.where('priority', 'high');
+
+// TypeScript will error if you use an invalid column name
+z.query.issue.where('invalidColumn', 'value'); // ❌ Type error
+
+// Return types are fully typed based on your schema
+const issues: readonly IssueRow[] = await z.query.issue.run();
+```
+
+## Running Queries
+
+There are several ways to execute ZQL queries depending on your use case:
+
+### Reactive Queries (Recommended)
+
+For UI components, use framework-specific hooks that automatically update when data changes:
+
+```tsx
+// React
+const [issues] = useQuery(z.query.issue.orderBy('created', 'desc'));
+
+// SolidJS
+const issues = createQuery(() => z.query.issue.orderBy('created', 'desc'));
+```
+
+### One-time Queries
+
+For non-reactive use cases, use the `run()` method:
+
+```tsx
+// Get current data available on client
+const issues = await z.query.issue.run();
+
+// Wait for server response to ensure completeness
+const issues = await z.query.issue.run({type: 'complete'});
+
+// Shorthand for run() with client data only
+const issues = await z.query.issue;
+```
+
+### Materialized Views
+
+For advanced use cases, you can create a materialized view directly:
+
+```tsx
+const view = z.query.issue.materialize();
+view.addListener((issues, result) => {
+  console.log('Issues updated:', issues);
+});
+
+// Don't forget to clean up
+view.destroy();
+```
+
+## Query Composition
+
+ZQL queries are composable, meaning you can build them up incrementally:
+
+```tsx
+// Start with a base query
+let query = z.query.issue;
+
+// Add conditions based on user input
+if (priority) {
+  query = query.where('priority', priority);
+}
+
+if (assignee) {
+  query = query.where('assignee', assignee);
+}
+
+// Add ordering and limits
+query = query.orderBy('created', 'desc').limit(50);
+
+// Execute the composed query
+const [issues] = useQuery(query);
+```
+
+## Next Steps
+
+Now that you understand the fundamentals of ZQL, you can explore more specific topics:
+
+- [Query Clauses](/query-clauses) - Learn about ordering, limiting, and paging
+- [Filtering Data](/filtering-data) - Master the `where` clause and comparison operators
+- [Relationships](/relationships) - Query related data across tables
+- [Query Lifecycle](/query-lifecycle) - Understand performance and caching behavior

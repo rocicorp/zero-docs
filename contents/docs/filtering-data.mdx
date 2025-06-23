@@ -1,0 +1,252 @@
+---
+title: Filtering Data
+---
+
+Filtering is one of the most important aspects of querying data. ZQL provides powerful and type-safe filtering capabilities through the `where` clause and related operators.
+
+## Basic Where Clause
+
+You can filter a query with `where()`:
+
+```tsx
+z.query.issue.where('priority', '=', 'high');
+```
+
+The first parameter is always a column name from the table being queried. IntelliSense will offer available options (sourced from your [Zero Schema](/zero-schema)).
+
+### Equals is the Default
+
+Because comparing by `=` is so common, you can leave it out and `where` defaults to `=`:
+
+```tsx
+// These are equivalent:
+z.query.issue.where('priority', '=', 'high');
+z.query.issue.where('priority', 'high');
+```
+
+## Comparison Operators
+
+ZQL supports a comprehensive set of comparison operators with full TypeScript type checking:
+
+| Operator                                 | Allowed Operand Types         | Description                                                              |
+| ---------------------------------------- | ----------------------------- | ------------------------------------------------------------------------ |
+| `=` , `!=`                               | boolean, number, string       | JS strict equal (===) semantics                                          |
+| `<` , `<=`, `>`, `>=`                    | number                        | JS number compare semantics                                              |
+| `LIKE`, `NOT LIKE`, `ILIKE`, `NOT ILIKE` | string                        | SQL-compatible `LIKE` / `ILIKE`                                          |
+| `IN` , `NOT IN`                          | boolean, number, string       | RHS must be array. Returns true if rhs contains lhs by JS strict equals. |
+| `IS` , `IS NOT`                          | boolean, number, string, null | Same as `=` but also works for `null`                                    |
+
+TypeScript will restrict you from using operators with types that don't make sense – you can't use `>` with `boolean` for example.
+
+### Examples of Each Operator
+
+```tsx
+// Equality operators
+z.query.issue.where('status', '=', 'open');
+z.query.issue.where('status', '!=', 'closed');
+
+// Numeric comparisons
+z.query.issue.where('priority', '>', 3);
+z.query.issue.where('votes', '<=', 100);
+
+// String pattern matching
+z.query.issue.where('title', 'LIKE', '%bug%');
+z.query.issue.where('title', 'ILIKE', '%BUG%'); // case-insensitive
+
+// Array membership
+z.query.issue.where('status', 'IN', ['open', 'in-progress']);
+z.query.issue.where('priority', 'NOT IN', [1, 2]);
+
+// Null checking (see below for details)
+z.query.issue.where('assignee', 'IS', null);
+z.query.issue.where('assignee', 'IS NOT', null);
+```
+
+<Note type="note" slug="adding-operators">
+  If you don't see the comparison operator you need, let us know, many are easy
+  to add.
+</Note>
+
+## Handling Null Values
+
+As in SQL, ZQL's `null` is not equal to itself (`null ≠ null`).
+
+This is required to make join semantics work: if you're joining `employee.orgID` on `org.id` you do **not** want an employee in no organization to match an org that hasn't yet been assigned an ID.
+
+When you purposely want to compare to `null`, ZQL supports `IS` and `IS NOT` operators that work just like in SQL:
+
+```tsx
+// Find employees not in any org.
+z.query.employee.where('orgID', 'IS', null);
+
+// Find employees that are assigned to an org
+z.query.employee.where('orgID', 'IS NOT', null);
+```
+
+TypeScript will prevent you from comparing to `null` with other operators:
+
+```tsx
+// ❌ TypeScript error - can't use = with null
+z.query.employee.where('orgID', '=', null);
+
+// ✅ Correct way to check for null
+z.query.employee.where('orgID', 'IS', null);
+```
+
+## Compound Filters
+
+The argument to `where` can also be a callback that returns a complex expression:
+
+```tsx
+// Get all issues that have priority 'critical' or else have both
+// priority 'medium' and not more than 100 votes.
+z.query.issue.where(({cmp, and, or, not}) =>
+  or(
+    cmp('priority', 'critical'),
+    and(cmp('priority', 'medium'), not(cmp('numVotes', '>', 100))),
+  ),
+);
+```
+
+### Compound Filter Functions
+
+The compound filter callback provides these functions:
+
+- **`cmp`**: Short for _compare_, works the same as `where` at the top-level except that it can't be chained
+- **`and`**: Logical AND operation
+- **`or`**: Logical OR operation
+- **`not`**: Logical NOT operation
+
+### Multiple Where Clauses
+
+Note that chaining `where()` is also a one-level `and`:
+
+```tsx
+// Find issues with priority 3 or higher, owned by aa
+z.query.issue.where('priority', '>=', 3).where('owner', 'aa');
+
+// This is equivalent to:
+z.query.issue.where(({cmp, and}) =>
+  and(cmp('priority', '>=', 3), cmp('owner', 'aa')),
+);
+```
+
+### Complex Filter Examples
+
+```tsx
+// Issues that are either:
+// - High priority and unassigned, OR
+// - Medium priority with more than 50 votes
+z.query.issue.where(({cmp, and, or}) =>
+  or(
+    and(cmp('priority', 'high'), cmp('assignee', 'IS', null)),
+    and(cmp('priority', 'medium'), cmp('votes', '>', 50)),
+  ),
+);
+
+// Issues that are NOT low priority AND NOT closed
+z.query.issue.where(({cmp, and, not}) =>
+  and(not(cmp('priority', 'low')), not(cmp('status', 'closed'))),
+);
+```
+
+## Relationship Filters
+
+Your filter can also test properties of relationships. Currently the only supported test is existence:
+
+```tsx
+// Find all orgs that have at least one employee
+z.query.organization.whereExists('employees');
+```
+
+### Refining Relationship Filters
+
+The argument to `whereExists` is a relationship, so just like other relationships it can be refined with a query:
+
+```tsx
+// Find all orgs that have at least one cool employee
+z.query.organization.whereExists('employees', q =>
+  q.where('location', 'Hawaii'),
+);
+```
+
+### Nested Relationship Filters
+
+As with querying relationships, relationship filters can be arbitrarily nested:
+
+```tsx
+// Get all issues that have comments that have reactions
+z.query.issue.whereExists('comments', q => q.whereExists('reactions'));
+```
+
+### Using Exists in Compound Filters
+
+The `exists` helper is also provided which can be used with `and`, `or`, `cmp`, and `not` to build compound filters that check relationship existence:
+
+```tsx
+// Find issues that have at least one comment or are high priority
+z.query.issue.where(({cmp, or, exists}) =>
+  or(cmp('priority', 'high'), exists('comments')),
+);
+
+// Find issues that have comments but no reactions
+z.query.issue.where(({and, not, exists}) =>
+  and(
+    exists('comments'),
+    not(exists('comments', q => q.whereExists('reactions'))),
+  ),
+);
+```
+
+## Performance Tips
+
+- **Use indexes**: Ensure columns used in `where` clauses are indexed in your database
+- **Filter early**: Apply the most selective filters first when chaining multiple `where` clauses
+- **Relationship filters**: `whereExists` can be expensive; consider denormalizing frequently-checked relationship data
+- **Compound filters**: Complex compound filters may benefit from database query plan analysis
+
+## Common Patterns
+
+### Status-based Filtering
+
+```tsx
+// Active items only
+z.query.issue.where('status', 'IN', ['open', 'in-progress']);
+
+// Everything except deleted
+z.query.issue.where('status', '!=', 'deleted');
+```
+
+### Date Range Filtering
+
+```tsx
+// Issues created in the last week
+const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+z.query.issue.where('created', '>=', weekAgo);
+
+// Issues created between two dates
+z.query.issue.where(({cmp, and}) =>
+  and(cmp('created', '>=', startDate), cmp('created', '<=', endDate)),
+);
+```
+
+### User-based Filtering
+
+```tsx
+// Issues assigned to current user
+z.query.issue.where('assignee', currentUserId);
+
+// Issues created by or assigned to current user
+z.query.issue.where(({cmp, or}) =>
+  or(cmp('creator', currentUserId), cmp('assignee', currentUserId)),
+);
+```
+
+## Next Steps
+
+Now that you understand filtering, explore these related topics:
+
+- [Relationships](/relationships) - Query related data across tables
+- [Clauses](/query-clauses) - Learn about ordering, limiting, and paging
+- [Query Lifecycle](/query-lifecycle) - Understand performance and caching behavior
+- [ZQL Fundamentals](/zql-fundamentals) - Review the basics if needed

@@ -495,6 +495,11 @@ mark {
   transition: opacity 0.2s;
 }
 
+html.dark .heading-link::after {
+  background: transparent url(/images/heading-link-darkmode.svg) no-repeat
+    center center;
+}
+
 h3 .heading-link::after {
   top: 0.32rem;
 }

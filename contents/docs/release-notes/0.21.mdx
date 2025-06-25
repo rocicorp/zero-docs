@@ -1,0 +1,44 @@
+---
+title: Zero 0.21
+description: Initial PG array support, new TanStack starter, and more
+---
+
+## Install
+
+```bash
+npm install @rocicorp/zero@0.21
+```
+
+## Upgrading
+
+See the [hello-zero](TODO) for an example of using arrays and the new `ZeroProvider` features.
+
+## Features
+
+- Add initial support for Postgres arrays ([docs](/docs/postgres-support#column-types), [bug](https://bugs.rocicorp.dev/issue/3617)).
+- The React `ZeroProvider` now accepts the `Zero` constructor params and creates/destroys `Zero` instances as needed ([docs](/docs/react#zero-provider), [PR](https://github.com/rocicorp/mono/pull/4527)).
+- Initial replication is now memory-bounded ([PR](https://github.com/rocicorp/mono/pull/4408)).
+- Add `--output-vended-rows` and `--output-synced-rows` to `analyze-query` ([PR](https://github.com/rocicorp/mono/pull/4463)).
+- Expose `Zero` instances automatically at `__zero` ([docs](/docs/debug/inspector#creating-an-inspector), [PR](https://github.com/rocicorp/mono/pull/4526)).
+- Technically a bug fix, but this was so annoying I'm calling it a feature: `zero-sqlite3` now correctly supports the up arrow key ([commit](https://github.com/rocicorp/zero-sqlite3/commit/50c7a850572d9d3d4ac26ffb2e1cca2e8c5e08b0)).
+- Another super annoying fix: log output from `zero-cache` is now colorized ([PR](https://github.com/rocicorp/mono/pull/4533)).
+
+## Fixes
+
+- Change the way otel starts up in `zero-cache-dev` to not rely on `npx` ([PR](https://github.com/rocicorp/mono/pull/4448)).
+- Use existing `--log-slow-hydrate-threshold` as the threshold for `--query-hydration-stats` rather than hardcoded 200ms.
+- Fix race condition starting up in multinode deployments ([PR](https://github.com/rocicorp/mono/pull/4400)).
+- Avoid site-local IPv6 addresses in auto-discovery ([PR](https://github.com/rocicorp/mono/pull/4414)).
+- Many z2s fixes found by our fuzzer (PRs: [4415](https://github.com/rocicorp/mono/pull/4415), [4416](https://github.com/rocicorp/mono/pull/4416), [4417](https://github.com/rocicorp/mono/pull/4417), [4421](https://github.com/rocicorp/mono/pull/4421), [4422](https://github.com/rocicorp/mono/pull/4422), [4423](https://github.com/rocicorp/mono/pull/4423).
+- `analyze-query`: don't load prettier. This was causing problems when prettier config was cjs. ([PR](https://github.com/rocicorp/mono/pull/4441)).
+- `analyze-query`: don't hydrate system relationships. This was causing incorrect results. ([PR](https://github.com/rocicorp/mono/pull/4458)).
+- Fix memory leaks from not cleaning up `pusher` and `mutagen` ([PR](https://github.com/rocicorp/mono/pull/4481)).
+- Fix handling of invalid websocket requests that were crashing server ([PR](https://github.com/rocicorp/mono/pull/4490)).
+- Lazy-load otel. This was causing problems with `pnpm` ([PR](https://github.com/rocicorp/mono/pull/4492)).
+- Remove red error text when `.env` missing ([PR](https://github.com/rocicorp/mono/pull/4523)).
+- Allow `zero-cache` to startup without schema file, but print a warning ([PR](https://github.com/rocicorp/mono/pull/4531)).
+- Log a warning when auth token exceeds max allowed header size ([PR](https://github.com/rocicorp/mono/pull/4535)).
+
+## Breaking Changes
+
+- Using `order by` and `limit` in many:many relationships now throws an error. It didn't work before but did the wrong thing silently. See [docs](/docs/reading-data#order-and-limit-not-supported-in-junction-relationships), [bug](https://bugs.rocicorp.dev/issue/3527).

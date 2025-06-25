@@ -15,11 +15,10 @@ This can help figuring out why you hit loading states, how many queries are acti
 
 Each `Zero` instance has an `inspect` method that will return the inspector. The `inspect` method is asynchronous because it performs lazy loading of inspect-only related code.
 
+For convenience, the active `Zero` instance is automatically exposed at `__zero`, so you can access the inspector in the console like this:
+
 ```ts
-const z = new Zero({
-  /*your zero options*/
-});
-const inspector = await z.inspect();
+const inspector = await __zero.inspect();
 ```
 
 <Note type="warning" slug="code-splitting">

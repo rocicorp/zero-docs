@@ -141,6 +141,12 @@ z.query.issue.related(
 
 This _relationship query_ can have all the same clauses that top-level queries can have.
 
+<Note type="warning" heading="Order and limit not supported in junction relationships">
+Using `orderBy` or `limit` in a relationship that goes through a junction table is not currently supported and will throw a runtime error. See [bug 3527](https://bugs.rocicorp.dev/issue/3527).
+
+You can sometimes work around this by making the junction relationship explicit, depending on your schema and usage.
+</Note>
+
 ### Nested Relationships
 
 You can nest relationships arbitrarily:

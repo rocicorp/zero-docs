@@ -21,18 +21,64 @@ Postgres has a massive feature set, of which Zero supports a growings subset.
 
 ## Column Types
 
-| Postgres Type                     | Type to put in `schema.ts` | Resulting JS/TS Type |
-| --------------------------------- | -------------------------- | -------------------- |
-| All numeric types                 | `number`                   | `number`             |
-| `char`, `varchar`, `text`, `uuid` | `string`                   | `string`             |
-| `bool`                            | `boolean`                  | `boolean`            |
-| `date`, `timestamp`, `timestampz` | `number`                   | `number`             |
-| `json`, `jsonb`                   | `json`                     | `JSONValue`          |
-| `enum`                            | `enumeration`              | `string`             |
+<table>
+  <thead>
+    <tr>
+      <th>Postgres Type</th>
+      <th>Type&nbsp;to&nbsp;put&nbsp;in&nbsp;`schema.ts`</th>
+      <th>Resulting&nbsp;JS/TS&nbsp;Type</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>All numeric types</td>
+      <td><code>number</code></td>
+      <td><code>number</code></td>
+    </tr>
+    <tr>
+      <td><code>char</code>, <code>varchar</code>, <code>text</code>, <code>uuid</code></td>
+      <td><code>string</code></td>
+      <td><code>string</code></td>
+    </tr>
+    <tr>
+      <td><code>bool</code></td>
+      <td><code>boolean</code></td>
+      <td><code>boolean</code></td>
+    </tr>
+    <tr>
+      <td><code>date</code>, <code>timestamp</code>, <code>timestampz</code></td>
+      <td><code>number</code></td>
+      <td><code>number</code></td>
+    </tr>
+    <tr>
+      <td><code>json</code>, <code>jsonb</code></td>
+      <td><code>json</code></td>
+      <td><code>JSONValue</code></td>
+    </tr>
+    <tr>
+      <td><code>enum</code></td>
+      <td><code>enumeration</code></td>
+      <td><code>string</code></td>
+    </tr>
+    <tr>
+      <td><code>T[]</code> <em>where <code>T</code> is a supported Postgres type (but please see ⚠️ below)</em></td>
+      <td><code>json&lt;U[]&gt;</code> <em>where <code>U</code> is the schema.ts type for <code>T</code></em></td>
+      <td><code>V[]</code> <em>where <code>V</code> is the JS/TS type for <code>T</code></em></td>
+    </tr>
+  </tbody>
+</table>
+
+<Note emoji="⚠️" type="note" heading="No ZQL operators for arrays yet">
+
+Zero will sync arrays to the client, but there is no support for filtering or joining on array elements yet in ZQL.
+
+</Note>
+
+
 
 Other Postgres column types aren’t supported. They will be ignored when replicating (the synced data will be missing that column) and you will get a warning when `zero-cache` starts up.
 
-If your schema has a pg type not listed here, you can support it in Zero by using a trigger to map it to some type that Zero can support. For example if you have an [enum type](https://www.postgresql.org/docs/current/datatype-enum.html#DATATYPE-ENUM) `Mood` used by column `user_mood mood`, you can use a trigger to map it to a `user_mood_text text` column. You would then use another trigger to map changes to `user_mood_text` back to `user_mood` so that the data can be updated by Zero.
+If your schema has a pg type not listed here, you can support it in Zero by using a trigger to map it to some type that Zero can support. For example if you have a [GIS polygon type](https://www.postgresql.org/docs/current/datatype-geometric.html#DATATYPE-POLYGON) in the column `my_poly polygon`, you can use a trigger to map it to a `my_poly_json json` column. You could either use another trigger to map in the reverse direction to support changes for writes, or you could use a [custom mutator](./custom-mutators) to write to the polygon type directly on the server.
 
 Let us know if the lack of a particular column type is hindering your use of Zero. It can likely be added.
 

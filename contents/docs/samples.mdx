@@ -4,59 +4,59 @@ title: Samples
 
 ## zbugs
 
-[zbugs](https://bugs.rocicorp.dev/) is a complete issue tracker in the style of Linear built with Zero.
+A complete Linear-style bug tracker. Not just a demo app, this is our actual live bug db. We use it every day and depend on it.
 
-Not just a demo app, this is the Rocicorp’s actual live issue tracker. We use it everyday and depend on it.
+<a href="https://bugs.rocicorp.dev/">
+  <img src="/images/samples/zbugs.png" alt="zbugs" style={{border: 'none', padding: 'none'}} />
+</a>
 
-<ImageLightbox src="/images/samples/zbugs.png" alt="zbugs" />
+**Demo:** https://bugs.rocicorp.dev/<br/>
+**Stack:** Vite/Fastify/React/AWS<br/>
+**Source:** https://github.com/rocicorp/mono/tree/main/apps/zbugs<br/>
+**Features:** Instant reads and writes, realtime updates, Github auth, write permissions, read permissions, custom mutators, complex filters, unread indicators, basic text search, emojis, short numeric bug IDs, notifications, and more.
 
-**Stack:** Vite/Fastify/React<br/>
-**Live demo:** https://bugs.rocicorp.dev/<br/>
-**Source:** https://github.com/rocicorp/mono/tree/main/apps/zbugs
+## ztunes
 
-### Features
+An ecommerce store built with Zero, TanStack, Drizzle, and Supabase.
 
-- Instant reads and writes with realtime updates throughout
-- Github auth
-- Write permissions (anyone can create a bug, but only creator can edit their own bug, etc)
-- Read permissions (only admins can see internal issues and comments on those issues)
-- Complex filters
-- Unread indicators
-- Basic text search
-- Emojis
-- Short numeric bug IDs rather than cryptic hashes
+<a href="https://ztunes.rocicorp.dev">
+  <img src="/images/samples/ztunes.png" alt="ztunes" style={{border: 'none', padding: 'none'}} />
+</a>
+
+**Demo:** https://ztunes.rocicorp.dev/<br/>
+**Stack:** TanStack/Drizzle/Better Auth/Fly.io<br/>
+**Source:** https://github.com/rocicorp/ztunes<br/>
+**Features:** 88k artists, 200k albums, single-command dev, full drizzle integration, text search, read permissions, write permissions.
 
 ## hello-zero
 
-A quickstart showing off the key features of Zero.
+Simple quickstart for Zero/React.
 
 <ImageLightbox src="/images/samples/quickstart.png" alt="Quickstart" />
 
 **Stack:** Vite/Hono/React<br/>
 **Source:** https://github.com/rocicorp/hello-zero<br/>
-**Docs:** [Quickstart](/docs/quickstart)
-
-### Features
-
-- Instant reads and writes with realtime updates throughout
-- 60fps (ish) mutations and sync
-- Hard-coded auth + write permissions
-- Write permissions (only logged in users can remove messages, only creating user can edit a message)
-- Complex filters
-- Basic text search
+**Docs:** [Quickstart](/docs/quickstart)<br/>
+**Features:** Instant reads and writes, realtime updates.
 
 ## hello-zero-solid
 
-Same as `hello-zero`, but in Solid. See @SolidJS.
+Simple quickstart for Zero/SolidJS.
+
+<ImageLightbox src="/images/samples/hello-zero-solid.png" alt="Quickstart" />
+
+**Stack:** Vite/Hono/SolidJS<br/>
+**Source:** https://github.com/rocicorp/hello-zero-solid
+**Features:** Instant reads and writes, realtime updates, custom mutators.
 
 ## hello-zero-do
+
+Shows how to use the Zero client from a Cloudflare Durable Objects.
 
 <Video
   src="https://d2nzlypqdo5xbb.cloudfront.net/video/hello-zero-do.mp4"
   alt="hello-zero-do demo"
 />
-
-Same as `zero-hello` and `zero-hello-solid` above, but demonstrates Cloudflare Durable Objects integration.
 
 This sample runs `zero-client` within a Durable Object and monitors changes to a Zero query. This can be used to do things like send notifications, update external services, etc.
 

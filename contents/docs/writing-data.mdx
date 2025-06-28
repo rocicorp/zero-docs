@@ -30,24 +30,36 @@ z.mutate.user.insert({
 });
 ```
 
-Optional fields can be set to `null` to explicitly set the new field to `null`. They can also be set to `undefined` to take the default value (which is often `null` but can also be some generated value server-side).
+Nullable fields can be set to `null` to explicitly set the new field to `null`. They can also be set to `undefined` to take the default value (which is often `null` but can also be some generated value server-side).
+
+<Note>
+  Columns with an `onInsert()` function do not need to be specified and will be automatically populated if omitted (or set to `undefined`).
+</Note>
 
 ```tsx
 // schema.ts
-import {createTableSchema} from '@rocicorp/zero';
+import {table, string, number} from '@rocicorp/zero';
 
-const userSchema = createTableSchema({
-  tableName: 'user',
-  columns: {
-    id: {type: 'string'},
-    name: {type: 'string'},
-    language: {type: 'string', optional: true},
-  },
-  primaryKey: ['id'],
-  relationships: {},
-});
+const user = table('user')
+  .columns({
+    id: string(),
+    username: string(),
+    language: string().nullable(),
+    createdAt: number().onInsert(() => Date.now()),
+    updatedAt: number()
+      .onInsert(() => Date.now())
+      .onUpdate(() => Date.now()),
+  })
+  .primaryKey('id');
 
 // app.tsx
+
+// Columns with onInsert() defaults are automatically populated
+z.mutate.user.insert({
+  id: '1',
+  username: 'John Doe',
+});
+// { id: '1', username: 'John Doe', createdAt: 1743018158777, updatedAt: 1743018158777 }
 
 // Sets language to `null` specifically
 z.mutate.user.insert({
@@ -85,14 +97,23 @@ z.mutate.user.upsert({
 
 `upsert` supports the same `null` / `undefined` semantics for optional fields that `insert` does (see above).
 
+<Note>
+  For columns with only an `onUpdate()` default, you must include that column (with `undefined` or a value) so Zero can use the value if it uses an insert.
+  This is because Zero doesn't know whether it will be an insert or update.
+</Note>
+
 ## Update
 
 Update an existing record. Does nothing if the specified record (by PK) does not exist.
 
+<Note>
+  Columns with `onUpdate()` defaults will be automatically populated if you omit them.
+</Note>
+
 You can pass a partial, leaving fields out that you don’t want to change. For example here we leave the username the same:
 
 ```tsx
-// Leaves username field to previous value.
+// Leaves username field to previous value. updatedAt is automatically set.
 z.mutate.user.update({
   id: samID,
   language: 'golang',

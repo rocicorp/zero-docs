@@ -114,7 +114,7 @@ export default $config({
     };
   },
   async run() {
-    const zeroVersion = execSync('npm show @rocicorp/zero version')
+    const zeroVersion = execSync('cat package.json | jq '.dependencies["@rocicorp/zero"]')
       .toString()
       .trim();
 

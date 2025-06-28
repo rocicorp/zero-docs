@@ -89,9 +89,9 @@ A nullable column can store a value of the specified type or `null` to mean _no 
 <Note type="note" heading="Null and undefined">
     Note that `null` and `undefined` mean different things when working with Zero rows.
 
-    - When reading, if a column is `optional`, Zero can return `null` for that field. `undefined` is not used at all when Reading from Zero.
-    - When writing, you can specify `null` for an optional field to explicitly write `null` to the datastore, unsetting any previous value.
-    - For `create` and `upsert` you can set optional fields to `undefined` (or leave the field off completely) to take the default value as specified by backend schema for that column. For `update` you can set any non-PK field to `undefined` to leave the previous value unmodified.
+    - When reading, if a column is `nullable`, Zero can return `null` for that field. `undefined` is not used at all when Reading from Zero.
+    - When writing, you can specify `null` for a nullable field to explicitly write `null` to the datastore, unsetting any previous value.
+    - For `create` and `upsert` you can set nullable fields to `undefined` (or leave the field off completely) to take the default value as specified by backend schema for that column. For `update` you can set any non-PK field to `undefined` to leave the previous value unmodified.
 
 </Note>
 

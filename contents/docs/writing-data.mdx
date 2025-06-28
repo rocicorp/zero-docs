@@ -95,7 +95,7 @@ z.mutate.user.upsert({
 });
 ```
 
-`upsert` supports the same `null` / `undefined` semantics for optional fields that `insert` does (see above).
+`upsert` supports the same `null` / `undefined` semantics for nullable fields that `insert` does (see above).
 
 <Note>
   For columns with only an `onUpdate()` default, you must include that column (with `undefined` or a value) so Zero can use the value if it uses an insert.

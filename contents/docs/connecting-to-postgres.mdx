@@ -16,6 +16,7 @@ Here are some common Postgres options and what we know about their support level
 | Postgres.app                      | ✅ |
 | postgres:16.2-alpine docker image | ✅ |
 | Supabase                          | ✅&nbsp;&nbsp;See [notes below](#supabase) |
+| PlanetScale for Postgres | 🤷‍♂️&nbsp;&nbsp;No [event triggers](#event-triggers), see [notes below](#planetscale-for-postgres) |
 | Render                            | 🤷‍♂️&nbsp;&nbsp;No [event triggers](#event-triggers) |
 | Heroku                            | 🤷‍♂️&nbsp;&nbsp;No [event triggers](#event-triggers) |
 
@@ -94,6 +95,12 @@ support IPv6, but some do not. For example, if you are running `zero-cache` in A
 difficult.
 
 IPv4 addresses are only supported on the Pro plan and are an extra $4/month.
+
+## PlanetScale for Postgres
+
+PlanetScale doesn't support [event triggers](#event-triggers) yet, but they say this is something they are working on.
+
+PlanetScale also doesn't support creating publications with the [`FOR ALL TABLES` clause](https://www.postgresql.org/docs/current/sql-createpublication.html). Zero typically uses this to create an initial default publication during setup. You can workaround this by [creating a publication](postgres-support#limiting-replication) explicitly listing the tables you want to replicate.
 
 ## Neon
 

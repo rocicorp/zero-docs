@@ -8,16 +8,18 @@ Here are some common Postgres options and what we know about their support level
 
 | Postgres                          | Support Status                                                                                                |
 | --------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| AWS RDS                           | ✅                                                                                                            |
-| AWS Aurora                        | ✅ v15.6+                                                                                                     |
-| Google Cloud SQL                  | ✅ See [notes below](#google-cloud-sql)                                                                       |
-| [Fly.io](http://Fly.io) Postgres  | ✅ See [notes below](#flyio)                                                                       |                                                                                                           |
-| Postgres.app                      | ✅                                                                                                            |
-| postgres:16.2-alpine docker image | ✅                                                                                                            |
-| Supabase                          | ✅ See [notes below](#supabase)                                                                               |
-| Neon, Render, Heroku              | 🤷‍♂️ Partial support with `autoreset`. See [Schema Changes](#schema-changes) and provider-specific notes below. |
+| AWS RDS                           | ✅ |
+| AWS Aurora                        | ✅&nbsp;&nbsp;v15.6+ |
+| Google Cloud SQL                  | ✅&nbsp;&nbsp;See [notes below](#google-cloud-sql) |
+| [Fly.io](http://Fly.io) Postgres  | ✅&nbsp;&nbsp;See [notes below](#flyio) |
+| Neon                              | ✅&nbsp;&nbsp;See [notes below](#neon) |
+| Postgres.app                      | ✅ |
+| postgres:16.2-alpine docker image | ✅ |
+| Supabase                          | ✅&nbsp;&nbsp;See [notes below](#supabase) |
+| Render                            | 🤷‍♂️&nbsp;&nbsp;No [event triggers](#event-triggers) |
+| Heroku                            | 🤷‍♂️&nbsp;&nbsp;No [event triggers](#event-triggers) |
 
-## Schema Changes
+## Event Triggers
 
 Zero uses Postgres “[Event Triggers](https://www.postgresql.org/docs/current/sql-createeventtrigger.html)” when possible to implement high-quality, efficient [schema migration](zero-schema/#migrations).
 
@@ -92,3 +94,15 @@ support IPv6, but some do not. For example, if you are running `zero-cache` in A
 difficult.
 
 IPv4 addresses are only supported on the Pro plan and are an extra $4/month.
+
+## Neon
+
+Neon fully supports Zero, but you should be aware of how Neon's pricing model and Zero interact.
+
+Because Zero keeps an open connection to Postgres to replicate changes, as long as zero-cache is running, Postgres will be running and you will be charged by Neon.
+
+For production databases that have enough usage to always be running anyway, this is fine. But for smaller applications that would otherwise not always be running, this can create a surprisingly high bill. You may want to choose a provider that charge a flat monthly rate instead.
+
+Also some users choose Neon because they hope to use branching for previews. Note that Zero doesn't support this usage model well yet, and if not done with care, Zero can end up keeping each Neon *preview* branch running too 😳.
+
+We are actively working on better preview support.

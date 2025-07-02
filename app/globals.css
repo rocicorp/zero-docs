@@ -16,6 +16,7 @@
     --secondary-foreground: 240 5.9% 10%;
     --muted: 240 4.8% 95.9%;
     --muted-foreground: 240 3.8% 46.1%;
+    --theme-toggle-bg: 0, 0, 0, 0.4;
     --accent: 240 4.8% 95.9%;
     --accent-foreground: 240 5.9% 10%;
     --destructive: 0 84.2% 60.2%;
@@ -47,6 +48,7 @@
     --secondary-foreground: 0 0% 98%;
     --muted: 240 3.7% 15.9%;
     --muted-foreground: 240 5% 64.9%;
+    --theme-toggle-bg: 255, 255, 255, 0.4;
     --accent: 240 3.7% 15.9%;
     --accent-foreground: 0 0% 98%;
     --destructive: 0 62.8% 30.6%;
@@ -62,6 +64,32 @@
     --code-border: rgba(39, 39, 42, 1);
     --inline-code-foreground: rgb(39, 252, 174);
     --inline-code-background: rgb(26, 27, 38);
+  }
+}
+
+.theme-toggle-group {
+  margin-top: 1rem;
+  display: flex;
+  gap: 0.5rem;
+  border: 1px solid hsl(var(--foreground) / 30%);
+  border-radius: 4rem;
+  padding: 0.25rem;
+  width: fit-content;
+
+  .theme-toggle {
+    border-radius: 4rem;
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+}
+
+.theme-toggle.active {
+  background-color: hsl(var(--foreground));
+  color: hsl(var(--background));
+
+  &:hover {
+    background-color: hsl(var(--foreground));
+    color: hsl(var(--background));
   }
 }
 

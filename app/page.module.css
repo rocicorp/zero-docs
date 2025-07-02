@@ -169,6 +169,14 @@
   opacity: 1;
 }
 
+.rootThemeToggleContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  margin-top: 2rem;
+}
+
 p.footerText {
   margin-top: 1rem;
   text-align: center;

@@ -40,6 +40,7 @@ export default function DocsMenu({isSheet = false}) {
             <TwitterLogo />
           </Link>
         </div>
+        <ModeToggle />
       </div>
     </div>
   );

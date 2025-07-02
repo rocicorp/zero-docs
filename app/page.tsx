@@ -74,7 +74,6 @@ export default function Home() {
           >
             <a href="/docs/introduction">Docs</a>
           </Button>
-          <ModeToggle />
         </div>
       </div>
 
@@ -180,6 +179,9 @@ export default function Home() {
             className={cn(styles.rociLogo, 'text-foreground')}
           />
         </Link>
+      </div>
+      <div className={styles.rootThemeToggleContainer}>
+        <ModeToggle />
       </div>
     </div>
   );

@@ -86,7 +86,7 @@
   color: hsl(var(--background));
 
   &:hover {
-    background-color: hsl(var(--foreground));
+    background-color: hsl(var(--foreground) / 50%);
     color: hsl(var(--background));
   }
 }

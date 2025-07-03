@@ -65,7 +65,7 @@ option when running `zero-cache`.
 
 (Google Cloud SQL does not provide sufficient permissions for `zero-cache` to create its default publication.)
 
-## Fly.io
+### Fly.io
 
 Fly does not support TLS on their internal networks. If you run both `zero-cache` and Postgres on Fly, you need
 to stop `zero-cache` from trying to use TLS to talk to Postgres. You can do this by adding the `sslmode=disable`
@@ -96,13 +96,13 @@ difficult.
 
 IPv4 addresses are only supported on the Pro plan and are an extra $4/month.
 
-## PlanetScale for Postgres
+### PlanetScale for Postgres
 
 PlanetScale doesn't support [event triggers](#event-triggers) yet, but they say this is something they are working on.
 
 PlanetScale also doesn't support creating publications with the [`FOR ALL TABLES` clause](https://www.postgresql.org/docs/current/sql-createpublication.html). Zero typically uses this to create an initial default publication during setup. You can workaround this by [creating a publication](postgres-support#limiting-replication) explicitly listing the tables you want to replicate.
 
-## Neon
+### Neon
 
 Neon fully supports Zero, but you should be aware of how Neon's pricing model and Zero interact.
 

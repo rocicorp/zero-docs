@@ -6,7 +6,6 @@ import CodeBlock from '@/components/CodeBlock';
 import {Button} from '@/components/ui/button';
 import {cn} from '@/lib/utils';
 import ZeroAlphaLogo from '@/components/logos/ZeroAlpha';
-import {ModeToggle} from '@/components/theme-toggle';
 import RocicorpLogo from '@/components/logos/Rocicorp';
 
 export default function Home() {
@@ -74,7 +73,6 @@ export default function Home() {
           >
             <a href="/docs/introduction">Docs</a>
           </Button>
-          <ModeToggle />
         </div>
       </div>
 
@@ -181,6 +179,7 @@ export default function Home() {
           />
         </Link>
       </div>
+      <div className={styles.rootThemeToggleContainer}></div>
     </div>
   );
 }

@@ -70,7 +70,7 @@ export function ModeToggle() {
       <Button
         variant="ghost"
         size="icon"
-        onClick={() => setTheme('light')}
+        onMouseDown={() => setTheme('light')}
         className={`theme-toggle ${theme === 'light' ? 'active' : ''}`}
       >
         <LightThemeIcon />
@@ -79,7 +79,7 @@ export function ModeToggle() {
       <Button
         variant="ghost"
         size="icon"
-        onClick={() => setTheme('dark')}
+        onMouseDown={() => setTheme('dark')}
         className={`theme-toggle ${theme === 'dark' ? 'active' : ''}`}
       >
         <DarkThemeIcon />
@@ -88,7 +88,7 @@ export function ModeToggle() {
       <Button
         variant="ghost"
         size="icon"
-        onClick={() => setTheme('system')}
+        onMouseDown={() => setTheme('system')}
         className={`theme-toggle ${theme === 'system' ? 'active' : ''}`}
       >
         <SystemThemeIcon />

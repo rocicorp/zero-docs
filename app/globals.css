@@ -77,27 +77,17 @@
     border-radius: 4rem;
     width: 1.5rem;
     height: 1.5rem;
+    color: hsl(var(--foreground) / 50%);
   }
 }
 
 .theme-toggle.active {
-  background-color: hsl(var(--foreground));
+  background-color: hsl(var(--foreground) / 50%);
   color: hsl(var(--background));
 
   &:hover {
     background-color: hsl(var(--foreground));
     color: hsl(var(--background));
-  }
-}
-
-.leftbar-aside {
-  .theme-toggle {
-    color: hsl(var(--foreground) / 50%);
-
-    &.active {
-      background-color: hsl(var(--foreground) / 50%);
-      color: hsl(var(--background));
-    }
   }
 }
 

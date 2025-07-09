@@ -3,9 +3,9 @@
 const fs = require('fs');
 const path = require('path');
 
-// Extract page paths from routes-config.tsx
+// Extract page paths from routes-config.ts
 function extractPagesFromRoutesConfig() {
-  const routesConfigPath = path.join(__dirname, 'lib', 'routes-config.tsx');
+  const routesConfigPath = path.join(__dirname, 'lib', 'routes-config.ts');
   const content = fs.readFileSync(routesConfigPath, 'utf8');
 
   // Extract all href values
@@ -77,9 +77,9 @@ function generateLLMsFile() {
   const outputFile = path.join(__dirname, 'public', 'llms.txt');
 
   try {
-    // Get ordered pages from routes-config.tsx
+    // Get ordered pages from routes-config.ts
     const tocPages = extractPagesFromRoutesConfig();
-    console.log(`Found ${tocPages.length} pages in routes-config.tsx`);
+    console.log(`Found ${tocPages.length} pages in routes-config.ts`);
 
     let allText = '';
     let processedFiles = new Set();

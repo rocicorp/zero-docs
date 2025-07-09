@@ -1,0 +1,1837 @@
+[
+  {
+    "id": "0-add-to-existing-project",
+    "title": "Add to Existing Project",
+    "url": "/docs/add-to-existing-project",
+    "icon": "Plus",
+    "content": "Zero integrates easily into most JavaScript or TypeScript projects, whether you're using React, Vue, Svelte, Solid, or vanilla JavaScript. Prerequisites A PostgreSQL database with Write-Ahead Logging (WAL) enabled. See Connecting to Postgres for setup instructions. If you are using TypeScript ensure that is set to in tsconfig.json. If this is not set then the advanced types Zero uses do not work as expected. Installation Install the Zero package: Zero's server component depends on , which contains a binary that requires running a postinstall script. Most alternative package managers (non-npm) disable these scripts by default for security reasons. Here's how to enable installation for common alternatives: pnpm For pnpm, either: Run to approve all build scripts, or Add the specific dependency to your : Bun For Bun, add the dependency to your trusted dependencies list: Environment Variables Configure Zero by creating a file in your project root: Replace the placeholders with your database connection details. For more options, see configuration options. Starting the Server Start the Zero server using the CLI: The server runs on port 4848 by default. To verify, open in your browser. If everything is configured correctly, you'll see \"OK\". Defining Your Schema Define your data model schema as described in the Zero schema documentation. Example: If you're using Prisma or Drizzle, you can convert their schemas to Zero schemas using tools listed in the community section. Permissions Update to include permissions for your tables. For example, to allow all users to read and write to the table, add the following: For more details, see permissions. Creating a Zero Instance To create a Zero client instance: In production, avoid hardcoding the server URL. Use environment variables like or . Reading Data To read data, use the method on a from the instance. This creates a materialized view that listens for real-time updates to the data: When the view is no longer needed, ensure you clean up by destroying it: For more details, see Reading Data with ZQL. React React developers can use the hook for seamless integration. See Integrations React for more details. SolidJS For SolidJS, use the function instead of . Refer to Integrations SolidJS for additional information. Other Frameworks For other frameworks, see the UI frameworks documentation. Writing Data Zero supports both simple and advanced data mutations. For basic use cases, use the CRUD mutator: For more complex scenarios, such as custom business logic, use custom mutators to define tailored mutation behavior. Server-Side Rendering (SSR) Zero does not yet support SSR. See SSR for details on disabling SSR for your framework. Deployment Ensure all variables are set in the production environment. For Zero cache deployment, see Deployment. For frontend deployment, consult your framework's documentation.",
+    "headings": [
+      {
+        "text": "Prerequisites",
+        "id": "prerequisites"
+      },
+      {
+        "text": "Installation",
+        "id": "installation"
+      },
+      {
+        "text": "pnpm",
+        "id": "pnpm"
+      },
+      {
+        "text": "Bun",
+        "id": "bun"
+      },
+      {
+        "text": "Environment Variables",
+        "id": "environment-variables"
+      },
+      {
+        "text": "Starting the Server",
+        "id": "starting-the-server"
+      },
+      {
+        "text": "Defining Your Schema",
+        "id": "defining-your-schema"
+      },
+      {
+        "text": "Permissions",
+        "id": "permissions"
+      },
+      {
+        "text": "Creating a Zero Instance",
+        "id": "creating-a-zero-instance"
+      },
+      {
+        "text": "Reading Data",
+        "id": "reading-data"
+      },
+      {
+        "text": "React",
+        "id": "react"
+      },
+      {
+        "text": "SolidJS",
+        "id": "solidjs"
+      },
+      {
+        "text": "Other Frameworks",
+        "id": "other-frameworks"
+      },
+      {
+        "text": "Writing Data",
+        "id": "writing-data"
+      },
+      {
+        "text": "Server-Side Rendering (SSR)",
+        "id": "server-side-rendering-ssr"
+      },
+      {
+        "text": "Deployment",
+        "id": "deployment"
+      }
+    ]
+  },
+  {
+    "id": "1-auth",
+    "title": "Authentication",
+    "url": "/docs/auth",
+    "icon": "KeyRound",
+    "content": "Zero uses a JWT-based flow to authenticate connections to zero-cache. Frontend During login: Your API server creates a and sends it to your client. Your client constructs a instance with this token by passing it to the option. Server For to be able to verify the JWT, one of the following environment variables needs to be set: - If your API server uses a symmetric key (secret) to create JWTs then this is that same key. - If your API server uses a private key to create JWTs then this is the corresponding public key, in JWK format. - Many auth providers host the public keys used to verify the JWTs they create at a public URL. If you use a provider that does this, or you publish your own keys publicly, set this to that URL. Refresh The parameter to Zero can also be a function: In this case, Zero will call this function to get a new JWT if verification fails. Client-Side Data Storage Zero stores client-side data in by default, but this is customizable with the parameter: Because multiple users can share the same browser, Zero requires that you provide a parameter on construction: Zero stores each user's data in a different IndexedDB instance. This allows users to quickly switch between multiple users and accounts without resyncing. <Note emoji=\"🧑‍🏫\" type=\"warning\" heading=\" is not a security boundary\" slug=\"user-id-is-not-a-security-boundary\" All users that have access to a browser profile have access to the same IndexedDB instances. There is nothing that Zero can do about this – users can just open the folder where the data is stored and look inside it. If your application is unauthenticated, or if you don't need fast user switching, you can just set to a constant like or : Alternately, if you have more than one set of Zero data per-user (i.e., for different apps in the same domain), you can additonally use the parameter: If specified, is concatenated along with and other internal Zero information to form a unique IndexedDB database name. Logging Out When a user logs out, you should consider what should happen to the synced data. If you do nothing, the synced data will be left on the device. The next login will be a little faster because Zero doesn't have to resync that dta from scratch. But also, the data will be left on the device indefinitely which could be undesirable for privacy and security. If you instead want to clear data on logout, Zero provides the function: Permissions Any data placed into your JWT (claims) can be used by permission rules on the backend. See the permissions section for more details. Examples See zbugs or hello-zero.",
+    "headings": [
+      {
+        "text": "Frontend",
+        "id": "frontend"
+      },
+      {
+        "text": "Server",
+        "id": "server"
+      },
+      {
+        "text": "Refresh",
+        "id": "refresh"
+      },
+      {
+        "text": "Client-Side Data Storage",
+        "id": "client-side-data-storage"
+      },
+      {
+        "text": "Logging Out",
+        "id": "logging-out"
+      },
+      {
+        "text": "Permissions",
+        "id": "permissions"
+      },
+      {
+        "text": "Examples",
+        "id": "examples"
+      }
+    ]
+  },
+  {
+    "id": "2-community",
+    "title": "From the Community",
+    "url": "/docs/community",
+    "icon": "Users2",
+    "content": "Integrations with various tools, built by the Zero dev community. If you have made something that should be here, send us a pull request. UI Frameworks One is a full-stack React (and React Native!) framework with built-in Zero support. zero-svelte and zero-svelte-query are two different approaches to Zero bindings for Svelte. zero-vue adds Zero bindings to Vue. zero-astro adds Zero bindings to Astro. Database Tools drizzle-zero generates Zero schemas from Drizzle. prisma-generator-zero generates Zero schemas from Prisma. Miscellaneous undo is a simple undo/redo library that was originally built for Replicache, but works just as well with Zero.",
+    "headings": [
+      {
+        "text": "UI Frameworks",
+        "id": "ui-frameworks"
+      },
+      {
+        "text": "Database Tools",
+        "id": "database-tools"
+      },
+      {
+        "text": "Miscellaneous",
+        "id": "miscellaneous"
+      }
+    ]
+  },
+  {
+    "id": "3-connecting-to-postgres",
+    "title": "Connecting to Postgres",
+    "url": "/docs/connecting-to-postgres",
+    "icon": "Cable",
+    "content": "In the future, Zero will work with many different backend databases. Today only Postgres is supported. Specifically, Zero requires Postgres v15.0 or higher, and support for logical replication. Here are some common Postgres options and what we know about their support level: | Postgres | Support Status | | --------------------------------- | ------------------------------------------------------------------------------------------------ | | AWS RDS | ✅ | | AWS Aurora | ✅ v15.6+ | | Google Cloud SQL | ✅ See notes below | | Fly.io Postgres | ✅ See notes below | | Neon | ✅ See notes below | | Postgres.app | ✅ | | postgres:16.2-alpine docker image | ✅ | | Supabase | ✅ See notes below | | PlanetScale for Postgres | 🤷‍♂️ No event triggers, see notes below | | Render | 🤷‍♂️ No event triggers | | Heroku | 🤷‍♂️ No event triggers | Event Triggers Zero uses Postgres “Event Triggers” when possible to implement high-quality, efficient schema migration. Some hosted Postgres providers don’t provide access to Event Triggers. Zero still works out of the box with these providers, but for correctness, any schema change triggers a full reset of all server-side and client-side state. For small databases (< 10GB) this can be OK, but for bigger databases we recommend choosing a provider that grants access to Event Triggers. Configuration The Postgres config parameter has to be set to . You can check what level your pg has with this command: If it doesn’t output then you need to change the wal level. To do this, run: Then restart Postgres. On most pg systems you can do this like so: After your server restarts, show the again to ensure it has changed: Provider-Specific Notes Google Cloud SQL To use Google Cloud SQL you must manually create a and specify that publication name in the App Publications option when running . (Google Cloud SQL does not provide sufficient permissions for to create its default publication.) Fly.io Fly does not support TLS on their internal networks. If you run both and Postgres on Fly, you need to stop from trying to use TLS to talk to Postgres. You can do this by adding the query parameter to your connection strings from . Supabase In order to connect to Supabase you must use the \"Direct Connection\" style connection string, not the pooler: This is because Zero sets up a logical replication slot, which is only supported with a direct connection. Additionally, you may need to assign an IPv4 address to your Supabase instance: This will be required if you cannot use IPv6 from wherever is running. Most cloud providers support IPv6, but some do not. For example, if you are running in AWS, it is possible to use IPv6 but difficult. IPv4 addresses are only supported on the Pro plan and are an extra $4/month. PlanetScale for Postgres PlanetScale doesn't support event triggers yet, but they say this is something they are working on. PlanetScale also doesn't support creating publications with the clause. Zero typically uses this to create an initial default publication during setup. You can workaround this by creating a publication explicitly listing the tables you want to replicate. Neon Neon fully supports Zero, but you should be aware of how Neon's pricing model and Zero interact. Because Zero keeps an open connection to Postgres to replicate changes, as long as zero-cache is running, Postgres will be running and you will be charged by Neon. For production databases that have enough usage to always be running anyway, this is fine. But for smaller applications that would otherwise not always be running, this can create a surprisingly high bill. You may want to choose a provider that charge a flat monthly rate instead. Also some users choose Neon because they hope to use branching for previews. Note that Zero doesn't support this usage model well yet, and if not done with care, Zero can end up keeping each Neon preview branch running too 😳. We are actively working on better preview support.",
+    "headings": [
+      {
+        "text": "Event Triggers",
+        "id": "event-triggers"
+      },
+      {
+        "text": "Configuration",
+        "id": "configuration"
+      },
+      {
+        "text": "Provider-Specific Notes",
+        "id": "provider-specific-notes"
+      },
+      {
+        "text": "Google Cloud SQL",
+        "id": "google-cloud-sql"
+      },
+      {
+        "text": "Fly.io",
+        "id": "fly-io"
+      },
+      {
+        "text": "Supabase",
+        "id": "supabase"
+      },
+      {
+        "text": "PlanetScale for Postgres",
+        "id": "planetscale-for-postgres"
+      },
+      {
+        "text": "Neon",
+        "id": "neon"
+      }
+    ]
+  },
+  {
+    "id": "4-custom-mutators",
+    "title": "Custom Mutators",
+    "url": "/docs/custom-mutators",
+    "icon": "ArrowUpWideNarrow",
+    "content": "Custom Mutators are a new way to write data in Zero that is much more powerful than the original \"CRUD\" mutator API. Instead of having only the few built-in // write operations for each table, custom mutators allow you to create your own write operations using arbitrary code. This makes it possible to do things that are impossible or awkward with other sync engines. For example, you can create custom mutators that: Perform arbitrary server-side validation Enforce fine-grained permissions Send email notifications Query LLMs Use Yjs for collaborative editing … and much, much more – custom mutators are just code, and they can do anything code can do! Despite their increased power, custom mutators still participate fully in sync. They execute instantly on the local device, immediately updating all active queries. They are then synced in the background to the server and to other clients. <Note slug=\"deprecating-crud\" heading=\"Custom mutators will eventually become Zero's only write API\" We're still refining the design of custom mutators. During this phase, the old CRUD mutators will continue to work. But we do want to deprecate CRUD mutators, and eventually remove them. So please try out custom mutators and let us know how they work for you, and what improvements you need before the cutover. Understanding Custom Mutators Architecture Custom mutators introduce a new server component to the Zero architecture. This server is implemented by you, the developer. It's typically just your existing backend, where you already put auth or other server-side functionality. The server can be a serverless function, a microservice, or a full stateful server. The only real requirement is that it expose a special push endpoint that can call to process mutations. This endpoint implements the push protocol and contains your custom logic for each mutation. Zero provides utilities in that make it really easy implement this endpoint in TypeScript. But you can also implement it yourself if you want. As long as your endpoint fulfills the push protocol, doesn't care. You can even write it in a different programming language. What Even is a Mutator? Zero's custom mutators are based on server reconciliation – a technique for robust sync that has been used by the video game industry for decades. A custom mutator is just a function that runs within a database transaction, and which can read and write to the database. Here's an example of a very simple custom mutator written in TypeScript: Each custom mutator gets two implementations: one on the client and one on the server. The client implementation must be written in TypeScript against the Zero interface, using ZQL for reads and a CRUD-style API for writes. The server implementation runs on your server, in your push endpoint, against your database. In principle, it can be written in any language and use any data access library. For example you could have the following Go-based server implementation of the same mutator: In practice however, most Zero apps use TypeScript on the server. For these users we provide a handy that implements ZQL against Postgres, so that you can share code between client and server mutators naturally. So on a TypeScript server, that server mutator can just be: Reusing ZQL on the server is a handy – and we expect frequently used – option, but not a requirement. Server Authority You may be wondering what happens if the client and server mutators implementations don't match. Zero is an example of a server-authoritative sync engine. This means that the server mutator always takes precedence over the client mutator. The result from the client mutator is considered speculative and is discarded as soon as the result from the server mutator is known. This is a very useful feature: it enables server-side validation, permissions, and other server-specific logic. Imagine that you wanted to use an LLM to detect whether an issue update is spammy, rather than a simple length check. We can just add that to our server mutator: If the server detects that the mutation is spammy, the client will see the error message and the mutation will be rolled back. If the server mutator succeeds, the client mutator will be rolled back and the server result will be applied. Life of a Mutation Now that we understand what client and server mutations are, let's walk through how they work together with Zero to sync changes from a source client to the server and then other clients: When you call a custom mutator on the client, Zero runs your client-side mutator immediately on the local device, updating all active queries instantly. In the background, Zero then sends a mutation (a record of the mutator having run with certain arguments) to your server's push endpoint. Your push endpoint runs the push protocol, executing the server-side mutator in a transaction against your database and recording the fact that the mutation ran. Optionally, you use our class to handle this for you, but you can also implement it yourself. The changes to the database are replicated to as normal. calculates the updates to active queries and sends rows that have changed to each client. It also sends information about the mutations that have been applied to the database. Clients receive row updates and apply them to their local cache. Any pending mutations which have been applied to the server have their local effects rolled back. Client-side queries are updated and the user sees the changes. Using Custom Mutators Registering Client Mutators By convention, the client mutators are defined with a function called in a file called : The convention allows mutator implementations to be easily reused server-side. The function convention is used so that we can pass authentication information in to implement permissions. You are free to make different code layout choices – the only real requirement is that you register your map of mutators in the constructor: Write Data on the Client The interface passed to client mutators exposes the same API as the existing CRUD-style mutators: See the CRUD docs for detailed semantics on these methods. Read Data on the Client You can read data within a client mutator using ZQL: You have the full power of ZQL at your disposal, including relationships, filters, ordering, and limits. Reads and writes within a mutator are transactional, meaning that the datastore is guaranteed to not change while your mutator is running. And if the mutator throws, the entire mutation is rolled back. This parameter isn't supported within mutators, because waiting for server results makes no sense in an optimistic mutation – it defeats the purpose of running optimistically to begin with. When a mutator runs on the client (), ZQL reads only return data already cached on the client. When mutators run on the server (), ZQL reads always return all data. You can use within custom mutators, but the argument does nothing. In the future, passing in this situation will throw an error. Invoking Client Mutators Once you have registered your client mutators, you can call them from your client-side application: The result of a call to a mutator is a . You do not usually need to this promise as Zero mutators run very fast, usually completing in a tiny fraction of one frame. However because mutators ocassionally need to access browser storage, they are technically . Reading a row that was written by a mutator immediately after it is written may not return the new data, because the mutator may not have completed writing to storage yet. Waiting for Mutator Result We typically recommend that you \"fire and forget\" mutators. Optimistic mutations make sense when the common case is that a mutation succeeds. If a mutation frequently fails, then showing the user an optimistic result doesn't make sense, because it will likely be wrong. That said there are cases where it is useful to know when a write succeeded on either the client or server. One example is if you need to read a row directly after writing it. Zero's local writes are very fast (almost always < 1 frame), but because Zero is backed by IndexedDB, writes are still technically asynchronous and reads directly after a write may not return the new data. You can use the promise in this case to wait for a write to complete on the client side: You can also wait for the server write to succeed: If the client-side mutator fails, the promise is also rejected with the same error. You don't have to listen to both promises, the server promise covers both cases. Setting Up the Server You will need a server somewhere you can run an endpoint on. This is typically a serverless function on a platform like Vercel or AWS but can really be anything. Set the push URL with the env var or . If there is per-client configuration you need to send to the push endpoint, you can do that with : The push endpoint receives a as input describing one or more mutations to apply to the backend, and must return a describing the results of those mutations. If you are implementing your server in TypeScript, you can use the class to trivially implement this endpoint. Here’s an example in a Hono app: depends on an abstract . This allows it to implement the push algorithm against any database. includes a implementation of this interface backed by Postgres. The implementation allows the same mutator functions to run on client and server, by providing an implementation of the ZQL APIs that custom mutators run on the client. in turn relies on an abstract that provides raw access to a Postgres database. This allows you to use any Postgres library you like, as long as you provide a implementation for it. The class implements for the excellent library to connect to Postgres. To reuse the client mutators exactly as-is on the server just pass the result of the same function to . Server Error Handling The in skips any mutations that throw: catches such errors and turns them into a structured response that gets sent back to the client. You can recover the errors and show UI if you want. It is also of course possible for the entire push endpoint to return an HTTP error, or to not reply at all: If Zero recieves any response from the push endpoint other than HTTP 200, 401, or 403, it will disconnect, wait a few moments, reconnect, and then retry all unprocessed mutations. If Zero receives HTTP 401 or 403, the client refreshes the token if possible, then retries all queued mutations. If you want a different behavior, it is possible to implement your own and handle errors differently. Server-Specific Code To implement server-specific code, just run different mutators in your push endpoint! An approach we like is to create a separate file that wraps the client mutators: For simple things, we also expose a field on the transaction object that you can use to branch your code: Permissions Because custom mutators are just arbitrary TypeScript functions, there is no need for a special permissions system. Therefore, you won't use Zero's write permissions when you use custom mutators. We hope to build custom queries next – a read analog to custom mutators. If we succeed, Zero's permission system will go away completely 🤯. In order to do permission checks, you'll need to know what user is making the request. You can pass this information to your mutators by adding a parameter to the function: The parameter can be any data required for authorization, but is typically just the decoded JWT: Dropping Down to Raw SQL The interface has a property that exposes the underlying database connection. This allows you to run raw SQL queries directly against the database. This is useful for complex queries, or for using Postgres features that Zero doesn't support yet: As a convenience we also expose a special for use with that sets all the mutators to by default: Notifications and Async Work It is bad practice to hold open database transactions while talking over the network, for example to send notifications. Instead, you should let the db transaction commit and do the work asynchronously. There is no specific support for this in custom mutators, but since mutators are just code, it’s easy to do: Then in your push handler: Custom Database Connections You can implement an adapter to a different Postgres library, or even a different database entirely. To do so, provide a to that returns a different implementation. For an example implementation, see the implementation. Custom Push Implementation You can manually implement the push protocol in any programming language. This will be documented in the future, but you can refer to the PushProcessor source code for an example for now. Examples Zbugs uses custom mutators for all mutations, write permissions, and notifications. uses custom mutators for all mutations, and for permissions.",
+    "headings": [
+      {
+        "text": "Understanding Custom Mutators",
+        "id": "understanding-custom-mutators"
+      },
+      {
+        "text": "Architecture",
+        "id": "architecture"
+      },
+      {
+        "text": "What Even is a Mutator?",
+        "id": "what-even-is-a-mutator"
+      },
+      {
+        "text": "Server Authority",
+        "id": "server-authority"
+      },
+      {
+        "text": "Life of a Mutation",
+        "id": "life-of-a-mutation"
+      },
+      {
+        "text": "Using Custom Mutators",
+        "id": "using-custom-mutators"
+      },
+      {
+        "text": "Registering Client Mutators",
+        "id": "registering-client-mutators"
+      },
+      {
+        "text": "Write Data on the Client",
+        "id": "write-data-on-the-client"
+      },
+      {
+        "text": "Read Data on the Client",
+        "id": "read-data-on-the-client"
+      },
+      {
+        "text": "Invoking Client Mutators",
+        "id": "invoking-client-mutators"
+      },
+      {
+        "text": "Waiting for Mutator Result",
+        "id": "waiting-for-mutator-result"
+      },
+      {
+        "text": "Setting Up the Server",
+        "id": "setting-up-the-server"
+      },
+      {
+        "text": "Server Error Handling",
+        "id": "server-error-handling"
+      },
+      {
+        "text": "Server-Specific Code",
+        "id": "server-specific-code"
+      },
+      {
+        "text": "Permissions",
+        "id": "permissions"
+      },
+      {
+        "text": "Dropping Down to Raw SQL",
+        "id": "dropping-down-to-raw-sql"
+      },
+      {
+        "text": "Notifications and Async Work",
+        "id": "notifications-and-async-work"
+      },
+      {
+        "text": "Custom Database Connections",
+        "id": "custom-database-connections"
+      },
+      {
+        "text": "Custom Push Implementation",
+        "id": "custom-push-implementation"
+      },
+      {
+        "text": "Examples",
+        "id": "examples"
+      }
+    ]
+  },
+  {
+    "id": "5-debug/inspector",
+    "title": "Inspector API",
+    "url": "/docs/debug/inspector",
+    "icon": "SearchIcon",
+    "content": "The Zero instance provides an API to gather information about the client's current state, such as: All active queries Query TTL Active clients Client database contents This can help figuring out why you hit loading states, how many queries are active at a time, if you have any resource leaks due to failing to clean up queries or if expected data is missing on the client. Creating an Inspector Each instance has an method that will return the inspector. The method is asynchronous because it performs lazy loading of inspect-only related code. For convenience, the active instance is automatically exposed at , so you can access the inspector in the console like this: If you are using React, you can use to dynamically load components that depend on the API. Once you have an inspector you can inspect the current client and client group. For example to see active queries for the current client: To inspect other clients within the group: Dumping Data In addition to information about queries, you can see the contents of the client side database.",
+    "headings": [
+      {
+        "text": "Creating an Inspector",
+        "id": "creating-an-inspector"
+      },
+      {
+        "text": "Dumping Data",
+        "id": "dumping-data"
+      }
+    ]
+  },
+  {
+    "id": "6-debug/otel",
+    "title": "OpenTelemetry",
+    "url": "/docs/debug/otel",
+    "icon": "ChartLine",
+    "content": "The service embeds the JavaScript OTLP Exporter and can send logs, traces, and metrics to any standard otel collector. To enable otel, set the following environment variables then run as normal: Grafana Cloud Walkthrough Here are instructions to setup Grafana Cloud, but the setup for other otel collectors should be similar. Sign up for Grafana Cloud (Free Tier) Click Connections > Add Connection in the left sidebar Search for \"OpenTelemetry\" and select it Click \"Quickstart\" Select \"JavaScript\" Create a new token Copy the environment variables into your file or similar Start Look for logs under \"Drilldown\" > \"Logs\" in left sidebar",
+    "headings": [
+      {
+        "text": "Grafana Cloud Walkthrough",
+        "id": "grafana-cloud-walkthrough"
+      }
+    ]
+  },
+  {
+    "id": "7-debug/permissions",
+    "title": "Debugging Permissions",
+    "url": "/docs/debug/permissions",
+    "icon": "ShieldCheck",
+    "content": "Given that permissions are defined in their own file and internally applied to queries, it might be hard to figure out if or why a permission check is failing. Read Permissions You can use the utility with the flag to see the complete query Zero runs, including read permissions. If the result looks right, the problem may be that Zero is not receiving the that you think it is. You can retrieve a query hash from websocket or server logs, then ask Zero for the details on that specific query. Run this command with the same environment you run with. It will use your or configuration to look up the query hash in the cvr database. Write Permissions Look for a level log in the output from like this: Zero prints the row, auth data, and permission policies that was applied to any failed writes.",
+    "headings": [
+      {
+        "text": "Read Permissions",
+        "id": "read-permissions"
+      },
+      {
+        "text": "Write Permissions",
+        "id": "write-permissions"
+      }
+    ]
+  },
+  {
+    "id": "8-debug/query-asts",
+    "title": "Query ASTs",
+    "url": "/docs/debug/query-asts",
+    "icon": "Workflow",
+    "content": "An AST (Abstract Syntax Tree) is a representation of a query that is used internally by Zero. It is not meant to be human readable, but it sometimes shows up in logs and other places. If you need to read one of these, save the AST to a json file. Then run the following command: The returned ZQL query will be using server names, rather than client names, to identify columns and tables. If you provide the schema file as an option you will get mapped back to client names: This comes into play if, in your schema.ts, you use the feature to have different names on the client than your backend DB.",
+    "headings": []
+  },
+  {
+    "id": "9-debug/replication",
+    "title": "Replication",
+    "url": "/docs/debug/replication",
+    "icon": "CopyIcon",
+    "content": "Resetting During development we all do strange things (unsafely changing schemas, removing files, etc.). If the replica ever gets wedged (stops replicating, acts strange) you can wipe it and start over. If you copied your setup from or , you can also run Otherwise you can run (see your file for the replica file location) to clear the contents of the replica. It is always safe to wipe the replica. Wiping will have no impact on your upstream database. Downstream zero-clients will get re-synced when they connect. Inspecting For data to be synced to the client it must first be replicated to . You can check the contents of via: To inspect your Zero database, you have two options: Use our pre-compiled SQLite build as described above Build SQLite from the SQLite branch yourself This will drop you into a shell with which you can use to explore the contents of the replica. Miscellaneous If you see in logs, it’s because you have two zero-cache instances running against dev. One is probably in a background tab somewhere. In production, can run horizontally scaled but on dev it doesn’t run in the config that allows that.",
+    "headings": [
+      {
+        "text": "Resetting",
+        "id": "resetting"
+      },
+      {
+        "text": "Inspecting",
+        "id": "inspecting"
+      },
+      {
+        "text": "Miscellaneous",
+        "id": "miscellaneous"
+      }
+    ]
+  },
+  {
+    "id": "10-debug/slow-queries",
+    "title": "Slow Queries",
+    "url": "/docs/debug/slow-queries",
+    "icon": "Clock",
+    "content": "In the logs, you may see statements indicating a query is slow: or: Or, you may just notice queries taking longer than expected in the UI. Here are some tips to help debug such slow queries. Check If you are seeing unexpected UI flicker when moving between views, it is likely that the queries backing these views have the default of . Set the to some longer value to keep data cached across navigations. You may alternately want to preload some data at app startup. Check Storage is effectively a database. It requires fast (low latency and high bandwidth) disk access to perform well. If you're running on network attached storage with high latency, or on AWS with low IOPS, then this is the most likely culprit. The default deployment of Zero currently uses Fargate which scales IOPS with vCPU. Increasing the vCPU will increase storage throughput and likely resolve the issue. Fly.io provides physically attached SSDs, even for their smallest VMs. Deploying zero-cache there (or any other provider that offers physically attached SSDs) is another option. Locality If you see log lines like: this indicates that is likely deployed too far away from your CVR database. If you did not configure a CVR database URL then this will be your product's Postgres DB. A slow CVR flush can slow down Zero, since it must complete the flush before sending query result(s) to clients. Try moving to be deployed as close as possible to the CVR database. Query Plan If neither (1) nor (2) is a problem, then the query itself is the most likely culprit. The package ships with a query analyzer to help debug this. The analyzer should be run in the directory that contains the file for as it will use the file to find your replica. Example: This will output the query plan and time to execute each phase of that plan. Note that query performance can also be affected by read permissions. See Debugging Permissions for information on how to analyze queries with read permissions applied. /statz makes some internal health statistics available via the endpoint of . In order to access this, you must configure an admin password.",
+    "headings": [
+      {
+        "text": "Check ",
+        "id": "check"
+      },
+      {
+        "text": "Check Storage",
+        "id": "check-storage"
+      },
+      {
+        "text": "Locality",
+        "id": "locality"
+      },
+      {
+        "text": "Query Plan",
+        "id": "query-plan"
+      },
+      {
+        "text": "/statz",
+        "id": "statz"
+      }
+    ]
+  },
+  {
+    "id": "11-deployment",
+    "title": "Deploying Zero",
+    "url": "/docs/deployment",
+    "icon": "Server",
+    "content": "To deploy a Zero app, you need to: Deploy your backend database. Most standard Postgres hosts work with Zero. Deploy . We provide a Docker image that can work with most Docker hosts. Deploy your frontend. You can use any hosting service like Vercel or Netlify. This page describes how to deploy . Architecture is a horizontally scalable, stateful web service that maintains a SQLite replica of your Postgres database. It uses this replica to sync ZQL queries to clients over WebSockets. You don't have to know the details of how works to run it, but it helps to know the basic structure. A running is composed of a single node and multiple nodes. It also depends on Postgres, S3, and attached SSD storage. Upstream: Your application's Postgres database. Change DB: A Postgres DB used by Zero to store a recent subset of the Postgres replication log. CVR DB: A Postgres DB used by Zero to store Client View Records (CVRs). CVRs track the state of each synced client. We allow separate DBs so that they can be scaled and tuned independently if desired. S3: Stores a canonical copy of the SQLite replica. File System: Used by both node types to store local copies of the SQLite replica. Can be ephemeral – Zero will re-initialize from S3 on startup. Recommended to use attached SSD storage for best performance. Replication Manager: Serves as the single consumer of the Postgres replication log. Stores a recent subset of the Postgres changelog in the Change DB for catching up ViewSyncers when they initialize. Also maintains the canonical replica, which ViewSyncers initialize from. View Syncers: Handle WebSocket connections from clients and run ZQL queries. Updates CVR DB with the latest state of each client as queries run. Uses CVR DB on client connection to compute the initial diff to catch clients up. Topology You should deploy close to your database because the mutation implementation is chatty. In the future, mutations will move out of . When that happens you can deploy geographically distributed and it will double as a read-replica. Updating When run with multiple View Syncer nodes, supports rolling, downtime-free updates. A new Replication Manager takes over the replication stream from the old Replication Manager, and connections from the old View Syncers are gradually drained and absorbed by active View Syncers. Client/Server Version Compatibility Servers are compatible with any client of same major version, and with clients one major version back. So for example: Server is compatible with client Server is compatible with client Server is compatible with client Server is compatible with client To upgrade Zero to a new major version, first deploy the new zero-cache, then the new frontend. Configuration The image is configured via environment variables. See zero-cache Config for available options. Guide: Multi-Node on SST+AWS SST is our recommended way to deploy Zero. The setup below costs about $35/month. You can scale it up or down as needed by adjusting the amount of vCPUs and memory in each task. Setup Upstream Create an upstream Postgres database server somewhere. See Connecting to Postgres for details. Populate the schema and any initial data for your application. Setup AWS See AWS setup guide. The end result should be that you have a dev profile and SSO session defined in your file. Initialize SST Choose \"aws\" for where to deploy. Then overwite with the following code: Set SST Secrets Configure SST with your Postgres connection string and Zero Auth Secret. Note that if you use JWT-based auth, you'll need to change the environment variables in the file above, then set a different secret here. Deploy This takes about 5-10 minutes. If successful, you should see a URL for the service. This is the URL to pass to the parameter of the constructor on the client. If unsuccessful, you can get detailed logs with . Come find us on Discord and we'll help get you sorted out. Guide: Single-Node on Fly.io Let's deploy the Quickstart app to Fly.io. We'll use Fly.io for both the database and . Setup Quickstart Go through the Quickstart guide to get the app running locally. Setup Fly.io Create an account on Fly.io and install the Fly CLI. Create Postgres app Seed Upstream database Populate the database with initial data and set its to to support replication to . Then restart the database to apply the changes. Create Fly.io app Publish Create a file. Then publish : Deploy Permissions Now is running on Fly.io, but there are no permissions. If you run the app against this , you'll see that no data is returned from any query. To fix this, deploy your permissions: You will need to redo this step every time you change your app's permissions, likely as part of your CI/CD pipeline. Use Remote Now restart the frontend to pick up the env change, and refresh the app. You can stop your local database and as we're not using them anymore. Open the web inspector to verify the app is talking to the remote ! You can deploy the frontend to any standard hosting service like Vercel or Netlify, or even to Fly.io! Deploy Frontend to Vercel If you've followed the above guide and deployed to fly, you can simply run: to deploy your frontend to Vercel. Explaining the arguments above -- - The secret to create and verify JWTs. This is the same secret that was used when deploying zero-cache to fly. - The URL the frontend will call to talk to the zero-cache server. This is the URL of the fly app. Guide: Multi-Node on Raw AWS S3 Bucket Create an S3 bucket. uses S3 to backup its SQLite replica so that it survives task restarts. Fargate Services Run as two Fargate services (using the same rocicorp/zero docker image): replication-manager config: Task count: 1 view-syncer config: Task count: N You can also use dynamic scaling Notes Standard rolling restarts are fine for both services Set and appropriately so that the total connections from both running and updating (e.g. DesiredCount * MaximumPercent) do not exceed your database’s . The component of the URL is an arbitrary path component that can be modified to reset the replica (e.g. a date, a number, etc.). Setting this to a new path is the multi-node equivalent of deleting the replica file to resync. Note: does not manage cleanup of old generations. The serves requests on port 4849. Routing from the to the is handled internally by storing data in the . Fargate ephemeral storage is used for the replica. The default size is 20GB. This can be increased up to 200GB Allocate at least twice the size of the database to support the internal VACUUM operation. Guide: $PLATFORM Where should we deploy Zero next?? Let us know on Discord!",
+    "headings": [
+      {
+        "text": "Architecture",
+        "id": "architecture"
+      },
+      {
+        "text": "Topology",
+        "id": "topology"
+      },
+      {
+        "text": "Updating",
+        "id": "updating"
+      },
+      {
+        "text": "Client/Server Version Compatibility",
+        "id": "client-server-version-compatibility"
+      },
+      {
+        "text": "Configuration",
+        "id": "configuration"
+      },
+      {
+        "text": "Guide: Multi-Node on SST+AWS",
+        "id": "guide-multi-node-on-sst-aws"
+      },
+      {
+        "text": "Setup Upstream",
+        "id": "setup-upstream"
+      },
+      {
+        "text": "Setup AWS",
+        "id": "setup-aws"
+      },
+      {
+        "text": "Initialize SST",
+        "id": "initialize-sst"
+      },
+      {
+        "text": "Set SST Secrets",
+        "id": "set-sst-secrets"
+      },
+      {
+        "text": "Deploy",
+        "id": "deploy"
+      },
+      {
+        "text": "Guide: Single-Node on Fly.io",
+        "id": "guide-single-node-on-fly-io"
+      },
+      {
+        "text": "Setup Quickstart",
+        "id": "setup-quickstart"
+      },
+      {
+        "text": "Setup Fly.io",
+        "id": "setup-fly-io"
+      },
+      {
+        "text": "Create Postgres app",
+        "id": "create-postgres-app"
+      },
+      {
+        "text": "Seed Upstream database",
+        "id": "seed-upstream-database"
+      },
+      {
+        "text": "Create  Fly.io app",
+        "id": "create-fly-io-app"
+      },
+      {
+        "text": "Publish ",
+        "id": "publish"
+      },
+      {
+        "text": "Deploy Permissions",
+        "id": "deploy-permissions"
+      },
+      {
+        "text": "Use Remote ",
+        "id": "use-remote"
+      },
+      {
+        "text": "Deploy Frontend to Vercel",
+        "id": "deploy-frontend-to-vercel"
+      },
+      {
+        "text": "Guide: Multi-Node on Raw AWS",
+        "id": "guide-multi-node-on-raw-aws"
+      },
+      {
+        "text": "S3 Bucket",
+        "id": "s3-bucket"
+      },
+      {
+        "text": "Fargate Services",
+        "id": "fargate-services"
+      },
+      {
+        "text": "replication-manager",
+        "id": "replication-manager"
+      },
+      {
+        "text": "view-syncer",
+        "id": "view-syncer"
+      },
+      {
+        "text": "Notes",
+        "id": "notes"
+      },
+      {
+        "text": "Guide: $PLATFORM",
+        "id": "guide-platform"
+      }
+    ]
+  },
+  {
+    "id": "12-errors",
+    "title": "Error Handling",
+    "url": "/docs/errors",
+    "icon": "FileCode",
+    "content": "Errors from mutators and queries are thrown in response to method calls where possible, but many Zero errors occur asynchronously, during sync. You can catch these errors with the constructor parameter: You can use this to send errors to Sentry, show custom UI, etc. The first parameter to is a descriptive message. Additional parameters provide more detail, for example an object (with a stack), or a JSON object.",
+    "headings": []
+  },
+  {
+    "id": "13-introduction",
+    "title": "Welcome to Zero Alpha",
+    "url": "/docs/introduction",
+    "icon": "BookOpen",
+    "content": "Zero is a new kind of sync engine powered by queries. Rather than syncing entire tables to the client, or using static rules to carefully specify what to sync, you just write queries directly in your client code. Queries can access the entire backend database. Zero caches the data for queries locally on the device, and reuses that data automatically to answer future queries whenever possible. For typical applications, the result is that almost all queries are answered locally, instantly. It feels like you have access to the entire backend database directly from the client in memory. Occasionally, when you do a more specific query, Zero falls back to the server. But this happens automatically without any extra work required. Zero is made possible by a custom streaming query engine we built called ZQL, which uses Incremental View Maintenance on both client and server to efficiently keep large, complex queries up to date. Status Zero is in alpha. There are still some rough edges, and to run it, you need to deploy it yourself to AWS or similar. Even so, Zero is already quite fun to work with. We are using it ourselves to build our very own Linear-style bug tracker. We find that Zero is already much more productive than alternatives, even having to occasionally work around a missing feature. If you are building a new web app that needs to be fast and reactive, and can do the deployment yourself, it's a great time to get started with Zero. We're working toward a beta release and full production readiness this year.",
+    "headings": [
+      {
+        "text": "Status",
+        "id": "status"
+      }
+    ]
+  },
+  {
+    "id": "14-llms",
+    "title": "Welcome, 🤖!",
+    "url": "/docs/llms",
+    "icon": "Sparkle",
+    "content": "Are you an LLM? Do you like long walks through vector space and late-night tokenization? Or maybe you're a friend of an LLM, just trying to make life a little easier for the contextually challenged? Either way, you're in the right place! Stream on over to llms.txt for the text-only version of these docs.",
+    "headings": []
+  },
+  {
+    "id": "15-offline",
+    "title": "Offline",
+    "url": "/docs/offline",
+    "icon": "Unplug",
+    "content": "Zero currently supports offline reads, but not writes. We plan to support offline writes in the future, but we don't have a timeline for that yet. The lack of offline writes is often surprising to people familiar with sync engines, because offline is usually touted as something that comes for free with these tools. This page explains why Zero doesn't currently support offline writes, how we recommend you handle connectivity loss, and our future plans in this area. Offline Writes are a UX Problem While Zero can technically queue offline writes and replay them when reconnected (this happens by default in any sync engine, and is what Zero does today), that fact doesn't make supporting offline writes much easier. That's because a really hard part of offline writes is in handling conflicts, and no software tool can make that problem go away. For example, imagine two users are editing an article about cats. One goes offline and does a bunch of work on the article, while the other decides that the article should actually be about dogs and rewrites it. When the offline user reconnects, there is no way that any software algorithm can automatically resolve their conflict. One or the other of them is going to be upset. And while the above example may sound extreme, you can construct similar situations with the majority of common applications. Just take your own application and ask yourself what should really happen if one user takes their device offline for a week and makes arbitrarily complex changes while other users are working online. People who work on sync engines and related tools often say that offline is just extreme lag, but that's only true at a technical level. At a human level, being \"offline\" for a few seconds is very different from being offline for a few hours. The difference is how much knowledge you have about what your collaborators are doing, and how much of your work can be lost. The only way to support offline writes in general is to either: Make the logical datamodel append-only (i.e., users can create and mark tasks done, but cannot edit or delete them). Support custom UX to allow users to fork and merge conflicts when they occur. Only support editing from a single device. None of these is free. Buiding a good offline UX is a lot of work, and most of that work is borne by application developers. … And a Schema Problem But it's not just users that can diverge from each other. The server software and database schema can also diverge arbitrarily far from the client while the client is disconnected. When the client comes back online, the changes made may no longer be processable by the application, or may have a different effect than the user intended. So to support long offline periods, the server must also maintain backward compatibility with clients indefinitely. Similarly, the server can never reject an offline write (i.e., due to validation) because that could lead to a user losing huge amounts of work. … And a Sync Engine Problem Supporting offline writes also requires work in the sync engine. In Zero, there are a few specific impacts: The Zero client itself can get out of date while offline. On reconnect, the app might reload with a new version of the client. This new version must be able to read and process old data from arbitrarily long ago. An arbitrarily large number of pending mutations can be built up. These mutations must be replayed on reconnect, which can take a long time. When processing mutations on server we must consider what should happen if the database or application server are temporarily unavailable. We need to treat that kind of error differently from a validation error. These problems are surmountable, but significant effort. Their solutions might also be in tension with other goals of the sync engine, like online performance and scalability. These tradeoffs will take time to work through. Zero's Position For all of the above reasons, we plan to disable offline writes in Zero for beta. When the Zero client loses connection to for several minutes (or when cannot reach the customer API server), it will enter a special offline mode. In this mode, all writes to Zero will throw. While we recognize that offline writes would be useful for some applications, the reality is that for most of the apps we want to support, the user is online the vast majority of the time and the cost to support offline is extremely high. There is simply more value in making the online experience great first. We would like to revisit this in the future and really think through how to design APIs and patterns that allow developers to make successful offline-enabled apps. But it's not our priority right now. Dealing with Offline Today Until Zero disables offline writes automatically, we recomment using the parameter to the constructor to detect connection loss and disable editing manually in your UI. Even More Information Lies I was Told About Collaborative Editing: a detailed overview of the challenges around offline writes in any collaborative editing system. This Zero Discord thread covers some challenges specifically in the context of Zero. Patchwork by Ink & Switch is new and interesting research around how to support offline writes well in collaborative systems.",
+    "headings": [
+      {
+        "text": "Offline Writes are a UX Problem",
+        "id": "offline-writes-are-a-ux-problem"
+      },
+      {
+        "text": "… And a Schema Problem",
+        "id": "and-a-schema-problem"
+      },
+      {
+        "text": "… And a Sync Engine Problem",
+        "id": "and-a-sync-engine-problem"
+      },
+      {
+        "text": "Zero's Position",
+        "id": "zero-s-position"
+      },
+      {
+        "text": "Dealing with Offline Today",
+        "id": "dealing-with-offline-today"
+      },
+      {
+        "text": "Even More Information",
+        "id": "even-more-information"
+      }
+    ]
+  },
+  {
+    "id": "16-open-source",
+    "title": "Zero is Open Source Software",
+    "url": "/docs/open-source",
+    "icon": "CircleDashed",
+    "content": "Specifically, the Zero client and server are Apache-2 licensed. You can use, modify, host, and distribute them freely: https://github.com/rocicorp/mono/blob/main/LICENSE Business Model We plan to commercialize Zero in the future by offering a hosted service for people who do not want to run it themselves. We expect to charge prices for this rougly comparable to today's database hosting services. We'll also offer white-glove service to help enterprises run within their own infrastructure. These plans may change as we develop Zero further. For example, we may also build closed-source companion software – similar to how Docker, Inc. charges for team access to Docker Desktop. But we have no plans to ever change the licensing of the core product: We're building a general-purpose sync engine for the entire web, and we can only do that if the core remains completely open.",
+    "headings": [
+      {
+        "text": "Business Model",
+        "id": "business-model"
+      }
+    ]
+  },
+  {
+    "id": "17-overview",
+    "title": "Concepts (How Zero Works)",
+    "url": "/docs/overview",
+    "icon": "FileCode",
+    "content": "",
+    "headings": []
+  },
+  {
+    "id": "18-permissions",
+    "title": "Permissions",
+    "url": "/docs/permissions",
+    "icon": "ShieldCheck",
+    "content": "Permissions are expressed using ZQL and run automatically with every read and write. Define Permissions Permissions are defined in using the function. Here's an example of limiting reads to members of an organization and deletes to only the creator of an issue: returns a policy object for each table in the schema. Each policy defines a ruleset for the operations that are possible on a table: , , , and . Access is Denied by Default If you don't specify any rules for an operation, it is denied by default. This is an important safety feature that helps ensure data isn't accidentally exposed. To enable full access to an action (i.e., during development) use the helper: To do this for all actions, use : Permission Evaluation Zero permissions are \"compiled\" into a JSON-based format at build-time. This file is stored in the table of your upstream database. Like other tables, it replicates live down to . then parses this file, and applies the encoded rules to every read and write operation. The end result is that you can't really use most features of JS in these rules. Specifically you cannot: Iterate over properties or array elements in the auth token Use any JS features beyond property access of Use any conditional or global state Basically only property access is allowed. This is really confusing and we're working on a better solution. Permission Deployment During development, permissions are compiled and uploaded to your database completely automatically as part of the script. For production, you need to call within your app to update the permissions in the production database whenever they change. You would typically do this as part of your normal schema migration or CI process. For example, the SST deployment script for zbugs looks like this: See the SST Deployment Guide for more details. Rules Each operation on a policy has a ruleset containing zero or more rules. A rule is just a TypeScript function that receives the logged in user's and generates a ZQL where expression. At least one rule in a ruleset must return a row for the operation to be allowed. Select Permissions You can limit the data a user can read by specifying a ruleset. Select permissions act like filters. If a user does not have permission to read a row, it will be filtered out of the result set. It will not generate an error. For example, imagine a select permission that restricts reads to only issues created by the user: If the issue table has two rows, one created by the user and one by someone else, the user will only see the row they created in any queries. Insert Permissions You can limit what rows can be inserted and by whom by specifying an ruleset. Insert rules are evaluated after the entity is inserted. So if they query the database, they will see the inserted row present. If any rule in the insert ruleset returns a row, the insert is allowed. Here's an example of an insert rule that disallows inserting users that have the role 'admin'. Update Permissions There are two types of update rulesets: and . Both rulesets must pass for an update to be allowed. rules see the version of a row before the mutation is applied. This is useful for things like checking whether a user owns an entity before editing it. rules see the version of a row after the mutation is applied. This is useful for things like ensuring a user can only mark themselves as the creator of an entity and not other users. Like other rulesets, and default to . This means that every table must define both these rulesets in order for any updates to be allowed. For example, the following ruleset allows an issue's owner to edit, but not re-assign the issue. The rule enforces that the current user still own the issue after edit. This ruleset allows an issue's owner to edit and re-assign the issue: And this allows anyone to edit an issue, but only if they also assign it to themselves. Useful for enforcing \"patches welcome\"? 🙃 Delete Permissions Delete permissions work in the same way as permissions except they run before the delete is applied. So if a delete rule queries the database, it will see that the deleted row is present. If any rule in the ruleset returns a row, the delete is allowed. Debugging See Debugging Permissions. Examples See hello-zero for a simple example of write auth and zbugs for a much more involved one.",
+    "headings": [
+      {
+        "text": "Define Permissions",
+        "id": "define-permissions"
+      },
+      {
+        "text": "Access is Denied by Default",
+        "id": "access-is-denied-by-default"
+      },
+      {
+        "text": "Permission Evaluation",
+        "id": "permission-evaluation"
+      },
+      {
+        "text": "Permission Deployment",
+        "id": "permission-deployment"
+      },
+      {
+        "text": "Rules",
+        "id": "rules"
+      },
+      {
+        "text": "Select Permissions",
+        "id": "select-permissions"
+      },
+      {
+        "text": "Insert Permissions",
+        "id": "insert-permissions"
+      },
+      {
+        "text": "Update Permissions",
+        "id": "update-permissions"
+      },
+      {
+        "text": "Delete Permissions",
+        "id": "delete-permissions"
+      },
+      {
+        "text": "Debugging",
+        "id": "debugging"
+      },
+      {
+        "text": "Examples",
+        "id": "examples"
+      }
+    ]
+  },
+  {
+    "id": "19-postgres-support",
+    "title": "Supported Postgres Features",
+    "url": "/docs/postgres-support",
+    "icon": "Blend",
+    "content": "Postgres has a massive feature set, and Zero supports a growing subset of it. Object Names Table and column names must begin with a letter or underscore This can be followed by letters, numbers, underscores, and hyphens Regex: The column name is reserved for internal use Object Types Tables are synced Views are not synced generated columns are synced All other generated columns are not synced Indexes aren't synced per-se, but we do implicitly add indexes to the replica that match the upstream indexes. In the future, this will be customizable. Column Types Zero will sync arrays to the client, but there is no support for filtering or joining on array elements yet in ZQL. Other Postgres column types aren’t supported. They will be ignored when replicating (the synced data will be missing that column) and you will get a warning when starts up. If your schema has a pg type not listed here, you can support it in Zero by using a trigger to map it to some type that Zero can support. For example if you have a GIS polygon type in the column , you can use a trigger to map it to a column. You could either use another trigger to map in the reverse direction to support changes for writes, or you could use a custom mutator to write to the polygon type directly on the server. Let us know if the lack of a particular column type is hindering your use of Zero. It can likely be added. Column Defaults Default values are allowed in the Postgres schema, but there currently is no way to use them from a Zero app. An mutation requires all columns to be specified, except when columns are nullable (in which case, they default to null). Since there is no way to leave non-nullable columns off the insert on the client, there is no way for PG to apply the default. This is a known issue and will be fixed in the future. IDs It is strongly recommended to use client-generated random strings like uuid, ulid, nanoid, etc for primary keys. This makes optimistic creation and updates much easier. You could sync the highest value seen for that table, but there are race conditions and it is possible for that ID to be taken by the time the creation makes it to the server. Your database can resolve this and assign the next ID, but now the relationships you created optimistically will be against the wrong row. Blech. GUIDs makes a lot more sense in synced applications. If your table has a natural key you can use that and it has less problems. But there is still the chance for a conflict. Imagine you are modeling orgs and you choose domainName as the natural key. It is possible for a race to happen and when the creation gets to the server, somebody has already chosen that domain name. In that case, the best thing to do is reject the write and show the user an error. If you want to have a short auto-incrementing numeric ID for UX reasons (i.e., a bug number), that is possible: Primary Keys Each table synced with Zero must have either a primary key or at least one unique index. This is needed so that Zero can identify rows during sync, to distinguish between an edit and a remove/add. Multi-column primary and foreign keys are supported. Limiting Replication You can use Permissions to limit tables and rows from replicating to Zero. In the near future, you'll also be able to use Permissions to limit individual columns. Until then, a workaround is to use the Postgres publication feature to control the tables and columns that are replicated into . In your pg schema setup, create a Postgres with the tables and columns you want: Then, specify this publication in the App Publications option. (By default, Zero creates a publication that publishes the entire public schema.) To limit what is synced from the replica to actual clients (e.g., web browsers) you can use read permissions. Schema changes Most Postgres schema changes are supported as is. Two cases require special handling: Adding columns Adding a column with a non-constant value is not supported. This includes any expression with parentheses, as well as the special functions , , and (due to a constraint of SQLite). However, the value of an existing column can be changed to any value, including non-constant expressions. To achieve the desired column default: Add the column with no value Backfill the column with desired values Set the column's value Changing publications Postgres allows you to change published tables/columns with an statement. Zero automatically adjusts the table schemas on the replica, but it does not receive the pre-existing data. To stream the pre-existing data to Zero, make an innocuous after adding the tables/columns to the publication: Self-Referential Relationships See zero-schema",
+    "headings": [
+      {
+        "text": "Object Names",
+        "id": "object-names"
+      },
+      {
+        "text": "Object Types",
+        "id": "object-types"
+      },
+      {
+        "text": "Column Types",
+        "id": "column-types"
+      },
+      {
+        "text": "Column Defaults",
+        "id": "column-defaults"
+      },
+      {
+        "text": "IDs",
+        "id": "ids"
+      },
+      {
+        "text": "Primary Keys",
+        "id": "primary-keys"
+      },
+      {
+        "text": "Limiting Replication",
+        "id": "limiting-replication"
+      },
+      {
+        "text": "Schema changes",
+        "id": "schema-changes"
+      },
+      {
+        "text": "Adding columns",
+        "id": "adding-columns"
+      },
+      {
+        "text": "Changing publications",
+        "id": "changing-publications"
+      },
+      {
+        "text": "Self-Referential Relationships",
+        "id": "self-referential-relationships"
+      }
+    ]
+  },
+  {
+    "id": "20-quickstart",
+    "title": "Quickstart",
+    "url": "/docs/quickstart",
+    "icon": "CirclePlay",
+    "content": "Prerequisites Docker Node 20+ Run In one terminal, install and start the database: In a second terminal, start : In a final terminal, start the UI: Quick Overview is a demo app that allows querying over a small dataset of fake messages between early Zero users. Here are some things to try: Press the Add Messages button to add messages to the UI. Any logged-in or anonymous users are allowed to add messages. Press the Remove Messages button to remove messages. Only logged-in users are allowed to remove messages. You can hold shift to bypass the UI warning and see that write access control is being enforced server-side – the UI flickers as the optimistic write happens instantly and is then reverted by the server. Press login to login as a random user, then the remove button will work. Open two different browsers and see how fast sync propagates changes. Add a filter using the From and Contains controls. Notice that filters are fully dynamic and synced. Edit a message by pressing the pencil icon. You can only edit messages from the user you’re logged in as. As before you can attempt to bypass by holding shift. Check out the SQL schema for this database in . Login to the database with (or any other pg viewer) and delete or alter a row. Observe that it deletes from UI automatically. Detailed Walkthrough Deployment You can deploy Zero apps to most cloud providers that support Docker and Postgres. See Deployment for more information.",
+    "headings": [
+      {
+        "text": "Prerequisites",
+        "id": "prerequisites"
+      },
+      {
+        "text": "Run",
+        "id": "run"
+      },
+      {
+        "text": "Quick Overview",
+        "id": "quick-overview"
+      },
+      {
+        "text": "Detailed Walkthrough",
+        "id": "detailed-walkthrough"
+      },
+      {
+        "text": "Deployment",
+        "id": "deployment"
+      }
+    ]
+  },
+  {
+    "id": "21-react",
+    "title": "React",
+    "url": "/docs/react",
+    "icon": "React",
+    "content": "Zero has built-in support for React. Here’s what basic usage looks like: ZeroProvider The hook must be used within a component. The component is responsible for creating and destroying instances reactively. You can also pass a instance to the if you want to control the lifecycle of the instance yourself: Complete quickstart here: https://github.com/rocicorp/hello-zero",
+    "headings": [
+      {
+        "text": "ZeroProvider",
+        "id": "zeroprovider"
+      }
+    ]
+  },
+  {
+    "id": "22-reading-data",
+    "title": "Reading Data with ZQL",
+    "url": "/docs/reading-data",
+    "icon": "ArrowDown",
+    "content": "ZQL is Zero’s query language. Inspired by SQL, ZQL is expressed in TypeScript with heavy use of the builder pattern. If you have used Drizzle or Kysely, ZQL will feel familiar. ZQL queries are composed of one or more clauses that are chained together into a query. Unlike queries in classic databases, the result of a ZQL query is a view that updates automatically and efficiently as the underlying data changes. You can call a query’s method to get a view, but more typically you run queries via some framework-specific bindings. For example see for React or SolidJS. ZQL caches values and returns them multiple times. If you modify a value returned from ZQL, you will modify it everywhere it is used. This can lead to subtle bugs. JavaScript and TypeScript lack true immutable types so we use to help enforce it. But it's easy to cast away the accidentally. In the future, we'll all returned data in mode to help prevent this. Select ZQL queries start by selecting a table. There is no way to select a subset of columns; ZQL queries always return the entire row (modulo column permissions). This is a design tradeoff that allows Zero to better reuse the row locally for future queries. This also makes it easier to share types between different parts of the code. Ordering You can sort query results by adding an clause: Multiple clauses can be present, in which case the data is sorted by those clauses in order: All queries in ZQL have a default final order of their primary key. Assuming the table has a primary key on the column, then: Limit You can limit the number of rows to return with : Paging You can start the results at or after a particular row with : By default is exclusive - it returns rows starting after the supplied reference row. This is what you usually want for paging. If you want inclusive results, you can do: Getting a Single Result If you want exactly zero or one results, use the clause. This causes ZQL to return rather than . overrides any clause that is also present. Relationships You can query related rows using relationships that are defined in your Zero schema. Relationships are returned as hierarchical data. In the above example, each row will have a field which is itself an array of the corresponding comments row. You can fetch multiple relationships in a single query: Refining Relationships By default all matching relationship rows are returned, but this can be refined. The method accepts an optional second function which is itself a query. This relationship query can have all the same clauses that top-level queries can have. You can sometimes work around this by making the junction relationship explicit, depending on your schema and usage. Nested Relationships You can nest relationships arbitrarily: Where You can filter a query with : The first parameter is always a column name from the table being queried. Intellisense will offer available options (sourced from your Zero Schema). Comparison Operators Where supports the following comparison operators: | Operator | Allowed Operand Types | Description | | ---------------------------------------- | ----------------------------- | ------------------------------------------------------------------------ | | , | boolean, number, string | JS strict equal (===) semantics | | , , , | number | JS number compare semantics | | , , , | string | SQL-compatible / | | , | boolean, number, string | RHS must be array. Returns true if rhs contains lhs by JS strict equals. | | , | boolean, number, string, null | Same as but also works for | TypeScript will restrict you from using operators with types that don’t make sense – you can’t use with for example. Equals is the Default Comparison Operator Because comparing by is so common, you can leave it out and defaults to . Comparing to As in SQL, ZQL’s is not equal to itself (). This is required to make join semantics work: if you’re joining on you do not want an employee in no organization to match an org that hasn’t yet been assigned an ID. When you purposely want to compare to ZQL supports and operators that work just like in SQL: TypeScript will prevent you from comparing to with other operators. Compound Filters The argument to can also be a callback that returns a complex expression: is short for compare and works the same as at the top-level except that it can’t be chained and it only accepts comparison operators (no relationship filters – see below). Note that chaining is also a one-level : Relationship Filters Your filter can also test properties of relationships. Currently the only supported test is existence: The argument to is a relationship, so just like other relationships it can be refined with a query: As with querying relationships, relationship filters can be arbitrarily nested: The helper is also provided which can be used with , , , and to build compound filters that check relationship existence: Data Lifetime and Reuse Zero reuses data synced from prior queries to answer new queries when possible. This is what enables instant UI transitions. But what controls the lifetime of this client-side data? How can you know whether any particular query will return instant results? How can you know whether those results will be up to date or stale? The answer is that the data on the client is simply the union of rows returned from queries which are currently syncing. Once a row is no longer returned by any syncing query, it is removed from the client. Thus, there is never any stale data in Zero. So when you are thinking about whether a query is going to return results instantly, you should think about what other queries are syncing, not about what data is local. Data exists locally if and only if there is a query syncing that returns that data. A cache has a random set of rows with a random set of versions. There is no expectation that the cache any particular rows, or that the rows' have matching versions. Rows are simply updated as they are fetched. A replica by contrast is eagerly updated, whether or not any client has requested a row. A replica is always very close to up-to-date, and always self-consistent. Zero is a partial replica because it only replicates rows that are returned by syncing queries. Query Lifecycle Queries can be either active or backgrounded. An active query is one that is currently being used by the application. Backgrounded queries are not currently in use, but continue syncing in case they are needed again soon. Active queries are created one of three ways: The app calls to get a . The app uses a platform binding like React's . The app calls to sync larger queries without a view. Active queries sync until they are deactivated. The way this happens depends on how the query was created: For queries, the UI calls on the view. For , the UI unmounts the component (which calls under the covers). For , the UI calls on the return value of . Background Queries By default a deactivated query stops syncing immediately. But it's often useful to keep queries syncing beyond deactivation in case the UI needs the same or a similar query in the near future. This is accomplished with the parameter: The parameter specifies how long the app developer wishes the query to run in the background. The following formats are allowed (where is a positive integer): | Format | Meaning | | --------- | ------------------------------------------------------------------------------------ | | | No backgrounding. Query will immediately stop when deactivated. This is the default. | | | Number of seconds. | | | Number of minutes. | | | Number of hours. | | | Number of days. | | | Number of years. | | | Query will never be stopped. | If the UI re-requests a background query, it becomes an active query again. Since the query was syncing in the background, the very first synchronous result that the UI receives after reactivation will be up-to-date with the server (i.e., it will have of ). Just like other types of queries, the data from background queries is available for use by new queries. A common pattern in to preload a subset of most commonly needed data with and then do more specific queries from the UI with, e.g., . Most often the preloaded data will be able to answer user queries, but if not, the new query will be answered by the server and backgrounded for a day in case the user revisits it. Client Capacity Management Zero has a default soft limit of 20,000 rows on the client-side, or about 20MB of data assuming 1KB rows. This limit can be increased with the flag, but we do not recommend setting it higher than 100,000. Initial sync will be slow, slowing down initial app load. Because storage in browser tabs is unreliable, initial sync can occur surprisingly often. We want to answer queries instantly as often as possible. This requires client-side data in memory on the main thread. If we have to page to disk, we may as well go to the network and reduce complexity. Even though Zero's queries are very efficient, they do still have some cost, especially hydration. Massive client-side storage would result in hydrating tons of queries that are unlikely to be used every time the app starts. Most importantly, no matter how much data you store on the client, there will be cases where you have to fallback to the server: Some users might have huge amounts of data. Some users might have tiny amounts of available client storage. You will likely want the app to start fast and sync in the background. Because you have to be able to fallback to server the question becomes what is the right amount of data to store on the client?, not how can I store the absolute max possible data on the client? The goal with Zero is to answer 99% of queries on the client from memory. The remaining 1% of queries can fallback gracefully to the server. 20,000 rows was chosen somewhat arbitrarily as a number of rows that was likely to be able to do this for many applications. There is no hard limit at 20,000 or 100,000. Nothing terrible happens if you go above. The thing to keep in mind is that: All those queries will revalidate every time your app boots. All data synced to the client is in memory in JS. Here is how this limit is managed: Active queries are never destroyed, even if the limit is exceeded. Developers are expected to keep active queries well under the limit. The value counts from the moment a query deactivates. Backgrounded queries are destroyed immediately when the is reached, even if the limit hasn't been reached. If the client exceeds its limit, Zero will destroy backgrounded queries, least-recently-used first, until the store is under the limit again. Thinking in Queries Although IVM is a very efficient way to keep queries up to date relative to re-running them, it isn't free. You still need to think about how many queries you are creating, how long they are kept alive, and how expensive they are. This is why Zero defaults to not backgrounding queries and doesn't try to aggressively fill its client datastore to capacity. You should put some thought into what queries you want to run in the background, and for how long. Zero currently provides a few basic tools to understand the cost of your queries: The client logs a warning for slow query materializations. Look for in your logs. The default threshold is (including network) but this is configurable with the parameter. The client logs the materialization time of all queries at the level. Look for in your logs. The server logs a warning for slow query materializations. Look for in your logs. The default threshold is but this is configurable with the configuration parameter. We will be adding more tools over time. Completeness Zero returns whatever data it has on the client immediately for a query, then falls back to the server for any missing data. Sometimes it's useful to know the difference between these two types of results. To do so, use the from : The possible values of are currently and . The value is currently only returned when Zero has received the server result. But in the future, Zero will be able to return this result type when it knows that all possible data for this query is already available locally. Additionally, we plan to add a result for when the data is known to be a prefix of the complete result. See Consistency for more information. Handling Missing Data It is inevitable that there will be cases where the requested data cannot be found. Because Zero returns local results immediately, and server results asynchronously, displaying \"not found\" / 404 UI can be slightly tricky. If you just use a simple existence check, you will often see the 404 UI flicker while the server result loads: The way to do this correctly is to only display the \"not found\" UI when the result type is . This way the 404 page is slow but pages with data are still just as fast. Listening to Changes Currently, the way to listen for changes in query results is not ideal. You can add a listener to a materialized view which has the new data and result as parameters: However, using this method will maintain its own materialized view in memory which is wasteful. It also doesn't allow for granular listening to events like and of rows. A better way would be to create your own view without actually storing the data which will also allow you to listen to specific events. Again, the API is not good and will be improved in the future. (see View implementations in or ) Preloading Almost all Zero apps will want to preload some data in order to maximize the feel of instantaneous UI transitions. In Zero, preloading is done via queries – the same queries you use in the UI and for auth. However, because preload queries are usually much larger than a screenful of UI, Zero provides a special helper to avoid the overhead of materializing the result into JS objects: Running Queries Once Usually subscribing to a query is what you want in a reactive UI, but every so often you'll need to run a query just once. To do this, use the method: By default, only returns results that are currently available on the client. That is, it returns the data that would be given for . If you want to wait for the server to return results, pass to : This is the same as saying or . Consistency Zero always syncs a consistent partial replica of the backend database to the client. This avoids many common consistency issues that come up in classic web applications. But there are still some consistency issues to be aware of when using Zero. For example, imagine that you have a bug database w/ 10k issues. You preload the first 1k issues sorted by created. The user then does a query of issues assigned to themselves, sorted by created. Among the 1k issues that were preloaded imagine 100 are found that match the query. Since the data we preloaded is in the same order as this query, we are guaranteed that any local results found will be a prefix of the server results. The UX that result is nice: the user will see initial results to the query instantly. If more results are found server-side, those results are guaranteed to sort below the local results. There's no shuffling of results when the server response comes in. Now imagine that the user switches the sort to ‘sort by modified’. This new query will run locally, and will again find some local matches. But it is now unlikely that the local results found are a prefix of the server results. When the server result comes in, the user will probably see the results shuffle around. To avoid this annoying effect, what you should do in this example is also preload the first 1k issues sorted by modified desc. In general for any query shape you intend to do, you should preload the first results for that query shape with no filters, in each sort you intend to use. In the future, we will be implementing a consistency model that fixes these issues automatically. We will prevent Zero from returning local data when that data is not known to be a prefix of the server result. Once the consistency model is implemented, preloading can be thought of as purely a performance thing, and not required to avoid unsightly flickering.",
+    "headings": [
+      {
+        "text": "Select",
+        "id": "select"
+      },
+      {
+        "text": "Ordering",
+        "id": "ordering"
+      },
+      {
+        "text": "Limit",
+        "id": "limit"
+      },
+      {
+        "text": "Paging",
+        "id": "paging"
+      },
+      {
+        "text": "Getting a Single Result",
+        "id": "getting-a-single-result"
+      },
+      {
+        "text": "Relationships",
+        "id": "relationships"
+      },
+      {
+        "text": "Refining Relationships",
+        "id": "refining-relationships"
+      },
+      {
+        "text": "Nested Relationships",
+        "id": "nested-relationships"
+      },
+      {
+        "text": "Where",
+        "id": "where"
+      },
+      {
+        "text": "Comparison Operators",
+        "id": "comparison-operators"
+      },
+      {
+        "text": "Equals is the Default Comparison Operator",
+        "id": "equals-is-the-default-comparison-operator"
+      },
+      {
+        "text": "Comparing to ",
+        "id": "comparing-to"
+      },
+      {
+        "text": "Compound Filters",
+        "id": "compound-filters"
+      },
+      {
+        "text": "Relationship Filters",
+        "id": "relationship-filters"
+      },
+      {
+        "text": "Data Lifetime and Reuse",
+        "id": "data-lifetime-and-reuse"
+      },
+      {
+        "text": "Query Lifecycle",
+        "id": "query-lifecycle"
+      },
+      {
+        "text": "Background Queries",
+        "id": "background-queries"
+      },
+      {
+        "text": "Client Capacity Management",
+        "id": "client-capacity-management"
+      },
+      {
+        "text": "Thinking in Queries",
+        "id": "thinking-in-queries"
+      },
+      {
+        "text": "Completeness",
+        "id": "completeness"
+      },
+      {
+        "text": "Handling Missing Data",
+        "id": "handling-missing-data"
+      },
+      {
+        "text": "Listening to Changes",
+        "id": "listening-to-changes"
+      },
+      {
+        "text": "Preloading",
+        "id": "preloading"
+      },
+      {
+        "text": "Running Queries Once",
+        "id": "running-queries-once"
+      },
+      {
+        "text": "Consistency",
+        "id": "consistency"
+      }
+    ]
+  },
+  {
+    "id": "23-release-notes/0.1",
+    "title": "Zero 0.1",
+    "url": "/docs/release-notes/0.1",
+    "icon": "FileCode",
+    "content": "Breaking changes The name of some config keys in changed: → → → → Changed default port of to . So your app startup should look like . Features Print a warning to js console when Zero constructor param is or zero-cache should now correctly bind to both ipv4 and ipv6 loopback addresses. This should fix the issue where using to connect to zero-cache on some systems did not work. Check for presence of early in startup of . Print a clear error to catch people accidentally running Zero under SSR. Fix annoying error in js console in React strict mode from constructing and closing Replicache in quick succession. Source tree fixes These only apply if you were working in the Rocicorp monorepo. Fixed issue where zbugs didn’t rebuild when zero dependency changed - generally zbugs build normally again The zero binary has the right permissions bit so you don’t have to chmod u+x after build Remove overloaded name in use-query.tsx (thanks Scott 🙃)",
+    "headings": [
+      {
+        "text": "Breaking changes",
+        "id": "breaking-changes"
+      },
+      {
+        "text": "Features",
+        "id": "features"
+      },
+      {
+        "text": "Source tree fixes",
+        "id": "source-tree-fixes"
+      }
+    ]
+  },
+  {
+    "id": "24-release-notes/0.10",
+    "title": "Zero 0.10",
+    "url": "/docs/release-notes/0.10",
+    "icon": "FileCode",
+    "content": "Install Features None. Fixes Remove top-level await from . Various logging improvements. Don't throw error when unavailable on server. Support building on Windows (running on Windows still doesn't work) Breaking Changes None.",
+    "headings": [
+      {
+        "text": "Install",
+        "id": "install"
+      },
+      {
+        "text": "Features",
+        "id": "features"
+      },
+      {
+        "text": "Fixes",
+        "id": "fixes"
+      },
+      {
+        "text": "Breaking Changes",
+        "id": "breaking-changes"
+      }
+    ]
+  },
+  {
+    "id": "25-release-notes/0.11",
+    "title": "Zero 0.11",
+    "url": "/docs/release-notes/0.11",
+    "icon": "FileCode",
+    "content": "Install Features Windows should work a lot better now. Thank you very much to aexylus and Sergio Leon for the testing and contributions here. Support nested property access in JWT auth tokens (docs). Make initial sync configurable (docs). Add query result type to SolidJS (docs) Docker image now contains native amd64 and arm64 binaries. Add constructor parameter to enable multiple instances for same . Fixes Many, many fixes, including: Fix downstream replication of primitive values Fix replication of messages Fix large storage use for idle pg instances Add runtime sanity checks for when a table is referenced but not synced Fix for multitenant Breaking Changes The addition of result types to SolidJS is a breaking API change on SolidJS only. See the changes to for upgrade example.",
+    "headings": [
+      {
+        "text": "Install",
+        "id": "install"
+      },
+      {
+        "text": "Features",
+        "id": "features"
+      },
+      {
+        "text": "Fixes",
+        "id": "fixes"
+      },
+      {
+        "text": "Breaking Changes",
+        "id": "breaking-changes"
+      }
+    ]
+  },
+  {
+    "id": "26-release-notes/0.12",
+    "title": "Zero 0.12",
+    "url": "/docs/release-notes/0.12",
+    "icon": "FileCode",
+    "content": "Install Features Schemas now support circular relationships (docs). Added and schema helpers to default relationship type (docs). Support for syncing tables without a primary key as long as there is a unique index. This enables Prisma's implicit many-to-many relations (docs). Zero has been confirmed to work with Aurora and Google Cloud SQL (docs) Client bundle size reduced from 55kb to 47kb (-15%). Fixes Windows: was spawning emptying terminals and leaving listeners connected on exit. Incorrect warning in about enums not being supported. Failure to handle the primary key of Postgres tables changing. Incorrect results when is before in query (bug). Error: The inferred type of '...' cannot be named without a reference to .... Error: insufficient upstream connections. Several causes of flicker in React. Incorrect values for when unloading and loading a query quickly (bug). Error: Postgres is missing the column '...' but that column was part of a row. Pointless initial empty render in React when data is already available in memory. Error: Expected string at ... Got array during auth. incorrectly allows comparing to with the operator (bug). SolidJS: Only call once per transaction. Breaking Changes The schema definition syntax has changed to support circular relationships. See the changes to and for upgrade examples.",
+    "headings": [
+      {
+        "text": "Install",
+        "id": "install"
+      },
+      {
+        "text": "Features",
+        "id": "features"
+      },
+      {
+        "text": "Fixes",
+        "id": "fixes"
+      },
+      {
+        "text": "Breaking Changes",
+        "id": "breaking-changes"
+      }
+    ]
+  },
+  {
+    "id": "27-release-notes/0.13",
+    "title": "Zero 0.13",
+    "url": "/docs/release-notes/0.13",
+    "icon": "FileCode",
+    "content": "Install Features Multinode deployment for horizontal scalability and zero-downtime deploys (docs). SST Deployment Guide (docs). Plain AWS Deployment Guide (docs). Various exports for external libraries Remove build hash from docker version for consistency with npm (discussion) Fixes Move heartbeat monitoring to separate path, not port Type instantiation is excessively deep and possibly infinite (bug). 20x improvement to performance (discussion) Breaking Changes Removing the hash from the version is a breaking change if you had scripts relying on that. Moving the heartbeat monitor to a path is a breaking change for deployments that were using that.",
+    "headings": [
+      {
+        "text": "Install",
+        "id": "install"
+      },
+      {
+        "text": "Features",
+        "id": "features"
+      },
+      {
+        "text": "Fixes",
+        "id": "fixes"
+      },
+      {
+        "text": "Breaking Changes",
+        "id": "breaking-changes"
+      }
+    ]
+  },
+  {
+    "id": "28-release-notes/0.14",
+    "title": "Zero 0.14",
+    "url": "/docs/release-notes/0.14",
+    "icon": "FileCode",
+    "content": "Install Features Use to map column or tables to a different name (docs). Sync from muliple Postgres schemas (docs) Fixes not working when unset (bug) Error: \"single output already exists\" in hello-zero-solid (bug) helper doesn't work with query having (bug) Partitioned Postgres tables not replicating Breaking Changes None.",
+    "headings": [
+      {
+        "text": "Install",
+        "id": "install"
+      },
+      {
+        "text": "Features",
+        "id": "features"
+      },
+      {
+        "text": "Fixes",
+        "id": "fixes"
+      },
+      {
+        "text": "Breaking Changes",
+        "id": "breaking-changes"
+      }
+    ]
+  },
+  {
+    "id": "29-release-notes/0.15",
+    "title": "Zero 0.15",
+    "url": "/docs/release-notes/0.15",
+    "icon": "FileCode",
+    "content": "Install Upgrade Guide This release changes the way that permissions are sent to the server. Before, permissions were sent to the server by setting the or environment variables, which include the permissions. In 0.15, these variables go away and are replaced by a new command: . This command writes the permissions to a new table in the upstream database. This design allows live permission updates, without restarting the server. It also solves problems with max env var size that users were seeing. This release also flips the default permission from to for all rules. To upgrade your app: See the changes to hello-zero or hello-zero-solid for how to update your permissions. Remove the and environment variables from your setup. They aren't used anymore. Use to deploy permissions when necessary. You can hook this up to your CI to automate it. See the zbugs implementation as an example. Features Live-updating permissions (docs). Permissions now default to deny rather than allow (docs). Fixes Multiple in same query not working (PR) Allow overlapped mutators (bug) \"Immutable type too deep\" error (PR) Log server version at startup (PR) Eliminate quadratic CVR writes (PR) Handle in the replication stream (PR) Make the auto-reset required error more prominent (PR) Add recommendation when schema load fails (PR) Throw error if multiple auth options set (PR) Handle NULL characters in JSON columns (PR) Breaking Changes Making permissions deny by default breaks existing apps. To fix add or other appropriate permissions for your tables. See docs. The and environment variables are no longer used. Remove them from your setup and use instead.",
+    "headings": [
+      {
+        "text": "Install",
+        "id": "install"
+      },
+      {
+        "text": "Upgrade Guide",
+        "id": "upgrade-guide"
+      },
+      {
+        "text": "Features",
+        "id": "features"
+      },
+      {
+        "text": "Fixes",
+        "id": "fixes"
+      },
+      {
+        "text": "Breaking Changes",
+        "id": "breaking-changes"
+      }
+    ]
+  },
+  {
+    "id": "30-release-notes/0.16",
+    "title": "Zero 0.16",
+    "url": "/docs/release-notes/0.16",
+    "icon": "FileCode",
+    "content": "Install Upgrading See the upgrade from hello-zero or hello-zero-solid for an example. Features Documented how to use lambdas to deploy permissions in SST, rather than needing CI/CD to have access to Postgres. (doc – search for \"\"). Added simple debugging logs for read and write permissions (doc). Fixes Improve performance of initial sync about 2x (PR 1, PR 2). should allow array arguments (Report, PR). Export (Report). Fix false-positive in schema change detection (Report, PR). Fix writes of numeric types (Report, PR) Fix bug where litestream was creating way too many files in s3 (PR) Fix memory leak in change-streamer noticeable under high write load (PR) Fix error (PR) Correctly handle optional booleans (PR) Ignore indexes with unpublished columns (PR) Breaking Changes None.",
+    "headings": [
+      {
+        "text": "Install",
+        "id": "install"
+      },
+      {
+        "text": "Upgrading",
+        "id": "upgrading"
+      },
+      {
+        "text": "Features",
+        "id": "features"
+      },
+      {
+        "text": "Fixes",
+        "id": "fixes"
+      },
+      {
+        "text": "Breaking Changes",
+        "id": "breaking-changes"
+      }
+    ]
+  },
+  {
+    "id": "31-release-notes/0.17",
+    "title": "Zero 0.17",
+    "url": "/docs/release-notes/0.17",
+    "icon": "FileCode",
+    "content": "Install Upgrading See the upgrade from hello-zero or hello-zero-solid for an example. Features Queries now take an optional argument. This argument backgrounds queries for some time after the app stops using them. Background queries continue syncing so they are instantly ready if the UI re-requests them. The data from background queries is also available to be used by new queries where possible (doc). Structural schema versioning. This is TypeScript, why are we versioning with numbers like cave-people?? We got rid of concept entirely and now determine schema compatibility completely automatically, TS-stylie (doc). Permissions now scoped to \"apps\". You can now have different Zero \"apps\" talking to the same upstream database. Each app gets completely separate configuration and permissions. This should also enable previewing (each preview would be its own app). Apps replace the existing \"shard\" concept (doc). Initial replication is over 5x faster, up to about 50MB/second or 15k row/second in our tests. Added warnings for slow hydration in both client and server (doc). is now enabled by default for databases that don't support event triggers (doc). Default and databases to , so that you don't have to specify them in the common case where they are the same as upstream. This docs site now has search! Fixes Certain kinds of many:many joins were causing assertions Certain kinds of queries were causing consistency issues Support for PostgreSQL tables We now print a stack trace during close at level to enable debugging errors where Zero is accessed after close. We now print a warning when is missing rather than throwing. This makes it a little easier to use Zero in SSR setups. We now reset implicitly in a few edge cases rather than halting replication. Fixed a deadlock in . Breaking Changes now returns its result via promise. This is required for compatibility with upcoming custom mutators, but also will allow us to wait for server results in the future (though that (still 😢) doesn't exist yet).",
+    "headings": [
+      {
+        "text": "Install",
+        "id": "install"
+      },
+      {
+        "text": "Upgrading",
+        "id": "upgrading"
+      },
+      {
+        "text": "Features",
+        "id": "features"
+      },
+      {
+        "text": "Fixes",
+        "id": "fixes"
+      },
+      {
+        "text": "Breaking Changes",
+        "id": "breaking-changes"
+      }
+    ]
+  },
+  {
+    "id": "32-release-notes/0.18",
+    "title": "Zero 0.18",
+    "url": "/docs/release-notes/0.18",
+    "icon": "FileCode",
+    "content": "Install Upgrading To try out custom mutators, see the changes to hello-zero-solid. Features Custom Mutators! Finally! Define arbitrary write operations in code (doc). Added inspector API for debugging sync, queries, and client storage (doc). Added tool to debug query performance (doc). Added tool to debug permissions (doc). Added script to prettify Zero's internal AST format (doc). Fixes Added backpressure to to protect against Postgres moving faster than we can push to clients (PR). has been deprecated. got folded into and got folded into (PR). Support DDL changes (PR) Allow to continue running while a new one re-replicates. (PR). Improve replication performance for some schema changes (PR). Make the log level of configurable (PR) Bind to the expression builder (PR) Fix error (PR) Fix in Expo (thanks !) (PR). Fix Vue bindings ref counting bug. Bindings no longer need to pass (PR). Fix CVR ownership takeover race conditions (PR). Support in degraded-mode pg providers (PR). Handle corrupt sqlite db by re-replicating (PR). Don't send useless pokes to clients that are unchanged (PR). Add to queries using a relation that is marked (PR). Export Breaking Changes None.",
+    "headings": [
+      {
+        "text": "Install",
+        "id": "install"
+      },
+      {
+        "text": "Upgrading",
+        "id": "upgrading"
+      },
+      {
+        "text": "Features",
+        "id": "features"
+      },
+      {
+        "text": "Fixes",
+        "id": "fixes"
+      },
+      {
+        "text": "Breaking Changes",
+        "id": "breaking-changes"
+      }
+    ]
+  },
+  {
+    "id": "33-release-notes/0.19",
+    "title": "Zero 0.19",
+    "url": "/docs/release-notes/0.19",
+    "icon": "FileCode",
+    "content": "Install Upgrading If you use custom mutators, please see hello-zero-solid for how to update your push endpoint. If you use SolidJS, please switch to . If you are , you should switch to to be consistent with . If you were using a 0.19 canary, the property returns error by rejection again (like 0.18 did). Sorry about the thrash here. Features Add a param to so it can wait for server results (doc, bug) is now for consistency with , old API still works but deprecated (doc) Improve speed of litestream restore by about 7x Increase replication speed when using JSON by about 25% Add options to to apply permissions and auth data (doc). Add option to to to delay connecting to upstram until first connection (doc) Add endpoint for getting some health statistics from a running Zero instance (doc) Fixes Support passing to (PR) Fix layering in to better support custom db implementations (thanks Erik Munson!) (PR) Fix socket disconnects in GCP (PR) Quote Postgres enum types to preserve casing (report) : Return for empty result set when using : Allow accessing tables in non-public schemas : Allow where is to match client behavior Fix broken replication when updating a key that is part of a unique (but non-PK) index : Rename to to fit Solid naming conventions (old name deprecated) Resync when publications are missing (PR) Fix missing in (PR) Fix timezone shift when writing to / and server is non-UTC timezone (thanks Tom Jenkinson!) (PR) Bound time spent in incremental updates to 1/2 hydration time Fix being off by 1000 in some cases 😬 (PR) : Relationships nested in a junction relationship were not working correctly (PR) Custom mutators: Due to multitab, client can receive multiple responses for same mutation Fix deadlock that could happen when pushing on a closed websocket (PR) Fix incorrect shutdown under heavy CPU load (thanks Erik Munson!) (PR) Fix case where deletes were getting reverted (thanks for reproduction Marc MacLeod!) (PR) : Incorrect handling of self-join, and not exists is not supported on the client re-auth on 401s returned by push endpoint Added constructor parameter to allow passing query params to the push endpoint (doc) Breaking Changes The structure of setting up a has changed slightly. See push endpoint setup or upgrade guide. Not technically a breaking change from 0.18, but if you were using 0.19 canaries, the property returns error by rejection again (like 0.18 did) (doc).",
+    "headings": [
+      {
+        "text": "Install",
+        "id": "install"
+      },
+      {
+        "text": "Upgrading",
+        "id": "upgrading"
+      },
+      {
+        "text": "Features",
+        "id": "features"
+      },
+      {
+        "text": "Fixes",
+        "id": "fixes"
+      },
+      {
+        "text": "Breaking Changes",
+        "id": "breaking-changes"
+      }
+    ]
+  },
+  {
+    "id": "34-release-notes/0.2",
+    "title": "Zero 0.2",
+    "url": "/docs/release-notes/0.2",
+    "icon": "FileCode",
+    "content": "Breaking changes None Features “Skip mode”: zero-cache now skips columns with unsupported datatypes. A warning is printed out when this happens: This makes it easy to use zero-cache with existing schemas that have columns Zero can’t handle. You can pair this with Postgres triggers to easily translate unsupported types into something Zero can sync. Zero now supports compound primary keys. You no longer need to include an extraneous column on the junction tables. Fixes Change the way Zero detects unsupported environments to work in One (and any other supported env). Before, Zero was looking for WebSocket and indexedDB early on, but indexedDB won’t be present on RN as SQLite will be used. Instead look for indexedDB only at use. Require Node v20 explicitly in package.json to prevent accidentally compiling better-sqlite3 with different Node version than running with. Ensure error messages early in startup get printed out before shutting down in multiprocess mode. Docs Factored out the sample app from the docs into its own Github repo so you can just download it and poke around if you prefer that. Source tree fixes Run zero-cache from source. You no longer have to build before running , it picks up the changes automatically. zbugs Numerous polish/styling fixes Change default to ‘open’ bugs Add ‘assignee’ field",
+    "headings": [
+      {
+        "text": "Breaking changes",
+        "id": "breaking-changes"
+      },
+      {
+        "text": "Features",
+        "id": "features"
+      },
+      {
+        "text": "Fixes",
+        "id": "fixes"
+      },
+      {
+        "text": "Docs",
+        "id": "docs"
+      },
+      {
+        "text": "Source tree fixes",
+        "id": "source-tree-fixes"
+      },
+      {
+        "text": "zbugs",
+        "id": "zbugs"
+      }
+    ]
+  },
+  {
+    "id": "35-release-notes/0.20",
+    "title": "Zero 0.20",
+    "url": "/docs/release-notes/0.20",
+    "icon": "FileCode",
+    "content": "Install Upgrading There are two config changes for multinode deployments: Required: Remove 's env var and replace it with . Optional: Change the env var from being passed to both and nodes to being passed only to . This config is no longer needed by (and is ignored by it). See hello-zero for an upgrade example using SST. Additionally, the , feature was removed. We do not think anyone was using it, but if you were please reach out to us for options. Features Supabase is now fully supported. After upgrading, you should see that schema changes are incremental and don't reset the replica (docs). Improve performance of single-key reads on client. Scale depends on size of data but 100x improvement is common (PR). Implement short-circuiting for queries. Because of permissions, one or more branches of would often be empty, turning the entire into a full-table scan. 100x improvement on chinook test dataset (PR). Remove DNF conversion. This was intended to make consistency easier in the future, but was resulting in some queries exploding in size (PR, bug). Autodiscovery for . nodes now find using the Postgres database, and no longer need an internal load balancer. See the new config in the deployment docs (PR). Make specific to . nodes now ignore this config and learn it from instead. This makes restarting replication less error-prone (PR, discussion). OpenTelemetry support (docs). Fixes Allow dots in column names (only works with custom mutators) (PR). Fix websocket liveness check to avoid false negatives when busy (PR). Fix unhandled exception in when processing query eviction (PR). Keep microsecond precision across timezones (PR). Fix unhandled exception in during (PR). Fix in (PR). Mutators: assert provided columns actually exist (PR). Fix ordering of columns in replicated index (PR). Use a shorter keepalive for replication stream for compat with Neon (PR). Allow destructuring in (PR). Add flow control for large change DB transactions (PR). Fix handling of pg types with params (char, varchar, numeric, etc) (PR). Support and in (PR). Breaking Changes The autodiscovery feature for is a breaking change for multinode deployments. See the upgrade instructions for details. The config was removed 🫗. The config was removed. It is no longer needed because initial sync now adapts to available memory automatically.",
+    "headings": [
+      {
+        "text": "Install",
+        "id": "install"
+      },
+      {
+        "text": "Upgrading",
+        "id": "upgrading"
+      },
+      {
+        "text": "Features",
+        "id": "features"
+      },
+      {
+        "text": "Fixes",
+        "id": "fixes"
+      },
+      {
+        "text": "Breaking Changes",
+        "id": "breaking-changes"
+      }
+    ]
+  },
+  {
+    "id": "36-release-notes/0.21",
+    "title": "Zero 0.21",
+    "url": "/docs/release-notes/0.21",
+    "icon": "FileCode",
+    "content": "Install Upgrading There is one breaking change in this release, but we think it is unlikely to affect anyone since the results were wrong already – the change just makes the error explicit. See hello-zero for an example of using arrays and the new features. Features New \"ztunes\" sample using TanStack, Drizzle, Better Auth, and Fly.io (docs). Add initial support for Postgres arrays (docs, bug). Improved React lifecycle management with (docs, PR). Expose instances automatically at (docs, PR). Add to (PR). Technically a bug fix, but this was so annoying I'm calling it a feature: now correctly supports the up/down arrow keys (commit). Another super annoying fix: logs from are now level-colored (PR). Fixes Lazy-load otel. This was causing problems with (PR). Initial replication is now memory-bounded (PR). Change the way otel starts up in to not rely on (PR). Use existing as the threshold for rather than hardcoded 200ms. Fix race condition starting up in multinode deployments (PR). Avoid site-local IPv6 addresses in auto-discovery (PR). Many z2s fixes found by fuzzing (PRs: 4415, 4416, 4417, 4421, 4422, 4423). Don't load prettier in . This was causing problems when prettier config was cjs. (PR). Don't hydrate system relationships in . This was causing incorrect results. (PR). Fix memory leaks from not cleaning up and (PR). Fix handling of invalid websocket requests that were crashing server. (PR). Remove red error text when missing (PR). Allow to startup without schema file, but print a warning (PR). Log a warning when auth token exceeds max allowed header size (PR). Breaking Changes Using and in many-to-many relationships now throws an error. It didn't work before but did the wrong thing silently. Now it throws a runtime error. See docs, bug.",
+    "headings": [
+      {
+        "text": "Install",
+        "id": "install"
+      },
+      {
+        "text": "Upgrading",
+        "id": "upgrading"
+      },
+      {
+        "text": "Features",
+        "id": "features"
+      },
+      {
+        "text": "Fixes",
+        "id": "fixes"
+      },
+      {
+        "text": "Breaking Changes",
+        "id": "breaking-changes"
+      }
+    ]
+  },
+  {
+    "id": "37-release-notes/0.3",
+    "title": "Zero 0.3",
+    "url": "/docs/release-notes/0.3",
+    "icon": "FileCode",
+    "content": "Install Breaking changes zero.config file is now TypeScript, not JSON. See: https://github.com/rocicorp/hello-zero/blob/07c08b1f86b526a96e281ee65af672f52a59bcee/zero.config.ts. Features Schema Migrations: Zero now has first-class support for schema migration (documentation). Write Permissions: First-class write permissions based on ZQL (documentation). Date/Time related types: Zero now natively supports the TIMESTAMP and DATE Postgres types (sample app, documentation). SolidJS: We now have first-class support for SolidJS (documentation). Intellisense for Schema Definition: Introduce and helper functions to enable intellisense when defining shemas. See Sample App. : Add helper to properly escape strings for use in filters. See Sample App. New QuickStart App: Entirely rewrote the setup/sample flow to (a) make it much faster to get started playing with Zero, and (b) demonstrate more features. Fixes The package now downloads a prebuilt sqlite instead of compiling it locally. This significantly speeds up install. Support RDS configuration. Fixed bug where sibling subqueries could be lost on edit changes. Fixes to error handling to ensure zero-cache prints errors when crashing in multiprocess mode. If zero-cache hears from a client with an unknown CVR/cookie, zero-cache forces that client to reset itself and reload automatically. Useful during development when server-state is frequently getting cleared. Docs Started work to make real docs. Not quite done yet. zbugs https://bugs.rocicorp.dev/ (pw: zql) Improve startup perf: ~3s → ~1.5s Hawaii ↔ US East. More work to do here but good progress. Responsive design for mobile. “Short IDs”: Bugs now have a short numeric ID, not a random hash. See Demo Video. First-class label picker. Unread indicators. Finish j/k support for paging through issues. It’s now “search-aware”, it pages through issues in order of search you clicked through to detail page in. Text search (slash to activate — needs better discoverability) Emojis on issues and comments Sort controls on list view remove fps meter temporarily numerous other UI polish",
+    "headings": [
+      {
+        "text": "Install",
+        "id": "install"
+      },
+      {
+        "text": "Breaking changes",
+        "id": "breaking-changes"
+      },
+      {
+        "text": "Features",
+        "id": "features"
+      },
+      {
+        "text": "Fixes",
+        "id": "fixes"
+      },
+      {
+        "text": "Docs",
+        "id": "docs"
+      },
+      {
+        "text": "zbugs",
+        "id": "zbugs"
+      }
+    ]
+  },
+  {
+    "id": "38-release-notes/0.4",
+    "title": "Zero 0.4",
+    "url": "/docs/release-notes/0.4",
+    "icon": "FileCode",
+    "content": "Install Breaking changes The changes modified the client/server protocol. You’ll need to restart zero-cache and clear browser data after updating. Added , , and to ZQL (documentation). Added method (documentation). Fixes Use method in zero-solid to improve performance when multiple updates happen in same frame. To take advantage of this you must use the helper from , instead of instantiating Zero directly. See the solid sample app. Postgres tables that were reserved words in SQLite but not Postgres caused crash during replication. was not matching correctly in the case of multiline subjects. Upstream database and zero database can now be same Postgres db (don’t need separate ports). Docs nothing notable zbugs Use to run text search over both titles and bodies prevent j/k in emoji preload emojis",
+    "headings": [
+      {
+        "text": "Install",
+        "id": "install"
+      },
+      {
+        "text": "Breaking changes",
+        "id": "breaking-changes"
+      },
+      {
+        "text": "Added  ,  , and  to ZQL ().",
+        "id": "added-and-to-zql"
+      },
+      {
+        "text": "Fixes",
+        "id": "fixes"
+      },
+      {
+        "text": "Docs",
+        "id": "docs"
+      },
+      {
+        "text": "zbugs",
+        "id": "zbugs"
+      }
+    ]
+  },
+  {
+    "id": "39-release-notes/0.5",
+    "title": "Zero 0.5",
+    "url": "/docs/release-notes/0.5",
+    "icon": "FileCode",
+    "content": "Install Breaking changes and moved to subpackage. This is in preparation to moving authorization into the schema file. helper type was renamed and moved into . Basically: Features Added support for JSON columns in Postgres (documentation). Zero pacakage now includes , which can be used to explore our sqlite files (documentation). Fixes We were not correctly replicating the type, despite documenting that we were. Docs nothing notable zbugs nothing notable",
+    "headings": [
+      {
+        "text": "Install",
+        "id": "install"
+      },
+      {
+        "text": "Breaking changes",
+        "id": "breaking-changes"
+      },
+      {
+        "text": "Features",
+        "id": "features"
+      },
+      {
+        "text": "Fixes",
+        "id": "fixes"
+      },
+      {
+        "text": "Docs",
+        "id": "docs"
+      },
+      {
+        "text": "zbugs",
+        "id": "zbugs"
+      }
+    ]
+  },
+  {
+    "id": "40-release-notes/0.6",
+    "title": "Zero 0.6",
+    "url": "/docs/release-notes/0.6",
+    "icon": "FileCode",
+    "content": "Install Upgrade Guide This release is a bit harder to upgrade to than previous alphas. For a step-by-step guide, please refer to the commits that upgrade the React and Solid quickstart apps: Upgrading hello-zero from Zero 0.5 to 0.6 Upgrading hello-zero-solid from Zero 0.5 to 0.6 Breaking Changes Totally new configuration system. is no more – config is now via env vars (documentation). Permissions rules moved into schema (documentation). Renamed CRUD mutators to be consistent with SQL naming (bug, documentation). Removed from ZQL. It wasn’t doing anything (documentation) Moved batch mutation to its own method. Before the field also doubled as a method. This made intellisense hard to understand since had all the tables as fields but also all the fields of a function. Features Relationship filters. Queries can now include (bug, documentation). Reworked syntax for compound filters, including ergonomically building expressions with dynamic number of clauses (bug, documentation). Support using Postgres databases without superuser access for smaller apps (documentation). Support for running client under Cloudflare Durable Objects (documentation). Reworked support for / to properly support optional fields (bug, documentation). Added / to ZQL to support checking for null (bug, documentation). Improved intellisense for mutators. Added flag and environment variable (bug, documentation). Default max connections of zero-cache more conservatively so that it should fit with even common small Postgres configurations. now accepts requests with any base path, not just . The parameter to the client constructor can now be a host () or a host with a single path component (). These two changes together allow hosting on same domain with an app that already uses the prefix (bug). Allow Postgres columns with default values, but don’t sync them (documentation). The utility now accepts all the same flags and arguments that does (documentation). zbugs Added tooltip describing who submitted which emoji reactions Updated implementation of label, assignee, and owner filters to use relationship filters Updated text filter implementation to use to search description and comments too Docs Added new ZQL reference Added new mutators reference Added new config reference",
+    "headings": [
+      {
+        "text": "Install",
+        "id": "install"
+      },
+      {
+        "text": "Upgrade Guide",
+        "id": "upgrade-guide"
+      },
+      {
+        "text": "Breaking Changes",
+        "id": "breaking-changes"
+      },
+      {
+        "text": "Features",
+        "id": "features"
+      },
+      {
+        "text": "zbugs",
+        "id": "zbugs"
+      },
+      {
+        "text": "Docs",
+        "id": "docs"
+      }
+    ]
+  },
+  {
+    "id": "41-release-notes/0.7",
+    "title": "Zero 0.7",
+    "url": "/docs/release-notes/0.7",
+    "icon": "FileCode",
+    "content": "Install Features Read permissions. You can now control read access to data using ZQL (docs). Deployment. We now have a single-node Docker container (docs). Future work will add multinode support. Compound FKs. Zero already supported compound primary keys, but now it also supports compound foreign keys (docs). Schema DX: Columns types can use bare strings now if is not needed (example). PK can be a single string in the common case where it’s non-compound (example). Breaking Changes Several changes to . See update to for overview. Details: was renamed to to avoid confusion with authentication. The way that many:many relationships are defined has changed to be more general and easy to remember. See example. The signature of and the related rule functions have changed: Now rules return an expression instead of full query. This was required to make read permissions work and we did it for write permissions for consitency (see example). The policy now has two child policies: and . The rules we used to have were . They run before a change and can be used to validate a user has permission to change a row. The rules run after and can be used to limit the changes a user is allowed to make. The file should export an object having two fields: and . The way that is consumed has also changed. Rather than directly reading the typescript source, we compile it to JSON and read that. should now point to a JSON file, not . It defaults to which we’ve found to be pretty useful so you’ll probably just remove this key from your entirely. Use to generate the JSON. You must currently do this manually each time you change the schema, we will automate it soon. zbugs Comments now have permalinks. Implementing permalinks in a synced SPA is fun! Private issues. Zbugs now supports private (to team only) issues. I wonder what’s in them … 👀. Docs The docs have moved. Please don’t use Notion anymore, they won’t be updated.",
+    "headings": [
+      {
+        "text": "Install",
+        "id": "install"
+      },
+      {
+        "text": "Features",
+        "id": "features"
+      },
+      {
+        "text": "Breaking Changes",
+        "id": "breaking-changes"
+      },
+      {
+        "text": "zbugs",
+        "id": "zbugs"
+      },
+      {
+        "text": "Docs",
+        "id": "docs"
+      }
+    ]
+  },
+  {
+    "id": "42-release-notes/0.8",
+    "title": "Zero 0.8",
+    "url": "/docs/release-notes/0.8",
+    "icon": "FileCode",
+    "content": "Install See the changes to hello-zero or hello-zero-solid for example updates. Features Schema Autobuild. There's now a script that automatically rebuilds the schema and restarts on changes to . (docs) Result Type. You can now tell whether a query is complete or partial. (docs) Enums. Enums are now supported in Postgres schemas and on client. (docs) Custom Types. You can define custom JSON types in your schema. (docs) OTEL Tracing. Initial tracing support. (docs) timestampz. Add support for Postgres column type. (docs) SSLMode. You can disable TLS when connects to DB with . (docs) Permission Helpers. and helpers were added to make these cases more readable. (docs) Multitenant Support. A single can now front separate Postgres databases. This is useful for customers that have one \"dev\" database in production per-developer. (docs) Fixes Crash with JSON Columns. Fixed a crash when a JSON column was used in a Zero app with write permissions (bug) Better Connection Error Reporting. Some connection errors would cause to exit silently. Now they are returned to client and logged. Breaking Changes in React now returns a 2-tuple of where is an object with a field. in write permissions for renamed to for consistency. renamed to to not be so silly long.",
+    "headings": [
+      {
+        "text": "Install",
+        "id": "install"
+      },
+      {
+        "text": "Features",
+        "id": "features"
+      },
+      {
+        "text": "Fixes",
+        "id": "fixes"
+      },
+      {
+        "text": "Breaking Changes",
+        "id": "breaking-changes"
+      }
+    ]
+  },
+  {
+    "id": "43-release-notes/0.9",
+    "title": "Zero 0.9",
+    "url": "/docs/release-notes/0.9",
+    "icon": "FileCode",
+    "content": "Install See the changes to hello-zero or hello-zero-solid for example updates. Features JWK Support. For auth, you can now specify a JWK containing a public key, or a JWKS url to support autodiscovery of keys. (docs) UUID column. Zero now supports the Postgres column type. (docs) Fixes Readonly Values. Type of values returned from Zero queries are marked . The system always considered them readonly, but now the types reflect that. (docs) Breaking Changes The config has been renamed to for consistency with the new JWK-related keys. If you were using the old name, you'll need to update your file. All values returned by Zero are now . You'll probably have to add this TS modifier various places. If you find yourself casting away you probably should be cloing the value instead.",
+    "headings": [
+      {
+        "text": "Install",
+        "id": "install"
+      },
+      {
+        "text": "Features",
+        "id": "features"
+      },
+      {
+        "text": "Fixes",
+        "id": "fixes"
+      },
+      {
+        "text": "Breaking Changes",
+        "id": "breaking-changes"
+      }
+    ]
+  },
+  {
+    "id": "44-release-notes/index",
+    "title": "Release Notes",
+    "url": "/docs/release-notes/index",
+    "icon": "FileCode",
+    "content": "Zero 0.21: PG arrays, TanStack starter, and more Zero 0.20: Full Supabase support, performance improvements Zero 0.19: Many, many bugfixes and cleanups Zero 0.18: Custom Mutators Zero 0.17: Background Queries Zero 0.16: Lambda-Based Permission Deployment Zero 0.15: Live Permission Updates Zero 0.14: Name Mapping and Multischema Zero 0.13: Multinode and SST Zero 0.12: Circular Relationships Zero 0.11: Windows Zero 0.10: Remove Top-Level Await Zero 0.9: JWK Support Zero 0.8: Schema Autobuild, Result Types, and Enums Zero 0.7: Read Perms and Docker Zero 0.6: Relationship Filters Zero 0.5: JSON Columns Zero 0.4: Compound Filters Zero 0.3: Schema Migrations and Write Perms Zero 0.2: Skip Mode and Computed PKs Zero 0.1: First Release",
+    "headings": []
+  },
+  {
+    "id": "45-reporting-bugs",
+    "title": "Reporting Bugs",
+    "url": "/docs/reporting-bugs",
+    "icon": "BadgeAlert",
+    "content": "zbugs You can use zbugs! (password: ) Our own bug tracker built from the ground up on Zero. Discord Alternately just pinging us on Discord is great too.",
+    "headings": [
+      {
+        "text": "zbugs",
+        "id": "zbugs"
+      },
+      {
+        "text": "Discord",
+        "id": "discord"
+      }
+    ]
+  },
+  {
+    "id": "46-roadmap",
+    "title": "Roadmap",
+    "url": "/docs/roadmap",
+    "icon": "Map",
+    "content": "Alpha (EOY ‘24) ~~Schema migration~~ ~~Write permissions~~ ~~Solid support~~ ~~Replica sqlite files not browsable with standard sqlite3 program~~ ~~Relationship filters - currently you can put relationships in the ‘select’ part of the query, but not the ‘where’ part. Relationship filters commonly needed to, i.e., find all issues with particular label.~~ ~~Multi-column primary keys~~ ~~Read permissions~~ ~~Docs for easily deploying Zero on your own AWS or Fly.io account~~ ~~Up to 20MB client-side and 1GB server-side per-replica~~ Beta (Q2 ‘25) ~~Custom mutators~~ Cell-level read permissions (already exist for write) First-class support for React Native ~~Ability to wait for authoritative results~~ Aggregations (count, sum, min, max, group-by, etc) Consistency. See: Consistency. This will also improve startup perf since apps won’t have to be so conservative in what they preload: ~~Cache size management: evict things from client-side cache to stay under size~~ Reduce zero client bundle size to < 40KB Up to 20 MB client-side and 100 GB server-side per-replica GA Vector-based text search Extensive testing using randomized query generation and dst External audit of design and impl Ability to lock queries down to only expected forms for security Additional databases beside Postgres SaaS",
+    "headings": [
+      {
+        "text": "Alpha (EOY ‘24)",
+        "id": "alpha-eoy-24"
+      },
+      {
+        "text": "Beta (Q2 ‘25)",
+        "id": "beta-q2-25"
+      },
+      {
+        "text": "GA",
+        "id": "ga"
+      }
+    ]
+  },
+  {
+    "id": "47-samples",
+    "title": "Samples",
+    "url": "/docs/samples",
+    "icon": "SwatchBook",
+    "content": "zbugs A complete Linear-style bug tracker. Not just a demo app, this is our actual live bug db. We use it every day and depend on it. Demo: https://bugs.rocicorp.dev/ Stack: Vite/Fastify/React/AWS Source: https://github.com/rocicorp/mono/tree/main/apps/zbugs Features: Instant reads and writes, realtime updates, Github auth, write permissions, read permissions, custom mutators, complex filters, unread indicators, basic text search, emojis, short numeric bug IDs, notifications, and more. ztunes An ecommerce store built with Zero, TanStack, Drizzle, and PlanetScale for Postgres. Demo: https://ztunes.rocicorp.dev/ Stack: TanStack/Drizzle/Better Auth/Fly.io Source: https://github.com/rocicorp/ztunes Features: 88k artists, 200k albums, single-command dev, full drizzle integration, text search, read permissions, write permissions. hello-zero Simple quickstart for Zero/React. Stack: Vite/Hono/React Source: https://github.com/rocicorp/hello-zero Docs: Quickstart Features: Instant reads and writes, realtime updates. hello-zero-solid Simple quickstart for Zero/SolidJS. Stack: Vite/Hono/SolidJS Source: https://github.com/rocicorp/hello-zero-solid Features: Instant reads and writes, realtime updates, custom mutators. hello-zero-do Shows how to use the Zero client from a Cloudflare Durable Objects. This sample runs within a Durable Object and monitors changes to a Zero query. This can be used to do things like send notifications, update external services, etc. Stack: Vite/Hono/React/Cloudflare Workers Source: https://github.com/rocicorp/hello-zero-do",
+    "headings": [
+      {
+        "text": "zbugs",
+        "id": "zbugs"
+      },
+      {
+        "text": "ztunes",
+        "id": "ztunes"
+      },
+      {
+        "text": "hello-zero",
+        "id": "hello-zero"
+      },
+      {
+        "text": "hello-zero-solid",
+        "id": "hello-zero-solid"
+      },
+      {
+        "text": "hello-zero-do",
+        "id": "hello-zero-do"
+      }
+    ]
+  },
+  {
+    "id": "48-solidjs",
+    "title": "SolidJS",
+    "url": "/docs/solidjs",
+    "icon": "SolidJS",
+    "content": "Zero has built-in support for Solid. Here’s what basic usage looks like: Complete quickstart here: https://github.com/rocicorp/hello-zero-solid",
+    "headings": []
+  },
+  {
+    "id": "49-writing-data",
+    "title": "Writing Data with Mutators",
+    "url": "/docs/writing-data",
+    "icon": "ArrowUp",
+    "content": "Zero generates basic CRUD mutators for every table you sync. Mutators are available at : Insert Create new records with : Optional fields can be set to to explicitly set the new field to . They can also be set to to take the default value (which is often but can also be some generated value server-side). Upsert Create new records or update existing ones with : supports the same / semantics for optional fields that does (see above). Update Update an existing record. Does nothing if the specified record (by PK) does not exist. You can pass a partial, leaving fields out that you don’t want to change. For example here we leave the username the same: Delete Delete an existing record. Does nothing if specified record does not exist. You can read more about it in Authentication. Batch Mutate You can do multiple CRUD mutates in a single batch. If any of the mutations fails, all will. They also all appear together atomically in a single transaction to other clients.",
+    "headings": [
+      {
+        "text": "Insert",
+        "id": "insert"
+      },
+      {
+        "text": "Upsert",
+        "id": "upsert"
+      },
+      {
+        "text": "Update",
+        "id": "update"
+      },
+      {
+        "text": "Delete",
+        "id": "delete"
+      },
+      {
+        "text": "Batch Mutate",
+        "id": "batch-mutate"
+      }
+    ]
+  },
+  {
+    "id": "50-zero-cache-config",
+    "title": "zero-cache Config",
+    "url": "/docs/zero-cache-config",
+    "icon": "Cog",
+    "content": "is configured either via CLI flag or environment variable. There is no separate file. You can also see all available flags by running . Required Flags Auth One of Auth JWK, Auth JWK URL, or Auth Secret must be specified. See Authentication for more details. Replica File File path to the SQLite replica that zero-cache maintains. This can be lost, but if it is, zero-cache will have to re-replicate next time it starts up. flag: env: required: Upstream DB The \"upstream\" authoritative postgres database. In the future we will support other types of upstream besides PG. flag: env: required: Optional Flags Admin Password A password used to administer zero-cache server, for example to access the endpoint. flag: env: required: App ID Unique identifier for the app. Multiple zero-cache apps can run on a single upstream database, each of which is isolated from the others, with its own permissions, sharding (future feature), and change/cvr databases. The metadata of an app is stored in an upstream schema with the same name, e.g. , and the metadata for each app shard, e.g. client and mutation ids, is stored in the schema. (Currently there is only a single \"0\" shard, but this will change with sharding). The CVR and Change data are managed in schemas named and , respectively, allowing multiple apps and shards to share the same database instance (e.g. a Postgres \"cluster\") for CVR and Change management. Due to constraints on replication slot names, an App ID may only consist of lower-case letters, numbers, and the underscore character. Note that this option is used by both and . flag: env: default: App Publications Postgres PUBLICATIONs that define the tables and columns to replicate. Publication names may not begin with an underscore, as zero reserves that prefix for internal use. If unspecified, zero-cache will create and use an internal publication that publishes all tables in the public schema, i.e.: Note that once an app has begun syncing data, this list of publications cannot be changed, and zero-cache will refuse to start if a specified value differs from what was originally synced. To use a different set of publications, a new app should be created. flag: env: default: Auth JWK A public key in JWK format used to verify JWTs. Only one of jwk, jwksUrl and secret may be set. flag: env: required: Auth JWK URL A URL that returns a JWK set used to verify JWTs. Only one of jwk, jwksUrl and secret may be set. flag: env: required: Auto Reset Automatically wipe and resync the replica when replication is halted. This situation can occur for configurations in which the upstream database provider prohibits event trigger creation, preventing the zero-cache from being able to correctly replicate schema changes. For such configurations, an upstream schema change will instead result in halting replication with an error indicating that the replica needs to be reset. When auto-reset is enabled, zero-cache will respond to such situations by shutting down, and when restarted, resetting the replica and all synced clients. This is a heavy-weight operation and can result in user-visible slowness or downtime if compute resources are scarce. flag: env: default: Auth Secret A symmetric key used to verify JWTs. Only one of jwk, jwksUrl and secret may be set. flag: env: required: Change DB The Postgres database used to store recent replication log entries, in order to sync multiple view-syncers without requiring multiple replication slots on the upstream database. If unspecified, the upstream-db will be used. flag: env: required: Change Max Connections The maximum number of connections to open to the change database. This is used by the change-streamer for catching up zero-cache replication subscriptions. flag: env: default: Change Streamer Mode The mode for running or connecting to the change-streamer: : runs the change-streamer and shuts down when another change-streamer takes over the replication slot. This is appropriate in a single-node configuration, or for the replication-manager in a multi-node configuration. : connects to the change-streamer as internally advertised in the change-db. This is appropriate for the view-syncers in a multi-node flag: env: default: Change Streamer Port The port on which the change-streamer runs. This is an internal protocol between the replication-manager and zero-cache, which runs in the same process in local development. If unspecified, defaults to --port + 1. flag: env: required: CVR DB The Postgres database used to store CVRs. CVRs (client view records) keep track of the data synced to clients in order to determine the diff to send on reconnect. If unspecified, the upstream-db will be used. flag: env: required: CVR Max Connections The maximum number of connections to open to the CVR database. This is divided evenly amongst sync workers. Note that this number must allow for at least one connection per sync worker, or zero-cache will fail to start. See num-sync-workers. flag: env: default: Initial Sync Table Copy Workers The number of parallel workers used to copy tables during initial sync. Each worker copies a single table at a time, fetching rows in batches of . flag: env: default: Lazy Startup Delay starting the majority of zero-cache until first request. This is mainly intended to avoid connecting to Postgres replication stream until the first request is received, which can be useful i.e., for preview instances. Currently only supported in single-node mode. flag: env: default: Litestream Executable Path to the litestream executable. This option has no effect if litestream-backup-url is unspecified. flag: env: required: Litestream Config Path Path to the litestream yaml config file. zero-cache will run this with its environment variables, which can be referenced in the file via substitution, for example: ZERO_REPLICA_FILE for the db Path ZERO_LITESTREAM_BACKUP_LOCATION for the db replica url ZERO_LITESTREAM_LOG_LEVEL for the log Level ZERO_LOG_FORMAT for the log type flag: env: default: Litestream Log Level flag: env: default: values: , , , Litestream Backup URL The location of the litestream backup, usually an s3:// URL. This is only consulted by the replication-manager. view-syncers receive this information from the replication-manager. flag: env: required: Litestream Checkpoint Threshold MB The size of the WAL file at which to perform an SQlite checkpoint to apply the writes in the WAL to the main database file. Each checkpoint creates a new WAL segment file that will be backed up by litestream. Smaller thresholds may improve read performance, at the expense of creating more files to download when restoring the replica from the backup. flag: env: default: Litestream Incremental Backup Interval Minutes The interval between incremental backups of the replica. Shorter intervals reduce the amount of change history that needs to be replayed when catching up a new view-syncer, at the expense of increasing the number of files needed to download for the initial litestream restore. flag: env: default: Litestream Snapshot Backup Interval Hours The interval between snapshot backups of the replica. Snapshot backups make a full copy of the database to a new litestream generation. This improves restore time at the expense of bandwidth. Applications with a large database and low write rate can increase this interval to reduce network usage for backups (litestream defaults to 24 hours). flag: env: default: Litestream Restore Parallelism The number of WAL files to download in parallel when performing the initial restore of the replica from the backup. flag: env: default: Log Format Use text for developer-friendly console logging and json for consumption by structured-logging services. flag: env: default: values: , Log IVM Sampling How often to collect IVM metrics. 1 out of N requests will be sampled where N is this value. flag: env: default: Log Level Sets the logging level for the application. flag: env: default: values: , , , Log Slow Hydrate Threshold The number of milliseconds a query hydration must take to print a slow warning. flag: env: default: Log Slow Row Threshold The number of ms a row must take to fetch from table-source before it is considered slow. flag: env: default: Log Trace Collector The URL of the trace collector to which to send trace data. Traces are sent over http. Port defaults to 4318 for most collectors. flag: env: required: Number of Sync Workers The number of processes to use for view syncing. Leave this unset to use the maximum available parallelism. If set to 0, the server runs without sync workers, which is the configuration for running the replication-manager. flag: env: required: Per User Mutation Limit Max The maximum mutations per user within the specified windowMs. flag: env: required: Per User Mutation Limit Window (ms) The sliding window over which the perUserMutationLimitMax is enforced. flag: env: default: Port The port for sync connections. flag: env: default: Push URL The URL of the API server to which zero-cache will push mutations. Required if you use custom mutators. flag: env: required: Query Hydration Stats Track and log the number of rows considered by query hydrations which take longer than log-slow-hydrate-threshold milliseconds. This is useful for debugging and performance tuning. flag: env: required: Replica Vacuum Interval Hours Performs a VACUUM at server startup if the specified number of hours has elapsed since the last VACUUM (or initial-sync). The VACUUM operation is heavyweight and requires double the size of the db in disk space. If unspecified, VACUUM operations are not performed. flag: env: required: Server Version The version string outputted to logs when the server starts up. flag: env: required: Storage DB Temp Dir Temporary directory for IVM operator storage. Leave unset to use . flag: env: required: Target Client Row Count A soft limit on the number of rows Zero will keep on the client. 20k is a good default value for most applications, and we do not recommend exceeding 100k. See Client Capacity Management for more details. flag: env: default: Task ID Globally unique identifier for the zero-cache instance. Setting this to a platform specific task identifier can be useful for debugging. If unspecified, zero-cache will attempt to extract the TaskARN if run from within an AWS ECS container, and otherwise use a random string. flag: env: required: Upstream Max Connections The maximum number of connections to open to the upstream database for committing mutations. This is divided evenly amongst sync workers. In addition to this number, zero-cache uses one connection for the replication stream. Note that this number must allow for at least one connection per sync worker, or zero-cache will fail to start. See num-sync-workers. flag: env: default:",
+    "headings": [
+      {
+        "text": "Required Flags",
+        "id": "required-flags"
+      },
+      {
+        "text": "Auth",
+        "id": "auth"
+      },
+      {
+        "text": "Replica File",
+        "id": "replica-file"
+      },
+      {
+        "text": "Upstream DB",
+        "id": "upstream-db"
+      },
+      {
+        "text": "Optional Flags",
+        "id": "optional-flags"
+      },
+      {
+        "text": "Admin Password",
+        "id": "admin-password"
+      },
+      {
+        "text": "App ID",
+        "id": "app-id"
+      },
+      {
+        "text": "App Publications",
+        "id": "app-publications"
+      },
+      {
+        "text": "Auth JWK",
+        "id": "auth-jwk"
+      },
+      {
+        "text": "Auth JWK URL",
+        "id": "auth-jwk-url"
+      },
+      {
+        "text": "Auto Reset",
+        "id": "auto-reset"
+      },
+      {
+        "text": "Auth Secret",
+        "id": "auth-secret"
+      },
+      {
+        "text": "Change DB",
+        "id": "change-db"
+      },
+      {
+        "text": "Change Max Connections",
+        "id": "change-max-connections"
+      },
+      {
+        "text": "Change Streamer Mode",
+        "id": "change-streamer-mode"
+      },
+      {
+        "text": "Change Streamer Port",
+        "id": "change-streamer-port"
+      },
+      {
+        "text": "CVR DB",
+        "id": "cvr-db"
+      },
+      {
+        "text": "CVR Max Connections",
+        "id": "cvr-max-connections"
+      },
+      {
+        "text": "Initial Sync Table Copy Workers",
+        "id": "initial-sync-table-copy-workers"
+      },
+      {
+        "text": "Lazy Startup",
+        "id": "lazy-startup"
+      },
+      {
+        "text": "Litestream Executable",
+        "id": "litestream-executable"
+      },
+      {
+        "text": "Litestream Config Path",
+        "id": "litestream-config-path"
+      },
+      {
+        "text": "Litestream Log Level",
+        "id": "litestream-log-level"
+      },
+      {
+        "text": "Litestream Backup URL",
+        "id": "litestream-backup-url"
+      },
+      {
+        "text": "Litestream Checkpoint Threshold MB",
+        "id": "litestream-checkpoint-threshold-mb"
+      },
+      {
+        "text": "Litestream Incremental Backup Interval Minutes",
+        "id": "litestream-incremental-backup-interval-minutes"
+      },
+      {
+        "text": "Litestream Snapshot Backup Interval Hours",
+        "id": "litestream-snapshot-backup-interval-hours"
+      },
+      {
+        "text": "Litestream Restore Parallelism",
+        "id": "litestream-restore-parallelism"
+      },
+      {
+        "text": "Log Format",
+        "id": "log-format"
+      },
+      {
+        "text": "Log IVM Sampling",
+        "id": "log-ivm-sampling"
+      },
+      {
+        "text": "Log Level",
+        "id": "log-level"
+      },
+      {
+        "text": "Log Slow Hydrate Threshold",
+        "id": "log-slow-hydrate-threshold"
+      },
+      {
+        "text": "Log Slow Row Threshold",
+        "id": "log-slow-row-threshold"
+      },
+      {
+        "text": "Log Trace Collector",
+        "id": "log-trace-collector"
+      },
+      {
+        "text": "Number of Sync Workers",
+        "id": "number-of-sync-workers"
+      },
+      {
+        "text": "Per User Mutation Limit Max",
+        "id": "per-user-mutation-limit-max"
+      },
+      {
+        "text": "Per User Mutation Limit Window (ms)",
+        "id": "per-user-mutation-limit-window-ms"
+      },
+      {
+        "text": "Port",
+        "id": "port"
+      },
+      {
+        "text": "Push URL",
+        "id": "push-url"
+      },
+      {
+        "text": "Query Hydration Stats",
+        "id": "query-hydration-stats"
+      },
+      {
+        "text": "Replica Vacuum Interval Hours",
+        "id": "replica-vacuum-interval-hours"
+      },
+      {
+        "text": "Server Version",
+        "id": "server-version"
+      },
+      {
+        "text": "Storage DB Temp Dir",
+        "id": "storage-db-temp-dir"
+      },
+      {
+        "text": "Target Client Row Count",
+        "id": "target-client-row-count"
+      },
+      {
+        "text": "Task ID",
+        "id": "task-id"
+      },
+      {
+        "text": "Upstream Max Connections",
+        "id": "upstream-max-connections"
+      }
+    ]
+  },
+  {
+    "id": "51-zero-schema",
+    "title": "Zero Schema",
+    "url": "/docs/zero-schema",
+    "icon": "Blocks",
+    "content": "Zero applications have both a database schema (the normal backend database schema that all web apps have) and a Zero schema. The purpose of the Zero schema is to: Provide typesafety for ZQL queries Define first-class relationships between tables Define permissions for access control <Note type=\"note\" slug=\"generating\" heading=\"You do not need to define the Zero schema by hand\" Community-contributed converters exist for Prisma and Drizzle that generate the tables and relationships. It is good to know how the underlying Zero schemas work, however, for debugging and conceptual understanding. This page describes using the schema to define your tables, columns, and relationships. Defining the Zero Schema The Zero schema is encoded in a TypeScript file that is conventionally called file. For example, see the schema file for . Table Schemas Use the function to define each table in your Zero schema: Column types are defined with the , , , , and helpers. See Column Types for how database types are mapped to these types. Name Mapping Use to map a TypeScript table or column name to a different database name: Multiple Schemas You can also use to access other Postgres schemas: Optional Columns Columns can be marked optional. This corresponds to the SQL concept . An optional column can store a value of the specified type or to mean no value. Enumerations Use the helper to define a column that can only take on a specific set of values. This is most often used alongside an Postgres column type. Custom JSON Types Use the helper to define a column that stores a JSON-compatible value: Compound Primary Keys Pass multiple columns to to define a compound primary key: Relationships Use the function to define relationships between tables. Use the and helpers to define singular and plural relationships, respectively: This creates \"sender\" and \"replies\" relationships that can later be queried with the ZQL clause: This will return an object for each message row. Each message will have a field that is a single object or , and a field that is an array of objects. Many-to-Many Relationships You can create many-to-many relationships by chaining the relationship definitions. Assuming and tables, along with an junction table, you can define a relationship like this: Compound Keys Relationships Relationships can traverse compound keys. Imagine a table with a compound primary key of and , and a table with a related and . This can be represented in your schema with: Circular Relationships Circular relationships are fully supported: Database Schemas Use to define the entire Zero schema: Migrations Zero uses TypeScript-style structural typing to detect schema changes and implement smooth migrations. How it Works When the Zero client connects to it sends a copy of the schema it was constructed with. compares this schema to the one it has, and rejects the connection with a special error code if the schema is incompatible. By default, The Zero client handles this error code by calling . The intent is to to get a newer version of the app that has been updated to handle the new server schema. If a reload loop does occur, Zero uses exponential backoff to avoid overloading the server. If you want to delay this reload, you can do so by providing the constructor parameter: If the schema changes while a client is running in a compatible way, syncs the schema change to the client so that it's ready when the app reloads and gets new code that needs it. If the schema changes while a client is running in an incompatible way, will close the client connection with the same error code as above. Schema Change Process Like other database-backed applications, Zero schema migration generally follow an “expand/migrate/contract” pattern: Implement and run an “expand” migration on the backend that is backwards compatible with existing schemas. Add new rows, tables, as well as any defaults and triggers needed for backwards compatibility. Add any new permissions required for the new tables/columns by running . Update and deploy the client app to use the new schema. Optionally, after some grace period, implement and run a “contract” migration on the backend, deleting any obsolete rows/tables. Steps 1-3 can generally be done as part of one deploy by your CI pipeline, but step 4 would be weeks later when most open clients have refreshed and gotten new code.",
+    "headings": [
+      {
+        "text": "Defining the Zero Schema",
+        "id": "defining-the-zero-schema"
+      },
+      {
+        "text": "Table Schemas",
+        "id": "table-schemas"
+      },
+      {
+        "text": "Name Mapping",
+        "id": "name-mapping"
+      },
+      {
+        "text": "Multiple Schemas",
+        "id": "multiple-schemas"
+      },
+      {
+        "text": "Optional Columns",
+        "id": "optional-columns"
+      },
+      {
+        "text": "Enumerations",
+        "id": "enumerations"
+      },
+      {
+        "text": "Custom JSON Types",
+        "id": "custom-json-types"
+      },
+      {
+        "text": "Compound Primary Keys",
+        "id": "compound-primary-keys"
+      },
+      {
+        "text": "Relationships",
+        "id": "relationships"
+      },
+      {
+        "text": "Many-to-Many Relationships",
+        "id": "many-to-many-relationships"
+      },
+      {
+        "text": "Compound Keys Relationships",
+        "id": "compound-keys-relationships"
+      },
+      {
+        "text": "Circular Relationships",
+        "id": "circular-relationships"
+      },
+      {
+        "text": "Database Schemas",
+        "id": "database-schemas"
+      },
+      {
+        "text": "Migrations",
+        "id": "migrations"
+      },
+      {
+        "text": "How it Works",
+        "id": "how-it-works"
+      },
+      {
+        "text": "Schema Change Process",
+        "id": "schema-change-process"
+      }
+    ]
+  },
+  {
+    "id": "52-zql-on-the-server",
+    "title": "ZQL on the Server",
+    "url": "/docs/zql-on-the-server",
+    "icon": "Share2",
+    "content": "Custom Mutators use ZQL on the server as an implementation detail, but you can also use ZQL on the server directly, outside of Custom Mutators. This is useful for a variety of reasons: You can use ZQL to implement standard REST endpoints, allowing you to share code with custom mutators. You can use ZQL as part of schema migrations. In the future (but not yet implemented), this can support server-side rendering Here's a basic example: If ZQL does not have the featuers you need, you can use to drop down to raw SQL. Custom Database Connection Zero only provides an adapter for . It is possible to write your own adatapter by implementing and . Node Postgres Here is an example for by Jökull Sólberg (full example) Drizzle ORM It is also possible to use ORMs like Drizzle. Wrap the drizzle transaction and now you can access drizzle's transaction within custom mutators. Blog post and full example by Jökull Sólberg (again 🙌) SSR Although you can run ZQL on the server, Zero does not yet have the wiring setup in its bindings layers to support server-side rendering (patches welcome though!). For now, you should use your framework's recommended pattern to prevent SSR execution. Next.js Add the directive. SolidStart Wrap components that use Zero with the higher-order component. The standard pattern uses dynamic imports, but note that this approach (similar to React's ) works with any function returning a . If code splitting is unnecessary, you can skip the dynamic import. TanStack Start Use React's for dynamic imports.",
+    "headings": [
+      {
+        "text": "Custom Database Connection",
+        "id": "custom-database-connection"
+      },
+      {
+        "text": "Node Postgres",
+        "id": "node-postgres"
+      },
+      {
+        "text": "Drizzle ORM",
+        "id": "drizzle-orm"
+      },
+      {
+        "text": "SSR",
+        "id": "ssr"
+      },
+      {
+        "text": "Next.js",
+        "id": "next-js"
+      },
+      {
+        "text": "SolidStart",
+        "id": "solidstart"
+      },
+      {
+        "text": "TanStack Start",
+        "id": "tanstack-start"
+      }
+    ]
+  }
+]

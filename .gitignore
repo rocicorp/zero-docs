@@ -20,7 +20,6 @@
 .DS_Store
 *.pem
 /public/llms.txt
-/public/search-index.json
 
 # debug
 npm-debug.log*

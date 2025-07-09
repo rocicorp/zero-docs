@@ -2,12 +2,12 @@
 title: Supported Postgres Features
 ---
 
-Postgres has a massive feature set, of which Zero supports a growings subset.
+Postgres has a massive feature set, and Zero supports a growing subset of it.
 
 ## Object Names
 
 - Table and column names must begin with a letter or underscore
-  - This can be followed letters, numbers, underscores, and hyphens
+  - This can be followed by letters, numbers, underscores, and hyphens
   - Regex: `/^[A-Za-z_]+[A-Za-z0-9_-]*$/`
 - The column name `_0_version` is reserved for internal use
 
@@ -17,7 +17,7 @@ Postgres has a massive feature set, of which Zero supports a growings subset.
 - Views are not synced
 - `identity` generated columns are synced
 - All other generated columns are not synced
-- Indexes aren’t _synced_ per-se but we do implicitly add indexes to the replica that match the upstream indexes. In the future this will be customizable.
+- Indexes aren't _synced_ per-se, but we do implicitly add indexes to the replica that match the upstream indexes. In the future, this will be customizable.
 
 ## Column Types
 
@@ -32,38 +32,89 @@ Postgres has a massive feature set, of which Zero supports a growings subset.
   <tbody>
     <tr>
       <td>All numeric types</td>
-      <td><code>number</code></td>
-      <td><code>number</code></td>
+      <td>
+        <code>number</code>
+      </td>
+      <td>
+        <code>number</code>
+      </td>
     </tr>
     <tr>
-      <td><code>char</code>, <code>varchar</code>, <code>text</code>, <code>uuid</code></td>
-      <td><code>string</code></td>
-      <td><code>string</code></td>
+      <td>
+        <code>char</code>, <code>varchar</code>, <code>text</code>,{' '}
+        <code>uuid</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
     </tr>
     <tr>
-      <td><code>bool</code></td>
-      <td><code>boolean</code></td>
-      <td><code>boolean</code></td>
+      <td>
+        <code>bool</code>
+      </td>
+      <td>
+        <code>boolean</code>
+      </td>
+      <td>
+        <code>boolean</code>
+      </td>
     </tr>
     <tr>
-      <td><code>date</code>, <code>timestamp</code>, <code>timestampz</code></td>
-      <td><code>number</code></td>
-      <td><code>number</code></td>
+      <td>
+        <code>date</code>, <code>timestamp</code>, <code>timestampz</code>
+      </td>
+      <td>
+        <code>number</code>
+      </td>
+      <td>
+        <code>number</code>
+      </td>
     </tr>
     <tr>
-      <td><code>json</code>, <code>jsonb</code></td>
-      <td><code>json</code></td>
-      <td><code>JSONValue</code></td>
+      <td>
+        <code>json</code>, <code>jsonb</code>
+      </td>
+      <td>
+        <code>json</code>
+      </td>
+      <td>
+        <code>JSONValue</code>
+      </td>
     </tr>
     <tr>
-      <td><code>enum</code></td>
-      <td><code>enumeration</code></td>
-      <td><code>string</code></td>
+      <td>
+        <code>enum</code>
+      </td>
+      <td>
+        <code>enumeration</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
     </tr>
     <tr>
-      <td><code>T[]</code> <em>where <code>T</code> is a supported Postgres type (but please see ⚠️ below)</em></td>
-      <td><code>json&lt;U[]&gt;</code> <em>where <code>U</code> is the schema.ts type for <code>T</code></em></td>
-      <td><code>V[]</code> <em>where <code>V</code> is the JS/TS type for <code>T</code></em></td>
+      <td>
+        <code>T[]</code>{' '}
+        <em>
+          where <code>T</code> is a supported Postgres type (but please see ⚠️
+          below)
+        </em>
+      </td>
+      <td>
+        <code>json&lt;U[]&gt;</code>{' '}
+        <em>
+          where <code>U</code> is the schema.ts type for <code>T</code>
+        </em>
+      </td>
+      <td>
+        <code>V[]</code>{' '}
+        <em>
+          where <code>V</code> is the JS/TS type for <code>T</code>
+        </em>
+      </td>
     </tr>
   </tbody>
 </table>
@@ -74,8 +125,6 @@ Zero will sync arrays to the client, but there is no support for filtering or jo
 
 </Note>
 
-
-
 Other Postgres column types aren’t supported. They will be ignored when replicating (the synced data will be missing that column) and you will get a warning when `zero-cache` starts up.
 
 If your schema has a pg type not listed here, you can support it in Zero by using a trigger to map it to some type that Zero can support. For example if you have a [GIS polygon type](https://www.postgresql.org/docs/current/datatype-geometric.html#DATATYPE-POLYGON) in the column `my_poly polygon`, you can use a trigger to map it to a `my_poly_json json` column. You could either use another trigger to map in the reverse direction to support changes for writes, or you could use a [custom mutator](./custom-mutators) to write to the polygon type directly on the server.
@@ -84,11 +133,13 @@ Let us know if the lack of a particular column type is hindering your use of Zer
 
 ## Column Defaults
 
-Default values are allowed in the Postgres schema but there currently is no way to use them from a Zero app. The create mutation requires all columns to be specified, except when columns are nullable (in which case,they default to null). Since there is no way to leave non-nullable columns off the insert, there is no way for PG to apply the default. This is a known issue and will be fixed in the future.
+Default values are allowed in the Postgres schema, but there currently is no way to use them from a Zero app.
+
+An `insert()` mutation requires all columns to be specified, except when columns are nullable (in which case, they default to null). Since there is no way to leave non-nullable columns off the insert on the client, there is no way for PG to apply the default. This is a known issue and will be fixed in the future.
 
 ## IDs
 
-It is strongly recommended that primary keys be client-generated random strings like [uuid](https://www.npmjs.com/package/uuid), [ulid](https://www.npmjs.com/package/ulid), [nanoid](https://www.npmjs.com/package/nanoid), etc. This makes optimistic creation and updates much easier.
+It is strongly recommended to use client-generated random strings like [uuid](https://www.npmjs.com/package/uuid), [ulid](https://www.npmjs.com/package/ulid), [nanoid](https://www.npmjs.com/package/nanoid), etc for primary keys. This makes optimistic creation and updates much easier.
 
 <Note type="note" slug="client-generated-ids" heading="Why are client-generated IDs better?">
   Imagine that the PK of your table is an auto-incrementing integer. If you optimistically create an entity of this type, you will have to give it some ID – the type will require it locally, but also if you want to optimistically create relationships to this row you’ll need an ID.
@@ -101,19 +152,17 @@ If your table has a natural key you can use that and it has less problems. But t
 
 </Note>
 
-If you want to have a short auto-incrementing numeric ID for ux reasons (ie, a bug number), that is possible – See [Demo Video](https://discord.com/channels/830183651022471199/1288232858795769917/1298114323272568852)!
+If you want to have a short auto-incrementing numeric ID for UX reasons (i.e., a bug number), that is possible - see [this video](https://discord.com/channels/830183651022471199/1288232858795769917/1298114323272568852).
 
 ## Primary Keys
 
-Each table synced with Zero must have either a primary key or at least one unique index.
-
-This is needed so that Zero can identify rows during sync, to distinguish between an edit and a remove/add.
+Each table synced with Zero must have either a primary key or at least one unique index. This is needed so that Zero can identify rows during sync, to distinguish between an edit and a remove/add.
 
 Multi-column primary and foreign keys are supported.
 
 ## Limiting Replication
 
-You can use [Permissions](permissions) to limit tables and rows from replicating to Zero. In the near future you’ll also be able to use Permissions to limit individual columns.
+You can use [Permissions](permissions) to limit tables and rows from replicating to Zero. In the near future, you'll also be able to use Permissions to limit individual columns.
 
 Until then, a workaround is to use the Postgres [_publication_](https://www.postgresql.org/docs/current/sql-createpublication.html) feature to control the tables and columns that are replicated into `zero-cache`.
 

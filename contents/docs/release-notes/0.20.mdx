@@ -13,8 +13,8 @@ npm install @rocicorp/zero@0.20
 
 There are two config changes for multinode deployments:
 
-* **Required:** Remove `view-syncer`'s `ZERO_CHANGE_STREAMER_URI` env var and replace it with `ZERO_CHANGE_STREAMER_MODE: "discover"`.
-* **Optional:** Change the `ZERO_LITESTREAM_BACKUP_URL` env var from being passed to both `replication-manager` and `view-syncer` nodes to being passed only to `replication-manager`. This config is no longer needed by `view-syncer` (and is ignored by it).
+- **Required:** Remove `view-syncer`'s `ZERO_CHANGE_STREAMER_URI` env var and replace it with `ZERO_CHANGE_STREAMER_MODE: "discover"`.
+- **Optional:** Change the `ZERO_LITESTREAM_BACKUP_URL` env var from being passed to both `replication-manager` and `view-syncer` nodes to being passed only to `replication-manager`. This config is no longer needed by `view-syncer` (and is ignored by it).
 
 See [hello-zero](https://github.com/rocicorp/hello-zero/pull/40/files#diff-6ae5efcb80db51f4b137515e1674caaf950405317e84e2961cf38f9d3a1804b9) for an upgrade example using SST.
 

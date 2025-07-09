@@ -121,13 +121,14 @@ env: `ZERO_CHANGE_MAX_CONNS`<br/>
 default: `5`
 
 ### Change Streamer Mode
+
 The mode for running or connecting to the change-streamer:
 
-* `dedicated`: runs the change-streamer and shuts down when another
+- `dedicated`: runs the change-streamer and shuts down when another
   change-streamer takes over the replication slot. This is appropriate in a
   single-node configuration, or for the replication-manager in a
   multi-node configuration.
-* `discover`: connects to the change-streamer as internally advertised in the
+- `discover`: connects to the change-streamer as internally advertised in the
   change-db. This is appropriate for the view-syncers in a multi-node
 
 flag: `--change-streamer-mode`<br/>
@@ -210,7 +211,7 @@ values: `debug`, `info`, `warn`, `error`
 
 ### Litestream Backup URL
 
-The location of the litestream backup, usually an s3:// URL. This is only consulted by the replication-manager. view-syncers receive this information from the replication-manager. 
+The location of the litestream backup, usually an s3:// URL. This is only consulted by the replication-manager. view-syncers receive this information from the replication-manager.
 
 flag: `--litestream-backup-url`<br/>
 env: `ZERO_LITESTREAM_BACKUP_URL`<br/>

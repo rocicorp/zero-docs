@@ -145,6 +145,7 @@ This _relationship query_ can have all the same clauses that top-level queries c
 Using `orderBy` or `limit` in a relationship that goes through a junction table (i.e., a many-to-many relationship) is not currently supported and will throw a runtime error. See [bug 3527](https://bugs.rocicorp.dev/issue/3527).
 
 You can sometimes work around this by making the junction relationship explicit, depending on your schema and usage.
+
 </Note>
 
 ### Nested Relationships
@@ -154,10 +155,8 @@ You can nest relationships arbitrarily:
 ```tsx
 // Get all issues, first 100 comments for each (ordered by modified,desc),
 // and for each comment all of its reactions.
-z.query.issue.related(
-	'comments', q => q.orderBy('modified', 'desc').limit(100).related(
-		'reactions')
-	)
+z.query.issue.related('comments', q =>
+  q.orderBy('modified', 'desc').limit(100).related('reactions'),
 );
 ```
 
@@ -280,7 +279,7 @@ z.query.issue.where({cmp, or, exists} =>
 
 Zero reuses data synced from prior queries to answer new queries when possible. This is what enables instant UI transitions.
 
-But what controls the lifetime of this client-side data? How can you know whether any partiular query will return instant results? How can you know whether those results will be up to date or stale?
+But what controls the lifetime of this client-side data? How can you know whether any particular query will return instant results? How can you know whether those results will be up to date or stale?
 
 The answer is that the data on the client is simply the union of rows returned from queries which are currently syncing. Once a row is no longer returned by any syncing query, it is removed from the client. Thus, there is never any stale data in Zero.
 
@@ -356,7 +355,7 @@ Contrary to the design of other sync engines, we believe that storing tons of da
 - Initial sync will be slow, slowing down initial app load.
 - Because storage in browser tabs is unreliable, initial sync can occur surprisingly often.
 - We want to answer queries _instantly_ as often as possible. This requires client-side data in memory on the main thread. If we have to page to disk, we may as well go to the network and reduce complexity.
-- Even though Zero's queries are very efficient, they do still have some cost, expecially hydration. Massive client-side storage would result in hydrating tons of queries that are unlikely to be used every time the app starts.
+- Even though Zero's queries are very efficient, they do still have some cost, especially hydration. Massive client-side storage would result in hydrating tons of queries that are unlikely to be used every time the app starts.
 
 Most importantly, no matter how much data you store on the client, there will be cases where you have to fallback to the server:
 
@@ -370,7 +369,7 @@ The goal with Zero is to answer 99% of queries on the client from memory. The re
 
 There is no hard limit at 20,000 or 100,000. Nothing terrible happens if you go above. The thing to keep in mind is that:
 
-1. All those queries will revalidate everytime your app boots.
+1. All those queries will revalidate every time your app boots.
 2. All data synced to the client is in memory in JS.
 
 </Note>
@@ -414,7 +413,7 @@ The `complete` value is currently only returned when Zero has received the serve
 
 ## Handling Missing Data
 
-It is inevetable that there will be cases where the requested data cannot be found. Because Zero returns local results immediately, and server results asynchronously, displaying "not found" / 404 UI can be slightly tricky. If you just use a simple existence check, you will often see the 404 UI flicker while the server result loads:
+It is inevitable that there will be cases where the requested data cannot be found. Because Zero returns local results immediately, and server results asynchronously, displaying "not found" / 404 UI can be slightly tricky. If you just use a simple existence check, you will often see the 404 UI flicker while the server result loads:
 
 ```tsx
 const [issue, issuesResult] = useQuery(

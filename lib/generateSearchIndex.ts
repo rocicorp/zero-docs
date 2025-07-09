@@ -5,10 +5,14 @@ import remarkParse from 'remark-parse';
 import remarkStringify from 'remark-stringify';
 import {unified} from 'unified';
 import {visit} from 'unist-util-visit';
+import {IconKey} from './icons';
+import {page_routes} from './routes-config';
+import {toString} from 'mdast-util-to-string';
+import {Root} from 'mdast';
 
 // Define the root directory where docs are stored
 const DOCS_ROOT = path.join(process.cwd(), 'contents/docs');
-const OUTPUT_FILE = path.join(process.cwd(), 'public', 'search-index.json');
+const OUTPUT_FILE = path.join(process.cwd(), 'assets', 'search-index.json');
 
 // Define the structure of a document for indexing
 interface SearchDocument {
@@ -16,10 +20,8 @@ interface SearchDocument {
   title: string;
   content: string;
   url: string;
-  headings: {
-    text: string;
-    id: string;
-  }[];
+  icon: IconKey;
+  headings: {text: string; id: string}[];
 }
 
 /**
@@ -45,10 +47,8 @@ function getAllMDXFiles(dir: string): string[] {
 /**
  * Extract headings with IDs from MDX content
  */
-function extractHeadings(content: string): {text: string; id: string}[] {
+function extractHeadings(tree: Root): {text: string; id: string}[] {
   const headings: {text: string; id: string}[] = [];
-
-  const tree = unified().use(remarkParse).parse(content);
 
   visit(tree, 'heading', (node: any) => {
     const text = node.children
@@ -70,6 +70,42 @@ function extractHeadings(content: string): {text: string; id: string}[] {
   return headings;
 }
 
+function markdownToText(tree: Root) {
+  let out = '';
+  let lastNodeWasBlock = false;
+
+  visit(tree, (node, _index, _parent) => {
+    if (node.type === 'text') {
+      // Add spacing before text if the previous node was a block element
+      if (
+        lastNodeWasBlock &&
+        out.length > 0 &&
+        !out.endsWith(' ') &&
+        !out.endsWith('\n')
+      ) {
+        out += ' ';
+      }
+      out += node.value;
+      lastNodeWasBlock = false;
+    } else if (node.type === 'break') {
+      // Line breaks should add a space
+      out += ' ';
+      lastNodeWasBlock = false;
+    } else if (
+      ['paragraph', 'heading', 'listItem', 'blockquote', 'code'].includes(
+        node.type,
+      )
+    ) {
+      // Mark that we've encountered a block element
+      lastNodeWasBlock = true;
+    }
+  });
+
+  return out;
+}
+
+let index = 0;
+
 /**
  * Extracts content from an MDX file and processes it into plain text
  */
@@ -77,14 +113,14 @@ async function extractTextFromMDX(filePath: string): Promise<SearchDocument> {
   const fileContent = fs.readFileSync(filePath, 'utf-8');
   const {content, data} = matter(fileContent); // Extract frontmatter
 
-  // Convert MDX content to plain text (ignoring JSX)
-  const plainText = await unified()
-    .use(remarkParse)
-    .use(remarkStringify)
-    .process(content);
+  // Convert MDX content to mdast
+  const mdast = unified().use(remarkParse).parse(content);
+
+  // Convert mdast to plain text
+  const plainText = markdownToText(mdast);
 
   // Extract headings with IDs
-  const headings = extractHeadings(content);
+  const headings = extractHeadings(mdast);
 
   // Derive a URL from the file name
   const pathWithoutExtension = path
@@ -92,11 +128,16 @@ async function extractTextFromMDX(filePath: string): Promise<SearchDocument> {
     .replace(/\.mdx$/, '');
   const url = `/docs/${pathWithoutExtension}`;
 
+  const route = page_routes.find(
+    route => route.href && url.endsWith(route.href),
+  );
+
   return {
-    id: pathWithoutExtension, // Use file name as ID
+    id: `${index++}-${pathWithoutExtension}`, // Use file name as ID
     title: data.title || pathWithoutExtension, // Use frontmatter title or fallback to path
     url,
-    content: plainText.toString().replace(/\n+/g, ' ').trim(),
+    icon: route?.icon ?? 'FileCode',
+    content: plainText.replace(/\n+/g, ' ').replace(/\s+/g, ' ').trim(),
     headings, // Include extracted headings with IDs
   };
 }

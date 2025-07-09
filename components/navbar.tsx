@@ -1,15 +1,16 @@
 import Link from 'next/link';
 import {SheetLeftbar} from './leftbar';
-import Search from './search';
 import {page_routes} from '@/lib/routes-config';
 import ZeroAlphaLogo from './logos/ZeroAlpha';
+import dynamic from 'next/dynamic';
 
-export const NAVLINKS = [
-  {
-    title: 'Docs',
-    href: `/docs${page_routes[0].href}`,
-  },
-];
+const Search = dynamic(() => import('./search'), {
+  loading: () => (
+    <div className="max-w-56 w-full h-10 bg-input/50 rounded-md animate-pulse" />
+  ),
+});
+
+export const NAVLINKS = [{title: 'Docs', href: `/docs${page_routes[0].href}`}];
 
 export function Navbar() {
   return (

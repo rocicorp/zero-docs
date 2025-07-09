@@ -77,8 +77,15 @@ const zero = new Zero({
 
 Zero stores each user's data in a different IndexedDB instance. This allows users to quickly switch between multiple users and accounts without resyncing.
 
-<Note emoji="🧑‍🏫" type="warning" heading="`userID` is not a security boundary" slug="user-id-is-not-a-security-boundary">
-All users that have access to a browser profile have access to the same IndexedDB instances. There is nothing that Zero can do about this – users can just open the folder where the data is stored and look inside it.
+<Note
+  emoji="🧑‍🏫"
+  type="warning"
+  heading="`userID` is not a security boundary"
+  slug="user-id-is-not-a-security-boundary"
+>
+  All users that have access to a browser profile have access to the same
+  IndexedDB instances. There is nothing that Zero can do about this – users can
+  just open the folder where the data is stored and look inside it.
 </Note>
 
 If your application is unauthenticated, or if you don't need fast user switching, you can just set `userID` to a constant like `anon` or `guest`:
@@ -99,18 +106,21 @@ const zero = new Zero({
   storageKey: "my-app",
 });
 ```
- 
+
 If specified, `storageKey` is concatenated along with `userID` and other internal Zero information to form a unique IndexedDB database name.
 
-<ImageLightbox src="/images/auth/indexeddb.png" caption="Zero's IndexedDB databases are prefixed with 'rep' or 'replicache' because ... well because we haven't fixed this yet." />
+<ImageLightbox
+  src="/images/auth/indexeddb.png"
+  caption="Zero's IndexedDB databases are prefixed with 'rep' or 'replicache' because ... well because we haven't fixed this yet."
+/>
 
 ## Logging Out
 
 When a user logs out, you should consider what should happen to the synced data.
- 
+
 If you do nothing, the synced data will be left on the device. The next login will be a little faster because Zero doesn't have to resync that dta from scratch. But also, the data will be left on the device indefinitely which could be undesirable for privacy and security.
 
- If you instead want to clear data on logout, Zero provides the `dropAllDatabases` function:
+If you instead want to clear data on logout, Zero provides the `dropAllDatabases` function:
 
 ```ts
 import {dropAllDatabases} from '@rocicorp/zero';

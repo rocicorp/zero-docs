@@ -1,7 +1,7 @@
 import path from 'path';
 import {promises as fs} from 'fs';
 import {compileMDX} from 'next-mdx-remote/rsc';
-import {page_routes, ROUTES} from './routes-config';
+import {page_routes} from './routes-config';
 import remarkGfm from 'remark-gfm';
 import rehypePrism from 'rehype-prism-plus';
 import rehypeAutolinkHeadings from 'rehype-autolink-headings';

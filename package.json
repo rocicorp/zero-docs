@@ -9,7 +9,7 @@
     "build:llms": "node generate-llms.js",
     "start": "npm run build:search && next start",
     "lint": "next lint",
-    "format": "prettier --write .",
+    "format": "prettier --write **/*.{ts,tsx,jsjson,md}",
     "links": "blc http://localhost:3000/ -ro --exclude 'https://discord.rocicorp.dev/' --exclude 'https://bsky.app/profile/zero.rocicorp.dev' --exclude 'https://x.com/rocicorp_zero'"
   },
   "dependencies": {
@@ -21,9 +21,11 @@
     "broken-link-checker": "^0.7.8",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
+    "cmdk": "^1.1.1",
     "gray-matter": "^4.0.3",
     "lucide-react": "^0.435.0",
     "lunr": "^2.3.9",
+    "mdast-util-to-string": "^4.0.0",
     "next": "^14.2.6",
     "next-mdx-remote": "^5.0.0",
     "next-themes": "^0.3.0",

@@ -27,7 +27,7 @@
 
 .main a {
   text-decoration: underline;
-  color: var(--foreground-rgb);
+  color: hsl(var(--foreground));
 }
 
 .main a:hover {
@@ -37,7 +37,7 @@
 
 .main a.primaryButton {
   text-decoration: none;
-  color: rgb(var(--foreground-rgb));
+  color: hsl(var(--foreground));
 }
 
 .main a.primaryButton:hover {
@@ -116,7 +116,7 @@
 }
 
 .main strong {
-  color: rgb(var(--foreground-rgb));
+  color: hsl(var(--foreground));
 }
 
 .main span.logoName {
@@ -181,7 +181,7 @@ p.footerText {
   margin-top: 1rem;
   text-align: center;
   font-size: 0.75rem;
-  color: rgb(var(--foreground-rgb));
+  color: hsl(var(--foreground));
 }
 
 @media (max-width: 909px) {

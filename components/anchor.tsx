@@ -8,6 +8,7 @@ import {ComponentProps} from 'react';
 type AnchorProps = ComponentProps<typeof Link> & {
   absolute?: boolean;
   activeClassName?: string;
+  hoverClassName?: string;
   disabled?: boolean;
 };
 
@@ -31,7 +32,14 @@ export default function Anchor({
       <div className={cn(className, 'cursor-not-allowed')}>{children}</div>
     );
   return (
-    <Link className={cn(className, isMatch && activeClassName)} {...props}>
+    <Link
+      className={cn(
+        className,
+        isMatch && activeClassName,
+        'transition ease-in',
+      )}
+      {...props}
+    >
       {children}
     </Link>
   );

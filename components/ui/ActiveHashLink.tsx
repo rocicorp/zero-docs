@@ -36,7 +36,11 @@ export const ActiveHashLink: React.FC<ActiveHashLinkProps> = ({
     <Link
       ref={ref}
       href={href}
-      className={clsx(className, {[activeClassName]: isActive})}
+      className={clsx(
+        className,
+        {[activeClassName]: isActive},
+        'transition ease-in',
+      )}
     >
       {children}
     </Link>

@@ -15,7 +15,7 @@ import searchIndex from '@/assets/search-index.json';
 import {CommandIcon, SearchIcon} from 'lucide-react';
 import lunr from 'lunr';
 import {useRouter} from 'next/navigation';
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 import {
   Command,
   CommandEmpty,
@@ -25,6 +25,7 @@ import {
   CommandList,
 } from './ui/command';
 import Kbd from './ui/kbd';
+import {useCommandState} from 'cmdk';
 
 const Anchor = React.forwardRef<HTMLAnchorElement, React.ComponentProps<'a'>>(
   ({children, ...props}, ref) => {
@@ -50,6 +51,7 @@ interface SearchDocument {
 interface SearchResult extends SearchDocument {
   snippet?: string;
   snippetId?: string;
+  composedUrl: string;
 }
 
 function extractSnippet(
@@ -195,12 +197,20 @@ export default function Search() {
         }
 
         // Deduplicate results by ID
-        const uniqueResults = results.filter(Boolean).reduce((acc, result) => {
-          if (!acc.has(result!.id)) {
-            acc.set(result!.id, result!);
-          }
-          return acc;
-        }, new Map<string, SearchResult>());
+        const uniqueResults = results
+          .filter(result => result !== null)
+          .map(result => ({
+            ...result,
+            composedUrl: result.snippetId
+              ? `${result.url}#${result.snippetId}`
+              : result.url,
+          }))
+          .reduce((acc, result) => {
+            if (!acc.has(result.id)) {
+              acc.set(result.id, result);
+            }
+            return acc;
+          }, new Map<string, SearchResult>());
 
         setSearchResults(Array.from(uniqueResults.values()));
       } catch (error) {
@@ -282,17 +292,16 @@ export default function Search() {
                         setIsOpen(false);
                         setSearchedInput('');
                         setSearchResults([]);
-                        const url = item.snippetId
-                          ? `${item.url}#${item.snippetId}`
-                          : item.url;
-                        router.push(url);
+                        router.push(item.composedUrl);
                       }}
                       className={cn(
                         'flex flex-col items-start gap-2 py-3 px-4 rounded-none',
                       )}
                     >
                       <div className="flex items-center gap-2">
-                        <div><Icon /></div>
+                        <div>
+                          <Icon />
+                        </div>
                         <span className="font-medium">{item.title}</span>
                       </div>
                       {item.snippet && (
@@ -307,8 +316,26 @@ export default function Search() {
               </CommandGroup>
             )}
           </CommandList>
+          <PreloadCurrentItem />
         </Command>
       </DialogContent>
     </Dialog>
   );
 }
+
+const PreloadCurrentItem = () => {
+  const value = useCommandState(state => state.value);
+  const router = useRouter();
+
+  const activeItem = useMemo(() => {
+    return searchDocs.find(item => item.id === value);
+  }, [value, searchDocs]);
+
+  useEffect(() => {
+    if (activeItem) {
+      router.prefetch(activeItem.url);
+    }
+  }, [activeItem]);
+
+  return <></>;
+};

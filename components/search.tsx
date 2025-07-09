@@ -198,7 +198,8 @@ export default function Search() {
 
         // Deduplicate results by ID
         const uniqueResults = results
-          .filter(result => result !== null)
+          .filter(Boolean)
+          .map(result => result!)
           .map(result => ({
             ...result,
             composedUrl: result.snippetId

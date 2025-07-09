@@ -9,7 +9,7 @@
     "build:llms": "node generate-llms.js",
     "start": "npm run build:search && next start",
     "lint": "next lint",
-    "format": "prettier --write **/*.{ts,tsx,jsjson,md}",
+    "format": "prettier --write **/*.{ts,tsx,js,json,md,mdx}",
     "links": "blc http://localhost:3000/ -ro --exclude 'https://discord.rocicorp.dev/' --exclude 'https://bsky.app/profile/zero.rocicorp.dev' --exclude 'https://x.com/rocicorp_zero'"
   },
   "dependencies": {

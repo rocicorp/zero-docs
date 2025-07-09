@@ -194,14 +194,12 @@ export default function Search() {
         }
 
         // Deduplicate results by ID
-        const uniqueResults = results
-          .filter(Boolean)
-          .reduce((acc, result) => {
-            if (!acc.has(result!.id)) {
-              acc.set(result!.id, result!);
-            }
-            return acc;
-          }, new Map<string, SearchResult>());
+        const uniqueResults = results.filter(Boolean).reduce((acc, result) => {
+          if (!acc.has(result!.id)) {
+            acc.set(result!.id, result!);
+          }
+          return acc;
+        }, new Map<string, SearchResult>());
 
         setSearchResults(Array.from(uniqueResults.values()));
       } catch (error) {

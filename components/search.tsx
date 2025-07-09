@@ -260,7 +260,7 @@ export default function Search() {
         showCloseButton={false}
         className={cn('overflow-hidden p-0')}
       >
-        <Command shouldFilter={false}>
+        <Command loop shouldFilter={false}>
           <CommandInput
             placeholder="Type to search..."
             value={searchedInput}

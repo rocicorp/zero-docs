@@ -21,7 +21,7 @@
     --accent-foreground: 240 5.9% 10%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
-    --border: 240 5.9% 90%;
+    --border: 240 5.9% 85%;
     --input: 240 5.9% 90%;
     --radius: 0.5rem;
     --primary-highlight: 331.2 97.3% 55.9%;
@@ -53,7 +53,7 @@
     --accent-foreground: 0 0% 98%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-    --border: 240 3.7% 15.9%;
+    --border: 240 3.7% 20%;
     --input: 240 3.7% 15.9%;
     --ring: 240 4.9% 83.9%;
     --primary-highlight: 331.2 97.3% 55.9%;
@@ -203,8 +203,8 @@ mark {
 }
 
 .new-badge {
-  color: var(--primary-highlight);
-  border-color: var(--primary-highlight);
+  color: hsl(var(--primary-highlight));
+  border-color: hsl(var(--primary-highlight));
 }
 
 .search-shortcut {
@@ -276,7 +276,7 @@ mark {
 }
 
 .prose code {
-  color: var(--primary-highlight) !important;
+  color: hsl(var(--primary-highlight)) !important;
   font-weight: 400;
   border-radius: 0.5rem !important;
   padding-left: 0.3rem !important;
@@ -481,7 +481,7 @@ mark {
 }
 
 .button-link:hover {
-  background-color: var(--primary-highlight) !important;
+  background-color: hsl(var(--primary-highlight)) !important;
 }
 
 .button-link.pagination-button {

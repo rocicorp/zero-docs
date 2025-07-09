@@ -25,33 +25,6 @@
   margin: 4rem 0 2rem;
 }
 
-.main a {
-  text-decoration: underline;
-  color: hsl(var(--foreground));
-}
-
-.main a:hover {
-  background: hsla(0, 0%, 100%, 0.3);
-  outline: 2px solid hsla(0, 0%, 100%, 0.3);
-}
-
-.main a.primaryButton {
-  text-decoration: none;
-  color: hsl(var(--foreground));
-}
-
-.main a.primaryButton:hover {
-  background: hsl(var(--accent));
-  outline: none;
-  color: rgba(255, 255, 255, 1);
-}
-
-.ctaContainer {
-  display: flex;
-  width: 100%;
-  justify-content: center;
-}
-
 .highlight {
   color: rgb(var(--primary-accent));
 }

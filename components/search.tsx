@@ -24,6 +24,7 @@ import {
   CommandItem,
   CommandList,
 } from './ui/command';
+import Kbd from './ui/kbd';
 
 const Anchor = React.forwardRef<HTMLAnchorElement, React.ComponentProps<'a'>>(
   ({children, ...props}, ref) => {
@@ -242,10 +243,10 @@ export default function Search() {
             value={searchedInput}
             onChange={e => setSearchedInput(e.target.value)}
           />
-          <div className="hidden md:flex flex-shrink-0 text-xs items-center font-medium font-mono lining-nums gap-0.5 dark:bg-stone-900 bg-stone-200/65 p-1 rounded-sm">
+          <Kbd className="hidden md:flex">
             <CommandIcon className="w-2.5 h-2.5" />
             <span>K</span>
-          </div>
+          </Kbd>
         </div>
       </DialogTrigger>
 

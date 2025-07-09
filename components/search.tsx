@@ -292,12 +292,12 @@ export default function Search() {
                       )}
                     >
                       <div className="flex items-center gap-2">
-                        <Icon />
+                        <div><Icon /></div>
                         <span className="font-medium">{item.title}</span>
                       </div>
                       {item.snippet && (
                         <p
-                          className="text-xs text-muted-foreground"
+                          className="text-xs text-muted-foreground leading-relaxed"
                           dangerouslySetInnerHTML={{__html: item.snippet}}
                         />
                       )}

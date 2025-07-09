@@ -71,7 +71,7 @@ export default function SubLink({
       Comp
     )
   ) : (
-    <h4 className="font-semibold text-xl pl-0.5 sm:text-sm text-primary flex items-center gap-3">
+    <h4 className="font-semibold pl-0.5 sm:text-sm text-primary flex items-center gap-3">
       {Icon && (
         <div>
           <Icon className="w-4 h-4" />

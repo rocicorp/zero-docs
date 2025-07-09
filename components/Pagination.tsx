@@ -2,6 +2,7 @@ import {getPreviousNext} from '@/lib/markdown';
 import {ChevronLeftIcon, ChevronRightIcon} from 'lucide-react';
 import Link from 'next/link';
 import {buttonVariants} from './ui/button';
+import {cn} from '@/lib/utils';
 
 export default function Pagination({pathname}: {pathname: string}) {
   const res = getPreviousNext(pathname);
@@ -11,11 +12,10 @@ export default function Pagination({pathname}: {pathname: string}) {
       <div>
         {res.prev && (
           <Link
-            className={buttonVariants({
-              variant: 'outline',
-              className:
-                'pagination-button pagination-button-prev no-underline w-full flex flex-col pl-3 !items-start',
-            })}
+            className={cn(
+              buttonVariants({variant: 'outline'}),
+              'no-underline w-full flex flex-col pl-3 items-start transition duration-300 ease-in-out whitespace-normal h-fit p-4 text-left hover:bg-inherit hover:border-foreground/30',
+            )}
             href={`/docs${res.prev.href}`}
           >
             <span className="flex items-center text-muted-foreground text-xs">
@@ -29,11 +29,10 @@ export default function Pagination({pathname}: {pathname: string}) {
       <div>
         {res.next && (
           <Link
-            className={buttonVariants({
-              variant: 'outline',
-              className:
-                'pagination-button pagination-button-next no-underline w-full flex flex-col pr-3 !items-end',
-            })}
+            className={cn(
+              buttonVariants({variant: 'outline'}),
+              'no-underline w-full flex flex-col pr-3 items-end transition duration-300 ease-in-out whitespace-normal h-fit p-4 text-right hover:bg-inherit hover:border-foreground/30',
+            )}
             href={`/docs${res.next.href}`}
           >
             <span className="flex items-center text-muted-foreground text-xs">

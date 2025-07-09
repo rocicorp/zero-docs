@@ -472,31 +472,6 @@ mark {
   cursor: pointer;
 }
 
-.button-link:hover {
-  background-color: hsl(var(--primary-highlight)) !important;
-}
-
-.button-link.pagination-button {
-  transition: all 0.3s ease;
-  white-space: normal;
-  height: fit-content;
-  padding: 1rem;
-  border-color: hsl(var(--border));
-}
-
-.button-link.pagination-button-prev {
-  text-align: left;
-}
-
-.button-link.pagination-button-next {
-  text-align: right;
-}
-
-.button-link.pagination-button:hover {
-  background-color: inherit !important;
-  border-color: hsl(var(--foreground) / 30%);
-}
-
 .prose a.button-link,
 .prose a.heading-link {
   text-decoration: none;

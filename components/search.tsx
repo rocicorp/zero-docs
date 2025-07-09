@@ -207,7 +207,7 @@ export default function Search() {
         console.error('Lunr.js Query Error:', error);
         setSearchResults([]);
       }
-    }, 50);
+    }, 20);
 
     return () => clearTimeout(delayDebounce);
   }, [searchedInput]);
@@ -260,10 +260,7 @@ export default function Search() {
         showCloseButton={false}
         className={cn('overflow-hidden p-0')}
       >
-        <Command
-          shouldFilter={false}
-          className="[&_[cmdk-group-heading]]:text-muted-foreground **:data-[slot=command-input-wrapper]:h-12 [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group]]:px-2 [&_[cmdk-group]:not([hidden])_~[cmdk-group]]:pt-0 [&_[cmdk-input-wrapper]_svg]:h-5 [&_[cmdk-input-wrapper]_svg]:w-5 [&_[cmdk-input]]:h-12 [&_[cmdk-item]]:px-2 [&_[cmdk-item]]:py-3 [&_[cmdk-item]_svg]:h-5 [&_[cmdk-item]_svg]:w-5"
-        >
+        <Command shouldFilter={false}>
           <CommandInput
             placeholder="Type to search..."
             value={searchedInput}
@@ -273,7 +270,7 @@ export default function Search() {
           <CommandList showBorder={Boolean(searchedInput)}>
             {searchedInput && <CommandEmpty>No results found.</CommandEmpty>}
             {searchResults.length > 0 && (
-              <CommandGroup>
+              <CommandGroup className="p-0">
                 {searchResults.map(item => {
                   const Icon = icons[item?.icon ?? 'FileCode'];
 
@@ -290,15 +287,17 @@ export default function Search() {
                           : item.url;
                         router.push(url);
                       }}
-                      className={cn('flex flex-col items-start gap-1 py-3')}
+                      className={cn(
+                        'flex flex-col items-start gap-2 py-3 px-4 rounded-none',
+                      )}
                     >
                       <div className="flex items-center gap-2">
-                        <Icon className="h-4 w-4" />
+                        <Icon />
                         <span className="font-medium">{item.title}</span>
                       </div>
                       {item.snippet && (
                         <p
-                          className="search-snippet text-xs text-muted-foreground px-3"
+                          className="text-xs text-muted-foreground"
                           dangerouslySetInnerHTML={{__html: item.snippet}}
                         />
                       )}

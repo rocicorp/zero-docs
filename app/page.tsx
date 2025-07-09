@@ -4,12 +4,12 @@ import CodeBlock from '@/components/CodeBlock';
 import GithubLogo from '@/components/logos/Github';
 import RocicorpLogo from '@/components/logos/Rocicorp';
 import ZeroAlphaLogo from '@/components/logos/ZeroAlpha';
-import { Button } from '@/components/ui/button';
+import {Button} from '@/components/ui/button';
 import Kbd from '@/components/ui/kbd';
 import ResponsiveImage from '@/components/ui/responsive-image';
-import { cn } from '@/lib/utils';
+import {cn} from '@/lib/utils';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import {useRouter} from 'next/navigation';
 import React from 'react';
 import styles from './page.module.css';
 

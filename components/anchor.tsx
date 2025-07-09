@@ -8,7 +8,6 @@ import {ComponentProps} from 'react';
 type AnchorProps = ComponentProps<typeof Link> & {
   absolute?: boolean;
   activeClassName?: string;
-  hoverClassName?: string;
   disabled?: boolean;
 };
 

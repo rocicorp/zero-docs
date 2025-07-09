@@ -1,5 +1,6 @@
 'use client';
 
+import searchIndex from '@/assets/search-index.json';
 import {
   Dialog,
   DialogContent,
@@ -11,11 +12,12 @@ import {
 import {Input} from '@/components/ui/input';
 import {IconKey, icons} from '@/lib/icons';
 import {cn} from '@/lib/utils';
-import searchIndex from '@/assets/search-index.json';
+import {useCommandState} from 'cmdk';
 import {CommandIcon, SearchIcon} from 'lucide-react';
 import lunr from 'lunr';
 import {useRouter} from 'next/navigation';
 import React, {useEffect, useMemo, useState} from 'react';
+import {useHotkeys} from 'react-hotkeys-hook';
 import {
   Command,
   CommandEmpty,
@@ -25,7 +27,6 @@ import {
   CommandList,
 } from './ui/command';
 import Kbd from './ui/kbd';
-import {useCommandState} from 'cmdk';
 
 const Anchor = React.forwardRef<HTMLAnchorElement, React.ComponentProps<'a'>>(
   ({children, ...props}, ref) => {
@@ -224,17 +225,13 @@ export default function Search() {
   }, [searchedInput]);
 
   // Toggle the menu when ⌘K is pressed
-  React.useEffect(() => {
-    const down = (e: KeyboardEvent) => {
-      if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
-        e.preventDefault();
-        setIsOpen(open => !open);
-      }
-    };
-
-    document.addEventListener('keydown', down);
-    return () => document.removeEventListener('keydown', down);
-  }, []);
+  useHotkeys(
+    'meta+k',
+    () => {
+      setIsOpen(open => !open);
+    },
+    {enableOnFormTags: true, enableOnContentEditable: true},
+  );
 
   return (
     <Dialog

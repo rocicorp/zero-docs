@@ -10,26 +10,20 @@ import ResponsiveImage from '@/components/ui/responsive-image';
 import {cn} from '@/lib/utils';
 import Link from 'next/link';
 import {useRouter} from 'next/navigation';
-import React from 'react';
+import {useEffect} from 'react';
+import {useHotkeys} from 'react-hotkeys-hook';
 import styles from './page.module.css';
 
 export default function Home() {
   const router = useRouter();
 
-  // Toggle the menu when ⌘K is pressed
-  React.useEffect(() => {
-    const down = (e: KeyboardEvent) => {
-      if (e.key === 'd') {
-        e.preventDefault();
-        router.push('/docs/introduction');
-      } else if (e.key === 'g') {
-        e.preventDefault();
-        router.push('https://github.com/rocicorp/mono#zero');
-      }
-    };
+  useHotkeys('d', () => router.push('/docs/introduction'));
+  useHotkeys('g', () =>
+    window.open('https://github.com/rocicorp/mono#zero', '_blank'),
+  );
 
-    document.addEventListener('keydown', down);
-    return () => document.removeEventListener('keydown', down);
+  useEffect(() => {
+    router.prefetch('/docs/introduction');
   }, [router]);
 
   const exampleCode = `function Playlist({id}: {id: string}) {
@@ -95,7 +89,7 @@ export default function Home() {
             size="default"
             asChild
           >
-            <Link prefetch href="/docs/introduction">
+            <Link href="/docs/introduction">
               Docs<Kbd>D</Kbd>
             </Link>
           </Button>

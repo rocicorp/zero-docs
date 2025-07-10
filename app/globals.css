@@ -40,7 +40,7 @@
     --foreground: 0 0% 98%;
     --card: 240 10% 3.9%;
     --card-foreground: 0 0% 98%;
-    --popover: 240 10% 3.9%;
+    --popover: 240 10% 6.3%;
     --popover-foreground: 0 0% 98%;
     --primary: 0 0% 98%;
     --primary-foreground: 240 5.9% 10%;
@@ -113,7 +113,6 @@
 
 mark {
   color: hsl(var(--primary-highlight-foreground));
-  font-weight: 400;
   border-radius: 0.25rem;
   padding: 0.2rem;
   margin: 0 0.05rem;
@@ -206,11 +205,6 @@ mark {
 .dialog-container {
   width: calc(100vw - 4rem);
   top: 4rem !important;
-}
-
-.leftbar-aside {
-  max-height: calc(100vh - 72px);
-  overflow-y: scroll;
 }
 
 .footer-container {

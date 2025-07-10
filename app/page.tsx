@@ -1,11 +1,10 @@
 'use client';
 
 import CodeBlock from '@/components/CodeBlock';
-import GithubLogo from '@/components/logos/Github';
 import RocicorpLogo from '@/components/logos/Rocicorp';
 import ZeroAlphaLogo from '@/components/logos/ZeroAlpha';
 import {Button} from '@/components/ui/button';
-import Kbd from '@/components/ui/kbd';
+import {HotkeyTooltip} from '@/components/ui/hotkey-tooltip';
 import ResponsiveImage from '@/components/ui/responsive-image';
 import {cn} from '@/lib/utils';
 import Link from 'next/link';
@@ -71,28 +70,39 @@ export default function Home() {
         />
 
         <div className={styles.navLinks}>
-          <Button
-            className="flex items-center gap-2"
-            variant="primary"
-            size="default"
-            asChild
+          <HotkeyTooltip
+            tooltip={{
+              hotkeys: 'G',
+              title: 'Go to the GitHub repository',
+              side: 'bottom',
+            }}
           >
-            <a href="https://github.com/rocicorp/mono#zero">
-              GitHub
-              <GithubLogo className="w-4 h-4" />
-            </a>
-          </Button>
+            <Button
+              className="flex items-center gap-2"
+              variant="primary"
+              size="default"
+              asChild
+            >
+              <a href="https://github.com/rocicorp/mono#zero">GitHub</a>
+            </Button>
+          </HotkeyTooltip>
 
-          <Button
-            variant="primary"
-            className="flex items-center gap-2"
-            size="default"
-            asChild
+          <HotkeyTooltip
+            tooltip={{
+              hotkeys: 'D',
+              title: 'Go to the documentation',
+              side: 'bottom',
+            }}
           >
-            <Link href="/docs/introduction">
-              Docs<Kbd>D</Kbd>
-            </Link>
-          </Button>
+            <Button
+              variant="primary"
+              className="flex items-center gap-2"
+              size="default"
+              asChild
+            >
+              <Link href="/docs/introduction">Docs</Link>
+            </Button>
+          </HotkeyTooltip>
         </div>
       </div>
 

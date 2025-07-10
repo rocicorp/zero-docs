@@ -2,8 +2,7 @@
 
 import clsx from 'clsx';
 import Link from 'next/link';
-import {useParams, usePathname} from 'next/navigation';
-import {useEffect, useMemo, useRef} from 'react';
+import {useEffect, useRef} from 'react';
 import useHash from '../hooks/useHash';
 
 interface ActiveHashLinkProps {

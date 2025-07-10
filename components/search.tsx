@@ -226,7 +226,7 @@ export default function Search() {
 
   // Toggle the menu when ⌘K is pressed
   useHotkeys(
-    'meta+k',
+    'mod+k',
     () => {
       setIsOpen(open => !open);
     },
@@ -245,6 +245,7 @@ export default function Search() {
         <div className="relative max-w-56 px-2.5 py-0.5 flex items-center gap-2 md:border rounded-md cursor-pointer h-10 bg-transparent md:bg-background focus-within:ring-2 focus-within:ring-primary hover:bg-accent md:hover:bg-background">
           <SearchIcon className="h-4 w-5 flex-shrink-0 aspect-square text-foreground" />
           <Input
+            name="search"
             className="hidden md:block bg-transparent text-sm px-0 overflow-ellipsis border-none shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
             placeholder="Search docs"
             type="search"
@@ -266,7 +267,7 @@ export default function Search() {
       </DialogHeader>
       <DialogContent
         showCloseButton={false}
-        className={cn('overflow-hidden p-0')}
+        className={cn('overflow-hidden p-0 top-32 translate-y-0')}
       >
         <Command loop shouldFilter={false}>
           <CommandInput

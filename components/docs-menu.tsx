@@ -9,7 +9,7 @@ import {ModeToggle} from './theme-toggle';
 
 export default function DocsMenu({isSheet = false}) {
   return (
-    <div className="flex flex-col mt-5 pr-2 gap-3 pb-6">
+    <div className="flex flex-col mt-5 pr-2 gap-6 pb-6">
       {ROUTES.map((item, index) => {
         const modifiedItems = {
           ...item,
@@ -18,14 +18,7 @@ export default function DocsMenu({isSheet = false}) {
           isSheet,
           noLink: item.href === null,
         };
-        return (
-          <div className="flex flex-col gap-3" key={item.title + index}>
-            <SubLink {...modifiedItems} />
-            {index < ROUTES.length - 1 && (
-              <div className="h-px w-full bg-border" />
-            )}
-          </div>
-        );
+        return <SubLink key={item.title + index} {...modifiedItems} />;
       })}
 
       <div className="footer-container mt-6">

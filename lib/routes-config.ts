@@ -30,6 +30,25 @@ export const ROUTES = [
   },
 
   {
+    title: 'Postgres',
+    href: null,
+    defaultOpen: true,
+    icon: 'Database',
+    items: [
+      {
+        title: 'Provider Support',
+        href: '/connecting-to-postgres',
+        icon: 'Cable',
+      },
+      {
+        title: 'Feature Compatibility',
+        href: '/postgres-support',
+        icon: 'Blend',
+      },
+    ],
+  },
+
+  {
     title: 'Concepts',
     href: null,
     icon: 'Eclipse',
@@ -52,25 +71,6 @@ export const ROUTES = [
       {title: 'Permissions', href: '/permissions', icon: 'ShieldCheck'},
       {title: 'Sharing ZQL', href: '/zql-on-the-server', icon: 'Share2'},
       {title: 'Offline', href: '/offline', icon: 'Unplug'},
-    ],
-  },
-
-  {
-    title: 'Postgres',
-    href: null,
-    defaultOpen: false,
-    icon: 'Database',
-    items: [
-      {
-        title: 'Provider Support',
-        href: '/connecting-to-postgres',
-        icon: 'Cable',
-      },
-      {
-        title: 'Feature Compatibility',
-        href: '/postgres-support',
-        icon: 'Blend',
-      },
     ],
   },
 

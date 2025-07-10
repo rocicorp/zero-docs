@@ -27,6 +27,7 @@ import {
   CommandList,
 } from './ui/command';
 import Kbd from './ui/kbd';
+import Link from 'next/link';
 
 const Anchor = React.forwardRef<HTMLAnchorElement, React.ComponentProps<'a'>>(
   ({children, ...props}, ref) => {
@@ -296,19 +297,22 @@ export default function Search() {
                       className={cn(
                         'flex flex-col items-start gap-2 py-3 px-4 rounded-none',
                       )}
+                      asChild
                     >
-                      <div className="flex items-center gap-2">
-                        <div>
-                          <Icon />
+                      <Link href={item.composedUrl}>
+                        <div className="flex items-center gap-2">
+                          <div>
+                            <Icon />
+                          </div>
+                          <span className="font-medium">{item.title}</span>
                         </div>
-                        <span className="font-medium">{item.title}</span>
-                      </div>
-                      {item.snippet && (
-                        <p
-                          className="text-xs text-muted-foreground leading-relaxed"
-                          dangerouslySetInnerHTML={{__html: item.snippet}}
-                        />
-                      )}
+                        {item.snippet && (
+                          <p
+                            className="text-xs text-muted-foreground leading-relaxed"
+                            dangerouslySetInnerHTML={{__html: item.snippet}}
+                          />
+                        )}
+                      </Link>
                     </CommandItem>
                   );
                 })}

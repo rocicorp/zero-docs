@@ -4,22 +4,15 @@ import CodeBlock from '@/components/CodeBlock';
 import RocicorpLogo from '@/components/logos/Rocicorp';
 import ZeroAlphaLogo from '@/components/logos/ZeroAlpha';
 import {Button} from '@/components/ui/button';
-import {HotkeyTooltip} from '@/components/ui/hotkey-tooltip';
 import ResponsiveImage from '@/components/ui/responsive-image';
 import {cn} from '@/lib/utils';
 import Link from 'next/link';
 import {useRouter} from 'next/navigation';
 import {useEffect} from 'react';
-import {useHotkeys} from 'react-hotkeys-hook';
 import styles from './page.module.css';
 
 export default function Home() {
   const router = useRouter();
-
-  useHotkeys('d', () => router.push('/docs/introduction'));
-  useHotkeys('g', () =>
-    window.open('https://github.com/rocicorp/mono#zero', '_blank'),
-  );
 
   useEffect(() => {
     router.prefetch('/docs/introduction');
@@ -70,39 +63,23 @@ export default function Home() {
         />
 
         <div className={styles.navLinks}>
-          <HotkeyTooltip
-            tooltip={{
-              hotkeys: 'G',
-              title: 'Go to the GitHub repository',
-              side: 'bottom',
-            }}
+          <Button
+            className="flex items-center gap-2"
+            variant="primary"
+            size="default"
+            asChild
           >
-            <Button
-              className="flex items-center gap-2"
-              variant="primary"
-              size="default"
-              asChild
-            >
-              <a href="https://github.com/rocicorp/mono#zero">GitHub</a>
-            </Button>
-          </HotkeyTooltip>
+            <a href="https://github.com/rocicorp/mono#zero">GitHub</a>
+          </Button>
 
-          <HotkeyTooltip
-            tooltip={{
-              hotkeys: 'D',
-              title: 'Go to the documentation',
-              side: 'bottom',
-            }}
+          <Button
+            variant="primary"
+            className="flex items-center gap-2"
+            size="default"
+            asChild
           >
-            <Button
-              variant="primary"
-              className="flex items-center gap-2"
-              size="default"
-              asChild
-            >
-              <Link href="/docs/introduction">Docs</Link>
-            </Button>
-          </HotkeyTooltip>
+            <Link href="/docs/introduction">Docs</Link>
+          </Button>
         </div>
       </div>
 

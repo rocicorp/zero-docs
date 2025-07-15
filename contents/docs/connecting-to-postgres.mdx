@@ -6,19 +6,19 @@ In the future, Zero will work with many different backend databases. Today only 
 
 Here are some common Postgres options and what we know about their support level:
 
-| Postgres                          | Support Status                                                                                                |
-| --------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| AWS RDS                           | ✅ |
-| AWS Aurora                        | ✅&nbsp;&nbsp;v15.6+ |
-| Google Cloud SQL                  | ✅&nbsp;&nbsp;See [notes below](#google-cloud-sql) |
-| [Fly.io](http://Fly.io) Postgres  | ✅&nbsp;&nbsp;See [notes below](#flyio) |
-| Neon                              | ✅&nbsp;&nbsp;See [notes below](#neon) |
-| Postgres.app                      | ✅ |
-| postgres:16.2-alpine docker image | ✅ |
-| Supabase                          | ✅&nbsp;&nbsp;See [notes below](#supabase) |
-| PlanetScale for Postgres | 🤷‍♂️&nbsp;&nbsp;No [event triggers](#event-triggers), see [notes below](#planetscale-for-postgres) |
-| Render                            | 🤷‍♂️&nbsp;&nbsp;No [event triggers](#event-triggers) |
-| Heroku                            | 🤷‍♂️&nbsp;&nbsp;No [event triggers](#event-triggers) |
+| Postgres                          | Support Status                                                                                   |
+| --------------------------------- | ------------------------------------------------------------------------------------------------ |
+| AWS RDS                           | ✅                                                                                               |
+| AWS Aurora                        | ✅&nbsp;&nbsp;v15.6+                                                                             |
+| Google Cloud SQL                  | ✅&nbsp;&nbsp;See [notes below](#google-cloud-sql)                                               |
+| [Fly.io](http://Fly.io) Postgres  | ✅&nbsp;&nbsp;See [notes below](#flyio)                                                          |
+| Neon                              | ✅&nbsp;&nbsp;See [notes below](#neon)                                                           |
+| Postgres.app                      | ✅                                                                                               |
+| postgres:16.2-alpine docker image | ✅                                                                                               |
+| Supabase                          | ✅&nbsp;&nbsp;See [notes below](#supabase)                                                       |
+| PlanetScale for Postgres          | 🤷‍♂️&nbsp;&nbsp;No [event triggers](#event-triggers), see [notes below](#planetscale-for-postgres) |
+| Render                            | 🤷‍♂️&nbsp;&nbsp;No [event triggers](#event-triggers)                                               |
+| Heroku                            | 🤷‍♂️&nbsp;&nbsp;No [event triggers](#event-triggers)                                               |
 
 ## Event Triggers
 
@@ -29,6 +29,8 @@ Some hosted Postgres providers don’t provide access to Event Triggers.
 Zero still works out of the box with these providers, but for correctness, any schema change triggers a full reset of all server-side and client-side state. For small databases (< 10GB) this can be OK, but for bigger databases we recommend choosing a provider that grants access to Event Triggers.
 
 ## Configuration
+
+### WAL Level
 
 The Postgres `wal_level` config parameter has to be set to `logical`. You can check what level your pg has with this command:
 
@@ -54,6 +56,16 @@ After your server restarts, show the `wal_level` again to ensure it has changed:
 ```bash
 psql -c 'SHOW wal_level'
 ```
+
+### Bounding WAL Size
+
+For development databases, you can set a `max_slot_wal_keep_size` value in Postgres. This will help limit the amount of WAL kept around.
+
+This is a configuration parameter that bounds the amount of WAL kept around for replication slots, and [invalidates the slots that are too far behind](https://www.postgresql.org/docs/current/runtime-config-replication.html#GUC-MAX-SLOT-WAL-KEEP-SIZE).
+
+`zero-cache` will automatically detect if the replication slot has been invalidated and re-sync replicas from scratch.
+
+This configuration can cause problems like `slot has been invalidated because it exceeded the maximum reserved size` and is not recommended for production databases.
 
 ## Provider-Specific Notes
 
@@ -110,6 +122,6 @@ Because Zero keeps an open connection to Postgres to replicate changes, as long 
 
 For production databases that have enough usage to always be running anyway, this is fine. But for smaller applications that would otherwise not always be running, this can create a surprisingly high bill. You may want to choose a provider that charge a flat monthly rate instead.
 
-Also some users choose Neon because they hope to use branching for previews. Note that Zero doesn't support this usage model well yet, and if not done with care, Zero can end up keeping each Neon *preview* branch running too 😳.
+Also some users choose Neon because they hope to use branching for previews. Note that Zero doesn't support this usage model well yet, and if not done with care, Zero can end up keeping each Neon _preview_ branch running too 😳.
 
 We are actively working on better preview support.

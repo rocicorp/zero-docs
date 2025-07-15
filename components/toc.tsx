@@ -2,6 +2,12 @@ import {ScrollArea} from '@/components/ui/scroll-area';
 import {getDocsTocs} from '@/lib/markdown';
 import clsx from 'clsx';
 import {ActiveHashLink} from './ui/ActiveHashLink';
+import Link from 'next/link';
+import {
+  ArrowUpRightFromSquare,
+  ArrowUpRightIcon,
+  ArrowUpRightSquare,
+} from 'lucide-react';
 
 export default async function Toc({path}: {path: string}) {
   const tocs = await getDocsTocs(path);
@@ -13,12 +19,12 @@ export default async function Toc({path}: {path: string}) {
           <>
             <h3 className="font-semibold text-sm">On this page</h3>
             <ScrollArea className="pb-4 h-full pt-0.5">
-              <div className="flex flex-col gap-2.5 text-sm dark:text-neutral-300/85 text-neutral-500/85 ml-0.5">
+              <div className="flex flex-col gap-2.5 text-sm text-muted-foreground ml-0.5">
                 {tocs.map(({href, level, text}) => (
                   <ActiveHashLink
                     key={href}
                     href={href}
-                    activeClassName="text-black dark:text-white"
+                    activeClassName="text-foreground"
                     className={clsx({
                       'pl-0': level == 2,
                       'pl-4': level == 3,
@@ -29,6 +35,17 @@ export default async function Toc({path}: {path: string}) {
                   </ActiveHashLink>
                 ))}
               </div>
+
+              <div className="h-px w-full bg-input mt-5" />
+
+              <a
+                href="https://github.com/rocicorp/zero-docs"
+                target="_blank"
+                className="flex items-center gap-1 mt-5 text-sm text-muted-foreground hover:text-foreground"
+              >
+                Edit this page on GitHub{' '}
+                <ArrowUpRightFromSquare className="w-4 h-4" />
+              </a>
             </ScrollArea>
           </>
         )}

@@ -1,13 +1,8 @@
 import {ScrollArea} from '@/components/ui/scroll-area';
 import {getDocsTocs} from '@/lib/markdown';
 import clsx from 'clsx';
+import {ArrowUpRightFromSquare} from 'lucide-react';
 import {ActiveHashLink} from './ui/ActiveHashLink';
-import Link from 'next/link';
-import {
-  ArrowUpRightFromSquare,
-  ArrowUpRightIcon,
-  ArrowUpRightSquare,
-} from 'lucide-react';
 
 export default async function Toc({path}: {path: string}) {
   const tocs = await getDocsTocs(path);
@@ -39,7 +34,7 @@ export default async function Toc({path}: {path: string}) {
               <div className="h-px w-full bg-input mt-5" />
 
               <a
-                href="https://github.com/rocicorp/zero-docs"
+                href={`https://github.com/rocicorp/zero-docs/blob/main/contents/docs/${path}.mdx`}
                 target="_blank"
                 className="flex items-center gap-1 mt-5 text-sm text-muted-foreground hover:text-foreground"
               >

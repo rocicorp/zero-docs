@@ -4,6 +4,8 @@ title: Permissions
 
 Permissions are expressed using [ZQL](reading-data) and run automatically with every read and write.
 
+Permissions are currently row based. Zero will eventually also have column permissions.
+
 ## Define Permissions
 
 Permissions are defined in [`schema.ts`](/docs/zero-schema) using the `definePermissions` function.
@@ -158,6 +160,12 @@ definePermissions<AuthData, Schema>(schema, () => {
 ```
 
 If the issue table has two rows, one created by the user and one by someone else, the user will only see the row they created in any queries.
+
+### Column permissions
+
+Zero does not currently support column based permissions. Select permission applies to every column. The recommended approach for now is to factor out private fields into a separate table, e.g. `user_private`. Column permissions are planned but currently not a high priority.
+
+Note that although the same limitation applies to declarative insert/update permissions, [custom mutators](/docs/custom-mutators) support arbitrary server-side logic and so can easily control which columns are writable.
 
 ## Insert Permissions
 

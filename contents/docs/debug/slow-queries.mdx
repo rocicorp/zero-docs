@@ -27,9 +27,11 @@ Here are some tips to help debug such slow queries.
 
 ## Check `ttl`
 
-If you are seeing unexpected UI flicker when moving between views, it is likely that the queries backing these views have the default `ttl` of `never`. Set the `ttl` to some longer value to [keep data cached across navigations](https://zero.rocicorp.dev/docs/reading-data#background-queries).
+If you are seeing unexpected UI flicker when moving between views, it is likely that the queries backing these views have the default `ttl` of `never`. Set the `ttl` to something like `5m` to [keep data cached across navigations](https://zero.rocicorp.dev/docs/reading-data#background-queries).
 
 You may alternately want to [preload some data](https://zero.rocicorp.dev/docs/reading-data#preloading) at app startup.
+
+Conversely, if you are setting `ttl` to long values, then it can happen that you have many backgrounded queries still running that the app is not using. You can see which queries are running using the [inspector](/docs/inspector). Ensure that only expected queries are running. See [long TTLs](/docs/reading-data#long-ttl-warning) for more information.
 
 ## Check Storage
 

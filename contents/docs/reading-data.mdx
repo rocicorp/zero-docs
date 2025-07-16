@@ -336,8 +336,14 @@ The `ttl` parameter specifies how long the app developer wishes the query to run
 | `%dm`     | Number of minutes.                                                                   |
 | `%dh`     | Number of hours.                                                                     |
 | `%dd`     | Number of days.                                                                      |
-| `%dy`     | Number of years.                                                                     |
-| `forever` | Query will never be stopped.                                                         |
+
+<Note type="warning" slug="long-ttl-warning" heading="Long TTLs are deprecated">
+Zero currently also accepts `ttl` values of `forever` and `%dy` (number of years). These are not recommended and will be removed in the next release. They were a misfeature.
+
+We realized long `ttl` values can lead to a lot of queries running in the background unnecessarily. If a new app release is deployed with new queries, the old queries keep running until their `ttl` expires, even though the app will never use them.
+
+We will be reworking this API to be less of a footgun in the next Zero release. For now we do not recommend using a `ttl` greater than `1d`.
+</Note>
 
 If the UI re-requests a background query, it becomes an active query again. Since the query was syncing in the background, the very first synchronous result that the UI receives after reactivation will be up-to-date with the server (i.e., it will have `resultType` of `complete`).
 

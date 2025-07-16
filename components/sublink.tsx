@@ -46,16 +46,16 @@ export default function SubLink({
 
   const Comp = (
     <Anchor
-      className="flex items-center gap-3 hover:text-primary py-1.5"
+      className="flex items-center gap-2.5 hover:text-primary"
       activeClassName="text-primary font-semibold"
       href={href ?? ''}
     >
       {Icon && (
-        <div>
-          <Icon className="w-4 h-4" />
+        <div className="flex items-center justify-center">
+          <Icon className="w-3.5 h-3.5" />
         </div>
       )}
-      {title}
+      <span>{title}</span>
       {isNew && (
         <span className="new-badge ml-2 rounded px-1 py-0.5 text-xs font-semibold border">
           NEW
@@ -71,10 +71,10 @@ export default function SubLink({
       Comp
     )
   ) : (
-    <h4 className="font-semibold pl-0.5 sm:text-sm text-primary flex items-center gap-3">
+    <h4 className="font-semibold pl-0.5 sm:text-sm text-primary flex items-center gap-2.5">
       {Icon && (
         <div>
-          <Icon className="w-4 h-4" />
+          <Icon className="w-3.5 h-3.5" />
         </div>
       )}
       {title}
@@ -107,7 +107,7 @@ export default function SubLink({
         <CollapsibleContent>
           <div
             className={cn(
-              'flex flex-col items-start sm:text-sm dark:text-neutral-300/85 text-neutral-800 ml-0.5 mt-2',
+              'flex flex-col items-start sm:text-sm text-muted-foreground ml-0.5 mt-2.5 gap-3',
               level > 0 && 'pl-4 border-l ml-1',
             )}
           >

@@ -30,6 +30,8 @@ Zero still works out of the box with these providers, but for correctness, any s
 
 ## Configuration
 
+### WAL Level
+
 The Postgres `wal_level` config parameter has to be set to `logical`. You can check what level your pg has with this command:
 
 ```bash
@@ -54,6 +56,16 @@ After your server restarts, show the `wal_level` again to ensure it has changed:
 ```bash
 psql -c 'SHOW wal_level'
 ```
+
+### Bounding WAL Size
+
+For development databases, you can set a `max_slot_wal_keep_size` value in Postgres. This will help limit the amount of WAL kept around.
+
+This is a configuration parameter that bounds the amount of WAL kept around for replication slots, and [invalidates the slots that are too far behind](https://www.postgresql.org/docs/current/runtime-config-replication.html#GUC-MAX-SLOT-WAL-KEEP-SIZE).
+
+`zero-cache` will automatically detect if the replication slot has been invalidated and re-sync replicas from scratch.
+
+This configuration can cause problems like `slot has been invalidated because it exceeded the maximum reserved size` and is not recommended for production databases.
 
 ## Provider-Specific Notes
 

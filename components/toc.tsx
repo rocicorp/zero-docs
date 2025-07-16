@@ -1,6 +1,7 @@
 import {ScrollArea} from '@/components/ui/scroll-area';
 import {getDocsTocs} from '@/lib/markdown';
 import clsx from 'clsx';
+import {ArrowUpRightFromSquare} from 'lucide-react';
 import {ActiveHashLink} from './ui/ActiveHashLink';
 
 export default async function Toc({path}: {path: string}) {
@@ -18,7 +19,7 @@ export default async function Toc({path}: {path: string}) {
                   <ActiveHashLink
                     key={href}
                     href={href}
-                    activeClassName="text-black dark:text-white"
+                    activeClassName="text-foreground"
                     className={clsx({
                       'pl-0': level == 2,
                       'pl-4': level == 3,
@@ -29,6 +30,17 @@ export default async function Toc({path}: {path: string}) {
                   </ActiveHashLink>
                 ))}
               </div>
+
+              <div className="h-px w-full bg-input mt-5" />
+
+              <a
+                href={`https://github.com/rocicorp/zero-docs/blob/main/contents/docs/${path}.mdx`}
+                target="_blank"
+                className="flex items-center gap-1 mt-5 text-sm text-muted-foreground hover:text-foreground"
+              >
+                Edit this page on GitHub{' '}
+                <ArrowUpRightFromSquare className="w-4 h-4" />
+              </a>
             </ScrollArea>
           </>
         )}

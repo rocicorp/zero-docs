@@ -67,7 +67,7 @@ function CommandList({
     <CommandPrimitive.List
       data-slot="command-list"
       className={cn(
-        'max-h-[300px] scroll-py-1 overflow-x-hidden overflow-y-auto h-[var(--cmdk-list-height)]',
+        'max-h-[300px] overflow-x-hidden overflow-y-auto',
         showBorder && 'border-t border-border',
         className,
       )}

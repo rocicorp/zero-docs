@@ -19,7 +19,7 @@ const config = {
       },
     },
     extend: {
-      screens:{
+      screens: {
         xxs: '320px',
         xs: '420px',
       },
@@ -57,6 +57,10 @@ const config = {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))',
         },
+        'primary-highlight': {
+          DEFAULT: 'hsl(var(--primary-highlight))',
+          foreground: 'hsl(var(--primary-highlight-foreground))',
+        },
       },
       borderRadius: {
         lg: 'var(--radius)',
@@ -69,17 +73,43 @@ const config = {
       },
       keyframes: {
         'accordion-down': {
-          from: {height: '0'},
-          to: {height: 'var(--radix-accordion-content-height)'},
+          from: {height: '0', opacity: '0', filter: 'blur(5px)'},
+          to: {
+            height: 'var(--radix-accordion-content-height)',
+            opacity: '1',
+            filter: 'blur(0px)',
+          },
         },
         'accordion-up': {
-          from: {height: 'var(--radix-accordion-content-height)'},
-          to: {height: '0'},
+          from: {
+            height: 'var(--radix-accordion-content-height)',
+            opacity: '1',
+            filter: 'blur(0px)',
+          },
+          to: {height: '0', opacity: '0', filter: 'blur(5px)'},
+        },
+        'collapsible-down': {
+          from: {height: '0', opacity: '0', filter: 'blur(5px)'},
+          to: {
+            height: 'var(--radix-collapsible-content-height)',
+            opacity: '1',
+            filter: 'blur(0px)',
+          },
+        },
+        'collapsible-up': {
+          from: {
+            height: 'var(--radix-collapsible-content-height)',
+            opacity: '1',
+            filter: 'blur(0px)',
+          },
+          to: {height: '0', opacity: '0', filter: 'blur(5px)'},
         },
       },
       animation: {
-        'accordion-down': 'accordion-down 0.2s ease-out',
-        'accordion-up': 'accordion-up 0.2s ease-out',
+        'accordion-down': 'accordion-down 0.15s ease-out',
+        'accordion-up': 'accordion-up 0.15s ease-out',
+        'collapsible-down': 'collapsible-down 0.15s ease-out',
+        'collapsible-up': 'collapsible-up 0.15s ease-out',
       },
     },
   },

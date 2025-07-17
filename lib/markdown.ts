@@ -1,7 +1,7 @@
 import path from 'path';
 import {promises as fs} from 'fs';
 import {compileMDX} from 'next-mdx-remote/rsc';
-import {page_routes, ROUTES} from './routes-config';
+import {page_routes} from './routes-config';
 import remarkGfm from 'remark-gfm';
 import rehypePrism from 'rehype-prism-plus';
 import rehypeAutolinkHeadings from 'rehype-autolink-headings';
@@ -16,18 +16,10 @@ import Video from '@/components/ui/Video';
 import {Button} from '@/components/ui/button';
 import {sluggify} from './utils';
 
-const components = {
-  Note,
-  ImageLightbox,
-  Video,
-  Button,
-};
+const components = {Note, ImageLightbox, Video, Button};
 
 // Define the structure of the frontmatter
-type BaseMdxFrontmatter = {
-  title: string;
-  description: string;
-};
+type BaseMdxFrontmatter = {title: string; description: string};
 
 // Parse MDX content with the given plugins
 async function parseMdx<Frontmatter>(rawMdx: string) {
@@ -90,11 +82,14 @@ export async function getDocsTocs(slug: string) {
   return extractedHeadings;
 }
 
-export function getPreviousNext(path: string) {
+export function getPreviousNext(path: string): {
+  prev: (typeof page_routes)[number] | null;
+  next: (typeof page_routes)[number] | null;
+} {
   const index = page_routes.findIndex(({href}) => href == `/${path}`);
   return {
-    prev: page_routes[index - 1],
-    next: page_routes[index + 1],
+    prev: page_routes[index - 1] ?? null,
+    next: page_routes[index + 1] ?? null,
   };
 }
 

@@ -1,14 +1,17 @@
 import {ScrollArea} from '@/components/ui/scroll-area';
-import {getDocsTocs} from '@/lib/markdown';
-import clsx from 'clsx';
-import {ArrowUpRightFromSquare} from 'lucide-react';
+import {cn} from '@/lib/utils';
 import {ActiveHashLink} from './ui/ActiveHashLink';
+import {ArrowUpRightFromSquare} from 'lucide-react';
 
-export default async function Toc({path}: {path: string}) {
-  const tocs = await getDocsTocs(path);
-
+export default function Toc({
+  tocs,
+  path,
+}: {
+  tocs: {level: number; text: string; href: string}[];
+  path: string;
+}) {
   return (
-    <div className="lg:flex hidden toc flex-[1] min-w-[230px] sticky py-8 top-16 h-[calc(100vh-64px)]">
+    <div className="lg:flex hidden toc flex-[1] min-w-[230px] w-[230px] sticky py-8 top-16 h-[calc(100vh-64px)]">
       <div className="flex flex-col gap-3 h-full w-full pl-2">
         {tocs.length > 0 && (
           <>
@@ -20,11 +23,12 @@ export default async function Toc({path}: {path: string}) {
                     key={href}
                     href={href}
                     activeClassName="text-foreground"
-                    className={clsx({
-                      'pl-0': level == 2,
-                      'pl-4': level == 3,
-                      'pl-8 ': level == 4,
-                    })}
+                    className={cn(
+                      'flex items-center justify-between gap-2 hover:text-primary',
+                      level === 2 && 'pl-0',
+                      level === 3 && 'pl-4',
+                      level === 4 && 'pl-8',
+                    )}
                   >
                     {text}
                   </ActiveHashLink>

@@ -1,25 +1,27 @@
 import {ROUTES} from '@/lib/routes-config';
-import SubLink from './sublink';
 import Link from 'next/link';
-import {ModeToggle} from './theme-toggle';
-import GithubLogo from './logos/Github';
-import DiscordLogo from './logos/Discord';
 import BlueskyLogo from './logos/Bluesky';
+import DiscordLogo from './logos/Discord';
+import GithubLogo from './logos/Github';
 import TwitterLogo from './logos/Twitter';
+import SubLink from './sublink';
+import {ModeToggle} from './theme-toggle';
+
 export default function DocsMenu({isSheet = false}) {
   return (
-    <div className="flex flex-col gap-12 mt-5 pr-2 pb-6">
+    <div className="flex flex-col mt-5 pr-2 gap-12 pb-6">
       {ROUTES.map((item, index) => {
         const modifiedItems = {
           ...item,
-          href: `/docs${item.href}`,
+          href: `/docs${item.href ?? ''}`,
           level: 0,
           isSheet,
+          noLink: item.href === null,
         };
         return <SubLink key={item.title + index} {...modifiedItems} />;
       })}
 
-      <div className="footer-container">
+      <div className="footer-container mt-6">
         <p className="copyright">
           Made by{' '}
           <Link href="https://rocicorp.dev" className="footer-text-link">

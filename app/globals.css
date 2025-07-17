@@ -21,13 +21,13 @@
     --accent-foreground: 240 5.9% 10%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
-    --border: 240 5.9% 90%;
+    --border: 240 5.9% 85%;
     --input: 240 5.9% 90%;
     --radius: 0.5rem;
-    --primary-highlight: rgba(252, 33, 138, 1);
+    --primary-highlight: 331.2 97.3% 55.9%;
+    --primary-highlight-foreground: 0 0% 100%;
 
     /* Root page */
-    --foreground-rgb: 0, 0, 0;
     --paragraph-color: hsl(0, 0%, 15%);
     --primary-accent: 39, 252, 174;
     --code-border: rgba(228, 228, 231, 1);
@@ -40,7 +40,7 @@
     --foreground: 0 0% 98%;
     --card: 240 10% 3.9%;
     --card-foreground: 0 0% 98%;
-    --popover: 240 10% 3.9%;
+    --popover: 240 10% 6.3%;
     --popover-foreground: 0 0% 98%;
     --primary: 0 0% 98%;
     --primary-foreground: 240 5.9% 10%;
@@ -53,12 +53,13 @@
     --accent-foreground: 0 0% 98%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-    --border: 240 3.7% 15.9%;
+    --border: 240 3.7% 20%;
     --input: 240 3.7% 15.9%;
     --ring: 240 4.9% 83.9%;
+    --primary-highlight: 331.2 97.3% 55.9%;
+    --primary-highlight-foreground: 0 0% 100%;
 
     /* Root page */
-    --foreground-rgb: 255, 255, 255;
     --paragraph-color: #d4d4d8;
     --primary-accent: 39, 252, 174;
     --code-border: rgba(39, 39, 42, 1);
@@ -110,18 +111,13 @@
   }
 }
 
-.search-snippet {
-  padding: 0.5rem;
-}
-
-.search-selected {
-  border-radius: 0.25rem;
-}
-
 mark {
-  color: rgb(var(--foreground-rgb));
-  padding: 0.25rem 0.1rem;
-  background-color: var(--primary-highlight);
+  color: hsl(var(--primary-highlight-foreground));
+  border-radius: 0.25rem;
+  padding: 0.2rem;
+  margin: 0 0.05rem;
+  background-color: hsl(var(--primary-highlight));
+  font-weight: 500;
 }
 
 .lightbulb-toggle {
@@ -198,8 +194,8 @@ mark {
 }
 
 .new-badge {
-  color: var(--primary-highlight);
-  border-color: var(--primary-highlight);
+  color: hsl(var(--primary-highlight));
+  border-color: hsl(var(--primary-highlight));
 }
 
 .search-shortcut {
@@ -209,11 +205,6 @@ mark {
 .dialog-container {
   width: calc(100vw - 4rem);
   top: 4rem !important;
-}
-
-.leftbar-aside {
-  max-height: calc(100vh - 72px);
-  overflow-y: scroll;
 }
 
 .footer-container {
@@ -271,7 +262,7 @@ mark {
 }
 
 .prose code {
-  color: var(--primary-highlight) !important;
+  color: hsl(var(--primary-highlight)) !important;
   font-weight: 400;
   border-radius: 0.5rem !important;
   padding-left: 0.3rem !important;
@@ -473,31 +464,6 @@ mark {
 
 .prose summary {
   cursor: pointer;
-}
-
-.button-link:hover {
-  background-color: var(--primary-highlight) !important;
-}
-
-.button-link.pagination-button {
-  transition: all 0.3s ease;
-  white-space: normal;
-  height: fit-content;
-  padding: 1rem;
-  border-color: hsl(var(--border));
-}
-
-.button-link.pagination-button-prev {
-  text-align: left;
-}
-
-.button-link.pagination-button-next {
-  text-align: right;
-}
-
-.button-link.pagination-button:hover {
-  background-color: inherit !important;
-  border-color: hsl(var(--foreground) / 30%);
 }
 
 .prose a.button-link,

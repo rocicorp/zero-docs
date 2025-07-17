@@ -20,5 +20,7 @@ You can use this to send errors to Sentry, show custom UI, etc.
 The first parameter to `onError` is a descriptive message. Additional parameters provide more detail, for example an `Error` object (with a stack), or a JSON object.
 
 <Note>
-If you implement `onError`, errors will no longer be sent to devtools by default. If you also want errors sent to the devtools console, you must call `console.error()` inside your `onError` handler.
+  If you implement `onError`, errors will no longer be sent to devtools by
+  default. If you also want errors sent to the devtools console, you must call
+  `console.error()` inside your `onError` handler.
 </Note>

@@ -25,33 +25,6 @@
   margin: 4rem 0 2rem;
 }
 
-.main a {
-  text-decoration: underline;
-  color: var(--foreground-rgb);
-}
-
-.main a:hover {
-  background: hsla(0, 0%, 100%, 0.3);
-  outline: 2px solid hsla(0, 0%, 100%, 0.3);
-}
-
-.main a.primaryButton {
-  text-decoration: none;
-  color: rgb(var(--foreground-rgb));
-}
-
-.main a.primaryButton:hover {
-  background: hsl(var(--accent));
-  outline: none;
-  color: rgba(255, 255, 255, 1);
-}
-
-.ctaContainer {
-  display: flex;
-  width: 100%;
-  justify-content: center;
-}
-
 .highlight {
   color: rgb(var(--primary-accent));
 }
@@ -116,7 +89,7 @@
 }
 
 .main strong {
-  color: rgb(var(--foreground-rgb));
+  color: hsl(var(--foreground));
 }
 
 .main span.logoName {
@@ -145,7 +118,7 @@
 }
 
 .footer {
-  margin: 8rem 0 0;
+  margin: 8rem 0 2rem;
   align-self: center;
 }
 
@@ -181,7 +154,7 @@ p.footerText {
   margin-top: 1rem;
   text-align: center;
   font-size: 0.75rem;
-  color: rgb(var(--foreground-rgb));
+  color: hsl(var(--foreground));
 }
 
 @media (max-width: 909px) {

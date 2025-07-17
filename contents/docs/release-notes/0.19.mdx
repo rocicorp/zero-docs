@@ -11,10 +11,10 @@ npm install @rocicorp/zero@0.19
 
 ## Upgrading
 
-* If you use custom mutators, please see [hello-zero-solid](https://github.com/rocicorp/hello-zero-solid/pull/18/files) for how to update your push endpoint.
-* If you use SolidJS, please switch to [`createQuery`](https://github.com/rocicorp/hello-zero-solid/pull/18/files).
-* If you are `awaiting z.mutate.foo.bar()`, you should [switch to `await z.mutate.foo.bar().client`](/docs/custom-mutators#waiting-for-mutator-result) to be consistent with `.server`.
-* If you were using a 0.19 canary, the `.server` property [returns error by rejection again](/docs/custom-mutators#waiting-for-mutator-result) (like 0.18 did). Sorry about the thrash here.
+- If you use custom mutators, please see [hello-zero-solid](https://github.com/rocicorp/hello-zero-solid/pull/18/files) for how to update your push endpoint.
+- If you use SolidJS, please switch to [`createQuery`](https://github.com/rocicorp/hello-zero-solid/pull/18/files).
+- If you are `awaiting z.mutate.foo.bar()`, you should [switch to `await z.mutate.foo.bar().client`](/docs/custom-mutators#waiting-for-mutator-result) to be consistent with `.server`.
+- If you were using a 0.19 canary, the `.server` property [returns error by rejection again](/docs/custom-mutators#waiting-for-mutator-result) (like 0.18 did). Sorry about the thrash here.
 
 ## Features
 
@@ -45,7 +45,7 @@ npm install @rocicorp/zero@0.19
 - `z2s`: Relationships nested in a junction relationship were not working correctly ([PR](https://github.com/rocicorp/mono/pull/4221))
 - Custom mutators: Due to multitab, client can receive multiple responses for same mutation
 - Fix deadlock that could happen when pushing on a closed websocket ([PR](https://github.com/rocicorp/mono/pull/4256))
-- Fix incorrect shutdown under heavy CPU load  (thanks Erik Munson!) ([PR](https://github.com/rocicorp/mono/pull/4252))
+- Fix incorrect shutdown under heavy CPU load (thanks Erik Munson!) ([PR](https://github.com/rocicorp/mono/pull/4252))
 - Fix case where deletes were getting reverted (thanks for reproduction Marc MacLeod!) ([PR](https://github.com/rocicorp/mono/pull/4282))
 - `z2s`: Incorrect handling of self-join, and not exists
 - `not(exists())` is not supported on the client

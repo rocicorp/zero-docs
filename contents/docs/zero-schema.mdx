@@ -8,7 +8,11 @@ Zero applications have both a _database schema_ (the normal backend database sch
 2. Define first-class relationships between tables
 3. Define permissions for access control
 
-<Note type="note" slug="generating" heading="You do not need to define the Zero schema by hand">
+<Note
+  type="note"
+  slug="generating"
+  heading="You do not need to define the Zero schema by hand"
+>
   [Community-contributed converters](./community#database-tools) exist for
   Prisma and Drizzle that generate the tables and relationships. It is good to
   know how the underlying Zero schemas work, however, for debugging and
@@ -19,7 +23,7 @@ This page describes using the schema to define your tables, columns, and relatio
 
 ## Defining the Zero Schema
 
-The Zero schema is encoded in a TypeScript file that is conventionally called `schema.ts` file. For example, see [the schema file for`hello-zero`](https://github.com/rocicorp/hello-zero/blob/main/src/schema.ts).
+The Zero schema is encoded in a TypeScript file that is conventionally called `schema.ts` file. For example, see [the schema file for `hello-zero`](https://github.com/rocicorp/hello-zero/blob/main/src/schema.ts).
 
 ## Table Schemas
 
@@ -230,16 +234,10 @@ Use `createSchema` to define the entire Zero schema:
 ```tsx
 import {createSchema} from '@rocicorp/zero';
 
-export const schema = createSchema(
-  {
-    tables: [user, medium, message],
-    relationships: [
-      userRelationships,
-      mediumRelationships,
-      messageRelationships,
-    ],
-  },
-);
+export const schema = createSchema({
+  tables: [user, medium, message],
+  relationships: [userRelationships, mediumRelationships, messageRelationships],
+});
 ```
 
 ## Migrations

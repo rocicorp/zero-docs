@@ -1,15 +1,22 @@
-import Link from 'next/link';
-import Image from 'next/image';
-import styles from './page.module.css';
-import ResponsiveImage from '@/components/ui/responsive-image';
+'use client';
+
 import CodeBlock from '@/components/CodeBlock';
-import {Button} from '@/components/ui/button';
-import {cn} from '@/lib/utils';
-import ZeroAlphaLogo from '@/components/logos/ZeroAlpha';
 import RocicorpLogo from '@/components/logos/Rocicorp';
+import ZeroAlphaLogo from '@/components/logos/ZeroAlpha';
+import {Button} from '@/components/ui/button';
+import ResponsiveImage from '@/components/ui/responsive-image';
+import {cn} from '@/lib/utils';
+import Link from 'next/link';
+import {useRouter} from 'next/navigation';
+import {useEffect} from 'react';
+import styles from './page.module.css';
 
 export default function Home() {
-  // Code block
+  const router = useRouter();
+
+  useEffect(() => {
+    router.prefetch('/docs/introduction');
+  }, [router]);
 
   const exampleCode = `function Playlist({id}: {id: string}) {
   // This usually resolves *instantly*, and updates reactively
@@ -57,8 +64,8 @@ export default function Home() {
 
         <div className={styles.navLinks}>
           <Button
-            variant="outline"
-            className={styles.primaryButton}
+            className="flex items-center gap-2"
+            variant="primary"
             size="default"
             asChild
           >
@@ -66,12 +73,12 @@ export default function Home() {
           </Button>
 
           <Button
-            variant="outline"
-            className={styles.primaryButton}
+            variant="primary"
+            className="flex items-center gap-2"
             size="default"
             asChild
           >
-            <a href="/docs/introduction">Docs</a>
+            <Link href="/docs/introduction">Docs</Link>
           </Button>
         </div>
       </div>
@@ -151,24 +158,21 @@ export default function Home() {
         Zero is currently in public alpha. It's got a few rough edges, and you
         have to deploy it yourself, but it's already remarkably fun. We&apos;re
         using it ourselves for Zero's{' '}
-        <a href="https://bugs.rocicorp.dev/">official bug tracker</a> and we
-        find it much more productive than the alternatives.
+        <a className="underline" href="https://bugs.rocicorp.dev/">
+          official bug tracker
+        </a>{' '}
+        and we find it much more productive than the alternatives.
       </p>
       <p>
         Ready to start? You can have your first app in production in about 20
         minutes.
       </p>
       <br />
-      <p className={styles.ctaContainer}>
-        <Button
-          variant="outline"
-          className={styles.primaryButton}
-          size="default"
-          asChild
-        >
+      <div className="flex w-full justify-center">
+        <Button variant="primary" size="default" asChild>
           <a href="/docs/introduction">Get Started Now</a>
         </Button>
-      </p>
+      </div>
 
       <div className={styles.footer}>
         <Link href="https://roci.dev">
@@ -179,7 +183,6 @@ export default function Home() {
           />
         </Link>
       </div>
-      <div className={styles.rootThemeToggleContainer}></div>
     </div>
   );
 }

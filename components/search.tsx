@@ -1,18 +1,34 @@
 'use client';
 
+import searchIndex from '@/assets/search-index.json';
 import {
   Dialog,
-  DialogClose,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
 import {Input} from '@/components/ui/input';
-import {ScrollArea} from '@/components/ui/scroll-area';
-import {CommandIcon, FileIcon, SearchIcon} from 'lucide-react';
+import {IconKey, icons} from '@/lib/icons';
+import {cn} from '@/lib/utils';
+import {useCommandState} from 'cmdk';
+import {CommandIcon, SearchIcon} from 'lucide-react';
 import lunr from 'lunr';
-import React, {useEffect, useRef, useState} from 'react';
+import {useRouter} from 'next/navigation';
+import React, {useEffect, useMemo, useState} from 'react';
+import {useHotkeys} from 'react-hotkeys-hook';
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from './ui/command';
+import Kbd from './ui/kbd';
+import Link from 'next/link';
+
 const Anchor = React.forwardRef<HTMLAnchorElement, React.ComponentProps<'a'>>(
   ({children, ...props}, ref) => {
     return (
@@ -30,15 +46,14 @@ interface SearchDocument {
   title: string;
   content: string;
   url: string;
-  headings: {
-    text: string;
-    id: string;
-  }[];
+  icon: IconKey;
+  headings: {text: string; id: string}[];
 }
 
 interface SearchResult extends SearchDocument {
   snippet?: string;
   snippetId?: string;
+  composedUrl: string;
 }
 
 function extractSnippet(
@@ -64,44 +79,37 @@ function extractSnippet(
   return `...${snippet}...`;
 }
 
-// Store Lunr index & search data globally (to avoid rebuilding on each render)
-let lunrIndex: lunr.Index | null = null;
-let searchDocs: SearchDocument[] = [];
+const searchDocs = Array.isArray(searchIndex)
+  ? (searchIndex as SearchDocument[])
+  : [];
 
 export default function Search() {
   const [searchedInput, setSearchedInput] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
-  const [highlightIndex, setHighlightIndex] = useState(0);
-  const resultRefs = useRef<(HTMLAnchorElement | null)[]>([]);
-  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+  const [lunrIndex, setLunrIndex] = useState<lunr.Index | null>(null);
+
+  const router = useRouter();
 
   // Load search index on component mount
   useEffect(() => {
-    async function loadSearchIndex() {
-      const response = await fetch('/search-index.json');
-      searchDocs = await response.json();
+    // Create Lunr index
+    const newLunrIndex = lunr(b => {
+      b.ref('id');
+      b.field('title', {boost: 10}); // Prioritize document title
+      b.field('content');
+      b.field('headings', {boost: 9}); // Prioritize headings
 
-      // Create Lunr index
-      lunrIndex = lunr(b => {
-        b.ref('id');
-        b.field('title', {boost: 10}); // Prioritize document title
-        b.field('content');
-        b.field('headings', {boost: 9}); // Prioritize headings
+      for (const doc of searchDocs) {
+        b.add({
+          ...doc,
+          title: doc.title?.toLowerCase() ?? '',
+          headings: doc.headings.map(h => h.text.toLowerCase()).join(' '), // Convert headings to searchable string
+        });
+      }
+    });
 
-        for (const doc of searchDocs) {
-          b.add({
-            ...doc,
-            title: doc.title?.toLowerCase() ?? '',
-            headings: doc.headings.map(h => h.text.toLowerCase()).join(' '), // Convert headings to searchable string
-          });
-        }
-      });
-    }
-
-    if (!lunrIndex) {
-      loadSearchIndex();
-    }
+    setLunrIndex(newLunrIndex);
   }, []);
 
   useEffect(() => {
@@ -174,11 +182,7 @@ export default function Search() {
             validHeadings.find(h => h.index > snippetIndex) ??
             doc.headings[0];
 
-          return {
-            ...doc,
-            snippet,
-            snippetId: finalHeading?.id || '',
-          };
+          return {...doc, snippet, snippetId: finalHeading?.id || ''};
         });
 
         // Add an extra result if the search term exactly matches a document title
@@ -194,82 +198,41 @@ export default function Search() {
           });
         }
 
-        setSearchResults(results.filter(Boolean) as SearchResult[]);
+        // Deduplicate results by ID
+        const uniqueResults = results
+          .filter(Boolean)
+          .map(result => result!)
+          .map(result => ({
+            ...result,
+            composedUrl: result.snippetId
+              ? `${result.url}#${result.snippetId}`
+              : result.url,
+          }))
+          .reduce((acc, result) => {
+            if (!acc.has(result.id)) {
+              acc.set(result.id, result);
+            }
+            return acc;
+          }, new Map<string, SearchResult>());
+
+        setSearchResults(Array.from(uniqueResults.values()));
       } catch (error) {
         console.error('Lunr.js Query Error:', error);
         setSearchResults([]);
       }
-    }, 200); // Debounce time: 200ms
+    }, 20);
 
     return () => clearTimeout(delayDebounce);
   }, [searchedInput]);
 
-  // Reset highlight index on new search
-  useEffect(() => {
-    setHighlightIndex(0);
-  }, [searchedInput]);
-
-  // Ensure the active search result scrolls into view when highlighted
-  useEffect(() => {
-    if (
-      isOpen &&
-      resultRefs.current[highlightIndex] &&
-      scrollContainerRef.current
-    ) {
-      const selectedItem = resultRefs.current[highlightIndex];
-      const container = scrollContainerRef.current;
-
-      if (selectedItem && container) {
-        const itemTop = selectedItem.offsetTop;
-        const itemHeight = selectedItem.offsetHeight;
-        const containerScrollTop = container.scrollTop;
-        const containerHeight = container.clientHeight;
-
-        // If the selected item is above the visible area, scroll up
-        if (itemTop < containerScrollTop) {
-          container.scrollTo({top: itemTop, behavior: 'smooth'});
-        }
-        // If the selected item is below the visible area, scroll down
-        else if (itemTop + itemHeight > containerScrollTop + containerHeight) {
-          container.scrollTo({
-            top: itemTop + itemHeight - containerHeight,
-            behavior: 'smooth',
-          });
-        }
-      }
-    }
-  }, [highlightIndex, isOpen]);
-
-  // Listen for CMD+K (Mac) or CTRL+K (Windows) and keyboard navigation when search dialog is open
-  useEffect(() => {
-    function handleKeyDown(event: KeyboardEvent) {
-      if (isOpen) {
-        if (event.key === 'ArrowDown') {
-          event.preventDefault();
-          setHighlightIndex(prev => (prev + 1) % searchResults.length);
-        } else if (event.key === 'ArrowUp') {
-          event.preventDefault();
-          setHighlightIndex(prev =>
-            prev > 0 ? prev - 1 : searchResults.length - 1,
-          );
-        } else if (
-          event.key === 'Enter' &&
-          searchResults[highlightIndex] != null
-        ) {
-          event.preventDefault();
-          setIsOpen(false); // Close search dialog
-          window.location.href = `${searchResults[highlightIndex].url}#${searchResults[highlightIndex].snippetId || searchResults[highlightIndex].headings[0]?.id}`;
-        }
-      }
-      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
-        event.preventDefault();
-        setIsOpen(true);
-      }
-    }
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, highlightIndex, searchResults]);
+  // Toggle the menu when ⌘K is pressed
+  useHotkeys(
+    'mod+k',
+    () => {
+      setIsOpen(open => !open);
+    },
+    {enableOnFormTags: true, enableOnContentEditable: true},
+  );
 
   return (
     <Dialog
@@ -280,74 +243,102 @@ export default function Search() {
       }}
     >
       <DialogTrigger asChild>
-        <div className="relative max-w-56 px-2.5 py-0.5 flex items-center gap-2 md:border rounded-md scursor-pointer h-10 bg-transparent md:bg-background focus-within:ring-2 focus-within:ring-primary hover:bg-accent md:hover:bg-background">
+        <div className="relative max-w-56 px-2.5 py-0.5 flex items-center gap-2 md:border rounded-md cursor-pointer h-10 bg-transparent md:bg-background focus-within:ring-2 focus-within:ring-primary hover:bg-accent md:hover:bg-background">
           <SearchIcon className="h-4 w-5 flex-shrink-0 aspect-square text-foreground" />
           <Input
+            name="search"
             className="hidden md:block bg-transparent text-sm px-0 overflow-ellipsis border-none shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
             placeholder="Search docs"
             type="search"
             value={searchedInput}
             onChange={e => setSearchedInput(e.target.value)}
           />
-          <div className="hidden md:flex flex-shrink-0 text-xs font-medium font-mono items-center gap-0.5 dark:bg-stone-900 bg-stone-200/65 p-1 rounded-sm">
-            <CommandIcon className="w-3 h-3" />
+          <Kbd className="hidden md:flex">
+            <CommandIcon className="w-2.5 h-2.5" />
             <span>K</span>
-          </div>
+          </Kbd>
         </div>
       </DialogTrigger>
 
-      <DialogContent className="dialog-container p-0 max-w-[650px] sm:top-[38%] top-[45%] !rounded-md">
-        <DialogTitle className="sr-only">Search</DialogTitle>
-        <DialogHeader>
-          <input
+      <DialogHeader className="sr-only">
+        <DialogTitle>Search</DialogTitle>
+        <DialogDescription>
+          Search the contents of the documentation for Zero
+        </DialogDescription>
+      </DialogHeader>
+      <DialogContent
+        showCloseButton={false}
+        className={cn('overflow-hidden p-0 top-32 translate-y-0')}
+      >
+        <Command loop shouldFilter={false}>
+          <CommandInput
+            placeholder="Type to search..."
             value={searchedInput}
-            onChange={e => setSearchedInput(e.target.value)}
-            placeholder="Type something to search..."
-            autoFocus
-            className="h-14 px-6 bg-transparent border-b text-[14px] outline-none"
+            onValueChange={setSearchedInput}
+            showCloseButton={true}
           />
-        </DialogHeader>
+          <CommandList showBorder={Boolean(searchedInput)}>
+            {searchedInput && <CommandEmpty>No results found.</CommandEmpty>}
+            {searchResults.length > 0 && (
+              <CommandGroup className="p-0">
+                {searchResults.map(item => {
+                  const Icon = icons[item?.icon ?? 'FileCode'];
 
-        {searchResults.length === 0 && searchedInput && (
-          <p className="text-muted-foreground mx-auto mt-2 text-sm">
-            No results found for{' '}
-            <span className="text-primary">"{searchedInput}"</span>
-          </p>
-        )}
-
-        <ScrollArea
-          ref={scrollContainerRef}
-          className="max-h-[400px] overflow-y-auto"
-        >
-          <div className="flex flex-col items-start overflow-y-auto sm:px-2 px-1 pb-4">
-            {searchResults.map((item, index) => (
-              <DialogClose key={item.id} asChild>
-                <Anchor
-                  ref={(el: HTMLAnchorElement | null) => {
-                    resultRefs.current[index] = el;
-                  }}
-                  className={`w-full ${index === highlightIndex ? 'bg-gray-200 dark:bg-gray-700 search-selected' : ''}`}
-                  href={
-                    item.snippetId ? `${item.url}#${item.snippetId}` : item.url
-                  }
-                  onClick={() => setIsOpen(false)} // Close the search dialog
-                >
-                  <div className="flex items-center w-fit h-full py-3 gap-1.5 px-2">
-                    <FileIcon className="h-[1.1rem] w-[1.1rem] mr-1" />{' '}
-                    {item.title}
-                  </div>
-                  {item.snippet && (
-                    <p
-                      className="search-snippet text-xs text-muted-foreground px-3"
-                      dangerouslySetInnerHTML={{__html: item.snippet}}
-                    />
-                  )}
-                </Anchor>
-              </DialogClose>
-            ))}
-          </div>
-        </ScrollArea>
+                  return (
+                    <CommandItem
+                      key={item.id}
+                      value={item.id}
+                      onSelect={() => {
+                        setIsOpen(false);
+                        setSearchedInput('');
+                        setSearchResults([]);
+                        router.push(item.composedUrl);
+                      }}
+                      className={cn(
+                        'flex flex-col items-start gap-2 py-3 px-4 rounded-none',
+                      )}
+                      asChild
+                    >
+                      <Link href={item.composedUrl}>
+                        <div className="flex items-center gap-2">
+                          <div>
+                            <Icon />
+                          </div>
+                          <span className="font-medium">{item.title}</span>
+                        </div>
+                        {item.snippet && (
+                          <p
+                            className="text-xs text-muted-foreground leading-relaxed"
+                            dangerouslySetInnerHTML={{__html: item.snippet}}
+                          />
+                        )}
+                      </Link>
+                    </CommandItem>
+                  );
+                })}
+              </CommandGroup>
+            )}
+          </CommandList>
+          <PreloadCurrentItem />
+        </Command>
       </DialogContent>
     </Dialog>
   );
 }
+
+const PreloadCurrentItem = () => {
+  const value = useCommandState(state => state.value);
+  const router = useRouter();
+
+  const activeItem = useMemo(() => {
+    return searchDocs.find(item => item.id === value);
+  }, [value, searchDocs]);
+
+  useEffect(() => {
+    if (activeItem) {
+      router.prefetch(activeItem.url);
+    }
+  }, [activeItem]);
+
+  return <></>;
+};

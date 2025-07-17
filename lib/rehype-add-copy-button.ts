@@ -16,7 +16,7 @@ const rehypeAddCopyButton: Plugin = () => {
           type: 'element',
           tagName: 'button',
           properties: {
-            className: ['copy-button'],
+            className: ['font-regular copy-button'],
           },
           children: [{type: 'text', value: 'Copy'}],
         };

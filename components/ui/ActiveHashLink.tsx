@@ -2,9 +2,9 @@
 
 import clsx from 'clsx';
 import Link from 'next/link';
-import {useParams, usePathname} from 'next/navigation';
-import {useEffect, useMemo, useRef} from 'react';
+import {useEffect, useRef} from 'react';
 import useHash from '../hooks/useHash';
+import {cn} from '@/lib/utils';
 
 interface ActiveHashLinkProps {
   href: string;
@@ -36,7 +36,11 @@ export const ActiveHashLink: React.FC<ActiveHashLinkProps> = ({
     <Link
       ref={ref}
       href={href}
-      className={clsx(className, {[activeClassName]: isActive})}
+      className={cn(
+        className,
+        {[activeClassName]: isActive},
+        'transition duration-75 ease-out',
+      )}
     >
       {children}
     </Link>

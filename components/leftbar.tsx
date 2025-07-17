@@ -6,16 +6,19 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet';
-import {Button} from './ui/button';
-import {buttonVariants} from './ui/button';
 import {AlignLeftIcon} from 'lucide-react';
 import DocsMenu from './docs-menu';
-import Image from 'next/image';
-import Link from 'next/link';
+import {Button} from './ui/button';
+import {cn} from '@/lib/utils';
 
-export function Leftbar() {
+export function Leftbar({className}: {className?: string}) {
   return (
-    <aside className="leftbar-aside md:flex hidden flex-[1] min-w-[230px] sticky top-16 flex-col py-4">
+    <aside
+      className={cn(
+        'overflow-y-auto md:flex hidden min-w-[230px] w-[230px] sticky top-16 flex-col py-4 max-h-[calc(100vh-72px)]',
+        className,
+      )}
+    >
       <ScrollArea className="h-full pr-2">
         <DocsMenu />
       </ScrollArea>

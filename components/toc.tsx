@@ -24,7 +24,7 @@ export default function Toc({
                     href={href}
                     activeClassName="text-foreground"
                     className={cn(
-                      'flex items-center justify-between gap-2',
+                      'flex items-center justify-between gap-2 hover:text-primary',
                       level === 2 && 'pl-0',
                       level === 3 && 'pl-4',
                       level === 4 && 'pl-8',

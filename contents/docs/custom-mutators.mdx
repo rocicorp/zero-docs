@@ -592,7 +592,7 @@ export function createMutators(clientMutators: CustomMutatorDefs<Schema>) {
     ...clientMutators,
 
     issue: {
-      // Reuse all issue mutators except `update`
+      // Reuse all issue mutators except `markAllAsRead`
       ...clientMutators.issue,
 
       markAllAsRead: async (tx, {userId: string}) {

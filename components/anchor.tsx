@@ -35,7 +35,7 @@ export default function Anchor({
       className={cn(
         className,
         isMatch && activeClassName,
-        'transition ease-in',
+        'transition duration-75 ease-out',
       )}
       {...props}
     >

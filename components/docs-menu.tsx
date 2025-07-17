@@ -9,7 +9,7 @@ import {ModeToggle} from './theme-toggle';
 
 export default function DocsMenu({isSheet = false}) {
   return (
-    <div className="flex flex-col mt-5 pr-2 gap-8 pb-6">
+    <div className="flex flex-col mt-5 pr-2 gap-12 pb-6">
       {ROUTES.map((item, index) => {
         const modifiedItems = {
           ...item,

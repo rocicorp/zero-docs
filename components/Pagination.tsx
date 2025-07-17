@@ -16,7 +16,7 @@ export default function Pagination({
           <Link
             className={cn(
               buttonVariants({variant: 'outline'}),
-              'no-underline w-full flex flex-col pl-3 items-start transition ease-in whitespace-normal h-fit p-4 text-left hover:bg-inherit hover:border-foreground/30',
+              'no-underline w-full flex flex-col pl-3 items-start transition ease-out whitespace-normal h-fit p-4 text-left hover:bg-inherit hover:border-foreground/30',
             )}
             href={`/docs${previousNext.prev.href}`}
           >
@@ -33,7 +33,7 @@ export default function Pagination({
           <Link
             className={cn(
               buttonVariants({variant: 'outline'}),
-              'no-underline w-full flex flex-col pr-3 items-end transition ease-in whitespace-normal h-fit p-4 text-right hover:bg-inherit hover:border-foreground/30',
+              'no-underline w-full flex flex-col pr-3 items-end transition ease-out whitespace-normal h-fit p-4 text-right hover:bg-inherit hover:border-foreground/30',
             )}
             href={`/docs${previousNext.next.href}`}
           >

@@ -31,7 +31,7 @@ export default async function DocsPage({params: {slug = []}}: PageProps) {
           <Pagination previousNext={previousNext} />
         </Typography>
       </div>
-      <Toc tocs={tocs} />
+      <Toc tocs={tocs} path={pathName} />
     </div>
   );
 }

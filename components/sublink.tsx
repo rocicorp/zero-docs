@@ -42,19 +42,12 @@ export default function SubLink({
     }
   }, [itemsIncludesPath]);
 
-  const Icon = icon ? icons[icon] : null;
-
   const Comp = (
     <Anchor
-      className="flex items-center gap-2.5 hover:text-primary"
+      className="flex items-center hover:text-primary"
       activeClassName="text-primary font-semibold"
       href={href ?? ''}
     >
-      {Icon && (
-        <div className="flex items-center justify-center">
-          <Icon className="w-3.5 h-3.5" />
-        </div>
-      )}
       <span>{title}</span>
       {isNew && (
         <span className="new-badge ml-2 rounded px-1 py-0.5 text-xs font-semibold border">
@@ -71,14 +64,7 @@ export default function SubLink({
       Comp
     )
   ) : (
-    <h4 className="font-semibold pl-0.5 sm:text-sm text-primary flex items-center gap-2.5">
-      {Icon && (
-        <div>
-          <Icon className="w-3.5 h-3.5" />
-        </div>
-      )}
-      {title}
-    </h4>
+    <h4 className="font-semibold sm:text-sm text-primary">{title}</h4>
   );
 
   if (!items) {
@@ -86,13 +72,17 @@ export default function SubLink({
   }
 
   return (
-    <div className="flex flex-col w-full">
+    <div className="flex flex-col gap-1 w-full">
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
         <CollapsibleTrigger asChild>
           <div className="flex select-none cursor-pointer items-center gap-2">
             {titleOrLink}
 
-            <Button className="ml-auto mr-1 h-6 w-6" variant="link" size="icon">
+            <Button
+              className="ml-auto mr-3.5 h-6 w-6"
+              variant="link"
+              size="icon"
+            >
               <ChevronRight
                 className={cn(
                   'h-[0.9rem] w-[0.9rem] transition ease-in',

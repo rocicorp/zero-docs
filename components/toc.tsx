@@ -5,8 +5,10 @@ import {ArrowUpRightFromSquare} from 'lucide-react';
 
 export default function Toc({
   tocs,
+  path,
 }: {
   tocs: {level: number; text: string; href: string}[];
+  path: string;
 }) {
   return (
     <div className="lg:flex hidden toc flex-[1] min-w-[230px] w-[230px] sticky py-8 top-16 h-[calc(100vh-64px)]">

@@ -2,37 +2,27 @@
 title: Roadmap
 ---
 
-## Alpha (EOY ‘24)
-
-- ~~Schema migration~~
-- ~~Write permissions~~
-- ~~Solid support~~
-- ~~Replica sqlite files not browsable with standard sqlite3 program~~
-- ~~Relationship filters - currently you can put relationships in the ‘select’ part of the query, but not the ‘where’ part. Relationship filters commonly needed to, i.e., find all issues with particular label.~~
-- ~~Multi-column primary keys~~
-- ~~Read permissions~~
-- ~~Docs for easily deploying Zero on your own AWS or Fly.io account~~
-- ~~Up to 20MB client-side and 1GB server-side per-replica~~
-
-## Beta (Q2 ‘25)
+## Q3 2025
 
 - ~~Custom mutators~~
-- Cell-level read permissions (already exist for write)
-- First-class support for React Native
 - ~~Ability to wait for authoritative results~~
-- Aggregations (count, sum, min, max, group-by, etc)
-- Consistency.
-  - See: [Consistency](/docs/reading-data#consistency).
-  - This will also improve startup perf since apps won’t have to be so conservative in what they preload:
-    ~~Cache size management: evict things from client-side cache to stay under size~~
-- Reduce zero client bundle size to < 40KB
-- Up to 20 MB client-side and 100 GB server-side per-replica
+- [Custom Queries](https://bugs.rocicorp.dev/issue/3453)
+- Revamp documentation and onboarding
+- [Rework TTL](https://bugs.rocicorp.dev/issue/4017)
+- Document perf expectations and best practices
+- [Gigabugs](https://bugs.rocicorp.dev/issue/3158)
+- Stabilization
 
-## GA
+## Q4 2025
 
-- Vector-based text search
-- Extensive testing using randomized query generation and dst
-- External audit of design and impl
-- Ability to lock queries down to only expected forms for security
-- Additional databases beside Postgres
 - SaaS
+- [Inspector](https://bugs.rocicorp.dev/issue/4018)
+- [Disable offline writes](https://bugs.rocicorp.dev/issue/4019)
+- First-class text search (maybe)
+- First-class React Native (maybe)
+- Column permissions (maybe)
+
+## Beyond
+
+- [Aggregates](https://bugs.rocicorp.dev/issue/3040) (count, min, max, group-by)
+- Client-side only queries

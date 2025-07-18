@@ -102,8 +102,9 @@ export default function Search() {
 
       for (const doc of searchDocs) {
         b.add({
-          ...doc,
+          id: doc.id,
           title: doc.title?.toLowerCase() ?? '',
+          content: doc.content?.toLowerCase() ?? '',
           headings: doc.headings.map(h => h.text.toLowerCase()).join(' '), // Convert headings to searchable string
         });
       }

@@ -9,6 +9,7 @@ import {IconKey} from './icons';
 import {page_routes} from './routes-config';
 import {toString} from 'mdast-util-to-string';
 import {Root} from 'mdast';
+import strip from 'strip-markdown';
 
 // Define the root directory where docs are stored
 const DOCS_ROOT = path.join(process.cwd(), 'contents/docs');
@@ -70,38 +71,11 @@ function extractHeadings(tree: Root): {text: string; id: string}[] {
   return headings;
 }
 
-function markdownToText(tree: Root) {
-  let out = '';
-  let lastNodeWasBlock = false;
-
-  visit(tree, (node, _index, _parent) => {
-    if (node.type === 'text') {
-      // Add spacing before text if the previous node was a block element
-      if (
-        lastNodeWasBlock &&
-        out.length > 0 &&
-        !out.endsWith(' ') &&
-        !out.endsWith('\n')
-      ) {
-        out += ' ';
-      }
-      out += node.value;
-      lastNodeWasBlock = false;
-    } else if (node.type === 'break') {
-      // Line breaks should add a space
-      out += ' ';
-      lastNodeWasBlock = false;
-    } else if (
-      ['paragraph', 'heading', 'listItem', 'blockquote', 'code'].includes(
-        node.type,
-      )
-    ) {
-      // Mark that we've encountered a block element
-      lastNodeWasBlock = true;
-    }
-  });
-
-  return out;
+async function markdownToText(tree: Root) {
+  const stripped = await unified()
+    .use(strip, {keep: ['code', 'table']})
+    .run(tree);
+  return String(await unified().use(remarkStringify).stringify(stripped));
 }
 
 let index = 0;
@@ -117,7 +91,7 @@ async function extractTextFromMDX(filePath: string): Promise<SearchDocument> {
   const mdast = unified().use(remarkParse).parse(content);
 
   // Convert mdast to plain text
-  const plainText = markdownToText(mdast);
+  const plainText = await markdownToText(mdast);
 
   // Extract headings with IDs
   const headings = extractHeadings(mdast);
@@ -132,12 +106,18 @@ async function extractTextFromMDX(filePath: string): Promise<SearchDocument> {
     route => route.href && url.endsWith(route.href),
   );
 
+  const cleanedContent = plainText
+    .replace(/```.*$/gm, '')
+    .replace(/\n+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
   return {
     id: `${index++}-${pathWithoutExtension}`, // Use file name as ID
     title: data.title || pathWithoutExtension, // Use frontmatter title or fallback to path
     url,
     icon: route?.icon ?? 'FileCode',
-    content: plainText.replace(/\n+/g, ' ').replace(/\s+/g, ' ').trim(),
+    content: cleanedContent,
     headings, // Include extracted headings with IDs
   };
 }

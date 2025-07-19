@@ -5,7 +5,6 @@ import remarkParse from 'remark-parse';
 import remarkStringify from 'remark-stringify';
 import {unified} from 'unified';
 import {visit} from 'unist-util-visit';
-import {IconKey} from './icons';
 import {page_routes} from './routes-config';
 import {toString} from 'mdast-util-to-string';
 import {Root} from 'mdast';
@@ -21,7 +20,6 @@ interface SearchDocument {
   title: string;
   content: string;
   url: string;
-  icon: IconKey;
   headings: {text: string; id: string}[];
 }
 
@@ -116,8 +114,7 @@ async function extractTextFromMDX(filePath: string): Promise<SearchDocument> {
     id: `${index++}-${pathWithoutExtension}`, // Use file name as ID
     title: data.title || pathWithoutExtension, // Use frontmatter title or fallback to path
     url,
-    icon: route?.icon ?? 'FileCode',
-    content: cleanedContent,
+    content: plainText.replace(/\n+/g, ' ').replace(/\s+/g, ' ').trim(),
     headings, // Include extracted headings with IDs
   };
 }

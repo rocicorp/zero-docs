@@ -1,11 +1,12 @@
 'use client';
 
-import React, {useState} from 'react';
+import React, {useState, CSSProperties} from 'react';
 
-const ImageLightbox: React.FC<{src: string; caption: string}> = ({
-  src,
-  caption,
-}) => {
+const ImageLightbox: React.FC<{
+  src: string;
+  caption: string;
+  style: CSSProperties;
+}> = ({src, caption, style}) => {
   const [isOpen, setIsOpen] = useState(false);
 
   if (!src) {
@@ -18,11 +19,17 @@ const ImageLightbox: React.FC<{src: string; caption: string}> = ({
   };
 
   return (
-    <>
+    <div style={{textAlign: 'center'}}>
       <img
         src={src}
         alt={caption || 'Image'}
-        style={{cursor: 'pointer', maxWidth: '100%', border: 'none'}}
+        style={{
+          cursor: 'pointer',
+          maxWidth: '100%',
+          border: 'none',
+          margin: '0 auto',
+          ...style,
+        }}
         onClick={toggleLightbox}
       />
       {caption && (
@@ -64,11 +71,12 @@ const ImageLightbox: React.FC<{src: string; caption: string}> = ({
               maxHeight: '90%',
               boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.5)',
               border: 'none',
+              background: 'hsl(var(--background))',
             }}
           />
         </div>
       )}
-    </>
+    </div>
   );
 };
 

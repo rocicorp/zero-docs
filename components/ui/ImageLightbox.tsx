@@ -44,7 +44,6 @@ const ImageLightbox: React.FC<{
         <p
           style={{
             textAlign: 'center',
-            marginTop: '-1.5rem',
             fontSize: '0.9rem',
             fontStyle: 'italic',
           }}

@@ -1,0 +1,84 @@
+---
+title: What is Sync?
+---
+
+We say that Zero is a *sync engine*. But what even is that? And why does it matter?
+
+<Note emoji="🌈" heading="The more you know">
+A *sync engine* is a type of software that keeps multiple copies of changing data consistent across devices and users. When the data changes, the sync engine ensures that all copies reflect those changes.
+</Note>
+
+## Problem
+
+Let's say you have some data that you want to read and write from multiple devices. The most common way to do this today is to put that data into a central database and expose access to it via APIs.
+
+<ImageLightbox
+  src="/images/sync/apis-bad.svg"
+  caption="Sharing data with APIs"
+  />
+
+This works, but has downsides:
+
+* **Slow access.** Every read and write has to go to the server, addding hundreds of milliseconds to each interaction.
+* **Stale data.** API responses are immediately stale. The client has no way to know when to refresh them. Users may make decisions based on old information, and the views on different devices diverge over time.
+* **Online-only.** If the server or the user's network connection is down, the app stops working completely.
+
+## Solution
+
+Sync engines can solve these problems by keeping a local copy of the data on each device.
+
+The app reads and writes *only to the local copy*, not to the network. The sync engine pushes changes back and forth between the local copy and the server in the background, when connectivity allows.
+
+<ImageLightbox
+  src="/images/sync/sync-good.svg"
+  caption="Sharing data with sync"
+  />
+
+<Note emoji="🤔" heading="What about conflicts?">
+If the sync engine allows writes from multiple devices, conflicts can occur. This is a central part of sync engine design, and different sync engines handle conflicts differently.
+
+Zero uses [server reconciliation](/custom-mutators#what-is-a-mutator) – an elegant and flexible technique pionneered by the video game industry.
+</Note>
+
+This architecture can enable:
+
+* **Instant UI.** Reads and writes are to local storage, effectively instant.
+* **Realtime updates.** By running the sync engine continuously, users can see updates from other devices and users in realtime. The data is always fresh.
+* **Offline support.** Because data is stored locally, it is possible to support at least limited offline access. Read-only access is definitely possible, and with careful attention to conflict resolution, offline writes can also be supported in some applications.
+
+<Note type="warning" emoji="⚠️" heading="Zero doesn't support offline writes">
+Zero currently allows only read-only access offline. Sync engines 
+</Note>
+
+Sync engines also simplify the development of complex apps. Big parts of modern app development are just data plumbing: fetching data, updating data, caching data, invalidating caches, keeping different copies of data consistent, and so-on. A sync engine abstracts all this away and lets you focus on what your app actually does.
+
+## History of Sync
+
+Sync Engines have been around a long time.
+
+The first mass-market sync engine was probably [Lotus Notes](https://en.wikipedia.org/wiki/HCL_Notes), released way back in 1989! Since then, there has been a steady trickle of important software built on sync engines:
+
+* Microsoft Exchange
+* Dropbox
+* Google Docs
+* Linear
+* Superhuman
+* Figma
+
+But sync engines are very hard to build. Typically, a new custom sync engine was built for each application at great expense. Knowledge about the specific application and its data model has to be built into each sync engine to correctly handle conflicts and partial sync.
+
+There have been some attempts at general-purpose sync engines:
+
+* [Firebase Realtime Database](https://firebase.google.com/products/realtime-database) (2012) - a cloud-hosted database and that syncs.
+* [PouchDB](https://pouchdb.com/) (2013) - a sync engine attachment for CouchDB.
+* [Realm](https://realm.io/) (2016) - a mobile database with sync capabilities.
+* [Replicache](https://replicache.dev/) (2020) - The predecessor to Zero, a JavaScript library for building collaborative applications with real-time sync.
+
+But all have suffered from one or more significant problems that have prevented widespread adoption:
+
+* No support for fine-grained data authorization
+* Limited support for partial sync – users have to sync all data, even if they only need a small subset
+* Required adoption of non-standard backend databases
+* Limited ability to put business logic on read or write paths
+
+We are building Zero to address these limitations, and bring the benefits of sync to many more applications.

@@ -22,7 +22,6 @@ export default function SubLink({
   level,
   isSheet,
   new: isNew,
-  icon,
   noLink,
 }: EachRoute & {level: number; isSheet: boolean; noLink: boolean}) {
   const path = usePathname();

@@ -80,7 +80,7 @@ function extractSnippet(
 }
 
 const searchDocs = Array.isArray(searchIndex)
-  ? (searchIndex as SearchDocument[])
+  ? (searchIndex as unknown as SearchDocument[])
   : [];
 
 export default function Search() {

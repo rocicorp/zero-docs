@@ -39,7 +39,7 @@ The app reads and writes *only to the local copy*, not to the network. The sync 
 <Note emoji="🤔" heading="What about conflicts?">
 If the sync engine allows writes from multiple devices, conflicts can occur. This is a central part of sync engine design, and different sync engines handle conflicts differently.
 
-Zero uses [server reconciliation](/custom-mutators#what-is-a-mutator) – an elegant and flexible technique pionneered by the video game industry.
+Zero uses [server reconciliation](./custom-mutators#what-is-a-mutator) – an elegant and flexible technique pionneered by the video game industry.
 </Note>
 
 This architecture can enable:
@@ -56,16 +56,16 @@ Sync Engines have been around a long time.
 
 The first mass-market sync engine was probably [Lotus Notes](https://en.wikipedia.org/wiki/HCL_Notes), released way back in 1989! Since then, there has been a steady trickle of important software built on sync engines:
 
-* Microsoft Exchange
-* Dropbox
-* Google Docs
-* Linear
-* Superhuman
-* Figma
+* Microsoft Exchange (1996)
+* Google Docs (2006)
+* Dropbox (2007)
+* Superhuman (2017)
+* Figma (2016)
+* Linear (2019)
 
-But sync engines are very hard to build. Typically, a new custom sync engine was built for each application at great expense. Knowledge about the specific application and its data model has to be built into each sync engine to correctly handle conflicts and partial sync.
+But sync engines are very hard to build. Typically, a new custom sync engine is built for each application at great expense. Knowledge about the specific application and its data model must be built into each sync engine to correctly handle conflicts and partial sync.
 
-There have been some attempts at general-purpose sync engines:
+There have also been some attempts at general-purpose sync engines:
 
 * [Firebase Realtime Database](https://firebase.google.com/products/realtime-database) (2012) - a cloud-hosted database and that syncs.
 * [PouchDB](https://pouchdb.com/) (2013) - a sync engine attachment for CouchDB.
@@ -74,9 +74,9 @@ There have been some attempts at general-purpose sync engines:
 
 But all have suffered from one or more significant problems that have prevented widespread adoption:
 
-* No support for fine-grained data authorization
+* No support for fine-grained authorization
 * Limited support for partial sync – users have to sync all data, even if they only need a small subset
-* Required adoption of non-standard backend databases
-* Limited ability to put business logic on read or write paths
+* Required adoption of non-standard backend databases or data models
+* Limited ability to put custom business logic on read or write paths
 
 We are building Zero to address these limitations, and bring the benefits of sync to many more applications.

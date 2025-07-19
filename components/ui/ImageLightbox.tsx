@@ -5,8 +5,9 @@ import React, {useState, CSSProperties} from 'react';
 const ImageLightbox: React.FC<{
   src: string;
   caption: string;
-  style: CSSProperties;
-}> = ({src, caption, style}) => {
+  style?: CSSProperties;
+  className?: string;
+}> = ({src, caption, style, className}) => {
   const [isOpen, setIsOpen] = useState(false);
 
   if (!src) {
@@ -19,7 +20,13 @@ const ImageLightbox: React.FC<{
   };
 
   return (
-    <div style={{textAlign: 'center'}}>
+    <div
+      style={{
+        textAlign: 'center',
+        margin: '3rem auto 4rem',
+        width: '100%',
+      }}
+    >
       <img
         src={src}
         alt={caption || 'Image'}
@@ -30,6 +37,7 @@ const ImageLightbox: React.FC<{
           margin: '0 auto',
           ...style,
         }}
+        className={className}
         onClick={toggleLightbox}
       />
       {caption && (
@@ -54,11 +62,11 @@ const ImageLightbox: React.FC<{
             left: 0,
             width: '100vw',
             height: '100vh',
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            backgroundColor: 'rgba(0, 0, 0, 0.93)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            zIndex: 1000,
+            zIndex: 9999,
             cursor: 'pointer',
             border: 'none',
           }}
@@ -71,7 +79,6 @@ const ImageLightbox: React.FC<{
               maxHeight: '90%',
               boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.5)',
               border: 'none',
-              background: 'hsl(var(--background))',
             }}
           />
         </div>

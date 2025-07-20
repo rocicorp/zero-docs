@@ -23,13 +23,18 @@ export const ROUTES = [
         href: '/add-to-existing-project',
       },
       {title: 'Samples', href: '/samples'},
+      {title: 'Status', href: '/status'},
     ],
   },
 
   {
-    title: 'Concepts',
+    title: 'Learning Zero',
     href: null,
-    items: [{title: 'What is Sync?', href: '/sync'}],
+    items: [
+      {title: 'What is Sync?', href: '/sync'},
+      {title: 'When to Use', href: '/when-to-use'},
+      {title: 'Roadmap', href: '/roadmap'},
+    ],
   },
 
   {
@@ -114,7 +119,6 @@ export const ROUTES = [
     href: null,
     defaultOpen: false,
     items: [
-      {title: 'Roadmap', href: '/roadmap'},
       {title: 'Release Notes', href: '/release-notes'},
       {title: 'Reporting Bugs', href: '/reporting-bugs'},
       {title: 'Open Source', href: '/open-source'},

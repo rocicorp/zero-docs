@@ -95,7 +95,7 @@ export default function Home() {
       <p>It&apos;s time for a rethink.</p>
       <p>
         We&apos;re building an open-source, general-purpose sync engine for the
-        web. You put Zero in front of your database or web service, and we
+        web. You put Zero in front of your database and web server, and we
         distribute your backend all the way to main thread of the UI.
       </p>
 
@@ -104,8 +104,8 @@ export default function Home() {
         className="invert dark:invert-0"
         src="/images/how-it-works.svg"
         alt="How Zero Works"
-        width={732}
-        height={73}
+        width={731}
+        height={176}
       />
 
       <p>

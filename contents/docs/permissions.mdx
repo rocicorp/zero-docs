@@ -6,7 +6,7 @@ Permissions are expressed using [ZQL](reading-data) and run automatically with e
 
 Permissions are currently row based. Zero will eventually also have column permissions.
 
-## Define Permissions
+## Defining Permissions
 
 Permissions are defined in [`schema.ts`](/docs/zero-schema) using the `definePermissions` function.
 
@@ -48,7 +48,7 @@ export const permissions = definePermissions<AuthData, Schema>(schema, () => {
 
 `definePermission` returns a _policy_ object for each table in the schema. Each policy defines a _ruleset_ for the _operations_ that are possible on a table: `select`, `insert`, `update`, and `delete`.
 
-## Access is Denied by Default
+### Access is Denied by Default
 
 If you don't specify any rules for an operation, it is denied by default. This is an important safety feature that helps ensure data isn't accidentally exposed.
 
@@ -85,7 +85,7 @@ const permissions = definePermissions<AuthData, Schema>(schema, () => {
 });
 ```
 
-## Permission Evaluation
+## Evaluating Permissions
 
 Zero permissions are "compiled" into a JSON-based format at build-time. This file is stored in the `{ZERO_APP_ID}.permissions` table of your upstream database. Like other tables, it replicates live down to `zero-cache`. `zero-cache` then parses this file, and applies the encoded rules to every read and write operation.
 
@@ -102,7 +102,7 @@ Basically only property access is allowed. This is really confusing and we're wo
 
 </Note>
 
-## Permission Deployment
+## Deploying Permissions
 
 During development, permissions are compiled and uploaded to your database completely automatically as part of the `zero-cache-dev` script.
 
@@ -134,7 +134,7 @@ Each operation on a policy has a _ruleset_ containing zero or more _rules_.
 
 A rule is just a TypeScript function that receives the logged in user's `AuthData` and generates a ZQL [where expression](reading-data#compound-filters). At least one rule in a ruleset must return a row for the operation to be allowed.
 
-## Select Permissions
+### Select
 
 You can limit the data a user can read by specifying a `select` ruleset.
 
@@ -161,15 +161,23 @@ definePermissions<AuthData, Schema>(schema, () => {
 
 If the issue table has two rows, one created by the user and one by someone else, the user will only see the row they created in any queries.
 
-### Column permissions
+<Note slug="column-permissions" heading="Column permissions are not supported yet">
+  Zero does not currently support column based permissions - the select permission applies to every column. The recommended approach for now is to factor out private fields into a separate table, e.g. `user_private`. Column permissions are [planned](roadmap#q4-2025) but currently not a high priority.
 
-Zero does not currently support column based permissions. Select permission applies to every column. The recommended approach for now is to factor out private fields into a separate table, e.g. `user_private`. Column permissions are planned but currently not a high priority.
+Although the same limitation applies to declarative insert/update permissions, [custom mutators](/docs/custom-mutators) support arbitrary server-side logic and so can easily control which columns are writable.
 
-Note that although the same limitation applies to declarative insert/update permissions, [custom mutators](/docs/custom-mutators) support arbitrary server-side logic and so can easily control which columns are writable.
+</Note>
 
-## Insert Permissions
+### Insert
 
 You can limit what rows can be inserted and by whom by specifying an `insert` ruleset.
+
+<Note slug="insert-permissions" heading="You might not need insert permissions" type="warning">
+  If you are using [custom mutators](/docs/custom-mutators), you do not need to use insert permissions. You can easily control which columns are writable
+  in the mutators themselves.
+
+Insert permissions are deprecated and will be removed in a future release.
+</Note>
 
 Insert rules are evaluated after the entity is inserted. So if they query the database, they will see the inserted row present. If any rule in the insert ruleset returns a row, the insert is allowed.
 
@@ -192,9 +200,16 @@ definePermissions<AuthData, Schema>(schema, () => {
 });
 ```
 
-## Update Permissions
+### Update
 
 There are two types of update rulesets: `preMutation` and `postMutation`. Both rulesets must pass for an update to be allowed.
+
+<Note slug="update-permissions" heading="You might not need update permissions" type="warning">
+  If you are using [custom mutators](/docs/custom-mutators), you do not need to use update permissions. You can easily control which columns are writable
+  in the mutators themselves.
+
+Update permissions are deprecated and will be removed in a future release.
+</Note>
 
 `preMutation` rules see the version of a row _before_ the mutation is applied. This is useful for things like checking whether a user owns an entity before editing it.
 
@@ -268,7 +283,14 @@ definePermissions<AuthData, Schema>(schema, () => {
 });
 ```
 
-## Delete Permissions
+### Delete
+
+<Note slug="delete-permissions" heading="You might not need delete permissions" type="warning">
+  If you are using [custom mutators](/docs/custom-mutators), you do not need to use delete permissions. You can easily control which rows can be deleted
+  in the mutators themselves.
+
+Delete permissions are deprecated and will be removed in a future release.
+</Note>
 
 Delete permissions work in the same way as `insert` permissions except they run _before_ the delete is applied. So if a delete rule queries the database, it will see that the deleted row is present. If any rule in the ruleset returns a row, the delete is allowed.
 

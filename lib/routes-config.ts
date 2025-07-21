@@ -47,10 +47,6 @@ export const ROUTES = [
       {title: 'Reading Data (ZQL)', href: '/reading-data'},
       {
         title: 'Writing Data (Mutators)',
-        href: '/writing-data',
-      },
-      {
-        title: 'Custom Mutators',
         href: '/custom-mutators',
       },
       {title: 'Authentication', href: '/auth'},

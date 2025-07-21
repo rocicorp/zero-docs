@@ -11,8 +11,8 @@ you're using React, Vue, Svelte, Solid, or vanilla JavaScript.
   to Postgres](connecting-to-postgres) for setup instructions.
 - If you are using [TypeScript](https://www.typescriptlang.org/) ensure that
   [`strictNullChecks`](https://www.typescriptlang.org/tsconfig/#strictNullChecks)
-  is set to `true` in [tsconfig.json](https://www.typescriptlang.org/tsconfig/). If this is not set then the advanced types Zero uses do not work
-  as expected.
+  is set to `true` in [tsconfig.json](https://www.typescriptlang.org/tsconfig/). If this is 
+  not set, then the advanced types in Zero will not work as expected.
 
 ## Installation
 
@@ -23,7 +23,7 @@ npm install @rocicorp/zero
 ```
 
 <details>
-<summary id="not-npm">Not using npm?</summary>
+<summary id="not-npm">Using `pnpm`, `bun`, or another package manager?</summary>
 
 Zero's server component depends on `@rocicorp/zero-sqlite3`, which contains a
 binary that requires running a postinstall script. Most alternative package
@@ -131,7 +131,7 @@ export const permissions = definePermissions<unknown, Schema>(schema, () => ({
 }));
 ```
 
-For more details, see [permissions](permissions).
+By default, all permissions are denied. For more details, see [permissions](permissions).
 
 ## Creating a Zero Instance
 
@@ -152,6 +152,28 @@ In production, avoid hardcoding the server URL. Use environment variables like
 
 ## Reading Data
 
+Developers using React, SolidJS, Svelte, Vue, or other frameworks can use
+framework-specific integrations. For more details on how to query,
+see [Reading Data with ZQL](reading-data).
+
+### React
+
+React developers can use the `useZero` hook for seamless integration. See
+[React](react) for more details.
+
+### SolidJS
+
+For SolidJS, use the `createZero` function instead of `new Zero`.
+
+Refer to [SolidJS](solidjs) for additional information.
+
+### Other Frameworks
+
+For other frameworks, see the [UI frameworks](community#ui-frameworks)
+documentation.
+
+### No Framework
+
 To read data, use the `materialize` method on a `Query` from the `Zero`
 instance. This creates a materialized view that listens for real-time updates to
 the data:
@@ -167,35 +189,19 @@ When the view is no longer needed, ensure you clean up by destroying it:
 view.destroy();
 ```
 
-For more details, see [Reading Data with ZQL](reading-data).
-
-### React
-
-React developers can use the `useZero` hook for seamless integration. See
-[Integrations React](react) for more details.
-
-### SolidJS
-
-For SolidJS, use the `createZero` function instead of `new Zero`.
-
-Refer to [Integrations SolidJS](solidjs) for additional information.
-
-### Other Frameworks
-
-For other frameworks, see the [UI frameworks](community#ui-frameworks)
-documentation.
-
 ## Writing Data
 
-Zero supports both simple and advanced data mutations. For basic use cases,
-use the [CRUD mutator](writing-data):
+Zero supports both simple and advanced data mutations. We recommend using
+[custom mutators](custom-mutators) - CRUD mutators are deprecated
+and not recommended for new projects.
+
+The custom mutator API on the client looks something like this:
 
 ```ts
 z.mutate.message.insert({id: nanoid(), body: 'Hello World!'});
 ```
 
-For more complex scenarios, such as custom business logic, use
-[custom mutators](custom-mutators) to define tailored mutation behavior.
+You can fully define the interface for a mutator, as well as its underlying implementation on both the client and server.
 
 ## Server-Side Rendering (SSR)
 
@@ -203,6 +209,5 @@ Zero does not yet support SSR. See [SSR](zql-on-the-server#ssr) for details on d
 
 ## Deployment
 
-Ensure all `.env` variables are set in the production environment. For Zero
-cache deployment, see [Deployment](deployment). For frontend deployment, consult
-your framework's documentation.
+Ensure all environment variables are set in the production environment. For `zero-cache` deployment,
+see [Deployment](deployment). For frontend deployment, consult your framework's documentation.

@@ -23,7 +23,7 @@ In the future, we'll [`freeze`](https://developer.mozilla.org/en-US/docs/Web/Jav
 
 ## Select
 
-ZQL queries start by selecting a table. There is no way to select a subset of columns; ZQL queries always return the entire row (modulo column permissions).
+ZQL queries start by selecting a table. There is no way to select a subset of columns; ZQL queries always return the entire row, if permissions allow it.
 
 ```tsx
 const z = new Zero(...);
@@ -117,7 +117,7 @@ You can query related rows using _relationships_ that are defined in your [Zero 
 z.query.issue.related('comments');
 ```
 
-Relationships are returned as hierarchical data. In the above example, each row will have a `comments` field which is itself an array of the corresponding comments row.
+Relationships are returned as hierarchical data. In the above example, each row will have a `comments` field, which is an array of the corresponding comments rows.
 
 You can fetch multiple relationships in a single query:
 
@@ -168,7 +168,7 @@ You can filter a query with `where()`:
 z.query.issue.where('priority', '=', 'high');
 ```
 
-The first parameter is always a column name from the table being queried. Intellisense will offer available options (sourced from your [Zero Schema](/docs/zero-schema)).
+The first parameter is always a column name from the table being queried. TypeScript completion will offer available options (sourced from your [Zero Schema](/docs/zero-schema)).
 
 ### Comparison Operators
 
@@ -245,7 +245,7 @@ Your filter can also test properties of relationships. Currently the only suppor
 z.query.organization.whereExists('employees');
 ```
 
-The argument to `whereExists` is a relationship, so just like other relationships it can be refined with a query:
+The argument to `whereExists` is a relationship, so just like other relationships, it can be refined with a query:
 
 ```tsx
 // Find all orgs that have at least one cool employee
@@ -288,9 +288,9 @@ So when you are thinking about whether a query is going to return results instan
 <Note type="note" heading="Caches vs Replicas">
   This is why we often say that despite the name `zero-cache`, Zero is not technically a cache. It's a *replica*.
 
-A cache has a random set of rows with a random set of versions. There is no expectation that the cache any particular rows, or that the rows' have matching versions. Rows are simply updated as they are fetched.
+A cache has a random set of rows with a random set of versions. There is no expectation that the cache has any particular rows, or that the rows have matching versions. Rows are simply updated as they are fetched.
 
-A replica by contrast is eagerly updated, whether or not any client has requested a row. A replica is always very close to up-to-date, and always self-consistent.
+A replica, by contrast, is eagerly updated whether or not any client has requested a row. A replica is always very close to up-to-date, and always self-consistent.
 
 Zero is a _partial_ replica because it only replicates rows that are returned by syncing queries.
 
@@ -347,7 +347,7 @@ We will be reworking this API to be less of a footgun in the next Zero release. 
 
 If the UI re-requests a background query, it becomes an active query again. Since the query was syncing in the background, the very first synchronous result that the UI receives after reactivation will be up-to-date with the server (i.e., it will have `resultType` of `complete`).
 
-Just like other types of queries, the data from background queries is available for use by new queries. A common pattern in to [preload](#preloading) a subset of most commonly needed data with `{ttl: 'forever'}` and then do more specific queries from the UI with, e.g., `{ttl: '1d'}`. Most often the preloaded data will be able to answer user queries, but if not, the new query will be answered by the server and backgrounded for a day in case the user revisits it.
+Just like other types of queries, the data from background queries is available for use by new queries. A common pattern is to [preload](#preloading) a subset of most commonly needed data with `{ttl: 'forever'}` and then do more specific queries from the UI with e.g. `{ttl: '1d'}`. Most often the preloaded data will be able to answer user queries, but if not, the new query will be answered by the server and backgrounded for a day in case the user revisits it.
 
 ### Client Capacity Management
 
@@ -402,7 +402,7 @@ We will be adding more tools over time.
 
 ## Completeness
 
-Zero returns whatever data it has on the client immediately for a query, then falls back to the server for any missing data. Sometimes it's useful to know the difference between these two types of results. To do so, use the `result` from `useQuery`:
+Zero immediately returns the data for a query it has on the client, then falls back to the server for any missing data. Sometimes it's useful to know the difference between these two types of results. To do so, use the `result` from `useQuery`:
 
 ```tsx
 const [issues, issuesResult] = useQuery(z.query.issue);
@@ -517,7 +517,7 @@ z.query.issue
 
 ## Running Queries Once
 
-Usually subscribing to a query is what you want in a reactive UI, but every so often you'll need to run a query just once. To do this, use the `run()` method:
+You usually want to subscribe to a query in a reactive UI, but every so often you'll need to run a query just once. To do this, use the `run()` method:
 
 ```tsx
 const results = await z.query.issue.where('foo', 'bar').run();
@@ -544,17 +544,17 @@ This is the same as saying `run()` or `run({type: 'unknown'})`.
 
 ## Consistency
 
-Zero always syncs a consistent partial replica of the backend database to the client. This avoids many common consistency issues that come up in classic web applications. But there are still some consistency issues to be aware of when using Zero.
+Zero keeps a consistent, partial replica of the backend database on each client. This removes most of the consistency pitfalls that plague traditional web apps, but a few edge cases remain.
 
-For example, imagine that you have a bug database w/ 10k issues. You preload the first 1k issues sorted by created.
+Imagine a bug database with 10 000 issues. You preload the first 1 000 issues ordered by `created`.
 
-The user then does a query of issues assigned to themselves, sorted by created. Among the 1k issues that were preloaded imagine 100 are found that match the query. Since the data we preloaded is in the same order as this query, we are guaranteed that any local results found will be a _prefix_ of the server results.
+Later, the user queries for issues assigned to them, still ordered by `created`. Out of the 1 000 preloaded rows, say 100 match. Because the preload and the query share the same sort, those 100 rows are guaranteed to be a _prefix_ of the full server result.
 
-The UX that result is nice: the user will see initial results to the query instantly. If more results are found server-side, those results are guaranteed to sort below the local results. There's no shuffling of results when the server response comes in.
+That’s great for UX: the user sees those 100 issues immediately, and any extra matches that arrive from the server are appended below—nothing jumps around.
 
-Now imagine that the user switches the sort to ‘sort by modified’. This new query will run locally, and will again find some local matches. But it is now unlikely that the local results found are a prefix of the server results. When the server result comes in, the user will probably see the results shuffle around.
+Now the user switches the sort to `modified`. The query again finds some local rows, but they are no longer guaranteed to be a prefix. When the server responds, new rows may appear above or between the existing ones, causing visible shuffling.
 
-To avoid this annoying effect, what you should do in this example is also preload the first 1k issues sorted by modified desc. In general for any query shape you intend to do, you should preload the first `n` results for that query shape with no filters, in each sort you intend to use.
+The fix is simple: also preload the first 1 000 issues sorted by `modified` (descending). More broadly, for every query shape you plan to run, preload the first `n` rows—without filters—for each sort order you intend to support.
 
 <Note slug="no-duplicate-rows" heading="Zero does not sync duplicate rows">
 Zero syncs the *union* of all active queries' results. You don't have to worry about syncing many sorts of the same query when it's likely the results will overlap heavily.

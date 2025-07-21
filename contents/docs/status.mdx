@@ -32,12 +32,12 @@ This page describes the current state of Zero at a high level. To understand whe
 
 ## Performance
 
-* We do not have a query analyzer, and do not do any join reordering. It's sometimes, but not always possible to manually reorder. Because of this, some queries (especially `exists`) can be pathological. We are actively working on this.
-* Every query is a hybrid query. We haven't yet implemented "client-only" queries, meaning patterns like typeahead search can easily crush the server if the query is expensive.
-* We have basic CLI tools to understand query performance, but we lack a full-featured inspector to understand at a glance what queries are open or slow.
+* We do not have a query analyzer, and do not do any join reordering. It's not always possible to manually reorder. Because of this, some queries (especially `exists`) can cause worst-case performance. We are actively working on this.
+* Every query goes through the server. We haven't yet implemented "client-only" queries, meaning patterns like typeahead search can easily crush the server if the query is expensive.
+* We have basic CLI tools to understand query performance, but we lack a full-featured inspector to easily understand what queries are open or slow.
 
 ## Miscellaneous
 
 * We do not have a way to limit queries to only expected/allowed forms ([in progress](roadmap)).
-* We do not have a good way to support previews (in progress).
+* We do not have a good way to support preview environments (in progress).
 * Running Zero requires [deploying it yourself](deployment) to AWS or similar. Running in a [multinode](deployment#guide-multi-node-on-sstaws), zero-downtime way is possible (we do it for zbugs), but significant effort. Running [single node](deployment#guide-single-node-on-flyio) is easier, but updating the server takes it down for a minute or so (we are working on a SaaS solution).

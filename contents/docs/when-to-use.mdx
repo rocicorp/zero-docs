@@ -4,13 +4,13 @@ title: When To Use Zero (and When Not To)
 
 We are trying to make Zero a great choice for a wide variety of applications. But every tool has tradeoffs, and Zero especially so [while in alpha](./status).
 
-This page will help you understance if Zero is a good fit for you today.
+This page will help you understand if Zero is a good fit for you today.
 
 ## Zero Might be a Good Fit
 
 ### You want to sync only a small subset of data to client
 
-Zero's query-driven sync is a powerful solution for partial sync. You can sync any data you can express as a set of Zero queries. By using partial sync, Zero apps can commonly load in < 1s, yet still maintain the interaction perf of sync.
+Zero's query-driven sync is a powerful solution for partial sync. You can define the data you want to sync with a set of Zero queries. By using partial sync, Zero apps can commonly load in < 1s, yet still maintain the interaction perf of sync.
 
 ### You need fine-grained read or write permissions
 
@@ -48,7 +48,7 @@ Zero is written in TypeScript and only supports TypeScript clients.
 
 ### The total backend dataset is > ~1TB
 
-Zero stores a replica of your database (at least the parts that can sync to client) in a SQLite database stored on attached SSD within the Zero server. The ultimate limit of this database size is the size of attached SSD. But 1TB is a reasonable practical limit today.
+Zero stores a replica of your database (or at least the parts that can sync to the client) in a SQLite database stored on attached SSD within the Zero server. The ultimate limit of this database size is the size of attached SSD. But 1TB is a reasonable practical limit today.
 
 ## Zero Might Not be a Good Fit **Yet**
 

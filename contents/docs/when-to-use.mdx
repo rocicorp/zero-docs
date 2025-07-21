@@ -1,5 +1,5 @@
 ---
-title: When To Use (And Not Use) Zero
+title: When To Use Zero (and When Not To)
 ---
 
 We are trying to make Zero a great choice for a wide variety of applications. But every tool has tradeoffs, and Zero especially so [while in alpha](./status).
@@ -18,11 +18,11 @@ Zero's [custom mutators](./custom-mutators) allow you to run arbitrary authoriza
 
 ### You are building a traditional client-server web app
 
-Zero was designed from the ground up to be as close to a classic web app as possible. It can even interop with REST APIs using the same database.
+Zero was designed from the ground up to be as close to a classic web app as a sync engine can be. If you have a traditional web app, you can try Zero side-by-side with your existing REST or GraphQL API, and incrementally migrate over time.
 
 ### You use PostgreSQL
 
-Other tools require you to use a non-standard backend database or data model. Zero works with PostgreSQL, and uses your existing schema.
+Some tools in our space require you to use a non-standard backend database or data model. Zero works with PostgreSQL, and uses your existing schema.
 
 ### Your app is broadly "like Linear"
 
@@ -80,4 +80,4 @@ If Zero isn't right for you, here are some good alternatives to consider:
 - [Electric](https://electric-sql.com/): Postgres-based sync engine with a SaaS cloud.
 - [LiveStore](https://livestore.dev/): Interesting event sourced design from one of the founders of Prisma.
 - [Jazz](https://jazz.tools/): Batteries-included local-first.
-- [Powersync](https://powersync.com/): Sync engine that works with Postgres, MySQL, and MongoDB.
+- [PowerSync](https://powersync.com/): Sync engine that works with Postgres, MySQL, and MongoDB.

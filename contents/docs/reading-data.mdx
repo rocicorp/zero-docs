@@ -1,5 +1,5 @@
 ---
-title: Reading Data with ZQL
+title: Reading Data
 ---
 
 ZQL is Zero’s query language.
@@ -23,7 +23,7 @@ In the future, we'll [`freeze`](https://developer.mozilla.org/en-US/docs/Web/Jav
 
 ## Select
 
-ZQL queries start by selecting a table. There is no way to select a subset of columns; ZQL queries always return the entire row (modulo column permissions).
+ZQL queries start by selecting a table. There is no way to select a subset of columns; ZQL queries always return the entire row, if permissions allow it.
 
 ```tsx
 const z = new Zero(...);
@@ -117,7 +117,7 @@ You can query related rows using _relationships_ that are defined in your [Zero 
 z.query.issue.related('comments');
 ```
 
-Relationships are returned as hierarchical data. In the above example, each row will have a `comments` field which is itself an array of the corresponding comments row.
+Relationships are returned as hierarchical data. In the above example, each row will have a `comments` field, which is an array of the corresponding comments rows.
 
 You can fetch multiple relationships in a single query:
 
@@ -168,7 +168,7 @@ You can filter a query with `where()`:
 z.query.issue.where('priority', '=', 'high');
 ```
 
-The first parameter is always a column name from the table being queried. Intellisense will offer available options (sourced from your [Zero Schema](/docs/zero-schema)).
+The first parameter is always a column name from the table being queried. TypeScript completion will offer available options (sourced from your [Zero Schema](/docs/zero-schema)).
 
 ### Comparison Operators
 
@@ -275,7 +275,7 @@ Your filter can also test properties of relationships. Currently the only suppor
 z.query.organization.whereExists('employees');
 ```
 
-The argument to `whereExists` is a relationship, so just like other relationships it can be refined with a query:
+The argument to `whereExists` is a relationship, so just like other relationships, it can be refined with a query:
 
 ```tsx
 // Find all orgs that have at least one cool employee
@@ -307,7 +307,7 @@ z.query.issue.where({cmp, or, exists} =>
 
 ## Completeness
 
-Zero returns whatever data it has on the client immediately for a query, then falls back to the server for any missing data. Sometimes it's useful to know the difference between these two types of results. To do so, use the `result` from `useQuery`:
+Zero immediately returns the data for a query it has on the client, then falls back to the server for any missing data. Sometimes it's useful to know the difference between these two types of results. To do so, use the `result` from `useQuery`:
 
 ```tsx
 const [issues, issuesResult] = useQuery(z.query.issue);
@@ -561,7 +561,7 @@ If you think you need longer TTLs, please [let us know](https://discord.rocicorp
 
 ## Running Queries Once
 
-Usually subscribing to a query is what you want in a reactive UI, but every so often you'll need to run a query just once. To do this, use the `run()` method:
+You usually want to subscribe to a query in a reactive UI, but every so often you'll need to run a query just once. To do this, use the `run()` method:
 
 ```tsx
 const results = await z.query.issue.where('foo', 'bar').run();

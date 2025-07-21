@@ -2,7 +2,7 @@
 title: ZQL on the Server
 ---
 
-[Custom Mutators](custom-mutators) use ZQL on the server as an implementation detail, but you can also use ZQL on the server directly, outside of Custom Mutators.
+[Mutators](./writing-data) use ZQL on the server as an implementation detail, but you can also use ZQL on the server directly.
 
 This is useful for a variety of reasons:
 
@@ -47,7 +47,7 @@ db.transaction(async tx => {
 }, dummyTransactionInput);
 ```
 
-If ZQL does not have the featuers you need, you can use `tx.dbTransaction` to [drop down to raw SQL](custom-mutators#dropping-down-to-raw-sql).
+If ZQL does not have the featuers you need, you can use `tx.dbTransaction` to [drop down to raw SQL](./writing-data#dropping-down-to-raw-sql).
 
 <Note type="warning" slug="schema-read">
   `ZQLDatabase` currently does a read of your postgres schema before every
@@ -127,7 +127,7 @@ const db = new ZQLDatabase(new PgConnection(client), schema);
 
 ### Drizzle ORM
 
-It is also possible to use ORMs like Drizzle. Wrap the drizzle transaction and now you can access drizzle's transaction within custom mutators.
+It is also possible to use ORMs like Drizzle. Wrap the drizzle transaction and now you can access drizzle's transaction within server-side mutators.
 
 [Blog post and full example](https://www.solberg.is/zero-custom-db-connection) by Jökull Sólberg (again 🙌)
 

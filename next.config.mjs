@@ -12,6 +12,16 @@ const nextConfig = {
         destination: '/docs/introduction',
         permanent: false,
       },
+      {
+        source: '/docs/custom-mutators',
+        destination: '/docs/writing-data',
+        permanent: false,
+      },
+      {
+        source: '/docs/schema-migration',
+        destination: '/docs/zero-schema/#migrations',
+        permanent: true,
+      },
     ];
   },
 };

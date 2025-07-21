@@ -15,7 +15,7 @@ export default function Home() {
   const router = useRouter();
 
   useEffect(() => {
-    router.prefetch('/docs/introduction');
+    router.prefetch('/docs/');
   }, [router]);
 
   const exampleCode = `function Playlist({id}: {id: string}) {
@@ -78,7 +78,7 @@ export default function Home() {
             size="default"
             asChild
           >
-            <Link href="/docs/introduction">Docs</Link>
+            <Link href="/docs/">Docs</Link>
           </Button>
         </div>
       </div>
@@ -170,7 +170,7 @@ export default function Home() {
       <br />
       <div className="flex w-full justify-center">
         <Button variant="primary" size="default" asChild>
-          <a href="/docs/introduction">Get Started Now</a>
+          <a href="/docs/">Get Started Now</a>
         </Button>
       </div>
 

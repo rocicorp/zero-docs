@@ -12,7 +12,7 @@ export type EachRoute = {
 
 export const ROUTES = [
   {
-    title: 'Welcome',
+    title: 'Get Started',
     href: null,
     new: false,
     items: [

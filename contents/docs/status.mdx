@@ -1,45 +1,43 @@
 
 <Note type="warning" emoji="🚧" heading="Zero is in Alpha">
-Zero is a new sync engine based on a new, custom query engine.
+Zero is a new sync engine based on a novel streaming query engine. This is an ambitious project at an early stage.
 
 You will encounter bugs. You may encounter pathologically slow queries. You are likely to encounter situations where ZQL is insufficiently powerful to express the
 query you want.
 
-That said, Zero can be, and is, used in production today for a certain applications. The path to beta involves expanding that set to an interesting size.
+That said, we believe in dogfooding. Zero can be, and is, used in production today for a certain applications. Our path to beta involves expanding that set to an interesting size.
 
 This page describes the current state of Zero at a high level. To understand whether Zero is currently a good fit for your application, please see [When to Use Zero](./when-to-use).
 </Note>
 
-## High-Level Status
+## Platforms and Frameworks
 
-**Platforms and frameworks**
+* [React](./react) and [SolidJS](./solidjs) are fully-supported
+* [Svelte and Vue](community) have community support
+* React Native is not supported yet, but is [planned](roadmap)
 
-* React and SolidJS are fully-supported
-* Svelte and Vue have community support
-* React Native is not supported yet, but it's planned
+## Databases
 
-**Databases**
+* Most Postgres providers [are supported](connecting-to-postgres)
+* [Drizzle and Prisma](community) have high-quality community-supported integrations
 
-* Most Postgres providers are supported
-* Drizzle and Prisma have high-quality community-supported integrations
+## Query Language
 
-**Query Language**
-
-* Filters, sorts, limits, relationships, and `exists` are supported.
-* Queries can have `ttl` to keep data synced across sesssions.
-* Zero will stay within a (configurable) client-side row limit using LRU.
-* Aggregates (count, min, max, group-by) are not yet supported.
-* Full-text search is not yet supported (you can sometimes simulate with `ILIKE`, though it scales linearly).
+* Filters, sorts, limits, relationships, and `exists` [are supported](./reading-data).
+* Queries can have [`ttl`](reading-data#background-queries) to keep data synced across sesssions.
+* Zero will stay within a (configurable) client-side [row limit using LRU](reading-data#client-capacity-management).
+* [Aggregates](roadmap) (count, min, max, group-by) are not yet supported.
+* [Full-text search](roadmap) is not yet supported (you can sometimes simulate with `ILIKE`, though it scales linearly).
 * Infinite/virtual scroll is possible, but not easy or optimal.
 
-**Performance**
+## Performance
 
 * We do not have a query analyzer, and do not do any join reordering. It's sometimes, but not always possible to manually reorder. Because of this, some queries (especially `exists`) can be pathological. We are actively working on this.
 * Every query is a hybrid query. We haven't yet implemented "client-only" queries, meaning patterns like typeahead search can easily crush the server if the query is expensive.
 * We have basic CLI tools to understand query performance, but we lack a full-featured inspector to understand at a glance what queries are open or slow.
 
-**Miscellaneous**
+## Miscellaneous
 
-* We do not have a way to limit queries to only expected/allowed forms (in progress).
+* We do not have a way to limit queries to only expected/allowed forms ([in progress](roadmap)).
 * We do not have a good way to support previews (in progress).
-* Running Zero requires deploying it yourself to AWS or similar. Running in a multinode, zero-downtime way is possible (we do it for zbugs), but significant effort. Running single node is easier, but updating the server takes it down for a minute or so (we are working on a SaaS solution).
+* Running Zero requires [deploying it yourself](deployment) to AWS or similar. Running in a [multinode](deployment#guide-multi-node-on-sstaws), zero-downtime way is possible (we do it for zbugs), but significant effort. Running [single node](deployment#guide-single-node-on-flyio) is easier, but updating the server takes it down for a minute or so (we are working on a SaaS solution).

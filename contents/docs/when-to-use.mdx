@@ -1,43 +1,46 @@
 ---
-title: When To Use Zero (and When Not To)
+title: When To Use (And Not Use) Zero
 ---
 
 We are trying to make Zero a great choice for a wide variety of applications. But every tool has tradeoffs, and Zero especially so [while in alpha](./status).
 
+This page will help you understance if Zero is a good fit for you today.
+
 ## Zero Might be a Good Fit
 
 - You are building a traditional client/server web app
-- You are building a desktop web app, or a web-based mobile app
-- You use PostgreSQL
-- You want to use a traditional database schema
-- Offline writes are not needed
-- Your application has a complex server-side (AI, complex business logic, etc.)
-- You need fine-grained permissions (read/write access depends on the groups a user is in, what has been shared with them, their role, etc.)
+- You use PostgreSQL, and want a traditional database schema
+- Your application has complex server-side validation or business logic that can make use of [custom mutators](./custom-mutators)
+- You need [fine-grained permissions](permissions) (read/write access depends on the groups a user is in, what has been shared with them, their role, etc.)
 - You cannot reasonably sync all data a user has access to onto the client, or don't want to for startup perf reasons
-- The total backend dataset is < ~100GB
-- You are comfortable running server-side infra like Docker containers
-- You can tolerate occasional downtime (e.g., for server updates, regressions)
 - Your app is broadly "like Linear" – a productivity app with lots of interactivity
 - Interaction performance is very important to you
 
 ## Zero Might Not be a Good Fit
 
-- You need the privacy or data ownership benefits of [local-first](TODO)
-- You need to support offline writes or long periods offline
-- You don't want to run server infrastructure
-- You have a major app already in prodution and need to minimize downtime
-- You are building a non-web mobile app
-- Your app is broadly not "like Linear" – e.g., an ecommerce app, a social media app, a game, a marketing site, etc.
-- You need startup speed (LCP) to be as fast as possible
-- You need support for crawlers
+- You need the privacy or data ownership benefits of [local-first](https://www.inkandswitch.com/essay/local-first/)
+- You need to support [offline writes](./offline) or long periods offline
+- You are building a native mobile app
+- Your app is an ecommerce app, a social media app, a game, a marketing site, or otherwise not very much "like Linear"
+- The total backend dataset is > ~1TB
+
+## Zero Might Not be a Good Fit **Yet**
+
+While Zero is in alpha, there are additional reasons to not choose:
+
+- You are not comfortable running server-side infra like Docker containers (you currently have to [self-host](./deployment) Zero – we're working on a SaaS solution)
+- You can't tolerate occasional downtime (the easiest way to run Zero today is single-node, which requires downtime for updates. Also there are occasional regressions.)
+- You need immediate support for React Native ([planned](./roadmap), but not ready yet)
+- You need support for SSR ([planned](./roadmap), but not ready yet)
 
 ## Alternatives
 
 If Zero isn't right for you, here are some good alternatives to consider:
 
-- [Electric](https://electric-sql.com/)
-- [LiveStore](TODO)
-- [Powersync](TODO)
-- [Convex](TODO)
-- [Ditto](TODO)
-- [Automerge](TODO)
+- [Automerge](https://automerge.org/): Local-first, CRDT-based solution. Pioneering branch-based offline support.
+- [Convex](https://www.convex.dev/): Not a sync engine (reads and writes are server-first), but a very nice reactive database that is in GA.
+- [Ditto](https://www.ditto.com/): CRDT-based, with high quality offline support.
+- [Electric](https://electric-sql.com/): Postgres-based sync engine with a SaaS cloud.
+- [LiveStore](https://livestore.dev/): Interesting event sourced design from one of the founders of Prisma.
+- [Jazz](https://jazz.tools/): Batteries-included local-first.
+- [Powersync](https://powersync.com/): Sync engine that works with Postgres, MySQL, and MongoDB.

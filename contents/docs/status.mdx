@@ -35,6 +35,7 @@ This page describes the current state of Zero at a high level. To understand whe
 * We do not have a query analyzer, and do not do any join reordering. It's sometimes, but not always possible to manually reorder. Because of this, some queries (especially `exists`) can be pathological. We are actively working on this.
 * Every query is a hybrid query. We haven't yet implemented "client-only" queries, meaning patterns like typeahead search can easily crush the server if the query is expensive.
 * We have basic CLI tools to understand query performance, but we lack a full-featured inspector to understand at a glance what queries are open or slow.
+* We share queries within a "client group" (e.g. all tabs in a browser), but not across groups. This means that if you have many users doing the same query, they will duplicate all that work server-side.
 
 ## Miscellaneous
 

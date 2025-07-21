@@ -8,30 +8,67 @@ This page will help you understance if Zero is a good fit for you today.
 
 ## Zero Might be a Good Fit
 
-- You are building a traditional client/server web app
-- You use PostgreSQL, and want a traditional database schema
-- Your application has complex server-side validation or business logic that can make use of [custom mutators](./custom-mutators)
-- You need [fine-grained permissions](permissions) (read/write access depends on the groups a user is in, what has been shared with them, their role, etc.)
-- You cannot reasonably sync all data a user has access to onto the client, or don't want to for startup perf reasons
-- Your app is broadly "like Linear" – a productivity app with lots of interactivity
-- Interaction performance is very important to you
+### You want to sync only a small subset of data to client
+
+Zero's query-driven sync is a powerful solution for partial sync. You can sync any data you can express as a set of Zero queries. By using partial sync, Zero apps can commonly load in < 1s, yet still maintain the interaction perf of sync.
+
+### You need fine-grained read or write permissions
+
+Zero's [custom mutators](./custom-mutators) allow you to run arbitrary authorization, validation, or business logic on the write path. You can enforce that a write depends on what group a user is in, what has been shared with them, their role, etc. [Read permissions](./permissions) are very expressive, allowing similar control over what data is synced to the client.
+
+### You are building a traditional client-server web app
+
+Zero was designed from the ground up to be as close to a classic web app as possible. It can even interop with REST APIs using the same database.
+
+### You use PostgreSQL
+
+Other tools require you to use a non-standard backend database or data model. Zero works with PostgreSQL, and uses your existing schema.
+
+### Your app is broadly "like Linear"
+
+Zero is currently best suited for productivity apps with lots of interactivity.
+
+### Interaction performance is very important to you
+
+Zero was built by people obsessed with interaction performance. If you share this goal you'll be going with the grain of Zero's design choices.
 
 ## Zero Might Not be a Good Fit
 
-- You need the privacy or data ownership benefits of [local-first](https://www.inkandswitch.com/essay/local-first/)
-- You need to support [offline writes](./offline) or long periods offline
-- You are building a native mobile app
-- Your app is an ecommerce app, a social media app, a game, a marketing site, or otherwise not very much "like Linear"
-- The total backend dataset is > ~1TB
+### You need the privacy or data ownership benefits of local-first
+
+Zero is not [local-first](https://www.inkandswitch.com/essay/local-first/). It's a client-server system with an authoritative server.
+
+### You need to support offline writes or long periods offline
+
+Zero doesn't support [offline writes](./offline) yet.
+
+### You are building a native mobile app
+
+Zero is written in TypeScript and only supports TypeScript clients.
+
+### The total backend dataset is > ~1TB
+
+Zero stores a replica of your database (at least the parts that can sync to client) in a SQLite database stored on attached SSD within the Zero server. The ultimate limit of this database size is the size of attached SSD. But 1TB is a reasonable practical limit today.
 
 ## Zero Might Not be a Good Fit **Yet**
 
-While Zero is in alpha, there are additional reasons to not choose:
+While Zero is in alpha, there are additional reasons not to choose it:
 
-- You are not comfortable running server-side infra like Docker containers (you currently have to [self-host](./deployment) Zero – we're working on a SaaS solution)
-- You can't tolerate occasional downtime (the easiest way to run Zero today is single-node, which requires downtime for updates. Also there are occasional regressions.)
-- You need immediate support for React Native ([planned](./roadmap), but not ready yet)
-- You need support for SSR ([planned](./roadmap), but not ready yet)
+### You don't want to run server-side infra
+
+Zero is a Docker container that you currently have to [self-host](./deployment). We're working on a SaaS solution but it's not ready yet.
+
+### You can't tolerate occasional downtime
+
+The easiest way to run Zero today is [single-node](./deployment#guide-single-node-on-flyio), which requires downtime for updates. Also there are occasional regressions.
+
+### You need immediate support for React Native
+
+Zero doesn't support [React Native](./roadmap#q4-2025) yet, but it is planned.
+
+### You need support for SSR
+
+Zero doesn't support [SSR](./roadmap#beyond) yet, but it is planned.
 
 ## Alternatives
 

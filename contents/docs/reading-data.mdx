@@ -544,17 +544,17 @@ This is the same as saying `run()` or `run({type: 'unknown'})`.
 
 ## Consistency
 
-Zero keeps a consistent, partial replica of the backend database on each client. This removes most of the consistency pitfalls that plague traditional web apps, but a few edge cases remain.
+Zero always syncs a consistent partial replica of the backend database to the client. This avoids many common consistency issues that come up in classic web applications. But there are still some consistency issues to be aware of when using Zero.
 
-Imagine a bug database with 10 000 issues. You preload the first 1 000 issues ordered by `created`.
+For example, imagine that you have a bug database w/ 10k issues. You preload the first 1k issues sorted by created.
 
-Later, the user queries for issues assigned to them, still ordered by `created`. Out of the 1 000 preloaded rows, say 100 match. Because the preload and the query share the same sort, those 100 rows are guaranteed to be a _prefix_ of the full server result.
+The user then does a query of issues assigned to themselves, sorted by created. Among the 1k issues that were preloaded imagine 100 are found that match the query. Since the data we preloaded is in the same order as this query, we are guaranteed that any local results found will be a _prefix_ of the server results.
 
-That’s great for UX: the user sees those 100 issues immediately, and any extra matches that arrive from the server are appended below—nothing jumps around.
+The UX that result is nice: the user will see initial results to the query instantly. If more results are found server-side, those results are guaranteed to sort below the local results. There's no shuffling of results when the server response comes in.
 
-Now the user switches the sort to `modified`. The query again finds some local rows, but they are no longer guaranteed to be a prefix. When the server responds, new rows may appear above or between the existing ones, causing visible shuffling.
+Now imagine that the user switches the sort to ‘sort by modified’. This new query will run locally, and will again find some local matches. But it is now unlikely that the local results found are a prefix of the server results. When the server result comes in, the user will probably see the results shuffle around.
 
-The fix is simple: also preload the first 1 000 issues sorted by `modified` (descending). More broadly, for every query shape you plan to run, preload the first `n` rows—without filters—for each sort order you intend to support.
+To avoid this annoying effect, what you should do in this example is also preload the first 1k issues sorted by modified desc. In general for any query shape you intend to do, you should preload the first `n` results for that query shape with no filters, in each sort you intend to use.
 
 <Note slug="no-duplicate-rows" heading="Zero does not sync duplicate rows">
 Zero syncs the *union* of all active queries' results. You don't have to worry about syncing many sorts of the same query when it's likely the results will overlap heavily.

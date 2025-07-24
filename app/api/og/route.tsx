@@ -43,8 +43,8 @@ export async function GET(req: NextRequest) {
         {subtitle && (
           <div
             style={{
-              fontSize: 30,
-              marginTop: 20,
+              fontSize: 24,
+              marginTop: 12,
               color: 'white',
               fontFamily: 'muoto-bold',
               letterSpacing: '-.09px' /* 48 * -3% */,

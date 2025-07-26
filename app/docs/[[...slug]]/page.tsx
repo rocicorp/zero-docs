@@ -42,7 +42,12 @@ export async function generateMetadata({params: {slug = []}}: PageProps) {
   if (!res) return null;
   const {frontmatter} = res;
 
-  const ogImageUrl = `/api/og?title=${encodeURIComponent(frontmatter.title)}&subtitle=${encodeURIComponent(frontmatter.description)}`;
+  const encode = (str: string | undefined) => {
+    if (!str) return '';
+    return encodeURIComponent(str);
+  };
+
+  const ogImageUrl = `/api/og?title=${encode(frontmatter.title)}&subtitle=${encode(frontmatter.description)}`;
 
   return {
     title: frontmatter.title,

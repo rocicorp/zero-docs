@@ -21,7 +21,7 @@ Let's say you have some data that you want to read and write from multiple devic
 
 This works, but has downsides:
 
-* **Slow access.** Every read and write has to go to the server, addding hundreds of milliseconds to each interaction.
+* **Slow access.** Every read and write has to go to the server, adding hundreds of milliseconds to each interaction.
 * **Stale data.** API responses are immediately stale. The client has no way to know when to refresh them. Users may make decisions based on old information, and the views on different devices diverge over time.
 * **Online-only.** If the server or the user's network connection is down, the app stops working completely.
 

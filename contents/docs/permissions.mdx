@@ -161,11 +161,11 @@ definePermissions<AuthData, Schema>(schema, () => {
 
 If the issue table has two rows, one created by the user and one by someone else, the user will only see the row they created in any queries.
 
-### Column permissions
-
-Zero does not currently support column based permissions. Select permission applies to every column. The recommended approach for now is to factor out private fields into a separate table, e.g. `user_private`. Column permissions are planned but currently not a high priority.
+<Note type="warning" heading="Column permissions are not currently supported">
+Select permission applies to every column. The recommended approach for now is to factor out private fields into a separate table, e.g. `user_private`. Column permissions are planned but currently not a high priority.
 
 Note that although the same limitation applies to declarative insert/update permissions, [custom mutators](/docs/custom-mutators) support arbitrary server-side logic and so can easily control which columns are writable.
+</Note>
 
 ## Insert Permissions
 
@@ -271,6 +271,27 @@ definePermissions<AuthData, Schema>(schema, () => {
 ## Delete Permissions
 
 Delete permissions work in the same way as `insert` permissions except they run _before_ the delete is applied. So if a delete rule queries the database, it will see that the deleted row is present. If any rule in the ruleset returns a row, the delete is allowed.
+
+## Permissions Based on Auth Data
+
+You can use the [`cmpLit` helper](reading-data#comparing-literal-values) to define permissions based on a field of the `authData` parameter:
+
+```ts
+definePermissions<AuthData, Schema>(schema, () => {
+  const allowIfAdmin = (
+    authData: AuthData,
+    {cmpLit}: ExpressionBuilder<Schema, 'issue'>,
+  ) => cmpLit(authData.role, 'admin');
+
+  return {
+    issue: {
+      row: {
+        select: [allowIfAdmin],
+      },
+    },
+  } satisfies PermissionsConfig<AuthData, Schema>;
+});
+```
 
 ## Debugging
 

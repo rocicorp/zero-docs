@@ -28,7 +28,7 @@ export async function GET(req: NextRequest) {
           backgroundColor: 'black',
           justifyContent: 'center',
           color: 'white',
-          padding: '0 300px',
+          padding: '0 200px',
           textAlign: 'center',
         }}
       >
@@ -46,6 +46,8 @@ export async function GET(req: NextRequest) {
             style={{
               fontSize: 48,
               marginTop: 36,
+              lineHeight: 1.4,
+              padding: '0 80px',
               color: 'white',
               fontWeight: 400,
               fontFamily: 'muoto-reg',

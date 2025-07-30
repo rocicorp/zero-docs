@@ -5,8 +5,9 @@ import {NextRequest} from 'next/server';
 export const runtime = 'edge'; // Required for @vercel/og
 
 const muotoBold = new URL('../../fonts/muoto-bold.woff', import.meta.url);
-const zeroLogo = new URL(
-  '../../../public/images/zero-logo.svg',
+const muotoReg = new URL('../../fonts/muoto-regular.woff', import.meta.url);
+const zeroDocsLogo = new URL(
+  '../../../public/images/zero-docs-logo.svg',
   import.meta.url,
 );
 
@@ -27,8 +28,7 @@ export async function GET(req: NextRequest) {
           backgroundColor: 'black',
           justifyContent: 'center',
           color: 'white',
-          fontFamily: 'muoto-bold',
-          padding: '0 200px',
+          padding: '0 300px',
           textAlign: 'center',
         }}
       >
@@ -36,6 +36,7 @@ export async function GET(req: NextRequest) {
           style={{
             fontSize: 86,
             letterSpacing: '-2.58px' /* 86 * -3% */,
+            fontFamily: 'muoto-bold',
           }}
         >
           {title}
@@ -43,20 +44,20 @@ export async function GET(req: NextRequest) {
         {subtitle && (
           <div
             style={{
-              fontSize: 30,
-              marginTop: 15,
+              fontSize: 48,
+              marginTop: 36,
               color: 'white',
-              fontFamily: 'muoto-bold',
-              letterSpacing: '-.09px' /* 48 * -3% */,
+              fontWeight: 400,
+              fontFamily: 'muoto-reg',
             }}
           >
             {subtitle}
           </div>
         )}
         <img
-          src={await loadFileAsBase64URL(zeroLogo, 'image/svg+xml')}
+          src={await loadFileAsBase64URL(zeroDocsLogo, 'image/svg+xml')}
           alt="Zero"
-          style={{width: 266, height: 72.88, marginTop: 75}}
+          style={{width: 424, height: 80, marginTop: 75}}
         />
       </div>
     ),
@@ -67,6 +68,10 @@ export async function GET(req: NextRequest) {
         {
           name: 'muoto-bold',
           data: await loadFile(muotoBold),
+        },
+        {
+          name: 'muoto-reg',
+          data: await loadFile(muotoReg),
         },
       ],
     },

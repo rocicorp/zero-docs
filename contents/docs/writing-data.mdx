@@ -1,5 +1,5 @@
 ---
-title: Writing Data with Mutators
+title: CRUD Mutators (Deprecated)
 ---
 
 Zero generates basic CRUD mutators for every table you sync. Mutators are available at `zero.mutate.<tablename>`:
@@ -13,10 +13,8 @@ z.mutate.user.insert({
 });
 ```
 
-<Note slug="moar-power" type="warning">
-  To build mutators with more complex logic or server-specific behavior, see the
-  new [Custom Mutators API](./custom-mutators) - we plan to eventually deprecate
-  the basic CRUD mutators in favor of this new API.
+<Note slug="moar-power" heading="CRUD mutators are deprecated" type="warning">
+  This API is now deprecated. Please use [Custom Mutators](./custom-mutators) instead.
 </Note>
 
 ## Insert

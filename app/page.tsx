@@ -150,18 +150,18 @@ export default function Home() {
 
       <p>
         Where Zero really shines is complex, highly-interactive applications
-        like Linear and Superhuman. With Zero, these apps can be built in a
+        similar to Linear and Superhuman. With Zero, these apps can be built in a
         fraction of the time it would take to build even an old-fashioned
         server-rendered web app.
       </p>
       <p>
-        Zero is currently in public alpha. It's got a few rough edges, and you
+        Zero is currently in public alpha. It has a few rough edges, and you
         have to deploy it yourself, but it's already remarkably fun. We&apos;re
         using it ourselves for Zero's{' '}
         <a className="underline" href="https://bugs.rocicorp.dev/">
           official bug tracker
         </a>{' '}
-        and we find it much more productive than the alternatives.
+        and we find it much more productive than alternatives.
       </p>
       <p>
         Ready to start? You can have your first app in production in about 20

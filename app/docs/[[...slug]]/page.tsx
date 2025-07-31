@@ -41,7 +41,29 @@ export async function generateMetadata({params: {slug = []}}: PageProps) {
   const res = await getDocsForSlug(pathName);
   if (!res) return null;
   const {frontmatter} = res;
-  return {title: frontmatter.title, description: frontmatter.description};
+
+  const encode = (str: string | undefined) => {
+    if (!str) return '';
+    return encodeURIComponent(str);
+  };
+
+  const ogImageUrl = `/api/og?title=${encode(frontmatter.title)}&subtitle=${encode(frontmatter.description)}`;
+
+  return {
+    title: frontmatter.title,
+    description: frontmatter.description,
+    openGraph: {
+      title: frontmatter.title,
+      description: frontmatter.description,
+      images: ogImageUrl,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: frontmatter.title,
+      description: frontmatter.description,
+      images: ogImageUrl,
+    },
+  };
 }
 
 export function generateStaticParams() {

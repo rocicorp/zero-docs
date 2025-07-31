@@ -236,6 +236,36 @@ Note that chaining `where()` is also a one-level `and`:
 z.query.issue.where('priority', '>=', 3).where('owner', 'aa');
 ```
 
+### Comparing Literal Values
+
+The `where` clause always expects its first parameter to be a column name as a string. Same with the `cmp` helper:
+
+```ts
+// "foo" is a column name, not a string:
+z.query.issue.where('foo', 'bar');
+
+// "foo" is a column name, not a string:
+z.query.issue.where(({cmp}) => cmp('foo', 'bar'));
+```
+
+To compareto a literal value, use the `cmpLit` helper:
+
+```ts
+z.query.issue.where(cmpLit('foobar', 'foo' + 'bar'));
+```
+
+By itself this is not very useful, but the first parameter can also be a JavaScript variable:
+
+```ts
+z.query.issue.where(cmpLit(role, 'admin'));
+```
+
+Or, within a [permission rule](/docs/permissions#permissions-based-on-auth-data), you can compare to a field of the `authData` parameter:
+
+```ts
+z.query.issue.where(cmpLit(authData.role, 'admin'));
+```
+
 ### Relationship Filters
 
 Your filter can also test properties of relationships. Currently the only supported test is existence:

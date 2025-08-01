@@ -444,8 +444,9 @@ Zero is a _partial_ replica because it only replicates rows that are returned by
 ## Query Lifecycle
 
 <ImageLightbox
-  src="/images/reading-data/query-lifecycle.png"
+  src="/images/reading-data/query-lifecycle.svg"
   caption="The lifecycle of a ZQL query."
+  className="invert dark:invert-0"
 />
 
 Queries can be either _active_ or _cached_. An active query is one that is currently being used by the application. Cached queries are not currently in use, but continue syncing in case they are needed again soon.

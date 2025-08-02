@@ -305,131 +305,6 @@ z.query.issue.where({cmp, or, exists} =>
 );
 ```
 
-## Data Lifetime and Reuse
-
-Zero reuses data synced from prior queries to answer new queries when possible. This is what enables instant UI transitions.
-
-But what controls the lifetime of this client-side data? How can you know whether any particular query will return instant results? How can you know whether those results will be up to date or stale?
-
-The answer is that the data on the client is simply the union of rows returned from queries which are currently syncing. Once a row is no longer returned by any syncing query, it is removed from the client. Thus, there is never any stale data in Zero.
-
-So when you are thinking about whether a query is going to return results instantly, you should think about _what other queries are syncing_, not about what data is local. Data exists locally if and only if there is a query syncing that returns that data.
-
-<Note type="note" heading="Caches vs Replicas">
-  This is why we often say that despite the name `zero-cache`, Zero is not technically a cache. It's a *replica*.
-
-A cache has a random set of rows with a random set of versions. There is no expectation that the cache any particular rows, or that the rows' have matching versions. Rows are simply updated as they are fetched.
-
-A replica by contrast is eagerly updated, whether or not any client has requested a row. A replica is always very close to up-to-date, and always self-consistent.
-
-Zero is a _partial_ replica because it only replicates rows that are returned by syncing queries.
-
-</Note>
-
-## Query Lifecycle
-
-<ImageLightbox
-  src="/images/reading-data/query-lifecycle.png"
-  caption="The lifecycle of a ZQL query."
-/>
-
-Queries can be either _active_ or _backgrounded_. An active query is one that is currently being used by the application. Backgrounded queries are not currently in use, but continue syncing in case they are needed again soon.
-
-Active queries are created one of three ways:
-
-1. The app calls `q.materialize()` to get a `View`.
-2. The app uses a platform binding like React's `useQuery(q)`.
-3. The app calls [`preload()`](#preloading) to sync larger queries without a view.
-
-Active queries sync until they are _deactivated_. The way this happens depends on how the query was created:
-
-1. For `materialize()` queries, the UI calls `destroy()` on the view.
-2. For `useQuery()`, the UI unmounts the component (which calls `destroy()` under the covers).
-3. For `preload()`, the UI calls `cleanup()` on the return value of `preload()`.
-
-### Background Queries
-
-By default a deactivated query stops syncing immediately.
-
-But it's often useful to keep queries syncing beyond deactivation in case the UI needs the same or a similar query in the near future. This is accomplished with the `ttl` parameter:
-
-```ts
-const [user] = useQuery(z.query.user.where('id', userId), {ttl: '1d'});
-```
-
-The `ttl` parameter specifies how long the app developer wishes the query to run in the background. The following formats are allowed (where `%d` is a positive integer):
-
-| Format    | Meaning                                                                              |
-| --------- | ------------------------------------------------------------------------------------ |
-| `none`    | No backgrounding. Query will immediately stop when deactivated. This is the default. |
-| `%ds`     | Number of seconds.                                                                   |
-| `%dm`     | Number of minutes.                                                                   |
-| `%dh`     | Number of hours.                                                                     |
-| `%dd`     | Number of days.                                                                      |
-
-<Note type="warning" slug="long-ttl-warning" heading="Long TTLs are deprecated">
-Zero currently also accepts `ttl` values of `forever` and `%dy` (number of years). These are not recommended and will be removed in the next release. They were a misfeature.
-
-We realized long `ttl` values can lead to a lot of queries running in the background unnecessarily. If a new app release is deployed with new queries, the old queries keep running until their `ttl` expires, even though the app will never use them.
-
-We will be reworking this API to be less of a footgun in the next Zero release. For now we do not recommend using a `ttl` greater than `1d`.
-</Note>
-
-If the UI re-requests a background query, it becomes an active query again. Since the query was syncing in the background, the very first synchronous result that the UI receives after reactivation will be up-to-date with the server (i.e., it will have `resultType` of `complete`).
-
-Just like other types of queries, the data from background queries is available for use by new queries. A common pattern in to [preload](#preloading) a subset of most commonly needed data with `{ttl: 'forever'}` and then do more specific queries from the UI with, e.g., `{ttl: '1d'}`. Most often the preloaded data will be able to answer user queries, but if not, the new query will be answered by the server and backgrounded for a day in case the user revisits it.
-
-### Client Capacity Management
-
-Zero has a default soft limit of 20,000 rows on the client-side, or about 20MB of data assuming 1KB rows.
-
-This limit can be increased with the [`--target-client-row-count`](./zero-cache-config#target-client-row-count) flag, but we do not recommend setting it higher than 100,000.
-
-<Note slug="client-capacity" heading="Why does Zero store so little data client-side?">
-Contrary to the design of other sync engines, we believe that storing tons of data client-side doesn't make sense. Here are some reasons why:
-
-- Initial sync will be slow, slowing down initial app load.
-- Because storage in browser tabs is unreliable, initial sync can occur surprisingly often.
-- We want to answer queries _instantly_ as often as possible. This requires client-side data in memory on the main thread. If we have to page to disk, we may as well go to the network and reduce complexity.
-- Even though Zero's queries are very efficient, they do still have some cost, especially hydration. Massive client-side storage would result in hydrating tons of queries that are unlikely to be used every time the app starts.
-
-Most importantly, no matter how much data you store on the client, there will be cases where you have to fallback to the server:
-
-- Some users might have huge amounts of data.
-- Some users might have tiny amounts of available client storage.
-- You will likely want the app to start fast and sync in the background.
-
-Because you have to be able to fallback to server the question becomes _what is the **right** amount of data to store on the client?_, not _how can I store the absolute max possible data on the client?_
-
-The goal with Zero is to answer 99% of queries on the client from memory. The remaining 1% of queries can fallback gracefully to the server. 20,000 rows was chosen somewhat arbitrarily as a number of rows that was likely to be able to do this for many applications.
-
-There is no hard limit at 20,000 or 100,000. Nothing terrible happens if you go above. The thing to keep in mind is that:
-
-1. All those queries will revalidate every time your app boots.
-2. All data synced to the client is in memory in JS.
-
-</Note>
-
-Here is how this limit is managed:
-
-1. Active queries are never destroyed, even if the limit is exceeded. Developers are expected to keep active queries well under the limit.
-2. The `ttl` value counts from the moment a query deactivates. Backgrounded queries are destroyed immediately when the `ttl` is reached, even if the limit hasn't been reached.
-3. If the client exceeds its limit, Zero will destroy backgrounded queries, least-recently-used first, until the store is under the limit again.
-
-### Thinking in Queries
-
-Although IVM is a very efficient way to keep queries up to date relative to re-running them, it isn't free. You still need to think about how many queries you are creating, how long they are kept alive, and how expensive they are.
-
-This is why Zero defaults to _not_ backgrounding queries and doesn't try to aggressively fill its client datastore to capacity. You should put some thought into what queries you want to run in the background, and for how long.
-
-Zero currently provides a few basic tools to understand the cost of your queries:
-
-- The client logs a warning for slow query materializations. Look for `Slow query materialization` in your logs. The default threshold is `5s` (including network) but this is configurable with the `slowMaterializeThreshold` parameter.
-- The client logs the materialization time of all queries at the `debug` level. Look for `Materialized query` in your logs.
-- The server logs a warning for slow query materializations. Look for `Slow query materialization` in your logs. The default threshold is `5s` but this is configurable with the `log-slow-materialize-threshold` configuration parameter.
-
-We will be adding more tools over time.
-
 ## Completeness
 
 Zero returns whatever data it has on the client immediately for a query, then falls back to the server for any missing data. Sometimes it's useful to know the difference between these two types of results. To do so, use the `result` from `useQuery`:
@@ -544,6 +419,145 @@ z.query.issue
   .limit(1000)
   .preload();
 ```
+
+## Data Lifetime and Reuse
+
+Zero reuses data synced from prior queries to answer new queries when possible. This is what enables instant UI transitions.
+
+But what controls the lifetime of this client-side data? How can you know whether any particular query will return instant results? How can you know whether those results will be up to date or stale?
+
+The answer is that the data on the client is simply the union of rows returned from queries which are currently syncing. Once a row is no longer returned by any syncing query, it is removed from the client. Thus, there is never any stale data in Zero.
+
+So when you are thinking about whether a query is going to return results instantly, you should think about _what other queries are syncing_, not about what data is local. Data exists locally if and only if there is a query syncing that returns that data.
+
+<Note type="note" heading="Caches vs Replicas">
+  This is why we often say that despite the name `zero-cache`, Zero is not technically a cache. It's a *replica*.
+
+A cache has a random set of rows with a random set of versions. There is no expectation that the cache any particular rows, or that the rows' have matching versions. Rows are simply updated as they are fetched.
+
+A replica by contrast is eagerly updated, whether or not any client has requested a row. A replica is always very close to up-to-date, and always self-consistent.
+
+Zero is a _partial_ replica because it only replicates rows that are returned by syncing queries.
+
+</Note>
+
+## Query Lifecycle
+
+<ImageLightbox
+  src="/images/reading-data/query-lifecycle.svg"
+  caption="The lifecycle of a ZQL query."
+  className="invert dark:invert-0"
+/>
+
+Queries can be either _active_ or _cached_. An active query is one that is currently being used by the application. Cached queries are not currently in use, but continue syncing in case they are needed again soon.
+
+Active queries are created one of four ways:
+
+1. The app calls `q.materialize()` to get a `View`.
+2. The app uses a framework binding like React's `useQuery(q)`.
+3. The app calls [`preload()`](#preloading) to sync larger queries without a view.
+4. The app calls `q.run()` to get a single result.
+
+Active queries sync until they are _deactivated_. The way this happens depends on how the query was created:
+
+1. For `materialize()` queries, the UI calls `destroy()` on the view.
+2. For `useQuery()`, the UI unmounts the component (which calls `destroy()` under the covers).
+3. For `preload()`, the UI calls `cleanup()` on the return value of `preload()`.
+4. For `run()`, queries are automatically deactivated immediately after the result is returned.
+
+Additionally when a Zero instance closes, all active queries are automatically deactivated. This also happens when the containing page or script is unloaded.
+
+## TTLs
+
+Each query has a `ttl` that controls how long it stays cached.
+
+<Note emoji="💡" heading="The TTL clock only ticks while Zero is running">
+If the user closes all tabs for your app, Zero stops running and the time that elapses doesn't count toward any TTLs.
+
+You do not need to account for such time when choosing a TTL – you only need to account for time your app is running *without* a query.
+</Note>
+
+## TTL Defaults
+
+In most cases, the default TTL should work well:
+
+* `preload()` queries default to `ttl:'none'`, meaning they are not cached at all, and will stop syncing immediately when deactivated. But because `preload()` queries are typically registered at app startup and never shutdown, and [because the ttl clock only ticks while Zero is running](#the-ttl-clock-only-ticks-while-zero-is-running), this means that preload queries never get unregistered.
+* Other queries have a default `ttl` of `5m` (five minutes).
+
+## Setting Different TTLs
+
+You can override the default TTL with the `ttl` parameter:
+
+```ts
+// With useQuery():
+const [user] = useQuery(
+    z.query.user.where('id', userId),
+    {ttl: '5m'});
+
+// With preload():
+z.query.user.where('id', userId).preload(
+    {ttl: '5m'});
+
+// With run():
+const user = await z.query.user.where('id', userId).run(
+    {ttl: '5m'});
+
+// With materialize():
+const view = z.query.user.where('id', userId).materialize(
+    {ttl: '5m'});
+```
+
+TTLs up to `10m` (ten minutes) are currently supported. The following formats are allowed:
+
+| Format    | Meaning                                                   |
+| --------- | --------------------------------------------------------- |
+| `none`    | No caching. Query will immediately stop when deactivated. |
+| `%ds`     | Number of seconds.                                        |
+| `%dm`     | Number of minutes.                                        |
+
+## Choosing a TTL
+
+If you choose a different TTL, you should consider how likely it is that the query will be reused, and how far into the future this reuse will occur. Here are some guidelines to help you choose a TTL for common query types:
+
+### Preload Queries
+
+These queries load the most commonly needed data for your app. They are typically larger, run with the `preload()` method, and stay running the entire time your app is running.
+
+Because these queries run the entire time Zero runs, they do not need any TTL to keep them alive. And using a `ttl` for them is wasteful since when your app changes its preload query, it will end up running the old preload query *and* the new preload query, even though the app only cares about the new one.
+
+**Recommendation:** `ttl: 'none'` *(the default for `preload()`)*.
+
+### Navigational Queries
+
+These queries load data specific to a route. They are typically smaller and run with the `useQuery()` method. It is useful to cache them for a short time, so that they can be reactivated quickly if the user navigates back to the route.
+
+**Recommendation:** `ttl: '5m'` *(the default for `useQuery()`)*.
+
+### Ephemeral Queries
+
+These queries load data for a specific, short-lived user interaction and often come in large numbers (e.g., typeahead search).
+
+The chance of any specific ephemeral query being reused is low, so the benefit of caching them is also low.
+
+**Recommendation:** `useQuery(..., {ttl: 'none'})`)*.
+
+### Why Zero TTLs are Short
+
+Zero queries are not free.
+
+Just as in any database, queries consume resources on both the client and server. Memory is used to keep metadata about the query, and disk storage is used to keep the query's current state.
+
+We do drop this state after we haven't heard from a client for awhile, but this is only a partial improvement. If the client returns, we have to re-run the query to get the latest data.
+
+This means that we do not actually *want* to keep queries active unless there is a good chance they will be needed again soon.
+
+The default Zero TTL values might initially seem too short, but they are designed to work well with the way Zero's TTL clock works and strike a good balance between keeping queries alive long enough to be useful, while not keeping them alive so long that they consume resources unnecessarily.
+
+<Note emoji="🧑‍🏫" type="warning" heading="Longer TTLs are disallowed">
+Previous versions of Zero allowed longer TTLs. The API still supports these, but they are clamped to `10m` and Zero prints a warning.
+
+If you think you need longer TTLs, please [let us know](https://discord.zerosync.dev). We are still iterating on these APIs and may have missed something. Alternately we may be able to help you achieve your goal a different way.
+</Note>
 
 ## Running Queries Once
 

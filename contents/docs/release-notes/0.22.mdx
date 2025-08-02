@@ -1,0 +1,63 @@
+---
+title: Zero 0.22
+description: Simplified TTLs
+---
+
+## Install
+
+```bash
+npm install @rocicorp/zero@0.22
+```
+
+## Upgrading
+
+This release simplifies the concept of TTLs in Zero.
+
+See [hello-zero](https://github.com/rocicorp/hello-zero/pull/48), [hello-zero-solid](https://github.com/rocicorp/hello-zero-solid/pull/23), or [ztunes](https://github.com/rocicorp/ztunes/pull/17) for example upgrades.
+
+This release also adds anonymous telemetry collection. You can opt-out with the [DO_NOT_TRACK=1](../zero-cache-config#enable-telemetry) environment variable. Though we hope you will not, as it helps us improve Zero.
+
+### How TTLs Used to Work
+
+Previously, the TTL of a query simply measured normal "wall clock time" from when a query inactivated, including any time the app wasn't running at all.
+
+With experience, we realized this was a misfeature because it encouraged the use of very long or infinite TTLs, especially for preload queries. Developers always want preload queries registered, but since they do not know how long the app will be offline, they had no real choice but to use the TTL `forever`.
+
+These infinite TTLs would remain registered even after the app's code changed such that it no longer wanted them, slowing connections and incremental updates to process queries that the app was not even using.
+
+Worse, the prevalence of infinite TTLs in turns meant we needed some way to limit the size of the client cache. We introduced the "client row limit" for this. But developers would frequently accidentally blow through this limit, causing cache thrash.
+
+### How TTLs Work Now
+
+Now, query TTLs measure *"TTL time"* which ***only elapses while Zero is running***. This means that preload queries usually don't need a TTL at all, since they run the entire time Zero is active. This in turn means we can clamp TTLs to low values, which means queries evict naturally, which means we no longer need the client row limit either.
+
+### Using New TTLs
+
+You don't need to do anything specific to upgrade. Zero [will clamp your TTLs at `10m`](../reading-data#longer-ttls-are-disallowed) and print a warning.
+
+But for best results, please review the [new TTL documentation](../reading-data#query-lifecycle). In particular, see [how to set your TTLs](../reading-data#choosing-a-ttl) (TL;DR: You can often just remove them – [the defaults usually just work](../reading-data#ttl-defaults)).
+
+## Features
+
+- Rework and simplify query TTLs ([docs](/docs/reading-data#query-lifecycle), [upgrading](#upgrading)).
+- SolidJS bindings are now fine-grained, improving performance ([PR](https://github.com/rocicorp/mono/pull/4575)).
+- Restore `ZERO_CHANGE_STREAMER_URI` option ([doc](../zero-cache-config#change-streamer-uri), [PR](https://github.com/rocicorp/mono/pull/4584)).
+- Add `useZeroOnline` to React and SolidJS bindings ([doc](/docs/offline#dealing-with-offline-today)).
+- Add `ttl` to `run()` ([PR](https://github.com/rocicorp/mono/pull/4603)).
+- Allow client to specify `push.url` in the `Zero` constructor ([doc](../custom-mutators#setting-up-the-server)).
+- Add anonymous telemetry collection to `zero-cache` ([doc](../zero-cache-config#enable-telemetry)).
+
+## Fixes
+
+- Handle `public` in aliases, like `.from('public.table')` ([PR](https://github.com/rocicorp/mono/pull/4548)).
+- Sorting by columns with `null` values was incorrect in some cases ([PR](https://github.com/rocicorp/mono/pull/4562)).
+- Fix fencepost issue editing queries with limits ([PR](https://github.com/rocicorp/mono/pull/4563)).
+- Fix copy runner to more reliably reuse connections ([PR](https://github.com/rocicorp/mono/pull/4573)).
+- Queries early in startup could not contain non-latin chars ([PR](https://github.com/rocicorp/mono/pull/4607)).
+- SolidJS: Export `createUseZero` ([PR](https://github.com/rocicorp/mono/pull/4610)).
+- Support parallel rollouts of replication-manager and view-syncer ([PR](https://github.com/rocicorp/mono/pull/4658)).
+- Fix upgrade path for already replicated array types ([PR](https://github.com/rocicorp/mono/pull/4676)).
+
+## Breaking Changes
+
+- Require Node v22+ (see [discussion](https://discord.com/channels/830183651022471199/1367274189178015955/1391931944089948361))

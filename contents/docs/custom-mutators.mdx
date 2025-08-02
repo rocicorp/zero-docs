@@ -295,7 +295,7 @@ You can use the `.client` promise in this case to wait for a write to complete o
 
 ```ts
 try {
-  const write = zero.mutate.issue.update({
+  const write = zero.mutate.issue.insert({
     id: 'issue-123',
     title: 'New title',
   });
@@ -318,12 +318,25 @@ You can also wait for the server write to succeed:
 
 ```ts
 try {
-  await zero.mutate.issue.update({
+  const write = zero.mutate.issue.insert({
     id: 'issue-123',
     title: 'New title',
-  }).server;
+  });
 
-  // issue-123 is written to server
+  await write.client;
+
+  // optimistic write guaranteed to be present here, but not
+  // server write.
+  const read1 = await zero.query.issue.where('id', 'issue-123').one();
+
+  // Await server write – this involves a round-trip.
+  await write.server;
+
+  // issue-123 is written to server and any results are
+  // syned to this client.
+  // read2 could potentially be undefined here, for example if the
+  // server mutator rejected the write.
+  const read2 = await zero.query.issue.where('id', 'issue-123').one();
 } catch (e) {
   console.error('Mutator failed on client or server', e);
 }
@@ -339,19 +352,23 @@ If the client-side mutator fails, the `.server` promise is also rejected with th
 
 You will need a server somewhere you can run an endpoint on. This is typically a serverless function on a platform like Vercel or AWS but can really be anything.
 
-Set the push URL with the [`ZERO_PUSH_URL` env var or `--push-url`](./zero-cache-config#push-url).
-
-If there is per-client configuration you need to send to the push endpoint, you can do that with `push.queryParams`:
+Configure the push endpoint with the `push.url` parameter in your `Zero` constructor:
 
 ```ts
-const z = new Zero({
+const zero = new Zero({
   push: {
-    queryParams: {
-      workspaceID: '42',
-    },
+    url: 'https://zero.my-server.com/push',
   },
 });
 ```
+
+You will also need to enable the server to be used as a push endpoint with the [`ZERO_PUSH_URL` environment variable or `--push-url` flag](./zero-cache-config#push-url):
+
+```bash
+ZERO_PUSH_URL=https://*.my-server.com/push
+```
+
+The `ZERO_PUSH_URL` parameter accepts wildcards, enabling the client to pass runtime configuration to the push endpoint or to use a different push endpoint, e.g., for previews. See the [config docs](./zero-cache-config#push-url) for the full syntax.
 
 The push endpoint receives a `PushRequest` as input describing one or more mutations to apply to the backend, and must return a `PushResponse` describing the results of those mutations.
 

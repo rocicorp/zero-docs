@@ -519,67 +519,6 @@ export default handle(app);
 
 To reuse the client mutators exactly as-is on the server just pass the result of the same `createMutators` function to `PushProcessor`.
 
-### Permissions
-
-Because mutators are just arbitrary TypeScript functions, there is no need for a special permissions system. Therefore, you won't use Zero's [write permissions](./permissions) when you use mutators.
-
-<Note slug="read-permissions" emoji="💡" heading="You do still need *read* permissions">
-  When using mutators you will have no [`insert`](permissions#insert-permissions), [`update`](permissions#update-permissions), or [`delete`](permissions#delete-permissions) permissions. You will still have [`select`](permissions#select-permissions) permissions, however.
-
-We hope to build [named queries](https://bugs.rocicorp.dev/issue/3453) next – a read analog to mutators. If we succeed, Zero's permission system will go away completely 🤯.
-
-</Note>
-
-In order to do permission checks, you'll need to know what user is making the request. You can pass this information to your mutators by adding a `AuthData` parameter to the `createMutators` function:
-
-```ts
-type AuthData = {
-  sub: string;
-};
-
-export function createMutators(authData: AuthData | undefined) {
-  return {
-    issue: {
-      launchMissiles: async (tx, args: {target: string}) => {
-        if (!authData) {
-          throw new Error('Users must be logged in to launch missiles');
-        }
-
-        const hasPermission = await tx.query.user
-          .where('id', authData.sub)
-          .whereExists('permissions', q => q.where('name', 'launch-missiles'))
-          .one();
-        if (!hasPermission) {
-          throw new Error('User does not have permission to launch missiles');
-        }
-      },
-    },
-  } as const satisfies CustomMutatorDefs<typeof schema>;
-}
-```
-
-The `AuthData` parameter can be any data required for authorization, but is typically just the decoded JWT:
-
-```ts
-// app.tsx
-const zero = new Zero({
-  schema,
-  auth: encodedJWT,
-  mutators: createMutators(decodedJWT),
-});
-
-// hono-server.ts
-const processor = new PushProcessor(
-  schema,
-  connectionProvider(postgres(process.env.ZERO_UPSTREAM_DB as string)),
-);
-processor.process(
-  createMutators(decodedJWT),
-  c.req.query(),
-  await c.req.json(),
-);
-```
-
 ### Server Error Handling
 
 The `PushProcessor` in `@rocicorp/zero/pg` skips any mutations that throw:
@@ -670,6 +609,67 @@ myMutator: (tx) => {
     // Server-side code
   }
 },
+```
+
+### Permissions
+
+Because mutators are just arbitrary TypeScript functions, there is no need for a special permissions system. Therefore, you do not need to use Zero's [write permissions](./permissions) (these will be deprecated in a future release).
+
+<Note slug="read-permissions" emoji="💡" heading="You do still need *read* permissions">
+  When using mutators you will have no [`insert`](permissions#insert-permissions), [`update`](permissions#update-permissions), or [`delete`](permissions#delete-permissions) permissions. You will still have [`select`](permissions#select-permissions) permissions, however.
+
+We hope to build [named queries](https://bugs.rocicorp.dev/issue/3453) next – a read analog to mutators. If we succeed, Zero's permission system will go away completely 🤯.
+
+</Note>
+
+In order to do permission checks, you'll need to know what user is making the request. You can pass this information to your mutators by adding a `AuthData` parameter to the `createMutators` function:
+
+```ts
+type AuthData = {
+  sub: string;
+};
+
+export function createMutators(authData: AuthData | undefined) {
+  return {
+    issue: {
+      launchMissiles: async (tx, args: {target: string}) => {
+        if (!authData) {
+          throw new Error('Users must be logged in to launch missiles');
+        }
+
+        const hasPermission = await tx.query.user
+          .where('id', authData.sub)
+          .whereExists('permissions', q => q.where('name', 'launch-missiles'))
+          .one();
+        if (!hasPermission) {
+          throw new Error('User does not have permission to launch missiles');
+        }
+      },
+    },
+  } as const satisfies CustomMutatorDefs<typeof schema>;
+}
+```
+
+The `AuthData` parameter can be any data required for authorization, but is typically just the decoded JWT:
+
+```ts
+// app.tsx
+const zero = new Zero({
+  schema,
+  auth: encodedJWT,
+  mutators: createMutators(decodedJWT),
+});
+
+// hono-server.ts
+const processor = new PushProcessor(
+  schema,
+  connectionProvider(postgres(process.env.ZERO_UPSTREAM_DB as string)),
+);
+processor.process(
+  createMutators(decodedJWT),
+  c.req.query(),
+  await c.req.json(),
+);
 ```
 
 ### Dropping Down to Raw SQL

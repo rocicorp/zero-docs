@@ -143,6 +143,15 @@ flag: `--change-streamer-port`<br/>
 env: `ZERO_CHANGE_STREAMER_PORT`<br/>
 required: `false`
 
+### Change Streamer URI
+
+When unset, the zero-cache runs its own replication-manager (i.e. change-streamer). In production, this should be set to the replication-manager URI, which runs a change-streamer on port 4849.
+
+flag: `--change-streamer-uri`<br/>
+env: `ZERO_CHANGE_STREAMER_URI`<br/>
+required: `false`
+
+
 ### CVR DB
 
 The Postgres database used to store CVRs. CVRs (client view records) keep track of the data synced to clients in order to determine the diff to send on reconnect. If unspecified, the upstream-db will be used.
@@ -160,6 +169,21 @@ Note that this number must allow for at least one connection per sync worker, or
 flag: `--cvr-max-conns`<br/>
 env: `ZERO_CVR_MAX_CONNS`<br/>
 default: `30`
+
+### Enable Telemetry
+
+Zero collects anonymous telemetry data to help us understand usage. We collect:
+
+- Zero version
+- Uptime
+- General machine information, like the number of CPUs, OS, CI/CD environment, etc.
+- Information about usage, such as number of queries or mutations processed per hour.
+
+This is completely optional and can be disabled at any time. You can also opt-out by setting [`DO_NOT_TRACK=1`](https://consoledonottrack.com/).
+
+flag: `--enable-telemetry`<br/>
+env: `ZERO_ENABLE_TELEMETRY`<br/>
+default: `true`
 
 ### Initial Sync Table Copy Workers
 
@@ -181,34 +205,6 @@ flag: `--lazy-startup`<br/>
 env: `ZERO_LAZY_STARTUP`<br/>
 default: `false`
 
-### Litestream Executable
-
-Path to the litestream executable. This option has no effect if litestream-backup-url is unspecified.
-
-flag: `--litestream-executable`<br/>
-env: `ZERO_LITESTREAM_EXECUTABLE`<br/>
-required: `false`
-
-### Litestream Config Path
-
-Path to the litestream yaml config file. zero-cache will run this with its environment variables, which can be referenced in the file via `${ENV}` substitution, for example:
-
-- ZERO_REPLICA_FILE for the db Path
-- ZERO_LITESTREAM_BACKUP_LOCATION for the db replica url
-- ZERO_LITESTREAM_LOG_LEVEL for the log Level
-- ZERO_LOG_FORMAT for the log type
-
-flag: `--litestream-config-path`<br/>
-env: `ZERO_LITESTREAM_CONFIG_PATH`<br/>
-default: `./src/services/litestream/config.yml`
-
-### Litestream Log Level
-
-flag: `--litestream-log-level`<br/>
-env: `ZERO_LITESTREAM_LOG_LEVEL`<br/>
-default: `warn`
-values: `debug`, `info`, `warn`, `error`
-
 ### Litestream Backup URL
 
 The location of the litestream backup, usually an s3:// URL. This is only consulted by the replication-manager. view-syncers receive this information from the replication-manager.
@@ -225,6 +221,27 @@ flag: `--litestream-checkpoint-threshold-mb`<br/>
 env: `ZERO_LITESTREAM_CHECKPOINT_THRESHOLD_MB`<br/>
 default: `40`
 
+### Litestream Config Path
+
+Path to the litestream yaml config file. zero-cache will run this with its environment variables, which can be referenced in the file via `${ENV}` substitution, for example:
+
+- ZERO_REPLICA_FILE for the db Path
+- ZERO_LITESTREAM_BACKUP_LOCATION for the db replica url
+- ZERO_LITESTREAM_LOG_LEVEL for the log Level
+- ZERO_LOG_FORMAT for the log type
+
+flag: `--litestream-config-path`<br/>
+env: `ZERO_LITESTREAM_CONFIG_PATH`<br/>
+default: `./src/services/litestream/config.yml`
+
+### Litestream Executable
+
+Path to the litestream executable. This option has no effect if litestream-backup-url is unspecified.
+
+flag: `--litestream-executable`<br/>
+env: `ZERO_LITESTREAM_EXECUTABLE`<br/>
+required: `false`
+
 ### Litestream Incremental Backup Interval Minutes
 
 The interval between incremental backups of the replica. Shorter intervals reduce the amount of change history that needs to be replayed when catching up a new view-syncer, at the expense of increasing the number of files needed to download for the initial litestream restore.
@@ -233,13 +250,40 @@ flag: `--litestream-incremental-backup-interval-minutes`<br/>
 env: `ZERO_LITESTREAM_INCREMENTAL_BACKUP_INTERVAL_MINUTES`<br/>
 default: `15`
 
-### Litestream Snapshot Backup Interval Hours
 
-The interval between snapshot backups of the replica. Snapshot backups make a full copy of the database to a new litestream generation. This improves restore time at the expense of bandwidth. Applications with a large database and low write rate can increase this interval to reduce network usage for backups (litestream defaults to 24 hours).
+### Litestream Multipart Concurrency
 
-flag: `--litestream-snapshot-backup-interval-hours`<br/>
-env: `ZERO_LITESTREAM_SNAPSHOT_BACKUP_INTERVAL_HOURS`<br/>
-default: `12`
+The number of parts (of size --litestream-multipart-size bytes) to upload or download in parallel when backing up or restoring the snapshot.
+
+flag: `--litestream-multipart-concurrency`<br/>
+env: `ZERO_LITESTREAM_MULTIPART_CONCURRENCY`<br/>
+default: `48`
+
+### Litestream Multipart Size
+
+The size of each part when uploading or downloading the snapshot with
+`--litestream-multipart-concurrency`. Note that up to concurrency * size
+bytes of memory are used when backing up or restoring the snapshot.
+
+flag: `--litestream-multipart-size`<br/>
+env: `ZERO_LITESTREAM_MULTIPART_SIZE`<br/>
+default: `16777216` (16 MiB)
+
+### Litestream Log Level
+
+flag: `--litestream-log-level`<br/>
+env: `ZERO_LITESTREAM_LOG_LEVEL`<br/>
+default: `warn`
+values: `debug`, `info`, `warn`, `error`
+
+### Litestream Port
+
+Port on which litestream exports metrics, used to determine the replication
+watermark up to which it is safe to purge change log records.
+
+flag: `--litestream-port`<br/>
+env: `ZERO_LITESTREAM_PORT`<br/>
+default: `--port + 2`
 
 ### Litestream Restore Parallelism
 
@@ -248,6 +292,14 @@ The number of WAL files to download in parallel when performing the initial rest
 flag: `--litestream-restore-parallelism`<br/>
 env: `ZERO_LITESTREAM_RESTORE_PARALLELISM`<br/>
 default: `48`
+
+### Litestream Snapshot Backup Interval Hours
+
+The interval between snapshot backups of the replica. Snapshot backups make a full copy of the database to a new litestream generation. This improves restore time at the expense of bandwidth. Applications with a large database and low write rate can increase this interval to reduce network usage for backups (litestream defaults to 24 hours).
+
+flag: `--litestream-snapshot-backup-interval-hours`<br/>
+env: `ZERO_LITESTREAM_SNAPSHOT_BACKUP_INTERVAL_HOURS`<br/>
+default: `12`
 
 ### Log Format
 
@@ -291,14 +343,6 @@ flag: `--log-slow-row-threshold`<br/>
 env: `ZERO_LOG_SLOW_ROW_THRESHOLD`<br/>
 default: `2`
 
-### Log Trace Collector
-
-The URL of the trace collector to which to send trace data. Traces are sent over http. Port defaults to 4318 for most collectors.
-
-flag: `--log-trace-collector`<br/>
-env: `ZERO_LOG_TRACE_COLLECTOR`<br/>
-required: `false`
-
 ### Number of Sync Workers
 
 The number of processes to use for view syncing. Leave this unset to use the maximum available parallelism. If set to 0, the server runs without sync workers, which is the configuration for running the replication-manager.
@@ -331,9 +375,37 @@ flag: `--port`<br/>
 env: `ZERO_PORT`<br/>
 default: `4848`
 
+### Push API Key
+
+An optional secret used to authorize zero-cache to call the API server handling writes.
+
+flag: `--push-api-key`<br/>
+env: `ZERO_PUSH_API_KEY`<br/>
+required: `false`
+
+### Push Forward Cookies
+
+If true, zero-cache will forward cookies from the request. This is useful for passing authentication cookies to the API server. If false, cookies are not forwarded.
+
+flag: `--push-forward-cookies`<br/>
+env: `ZERO_PUSH_FORWARD_COOKIES`<br/>
+default: `false`
+
 ### Push URL
 
-The URL of the API server to which zero-cache will push mutations. Required if you use [custom mutators](/docs/custom-mutators).
+The URL of the API server to which zero-cache will push custom mutations.
+
+Can also be a pattern, or set of patterns, which is used in conjunction with the `push.url` paramter of the `Zero` constructor. In this case, the pattern specifies the URLs which Zero will allow the constructor to specify.
+
+Examples:
+
+* `https://*.example.com` matches `https://api.example.com` and `https://www.example.com`
+* `https://*.example.com` does not match `https://example.com` (no subdomain)
+* `https://*.example.com` does not match `https://api.example.com/path` (no trailing path)
+* `https://*.*.example.com` matches `https://api.v1.example.com` and `https://www.v2.example.com`
+* `https://*.*.example.com` does not match `https://api.example.com` (only one subdomain)
+
+Currently, wildcards are only allowed for subdomains.
 
 flag: `--push-url`<br/>
 env: `ZERO_PUSH_URL`<br/>
@@ -372,14 +444,6 @@ Temporary directory for IVM operator storage. Leave unset to use `os.tmpdir()`.
 flag: `--storage-db-tmp-dir`<br/>
 env: `ZERO_STORAGE_DB_TMP_DIR`<br/>
 required: `false`
-
-### Target Client Row Count
-
-A soft limit on the number of rows Zero will keep on the client. 20k is a good default value for most applications, and we do not recommend exceeding 100k. See [Client Capacity Management](/docs/reading-data#client-capacity-management) for more details.
-
-flag: `--target-client-row-count`<br/>
-env: `ZERO_TARGET_CLIENT_ROW_COUNT`<br/>
-default: `20000`
 
 ### Task ID
 

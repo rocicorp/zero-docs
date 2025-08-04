@@ -61,7 +61,23 @@ We would like to revisit this in the future and really think through how to desi
 
 ## Dealing with Offline Today
 
-Until Zero disables offline writes automatically, we recommend using the `onOnlineChange` parameter to the `Zero` constructor to detect connection loss and disable editing manually in your UI.
+Until Zero disables offline writes automatically, use `useZeroOnline` to detect connection loss and manually disable writes in your UI:
+
+```tsx
+const {online} = useZeroOnline();
+
+return <button disabled={!online}>
+  Add to cart
+</button>;
+```
+
+... or use the underlying `zero.onOnline` event:
+
+```tsx
+const unsubscribe = zero.onOnline(online => {
+  console.log('Online:', online);
+});
+```
 
 ## Even More Information
 

@@ -164,7 +164,7 @@ If the issue table has two rows, one created by the user and one by someone else
 <Note type="warning" heading="Column permissions are not currently supported">
 Select permission applies to every column. The recommended approach for now is to factor out private fields into a separate table, e.g. `user_private`. Column permissions are planned but currently not a high priority.
 
-Note that although the same limitation applies to declarative insert/update permissions, [custom mutators](/docs/custom-mutators) support arbitrary server-side logic and so can easily control which columns are writable.
+Note that although the same limitation applies to declarative insert/update permissions, [mutators](/docs/custom-mutators) support arbitrary server-side logic and so can easily control which columns are writable.
 </Note>
 
 ### Insert
@@ -172,7 +172,7 @@ Note that although the same limitation applies to declarative insert/update perm
 You can limit what rows can be inserted and by whom by specifying an `insert` ruleset.
 
 <Note slug="insert-permissions" heading="You might not need insert permissions" type="warning">
-  If you are using [custom mutators](/docs/custom-mutators), you do not need to use insert permissions. You can easily control which columns are writable
+  If you are using [mutators](/docs/custom-mutators), you do not need to use insert permissions. You can easily control which columns are writable
   in the mutators themselves.
 
 Insert permissions are deprecated and will be removed in a future release.
@@ -204,7 +204,7 @@ definePermissions<AuthData, Schema>(schema, () => {
 There are two types of update rulesets: `preMutation` and `postMutation`. Both rulesets must pass for an update to be allowed.
 
 <Note slug="update-permissions" heading="You might not need update permissions" type="warning">
-  If you are using [custom mutators](/docs/custom-mutators), you do not need to use update permissions. You can easily control which columns are writable
+  If you are using [mutators](/docs/custom-mutators), you do not need to use update permissions. You can easily control which columns are writable
   in the mutators themselves.
 
 Update permissions are deprecated and will be removed in a future release.

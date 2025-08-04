@@ -192,10 +192,10 @@ view.destroy();
 ## Writing Data
 
 Zero supports both simple and advanced data mutations. We recommend using
-[custom mutators](custom-mutators) - CRUD mutators are deprecated
+[mutators](custom-mutators) - CRUD mutators are deprecated
 and not recommended for new projects.
 
-The custom mutator API on the client looks something like this:
+The mutator API on the client looks something like this:
 
 ```ts
 z.mutate.message.insert({id: nanoid(), body: 'Hello World!'});

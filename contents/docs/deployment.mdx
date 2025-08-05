@@ -458,7 +458,7 @@ Run `zero-cache` as two Fargate services (using the same [rocicorp/zero](https:/
 #### view-syncer
 
 - `zero-cache` config:
-  - `ZERO_CHANGE_STREAMER_MODE=discover`
+  - `ZERO_CHANGE_STREAMER_URI=http://{replication-manager}`
 - Task count: **N**
   - You can also use dynamic scaling
 
@@ -468,7 +468,10 @@ Run `zero-cache` as two Fargate services (using the same [rocicorp/zero](https:/
 - Set `ZERO_CVR_MAX_CONNS` and `ZERO_UPSTREAM_MAX_CONNS` appropriately so that the total connections from both running and updating `view-syncers` (e.g. DesiredCount \* MaximumPercent) do not exceed your database’s `max_connections`.
 - The `{generation}` component of the `s3://{bucketName}/{generation}` URL is an arbitrary path component that can be modified to reset the replica (e.g. a date, a number, etc.). Setting this to a new path is the multi-node equivalent of deleting the replica file to resync.
   - Note: `zero-cache` does not manage cleanup of old generations.
-- The `replication-manager` serves requests on port **4849**. Routing from the `view-syncer` to the `http://{replication-manager}` is handled internally by storing data in the `changedb`.
+- The `replication-manager` serves requests on port **4849**. Routing from the `view-syncer` to the `http://{replication-manager}` can be achieved using the following mechanisms (in order of preference):
+  - An internal load balancer
+  - [Service Connect](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-connect.html)
+  - [Service Discovery](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-discovery.html)
 - Fargate ephemeral storage is used for the replica.
   - The default size is 20GB. This can be increased up to 200GB
   - Allocate at least twice the size of the database to support the internal VACUUM operation.

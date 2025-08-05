@@ -166,7 +166,20 @@ export default $config({
         ZERO_LITESTREAM_BACKUP_URL: $interpolate`s3://${replicationBucket.name}/backup`,
         ZERO_NUM_SYNC_WORKERS: '0',
       },
+      loadBalancer: {
+        public: false,
+        ports: [
+          {
+            listen: '80/http',
+            forward: '4849/http',
+          },
+        ],
+      },
       transform: {
+        service: {
+          // e.g. extend the grace period for initial sync of large databases
+          healthCheckGracePeriodSeconds: 600,
+        }
         target: {
           healthCheck: {
             enabled: true,
@@ -197,12 +210,24 @@ export default $config({
         },
         environment: {
           ...commonEnv,
-          ZERO_CHANGE_STREAMER_MODE: 'discover',
+          ZERO_CHANGE_STREAMER_URI: replicationManager.url,
+        },
+        loadBalancer: {
+          ports: [
+            {
+              listen: '80/http',
+              forward: '4848/http',
+            },
+          ],
         },
         logging: {
           retention: '1 month',
         },
         transform: {
+          service: {
+            // e.g. extend the grace period for initial sync of large databases
+            healthCheckGracePeriodSeconds: 600,
+          }
           target: {
             healthCheck: {
               enabled: true,
@@ -219,11 +244,6 @@ export default $config({
             },
           },
         },
-      },
-      {
-        // Wait for replication-manager to come up first, for breaking changes
-        // to replication-manager interface.
-        dependsOn: [replicationManager],
       },
     );
 

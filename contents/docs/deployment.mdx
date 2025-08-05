@@ -4,7 +4,7 @@ title: Deploying Zero
 
 To deploy a Zero app, you need to:
 
-1. Deploy your backend database. Most standard Postgres hosts [work with Zero](connecting-to-postgres).
+1. Deploy your backend database. Most standard Postgres hosts [work with Zero](/docs/connecting-to-postgres).
 1. Deploy `zero-cache`. We provide a [Docker image](https://hub.docker.com/r/rocicorp/zero) that can work with most Docker hosts.
 1. Deploy your frontend. You can use any hosting service like Vercel or Netlify.
 
@@ -65,7 +65,7 @@ To upgrade Zero to a new major version, first deploy the new zero-cache, then th
 
 ## Configuration
 
-The `zero-cache` image is configured via environment variables. See [zero-cache Config](./zero-cache-config) for available options.
+The `zero-cache` image is configured via environment variables. See [zero-cache Config](/docs/zero-cache-config) for available options.
 
 <Note heading="Custom mutators" slug="push-url">
   When using custom mutators, don't forget to set the push api url with
@@ -80,7 +80,7 @@ The setup below costs about $35/month. You can scale it up or down as needed by 
 
 ### Setup Upstream
 
-Create an upstream Postgres database server somewhere. See [Connecting to Postgres](connecting-to-postgres) for details. Populate the schema and any initial data for your application.
+Create an upstream Postgres database server somewhere. See [Connecting to Postgres](/docs/connecting-to-postgres) for details. Populate the schema and any initial data for your application.
 
 ### Setup AWS
 
@@ -296,11 +296,11 @@ If unsuccessful, you can get detailed logs with `npx sst deploy --verbose`. [Com
 
 ## Guide: Single-Node on Fly.io
 
-Let's deploy the [Quickstart](quickstart) app to [Fly.io](https://fly.io). We'll use Fly.io for both the database and `zero-cache`.
+Let's deploy the [Quickstart](/docs/quickstart) app to [Fly.io](https://fly.io). We'll use Fly.io for both the database and `zero-cache`.
 
 ### Setup Quickstart
 
-Go through the [Quickstart](quickstart) guide to get the app running locally.
+Go through the [Quickstart](/docs/quickstart) guide to get the app running locally.
 
 ### Setup Fly.io
 
@@ -450,7 +450,7 @@ Run `zero-cache` as two Fargate services (using the same [rocicorp/zero](https:/
 
 #### replication-manager
 
-- `zero-cache` [config](https://zero.rocicorp.dev/docs/zero-cache-config):
+- `zero-cache` config:
   - `ZERO_LITESTREAM_BACKUP_URL=s3://{bucketName}/{generation}`
   - `ZERO_NUM_SYNC_WORKERS=0`
 - Task count: **1**

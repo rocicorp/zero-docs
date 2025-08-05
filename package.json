@@ -10,7 +10,7 @@
     "start": "npm run build:search && next start",
     "lint": "next lint",
     "format": "prettier --write **/*.{ts,tsx,js,json,md,mdx}",
-    "links": "blc http://localhost:3000/ -ro --exclude 'https://discord.rocicorp.dev/' --exclude 'https://bsky.app/profile/zero.rocicorp.dev' --exclude 'https://x.com/rocicorp_zero'"
+    "links": "blc http://localhost:3000/ -ro --exclude 'https://discord.rocicorp.dev/' --exclude 'https://bsky.app/profile/zero.rocicorp.dev' --exclude 'https://x.com/rocicorp_zero'  --exclude 'https://x.com/zero__ms'"
   },
   "dependencies": {
     "@radix-ui/react-collapsible": "^1.1.0",

@@ -8,7 +8,7 @@ Inspired by SQL, ZQL is expressed in TypeScript with heavy use of the builder pa
 
 ZQL queries are composed of one or more _clauses_ that are chained together into a _query_.
 
-Unlike queries in classic databases, the result of a ZQL query is a _view_ that updates automatically and efficiently as the underlying data changes. You can call a query’s `materialize()` method to get a view, but more typically you run queries via some framework-specific bindings. For example see `useQuery` for [React](react) or [SolidJS](solidjs).
+Unlike queries in classic databases, the result of a ZQL query is a _view_ that updates automatically and efficiently as the underlying data changes. You can call a query’s `materialize()` method to get a view, but more typically you run queries via some framework-specific bindings. For example see `useQuery` for [React](/docs/react) or [SolidJS](/docs/solidjs).
 
 <Note type="note" emoji="🧑‍🏫" slug="immutability" heading="Data returned from ZQL should be considered immutable">
 This means you should not modify the data directly. Instead, clone the data and modify the clone.
@@ -556,7 +556,7 @@ The default Zero TTL values might initially seem too short, but they are designe
 <Note emoji="🧑‍🏫" type="warning" heading="Longer TTLs are disallowed">
 Previous versions of Zero allowed longer TTLs. The API still supports these, but they are clamped to `10m` and Zero prints a warning.
 
-If you think you need longer TTLs, please [let us know](https://discord.zerosync.dev). We are still iterating on these APIs and may have missed something. Alternately we may be able to help you achieve your goal a different way.
+If you think you need longer TTLs, please [let us know](https://discord.rocicorp.dev). We are still iterating on these APIs and may have missed something. Alternately we may be able to help you achieve your goal a different way.
 </Note>
 
 ## Running Queries Once

@@ -13,7 +13,7 @@ Zero applications have both a _database schema_ (the normal backend database sch
   slug="generating"
   heading="You do not need to define the Zero schema by hand"
 >
-  [Community-contributed converters](./community#database-tools) exist for
+  [Community-contributed converters](/docs/community#database-tools) exist for
   Prisma and Drizzle that generate the tables and relationships. It is good to
   know how the underlying Zero schemas work, however, for debugging and
   conceptual understanding.
@@ -101,7 +101,7 @@ An optional column can store a value of the specified type or `null` to mean _no
 
 ### Enumerations
 
-Use the `enumeration` helper to define a column that can only take on a specific set of values. This is most often used alongside an [`enum` Postgres column type](postgres-support#column-types).
+Use the `enumeration` helper to define a column that can only take on a specific set of values. This is most often used alongside an [`enum` Postgres column type](/docs/postgres-support#column-types).
 
 ```tsx
 import {table, string, enumeration} from '@rocicorp/zero';
@@ -164,7 +164,7 @@ const messageRelationships = relationships(message, ({one, many}) => ({
 }));
 ```
 
-This creates "sender" and "replies" relationships that can later be queried with the [`related` ZQL clause](./reading-data#relationships):
+This creates "sender" and "replies" relationships that can later be queried with the [`related` ZQL clause](/docs/reading-data#relationships):
 
 ```ts
 const messagesWithSenderAndReplies = z.query.messages

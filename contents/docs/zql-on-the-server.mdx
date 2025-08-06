@@ -2,7 +2,7 @@
 title: ZQL on the Server
 ---
 
-[Mutators](custom-mutators) use ZQL on the server as an implementation detail, but you can also use ZQL on the server directly.
+[Mutators](./writing-data) use ZQL on the server as an implementation detail, but you can also use ZQL on the server directly.
 
 This is useful for a variety of reasons:
 
@@ -47,7 +47,7 @@ db.transaction(async tx => {
 }, dummyTransactionInput);
 ```
 
-If ZQL does not have the featuers you need, you can use `tx.dbTransaction` to [drop down to raw SQL](custom-mutators#dropping-down-to-raw-sql).
+If ZQL does not have the featuers you need, you can use `tx.dbTransaction` to [drop down to raw SQL](./writing-data#dropping-down-to-raw-sql).
 
 <Note type="warning" slug="schema-read">
   `ZQLDatabase` currently does a read of your postgres schema before every

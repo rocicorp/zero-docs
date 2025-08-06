@@ -1,0 +1,260 @@
+---
+title: CRUD Mutators (Deprecated)
+---
+
+<Note type="warning" slug="crud-mutators">
+  You can migrate to the new [Mutators API](./writing-data). The documentation
+  below is for reference.
+</Note>
+
+Zero generates basic CRUD mutators for every table you sync. Mutators are available at `zero.mutate.<tablename>`:
+
+```tsx
+const z = new Zero(...);
+z.mutate.user.insert({
+	id: nanoid(),
+	username: 'abby',
+	language: 'en-us',
+});
+```
+
+## CRUD Mutators
+
+### Insert
+
+Create new records with `insert`:
+
+```tsx
+z.mutate.user.insert({
+  id: nanoid(),
+  username: 'sam',
+  language: 'js',
+});
+```
+
+Optional fields can be set to `null` to explicitly set the new field to `null`. They can also be set to `undefined` to take the default value (which is often `null` but can also be some generated value server-side).
+
+```tsx
+// schema.ts
+import {createTableSchema} from '@rocicorp/zero';
+
+const userSchema = createTableSchema({
+  tableName: 'user',
+  columns: {
+    id: {type: 'string'},
+    name: {type: 'string'},
+    language: {type: 'string', optional: true},
+  },
+  primaryKey: ['id'],
+  relationships: {},
+});
+
+// app.tsx
+
+// Sets language to `null` specifically
+z.mutate.user.insert({
+  id: nanoid(),
+  username: 'sam',
+  language: null,
+});
+
+// Sets language to the default server-side value. Could be null, or some
+// generated or constant default value too.
+z.mutate.user.insert({
+  id: nanoid(),
+  username: 'sam',
+});
+
+// Same as above
+z.mutate.user.insert({
+  id: nanoid(),
+  username: 'sam',
+  language: undefined,
+});
+```
+
+### Upsert
+
+Create new records or update existing ones with `upsert`:
+
+```tsx
+z.mutate.user.upsert({
+  id: samID,
+  username: 'sam',
+  language: 'ts',
+});
+```
+
+`upsert` supports the same `null` / `undefined` semantics for optional fields that `insert` does (see above).
+
+### Update
+
+Update an existing record. Does nothing if the specified record (by PK) does not exist.
+
+You can pass a partial, leaving fields out that you don’t want to change. For example here we leave the username the same:
+
+```tsx
+// Leaves username field to previous value.
+z.mutate.user.update({
+  id: samID,
+  language: 'golang',
+});
+
+// Same as above
+z.mutate.user.update({
+  id: samID,
+  username: undefined,
+  language: 'haskell',
+});
+
+// Reset language field to `null`
+z.mutate.user.update({
+  id: samID,
+  language: null,
+});
+```
+
+### Delete
+
+Delete an existing record. Does nothing if specified record does not exist.
+
+```tsx
+z.mutate.user.delete({
+  id: samID,
+});
+```
+
+<Note type="note" heading="Cache Persistence" slug="cache-persistence">
+If you want to remove cached data from the browser you can call the `dropAllDatabases` function provided by Zero.
+
+You can read more about it in [Authentication](/docs/auth#data-storage).
+
+</Note>
+
+### Batch Mutate
+
+You can do multiple CRUD mutates in a single _batch_. If any of the mutations fails, all will. They also all appear together atomically in a single transaction to other clients.
+
+```tsx
+z.mutateBatch(async tx => {
+  const samID = nanoid();
+  tx.user.insert({
+    id: samID,
+    username: 'sam',
+  });
+
+  const langID = nanoid();
+  tx.language.insert({
+    id: langID,
+    userID: samID,
+    name: 'js',
+  });
+});
+```
+
+## Permissions
+
+### Insert
+
+You can limit what rows can be inserted and by whom by specifying an `insert` ruleset.
+
+Insert rules are evaluated after the entity is inserted. So if they query the database, they will see the inserted row present. If any rule in the insert ruleset returns a row, the insert is allowed.
+
+Here's an example of an insert rule that disallows inserting users that have the role 'admin'.
+
+```ts
+definePermissions<AuthData, Schema>(schema, () => {
+  const allowIfNonAdmin = (
+    authData: AuthData,
+    {cmp}: ExpressionBuilder<Schema, 'user'>,
+  ) => cmp('role', '!=', 'admin');
+
+  return {
+    user: {
+      row: {
+        insert: [allowIfNonAdmin],
+      },
+    },
+  } satisfies PermissionsConfig<AuthData, Schema>;
+});
+```
+
+### Update
+
+There are two types of update rulesets: `preMutation` and `postMutation`. Both rulesets must pass for an update to be allowed.
+
+`preMutation` rules see the version of a row _before_ the mutation is applied. This is useful for things like checking whether a user owns an entity before editing it.
+
+`postMutation` rules see the version of a row _after_ the mutation is applied. This is useful for things like ensuring a user can only mark themselves as the creator of an entity and not other users.
+
+Like other rulesets, `preMutation` and `postMutation` default to `NOBODY_CAN`. This means that every table must define both these rulesets in order for any updates to be allowed.
+
+For example, the following ruleset allows an issue's owner to edit, but **not** re-assign the issue. The `postMutation` rule enforces that the current user still own the issue after edit.
+
+```ts
+definePermissions<AuthData, Schema>(schema, () => {
+  const allowIfIssueOwner = (
+    authData: AuthData,
+    {cmp}: ExpressionBuilder<Schema, 'issue'>,
+  ) => cmp('ownerID', authData.sub);
+
+  return {
+    issue: {
+      row: {
+        update: {
+          preMutation: [allowIfIssueOwner],
+          postMutation: [allowIfIssueOwner],
+        },
+      },
+    },
+  } satisfies PermissionsConfig<AuthData, Schema>;
+});
+```
+
+This ruleset allows an issue's owner to edit and re-assign the issue:
+
+```ts
+definePermissions<AuthData, Schema>(schema, () => {
+  const allowIfIssueOwner = (
+    authData: AuthData,
+    {cmp}: ExpressionBuilder<Schema, 'issue'>,
+  ) => cmp('ownerID', authData.sub);
+
+  return {
+    issue: {
+      row: {
+        update: {
+          preMutation: [allowIfIssueOwner],
+          postMutation: ANYONE_CAN,
+        },
+      },
+    },
+  } satisfies PermissionsConfig<AuthData, Schema>;
+});
+```
+
+And this allows anyone to edit an issue, but only if they also assign it to themselves. Useful for enforcing _"patches welcome"_? 🙃
+
+```ts
+definePermissions<AuthData, Schema>(schema, () => {
+  const allowIfIssueOwner = (
+    authData: AuthData,
+    {cmp}: ExpressionBuilder<Schema, 'issue'>,
+  ) => cmp('ownerID', authData.sub);
+
+  return {
+    issue: {
+      row: {
+        update: {
+          preMutation: ANYONE_CAN,
+          postMutation: [allowIfIssueOwner],
+        },
+      },
+    },
+  } satisfies PermissionsConfig<AuthData, Schema>;
+});
+```
+
+### Delete
+
+Delete permissions work in the same way as `insert` permissions except they run _before_ the delete is applied. So if a delete rule queries the database, it will see that the deleted row is present. If any rule in the ruleset returns a row, the delete is allowed.

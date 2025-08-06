@@ -47,7 +47,7 @@ export const ROUTES = [
       {title: 'Reading Data (ZQL)', href: '/reading-data'},
       {
         title: 'Writing Data (Mutators)',
-        href: '/custom-mutators',
+        href: '/writing-data',
       },
       {title: 'Authentication', href: '/auth'},
       {title: 'Permissions', href: '/permissions'},
@@ -119,6 +119,15 @@ export const ROUTES = [
       {title: 'Reporting Bugs', href: '/reporting-bugs'},
       {title: 'Open Source', href: '/open-source'},
       {title: 'LLMs', href: '/llms'},
+    ],
+  },
+
+  {
+    title: 'Deprecated',
+    href: null,
+    defaultOpen: false,
+    items: [
+      {title: 'CRUD Mutators', href: '/crud-mutators'},
     ],
   },
 ] as const satisfies EachRoute[];

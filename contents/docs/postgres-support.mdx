@@ -127,7 +127,7 @@ Zero will sync arrays to the client, but there is no support for filtering or jo
 
 Other Postgres column types aren’t supported. They will be ignored when replicating (the synced data will be missing that column) and you will get a warning when `zero-cache` starts up.
 
-If your schema has a pg type not listed here, you can support it in Zero by using a trigger to map it to some type that Zero can support. For example if you have a [GIS polygon type](https://www.postgresql.org/docs/current/datatype-geometric.html#DATATYPE-POLYGON) in the column `my_poly polygon`, you can use a trigger to map it to a `my_poly_json json` column. You could either use another trigger to map in the reverse direction to support changes for writes, or you could use a [server mutator](./custom-mutators#dropping-down-to-raw-sql) to write to the polygon type directly on the server.
+If your schema has a pg type not listed here, you can support it in Zero by using a trigger to map it to some type that Zero can support. For example if you have a [GIS polygon type](https://www.postgresql.org/docs/current/datatype-geometric.html#DATATYPE-POLYGON) in the column `my_poly polygon`, you can use a trigger to map it to a `my_poly_json json` column. You could either use another trigger to map in the reverse direction to support changes for writes, or you could use [server-only logic](./writing-data#dropping-down-to-raw-sql) to write to the polygon type directly on the server.
 
 Let us know if the lack of a particular column type is hindering your use of Zero. It can likely be added.
 

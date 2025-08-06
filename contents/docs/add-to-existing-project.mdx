@@ -11,7 +11,7 @@ you're using React, Vue, Svelte, Solid, or vanilla JavaScript.
   to Postgres](connecting-to-postgres) for setup instructions.
 - If you are using [TypeScript](https://www.typescriptlang.org/) ensure that
   [`strictNullChecks`](https://www.typescriptlang.org/tsconfig/#strictNullChecks)
-  is set to `true` in [tsconfig.json](https://www.typescriptlang.org/tsconfig/). If this is 
+  is set to `true` in [tsconfig.json](https://www.typescriptlang.org/tsconfig/). If this is
   not set, then the advanced types in Zero will not work as expected.
 
 ## Installation
@@ -23,7 +23,7 @@ npm install @rocicorp/zero
 ```
 
 <details>
-<summary id="not-npm">Using `pnpm`, `bun`, or another package manager?</summary>
+<summary id="not-npm">Using `pnpm` or `bun`?</summary>
 
 Zero's server component depends on `@rocicorp/zero-sqlite3`, which contains a
 binary that requires running a postinstall script. Most alternative package
@@ -119,8 +119,9 @@ section](./community#database-tools).
 
 ### Permissions
 
-Update `schema.ts` to include permissions for your tables. For example, to allow
-all users to read and write to the `message` table, add the following:
+By default, all permissions are denied. Allow access to tables by [adding permissions](permissions).
+
+For example, to allow all users to read and write to the `message` table, add the following:
 
 ```ts
 // schema.ts
@@ -130,8 +131,6 @@ export const permissions = definePermissions<unknown, Schema>(schema, () => ({
   message: ANYONE_CAN_DO_ANYTHING,
 }));
 ```
-
-By default, all permissions are denied. For more details, see [permissions](permissions).
 
 ## Creating a Zero Instance
 
@@ -158,14 +157,112 @@ see [Reading Data with ZQL](reading-data).
 
 ### React
 
-React developers can use the `useZero` hook for seamless integration. See
-[React](react) for more details.
+#### Add the ZeroProvider
+
+First, wrap your app with a `ZeroProvider` to make Zero available throughout your component tree.
+
+```tsx
+import {ZeroProvider} from '@rocicorp/zero/react';
+import {schema} from './schema.ts';
+import {createMutators} from './mutators.ts';
+import {useMemo} from 'react';
+
+export function App() {
+  const authData = useAuth(); // replace with your auth logic
+
+  const props = useMemo(() => {
+    return {
+      schema,
+      server: 'http://localhost:4848', // replace with an env var
+      userID: authData?.sub ?? 'anon',
+      mutators: createMutators(authData),
+    };
+  }, [authData]);
+
+  return (
+    <ZeroProvider {...props}>
+      <IssueList />
+    </ZeroProvider>
+  );
+}
+```
+
+#### Query Data
+
+Now you can use the `useZero` hook in any component within the provider:
+
+```tsx
+import {useQuery, useZero} from '@rocicorp/zero/react';
+import {type Schema} from './schema.ts';
+import {type Mutators} from './mutators.ts';
+
+function IssueList() {
+  const z = useZero<Schema, Mutators>();
+  const issueQuery = z.query.issue.limit(100);
+
+  const [issues] = useQuery(issueQuery);
+
+  return (
+    <div>
+      {issues.map(issue => (
+        <IssueRow key={issue.id} issue={issue} />
+      ))}
+    </div>
+  );
+}
+```
 
 ### SolidJS
 
-For SolidJS, use the `createZero` function instead of `new Zero`.
+#### Add the ZeroProvider
 
-Refer to [SolidJS](solidjs) for additional information.
+Wrap your app with a SolidJS `ZeroProvider` to make Zero available throughout your component tree.
+
+```tsx
+import {ZeroProvider} from '@rocicorp/zero/solid';
+import {schema} from './schema.ts';
+import {createMutators} from './mutators.ts';
+import {createMemo} from 'solid-js';
+
+export function App() {
+  const authData = useAuth(); // replace with your auth logic
+
+  const props = createMemo(() => {
+    return {
+      schema,
+      server: 'http://localhost:4848', // replace with an env var
+      userID: authData()?.sub ?? 'anon',
+      mutators: createMutators(authData()),
+    };
+  });
+
+  return (
+    <ZeroProvider {...props()}>
+      <IssueList />
+    </ZeroProvider>
+  );
+}
+```
+
+#### Query Data
+
+Use the `useZero` hook within any component inside the provider:
+
+```tsx
+import {useQuery, useZero} from '@rocicorp/zero/solid';
+import {For} from 'solid-js';
+
+function IssueList() {
+  const z = useZero();
+  const [issues] = useQuery(() => z.query.issue.limit(100));
+
+  return (
+    <div>
+      <For each={issues()}>{issue => <IssueRow issue={issue} />}</For>
+    </div>
+  );
+}
+```
 
 ### Other Frameworks
 

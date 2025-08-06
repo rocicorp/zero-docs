@@ -150,7 +150,7 @@ export default function Home() {
 
       <p>
         Where Zero really shines is complex, highly-interactive applications
-        similar to Linear and Superhuman. With Zero, these apps can be built in a
+        like Linear and Superhuman. With Zero, these apps can be built in a
         fraction of the time it would take to build even an old-fashioned
         server-rendered web app.
       </p>

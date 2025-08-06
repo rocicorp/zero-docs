@@ -50,7 +50,7 @@ export const ROUTES = [
         href: '/writing-data',
       },
       {title: 'Authentication', href: '/auth'},
-      {title: 'Permissions', href: '/permissions'},
+      {title: 'Read Permissions', href: '/permissions'},
       {title: 'Sharing ZQL', href: '/zql-on-the-server'},
       {title: 'Offline', href: '/offline'},
     ],

@@ -121,14 +121,18 @@ section](./community#database-tools).
 
 By default, all permissions are denied. Allow access to tables by [adding permissions](permissions).
 
-For example, to allow all users to read and write to the `message` table, add the following:
+For example, to allow all users to read from the `message` table, add the following:
 
 ```ts
 // schema.ts
-import {ANYONE_CAN_DO_ANYTHING, definePermissions} from '@rocicorp/zero';
+import {ANYONE_CAN, definePermissions} from '@rocicorp/zero';
 
 export const permissions = definePermissions<unknown, Schema>(schema, () => ({
-  message: ANYONE_CAN_DO_ANYTHING,
+  message: {
+    row: {
+      select: ANYONE_CAN,
+    },
+  },
 }));
 ```
 

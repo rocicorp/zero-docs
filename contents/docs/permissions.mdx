@@ -1,8 +1,8 @@
 ---
-title: Permissions
+title: Read Permissions
 ---
 
-Permissions are expressed using [ZQL](reading-data) and run automatically with every read and write.
+Permissions are expressed using [ZQL](reading-data) and run automatically with every read.
 
 Permissions are currently row based. Zero will eventually also have column permissions.
 
@@ -10,7 +10,7 @@ Permissions are currently row based. Zero will eventually also have column permi
 
 Permissions are defined in [`schema.ts`](/docs/zero-schema) using the `definePermissions` function.
 
-Here's an example of limiting reads to members of an organization and deletes to only the creator of an issue:
+Here's an example of limiting reads to members of an organization:
 
 ```ts
 // The decoded value of your JWT.
@@ -29,30 +29,23 @@ export const permissions = definePermissions<AuthData, Schema>(schema, () => {
       q.whereExists('user', q => q.where('id', authData.sub)),
     );
 
-  // Checks if the user is the creator
-  const allowIfIssueCreator = (
-    authData: AuthData,
-    {cmp}: ExpressionBuilder<Schema, 'issue'>,
-  ) => cmp('creatorID', authData.sub);
-
   return {
     issue: {
       row: {
         select: [allowIfInOrganization],
-        delete: [allowIfIssueCreator],
       },
     },
   } satisfies PermissionsConfig<AuthData, Schema>;
 });
 ```
 
-`definePermission` returns a _policy_ object for each table in the schema. Each policy defines a _ruleset_ for the _operations_ that are possible on a table: `select`, `insert`, `update`, and `delete`.
+`definePermission` returns a _policy_ object for each table in the schema.
 
 ### Access is Denied by Default
 
-If you don't specify any rules for an operation, it is denied by default. This is an important safety feature that helps ensure data isn't accidentally exposed.
+If you don't specify any rules for a table, it is denied by default. This is an important safety feature that helps ensure data isn't accidentally exposed.
 
-To enable full access to an action (i.e., during development) use the `ANYONE_CAN` helper:
+To enable full access to a select operation (i.e., during development) use the `ANYONE_CAN` helper:
 
 ```ts
 import {ANYONE_CAN} from '@rocicorp/zero';
@@ -62,7 +55,6 @@ const permissions = definePermissions<AuthData, Schema>(schema, () => {
     issue: {
       row: {
         select: ANYONE_CAN,
-        // Other operations are denied by default.
       },
     },
     // Other tables are denied by default.
@@ -70,24 +62,9 @@ const permissions = definePermissions<AuthData, Schema>(schema, () => {
 });
 ```
 
-To do this for all actions, use `ANYONE_CAN_DO_ANYTHING`:
-
-```ts
-import {ANYONE_CAN_DO_ANYTHING} from '@rocicorp/zero';
-
-const permissions = definePermissions<AuthData, Schema>(schema, () => {
-  return {
-    // All operations on issue are allowed to all users.
-    issue: ANYONE_CAN_DO_ANYTHING,
-
-    // Other tables are denied by default.
-  } satisfies PermissionsConfig<AuthData, Schema>;
-});
-```
-
 ## Evaluating Permissions
 
-Zero permissions are "compiled" into a JSON-based format at build-time. This file is stored in the `{ZERO_APP_ID}.permissions` table of your upstream database. Like other tables, it replicates live down to `zero-cache`. `zero-cache` then parses this file, and applies the encoded rules to every read and write operation.
+Zero permissions are "compiled" into a JSON-based format at build-time. This file is stored in the `{ZERO_APP_ID}.permissions` table of your upstream database. Like other tables, it replicates live down to `zero-cache`. `zero-cache` then parses this file, and applies the encoded rules to every read operation.
 
 <Note type="warning" slug="rule-compilation-is-dumb">
 The compilation process is very simple-minded (read: dumb). Despite looking like normal TypeScript functions that receive an `AuthData` parameter, rule functions are not actually invoked at runtime. Instead, they are invoked with a "placeholder" `AuthData` at build time. We track which fields of this placeholder are accessed and construct a ZQL expression that accesses the right field of `AuthData` at runtime.
@@ -192,4 +169,4 @@ See [Debugging Permissions](./debug/permissions).
 
 ## Examples
 
-See [hello-zero](https://github.com/rocicorp/hello-zero/blob/main/src/schema.ts) for a simple example of write auth and [zbugs](https://github.com/rocicorp/mono/blob/main/apps/zbugs/shared/schema.ts#L217) for a much more involved one.
+See [hello-zero](https://github.com/rocicorp/hello-zero/blob/main/src/schema.ts) for a simple example of read permissions.

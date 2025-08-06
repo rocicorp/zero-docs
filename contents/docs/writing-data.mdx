@@ -2,21 +2,24 @@
 title: Writing Data with Mutators
 ---
 
-Data is written in Zero with mutators – they are powerful, flexible, and expressive.
+Zero does not write directly to your database.
 
-Mutators allow you to _create your own write operations_ using arbitrary code. This makes it possible to do things that are impossible or awkward with other sync engines.
+Instead, just as in classic web apps, database writes happen _on your server_, with mutators.
 
-For example, you can write code that:
+A mutator is just a function with a database transaction and some arbitrary arguments passed in.
+
+When a mutator is called, it executes instantly on the client, and updates the local store and query results. Then, it is synced in the background to the server.
+
+The server can share the same mutator implementation with the client, or it can extend or override it completely. For example, you can write code that:
 
 - Performs arbitrary server-side validation
 - Enforces fine-grained permissions
 - Sends email notifications
-- Queries LLMs
+- Runs LLM inference
 - Uses Yjs for collaborative editing
 - … and much, _much_ more – mutators are just code, and they can do anything code can do!
 
-Mutators participate fully in sync. They execute instantly on the local device, immediately updating all active queries. They are then synced in the background to the server and to other clients.
-You can even share logic between the client and server mutators.
+These writes to the database are then synced to other clients – even when they don't come from mutators.
 
 <Note
   slug="deprecating-crud"

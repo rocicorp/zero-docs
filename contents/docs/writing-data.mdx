@@ -226,7 +226,7 @@ async function myMutator(tx: Transaction) {
 Create new records with `insert`:
 
 ```tsx
-z.mutate.user.insert({
+tx.mutate.user.insert({
   id: nanoid(),
   username: 'sam',
   language: 'js',
@@ -253,7 +253,7 @@ const userSchema = createTableSchema({
 // app.tsx
 
 // Sets language to `null` specifically
-z.mutate.user.insert({
+tx.mutate.user.insert({
   id: nanoid(),
   username: 'sam',
   language: null,
@@ -261,13 +261,13 @@ z.mutate.user.insert({
 
 // Sets language to the default server-side value. Could be null, or some
 // generated or constant default value too.
-z.mutate.user.insert({
+tx.mutate.user.insert({
   id: nanoid(),
   username: 'sam',
 });
 
 // Same as above
-z.mutate.user.insert({
+tx.mutate.user.insert({
   id: nanoid(),
   username: 'sam',
   language: undefined,
@@ -279,7 +279,7 @@ z.mutate.user.insert({
 Create new records or update existing ones with `upsert`:
 
 ```tsx
-z.mutate.user.upsert({
+tx.mutate.user.upsert({
   id: samID,
   username: 'sam',
   language: 'ts',
@@ -296,20 +296,20 @@ You can pass a partial, leaving fields out that you don’t want to change. For 
 
 ```tsx
 // Leaves username field to previous value.
-z.mutate.user.update({
+tx.mutate.user.update({
   id: samID,
   language: 'golang',
 });
 
 // Same as above
-z.mutate.user.update({
+tx.mutate.user.update({
   id: samID,
   username: undefined,
   language: 'haskell',
 });
 
 // Reset language field to `null`
-z.mutate.user.update({
+tx.mutate.user.update({
   id: samID,
   language: null,
 });
@@ -320,7 +320,7 @@ z.mutate.user.update({
 Delete an existing record. Does nothing if specified record does not exist.
 
 ```tsx
-z.mutate.user.delete({
+tx.mutate.user.delete({
   id: samID,
 });
 ```

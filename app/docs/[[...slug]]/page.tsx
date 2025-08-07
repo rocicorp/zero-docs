@@ -1,10 +1,10 @@
 import Toc from '@/components/toc';
 import Pagination from '@/components/Pagination';
-import {page_routes} from '@/lib/routes-config';
 import {notFound} from 'next/navigation';
 import {getDocsForSlug, getDocsTocs, getPreviousNext} from '@/lib/markdown';
 import {Typography} from '@/components/typography';
 import CopyContent from '@/components/ui/copy-content';
+import {getAllPageSlugs} from '@/lib/get-slugs';
 
 type PageProps = {params: Promise<{slug: string[]}>};
 
@@ -72,5 +72,5 @@ export async function generateMetadata({params}: PageProps) {
 }
 
 export function generateStaticParams() {
-  return page_routes.map(item => ({slug: item.href.split('/').slice(1)}));
+  return getAllPageSlugs();
 }

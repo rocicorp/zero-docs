@@ -12,11 +12,6 @@ const nextConfig = {
         destination: '/docs/introduction',
         permanent: false,
       },
-      {
-        source: '/docs/schema-migration',
-        destination: '/docs/zero-schema/#migrations',
-        permanent: true,
-      },
     ];
   },
 };

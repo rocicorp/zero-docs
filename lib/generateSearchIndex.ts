@@ -5,9 +5,7 @@ import remarkParse from 'remark-parse';
 import remarkStringify from 'remark-stringify';
 import {unified} from 'unified';
 import {visit} from 'unist-util-visit';
-import {page_routes} from './routes-config';
-import {toString} from 'mdast-util-to-string';
-import {Root} from 'mdast';
+import {Nodes, Root} from 'mdast';
 import strip from 'strip-markdown';
 
 // Define the root directory where docs are stored
@@ -49,11 +47,14 @@ function getAllMDXFiles(dir: string): string[] {
 function extractHeadings(tree: Root): {text: string; id: string}[] {
   const headings: {text: string; id: string}[] = [];
 
-  visit(tree, 'heading', (node: any) => {
-    const text = node.children
-      .filter((child: any) => child.type === 'text')
-      .map((child: any) => child.value)
-      .join('');
+  visit(tree, 'heading', (node: Nodes) => {
+    const text =
+      'children' in node
+        ? node.children
+            .filter((child: Nodes) => child.type === 'text')
+            .map((child: Nodes) => ('value' in child ? child.value : ''))
+            .join('')
+        : '';
 
     // Extract the slug ID from the heading node
     const id = text
@@ -100,10 +101,6 @@ async function extractTextFromMDX(filePath: string): Promise<SearchDocument> {
     .replace(/\.mdx$/, '');
   const url = `/docs/${pathWithoutExtension}`;
 
-  const route = page_routes.find(
-    route => route.href && url.endsWith(route.href),
-  );
-
   const cleanedContent = plainText
     .replace(/```.*$/gm, '')
     .replace(/\n+/g, ' ')
@@ -114,7 +111,7 @@ async function extractTextFromMDX(filePath: string): Promise<SearchDocument> {
     id: `${index++}-${pathWithoutExtension}`, // Use file name as ID
     title: data.title || pathWithoutExtension, // Use frontmatter title or fallback to path
     url,
-    content: plainText.replace(/\n+/g, ' ').replace(/\s+/g, ' ').trim(),
+    content: cleanedContent,
     headings, // Include extracted headings with IDs
   };
 }

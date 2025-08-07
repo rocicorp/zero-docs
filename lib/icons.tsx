@@ -17,7 +17,6 @@ import {
   CopyIcon,
   Database,
   Eclipse,
-  File,
   FileCode,
   KeyRound,
   Link2,

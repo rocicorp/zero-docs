@@ -7,6 +7,7 @@ import {unified} from 'unified';
 import {visit} from 'unist-util-visit';
 import {Nodes, Root} from 'mdast';
 import strip from 'strip-markdown';
+import {getAllMDXFiles} from './get-slugs';
 
 // Define the root directory where docs are stored
 const DOCS_ROOT = path.join(process.cwd(), 'contents/docs');
@@ -19,26 +20,6 @@ interface SearchDocument {
   content: string;
   url: string;
   headings: {text: string; id: string}[];
-}
-
-/**
- * Recursively find all `index.mdx` files in subdirectories
- */
-export function getAllMDXFiles(dir: string): string[] {
-  let files: string[] = [];
-
-  fs.readdirSync(dir, {withFileTypes: true}).forEach(entry => {
-    const fullPath = path.join(dir, entry.name);
-
-    if (entry.isDirectory()) {
-      // If it's a directory, recurse into it
-      files = files.concat(getAllMDXFiles(fullPath));
-    } else if (entry.isFile() && entry.name.endsWith('.mdx')) {
-      files.push(fullPath);
-    }
-  });
-
-  return files;
 }
 
 /**
@@ -98,6 +79,7 @@ async function extractTextFromMDX(filePath: string): Promise<SearchDocument> {
   // Derive a URL from the file name
   const pathWithoutExtension = path
     .relative(DOCS_ROOT, filePath)
+    .replace(/\/index\.mdx$/, '')
     .replace(/\.mdx$/, '');
   const url = `/docs/${pathWithoutExtension}`;
 
@@ -129,8 +111,4 @@ async function generateSearchIndex() {
   console.log(`✅ Search index generated: ${OUTPUT_FILE}`);
 }
 
-// Run the script only when explicitly enabled to avoid side effects on import
-if (process.env.GENERATE_SEARCH_INDEX === 'true') {
-  // eslint-disable-next-line no-console
-  generateSearchIndex().catch(console.error);
-}
+generateSearchIndex().catch(console.error);

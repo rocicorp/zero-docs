@@ -308,9 +308,9 @@
     "headings": []
   },
   {
-    "id": "44-release-notes/index",
+    "id": "44-release-notes",
     "title": "Release Notes",
-    "url": "/docs/release-notes/index",
+    "url": "/docs/release-notes",
     "content": "Zero 0.22: Simplified TTLs Zero 0.21: PG arrays, TanStack starter, and more Zero 0.20: Full Supabase support, performance improvements Zero 0.19: Many, many bugfixes and cleanups Zero 0.18: Custom Mutators Zero 0.17: Background Queries Zero 0.16: Lambda-Based Permission Deployment Zero 0.15: Live Permission Updates Zero 0.14: Name Mapping and Multischema Zero 0.13: Multinode and SST Zero 0.12: Circular Relationships Zero 0.11: Windows Zero 0.10: Remove Top-Level Await Zero 0.9: JWK Support Zero 0.8: Schema Autobuild, Result Types, and Enums Zero 0.7: Read Perms and Docker Zero 0.6: Relationship Filters Zero 0.5: JSON Columns Zero 0.4: Compound Filters Zero 0.3: Schema Migrations and Write Perms Zero 0.2: Skip Mode and Computed PKs Zero 0.1: First Release",
     "headings": []
   },

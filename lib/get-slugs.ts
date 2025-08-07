@@ -1,10 +1,10 @@
 import path from 'path';
-import {getAllMDXFiles} from './generateSearchIndex';
+import fs from 'fs';
 
 export type StaticParam = {slug: string[]};
 
 /**
- * Returns all static params (slug arrays) for docs pages - all files under `contents/docs/*.mdx`
+ * Returns all static params (slug arrays) for docs pages all files under `contents/docs/*.mdx`
  */
 export const getAllPageSlugs = (): StaticParam[] => {
   const DOCS_ROOT = path.join(process.cwd(), 'contents/docs');
@@ -31,3 +31,23 @@ export const getAllPageSlugs = (): StaticParam[] => {
     return true;
   });
 };
+
+/**
+ * Recursively find all `*.mdx` files in subdirectories
+ */
+export function getAllMDXFiles(dir: string): string[] {
+  let files: string[] = [];
+
+  fs.readdirSync(dir, {withFileTypes: true}).forEach(entry => {
+    const fullPath = path.join(dir, entry.name);
+
+    if (entry.isDirectory()) {
+      // If it's a directory, recurse into it
+      files = files.concat(getAllMDXFiles(fullPath));
+    } else if (entry.isFile() && entry.name.endsWith('.mdx')) {
+      files.push(fullPath);
+    }
+  });
+
+  return files;
+}

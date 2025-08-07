@@ -47,9 +47,15 @@ Zero doesn't support [offline writes](./offline) yet.
 
 Zero is written in TypeScript and only supports TypeScript clients.
 
-### The total backend dataset is > ~1TB
+### The total backend dataset is > ~100GB
 
-Zero stores a replica of your database (at least the parts that can sync to client) in a SQLite database stored on attached SSD within the Zero server. The ultimate limit of this database size is the size of attached SSD. But 1TB is a reasonable practical limit today.
+Zero stores a replica of your database (at least the subset you want to be syncable to clients) in a SQLite database owned by zero-cache.
+
+Zero's query engine is built assuming very fast local access to this replica (i.e., attached NVMe). But other setups are technically supported and work for smaller data.
+
+The ultimate size limit on the database that Zero can work with is the size limit of this SQLite database. So [up to 45TB on EC2](https://aws.amazon.com/ec2/instance-types/) at time of writing.
+
+However, most of our experience with Zero so far is with much smaller workloads. We currently recommend Zero for use with datasets smaller than 100GB, but are working to improve this in the beta timeframe.
 
 ## Zero Might Not be a Good Fit **Yet**
 

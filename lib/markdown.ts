@@ -58,28 +58,35 @@ export async function getDocsForSlug(slug: string) {
     return await parseMdx<BaseMdxFrontmatter>(rawMdx);
   } catch (err) {
     console.error(`Error fetching docs for slug "${slug}":`, err);
-    throw err;
+    return null;
   }
 }
 
 // Generate a Table of Contents (TOC) from markdown headings
 export async function getDocsTocs(slug: string) {
-  const contentPath = await getDocsContentPath(slug);
-  const rawMdx = await fs.readFile(contentPath, 'utf-8');
-  const headingsRegex = /^(#{2,4})\s(.+)$/gm; // Matches headings ## to ####
-  let match;
-  const extractedHeadings = [];
-  while ((match = headingsRegex.exec(rawMdx)) !== null) {
-    const headingLevel = match[1].length;
-    const headingText = match[2].trim();
-    const slug = sluggify(headingText);
-    extractedHeadings.push({
-      level: headingLevel,
-      text: headingText,
-      href: `#${slug}`, // Create anchor links
-    });
+  let rawMdx: string;
+  try {
+    const contentPath = await getDocsContentPath(slug);
+    rawMdx = await fs.readFile(contentPath, 'utf-8');
+
+    const headingsRegex = /^(#{2,4})\s(.+)$/gm; // Matches headings ## to ####
+    let match;
+    const extractedHeadings = [];
+    while ((match = headingsRegex.exec(rawMdx)) !== null) {
+      const headingLevel = match[1].length;
+      const headingText = match[2].trim();
+      const slug = sluggify(headingText);
+      extractedHeadings.push({
+        level: headingLevel,
+        text: headingText,
+        href: `#${slug}`, // Create anchor links
+      });
+    }
+    return extractedHeadings;
+  } catch (err) {
+    console.error(`Error fetching docs for slug "${slug}":`, err);
+    return [];
   }
-  return extractedHeadings;
 }
 
 export function getPreviousNext(path: string): {

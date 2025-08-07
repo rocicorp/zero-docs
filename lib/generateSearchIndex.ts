@@ -24,7 +24,7 @@ interface SearchDocument {
 /**
  * Recursively find all `index.mdx` files in subdirectories
  */
-function getAllMDXFiles(dir: string): string[] {
+export function getAllMDXFiles(dir: string): string[] {
   let files: string[] = [];
 
   fs.readdirSync(dir, {withFileTypes: true}).forEach(entry => {
@@ -129,5 +129,8 @@ async function generateSearchIndex() {
   console.log(`✅ Search index generated: ${OUTPUT_FILE}`);
 }
 
-// Run the script
-generateSearchIndex().catch(console.error);
+// Run the script only when explicitly enabled to avoid side effects on import
+if (process.env.GENERATE_SEARCH_INDEX === 'true') {
+  // eslint-disable-next-line no-console
+  generateSearchIndex().catch(console.error);
+}

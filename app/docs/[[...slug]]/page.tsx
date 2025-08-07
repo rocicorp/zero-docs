@@ -6,10 +6,12 @@ import {getDocsForSlug, getDocsTocs, getPreviousNext} from '@/lib/markdown';
 import {Typography} from '@/components/typography';
 import CopyContent from '@/components/ui/copy-content';
 
-type PageProps = {params: {slug: string[]}};
+type PageProps = {params: Promise<{slug: string[]}>};
 
-export default async function DocsPage({params: {slug = []}}: PageProps) {
-  const pathName = slug.join('/');
+export default async function DocsPage({params}: PageProps) {
+  const {slug: slugParams} = await params;
+
+  const pathName = slugParams.join('/');
   const [res, tocs, previousNext] = await Promise.all([
     getDocsForSlug(pathName),
     getDocsTocs(pathName),
@@ -38,8 +40,9 @@ export default async function DocsPage({params: {slug = []}}: PageProps) {
   );
 }
 
-export async function generateMetadata({params: {slug = []}}: PageProps) {
-  const pathName = slug.join('/');
+export async function generateMetadata({params}: PageProps) {
+  const {slug: slugParams} = await params;
+  const pathName = slugParams.join('/');
   const res = await getDocsForSlug(pathName);
   if (!res) return null;
   const {frontmatter} = res;

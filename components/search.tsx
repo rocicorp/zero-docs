@@ -143,7 +143,7 @@ export default function Search() {
           const doc = searchDocs.find(d => d.id === ref);
           if (!doc) return null;
 
-          let snippet = extractSnippet(doc.content, sanitizedInput);
+          const snippet = extractSnippet(doc.content, sanitizedInput);
 
           const snippetIndex = doc.content
             .toLowerCase()
@@ -224,7 +224,7 @@ export default function Search() {
     }, 20);
 
     return () => clearTimeout(delayDebounce);
-  }, [searchedInput]);
+  }, [searchedInput, lunrIndex]);
 
   // Toggle the menu when ⌘K is pressed
   useHotkeys(
@@ -333,13 +333,13 @@ const PreloadCurrentItem = () => {
 
   const activeItem = useMemo(() => {
     return searchDocs.find(item => item.id === value);
-  }, [value, searchDocs]);
+  }, [value]);
 
   useEffect(() => {
     if (activeItem) {
       router.prefetch(activeItem.url);
     }
-  }, [activeItem]);
+  }, [activeItem, router]);
 
   return <></>;
 };

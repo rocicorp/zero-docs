@@ -1,6 +1,6 @@
 'use client';
 
-import React, {useEffect} from 'react';
+import React from 'react';
 import hljs from 'highlight.js';
 
 type CodeBlockProps = {

@@ -6,7 +6,6 @@ import {
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
 import {SheetClose} from '@/components/ui/sheet';
-import {icons} from '@/lib/icons';
 import {EachRoute} from '@/lib/routes-config';
 import {cn} from '@/lib/utils';
 import {ChevronRight} from 'lucide-react';

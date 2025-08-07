@@ -155,9 +155,9 @@ export default function Home() {
         server-rendered web app.
       </p>
       <p>
-        Zero is currently in public alpha. It's got a few rough edges, and you
-        have to deploy it yourself, but it's already remarkably fun. We&apos;re
-        using it ourselves for Zero's{' '}
+        Zero is currently in public alpha. It&apos;s got a few rough edges, and
+        you have to deploy it yourself, but it&apos;s already remarkably fun.
+        We&apos;re using it ourselves for Zero&apos;s{' '}
         <a className="underline" href="https://bugs.rocicorp.dev/">
           official bug tracker
         </a>{' '}
@@ -170,7 +170,7 @@ export default function Home() {
       <br />
       <div className="flex w-full justify-center">
         <Button variant="primary" size="default" asChild>
-          <a href="/docs/">Get Started Now</a>
+          <Link href="/docs/">Get Started Now</Link>
         </Button>
       </div>
 

@@ -438,6 +438,92 @@ Explaining the arguments above --
 - `ZERO_AUTH_SECRET` - The secret to create and verify JWTs. This is the same secret that was used when deploying zero-cache to fly.
 - `VITE_PUBLIC_SERVER` - The URL the frontend will call to talk to the zero-cache server. This is the URL of the fly app.
 
+## Guide: Single-Node on Sevalla
+
+[Sevalla.com](https://sevalla.com) is a modern Platform as a Service (PaaS) that can be used to deploy `zero-cache` in a single-node configuration, similar to Fly.io.
+
+This guide will walk you through deploying `zero-cache` to Sevalla using its web dashboard.
+
+### Setup Sevalla
+
+First, create an account on [Sevalla.com](https://sevalla.com). You will also need an upstream Postgres database. You can use any hosted Postgres provider like Supabase or Neon. Ensure you have the connection string handy.
+
+### Create a `zero-cache` Sevalla app
+
+1.  From the Sevalla dashboard, create a new Application.
+2.  Choose **Deploy from a public Docker image**.
+3.  For the **Image URL**, enter `rocicorp/zero`. You can append a specific version tag like `rocicorp/zero:0.22.2025080201`, or use `latest` to get the newest version.
+4.  Click **Continue**.
+
+On the configuration screen, you will set up the necessary resources, networking, and environment variables.
+
+#### Resources
+
+Under the **Resources** section, it is critical to allocate enough memory. `zero-cache` can be memory-intensive during startup.
+
+-   **RAM**: Set to at least **2 GB**.
+-   **vCPU**: Set to at least **1 vCPU**.
+
+<Note type="warning" slug="sevalla-oom">
+  **Note:** Running with less than 2GB of RAM may cause the deployment to fail with an Out-Of-Memory (OOM) error (exit code 137). The process may fail silently and enter a restart loop, making it difficult to debug.
+</Note>
+
+#### Storage
+
+`zero-cache` requires a persistent disk to store the SQLite replica.
+
+1.  Under the **Storage** section, click **Add disk**.
+2.  **Name** your disk (e.g., `sqlite-db`).
+3.  Set the **Mount path** to `/opt/app`. This is the working directory inside the `zero-cache` Docker container.
+4.  Choose a sufficient size (e.g., 5 GB).
+
+#### Networking
+
+Expose `zero-cache` to the internet so your frontend client can connect to it.
+
+1.  Under the **Networking** section, ensure the **Web (HTTP)** service is enabled.
+2.  Set the **Port** to `4848`. This is the default port `zero-cache` listens on in single-node mode.
+3.  You can leave the other settings at their defaults. Sevalla automatically handles HTTPS termination and WebSocket proxying.
+
+#### Environment Variables
+
+This is where you'll configure `zero-cache` to connect to your database.
+
+1. Under the **Environment variables** section, add the following variables, replacing them with their corresponding values.
+```
+ZERO_UPSTREAM_DB="..."
+ZERO_REPLICA_FILE="./sync-replica.db"
+ZERO_PUSH_URL="..."
+ZERO_AUTH_JWKS_URL="..." # or `ZERO_AUTH_SECRET` alternatively
+ZERO_LOG_FORMAT="text" # required by Sevalla.com to properly display logs
+```
+
+#### Deploy
+
+Click **Deploy** to deploy your `zero-cache` app.
+
+### Deploy Permissions
+
+Now `zero-cache` is running on Sevalla, but there are no permissions. If you run the app against this `zero-cache`, you'll see that no data is returned from any query. To fix this, deploy your permissions:
+
+```bash
+npx zero-deploy-permissions --schema-path='./src/schema.ts'  --output-file='/tmp/permissions.sql'
+(cat /tmp/permissions.sql; echo "\q") | fly pg connect -a $PG_APP_NAME -d zstart
+```
+
+You will need to redo this step every time you change your app's permissions, likely as part of your
+CI/CD pipeline.
+
+### Use Remote `zero-cache`
+
+```bash
+VITE_PUBLIC_SERVER="https://${CACHE_APP_NAME}.fly.dev/" npm run dev:ui
+```
+
+Now restart the frontend to pick up the env change, and refresh the app. You can stop your local database and `zero-cache` as we're not using them anymore. Open the web inspector to verify the app is talking to the remote `zero-cache`!
+
+You can deploy the frontend to any standard hosting service like Vercel or Netlify, or even to Sevalla.com!
+
 ## Guide: Multi-Node on Raw AWS
 
 ### S3 Bucket

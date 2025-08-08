@@ -155,13 +155,13 @@ export default function Home() {
         server-rendered web app.
       </p>
       <p>
-        Zero is currently in public alpha. It&apos;s got a few rough edges, and
-        you have to deploy it yourself, but it&apos;s already remarkably fun.
-        We&apos;re using it ourselves for Zero&apos;s{' '}
+        Zero is currently in public alpha. It has a few rough edges, and you
+        have to deploy it yourself, but it&apos;s already remarkably fun. We&apos;re
+        using it ourselves for Zero&apos;s{' '}
         <a className="underline" href="https://bugs.rocicorp.dev/">
           official bug tracker
         </a>{' '}
-        and we find it much more productive than the alternatives.
+        and we find it much more productive than alternatives.
       </p>
       <p>
         Ready to start? You can have your first app in production in about 20

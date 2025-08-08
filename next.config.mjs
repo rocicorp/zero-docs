@@ -12,6 +12,11 @@ const nextConfig = {
         destination: '/docs/introduction',
         permanent: false,
       },
+      {
+        source: '/docs/custom-mutators',
+        destination: '/docs/writing-data',
+        permanent: false,
+      },
     ];
   },
 };

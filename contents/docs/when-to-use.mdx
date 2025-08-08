@@ -11,11 +11,11 @@ This page will help you understand if Zero is a good fit for you today.
 
 ### You want to sync only a small subset of data to client
 
-Zero's query-driven sync is a powerful solution for partial sync. You can sync any data you can express as a set of Zero queries. By using partial sync, Zero apps can commonly load in < 1s, yet still maintain the interaction perf of sync.
+Zero's query-driven sync is a powerful solution for partial sync. You can define the data you want to sync with a set of Zero queries. By using partial sync, Zero apps can commonly load in < 1s, yet still maintain the interaction perf of sync.
 
 ### You need fine-grained read or write permissions
 
-Zero's [custom mutators](./custom-mutators) allow you to run arbitrary authorization, validation, or business logic on the write path. You can enforce that a write depends on what group a user is in, what has been shared with them, their role, etc. [Read permissions](./permissions) are very expressive, allowing similar control over what data is synced to the client.
+Zero's [mutators](./writing-data) allow you to run arbitrary authorization, validation, or business logic on the write path. You can enforce that a write depends on what group a user is in, what has been shared with them, their role, etc. [Read permissions](./permissions) are very expressive, allowing similar control over what data is synced to the client.
 
 ### You are building a traditional client-server web app
 

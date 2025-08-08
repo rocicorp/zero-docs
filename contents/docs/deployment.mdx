@@ -440,44 +440,67 @@ Explaining the arguments above --
 
 ## Guide: Single-Node on  Sevalla.com
 
-Let's deploy a single-node `zero-cache` to [Sevalla](https://sevalla.com). Sevalla provides a simple, Heroku-like developer experience (DX) for deploying Docker containers. It is a good alternative to Fly.io for single-node deployments.
+[Sevalla.com](https://sevalla.com) is a modern Platform as a Service (PaaS) that can be used to deploy `zero-cache` in a single-node configuration, similar to Fly.io.
 
-Note that this guide assumes you already have a PostgreSQL (upstream) database available at `ZERO_UPSTREAM_DB`.
+This guide will walk you through deploying `zero-cache` to Sevalla using its web dashboard.
 
----
+### Setup
 
-### Create a Sevalla application
+First, create an account on [Sevalla.com](https://sevalla.com). You will also need an upstream Postgres database. You can use any hosted Postgres provider like Supabase or Neon. Ensure you have the connection string handy.
 
-First, [create a new application](https://docs.sevalla.com/applications/create) on Sevalla using the official [Docker image](https://hub.docker.com/r/rocicorp/zero).
+### 1. Create a New Application
 
-<Note type="warning" slug="sevalla-memory-requirements">
-  **Note:** `zero-cache` can be memory intensive during startup, especially when dealing with a large database. The recommended memory allocation for a single-node setup is **2GB**. Sevalla's M1 plan (2GB RAM) has been verified to work.
+1.  From the Sevalla dashboard, create a new Application.
+2.  Choose **Deploy from a public Docker image**.
+3.  For the **Image URL**, enter `rocicorp/zero`. You can append a specific version tag like `rocicorp/zero:0.22.2025080201`, or use `latest` to get the newest version.
+4.  Click **Continue**.
+
+### 2. Configure Your Application
+
+On the configuration screen, you will set up the necessary resources, networking, and environment variables.
+
+#### Resources
+
+Under the **Resources** section, it is critical to allocate enough memory. `zero-cache` can be memory-intensive during startup.
+
+-   **RAM**: Set to at least **2 GB**.
+-   **vCPU**: Set to at least **1 vCPU**.
+
+<Note type="warning" slug="sevalla-oom">
+  **Note:** Running with less than 2GB of RAM may cause the deployment to fail with an Out-Of-Memory (OOM) error (exit code 137). The process may fail silently and enter a restart loop, making it difficult to debug.
 </Note>
 
-### Configure environment variables
+#### Storage
 
-Sevalla lets you configure environment variables through its dashboard. You'll need to set the following:
+`zero-cache` requires a persistent disk to store the SQLite replica.
 
-- `ZERO_UPSTREAM_DB`: Your upstream Postgres database connection string.
-- `ZERO_REPLICA_FILE`: Set this to `./sync-replica.db` to store the replica file in the application's working directory, which is `/opt/app`.
-- `ZERO_PUSH_URL`: The URL for your custom mutators, if applicable.
-- `ZERO_AUTH_JWKS_URL` or `ZERO_AUTH_SECRET`: Your authentication secrets.
-- `LOG_LEVEL`: Set to `debug` for detailed logs.
+1.  Under the **Storage** section, click **Add disk**.
+2.  **Name** your disk (e.g., `sqlite-db`).
+3.  Set the **Mount path** to `/opt/app`. This is the working directory inside the `zero-cache` Docker container.
+4.  Choose a sufficient size (e.g., 5 GB).
 
-### Add a persistent disk (optional)
+#### Networking
 
-`zero-cache` needs a persistent disk to persist its SQLite replica. Add a disk at `/opt/app` to ensure the data is saved across restarts. This is where the replica file, specified by `ZERO_REPLICA_FILE=./sync-replica.db`, will be stored by default. You can always change this, but be sure `ZERO_REPLICA_FILE` is within it.
+Expose `zero-cache` to the internet so your frontend client can connect to it.
 
-### Configure networking and health checks
+1.  Under the **Networking** section, ensure the **Web (HTTP)** service is enabled.
+2.  Set the **Port** to `4848`. This is the default port `zero-cache` listens on in single-node mode.
+3.  You can leave the other settings at their defaults. Sevalla automatically handles HTTPS termination and WebSocket proxying.
 
-`zero-cache` runs on port **4848** in single-node mode. You need to configure Sevalla's networking settings to expose this port.
+#### Environment Variables
 
-Set up the public HTTP traffic to forward to port **4848**. Sevalla's health check will also need to be configured to handle `zero-cache`'s startup time.
+This is where you'll configure `zero-cache` to connect to your database. 
 
-- **Listen:** `80/http`
-- **Forward:** `4848/http`
-- **Health Check Path:** `/`
-- **Start Period:** Since `zero-cache` can take some time to start up, it's crucial to set the health check's `startPeriod` to a higher value (e.g., 300 seconds) to prevent Sevalla from restarting the container prematurely.
+1. Under the **Environment variables** section, add the following variables, replacing them with their corresponding values.
+```
+ZERO_UPSTREAM_DB="..."
+ZERO_REPLICA_FILE="./sync-replica.db"
+ZERO_PUSH_URL="..."
+ZERO_AUTH_JWKS_URL="..." # or `ZERO_AUTH_SECRET` alternatively
+ZERO_LOG_FORMAT="text" # required by Sevalla.com to properly display logs
+```
+
+####
 
 ## Guide: Multi-Node on Raw AWS
 

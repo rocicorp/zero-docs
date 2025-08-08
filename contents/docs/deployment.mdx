@@ -438,6 +438,47 @@ Explaining the arguments above --
 - `ZERO_AUTH_SECRET` - The secret to create and verify JWTs. This is the same secret that was used when deploying zero-cache to fly.
 - `VITE_PUBLIC_SERVER` - The URL the frontend will call to talk to the zero-cache server. This is the URL of the fly app.
 
+## Guide: Single-Node on  Sevalla.com
+
+Let's deploy a single-node `zero-cache` to [Sevalla](https://sevalla.com). Sevalla provides a simple, Heroku-like developer experience (DX) for deploying Docker containers. It is a good alternative to Fly.io for single-node deployments.
+
+Note that this guide assumes you already have a PostgreSQL (upstream) database available at `ZERO_UPSTREAM_DB`.
+
+---
+
+### Create a Sevalla application
+
+First, [create a new application](https://docs.sevalla.com/applications/create) on Sevalla using the official [Docker image](https://hub.docker.com/r/rocicorp/zero).
+
+<Note type="warning" slug="sevalla-memory-requirements">
+  **Note:** `zero-cache` can be memory intensive during startup, especially when dealing with a large database. The recommended memory allocation for a single-node setup is **2GB**. Sevalla's M1 plan (2GB RAM) has been verified to work.
+</Note>
+
+### Configure environment variables
+
+Sevalla lets you configure environment variables through its dashboard. You'll need to set the following:
+
+- `ZERO_UPSTREAM_DB`: Your upstream Postgres database connection string.
+- `ZERO_REPLICA_FILE`: Set this to `./sync-replica.db` to store the replica file in the application's working directory, which is `/opt/app`.
+- `ZERO_PUSH_URL`: The URL for your custom mutators, if applicable.
+- `ZERO_AUTH_JWKS_URL` or `ZERO_AUTH_SECRET`: Your authentication secrets.
+- `LOG_LEVEL`: Set to `debug` for detailed logs.
+
+### Add a persistent disk (optional)
+
+`zero-cache` needs a persistent disk to persist its SQLite replica. Add a disk at `/opt/app` to ensure the data is saved across restarts. This is where the replica file, specified by `ZERO_REPLICA_FILE=./sync-replica.db`, will be stored by default. You can always change this, but be sure `ZERO_REPLICA_FILE` is within it.
+
+### Configure networking and health checks
+
+`zero-cache` runs on port **4848** in single-node mode. You need to configure Sevalla's networking settings to expose this port.
+
+Set up the public HTTP traffic to forward to port **4848**. Sevalla's health check will also need to be configured to handle `zero-cache`'s startup time.
+
+- **Listen:** `80/http`
+- **Forward:** `4848/http`
+- **Health Check Path:** `/`
+- **Start Period:** Since `zero-cache` can take some time to start up, it's crucial to set the health check's `startPeriod` to a higher value (e.g., 300 seconds) to prevent Sevalla from restarting the container prematurely.
+
 ## Guide: Multi-Node on Raw AWS
 
 ### S3 Bucket

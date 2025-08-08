@@ -1,7 +1,5 @@
 // for page navigation & to sort on leftbar
 
-import {IconKey} from './icons';
-
 export type EachRoute = {
   title: string;
   href: string | null;

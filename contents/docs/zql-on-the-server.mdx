@@ -8,7 +8,7 @@ This is useful for a variety of reasons:
 
 - You can use ZQL to implement standard REST endpoints, allowing you to share code with custom mutators.
 - You can use ZQL as part of schema migrations.
-- In the future ([but not yet implemented](#ssr)), this can support server-side rendering
+- In the future ([but not yet implemented](#ssr)), this can support server-side rendering.
 
 Here's a basic example:
 
@@ -47,7 +47,7 @@ db.transaction(async tx => {
 }, dummyTransactionInput);
 ```
 
-If ZQL does not have the featuers you need, you can use `tx.dbTransaction` to [drop down to raw SQL](custom-mutators#dropping-down-to-raw-sql).
+If ZQL does not have the features you need, you can use `tx.dbTransaction` to [drop down to raw SQL](custom-mutators#dropping-down-to-raw-sql).
 
 <Note type="warning" slug="schema-read">
   `ZQLDatabase` currently does a read of your postgres schema before every
@@ -58,7 +58,7 @@ If ZQL does not have the featuers you need, you can use `tx.dbTransaction` to [d
 
 ## Custom Database Connection
 
-Zero only provides an adapter for `postgres.js`. It is possible to write your own adatapter by implementing `DBTransaction` and `DBConnection`.
+Zero only provides an adapter for `postgres.js`. It is possible to write your own adapter by implementing `DBTransaction` and `DBConnection`.
 
 ### Node Postgres
 

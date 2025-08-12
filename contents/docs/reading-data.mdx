@@ -459,7 +459,7 @@ Active queries are created one of four ways:
 3. The app calls [`preload()`](#preloading) to sync larger queries without a view.
 4. The app calls `q.run()` to get a single result.
 
-Active queries sync until they are _deactivated_. The way this happens depends on how the query was created:
+Active queries can be _deactivated_ according to how they were created:
 
 1. For `materialize()` queries, the UI calls `destroy()` on the view.
 2. For `useQuery()`, the UI unmounts the component (which calls `destroy()` under the covers).

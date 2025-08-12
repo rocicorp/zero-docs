@@ -42,11 +42,8 @@ export const ROUTES = [
       //TODO
       //{title: 'How Zero Works', href: '/overview'},
       {title: 'Schema', href: '/zero-schema'},
-      {title: 'Reading Data (ZQL)', href: '/reading-data'},
-      {
-        title: 'Writing Data (Mutators)',
-        href: '/writing-data',
-      },
+      {title: 'Reading Data', href: '/reading-data'},
+      {title: 'Writing Data', href: '/writing-data'},
       {title: 'Authentication', href: '/auth'},
       {title: 'Read Permissions', href: '/permissions'},
       {title: 'Sharing ZQL', href: '/zql-on-the-server'},
@@ -124,9 +121,7 @@ export const ROUTES = [
     title: 'Deprecated',
     href: null,
     defaultOpen: false,
-    items: [
-      {title: 'CRUD Mutators', href: '/crud-mutators'},
-    ],
+    items: [{title: 'CRUD Mutators', href: '/crud-mutators'}],
   },
 ] as const satisfies EachRoute[];
 

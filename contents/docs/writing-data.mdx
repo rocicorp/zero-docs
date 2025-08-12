@@ -1,25 +1,24 @@
 ---
-title: Writing Data with Mutators
+title: Writing Data
+description: Introduction to Mutators
 ---
 
 Zero does not write directly to your database.
 
-Instead, just as in classic web apps, database writes happen _on your server_, with mutators.
+Instead, Zero uses _mutations_ to describe changes that need to be made. These mutations are processed initially on the client to provide instant UI, and later on your server to change the database.
 
-A mutator is just a function with a database transaction and some arbitrary arguments passed in.
+![diagram](/images/custom-mutators/overview.png)
 
-When a mutator is called, it executes instantly on the client, and updates the local store and query results. Then, it is synced in the background to the server.
+_Mutators_ are the functions you write to process these mutations.
 
-The server can share the same mutator implementation with the client, or it can extend or override it completely. For example, you can write code that:
+Because they contain arbitrary code, mutators are very flexible. You can write mutators that:
 
-- Performs arbitrary server-side validation
-- Enforces fine-grained permissions
-- Sends email notifications
-- Runs LLM inference
-- Uses Yjs for collaborative editing
-- … and much, _much_ more – mutators are just code, and they can do anything code can do!
-
-The writes to the database are then synced to other clients – even when they don't come from mutators.
+* Perform complex validation
+* Enforce fine-grained permissions
+* Send email notifications
+* Query LLMs
+* Use Yjs for collaborative editing
+* … and much, much more – anything code can do!
 
 <Note
   slug="deprecating-crud"
@@ -29,21 +28,7 @@ The writes to the database are then synced to other clients – even when they d
   We have deprecated the [old CRUD mutators](/docs/crud-mutators) and they will be removed in a future release.
 </Note>
 
-## What are Mutators?
-
-### Architecture
-
-Mutators rely on a server in the Zero architecture.
-
-![diagram](/images/custom-mutators/overview.png)
-
-This server is implemented by you, the developer. It's typically just your existing backend, where you already put auth or other server-side functionality.
-
-The server can be a serverless function, a microservice, or a full stateful server. The only real requirement is that it expose a special _push endpoint_ that `zero-cache` can call to process mutations. This endpoint implements the [push protocol](#custom-push-implementation) and contains your custom logic for each mutation.
-
-Zero provides utilities in `@rocicorp/zero` that make it really easy implement this endpoint in TypeScript. But you can also implement it yourself if you want. As long as your endpoint fulfills the push protocol, `zero-cache` doesn't care. You can even write it in a different programming language.
-
-### What is a Mutator?
+## What is a Mutator?
 
 Zero's mutators are based on [_server reconciliation_](https://www.gabrielgambetta.com/client-side-prediction-server-reconciliation.html) – a technique for robust sync that has been used by the video game industry for decades.
 

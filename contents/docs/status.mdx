@@ -27,7 +27,7 @@ This page describes the current state of Zero at a high level. To understand whe
 ## Query Language
 
 * Filters, sorts, limits, relationships, and `exists` [are supported](./reading-data).
-* Queries can have [`ttl`](reading-data#background-queries) to keep data synced across sesssions.
+* Queries can have [`ttl`](reading-data#background-queries) to keep data synced across sessions.
 * Zero will stay within a (configurable) client-side [row limit using LRU](reading-data#client-capacity-management).
 * [Aggregates](roadmap) (count, min, max, group-by) are not yet supported.
 * [Full-text search](roadmap) is not yet supported (you can sometimes simulate with `ILIKE`, though it scales linearly).

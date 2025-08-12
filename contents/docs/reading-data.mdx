@@ -248,7 +248,7 @@ z.query.issue.where('foo', 'bar');
 z.query.issue.where(({cmp}) => cmp('foo', 'bar'));
 ```
 
-To compareto a literal value, use the `cmpLit` helper:
+To compare to a literal value, use the `cmpLit` helper:
 
 ```ts
 z.query.issue.where(cmpLit('foobar', 'foo' + 'bar'));

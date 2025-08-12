@@ -279,7 +279,7 @@ zero.mutate.issue.update({
 
 The result of a call to a mutator is a `Promise`. You do not usually need to `await` this promise as Zero mutators run very fast, usually completing in a tiny fraction of one frame.
 
-However because mutators ocassionally need to access browser storage, they are technically `async`. Reading a row that was written by a mutator immediately after it is written may not return the new data, because the mutator may not have completed writing to storage yet.
+However because mutators occasionally need to access browser storage, they are technically `async`. Reading a row that was written by a mutator immediately after it is written may not return the new data, because the mutator may not have completed writing to storage yet.
 
 ### Waiting for Mutator Result
 
@@ -333,7 +333,7 @@ try {
   await write.server;
 
   // issue-123 is written to server and any results are
-  // syned to this client.
+  // synced to this client.
   // read2 could potentially be undefined here, for example if the
   // server mutator rejected the write.
   const read2 = await zero.query.issue.where('id', 'issue-123').one();
@@ -345,7 +345,7 @@ try {
 If the client-side mutator fails, the `.server` promise is also rejected with the same error. You don't have to listen to both promises, the server promise covers both cases.
 
 <Note heading="Returning data from mutators" slug="returning-data">
-  There is not yet a way to return data from mutators in the success case – the type of `.clent` and `.server` is always `Promise<void>`. [Let us know](https://discord.rocicorp.dev/) if you need this.
+  There is not yet a way to return data from mutators in the success case – the type of `.client` and `.server` is always `Promise<void>`. [Let us know](https://discord.rocicorp.dev/) if you need this.
 </Note>
 
 ### Setting Up the Server
@@ -446,7 +446,7 @@ app.post('/push', async c => {
 })
 ```
 
-If Zero recieves any response from the push endpoint other than HTTP 200, 401, or 403, it will disconnect, wait a few moments, reconnect, and then retry all unprocessed mutations.
+If Zero receives any response from the push endpoint other than HTTP 200, 401, or 403, it will disconnect, wait a few moments, reconnect, and then retry all unprocessed mutations.
 
 If Zero receives HTTP 401 or 403, the client [refreshes the `auth` token](./auth#refresh) if possible, then retries all queued mutations.
 

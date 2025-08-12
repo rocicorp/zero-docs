@@ -13,19 +13,20 @@ _Mutators_ are the functions you write to process these mutations.
 
 Because they contain arbitrary code, mutators are very flexible. You can write mutators that:
 
-* Perform complex validation
-* Enforce fine-grained permissions
-* Send email notifications
-* Query LLMs
-* Use Yjs for collaborative editing
-* … and much, much more – anything code can do!
+- Perform complex validation
+- Enforce fine-grained permissions
+- Send email notifications
+- Query LLMs
+- Use Yjs for collaborative editing
+- … and much, much more – anything code can do!
 
 <Note
   slug="deprecating-crud"
   heading="Looking for the old mutators?"
   type="warning"
 >
-  We have deprecated the [old CRUD mutators](/docs/crud-mutators) and they will be removed in a future release.
+  We have deprecated the [old CRUD mutators](/docs/crud-mutators) and they will
+  be removed in a future release.
 </Note>
 
 ## What is a Mutator?
@@ -35,8 +36,8 @@ Zero's mutators are based on [_server reconciliation_](https://www.gabrielgambet
 <Note emoji="🧑‍🏫" heading="A bit of history">
   Our previous sync engine, [Replicache](https://replicache.dev/), also used
   server reconciliation. The ability to implement arbitrary mutators was one of
-  Replicache's most popular features. Mutators bring this same power to
-  Zero, but with a much better developer experience.
+  Replicache's most popular features. Mutators bring this same power to Zero,
+  but with a much better developer experience.
 </Note>
 
 A mutator is just a function that runs within a database transaction, and which can read and write to the database. Here's an example of a very simple mutator written in TypeScript:

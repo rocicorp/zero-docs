@@ -162,19 +162,25 @@ Multi-column primary and foreign keys are supported.
 
 ## Limiting Replication
 
-You can use [Permissions](permissions) to limit tables and rows from replicating to Zero. In the near future, you'll also be able to use Permissions to limit individual columns.
+There are two levels of replication to consider with Zero: replicating from Postgres to zero-cache, and from zero-cache to the Zero browser client.
 
-Until then, a workaround is to use the Postgres [_publication_](https://www.postgresql.org/docs/current/sql-createpublication.html) feature to control the tables and columns that are replicated into `zero-cache`.
+### zero-cache replication
 
-In your pg schema setup, create a Postgres `publication` with the tables and columns you want:
+By default, Zero creates a Postgres [_publication_](https://www.postgresql.org/docs/current/sql-createpublication.html) that publishes all tables in the `public` schema to zero-cache.
+
+To limit which tables or columns are replicated to zero-cache, you can create a Postgres `publication` with the tables and columns you want:
 
 ```sql
 CREATE PUBLICATION zero_data FOR TABLE users (col1, col2, col3, ...), issues, comments;
 ```
 
-Then, specify this publication in the [App Publications](/docs/zero-cache-config#app-publications) `zero-cache` option. (By default, Zero creates a publication that publishes the entire public schema.)
+Then, specify this publication in the [App Publications](/docs/zero-cache-config#app-publications) `zero-cache` option.
 
-To limit what is synced from the `zero-cache` replica to actual clients (e.g., web browsers) you can use [read permissions](/docs/permissions#select-permissions).
+### Browser client replication
+
+You can use [Read Permissions](permissions#select-permissions) to control which rows are synced from the `zero-cache` replica to actual clients (e.g., web browsers).
+
+Currently, Permissions can limit which tables and rows can be replicated to the client. In the near future, you'll also be able to use Permissions to limit syncing individual columns. Until then, you will need to create a publication to control which columns are synced to zero-cache.
 
 ## Schema changes
 

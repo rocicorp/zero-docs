@@ -161,7 +161,7 @@ export default function Home() {
         <a className="underline" href="https://bugs.rocicorp.dev/">
           official bug tracker
         </a>{' '}
-        and we find it much more productive than the alternatives.
+        and we find it much more productive than alternatives.
       </p>
       <p>
         Ready to start? You can have your first app in production in about 20

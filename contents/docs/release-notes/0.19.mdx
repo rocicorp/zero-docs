@@ -13,13 +13,13 @@ npm install @rocicorp/zero@0.19
 
 - If you use custom mutators, please see [hello-zero-solid](https://github.com/rocicorp/hello-zero-solid/pull/18/files) for how to update your push endpoint.
 - If you use SolidJS, please switch to [`createQuery`](https://github.com/rocicorp/hello-zero-solid/pull/18/files).
-- If you are `awaiting z.mutate.foo.bar()`, you should [switch to `await z.mutate.foo.bar().client`](/docs/custom-mutators#waiting-for-mutator-result) to be consistent with `.server`.
-- If you were using a 0.19 canary, the `.server` property [returns error by rejection again](/docs/custom-mutators#waiting-for-mutator-result) (like 0.18 did). Sorry about the thrash here.
+- If you are `awaiting z.mutate.foo.bar()`, you should [switch to `await z.mutate.foo.bar().client`](/docs/writing-data#waiting-for-mutator-result) to be consistent with `.server`.
+- If you were using a 0.19 canary, the `.server` property [returns error by rejection again](/docs/writing-data#waiting-for-mutator-result) (like 0.18 did). Sorry about the thrash here.
 
 ## Features
 
 - Add a `type` param to `query.run()` so it can wait for server results ([doc](/docs/reading-data#running-queries-once), [bug](https://bugs.rocicorp.dev/issue/3243))
-- `await z.mutate.foo.bar()` is now `await z.mutate.foo.bar().client` for consistency with `.server`, old API still works but deprecated ([doc](/docs/custom-mutators#waiting-for-mutator-result))
+- `await z.mutate.foo.bar()` is now `await z.mutate.foo.bar().client` for consistency with `.server`, old API still works but deprecated ([doc](/docs/writing-data#waiting-for-mutator-result))
 - Improve speed of litestream restore by about 7x
 - Increase replication speed when using JSON by about 25%
 - Add options to `analyze-query` to apply permissions and auth data ([doc](/docs/debug/permissions#read-permissions)).
@@ -50,9 +50,9 @@ npm install @rocicorp/zero@0.19
 - `z2s`: Incorrect handling of self-join, and not exists
 - `not(exists())` is not supported on the client
 - re-auth on 401s returned by push endpoint
-- Added `push.queryParams` constructor parameter to allow passing query params to the push endpoint ([doc](/docs/custom-mutators#setting-up-the-server))
+- Added `push.queryParams` constructor parameter to allow passing query params to the push endpoint ([doc](/docs/writing-data#setting-up-the-server))
 
 ## Breaking Changes
 
-- The structure of setting up a `PushProcesor` has changed slightly. See [push endpoint setup](/docs/custom-mutators#setting-up-the-server) or [upgrade guide](#upgrading).
-- Not technically a breaking change from 0.18, but if you were using 0.19 canaries, the `.server` property returns error by rejection again (like 0.18 did) ([doc](/docs/custom-mutators#waiting-for-mutator-result)).
+- The structure of setting up a `PushProcesor` has changed slightly. See [push endpoint setup](/docs/writing-data#setting-up-the-server) or [upgrade guide](#upgrading).
+- Not technically a breaking change from 0.18, but if you were using 0.19 canaries, the `.server` property returns error by rejection again (like 0.18 did) ([doc](/docs/writing-data#waiting-for-mutator-result)).

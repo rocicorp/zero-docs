@@ -85,6 +85,8 @@ query parameter to your connection strings from `zero-cache`.
 
 ### Supabase
 
+Supabase requires at least 15.8.1.083 for event trigger support. If you have a lower 15.x, Zero will still work but [schema updates will be slower](#event-triggers).
+
 In order to connect to Supabase you must use the "Direct Connection" style connection string, not the pooler:
 
 <ImageLightbox

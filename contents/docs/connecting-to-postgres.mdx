@@ -85,7 +85,11 @@ query parameter to your connection strings from `zero-cache`.
 
 ### Supabase
 
-Supabase requires at least 15.8.1.083 for event trigger support. If you have a lower 15.x, Zero will still work but [schema updates will be slower](#event-triggers).
+#### Postgres Version
+
+Supabase requires at least 15.8.1.083 for event trigger support. If you have a lower 15.x, Zero will still work but [schema updates will be slower](#event-triggers). See Supabase's docs for upgrading your Postgres version.
+
+#### Connection Type
 
 In order to connect to Supabase you must use the "Direct Connection" style connection string, not the pooler:
 
@@ -96,7 +100,9 @@ In order to connect to Supabase you must use the "Direct Connection" style conne
 
 This is because Zero sets up a logical replication slot, which is only supported with a direct connection.
 
-Additionally, you may need to assign an IPv4 address to your Supabase instance:
+#### IPv4
+
+You may also need to assign an IPv4 address to your Supabase instance:
 
 <ImageLightbox
   src="/images/connecting-to-postgres/ipv4.png"

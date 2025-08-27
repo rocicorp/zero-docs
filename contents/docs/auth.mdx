@@ -56,8 +56,8 @@ Zero stores client-side data in `IndexedDB` by default, but this is customizable
 ```ts
 const zero = new Zero({
   // Store data in React Native's SQLite database
-  // See https://github.com/Braden1996/react-native-replicache
-  kvStore: createReplicacheReactNativeOPSQLiteKVStore,
+  // See https://zero.rocicorp.dev/docs/react-native
+  kvStore: expoSQLiteStoreProvider(),
 });
 
 const zero = new Zero({

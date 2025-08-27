@@ -81,6 +81,7 @@ export const ROUTES = [
     items: [
       {title: 'React', href: '/react'},
       {title: 'SolidJS', href: '/solidjs'},
+      {title: 'React Native', href: '/react-native'},
       {title: 'Community', href: '/community'},
     ],
   },

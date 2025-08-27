@@ -71,11 +71,14 @@ This configuration can cause problems like `slot has been invalidated because it
 
 ### Google Cloud SQL
 
-To use Google Cloud SQL you must [manually create a `PUBLICATION`](/docs/postgres-support#limiting-replication)
-and specify that publication name in the [App Publications](/docs/zero-cache-config#app-publications)
-option when running `zero-cache`.
+Zero works with Google Cloud SQL out of the box. In many configurations, when you connect with a user that has sufficient privileges, `zero-cache` will create its default publication automatically.
 
-(Google Cloud SQL does not provide sufficient permissions for `zero-cache` to create its default publication.)
+If your Cloud SQL user does not have permission to create publications, you can still use Zero by [creating a publication manually](/docs/postgres-support#limiting-replication) and then specifying that publication name in [App Publications](/docs/zero-cache-config#app-publications) when running `zero-cache`.
+
+On Google Cloud SQL for PostgreSQL, enable logical decoding by turning on the instance flag `cloudsql.logical_decoding`.
+You do not set `wal_level` directly on Cloud SQL. 
+See Google's documentation for details: [Configure logical replication](https://cloud.google.com/sql/docs/postgres/replication/configure-logical-replication).
+
 
 ### Fly.io
 

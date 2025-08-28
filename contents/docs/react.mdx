@@ -84,3 +84,15 @@ You can also pass a `Zero` instance to the `ZeroProvider` if you want to control
 Complete quickstart here:
 
 https://github.com/rocicorp/hello-zero
+
+## Suspense
+
+The `useSuspenseQuery` hook is exactly like `useQuery`, except it support React Suspense.
+
+```tsx
+const [issues, issuesDetail] = useSuspenseQuery(issueQuery, {
+  suspendUntil: 'complete', // 'partial' or 'complete'
+});
+```
+
+Use the `suspendUntil` parameter to control how long to suspend for. The value `complete` suspends until authoritative results from the server are received. The `partial` value suspends until any non-empty data is received, or for a empty result that is `complete`.

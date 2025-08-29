@@ -2,52 +2,14 @@
 title: React
 ---
 
-Zero has built-in support for React. Here’s what basic usage looks like:
+Zero has built-in support for React. Here's what basic usage looks like.
+
+## Setup
+
+Use the `ZeroProvider` component to setup Zero. It takes care of creating and destroying `Zero` instances reactively:
 
 ```tsx
-import {useQuery, useZero} from '@rocicorp/zero/react';
-import {type Schema} from './schema.ts';
-import {type Mutators} from './mutators.ts';
-
-function IssueList() {
-  const z = useZero<Schema, Mutators>();
-  let issueQuery = z.query.issue
-    .related('creator')
-    .related('labels')
-    .limit(100);
-
-  const userID = selectedUserID();
-
-  if (userID) {
-    issueQuery = issueQuery.where('creatorID', '=', userID);
-  }
-
-  const [issues, issuesDetail] = useQuery(issueQuery);
-
-  return (
-    <>
-      <div>
-        {issuesDetail.type === 'complete' ? 'Complete' : 'Partial'}
-        results
-      </div>
-      <div>
-        {issues.map(issue => (
-          <IssueRow issue={issue} />
-        ))}
-      </div>
-    </>
-  );
-}
-```
-
-## ZeroProvider
-
-The `useZero` hook must be used within a `ZeroProvider` component. The
-`ZeroProvider` component is responsible for creating and destroying
-`Zero` instances reactively.
-
-```tsx
-import {SessionProvider} from 'my-auth-provider';
+import {useSession} from 'my-auth-provider';
 import {ZeroProvider} from '@rocicorp/zero/react';
 import {type Schema, schema} from './schema.ts';
 import {type Mutators, createMutators} from './mutators.ts';
@@ -81,9 +43,52 @@ You can also pass a `Zero` instance to the `ZeroProvider` if you want to control
 </ZeroProvider>
 ```
 
-Complete quickstart here:
+## Usage
 
-https://github.com/rocicorp/hello-zero
+Use the `useZero` hook to get access to the current `Zero` instance, then `useQuery` to run queries:
+
+```tsx
+import {useQuery, useZero} from '@rocicorp/zero/react';
+import {syncedQuery} from '@rocicorp/zero';
+import {builder, type Schema} from './schema.ts';
+import {type Mutators} from './mutators.ts';
+
+export const getIssues = syncedQuery(
+  'issues',
+  z.tuple([z.string().optional()]),
+  (creatorID: string|undefined) => {
+    let q = builder.issue
+      .related('creator')
+      .related('labels')
+      .limit(100);
+
+    if (creatorID) {
+      q = q.where('creatorID', '=', creatorID);
+    }
+    return q;
+  }
+);
+
+function IssueList() {
+  const z = useZero<Schema, Mutators>();
+  const userID = selectedUserID();
+  const [issues, issuesDetail] = useQuery(getIssues(userID));
+
+  return (
+    <>
+      <div>
+        {issuesDetail.type === 'complete' ? 'Complete' : 'Partial'}
+        results
+      </div>
+      <div>
+        {issues.map(issue => (
+          <IssueRow issue={issue} />
+        ))}
+      </div>
+    </>
+  );
+}
+```
 
 ## Suspense
 
@@ -96,3 +101,7 @@ const [issues, issuesDetail] = useSuspenseQuery(issueQuery, {
 ```
 
 Use the `suspendUntil` parameter to control how long to suspend for. The value `complete` suspends until authoritative results from the server are received. The `partial` value suspends until any non-empty data is received, or for a empty result that is `complete`.
+
+## Examples
+
+See [the sample directory](samples/) for more complete React examples.

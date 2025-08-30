@@ -19,8 +19,27 @@ TODO
 - First-class React Native support (thanks [Austin](https://github.com/austinm911) and [Chase](https://x.com/0xcadams)) ([docs](/docs/react-native)).
 - Suspense support for React ([docs](/docs/react#suspense)).
 - Disable CRUD mutators ([docs](/docs/custom-mutators#disabling-crud-mutators))
+- New query metrics in inspector ([docs](/docs/debug/inspector#query-metrics)).
+- `serverVersion()` in inspector ([docs](/docs/debug/inspector#server-version)).
 
 ## Fixes
 
+- `zero-cache` now logs its version on startup ([PR](https://github.com/rocicorp/mono/pull/4734)).
+- Large connection headers should not throw ([PR](https://github.com/rocicorp/mono/pull/4720)).
+- Remove verbose stats from `/statz` that were crashing larger instances ([PR](https://github.com/rocicorp/mono/pull/4719)).
+- Fix `zero-sqlite3` in Docker container ([PR](https://github.com/rocicorp/mono/pull/4739)).
+- GC inactive CVRs ([PR](https://github.com/rocicorp/mono/pull/4741)).
+- Refuse or halt replication for unsupported replica identities ([PR](https://github.com/rocicorp/mono/pull/4775)).
+- Disable DB-level `statement_timeout` for `zero-cache` connections ([PR](https://github.com/rocicorp/mono/pull/4811)).
+- Handle resync after partial state drop ([PR](https://github.com/rocicorp/mono/pull/48141)).
+- Fix logging color output on light terminals ([PR](https://github.com/rocicorp/mono/pull/4056)).
+- Use `TableSource` with `analyze-query` to better match production ([PR](https://github.com/rocicorp/mono/pull/4822)).
+
+## zbugs
+
+- zbugs now supports image uploads! ([PR](https://github.com/rocicorp/mono/pull/4724)).
+
 ## Breaking Changes
 
+- `ZeroProvider` is now required to be used in SolidJS, just like in React. ([docs](/docs/solidjs#setup), [PR](https://github.com/rocicorp/mono/pull/4692)).
+- The `tx` paramter to custom mutators is now required to have an explicit type. ([PR](https://github.com/rocicorp/mono/pull/4703)).

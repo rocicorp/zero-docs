@@ -57,7 +57,7 @@ A custom mutator is just a function that runs within a database transaction, and
 
 ```ts
 async function updateIssue(
-  tx: Transaction,
+  tx: Transaction<Schema>,
   {id, title}: {id: string; title: string},
 ) {
   // Validate title length.
@@ -93,7 +93,7 @@ So on a TypeScript server, that server mutator can just be:
 
 ```ts
 async function updateIssueOnServer(
-  tx: ServerTransaction,
+  tx: ServerTransaction<Schema>,
   {id, title},
   {id: string, title: string},
 ) {
@@ -121,7 +121,7 @@ Imagine that you wanted to use an LLM to detect whether an issue update is spamm
 
 ```ts
 async function updateIssueOnServer(
-  tx: ServerTransaction,
+  tx: ServerTransaction<Schema>,
   {id, title}: {id: string; title: string},
 ) {
   const response = await llamaSession.prompt(
@@ -164,7 +164,10 @@ import {schema} from './schema';
 export function createMutators() {
   return {
     issue: {
-      update: async (tx, {id, title}: {id: string; title: string}) => {
+      update: async (
+        tx: Transaction<Schema>,
+        {id, title}: {id: string; title: string}
+      ) => {
         // Validate title length. Legacy issues are exempt.
         if (title.length > 100) {
           throw new Error(`Title is too long`);
@@ -197,7 +200,7 @@ const zero = new Zero({
 The `Transaction` interface passed to client mutators exposes the same `mutate` API as the existing [CRUD-style mutators](./writing-data):
 
 ```ts
-async function myMutator(tx: Transaction) {
+async function myMutator(tx: Transaction<Schema>) {
   // Insert a new issue
   await tx.mutate.issue.insert({
     id: 'issue-123',
@@ -235,7 +238,10 @@ You can read data within a client mutator using [ZQL](./reading-data):
 export function createMutators() {
   return {
     issue: {
-      update: async (tx, {id, title}: {id: string; title: string}) => {
+      update: async (
+        tx: Transaction<Schema>,
+        {id, title}: {id: string; title: string}
+      ) => {
         // Read existing issue
         const prev = await tx.query.issue.where('id', id).one();
 
@@ -421,7 +427,7 @@ The `PushProcessor` in `@rocicorp/zero/pg` skips any mutations that throw:
 app.post('/push', async c => {
   const result = await processor.process({
     issue: {
-      update: async (tx, data) => {
+      update: async (tx: Transaction<Schema>, data: string) => {
         // The mutation is skipped and the next mutation runs as normal.
         throw new Error('bonk');
       },
@@ -474,7 +480,10 @@ export function createMutators(
       // Reuse all issue mutators except `update`
       ...clientMutators.issue,
 
-      update: async (tx, {id, title}: {id: string; title: string}) => {
+      update: async (
+        tx: Transaction<Schema>,
+        {id, title}: {id: string; title: string}
+      ) => {
         // Call the shared mutator first
         await clientMutators.issue.update(tx, {id, title});
 
@@ -496,7 +505,7 @@ export function createMutators(
 For simple things, we also expose a `location` field on the transaction object that you can use to branch your code:
 
 ```ts
-myMutator: (tx) => {
+myMutator: (tx: Transaction<Schema>) => {
   if (tx.location === 'client') {
     // Client-side code
   } else {
@@ -519,7 +528,10 @@ type AuthData = {
 export function createMutators(authData: AuthData | undefined) {
   return {
     issue: {
-      launchMissiles: async (tx, args: {target: string}) => {
+      launchMissiles: async (
+        tx: Transaction<Schema>,
+        args: {target: string}
+      ) => {
         if (!authData) {
           throw new Error('Users must be logged in to launch missiles');
         }
@@ -566,7 +578,7 @@ The `ServerTransaction` interface has a `dbTransaction` property that exposes th
 This is useful for complex queries, or for using Postgres features that Zero doesn't support yet:
 
 ```ts
-markAllAsRead: async(tx: Transaction, {userId: string}) {
+markAllAsRead: async(tx: Transaction<Schema>, {userId: string}) {
   // shared stuff ...
 
   if (tx.location === 'server') {
@@ -605,7 +617,10 @@ export function createMutators(clientMutators: CustomMutatorDefs<Schema>) {
       // Reuse all issue mutators except `update`
       ...clientMutators.issue,
 
-      markAllAsRead: async (tx, {userId: string}) {
+      markAllAsRead: async (
+        tx: Transaction<Schema>,
+        {userId}: {userId: string}
+      ) => {
         // No narrowing necessary – tx is already a `ServerTransaction`
         // assert(tx.location === 'server');
         await tx.dbTransaction.query(
@@ -639,7 +654,10 @@ export function createMutators(
 ) {
   return {
     issue: {
-      update: async (tx, {id, title}: {id: string; title: string}) => {
+      update: async (
+        tx: Transaction<Schema>,
+        {id, title}: {id: string; title: string}
+      ) => {
         await tx.mutate.issue.update({id, title});
 
         asyncTasks.push(async () => {

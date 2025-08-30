@@ -51,6 +51,11 @@ export const ROUTES = [
         title: 'Custom Mutators',
         href: '/custom-mutators',
       },
+      {
+        title: 'Synced Queries',
+        href: '/synced-queries',
+        new: true,
+      },
       {title: 'Authentication', href: '/auth'},
       {title: 'Permissions', href: '/permissions'},
       {title: 'Sharing ZQL', href: '/zql-on-the-server'},

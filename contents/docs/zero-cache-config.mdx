@@ -185,6 +185,21 @@ flag: `--enable-telemetry`<br/>
 env: `ZERO_ENABLE_TELEMETRY`<br/>
 default: `true`
 
+### Get Queries URL
+
+The URL of the API server to which zero-cache will send synced queries. 
+
+* is allowed if you would like to allow the client to specify a subdomain to use.
+
+For example: *.example.com/api/mutate
+
+You can specify multiple URLs as well which the client can choose from.                           
+e.g., ["https://api1.example.com/mutate", "https://api2.example.com/mutate"]  
+
+flag: `--get-queries-url`<br/>
+env: `ZERO_GET_QUERIES_URL`<br/>
+required: `false`
+
 ### Initial Sync Table Copy Workers
 
 The number of parallel workers used to copy tables during initial sync. Each worker copies a single table at a time, fetching rows in batches of `initial-sync-row-batch-size`.
@@ -342,6 +357,14 @@ The number of ms a row must take to fetch from table-source before it is conside
 flag: `--log-slow-row-threshold`<br/>
 env: `ZERO_LOG_SLOW_ROW_THRESHOLD`<br/>
 default: `2`
+
+### Mutate URL
+
+Alias for [Push URL](#push-url).
+
+flag: `--mutate-url`<br/>
+env: `ZERO_MUTATE_URL`<br/>
+required: `false`
 
 ### Number of Sync Workers
 

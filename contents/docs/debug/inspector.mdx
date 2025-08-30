@@ -55,6 +55,35 @@ To inspect other clients within the group:
 const allClients = await inspector.clients();
 ```
 
+## Query Metrics
+
+The inspector tracks a number of per-query metrics:
+
+```ts
+const queries = await inspector.client.queries();
+const slowQuery = queries[0];
+
+// Median server materialization time for this query.
+console.log(
+  slowQuery.metrics['query-materialization-server']
+  .quantile(0.5)
+);
+
+// 95th percentile client materialization time for this query.
+console.log(
+  slowQuery.metrics['query-materialization-client']
+  .quantile(0.95)
+);
+```
+
+You can list all the available metrics like so:
+
+```ts
+const queries = await inspector.client.queries();
+const slowQuery = queries[0];
+console.log(Object.keys(slowQuery.metrics));
+```
+
 ## Dumping Data
 
 In addition to information about queries, you can see the contents of the client side database.
@@ -73,4 +102,12 @@ for (const tableName of Object.keys(schema.tables)) {
   console.log(`table ${tableName}:`);
   console.table(await client.rows(tableName));
 }
+```
+
+## Server Version
+
+Ask the server to confirm what version it is:
+
+```ts
+console.log('server version: ', await inspector.serverVersion());
 ```

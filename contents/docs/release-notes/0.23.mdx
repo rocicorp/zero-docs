@@ -1,6 +1,6 @@
 ---
 title: Zero 0.23
-description: Synced Queries, First-Class React Native, and Somehow Even More
+description: Synced Queries and React Native Support
 ---
 
 ## Install
@@ -17,8 +17,8 @@ TODO
 
 - Synced Queries ([docs](/docs/synced-queries)).
 - First-class React Native support (thanks [Austin](https://github.com/austinm911) and [Chase](https://x.com/0xcadams)) ([docs](/docs/react-native)).
-- Suspense support for React ([docs](/docs/react#suspense)).
-- Disable CRUD mutators ([docs](/docs/custom-mutators#disabling-crud-mutators))
+- Suspense support for React (thanks [Lewis](https://x.com/lewisl9029)) ([docs](/docs/react#suspense)).
+- Flag to disable CRUD mutators ([docs](/docs/custom-mutators#disabling-crud-mutators)).
 - New query metrics in inspector ([docs](/docs/debug/inspector#query-metrics)).
 - `serverVersion()` in inspector ([docs](/docs/debug/inspector#server-version)).
 
@@ -41,5 +41,6 @@ TODO
 
 ## Breaking Changes
 
-- `ZeroProvider` is now required to be used in SolidJS, just like in React. ([docs](/docs/solidjs#setup), [PR](https://github.com/rocicorp/mono/pull/4692)).
-- The `tx` paramter to custom mutators is now required to have an explicit type. ([PR](https://github.com/rocicorp/mono/pull/4703)).
+- `ZeroProvider` now required in SolidJS, just like in React. ([docs](/docs/solidjs#setup), [PR](https://github.com/rocicorp/mono/pull/4692)).
+- The `tx` parameter in custom mutators now requires an explicit type. ([PR](https://github.com/rocicorp/mono/pull/4703)).
+- The `delegate()` method on the `Query` class was removed. Use [`zero.run`, `zero.preload`, or `zero.materialize`](/docs/synced-queries#invoking-queries) instead ([PR](https://github.com/rocicorp/mono/pull/4806)).

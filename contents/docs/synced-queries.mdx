@@ -1,0 +1,396 @@
+---
+title: Synced Queries
+---
+
+Synced Queries are Zero's new read API.
+
+With the [existing query system](reading-data), queries are defined on the client and run directly against the server. The [permission system](permissions) restricts which rows can be read, but clients can still run any query they want against those rows.
+
+With synced queries, clients can no longer run arbitrary queries. Clients instead invoke named queries that are defined both on the client and on your server. Your server controls the implementation of these queries, and can add additional filters to enforce permissions.
+
+This has many benefits:
+
+* No need for a separate permission system. Your server enforces permissions by constructing queries dynamically. Clients have no direct access to the database.
+* Simpler auth. Your server can use any auth system you want – Zero does not need to know or understand it.
+* Free previews. If you use a hosting platform like Vercel, your synced queries will naturally get [previews](https://vercel.com/docs/deployments/sharing-deployments) along with the rest of your app.
+
+<Note emoji="💬" heading='"Synced Queries" === "Custom Queries"'>
+This feature used to be called "custom queries". But soon it will be Zero's only read API, and won't be "custom" at all. So we renamed it.
+</Note>
+
+## Introduction
+
+A synced query is basically a named function that returns a [ZQL](reading-data) query.
+
+Here's an example:
+
+```ts
+import { syncedQuery, createBuilder } from '@rocicorp/zero';
+import z from "zod";
+import { schema } from './schema.ts';
+
+const builder = createBuilder(schema);
+
+const myPostsQuery = syncedQuery(
+  'postsByAuthor',
+  z.tuple([{ authorID: z.string() }]),
+  (authorID: string) => {
+    return builder.post.where('authorID', authorID);
+  }
+);
+```
+
+See [using synced queries](#using-synced-queries) for more details on the `syncedQuery` function.
+
+An implementation of each synced query exists on both the client and on your server:
+
+<ImageLightbox
+  src="/images/custom-queries/queries1.svg"
+  caption="Query architecture"
+  className="invert dark:invert-0"
+/>
+
+Often the implementations will be the same, and you can just share
+their code. This is easy with full-stack frameworks
+like [TanStack Start](https://tanstack.com/start) or [Next.js](https://nextjs.org/).
+
+But the implementations don't have to be the same, or even compute the same result. For example, the server can add extra filters to enforce permissions that the client query does not.
+
+## Life of a Synced Query
+
+Calling a synced query invokes the wrapped `queryFn` and returns a ZQL query. You can pass that to `useQuery` just like any other ZQL query:
+
+```tsx
+const [posts] = useQuery(myPostsQuery('user123'));
+
+return (
+  <ul>
+    {posts.map(post => (
+      <li key={post.id}>{post.title}</li>
+    ))}
+  </ul>
+);
+```
+
+Just as with ZQL queries, synced queries runs client-side immediately. You get an instant result with any available local data:
+
+<ImageLightbox
+  src="/images/custom-queries/queries2.svg"
+  caption="Registering a query"
+  className="invert dark:invert-0"
+/>
+
+And just as with other ZQL queries, synced queries are live. Optimistic mutations are reflected immediatley and automatically:
+
+<ImageLightbox
+  src="/images/custom-queries/queries3.svg"
+  caption="Local updates"
+  className="invert dark:invert-0"
+/>
+
+### Query Subscription
+
+When you run a synced query, `zero-client` "subscribes"
+to the query by sending the query's name and arguments
+to `zero-cache`.
+
+Zero-cache then turns around and asks your server for the
+definition of that query by calling its `/get-queries` endpoint:
+
+<ImageLightbox
+  src="/images/custom-queries/queries4.svg"
+  caption="Query subscription"
+  className="invert dark:invert-0"
+/>
+
+See [Server Setup](TODO) for details on implementing this endpoint. We provide
+some TypeScript libraries to make it easy.
+
+### Sever Hydration
+
+Once `zero-cache` has the query definition from your server, it creates an
+instance of the query on the server, computes the initial result,
+and returns the response to the client:
+
+<ImageLightbox
+  src="/images/custom-queries/queries5.svg"
+  caption="Server result"
+  className="invert dark:invert-0"
+/>
+
+These results are merged into the local datastore, updating client queries and the app as needed.
+
+### Ongoing Sync
+
+`zero-cache` receives updates from Postgres via logical replication.
+
+It feeds these changes into all open queries, which are incrementally updated. The resulting deltas are sent to the clients, which merge them into their local datastore, updating client queries and the app as needed:
+
+<ImageLightbox
+  src="/images/custom-queries/queries6.svg"
+  caption="Server result"
+  className="invert dark:invert-0"
+/>
+
+## Using Synced Queries
+
+The `syncedQuery` function creates a synced query:
+
+```ts
+import z from "zod";
+import { syncedQuery, createBuilder } from '@rocicorp/zero';
+import { schema } from './schema.ts';
+
+const builder = createBuilder(schema);
+
+export const myPosts = syncedQuery(
+  'myPosts',
+  z.tuple([userId: z.string()]),
+  (userId) => {
+    return builder.post.where('userID', userId);
+  }
+);
+```
+
+It takes three parameters:
+
+* `queryName`: A unique name for the query. This is used by clients to identify the query to the server.
+* `parseFn`: A function that validates the arguments passed to the query on the server. This is any function matching the signature `(args: unknown[]) => ParsedArgs` where `ParsedArgs` is a tuple type. You can also pass an object that has a matching `parse` method as a convenience.
+* `queryFn`: A function that takes the validated arguments and returns a ZQL query.
+
+<Note emoji="🤦‍♂️" heading="Yes we should have used Standard Schema">
+The `parseFn` parameter should obviously be a [standard schema](https://github.com/standard-schema/standard-schema) instance. Whoops. This will be fixed.
+</Note>
+
+Use the `createBuilder` function to create a `builder` from your schema. This allows you to define ZQL queries without needing a `Zero` instance.
+
+A common convention is to define and export a builder in your [`schema.ts`](schema) file:
+
+```ts
+// schema.ts
+import { createSchema, createBuilder } from "@rocicorp/zero";
+
+// ... table and relationship definitions ...
+
+export const schema = createSchema({
+  tables: [user, medium, message],
+  relationships: [messageRelationships],
+});
+
+export const builder = createBuilder(schema);
+```
+
+### Authenticated Queries
+
+To define a synced query that uses the current authenticated user, use `syncedQueryWithContext`:
+
+```ts
+import z from "zod";
+import { syncedQueryWithContext } from '@rocicorp/zero';
+import { builder } from './schema.ts';
+
+export const myIssues = syncedQueryWithContext(
+  'myIssues',
+  z.tuple([isOpen: z.boolean()]),
+  (authData: AuthData, isOpen) => {
+    return builder.issue
+      .where('userID', authData.userID)
+      .where("isOpen", isOpen);
+  }
+);
+```
+
+The `AuthData` type can be anything, but it usually makes most sense to use the same `AuthData` type for all your authenticated queries, so that you can treat queries genericaly [in your server handler](#server-setup).
+
+### Invoking Queries
+
+The most common way to invoke a synced query is with `useQuery` from the [React](react) or [SolidJS](solid) bindings as [shown above](#life-of-a-synced-query).
+
+But there are also new `zero.run`, `zero.materialize`, and `zero.preload` methods that allow you to run synced queries outside of UI components:
+
+```ts
+// Run a query once
+const posts = await zero.run(myPosts('user123'));
+
+// Materialize a view of a query
+const postsView = zero.materialize(myPosts('user123'));
+postsView.addListener((posts) => {
+  console.log('posts updated', posts);
+});
+
+// Preload a query to ensure it's ready when you need it
+await zero.preload(myPosts('user123'));
+```
+
+See the descriptions of [run](reading-data#getting-a-single-result), [materialize](reading-data#listening-to-changes), and [preload](reading-data#preloading) from the existing query system for more details on these method. They work the same.
+
+### Server Setup
+
+Use the [`ZERO_GET_QUERIES_URL` parameter](./zero-cache-config#get-queries-url) to tell Zero the URL to call:
+
+```bash
+ZERO_GET_QUERIES_URL="http://localhost:3000/api/zero/get-queries"
+```
+
+You can easily implement this endpoint in TypeScript with the `handleGetQueriesRequest` and `withValidation` functions.
+
+For example, with [Hono](https://hono.dev):
+
+```ts
+import { withValidation, ReadonlyJSONValue } from "@rocicorp/zero";
+import { handleGetQueriesRequest } from "@rocicorp/zero/server";
+import { issuesByLabel, allLabels } from "issue-list.ts";
+import { schema } from "../shared/schema";
+
+app.post("/get-queries", async (c) => {
+  return await c.json(await handleGetQueriesRequest(getQuery, schema, c.req.raw));
+});
+
+// Build a map of queries with validation by name.
+const validated = Object.fromEntries(
+    [issuesByLabel, allLabels].map(
+        q => [q.queryName, withValidation(q)])
+);
+
+function getQuery(name: string, args: readonly ReadonlyJSONValue[]) {
+  const q = validated[name];
+  if (!q) {
+    throw new Error(`No such query: ${name}`);
+  }
+  return {
+    // First param is the context for authenticated queries.
+    // `args` are validated using the `parser` you provided with
+    // the query definition.
+    query: q(undefined, ...args),
+  };
+}
+```
+
+`handleGetQueriesRequest` accepts a standard `Request` and returns a JSON object which can be serialized and returned by your server framework of choice.
+
+`withValidation` uses the `parser` function you provided when defining the synced query to validate the arguments passed to the query. If validation fails, invoking the synced queries throws and an error is returned to the client.
+
+### Providing Auth Data
+
+The function returned by `withValidation` always takes an `authData` argument as its first parameter. 
+
+If the validated query was defined with `syncedQuery`, this argument is not used and anything can be passed to it. If the query was defined with `syncedQueryWithContext`, this argument will contain the authenticated user data.
+
+This makes it easy to handle authenticated and unauthenticated queries generically with a pattern like:
+
+```ts
+import { handleGetQueriesRequest } from "@rocicorp/zero/server";
+import { withValidation } from "@rocicorp/zero";
+import { issuesByLabel, allLabels } from "issue-list.ts";
+import { schema } from "../shared/schema";
+import { ReadonlyJSONValue } from "@rocicorp/zero";
+
+const validated = Object.fromEntries(
+  [
+    // unauth'd queries
+    issuesByLabel, allLabels,
+    
+    // auth'd query
+    myIssues
+  ].map((q) => [q.queryName, withValidation(q)])
+);
+
+export async function handleGetQueries(request: Request) {
+  const authData = await authenticateUser(request);
+  if (!authData) {
+    return new Response('Unauthorized', {status: 401});
+  }
+
+  return await handleGetQueriesRequest(
+    (name, args) => getQuery(authData, name, args),
+    schema, request);
+}
+
+function getQuery(
+    authData: AuthData,
+    name: string,
+    args: readonly ReadonlyJSONValue[]) {
+  const q = validated[name];
+  if (!q) {
+    throw new Error(`No such query: ${name}`);
+  }
+  return {
+    // Pass authData to both auth'd and unauth'd queries
+    query: q(authData, ...args),
+  };
+}
+```
+
+## Custom Server Implementation
+
+It is possible to implement the `ZERO_GET_QUERIES_URL` endpoint without using Zero's TypeScript libraries, or even in a different language entirely.
+
+The endpoint receives a `POST` request with a JSON body of the form:
+
+```ts
+type TransformRequestBody = {
+    id: string;
+    name: string;
+    args: readonly ReadonlyJSONValue[];
+}[]
+```
+
+And responds with:
+
+```ts
+type TransformResponseBody = ({
+    id: string;
+    name: string;
+    // See https://github.com/rocicorp/mono/blob/main/packages/zero-protocol/src/ast.ts
+    ast: AST;
+} | {
+    error: "app";
+    id: string;
+    name: string;
+    details: ReadonlyJSONValue;
+} | {
+    error: "zero";
+    id: string;
+    name: string;
+    details: ReadonlyJSONValue;
+} | {
+    error: "http";
+    id: string;
+    name: string;
+    status: number;
+    details: ReadonlyJSONValue;
+})[]
+```
+
+## Disabling Old Queries
+
+If you don't want clients to be able to run arbitrary ZQL queries anymore, you can disable them with the `enableLegacyQueries` option to `Zero`:
+
+```tsx
+const zeroOptions = {
+  userID,
+  auth,
+  schema,
+  mutators,
+  server,
+  enableLegacyQueries: false
+};
+
+<ZeroProvider {...zeroOptions}>
+  <App />
+</ZeroProvider>
+```
+
+You will still be able to call `useQuery(z.query.myTable)` or `useQuery(builder.myTable)`, but those queries won't sync. Only queries defined with `syncedQuery` will sync.
+
+## Local-Only Queries
+
+It can sometime be useful to run queries only on the client. For example, to implement typeahead search, it really doesn't make sense to register every single keystroke with the server.
+
+See [disabling legacy queries](#disabling-old-queries) for how to do this.
+
+## Examples
+
+See [zslack](samples#zslack) and [zbugs](samples#zbugs) for an example of a complete app using synced queries.
+
+There is also a PR open for [hello-zero-solid](https://github.com/rocicorp/hello-zero-solid/pull/26).

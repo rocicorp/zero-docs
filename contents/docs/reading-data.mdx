@@ -10,17 +10,6 @@ ZQL queries are composed of one or more _clauses_ that are chained together into
 
 Unlike queries in classic databases, the result of a ZQL query is a _view_ that updates automatically and efficiently as the underlying data changes. You can call a query’s `materialize()` method to get a view, but more typically you run queries via some framework-specific bindings. For example see `useQuery` for [React](/docs/react) or [SolidJS](/docs/solidjs).
 
-<Note type="note" emoji="🧑‍🏫" slug="immutability" heading="Data returned from ZQL should be considered immutable">
-This means you should not modify the data directly. Instead, clone the data and modify the clone.
-
-ZQL caches values and returns them multiple times. If you modify a value returned from ZQL, you will modify it everywhere it is used. This can lead to subtle bugs.
-
-JavaScript and TypeScript lack true immutable types so we use `readonly` to help enforce it. But it's easy to cast away the `readonly` accidentally.
-
-In the future, we'll [`freeze`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/freeze) all returned data in `dev` mode to help prevent this.
-
-</Note>
-
 ## Select
 
 ZQL queries start by selecting a table. There is no way to select a subset of columns; ZQL queries always return the entire row, if permissions allow it.
@@ -33,6 +22,14 @@ z.query.issue;
 ```
 
 This is a design tradeoff that allows Zero to better reuse the row locally for future queries. This also makes it easier to share types between different parts of the code.
+
+<Note type="note" emoji="🧑‍🏫" slug="immutability" heading="Data returned from ZQL should be considered immutable">
+This means you should not modify the data directly. Instead, clone the data and modify the clone.
+
+ZQL caches values and returns them multiple times. If you modify a value returned from ZQL, you will modify it everywhere it is used. This can lead to subtle bugs.
+
+JavaScript and TypeScript lack true immutable types so we use `readonly` to help enforce it. But it's easy to cast away the `readonly` accidentally.
+</Note>
 
 ## Ordering
 

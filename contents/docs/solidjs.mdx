@@ -4,23 +4,90 @@ title: SolidJS
 
 Zero has built-in support for Solid. Here’s what basic usage looks like:
 
+## Setup
+
+Use the `ZeroProvider` component to setup Zero. It takes care of creating and destroying `Zero` instances reactively:
+
 ```tsx
-import {useQuery} from '@rocicorp/zero/solid';
+import App from "./App.tsx";
+import { schema } from "../shared/schema.ts";
+import {useSession} from 'my-auth-provider';
+import { ZeroProvider } from "@rocicorp/zero/solid";
+import { createMutators } from "../shared/mutators.ts";
 
-const issues = useQuery(() => {
-  let issueQuery = z.query.issue
-    .related('creator')
-    .related('labels')
-    .limit(100);
-  const userID = selectedUserID();
+function Root() {
+  const session = useSession();
+  const {userID, authToken: auth} = session;
+  const server = import.meta.env.VITE_PUBLIC_SERVER;
 
-  if (userID) {
-    issueQuery = issueQuery.where('creatorID', '=', userID);
-  }
-  return issueQuery;
-});
+  const zeroOptions = {
+    userID,
+    auth: encodedJWT,
+    server: import.meta.env.VITE_PUBLIC_SERVER,
+    schema,
+    mutators: createMutators(authData),
+  };
+
+  return (
+    <ZeroProvider {...zeroOptions}>
+      <App />
+    </ZeroProvider>
+  );
+}
 ```
 
-Complete quickstart here:
+You can also pass a `Zero` instance to the `ZeroProvider` if you want to control the lifecycle of the `Zero` instance yourself:
+
+```tsx
+// ZeroProvider just sets up the context, it doesn't manage
+// the lifecycle of the Zero instance.
+<ZeroProvider zero={zero}>
+  <App />
+</ZeroProvider>
+```
+
+## Usage
+
+Use `useZero` to get access to the current `Zero` instance, then `useQuery` to run queries:
+
+```tsx
+import {useQuery, useZero} from '@rocicorp/zero/solid';
+import {syncedQuery} from '@rocicorp/zero';
+import {type Schema} from './schema.ts';
+import {type Mutators} from './mutators.ts';
+
+export const getIssues = syncedQuery(
+  'issues',
+  z.tuple([z.string().optional()]),
+  (creatorID: string|undefined) => {
+    let q = builder.issue
+      .related('creator')
+      .related('labels')
+      .limit(100);
+
+    if (creatorID) {
+      q = q.where('creatorID', '=', creatorID);
+    }
+    return q;
+  }
+);
+
+function App() {
+  const z = useZero<Schema, Mutators>()();
+  const userID = selectedUserID();
+  const issues = useQuery(() => getIssues(userID));
+  return (
+    <div>
+      {issues()?.map((issue) => (
+        <div>{issue.title}</div>
+      ))}
+    </div>
+  );
+}
+```
+
+## Examples
+
+See the complete quickstart here:
 
 https://github.com/rocicorp/hello-zero-solid

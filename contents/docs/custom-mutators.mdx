@@ -509,13 +509,6 @@ myMutator: (tx) => {
 
 Because custom mutators are just arbitrary TypeScript functions, there is no need for a special permissions system. Therefore, you won't use Zero's [write permissions](./permissions) when you use custom mutators.
 
-<Note slug="read-permissions" emoji="💡" heading="You do still need *read* permissions">
-  When using custom mutators you will have no [`insert`](permissions#insert-permissions), [`update`](permissions#update-permissions), or [`delete`](permissions#delete-permissions) permissions. You will still have [`select`](permissions#select-permissions) permissions, however.
-
-We hope to build [custom queries](https://bugs.rocicorp.dev/issue/3453) next – a read analog to custom mutators. If we succeed, Zero's permission system will go away completely 🤯.
-
-</Note>
-
 In order to do permission checks, you'll need to know what user is making the request. You can pass this information to your mutators by adding a `AuthData` parameter to the `createMutators` function:
 
 ```ts

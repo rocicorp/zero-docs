@@ -679,6 +679,29 @@ You can manually implement the push protocol in any programming language.
 
 This will be documented in the future, but you can refer to the [PushProcessor](https://github.com/rocicorp/mono/blob/1a3741fbdad6dbdd56aa1f48cc2cc83938a61b16/packages/zero-pg/src/web.ts#L33) source code for an example for now.
 
+## Disabling CRUD Mutators
+
+Ready to go all-in?
+
+Set the `enableLegacyMutators` flag to `false` in your `Zero` options:
+
+```tsx
+const zeroOptions = {
+  userID,
+  auth,
+  schema,
+  mutators,
+  server,
+  enableLegacyMutators: false
+};
+
+<ZeroProvider {...zeroOptions}>
+  <App />
+</ZeroProvider>
+```
+
+This stops the CRUD mutators from showing up in `z.mutate.*`.
+
 ## Examples
 
 - Zbugs uses [custom mutators](https://github.com/rocicorp/mono/blob/a76c9a61670cc09e1a9fe7ab795749f3eef25577/apps/zbugs/shared/mutators.ts) for all mutations, [write permissions](https://github.com/rocicorp/mono/blob/a76c9a61670cc09e1a9fe7ab795749f3eef25577/apps/zbugs/shared/mutators.ts#L61), and [notifications](https://github.com/rocicorp/mono/blob/a76c9a61670cc09e1a9fe7ab795749f3eef25577/apps/zbugs/server/server-mutators.ts#L35).

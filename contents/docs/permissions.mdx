@@ -2,6 +2,14 @@
 title: Permissions
 ---
 
+<Note type="warning" emoji="🫗" heading="Pouring one out for the permissions API" slug="deprecation">
+This API is going to be deprecated really soon in favor of [Synced Queries](/docs/synced-queries) and [Custom&nbsp;Mutators](/docs/custom-mutators).
+
+By putting your server on the query path, these two features let you define permissions using custom code.
+
+Please use them instead of this API for new projects.
+</Note>
+
 Permissions are expressed using [ZQL](reading-data) and run automatically with every read and write.
 
 Permissions are currently row based. Zero will eventually also have column permissions.

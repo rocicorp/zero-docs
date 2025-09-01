@@ -699,23 +699,27 @@ This will be documented in the future, but you can refer to the [PushProcessor](
 
 ## Disabling CRUD Mutators
 
-Ready to go all-in?
+Ready to go all-in on custom mutator?
 
-Set the `enableLegacyMutators` flag to `false` in your `Zero` options:
+Set the `enableLegacyMutators` flag to `false` in your Zero schema:
 
-```tsx
-const zeroOptions = {
-  userID,
-  auth,
-  schema,
-  mutators,
-  server,
-  enableLegacyMutators: false
-};
+```ts
+export const schema = createSchema({
+  // ...
+  enableLegacyMutators: false,
+});
+```
 
-<ZeroProvider {...zeroOptions}>
-  <App />
-</ZeroProvider>
+The `schema` object itself has the same field. So if you use a generator like `drizzle-zero`, you can just add the flag yourself:
+
+```ts
+import { Schema as ZeroSchema } from '@rocicorp/zero';
+import {schema as genSchema} from './schema.gen';
+
+export const schema = {
+  ...genSchema,
+  enableLegacyMutators: false,
+} as const satisfies ZeroSchema;
 ```
 
 This stops the CRUD mutators from showing up in `z.mutate.*`.

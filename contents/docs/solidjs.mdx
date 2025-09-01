@@ -48,39 +48,30 @@ You can also pass a `Zero` instance to the `ZeroProvider` if you want to control
 
 ## Usage
 
-Use `useZero` to get access to the current `Zero` instance, then `useQuery` to run queries:
+Use `useZero` to get the current `Zero` instance, then `useQuery` to run queries:
 
 ```tsx
 import {useQuery, useZero} from '@rocicorp/zero/solid';
-import {syncedQuery} from '@rocicorp/zero';
 import {type Schema} from './schema.ts';
-import {type Mutators} from './mutators.ts';
-
-export const getIssues = syncedQuery(
-  'issues',
-  z.tuple([z.string().optional()]),
-  (creatorID: string|undefined) => {
-    let q = builder.issue
-      .related('creator')
-      .related('labels')
-      .limit(100);
-
-    if (creatorID) {
-      q = q.where('creatorID', '=', creatorID);
-    }
-    return q;
-  }
-);
 
 function App() {
-  const z = useZero<Schema, Mutators>()();
+  const zero = useZero<Schema, Mutators>()();
   const userID = selectedUserID();
-  const issues = useQuery(() => getIssues(userID));
+
+  const [posts] = useQuery(() =>
+    zero.query.posts
+      .where('author_id', userID)
+      .related('comments'));
+
   return (
     <div>
-      {issues()?.map((issue) => (
-        <div>{issue.title}</div>
-      ))}
+      <For each={posts()}>
+        {(post) => (
+          <div key={post.id}>
+            {post.title} - ({post.comments.length} comments)
+          </div>
+        )}
+      </For>
     </div>
   );
 }

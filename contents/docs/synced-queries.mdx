@@ -12,7 +12,7 @@ This has many benefits:
 
 * No need for a separate permission system. Your server enforces permissions by constructing queries dynamically. Clients have no direct access to the database.
 * Simpler auth. Your server can use any auth system you want – Zero does not need to know or understand it.
-* Free previews. If you use a hosting platform like Vercel, your synced queries will naturally get [previews](https://vercel.com/docs/deployments/sharing-deployments) along with the rest of your app.
+* Previews. Since synced queries are implemented on your server, they can naturally support [branch previews](https://vercel.com/docs/deployments/sharing-deployments) on platforms like Vercel. This [doesn't quite work yet](https://bugs.rocicorp.dev/issue/4063), but will be coming to Zero soon.
 
 <Note emoji="💬" heading='"Synced Queries" === "Custom Queries"'>
 This feature used to be called "custom queries". But soon it will be Zero's only read API, and won't be "custom" at all. So we renamed it.
@@ -33,7 +33,7 @@ const builder = createBuilder(schema);
 
 const myPostsQuery = syncedQuery(
   'postsByAuthor',
-  z.tuple([{ authorID: z.string() }]),
+  z.tuple([z.string()]),
   (authorID: string) => {
     return builder.post.where('authorID', authorID);
   }
@@ -158,10 +158,6 @@ It takes three parameters:
 * `parseFn`: A function that validates the arguments passed to the query on the server. This is any function matching the signature `(args: unknown[]) => ParsedArgs` where `ParsedArgs` is a tuple type. You can also pass an object that has a matching `parse` method as a convenience.
 * `queryFn`: A function that takes the validated arguments and returns a ZQL query.
 
-<Note emoji="🤦‍♂️" heading="Yes we should have used Standard Schema">
-The `parseFn` parameter should obviously be a [standard schema](https://github.com/standard-schema/standard-schema) instance. Whoops. This will be fixed.
-</Note>
-
 Use the `createBuilder` function to create a `builder` from your schema. This allows you to define ZQL queries without needing a `Zero` instance.
 
 A common convention is to define and export a builder in your [`schema.ts`](schema) file:
@@ -191,7 +187,7 @@ import { builder } from './schema.ts';
 
 export const myIssues = syncedQueryWithContext(
   'myIssues',
-  z.tuple([isOpen: z.boolean()]),
+  z.tuple([z.boolean()]),
   (authData: AuthData, isOpen) => {
     return builder.issue
       .where('userID', authData.userID)
@@ -364,21 +360,25 @@ type TransformResponseBody = ({
 
 ## Disabling Old Queries
 
-If you don't want clients to be able to run arbitrary ZQL queries anymore, you can disable them with the `enableLegacyQueries` option to `Zero`:
+If you don't want clients to be able to run arbitrary ZQL queries anymore, you can disable them with the `enableLegacyQueries` flag in your Zero schema:
 
-```tsx
-const zeroOptions = {
-  userID,
-  auth,
-  schema,
-  mutators,
-  server,
-  enableLegacyQueries: false
-};
+```ts
+export const schema = createSchema({
+  // ...
+  enableLegacyQueries: false,
+});
+```
 
-<ZeroProvider {...zeroOptions}>
-  <App />
-</ZeroProvider>
+The `schema` object itself has the same field. So if you use a generator like `drizzle-zero`, you can just add the flag yourself:
+
+```ts
+import { Schema as ZeroSchema } from '@rocicorp/zero';
+import {schema as genSchema} from './schema.gen';
+
+export const schema = {
+  ...genSchema,
+  enableLegacyQueries: false,
+} as const satisfies ZeroSchema;
 ```
 
 You will still be able to call `useQuery(z.query.myTable)` or `useQuery(builder.myTable)`, but those queries won't sync. Only queries defined with `syncedQuery` will sync.
@@ -391,6 +391,4 @@ See [disabling legacy queries](#disabling-old-queries) for how to do this.
 
 ## Examples
 
-See [zslack](samples#zslack) and [zbugs](samples#zbugs) for an example of a complete app using synced queries.
-
-There is also a PR open for [hello-zero-solid](https://github.com/rocicorp/hello-zero-solid/pull/26).
+See [zslack](samples#zslack), [zbugs](samples#zbugs), and [hello-zero-solid](samples#hello-zero-solid) for examples of complete apps using synced queries.

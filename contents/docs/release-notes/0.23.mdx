@@ -11,20 +11,24 @@ npm install @rocicorp/zero@0.23
 
 ## Upgrading
 
-TODO
+For example upgrades, see [ztunes](https://github.com/rocicorp/ztunes/pull/18) or [hello-zero-solid](https://github.com/rocicorp/hello-zero-solid/pull/26).
+
+Please note the [breaking changes](#breaking-changes) below. They are minor this time.
+
+To try synced queries, please refer to the [docs](/docs/synced-queries), or the [zslack](https://github.com/rocicorp/zslack) / [hello-zero-solid](https://github.com/rocicorp/hello-zero-solid) repos which have sample implementations. We will update the rest of the samples to synced queries and custom mutators in September.
 
 ## Features
 
-- Synced Queries ([docs](/docs/synced-queries)).
+- Synced Queries (previously known as "custom queries") ([docs](/docs/synced-queries)).
 - First-class React Native support (thanks [Austin](https://github.com/austinm911) and [Chase](https://x.com/0xcadams)) ([docs](/docs/react-native)).
+- New *"zslack"* sample featuring React Native and Synced Queries ([doc](/doc/samples#zslack)).
+- PlanetScale for Postgres is now fully supported ([docs](/docs/connecting-to-postgres)).
 - Suspense support for React (thanks [Lewis](https://x.com/lewisl9029)) ([docs](/docs/react#suspense)).
 - Flag to disable CRUD mutators ([docs](/docs/custom-mutators#disabling-crud-mutators)).
 - New query metrics in inspector ([docs](/docs/debug/inspector#query-metrics)).
-- `serverVersion()` in inspector ([docs](/docs/debug/inspector#server-version)).
 
 ## Fixes
 
-- `zero-cache` now logs its version on startup ([PR](https://github.com/rocicorp/mono/pull/4734)).
 - Large connection headers should not throw ([PR](https://github.com/rocicorp/mono/pull/4720)).
 - Remove verbose stats from `/statz` that were crashing larger instances ([PR](https://github.com/rocicorp/mono/pull/4719)).
 - Fix `zero-sqlite3` in Docker container ([PR](https://github.com/rocicorp/mono/pull/4739)).
@@ -34,6 +38,8 @@ TODO
 - Handle resync after partial state drop ([PR](https://github.com/rocicorp/mono/pull/48141)).
 - Fix logging color output on light terminals ([PR](https://github.com/rocicorp/mono/pull/4056)).
 - Use `TableSource` with `analyze-query` to better match production ([PR](https://github.com/rocicorp/mono/pull/4822)).
+- `zero-cache` now logs its version on startup ([PR](https://github.com/rocicorp/mono/pull/4734)).
+- "Go to definition" works on custom mutators if you set [`enableLegacyMutators: false`](/docs/custom-mutators#disabling-crud-mutators) ([bug](https://bugs.rocicorp.dev/issue/3830)).
 
 ## zbugs
 
@@ -41,6 +47,7 @@ TODO
 
 ## Breaking Changes
 
-- `ZeroProvider` now required in SolidJS, just like in React. ([docs](/docs/solidjs#setup), [PR](https://github.com/rocicorp/mono/pull/4692)).
-- The `tx` parameter in custom mutators now requires an explicit type. ([PR](https://github.com/rocicorp/mono/pull/4703)).
+- `ZeroProvider` now required in SolidJS, just like in React ([docs](/docs/solidjs#setup), [PR](https://github.com/rocicorp/mono/pull/4692)).
+- The `tx` parameter in custom mutators now requires an explicit type ([PR](https://github.com/rocicorp/mono/pull/4703)).
+- The `CustomMutatorDefs` type no longer accepts template parameters ([PR](https://github.com/rocicorp/mono/pull/4703))
 - The `delegate()` method on the `Query` class was removed. Use [`zero.run`, `zero.preload`, or `zero.materialize`](/docs/synced-queries#invoking-queries) instead ([PR](https://github.com/rocicorp/mono/pull/4806)).

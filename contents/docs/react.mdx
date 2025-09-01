@@ -9,28 +9,21 @@ Zero has built-in support for React. Here's what basic usage looks like.
 Use the `ZeroProvider` component to setup Zero. It takes care of creating and destroying `Zero` instances reactively:
 
 ```tsx
-import {useSession} from 'my-auth-provider';
-import {ZeroProvider} from '@rocicorp/zero/react';
-import {type Schema, schema} from './schema.ts';
-import {type Mutators, createMutators} from './mutators.ts';
+import { createRoot } from "react-dom/client";
+import App from "./App.tsx";
+import { ZeroProvider } from "@rocicorp/zero/react";
+import { schema } from "./schema.ts";
+import {useSession} from "my-session-provider";
 
-export function Root() {
-  const session = useSession();
-  const {userID, authToken: auth} = session;
-  const server = import.meta.env.VITE_PUBLIC_SERVER;
+const session = useSession();
+const {userID, auth} = session;
+const server = import.meta.env.VITE_PUBLIC_SERVER;
 
-  const mutators = useMemo(() => {
-    return createMutators(auth);
-  }, [auth]);
-
-  return (
-    // ZeroProvider will reactively create and destroy Zero instances
-    // as needed when props change.
-    <ZeroProvider {...{userID, auth, schema, mutators, server}}>
-      <App />
-    </ZeroProvider>
-  );
-}
+createRoot(document.getElementById("root")!).render(
+  <ZeroProvider {...{ userID, auth, server, schema }}>
+    <App />
+  </ZeroProvider>
+);
 ```
 
 You can also pass a `Zero` instance to the `ZeroProvider` if you want to control the lifecycle of the `Zero` instance yourself:
@@ -45,48 +38,25 @@ You can also pass a `Zero` instance to the `ZeroProvider` if you want to control
 
 ## Usage
 
-Use the `useZero` hook to get access to the current `Zero` instance, then `useQuery` to run queries:
+Use the `useZero` to get the current `Zero` instance, then `useQuery` to run queries:
 
 ```tsx
-import {useQuery, useZero} from '@rocicorp/zero/react';
-import {syncedQuery} from '@rocicorp/zero';
-import {builder, type Schema} from './schema.ts';
-import {type Mutators} from './mutators.ts';
+import { useQuery, useZero } from "@rocicorp/zero/react";
+import { Schema } from "./schema";
 
-export const getIssues = syncedQuery(
-  'issues',
-  z.tuple([z.string().optional()]),
-  (creatorID: string|undefined) => {
-    let q = builder.issue
-      .related('creator')
-      .related('labels')
-      .limit(100);
+function Posts() {
+  const z = useZero<Schema>();
+  const [posts] = useQuery(z.query.posts
+    .where("status", "draft")
+    .related("comments"));
 
-    if (creatorID) {
-      q = q.where('creatorID', '=', creatorID);
-    }
-    return q;
-  }
-);
-
-function IssueList() {
-  const z = useZero<Schema, Mutators>();
-  const userID = selectedUserID();
-  const [issues, issuesDetail] = useQuery(getIssues(userID));
-
-  return (
-    <>
-      <div>
-        {issuesDetail.type === 'complete' ? 'Complete' : 'Partial'}
-        results
+  return <>
+    {posts.map((p) => (
+      <div key={p.id}>
+        {p.title} ({p.comments.length} comments)
       </div>
-      <div>
-        {issues.map(issue => (
-          <IssueRow issue={issue} />
-        ))}
-      </div>
-    </>
-  );
+    ))}
+  </>;
 }
 ```
 
@@ -95,7 +65,7 @@ function IssueList() {
 The `useSuspenseQuery` hook is exactly like `useQuery`, except it support React Suspense.
 
 ```tsx
-const [issues, issuesDetail] = useSuspenseQuery(issueQuery, {
+const [issues] = useSuspenseQuery(issueQuery, {
   suspendUntil: 'complete', // 'partial' or 'complete'
 });
 ```

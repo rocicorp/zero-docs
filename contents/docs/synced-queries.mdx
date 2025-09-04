@@ -12,7 +12,7 @@ This has many benefits:
 
 * No need for a separate permission system. Your server enforces permissions by constructing queries dynamically. Clients have no direct access to the database.
 * Simpler auth. Your server can use any auth system you want – Zero does not need to know or understand it.
-* Previews. Since synced queries are implemented on your server, they can naturally support [branch previews](https://vercel.com/docs/deployments/sharing-deployments) on platforms like Vercel. This [doesn't quite work yet](https://bugs.rocicorp.dev/issue/4063), but will be coming to Zero soon.
+* Previews. Since synced queries are implemented on your server, they can naturally support [branch previews](#custom-get-queries-url) on platforms like Vercel.
 
 <Note emoji="💬" heading='"Synced Queries" === "Custom Queries"'>
 This feature used to be called "custom queries". But we plan for this to become Zero's main read API, and not really "custom". So we renamed it.
@@ -325,6 +325,30 @@ function getQuery(
   };
 }
 ```
+
+### Custom Get Queries URL
+
+By default, synced queries use the URL specified in the `ZERO_GET_QUERIES_URL` parameter. However you can customize this on a per-client basis. To do so, list multiple comma-separted URLs in the `ZERO_GET_QUERIES_URL` parameter:
+
+However you can customize this on a per-client basis. To do so, list multiple comma-separted URLs in the `ZERO_GET_QUERIES_URL` parameter:
+
+```bash
+ZERO_GET_QUERIES_URL='https://api.example.com/get-queries,https://api.staging.example.com/get-queries'
+```
+
+Then choose one of those URLs by passing it to `getQueriesURL` on the `Zero` constructor:
+
+```ts
+const zero = new Zero({
+  schema,
+  mutators: createMutators(),
+  getQueriesURL: 'https://api.staging.example.com/get-queries',
+});
+```
+
+### Wildcards
+
+The URLs listed in `ZERO_GET_QUERIES_URL` can contain `*` wildcards. See the [Wildcard Syntax](./custom-mutators#wildcard-syntax) section in the Custom Mutators documentation for details. It works the same way for synced queries.
 
 ## Custom Server Implementation
 

@@ -357,23 +357,11 @@ If the client-side mutator fails, the `.server` promise is also rejected with th
 
 You will need a server somewhere you can run an endpoint on. This is typically a serverless function on a platform like Vercel or AWS but can really be anything.
 
-Configure the push endpoint with the `push.url` parameter in your `Zero` constructor:
-
-```ts
-const zero = new Zero({
-  push: {
-    url: 'https://zero.my-server.com/push',
-  },
-});
-```
-
-You will also need to enable the server to be used as a push endpoint with the [`ZERO_PUSH_URL` environment variable or `--push-url` flag](./zero-cache-config#push-url):
+Configure the push endpoint with the `ZERO_MUTATE_URL` configuration parameter:
 
 ```bash
-ZERO_PUSH_URL=https://*.my-server.com/push
+ZERO_MUTATE_URL=https://my-server.com/api/mutate
 ```
-
-The `ZERO_PUSH_URL` parameter accepts wildcards, enabling the client to pass runtime configuration to the push endpoint or to use a different push endpoint, e.g., for previews. See the [config docs](./zero-cache-config#push-url) for the full syntax.
 
 The push endpoint receives a `PushRequest` as input describing one or more mutations to apply to the backend, and must return a `PushResponse` describing the results of those mutations.
 
@@ -417,6 +405,72 @@ export default handle(app);
 `ZQLDatabase` in turn relies on an abstract `DBConnection` that provides raw access to a Postgres database. This allows you to use any Postgres library you like, as long as you provide a `DBConnection` implementation for it. The `PostgresJSConnection` class implements `DBConnection` for the excellent [`postgres.js`](https://www.npmjs.com/package/postgres) library to connect to Postgres.
 
 To reuse the client mutators exactly as-is on the server just pass the result of the same `createMutators` function to `PushProcessor`.
+
+### Custom Mutate URL
+
+By default, custom mutators use the URL specified in the `ZERO_MUTATE_URL` parameter. However you can customize this on a per-client basis. To do so, list multiple comma-separted URLs in the `ZERO_MUTATE_URL` parameter:
+
+```bash
+ZERO_MUTATE_URL='https://api.example.com/mutate,https://api.staging.example.com/mutate'
+```
+
+Then choose one of those URLs by passing it to `mutateURL` on the `Zero` constructor:
+
+```ts
+const zero = new Zero({
+  schema,
+  mutators: createMutators(),
+  mutateURL: 'https://api.staging.example.com/mutate',
+});
+```
+
+### Wildcards
+
+The URLs listed in `ZERO_MUTATE_URL` can contain `*` wildcards:
+
+```bash
+# Allow any subdomain of example.com
+ZERO_MUTATE_URL="https://*.example.com/push"
+```
+
+This mutate URL will allow clients to choose URLs like:
+- `https://api.example.com/push` ✅
+- `https://staging.example.com/push` ✅
+- `https://api-feat-123.example.com/push` ✅
+
+But rejects URLs like:
+- `https://example.com/push` ❌ (no subdomain)
+- `https://malicious.com/push` ❌ (different domain)
+- `https://api.example.com/push/extra` ❌ (extra path)
+
+Wildcards are only allowed for subdomains and follow these rules:
+
+**Single Wildcard:**
+```bash
+ZERO_MUTATE_URL="https://*.example.com/push"
+```
+- ✅ Matches: `https://api.example.com/push`
+- ✅ Matches: `https://www.example.com/push`
+- ✅ Matches: `https://staging-v2.example.com/push`
+- ❌ Does not match: `https://example.com/push` (no subdomain)
+- ❌ Does not match: `https://api.staging.example.com/push` (multiple subdomains)
+
+**Multiple Wildcards:**
+```bash
+ZERO_MUTATE_URL="https://*.*.example.com/push"
+```
+- ✅ Matches: `https://api.v1.example.com/push`
+- ✅ Matches: `https://www.staging.example.com/push`
+- ❌ Does not match: `https://api.example.com/push` (only one subdomain)
+- ❌ Does not match: `https://api.v1.staging.example.com/push` (three subdomains)
+
+**Path Restrictions:**
+```bash
+ZERO_MUTATE_URL="https://*.example.com/api/push"
+```
+- ✅ Matches: `https://api.example.com/api/push`
+- ❌ Does not match: `https://api.example.com/api/push/extra` (trailing path)
+- ❌ Does not match: `https://api.example.com/push` (missing /api)
 
 ### Server Error Handling
 

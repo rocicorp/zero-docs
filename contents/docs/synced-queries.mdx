@@ -185,18 +185,30 @@ import z from "zod";
 import { syncedQueryWithContext } from '@rocicorp/zero';
 import { builder } from './schema.ts';
 
+type QueryContext = {
+  userID: string;
+};
+
 export const myIssues = syncedQueryWithContext(
   'myIssues',
   z.tuple([z.boolean()]),
-  (authData: AuthData, isOpen) => {
+  (ctx: QueryContext, isOpen) => {
     return builder.issue
-      .where('userID', authData.userID)
+      .where('userID', ctx.userID)
       .where("isOpen", isOpen);
   }
 );
 ```
 
-The context type passed can be anything, but it will most often be the currently logged in user, along with any other related state such as their role. It makes most sense to use the same context type for all your authenticated queries, so that you can treat queries generically [in your server handler](#server-setup).
+The context type passed can be anything, but at the very least it will most commonly include the current user's ID. It can also be useful to put other information tied to the current user here, such as their role.
+
+It makes most sense to use the same context type for all your contextful queries, so that you can treat queries generically [in your server handler](#server-setup). Also, if you use [custom mutators](./custom-mutators) you will likely use the same `AuthData` struct you use there, or some related type, so that you can share auth code between synced queries and custom mutators.
+
+<Note emoji="🫣" heading="Sorry about the mess!">
+A lot of the APIs between custom mutators, synced queries, and authenctication are in transition and will be rationalized.
+
+For example, we will move custom mutators to an API that looks similar to synced queries and uses the same context concept. We will also be removing the `userID` property from `Zero` so that it's not duplicated in typical usage of context.
+</Note>
 
 ### Invoking Queries
 
@@ -254,7 +266,7 @@ function getQuery(name: string, args: readonly ReadonlyJSONValue[]) {
     throw new Error(`No such query: ${name}`);
   }
   return {
-    // First param is the context for authenticated queries.
+    // First param is the context for contextful queries.
     // `args` are validated using the `parser` you provided with
     // the query definition.
     query: q(undefined, ...args),

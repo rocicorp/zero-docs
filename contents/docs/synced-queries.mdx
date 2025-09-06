@@ -196,7 +196,7 @@ export const myIssues = syncedQueryWithContext(
 );
 ```
 
-The `AuthData` type can be anything, but it usually makes most sense to use the same `AuthData` type for all your authenticated queries, so that you can treat queries genericaly [in your server handler](#server-setup).
+The context type passed can be anything, but it will most often be the currently logged in user, along with any other related state such as their role. It makes most sense to use the same context type for all your authenticated queries, so that you can treat queries generically [in your server handler](#server-setup).
 
 ### Invoking Queries
 
@@ -268,9 +268,9 @@ function getQuery(name: string, args: readonly ReadonlyJSONValue[]) {
 
 ### Providing Auth Data
 
-The function returned by `withValidation` always takes an `authData` argument as its first parameter. 
+The function returned by `withValidation` always takes a `context` argument as its first parameter. 
 
-If the validated query was defined with `syncedQuery`, this argument is not used and anything can be passed to it. If the query was defined with `syncedQueryWithContext`, this argument will contain the authenticated user data.
+If the validated query was defined with `syncedQuery`, this argument is ignored and anything can be passed to it. If the query was defined with `syncedQueryWithContext`, this argument is passed into the `queryFn` that the query was defined with.
 
 This makes it easy to handle authenticated and unauthenticated queries generically with a pattern like:
 

@@ -159,7 +159,7 @@ By convention, the client mutators are defined with a function called `createMut
 ```ts
 // mutators.ts
 import {CustomMutatorDefs} from '@rocicorp/zero';
-import {schema} from './schema';
+import {Schema} from './schema';
 
 export function createMutators() {
   return {
@@ -175,7 +175,7 @@ export function createMutators() {
         await tx.mutate.issue.update({id, title});
       },
     },
-  } as const satisfies CustomMutatorDefs<typeof schema>;
+  } as const satisfies CustomMutatorDefs<Schema>;
 }
 ```
 
@@ -235,6 +235,8 @@ See [the CRUD docs](./writing-data) for detailed semantics on these methods.
 You can read data within a client mutator using [ZQL](./reading-data):
 
 ```ts
+import {Schema} from './schema';
+
 export function createMutators() {
   return {
     issue: {
@@ -253,7 +255,7 @@ export function createMutators() {
         await tx.mutate.issue.update({id, title});
       },
     },
-  } as const satisfies CustomMutatorDefs<typeof schema>;
+  } as const satisfies CustomMutatorDefs<Schema>;
 }
 ```
 
@@ -467,10 +469,10 @@ An approach we like is to create a separate `server-mutators.ts` file that wraps
 ```ts
 // server-mutators.ts
 import {CustomMutatorDefs} from '@rocicorp/zero';
-import {schema} from './schema';
+import {Schema} from './schema';
 
 export function createMutators(
-  clientMutators: CustomMutatorDefs<typeof schema>,
+  clientMutators: CustomMutatorDefs<Schema>,
 ) {
   return {
     // Reuse all client mutators except the ones in `issue`
@@ -498,7 +500,7 @@ export function createMutators(
         });
       },
     },
-  } as const satisfies CustomMutatorDefs<typeof schema>;
+  } as const satisfies CustomMutatorDefs<Schema>;
 }
 ```
 
@@ -521,6 +523,8 @@ Because custom mutators are just arbitrary TypeScript functions, there is no nee
 In order to do permission checks, you'll need to know what user is making the request. You can pass this information to your mutators by adding a `AuthData` parameter to the `createMutators` function:
 
 ```ts
+import {Schema} from './schema';
+
 type AuthData = {
   sub: string;
 };
@@ -545,7 +549,7 @@ export function createMutators(authData: AuthData | undefined) {
         }
       },
     },
-  } as const satisfies CustomMutatorDefs<typeof schema>;
+  } as const satisfies CustomMutatorDefs<Schema>;
 }
 ```
 
@@ -647,6 +651,8 @@ It is bad practice to hold open database transactions while talking over the net
 There is no specific support for this in custom mutators, but since mutators are just code, it’s easy to do:
 
 ```ts
+import {Schema} from './schema';
+
 // server-mutators.ts
 export function createMutators(
   authData: AuthData,
@@ -665,7 +671,7 @@ export function createMutators(
         });
       },
     },
-  } as const satisfies CustomMutatorDefs<typeof schema>;
+  } as const satisfies CustomMutatorDefs<Schema>;
 }
 ```
 

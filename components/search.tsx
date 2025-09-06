@@ -229,7 +229,8 @@ export default function Search() {
   // Toggle the menu when ⌘K is pressed
   useHotkeys(
     'mod+k',
-    () => {
+    (e) => {
+      e.preventDefault();
       setIsOpen(open => !open);
     },
     {enableOnFormTags: true, enableOnContentEditable: true},

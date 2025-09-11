@@ -155,7 +155,7 @@ export const myPosts = syncedQuery(
 It takes three parameters:
 
 * `queryName`: A unique name for the query. This is used by clients to identify the query to the server.
-* `parseFn`: A function that validates the arguments passed to the query on the server. This is any function matching the signature `(args: unknown[]) => ParsedArgs` where `ParsedArgs` is a tuple type. You can also pass an object that has a matching `parse` method as a convenience.
+* `parser`: A function that validates the arguments passed to the query on the server. This is any function matching the signature `(args: unknown[]) => ParsedArgs` where `ParsedArgs` is a tuple type. You can also pass an object that has a matching `parse` method as a convenience.
 * `queryFn`: A function that takes the validated arguments and returns a ZQL query.
 
 Use the `createBuilder` function to create a `builder` from your schema. This allows you to define ZQL queries without needing a `Zero` instance.

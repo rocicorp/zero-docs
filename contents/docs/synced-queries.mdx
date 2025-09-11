@@ -6,7 +6,7 @@ Synced Queries are Zero's new read API.
 
 With the [existing query system](reading-data), queries are defined on the client and run directly against the server. The [permission system](permissions) restricts which rows can be read, but clients can still run any query they want against those rows.
 
-With synced queries, clients can no longer run arbitrary queries. Clients instead invoke named queries that are defined both on the client and on your server. Your server controls the implementation of these queries, and can add additional filters to enforce permissions.
+With synced queries, clients instead invoke named queries that are defined both on the client and on your server. Your server controls the implementation of these queries, and can add additional filters to enforce permissions.
 
 This has many benefits:
 
@@ -15,7 +15,7 @@ This has many benefits:
 * Previews. Since synced queries are implemented on your server, they can naturally support [branch previews](https://vercel.com/docs/deployments/sharing-deployments) on platforms like Vercel. This [doesn't quite work yet](https://bugs.rocicorp.dev/issue/4063), but will be coming to Zero soon.
 
 <Note emoji="💬" heading='"Synced Queries" === "Custom Queries"'>
-This feature used to be called "custom queries". But soon it will be Zero's only read API, and won't be "custom" at all. So we renamed it.
+This feature used to be called "custom queries". But we plan for this to become Zero's main read API, and not really "custom". So we renamed it.
 </Note>
 
 ## Introduction

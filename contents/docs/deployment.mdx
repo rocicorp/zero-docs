@@ -43,9 +43,9 @@ We allow separate DBs so that they can be scaled and tuned independently if desi
 
 ## Topology
 
-When using the old [CRUD mutators](https://zero.rocicorp.dev/docs/writing-data), we recommend deploying zero-cache close to your database because the implementation is chatty. 
+When using the old [CRUD mutators](https://zero.rocicorp.dev/docs/writing-data), we recommend deploying zero-cache close to your database because the implementation is chatty.
 
-With the introduction of [custom mutators](https://zero.rocicorp.dev/docs/custom-mutators), mutations have moved out of zero-cache. This allows you to deploy zero-cache geographically distributed, where it also serves as a read-replica. 
+With the introduction of [custom mutators](https://zero.rocicorp.dev/docs/custom-mutators), mutations have moved out of zero-cache. This allows you to deploy zero-cache geographically distributed, where it also serves as a read-replica.
 
 The old CRUD mutators are still supported, so if you use them, the recommendation to deploy close to your database continues to apply.
 

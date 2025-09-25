@@ -305,9 +305,6 @@ const validated = Object.fromEntries(
 
 export async function handleGetQueries(request: Request) {
   const authData = await authenticateUser(request);
-  if (!authData) {
-    return new Response('Unauthorized', {status: 401});
-  }
 
   return await handleGetQueriesRequest(
     (name, args) => getQuery(authData, name, args),
@@ -315,7 +312,7 @@ export async function handleGetQueries(request: Request) {
 }
 
 function getQuery(
-    authData: AuthData,
+    authData: AuthData | undefined,
     name: string,
     args: readonly ReadonlyJSONValue[]) {
   const q = validated[name];

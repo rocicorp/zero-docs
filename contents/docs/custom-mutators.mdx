@@ -158,7 +158,6 @@ By convention, the client mutators are defined with a function called `createMut
 
 ```ts
 // mutators.ts
-import {CustomMutatorDefs} from '@rocicorp/zero';
 import {schema} from './schema';
 
 export function createMutators() {
@@ -175,7 +174,7 @@ export function createMutators() {
         await tx.mutate.issue.update({id, title});
       },
     },
-  } as const satisfies CustomMutatorDefs<typeof schema>;
+  } as const;
 }
 ```
 
@@ -253,7 +252,7 @@ export function createMutators() {
         await tx.mutate.issue.update({id, title});
       },
     },
-  } as const satisfies CustomMutatorDefs<typeof schema>;
+  } as const;
 }
 ```
 
@@ -470,7 +469,7 @@ import {CustomMutatorDefs} from '@rocicorp/zero';
 import {schema} from './schema';
 
 export function createMutators(
-  clientMutators: CustomMutatorDefs<typeof schema>,
+  clientMutators: CustomMutatorDefs,
 ) {
   return {
     // Reuse all client mutators except the ones in `issue`
@@ -498,7 +497,7 @@ export function createMutators(
         });
       },
     },
-  } as const satisfies CustomMutatorDefs<typeof schema>;
+  } as const;
 }
 ```
 
@@ -545,7 +544,7 @@ export function createMutators(authData: AuthData | undefined) {
         }
       },
     },
-  } as const satisfies CustomMutatorDefs<typeof schema>;
+  } as const;
 }
 ```
 
@@ -596,19 +595,17 @@ markAllAsRead: async(tx: Transaction<Schema>, {userId: string}) {
 }
 ```
 
-As a convenience we also expose a special `CustomMutatorDefs` for use with `server-mutators.ts` that
-sets all the mutators to `ServerTransaction` by default:
+You can use `ServerTransaction` to provide types for the underlying database transaction:
 
 ```ts
 // server-mutators.ts
-import type {
-  CustomMutatorDefs,  // Special server-side CustomMutatorDefs
-  PostgresJSTransaction,
-  ServerTransaction,
-} from '@rocicorp/zero/pg';
+import type {CustomMutatorDefs, ServerTransaction} from '@rocicorp/zero';
+import type {TransactionSql} from 'postgres';
 import {Schema} from './schema';
 
-export function createMutators(clientMutators: CustomMutatorDefs<Schema>) {
+type MutatorTx = ServerTransaction<Schema, TransactionSql>;
+
+export function createMutators(clientMutators: CustomMutatorDefs) {
   return {
     // Reuse all client mutators except the ones in `issue`
     ...clientMutators,
@@ -618,12 +615,10 @@ export function createMutators(clientMutators: CustomMutatorDefs<Schema>) {
       ...clientMutators.issue,
 
       markAllAsRead: async (
-        tx: Transaction<Schema>,
+        tx: MutatorTx,
         {userId}: {userId: string}
       ) => {
-        // No narrowing necessary – tx is already a `ServerTransaction`
-        // assert(tx.location === 'server');
-        await tx.dbTransaction.query(
+        await tx.dbTransaction.wrappedTransaction.unsafe(
           `
           UPDATE notification
           SET read = true
@@ -633,9 +628,7 @@ export function createMutators(clientMutators: CustomMutatorDefs<Schema>) {
         );
       },
     }
-  } as const satisfies CustomMutatorDefs<
-    ServerTransaction<Schema, PostgresJSTransaction>
-  >;
+  } as const;
 }
 
 ```
@@ -665,7 +658,7 @@ export function createMutators(
         });
       },
     },
-  } as const satisfies CustomMutatorDefs<typeof schema>;
+  } as const;
 }
 ```
 

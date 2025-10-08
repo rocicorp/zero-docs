@@ -326,6 +326,45 @@ function getQuery(
 }
 ```
 
+### Handling Errors
+
+If the query endpoint returns an HTTP or network error, it will be reported to the client with using the `type` and `error` fields on the query details object:
+
+```ts
+const [posts, details] = useQuery(myPosts('user123'));
+if (details.type === 'error') {
+  return <div>Error loading posts: {details.error.message}</div>;
+}
+```
+
+Or using the low-level API:
+
+```ts
+// Materialize a view of a query
+const postsView = zero.materialize(myPosts('user123'));
+postsView.addListener((posts, resultType, error) => {
+  if (resultType === 'error') {
+    console.error('Error loading posts', error);
+  }
+});
+```
+
+In React and SolidJS, you can re-run the failed query using `refetch`:
+
+```ts
+const [posts, details, { refetch }] = useQuery(myPosts('user123'));
+if (details.type === 'error') {
+  return (
+    <div>
+      Error loading posts: {details.error.message}
+      <button onClick={() => details.refetch()}>Retry</button>
+    </div>
+  );
+}
+```
+
+When using the low-level API, just call `materialize()` again.
+
 ### Custom Get Queries URL
 
 By default, synced queries use the URL specified in the `ZERO_GET_QUERIES_URL` parameter. However you can customize this on a per-client basis. To do so, list multiple comma-separted URLs in the `ZERO_GET_QUERIES_URL` parameter:

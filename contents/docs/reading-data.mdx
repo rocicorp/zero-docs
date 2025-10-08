@@ -302,6 +302,51 @@ z.query.issue.where({cmp, or, exists} =>
 );
 ```
 
+## Join Flipping
+
+Zero implements `exists` using an [inner join](https://en.wikipedia.org/wiki/Join_(SQL)) internally. As in any database, the order the tables are joined in dramatically affects performance.
+
+Zero doesn't yet have a query planner that can automatically pick the best join order. But you can control the join order manually using the `flip:true` option to `whereExists`:
+
+```tsx
+// Find the first 100 documents that user 42 can edit,
+// ordered by created desc. Because each user is an editor
+// of only a few documents, flip:true makes this query
+// much faster. 
+z.query.documents.whereExists('editors',
+    e => e.where('userID', 42),
+    {flip: true}
+  ),
+  .orderBy('created', 'desc')
+  .limit(100);
+```
+
+Or with `exists`:
+
+```tsx
+// Find issues created by user 42 or that have a comment
+// by user 42. Because user 42 has commented on only a
+// few issues, flip:true makes this query faster.
+z.query.issue.where({cmp, or, exists} =>
+  or(
+    cmp('creatorID', 42),
+    exists('comments',
+      c => c.where('creatorID', 42),
+      {flip: true}),
+  ),
+);
+```
+
+<Note type="note" heading="When to use join flipping">
+  You should use `flip:true` when the query passed to `exists()` is expected to return a match only for a small subset of the rows in the parent table.
+
+  By default, Zero implements `exists` by looping through all the rows of the parent query and for each row, checking if there is a matching row in the child query. This strategy works well if the child filter is expected to match a large fraction of the parent rows. For example in [zbugs](samples#zbugs), most users can access most bugs, so Zero's default strategy works well.
+
+  But if you know that the child query will match a small fraction of rows in parent query, use the `flip` to tell Zero to loop through the child query first.
+</Note>
+
+We are working on an auto-planner that will make manual join flipping unnecessary in most cases.
+
 ## Completeness
 
 Zero immediately returns the data for a query it has on the client, then falls back to the server for any missing data. Sometimes it's useful to know the difference between these two types of results. To do so, use the `result` from `useQuery`:

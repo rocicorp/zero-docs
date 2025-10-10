@@ -32,11 +32,13 @@ required: `true`
 
 ### Admin Password
 
-A password used to administer zero-cache server, for example to access the `/statz` endpoint.
+A password used to administer zero-cache server, for example to access the `/statz` endpoint and the [inspector](debug/inspector).
+
+This is required in production (when `NODE_ENV=production`) because we want all Zero servers to be debuggable using admin tools by default, without needing a restart. But we also don't want to expose sensitive data using them.
 
 flag: `--admin-password`<br/>
 env: `ZERO_ADMIN_PASSWORD`<br/>
-required: `false`
+required: in production (when `NODE_ENV=production`)
 
 ### App ID
 

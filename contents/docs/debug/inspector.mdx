@@ -2,37 +2,32 @@
 title: Inspector API
 ---
 
-The Zero instance provides an API to gather information about the client's current state, such as:
+The Zero instance provides an API to explore the client's current state, including information such as:
 
 - All active queries
-- Query TTL
+- Query TTLs
 - Active clients
 - Client database contents
 
 This can help figuring out why you hit loading states, how many queries are active at a time, if you have any resource leaks due to failing to clean up queries or if expected data is missing on the client.
 
-## Creating an Inspector
+## Accessing the Inspector
 
-Each `Zero` instance has an `inspect` method that will return the inspector. The `inspect` method is asynchronous because it performs lazy loading of inspect-only related code.
-
-For convenience, the active `Zero` instance is automatically exposed at `__zero`, so you can access the inspector in the console like this:
+Use the `inspector` field of your `Zero` instance:
 
 ```ts
-const inspector = await __zero.inspect();
+console.log(__zero.inspector.clientID);
 ```
 
-<Note type="warning" slug="code-splitting">
-  Ensure that code splitting is enabled when bundling your app to prevent
-  loading inspect-related code by default. The `inspect` API is intended for
-  debugging purposes only and should not be used in production applications. It
-  is not efficient and communicates directly with the zero-cache via RPC over a
-  web socket.
+For convenience, the active `Zero` instance is automatically exposed at `__zero` in every Zero app.
 
-If you are using React, you can use
-[`React.lazy`](https://react.dev/reference/react/lazy) to dynamically load
-components that depend on the `inspect` API.
-
+<Note type="note" slug="Password required in production">
+  To protect the inspector from being accessed by unauthorized users, the
+  [`ZERO_ADMIN_PASSWORD`](/docs/zero-cache-config#admin-password) config variable must be set in
+  production.
 </Note>
+
+## Clients and Groups
 
 Once you have an inspector you can inspect the current client and client group.
 

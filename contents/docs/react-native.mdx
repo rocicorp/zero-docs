@@ -39,3 +39,30 @@ export default function RootLayout() {
 ```
 
 For a complete example, see [zslack](./samples#zslack).
+
+## OP-SQLite
+
+Zero includes support for using the [`op-sqlite`](https://github.com/OP-Engineering/op-sqlite) bindings to SQLite:
+
+```tsx
+import { opSQLiteStoreProvider } from "@rocicorp/zero/op-sqlite";
+
+export default function RootLayout() {
+  const zeroProps = useMemo(() => {
+    return {
+      kvStore: opSQLiteStoreProvider(),
+      // ...
+    } as const satisfies ZeroOptions<Schema, Mutators>;
+  }, []);
+
+  return (
+    <ZeroProvider {...zeroProps}>
+      <SafeAreaProvider>
+        <App />
+      </SafeAreaProvider>
+    </ZeroProvider>
+  );
+}
+```
+
+This is much faster than using `expo-sqlite`, but it doesn't work with [Expo Go](https://expo.dev/go).

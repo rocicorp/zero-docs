@@ -58,7 +58,7 @@ export const ROUTES = [
       },
       {title: 'Authentication', href: '/auth'},
       {title: 'Permissions', href: '/permissions'},
-      {title: 'Sharing ZQL', href: '/zql-on-the-server'},
+      {title: 'ZQL on the Server', href: '/zql-on-the-server'},
       {title: 'Offline', href: '/offline'},
     ],
   },

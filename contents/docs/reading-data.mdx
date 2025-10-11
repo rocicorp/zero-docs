@@ -302,7 +302,7 @@ z.query.issue.where({cmp, or, exists} =>
 );
 ```
 
-## Join Flipping
+### Join Flipping
 
 Zero implements `exists` using an [inner join](https://en.wikipedia.org/wiki/Join_(SQL)) internally. As in any database, the order the tables are joined in dramatically affects query performance.
 

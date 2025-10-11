@@ -18,6 +18,7 @@ npm install @rocicorp/zero@0.24
 - Preview support for [custom mutators](/docs/custom-mutators#custom-mutate-url) and [synced queries](/docs/synced-queries#custom-get-queries-url).
 - Return server errors during synced queries to client ([doc](/docs/synced-queries#handling-errors)).
 - Added `analyze()` to the inspector and various other improvements ([doc](/docs/debug/inspector#analyzing-queries)).
+- Improved server ZQL APIs, added `node-postgres` and Drizzle support ([doc](/docs/zql-on-the-server)).
 
 ## Fixes
 
@@ -32,7 +33,7 @@ npm install @rocicorp/zero@0.24
 - Fix WAL growth when no connected clients ([PR](https://github.com/rocicorp/mono/pull/4954)).
 - Fix exception when using local-only queries with `enableLegacyQueries:false` ([PR](https://github.com/rocicorp/mono/pull/4967)).
 - Fix inability to use `--flags` with `zero-cache-dev` (thanks [Alizain](https://github.com/alizain)!) ([PR](https://github.com/rocicorp/mono/pull/4966)).
-- Cleaned up server-side interfaces and added first-class support for `node-postgres` and Drizzle ([doc](/docs/zql-on-the-server)).
+- Reduce ping timeouts during slow queries with better time-slicing ([PR](https://github.com/rocicorp/mono/pull/4989)).
 
 ## zbugs
 

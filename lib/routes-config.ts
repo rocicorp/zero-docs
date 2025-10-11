@@ -106,7 +106,7 @@ export const ROUTES = [
     href: null,
     defaultOpen: false,
     items: [
-      {title: 'Inspector API', href: '/debug/inspector'},
+      {title: 'Inspector', href: '/debug/inspector'},
       {
         title: 'Permissions',
         href: '/debug/permissions',

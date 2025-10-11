@@ -2,52 +2,14 @@
 title: ZQL on the Server
 ---
 
-[Custom Mutators](custom-mutators) use ZQL on the server as an implementation detail, but you can also use ZQL on the server directly, outside of Custom Mutators.
+The Zero package includes utilities to run ZQL on the server directly against your Postgres database.
 
-This is useful for a variety of reasons:
+This is useful for many reasons:
 
+- It allows [Custom Mutators](custom-mutators) to read data using ZQL to check permissions or invariants.
 - You can use ZQL to implement standard REST endpoints, allowing you to share code with custom mutators.
 - You can use ZQL as part of schema migrations.
 - In the future ([but not yet implemented](#ssr)), this can support server-side rendering.
-
-Here's a basic example:
-
-```ts
-import {
-  PushProcessor,
-  ZQLDatabase,
-  PostgresJSConnection,
-  TransactionProviderInput,
-} from '@rocicorp/zero/pg';
-
-const db = new ZQLDatabase(
-  new PostgresJSConnection(
-    postgres(
-      must(
-        process.env.ZERO_UPSTREAM_DB as string,
-        'required env var ZERO_UPSTREAM_DB',
-      ),
-    ),
-  ),
-  schema,
-);
-
-// This is needed temporarily and will be cleaned up in the future.
-const dummyTransactionInput: TransactionProviderInput = {
-  clientGroupID: 'unused',
-  clientID: 'unused',
-  mutationID: 42,
-  upstreamSchema: 'unused',
-};
-
-db.transaction(async tx => {
-  // await tx.mutate...
-  // await tx.query...
-  // await myMutator(tx, ...args);
-}, dummyTransactionInput);
-```
-
-If ZQL does not have the features you need, you can use `tx.dbTransaction` to [drop down to raw SQL](custom-mutators#dropping-down-to-raw-sql).
 
 <Note type="warning" slug="schema-read">
   `ZQLDatabase` currently does a read of your postgres schema before every
@@ -56,9 +18,82 @@ If ZQL does not have the features you need, you can use `tx.dbTransaction` to [d
   for this.
 </Note>
 
+# Creating a Database
+
+To run ZQL on the database, you will create an instance of the `Database` interface. Zero ships with
+several built-in implementations:
+
+## `pg`
+
+The industry standard [`pg`](https://node-postgres.com/) library is supported via the `zeroNodePg` helper:
+
+```ts
+import {Pool} from 'pg';
+import {zeroNodePg} from '@rocicorp/zero/server/adapters/pg';
+import {schema} from '../shared/schema';
+
+const db = zeroNodePg(schema, new Pool({
+  connectionString: process.env.ZERO_UPSTREAM_DB!,
+}));
+```
+
+You can also pass a `Client`:
+
+```ts
+import {Client} from 'pg';
+import {zeroNodePg} from '@rocicorp/zero/server/adapters/pg';
+import {schema} from '../shared/schema';  
+const client = new Client({
+  connectionString: process.env.ZERO_UPSTREAM_DB!,
+});
+await client.connect();
+const db = zeroNodePg(schema, client);
+```
+
+### `postgres`
+
+The popular [`postgres`](https://github.com/porsager/postgres) library is supported via the `ZQLDatabase` and `PostgresJSConnection` classes.
+
+```ts
+import postgres from 'postgres';
+import {zeroPostgresJS} from '@rocicorp/zero/server/adapters/postgresjs';
+import {schema} from '../shared/schema';
+
+const db = zeroPostgresJS(
+  schema,
+  postgres(process.env.ZERO_UPSTREAM_DB!),
+);
+```
+
+### Drizzle
+
+Zero also includes an adapter for [Drizzle ORM](https://orm.drizzle.team/):
+
+```ts
+import {Pool} from 'pg';
+import {drizzle} from 'drizzle-orm/node-postgres';
+import {zeroDrizzle} from '@rocicorp/zero/server/adapters/drizzle';
+import * as drizzleSchema from './drizzle-schema';
+
+const drizzleDb = drizzle(pool, { schema: drizzleSchema });
+const db = zeroDrizzle(schema, drizzleDb);
+```
+
+### Custom Database Implementation
+
+You can easily create your own implementation of the `Database` interface. See the [pg](TODO), [postgres](TODO), and [drizzle](TODO) adapters for examples.
+
 ## Custom Database Connection
 
 Zero only provides an adapter for `postgres.js`. It is possible to write your own adapter by implementing `DBTransaction` and `DBConnection`.
+
+# Running ZQL
+
+Use the `transaction()` method to run ZQL:
+
+```ts
+
+
 
 ### Node Postgres
 

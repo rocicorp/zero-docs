@@ -370,39 +370,38 @@ If you are implementing your server in TypeScript, you can use the `PushProcesso
 ```ts
 import {Hono} from 'hono';
 import {handle} from 'hono/vercel';
-import {
-  PushProcessor,
-  ZQLDatabase,
-  PostgresJSConnection,
-} from '@rocicorp/zero/pg';
-import postgres from 'postgres';
+import {Pool} from 'pg';
+import {PushProcessor} from '@rocicorp/zero/server';
+import {zeroNodePg} from '@rocicorp/zero/server/adapters/pg';
 import {schema} from '../shared/schema';
 import {createMutators} from '../shared/mutators';
+
+const pool = new Pool({
+  connectionString: process.env.ZERO_UPSTREAM_DB! as string,
+});
 
 // PushProcessor is provided by Zero to encapsulate a standard
 // implementation of the push protocol.
 const processor = new PushProcessor(
-  new ZQLDatabase(
-    new PostgresJSConnection(postgres(process.env.ZERO_UPSTREAM_DB! as string)),
-    schema,
-  ),
+  zeroNodePg(schema, pool)
 );
 
 export const app = new Hono().basePath('/api');
 
 app.post('/push', async c => {
-  const result = await processor.process(createMutators(), c.req.raw);
+  const result = await processor.process(
+    createMutators(), c.req.raw);
   return await c.json(result);
 });
 
 export default handle(app);
 ```
 
-`PushProcessor` depends on an abstract `Database`. This allows it to implement the push algorithm against any database.
+`PushProcessor` depends on an abstract `Database`. This allows it to implement the push algorithm against any database. In this example, we use the [`pg` library](https://www.npmjs.com/package/pg) to connect to Postgres.
 
-`@rocicorp/zero/pg` includes a `ZQLDatabase` implementation of this interface backed by Postgres. The implementation allows the same mutator functions to run on client and server, by providing an implementation of the ZQL APIs that custom mutators run on the client.
-
-`ZQLDatabase` in turn relies on an abstract `DBConnection` that provides raw access to a Postgres database. This allows you to use any Postgres library you like, as long as you provide a `DBConnection` implementation for it. The `PostgresJSConnection` class implements `DBConnection` for the excellent [`postgres.js`](https://www.npmjs.com/package/postgres) library to connect to Postgres.
+<Note heading="Using a different bindings library">
+Zero includes several built-in database adapters. You can also easily create your own. See [ZQL on the Server](zql-on-the-server) for more information.
+</Note>
 
 To reuse the client mutators exactly as-is on the server just pass the result of the same `createMutators` function to `PushProcessor`.
 
@@ -731,12 +730,6 @@ app.post('/push', async c => {
   return await c.json(result);
 });
 ```
-
-### Custom Database Connections
-
-You can implement an adapter to a different Postgres library, or even a different database entirely.
-
-To do so, provide a `connectionProvider` to `PushProcessor` that returns a different [`DBConnection`](https://github.com/rocicorp/mono/blob/1a3741fbdad6dbdd56aa1f48cc2cc83938a61b16/packages/zql/src/mutate/custom.ts#L67) implementation. For an example implementation, [see the `postgres` implementation](https://github.com/rocicorp/mono/blob/1a3741fbdad6dbdd56aa1f48cc2cc83938a61b16/packages/zero-pg/src/postgres-connection.ts#L4).
 
 ### Custom Push Implementation
 

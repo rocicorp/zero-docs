@@ -1,82 +1,144 @@
 ---
-title: Inspector API
+title: Inspector
 ---
 
-The Zero instance provides an API to explore the client's current state, including information such as:
-
-- All active queries
-- Query TTLs
-- Active clients
-- Client database contents
-
-This can help figuring out why you hit loading states, how many queries are active at a time, if you have any resource leaks due to failing to clean up queries or if expected data is missing on the client.
+Zero includes a rich inspector API that can help you understand performance or behavior issues you are seeing in your apps.
 
 ## Accessing the Inspector
 
-Use the `inspector` field of your `Zero` instance:
+You access the inspector right from the standard developer console in your browser:
 
-```ts
-console.log(__zero.inspector.clientID);
-```
+<ImageLightbox
+  src="/images/debugging/inspector/hello.png"
+  caption="Why hello there, inspector!"
+/>
 
-For convenience, the active `Zero` instance is automatically exposed at `__zero` in every Zero app.
+For convenience, `Zero` automatically injects itself as `__zero` on the global scope of every Zero app.
 
-<Note type="note" slug="Password required in production">
-  To protect the inspector from being accessed by unauthorized users, the
-  [`ZERO_ADMIN_PASSWORD`](/docs/zero-cache-config#admin-password) config variable must be set in
-  production.
+<Note type="note" emoji="🔒" heading="Password protected in production">
+  Access to the inspector is gated behind the
+  [`ZERO_ADMIN_PASSWORD`](/docs/zero-cache-config#admin-password) config variable in production (when `NODE_ENV` is set to "production").
+
+  We require this variable to be set to a non-empty value in production because we want the inspector enabled in all Zero apps without requiring a restart.
 </Note>
 
 ## Clients and Groups
 
-Once you have an inspector you can inspect the current client and client group.
+Once you have an inspector, you can inspect the current client and client group. For example to see active queries for the current client:
 
-<Note heading="Clients and Client Groups">
-  The client group represents a web browser profile. A client represents an
-  instance of `Zero` within that profile. If a user has Chrome open with 5
-  different tabs, each with one `Zero` instance, there will be 1 client group
-  and 5 clients.
+```ts
+let qs = await inspector.client.queries();
+console.table(qs);
+```
+
+To see active queries for the entire group:
+
+```ts
+let qs = await inspector.client.queries();
+console.table(qs);
+```
+
+<Note heading="Clients vs Groups">
+In Zero, each instance of the `Zero` class is a *client*. Each client belongs to a *group*, which is a set of clients that share the same `clientGroupID` (typically all clients within a browser profile).
+
+Zero syncs all clients in a group together, so they all see the same data. So if you are debugging performance, you often want to look at the queries for the *group*, since that is what Zero is actually syncing.
+
+But if you are trying to understand when particular queries get added, it's convenient to look at the queries for just the current *client* so that queries from other clients aren't mixed in.
 </Note>
 
-For example to see active queries for the current client:
+
+## Queries
+
+The inspector exposes a bunch of useful information about queries. For example, to see the first query for the current client:
 
 ```ts
-console.table(await inspector.client.queries());
+let qs = await inspector.client.queries();
+console.log(qs[0]);
 ```
 
-To inspect other clients within the group:
+This outputs something like:
+
+<ImageLightbox
+  src="/images/debugging/inspector/query.png"
+  caption="Information about a query"
+/>
+
+Here are some of the more useful fields:
+
+| Field  | Description |
+|--------|-------------|
+| `name`, `args` | The name and arguments of the synced query. |
+| `clientZQL` | The client-side ZQL run to give optimistic results. |
+| `serverZQL` | The server-side ZQL that your `get-queries` endpoint returned for this query. |
+| `got` | Whether the first authoritative result has been returned. |
+| `hydrateClient` | How long the client took to hydrate the first optimistic result. |
+| `hydrateServer` | How long the server took to hydrate the first authoritative result. |
+| `hydrateTotal` | Total time to hydrate the first authoritative result, including network. |
+| `rowCount` | Number of rows the query returns. |
+| `ttl` | The ttl specified when the query was created. |
+| `inactivatedAt` | If non-null, the UI is no longer actively using this query, but it's still running due to `ttl`. |
+| `updateClientP50`,<br/>`updateClientP95` | Median and 95th percentile time to update the client-side result after a mutation (optimistically). |
+| `updateServerP50`,<br/>`updateServerP95` | Median and 95th percentile time to update the server-side result after a mutation. |
+
+## Analyzing Queries
+
+Use the `analyze` method to get information about how a query hydrates:
 
 ```ts
-const allClients = await inspector.clients();
+await qs[0].analyze();
 ```
 
-## Query Metrics
+TODO: image
 
-The inspector tracks a number of per-query metrics:
+Here are the key fields in the output:
+
+| Field  | Description |
+|--------|-------------|
+| `elapsed` | Total time to run the analysis. This is a good proxy for to how long the query will takes to hydrate in your app. |
+| `syncedRowCount` | Number of rows the query returns and syncs to client. |
+| `readRowCount` | Total number of rows read from the replica to find the synced rows. This is often the most important number for performance, since it reflects how much work Zero has to do to hydrate the query. We generally want this to be a small single-digit multiple of `syncedRowCount`. |
+| `sql` | The individual single-table SQL queries Zero runs against the replica to hydrate the ZQL query. |
+| `sql.$table`<br/>`.$query.readRows` | Number of rows read by Zero from this SQL statement. |
+| `sql.$table`<br/>`.$query.plan` | The output from SQLite's [`EXPLAIN QUERY PLAN`](https://www.sqlite.org/eqp.html) for the query, which can help you understand why the query is reading more rows than necessary. |
+
+In general, to optimize hydration performance:
+
+1. Check if the `readRowCount` is much larger than the `syncedRowCount`. This is often the problem.
+2. Find which query/queries has surprisingly high `readRows`.
+3. Look at the `plan` for that query to see if it is using indexes well. You want to see `SEARCH` in the plan, not `SCAN`.
+
+Another reason for a large number of `readRows` is bad join order. See [Join Flipping](/docs/reading-data#join-flipping) for how to control this.
+
+## Inspecting Synced Rows
+
+Ocassionally it is useful to understand which queries cause which rows to be synced. You can get this with the `syncedRows` flag to `analyze`:
 
 ```ts
-const queries = await inspector.client.queries();
-const slowQuery = queries[0];
-
-// Median server materialization time for this query.
-console.log(
-  slowQuery.metrics['query-materialization-server']
-  .quantile(0.5)
-);
-
-// 95th percentile client materialization time for this query.
-console.log(
-  slowQuery.metrics['query-materialization-client']
-  .quantile(0.95)
-);
+await qs[0].analyze({syncedRows: true});
 ```
 
-You can list all the available metrics like so:
+<ImageLightbox
+  src="/images/debugging/inspector/synced-rows.png"
+  caption="Showing synced rows for a query"/>
+
+## Analyzing Arbitrary ZQL
+
+You can also analyze arbitrary ZQL, not just queries that are currently active:
 
 ```ts
-const queries = await inspector.client.queries();
-const slowQuery = queries[0];
-console.log(Object.keys(slowQuery.metrics));
+await __zero.inspector.analyzeQuery(
+  __builder.issues.whereExists('labels', q => q.id.equals('sync')));
+```
+
+This is useful for exploring alternative query constructions to optimize performance.
+
+To use this, you will first have to expose your `builder` as a property of the global object, so that you can access it from the console. For example:
+
+```ts
+// schema.ts
+// ...
+const g = globalThis as any;
+g.__builder = builder;
 ```
 
 ## Dumping Data

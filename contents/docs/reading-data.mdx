@@ -17,7 +17,8 @@ ZQL queries start by selecting a table. There is no way to select a subset of co
 ```tsx
 const z = new Zero(...);
 
-// Returns a query that selects all rows and columns from the issue table.
+// Returns a query that selects all rows and columns from the
+// issue table.
 z.query.issue;
 ```
 
@@ -351,6 +352,34 @@ z.query.issue.where({cmp, or, exists} =>
 </Note>
 
 We are working on an auto-planner that will make manual join flipping unnecessary in most cases.
+
+## Type Helpers
+
+You can get the TypeScript type of the result of a query using the `QueryResultType` helper:
+
+```ts
+const complexQuery = z.query.issue.related('comments',
+  q => q.related('author'));
+type MyComplexResult = QueryResultType<typeof complexQuery>;
+
+// MyComplexResult is: readonly IssueRow & {
+//   readonly comments: readonly (CommentRow & {
+//     readonly author: readonly AuthorRow|undefined;
+//   })[];
+// }[]
+```
+
+You can get the type of a single row with `QueryRowType`:
+
+```ts
+type MySingleRow = QueryRowType<typeof complexQuery>;
+
+// MySingleRow is: readonly IssueRow & {
+//   readonly comments: readonly (CommentRow & {
+//     readonly author: readonly AuthorRow|undefined;
+//   })[];
+// }
+```
 
 ## Completeness
 

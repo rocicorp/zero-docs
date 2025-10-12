@@ -11,13 +11,22 @@ npm install @rocicorp/zero@0.24
 
 ## About
 
-This release adds [*join flipping*](/docs/reading-data#join-flipping), a form of manual query planning. This is a major benefit for queries that use `whereExists()`. Since almost all Zero applications use `whereExists()` to implement features like permissions and label filters, this should improve performance for most applications.
+This release adds [*join flipping*](/docs/reading-data#join-flipping), a way to hint to ZQL the order joins should happen in. This is a major benefit for queries that use `whereExists()`. Since almost all Zero applications use `whereExists()` to implement features like permissions and label filters, this should improve performance for most applications.
 
 There are also several other major new features and many bug fixes.
 
 ## Upgrading
 
-There were two minor [breaking changes](#breaking-changes) in this release.
+1. If you are using the `push.url` param to the `Zero` constructor, rename it to `mutateURL`.
+2. If you are using the `ZERO_PUSH_URL` config param, rename it to `ZERO_MUTATE_URL`.
+3. If you are awaiting queries directly without calling `run()`, like `await z.query.foo.where(...)`, or `await tx.query.foo.where(...)`, add `.run()` to the end, like `await z.query.foo.where(...).run()` or `await tx.query.foo.where(...).run()`. This is most common in custom mutator implementations.
+4. Add a `ZERO_ADMIN_PASSWORD` env var to your production config. This is now required.
+
+See [Breaking Changes](#breaking-changes) for details on each of these.
+
+Finally, learn about [join flipping](/docs/reading-data#join-flipping) and consider each of your `whereExists()` queries to see if you can improve performance by applying it.
+
+See the [ztunes](TODO) and [zslack](TODO) updates for examples of updating to 0.24.
 
 ## Features
 
@@ -48,5 +57,6 @@ There were two minor [breaking changes](#breaking-changes) in this release.
 
 ## Breaking Changes
 
-- [`push.url`/`ZERO_PUSH_URL` were renamed to `mutateURL`/`ZERO_MUTATE_URL`](/docs/zero-cache-config#mutate-url)
 - [The `ZERO_ADMIN_PASSWORD` config param is now required in production](/docs/zero-cache-config#admin-password)
+- [`push.url`/`ZERO_PUSH_URL` were renamed to `mutateURL`/`ZERO_MUTATE_URL`](/docs/custom-mutators#custom-mutate-url)
+- [Queries are no longer thenable – any place you were using `await tx.query.foo` needs to change to `await tx.query.foo.run()`](/docs/reading-data#default-run)

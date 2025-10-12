@@ -648,18 +648,28 @@ By default, `run()` only returns results that are currently available on the cli
 If you want to wait for the server to return results, pass `{type: 'complete'}` to `run`:
 
 ```tsx
-const results = await z.query.issue.where('foo', 'bar').run({type: 'complete'});
+const results = await z.query.issue.where('foo', 'bar')
+  .run({type: 'complete'});
 ```
 
-<Note slug="default-run">
-As a convenience you can also directly await queries:
+<Note type="warning" emoji="🚧" heading="Queries no longer thenable" slug="default-run">
+You used to be able to await a query directly without calling `run()`:
 
 ```ts
+// ❌ No longer supported
 await z.query.issue.where('foo', 'bar');
 ```
 
-This is the same as saying `run()` or `run({type: 'unknown'})`.
+This is no longer supported becuause for [synced queries](/docs/synced-queries) we needed to be able to return a ZQL query object from an async function. We didn't want this to implicitly invoke the query.
 
+You must now explicitly call `run()`:
+
+```ts
+// ✅ Do this instead
+await z.query.issue.where('foo', 'bar').run();
+```
+
+The main place this comes up is in [custom mutators](/docs/custom-mutations) where it is common to read some data using ZQL before writing a change.
 </Note>
 
 ## Consistency

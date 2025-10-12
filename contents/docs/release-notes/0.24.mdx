@@ -1,6 +1,6 @@
 ---
 title: Zero 0.24
-description: Faster whereExists(), Preview Support, Inspector Updates, Cookie Auth
+description: Join Flipping, Previews, Cookie Auth
 ---
 
 ## Install
@@ -8,6 +8,12 @@ description: Faster whereExists(), Preview Support, Inspector Updates, Cookie Au
 ```bash
 npm install @rocicorp/zero@0.24
 ```
+
+## About
+
+This release adds [*join flipping*](/docs/reading-data#join-flipping), a form of manual query planning. This is a major benefit for queries that use `whereExists()`. Since almost all Zero applications use `whereExists()` to implement features like permissions and label filters, this should improve performance for most applications.
+
+There are also several other major new features and many bug fixes.
 
 ## Upgrading
 
@@ -18,11 +24,11 @@ There were two minor [breaking changes](#breaking-changes) in this release.
 - [Dramatically faster `whereExists()` with join flipping](/docs/reading-data#join-flipping)
 - [Support for `op-sqlite` in React Native](/docs/react-native#op-sqlite)
 - [Preview support for custom mutators](/docs/custom-mutators#custom-mutate-url) and [synced queries](/docs/synced-queries#custom-get-queries-url)
-- [Return server errors during synced queries to client](/docs/synced-queries#handling-errors)
 - [Added `analyze()` to the inspector and various other improvements](/docs/debug/inspector#analyzing-queries)
 - [Improved server ZQL APIs, added `node-postgres` and Drizzle support](/docs/zql-on-the-server)
 - [Added `QueryResultType` and `QueryRowType` helpers](/docs/reading-data#type-helpers)
 - [Added support for opaque](/docs/auth#opaque-auth-tokens) and [cookie-based auth](/docs/auth#cookie-based-auth)
+- [Expose server errors from get-queries endpoint to client](/docs/synced-queries#handling-errors)
 
 ## Fixes
 

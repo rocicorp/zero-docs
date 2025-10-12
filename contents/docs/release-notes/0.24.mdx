@@ -1,6 +1,6 @@
 ---
 title: Zero 0.24
-description: Faster whereExists(), preview support
+description: Faster whereExists(), Preview Support, Inspector Updates, Cookie Auth
 ---
 
 ## Install
@@ -11,35 +11,34 @@ npm install @rocicorp/zero@0.24
 
 ## Upgrading
 
+There were two minor [breaking changes](#breaking-changes) in this release.
+
 ## Features
 
-- Dramatically faster `whereExists()` with `flip:true` ([doc](/docs/reading-data#join-flipping)).
-- Support for `op-sqlite` in React Native ([doc](/docs/react-native#op-sqlite)).
-- Preview support for [custom mutators](/docs/custom-mutators#custom-mutate-url) and [synced queries](/docs/synced-queries#custom-get-queries-url).
-- Return server errors during synced queries to client ([doc](/docs/synced-queries#handling-errors)).
-- Added `analyze()` to the inspector and various other improvements ([doc](/docs/debug/inspector#analyzing-queries)).
-- Improved server ZQL APIs, added `node-postgres` and Drizzle support ([doc](/docs/zql-on-the-server)).
-- Added `QueryResultType` and `QueryRowType` helpers ([doc](/docs/reading-data#type-helpers)).
-- Added support for opaque and cookie-based auth ([doc](/docs/auth#opaque-auth-tokens), [doc](/docs/auth#cookie-based-auth)).
+- [Dramatically faster `whereExists()` with join flipping](/docs/reading-data#join-flipping)
+- [Support for `op-sqlite` in React Native](/docs/react-native#op-sqlite)
+- [Preview support for custom mutators](/docs/custom-mutators#custom-mutate-url) and [synced queries](/docs/synced-queries#custom-get-queries-url)
+- [Return server errors during synced queries to client](/docs/synced-queries#handling-errors)
+- [Added `analyze()` to the inspector and various other improvements](/docs/debug/inspector#analyzing-queries)
+- [Improved server ZQL APIs, added `node-postgres` and Drizzle support](/docs/zql-on-the-server)
+- [Added `QueryResultType` and `QueryRowType` helpers](/docs/reading-data#type-helpers)
+- [Added support for opaque](/docs/auth#opaque-auth-tokens) and [cookie-based auth](/docs/auth#cookie-based-auth)
 
 ## Fixes
 
-- Correctly map primary keys to server names in some edge cases ([PR](https://github.com/rocicorp/mono/pull/4857)).
-- Reduce some OTEL error logging to `warn` ([PR](https://github.com/rocicorp/mono/pull/4867)).
-- Fix a case of deadlock related to CVR cleanup ([PR](https://github.com/rocicorp/mono/pull/4877)).
-- Fix hang on shutdown under Bun CLI (thanks [David](https://github.com/dpeek)!) ([PR](https://github.com/rocicorp/mono/pull/4854)).
-- Fix "View already exists" error ([PR](https://github.com/rocicorp/mono/pull/4888), [Discord](https://discord.com/channels/830183651022471199/1415395645203812424/1415395649205305434)).
-- Fix rows sometimes missing from `startAt` queries ([PR](https://github.com/rocicorp/mono/pull/4926)]).
-- Improve performance of CVR cleanup ([PR](https://github.com/rocicorp/mono/pull/4930)).
-- Disable statement-level timeouts that were preventing CVR cleanup from succeeding ([PR](https://github.com/rocicorp/mono/pull/4933)).
-- Fix WAL growth when no connected clients ([PR](https://github.com/rocicorp/mono/pull/4954)).
-- Fix exception when using local-only queries with `enableLegacyQueries:false` ([PR](https://github.com/rocicorp/mono/pull/4967)).
-- Fix inability to use `--flags` with `zero-cache-dev` (thanks [Alizain](https://github.com/alizain)!) ([PR](https://github.com/rocicorp/mono/pull/4966)).
-- Reduce ping timeouts during slow queries with better time-slicing ([PR](https://github.com/rocicorp/mono/pull/4989)).
-- Improve handling of ownership changes in the change-streamer ([PR](https://github.com/rocicorp/mono/pull/4994)).
-
-
-## zbugs
+- [Correctly map primary keys to server names in some edge cases](https://github.com/rocicorp/mono/pull/4857)
+- [Reduce some OTEL error logging to `warn`](https://github.com/rocicorp/mono/pull/4867)
+- [Fix a case of deadlock related to CVR cleanup](https://github.com/rocicorp/mono/pull/4877)
+- [Fix hang on shutdown under Bun CLI](https://github.com/rocicorp/mono/pull/4854) (thanks [David](https://github.com/dpeek)!)
+- [Fix "View already exists" error](https://github.com/rocicorp/mono/pull/4888), [Discord](https://discord.com/channels/830183651022471199/1415395645203812424/1415395649205305434)
+- [Fix rows sometimes missing from `startAt` queries](https://github.com/rocicorp/mono/pull/4926)
+- [Improve performance of CVR cleanup](https://github.com/rocicorp/mono/pull/4930)
+- [Disable statement-level timeouts that were preventing CVR cleanup](https://github.com/rocicorp/mono/pull/4933)
+- [Fix WAL growth when no connected clients](https://github.com/rocicorp/mono/pull/4954)
+- [Fix exception with local-only queries and `enableLegacyQueries:false`](https://github.com/rocicorp/mono/pull/4967)
+- [Fix inability to use `--flags` with `zero-cache-dev`](https://github.com/rocicorp/mono/pull/4966) (thanks [Alizain](https://github.com/alizain)!).
+- [Reduce ping timeouts during slow queries with better time-slicing](https://github.com/rocicorp/mono/pull/4989)
+- [Improve handling of ownership changes in the change-streamer](https://github.com/rocicorp/mono/pull/4994)
 
 ## Breaking Changes
 

@@ -49,6 +49,25 @@ const zero = new Zero({
 
 In this case, Zero will call this function to get a new JWT if verification fails.
 
+## Opaque Auth Tokens
+
+If you use only [custom mutators](/docs/custom-mutators) and [synced queries](/docs/synced-queries), you can use an opaque token instead of a JWT. This is because in this case Zero's permmision system is not used and thus Zero doesn't need to be able to decode your auth token. In this case, you do not need to set `ZERO_AUTH_SECRET`, `ZERO_AUTH_JWK`, or `ZERO_AUTH_JWKS_URL` on the server.
+
+## Cookie-Based Auth
+
+Restricting yourself to [custom mutators](/docs/custom-mutators) and [synced queries](/docs/synced-queries) also enables standard cookie-based auth.
+
+To do this, you'll need to run `zero-cache` on the same domain as (or a subdomain of) your frontend app so that the browser sends cookies to it automatically. For example, you could use [Caddy](https://caddyserver.com/) or [Nginx](https://nginx.org/) to run `zero-cache` on `api.example.com` and your frontend app on `example.com`.
+
+Then, when you create your `Zero` instance, set:
+
+Once you've done this, set:
+
+```bash
+ZERO_GET_QUERIES_FORWARD_COOKIES: "true",
+ZERO_MUTATE_FORWARD_COOKIES: "true",
+```
+
 ## Client-Side Data Storage
 
 Zero stores client-side data in `IndexedDB` by default, but this is customizable with the `kvStore` parameter:

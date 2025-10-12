@@ -20,6 +20,7 @@ npm install @rocicorp/zero@0.24
 - Added `analyze()` to the inspector and various other improvements ([doc](/docs/debug/inspector#analyzing-queries)).
 - Improved server ZQL APIs, added `node-postgres` and Drizzle support ([doc](/docs/zql-on-the-server)).
 - Added `QueryResultType` and `QueryRowType` helpers ([doc](/docs/reading-data#type-helpers)).
+- Added support for opaque and cookie-based auth ([doc](/docs/auth#opaque-auth-tokens), [doc](/docs/auth#cookie-based-auth)).
 
 ## Fixes
 
@@ -36,6 +37,7 @@ npm install @rocicorp/zero@0.24
 - Fix inability to use `--flags` with `zero-cache-dev` (thanks [Alizain](https://github.com/alizain)!) ([PR](https://github.com/rocicorp/mono/pull/4966)).
 - Reduce ping timeouts during slow queries with better time-slicing ([PR](https://github.com/rocicorp/mono/pull/4989)).
 - Improve handling of ownership changes in the change-streamer ([PR](https://github.com/rocicorp/mono/pull/4994)).
+
 
 ## zbugs
 

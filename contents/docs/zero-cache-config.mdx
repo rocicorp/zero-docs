@@ -187,6 +187,14 @@ flag: `--enable-telemetry`<br/>
 env: `ZERO_ENABLE_TELEMETRY`<br/>
 default: `true`
 
+### Mutate Forward Cookies
+
+If true, zero-cache will forward cookies from the request to your get-queries endpoint. This is useful for passing authentication cookies to the API server. If false, cookies are not forwarded.
+
+flag: `--mutate-get-queries-cookies`<br/>
+env: `ZERO_MUTATE_GET_QUERIES_COOKIES`<br/>
+default: `false`
+
 ### Get Queries URL
 
 The URL of the API server to which zero-cache will send synced queries. 
@@ -360,6 +368,14 @@ flag: `--log-slow-row-threshold`<br/>
 env: `ZERO_LOG_SLOW_ROW_THRESHOLD`<br/>
 default: `2`
 
+### Mutate Forward Cookies
+
+If true, zero-cache will forward cookies from the request to your mutate endpoint. This is useful for passing authentication cookies to the API server. If false, cookies are not forwarded.
+
+flag: `--mutate-forward-cookies`<br/>
+env: `ZERO_MUTATE_FORWARD_COOKIES`<br/>
+default: `false`
+
 ### Mutate URL
 
 Alias for [Push URL](#push-url).
@@ -415,6 +431,8 @@ If true, zero-cache will forward cookies from the request. This is useful for pa
 flag: `--push-forward-cookies`<br/>
 env: `ZERO_PUSH_FORWARD_COOKIES`<br/>
 default: `false`
+
+Deprecated. Please use [Mutate Forward Cookies](#mutate-forward-cookies) instead.
 
 ### Push URL
 

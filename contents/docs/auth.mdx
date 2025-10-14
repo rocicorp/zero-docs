@@ -53,20 +53,29 @@ In this case, Zero will call this function to get a new JWT if verification fail
 
 If you use only [custom mutators](/docs/custom-mutators) and [synced queries](/docs/synced-queries), you can use an opaque token instead of a JWT. This is because in this case Zero's permmision system is not used and thus Zero doesn't need to be able to decode your auth token. In this case, you do not need to set `ZERO_AUTH_SECRET`, `ZERO_AUTH_JWK`, or `ZERO_AUTH_JWKS_URL` on the server.
 
+You will still set the `auth` parameter to Zero on the client as described above, but Zero won't try to decode or validate it. Zero will simply forward it to your server in the `Authorization` header.
+
 ## Cookie-Based Auth
 
 Restricting yourself to [custom mutators](/docs/custom-mutators) and [synced queries](/docs/synced-queries) also enables standard cookie-based auth.
 
-To do this, you'll need to run `zero-cache` on the same domain as (or a subdomain of) your frontend app so that the browser sends cookies to it automatically. For example, you could use [Caddy](https://caddyserver.com/) or [Nginx](https://nginx.org/) to run `zero-cache` on `api.example.com` and your frontend app on `example.com`.
+To do this, you'll need `zero-cache` and your server to run on the same domain so that they can share cookies.
 
-Then, when you create your `Zero` instance, set:
+This happens automatically for dev as long as your frontend and `zero-cache` are both running on localhost with different ports.
 
-Once you've done this, set:
+For production you'll need to do two things:
+
+1. Run `zero-cache` on a subdomain of your main site (e.g., `zero.example.com` if your main site is `example.com`). Consult your hosting provider's docs, or your favorite LLM for how to configure this.
+2. Set cookies from your main site with the `Domain` attribute set to your main domain (e.g., `.example.com`). If you use a third-party auth provider, consult their docs on how to do this. For example, for Better Auth, this is done with the [`crossSubDomainCookies`](https://www.better-auth.com/docs/concepts/cookies#cross-subdomain-cookies) feature.
+
+Once you've done these two steps, tell `zero-cache` to forward cookies to your server by setting these two config vars:
 
 ```bash
-ZERO_GET_QUERIES_FORWARD_COOKIES: "true",
-ZERO_MUTATE_FORWARD_COOKIES: "true",
+ZERO_GET_QUERIES_FORWARD_COOKIES=true
+ZERO_MUTATE_FORWARD_COOKIES=true
 ```
+
+From there, you can authenticate the user using cookies the same way you would for any other request to your server.
 
 ## Client-Side Data Storage
 

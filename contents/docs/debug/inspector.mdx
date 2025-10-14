@@ -88,38 +88,21 @@ Use the `analyze` method to get information about how a query hydrates:
 await qs[0].analyze();
 ```
 
-TODO: image
+<ImageLightbox
+  src="/images/debugging/inspector/analyze.png"
+  caption="Analyzing a query"
+/>
 
-Here are the key fields in the output:
+Here are some of the most useful fields in the output:
 
 | Field  | Description |
 |--------|-------------|
-| `elapsed` | Total time to run the analysis. This is a good proxy for to how long the query will takes to hydrate in your app. |
-| `syncedRowCount` | Number of rows the query returns and syncs to client. |
+| `elapsed` | Total time to run the analysis in milliseconds. This is a good proxy for to how long the query will takes to hydrate in your app. |
 | `readRowCount` | Total number of rows read from the replica to find the synced rows. This is often the most important number for performance, since it reflects how much work Zero has to do to hydrate the query. We generally want this to be a small single-digit multiple of `syncedRowCount`. |
-| `sql` | The individual single-table SQL queries Zero runs against the replica to hydrate the ZQL query. |
-| `sql.$table`<br/>`.$query.readRows` | Number of rows read by Zero from this SQL statement. |
-| `sql.$table`<br/>`.$query.plan` | The output from SQLite's [`EXPLAIN QUERY PLAN`](https://www.sqlite.org/eqp.html) for the query, which can help you understand why the query is reading more rows than necessary. |
-
-In general, to optimize hydration performance:
-
-1. Check if the `readRowCount` is much larger than the `syncedRowCount`. This is often the problem.
-2. Find which query/queries has surprisingly high `readRows`.
-3. Look at the `plan` for that query to see if it is using indexes well. You want to see `SEARCH` in the plan, not `SCAN`.
-
-Another reason for a large number of `readRows` is bad join order. See [Join Flipping](/docs/reading-data#join-flipping) for how to control this.
-
-## Inspecting Synced Rows
-
-Ocassionally it is useful to understand which queries cause which rows to be synced. You can get this with the `syncedRows` flag to `analyze`:
-
-```ts
-await qs[0].analyze({syncedRows: true});
-```
-
-<ImageLightbox
-  src="/images/debugging/inspector/synced-rows.png"
-  caption="Showing synced rows for a query"/>
+| `readRowCountsByQuery` | Number of rows read by each SQLite query. |
+| `syncedRowCount` | Number of rows actually synced to the client for this query. |
+| `syncedRows` | The actual rows synced. |
+| `plans` | The output from SQLite's [`EXPLAIN QUERY PLAN`](https://www.sqlite.org/eqp.html) for each SQLite query used, which can help you understand why the query is reading more rows than necessary |
 
 ## Analyzing Arbitrary ZQL
 
@@ -141,9 +124,9 @@ const g = globalThis as any;
 g.__builder = builder;
 ```
 
-## Dumping Data
+## Table Data
 
-In addition to information about queries, you can see the contents of the client side database.
+In addition to information about queries, you can get direct access to the contents of the client side database.
 
 ```ts
 const inspector = await zero.inspect();

@@ -58,23 +58,6 @@ Simple Slack-like app built with Expo/React Native.
 **Source:** https://github.com/rocicorp/zslack<br/>
 **Features:** Native iOS/Android, instant reads and writes, realtime updates, custom mutators, custom queries.
 
-## hello-zero
-
-Simple quickstart for Zero/React.
-
-<a href="https://github.com/rocicorp/hello-zero">
-  <img
-    src="/images/samples/quickstart.png"
-    alt="Hello Zero!"
-    style={{border: 'none', padding: 'none'}}
-  />
-</a>
-
-**Stack:** Vite/Hono/React<br/>
-**Source:** https://github.com/rocicorp/hello-zero<br/>
-**Docs:** [Quickstart](/docs/quickstart)<br/>
-**Features:** Instant reads and writes, realtime updates.
-
 ## hello-zero-solid
 
 Simple quickstart for Zero/SolidJS.
@@ -91,16 +74,37 @@ Simple quickstart for Zero/SolidJS.
 **Source:** https://github.com/rocicorp/hello-zero-solid<br/>
 **Features:** Instant reads and writes, realtime updates, custom mutators.
 
-## hello-zero-do
+## hello-zero-cf
 
-Shows how to use the Zero client from a Cloudflare Durable Objects.
+Shows how to use the Zero in a Cloudflare Worker environment.
 
 <Video
   src="https://d2nzlypqdo5xbb.cloudfront.net/video/hello-zero-do.mp4"
   alt="hello-zero-do demo"
 />
 
-This sample runs `zero-client` within a Durable Object and monitors changes to a Zero query. This can be used to do things like send notifications, update external services, etc.
+This sample runs Zero in a React/Hono app, within the Cloudflare worker environment. It uses Hono to implement authentication and Zero's API endpoints.
 
-**Stack:** Vite/Hono/React/Cloudflare Workers<br/>
-**Source:** [https://github.com/rocicorp/hello-zero-do](https://github.com/rocicorp/hello-zero-do)
+It also runs `zero-client` within a Durable Object and monitors changes to a Zero query. This can be used to do things like send notifications, update external services, etc.
+
+**Stack:** pnpm/Vite/Hono/React/Cloudflare Workers<br/>
+**Source:** [https://github.com/rocicorp/hello-zero-cf](https://github.com/rocicorp/hello-zero-cf)
+
+## hello-zero
+
+Old quickstart for Zero/React using legacy query/mutation/permissions APIs.
+
+This sample is maintained for testing old APIs we still support. You should not use it as a basis for new projects. Use [ztunes](#ztunes), [zslack](#zslack), [hello-zero-solid](#hello-zero-solid), or [hello-zero-cf](#hello-zero-cf) instead.
+
+<a href="https://github.com/rocicorp/hello-zero">
+  <img
+    src="/images/samples/quickstart.png"
+    alt="Hello Zero!"
+    style={{border: 'none', padding: 'none'}}
+  />
+</a>
+
+**Stack:** Vite/Hono/React<br/>
+**Source:** https://github.com/rocicorp/hello-zero<br/>
+**Docs:** [Quickstart](/docs/quickstart)<br/>
+**Features:** Instant reads and writes, realtime updates.

@@ -43,13 +43,6 @@ const user = table('user')
 
 Column types are defined with the `boolean()`, `number()`, `string()`, `json()`, and `enumeration()` helpers. See [Column Types](/docs/postgres-support#column-types) for how database types are mapped to these types.
 
-<Note type="warning" slug="type-mismatches">
-  Currently, if the database type doesn’t map correctly to the Zero type,
-  replication will continue and succeed but the data won't match the TypeScript
-  type. This is a bug – in the future, this will be an error. See
-  https://bugs.rocicorp.dev/issue/3112.
-</Note>
-
 ### Name Mapping
 
 Use `from()` to map a TypeScript table or column name to a different database name:

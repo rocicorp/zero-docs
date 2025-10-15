@@ -423,53 +423,31 @@ const zero = new Zero({
 });
 ```
 
-### Wildcards
+### Mutate URL Patterns
 
-The URLs listed in `ZERO_MUTATE_URL` can contain `*` wildcards:
+The strings listed in `ZERO_MUTATE_URL` can also be [`URLPatterns`](https://developer.mozilla.org/en-US/docs/Web/API/URL_Pattern_API):
 
 ```bash
-# Allow any subdomain of example.com
-ZERO_MUTATE_URL="https://*.example.com/push"
+ZERO_MUTATE_URL="https://mybranch-*.preview.myapp.com/push"
 ```
 
 This mutate URL will allow clients to choose URLs like:
-- `https://api.example.com/push` ✅
-- `https://staging.example.com/push` ✅
-- `https://api-feat-123.example.com/push` ✅
+- `https://mybranch-aaa.preview.myapp.com/push` ✅
+- `https://mybranch-bbb.preview.myapp.com/push` ✅
 
 But rejects URLs like:
-- `https://example.com/push` ❌ (no subdomain)
+- `https://preview.myapp.com/push` ❌ (missing subdomain)
 - `https://malicious.com/push` ❌ (different domain)
-- `https://api.example.com/push/extra` ❌ (extra path)
+- `https://mybranch-123.preview.myapp.com/push/extra` ❌ (extra path)
+- `https://mybranch-123.preview.myapp.com/other` ❌ (different path)
 
-Wildcards are only allowed for subdomains and follow these rules:
+<Note emoji="🥇" heading="Pro Tip (tm)">
+Because URLPattern is a web standard, you can test them right in your browser:
+  <img
+    src="/images/mutators/url-pattern.png"/>
+</Note>
 
-**Single Wildcard:**
-```bash
-ZERO_MUTATE_URL="https://*.example.com/push"
-```
-- ✅ Matches: `https://api.example.com/push`
-- ✅ Matches: `https://www.example.com/push`
-- ✅ Matches: `https://staging-v2.example.com/push`
-- ❌ Does not match: `https://example.com/push` (no subdomain)
-- ❌ Does not match: `https://api.staging.example.com/push` (multiple subdomains)
-
-**Multiple Wildcards:**
-```bash
-ZERO_MUTATE_URL="https://*.*.example.com/push"
-```
-- ✅ Matches: `https://api.v1.example.com/push`
-- ✅ Matches: `https://www.staging.example.com/push`
-- ❌ Does not match: `https://api.example.com/push` (only one subdomain)
-- ❌ Does not match: `https://api.v1.staging.example.com/push` (three subdomains)
-
-**Path Restrictions:**
-```bash
-ZERO_MUTATE_URL="https://*.example.com/api/push"
-```
-- ✅ Matches: `https://api.example.com/api/push`
-- ❌ Does not match: `https://api.example.com/api/push/extra` (trailing path)
-- ❌ Does not match: `https://api.example.com/push` (missing /api)
+For more information, see the [URLPattern docs](https://developer.mozilla.org/en-US/docs/Web/API/URL_Pattern_API).
 
 ### Server Error Handling
 

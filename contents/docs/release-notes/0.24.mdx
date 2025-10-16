@@ -1,13 +1,7 @@
 ---
 title: Zero 0.24
-description: Join Flipping, Previews, Cookie Auth
+description: Join Flipping, Cookie Auth, Previews
 ---
-
-## Install
-
-```bash
-npm install @rocicorp/zero@0.24
-```
 
 ## About
 
@@ -15,28 +9,35 @@ This release adds [*join flipping*](/docs/reading-data#join-flipping), a way to 
 
 There are also several other major new features and many bug fixes.
 
-## Upgrading
+## Installation
 
-1. If you are using the `push.url` param to the `Zero` constructor, rename it to `mutateURL`.
-2. If you are using the `ZERO_PUSH_URL` config param, rename it to `ZERO_MUTATE_URL`.
-3. If you are awaiting queries directly without calling `run()`, like `await z.query.foo.where(...)`, or `await tx.query.foo.where(...)`, add `.run()` to the end, like `await z.query.foo.where(...).run()` or `await tx.query.foo.where(...).run()`. This is most common in custom mutator implementations.
-4. Add a `ZERO_ADMIN_PASSWORD` env var to your production config. This is now required.
+```bash
+npm install @rocicorp/zero@0.24
+```
 
-See [Breaking Changes](#breaking-changes) for details on each of these.
+## Breaking Changes
 
-Finally, learn about [join flipping](/docs/reading-data#join-flipping) and consider each of your `whereExists()` queries to see if you can improve performance by applying it.
+1. If you are using the `push.url` param to the `Zero` constructor, rename it to `mutateURL` ([more info](/docs/custom-mutators#custom-mutate-url)).
+2. If you are using the `ZERO_PUSH_URL` config param, rename it to `ZERO_MUTATE_URL` ([more info](/docs/custom-mutators#custom-mutate-url)).
+3. If you are awaiting queries directly without calling `run()`, like `await z.query.foo.where(...)`, or `await tx.query.foo.where(...)`, add `.run()` to the end, like `await z.query.foo.where(...).run()` or `await tx.query.foo.where(...).run()`.. This is most common in custom mutator implementations ([more info](/docs/reading-data#default-run))
+4. Add a `ZERO_ADMIN_PASSWORD` env var to your production config. This is now required ([more info](/docs/zero-cache-config#admin-password))
 
-See the [ztunes](TODO) and [zslack](TODO) updates for examples of updating to 0.24.
+## Example Upgrades
+
+* [ztunes](https://github.com/rocicorp/ztunes/pull/23)
+* [zslack](https://github.com/rocicorp/zslack/pull/12)
+* [hello-zero-solid](https://github.com/rocicorp/hello-zero-solid/pull/27)
+* [hello-zero](https://github.com/rocicorp/hello-zero/pull/50) – Note that we are keeping `hello-zero` on the legacy query and mutator APIs until they are deprecated, for testing reasons. So this PR doesn't include custom mutator, synced query, or auth-related changes.
 
 ## Features
 
 - [Dramatically faster `whereExists()` with join flipping](/docs/reading-data#join-flipping)
-- [Support for `op-sqlite` in React Native](/docs/react-native#op-sqlite)
+- [Added support for opaque](/docs/auth#opaque-auth-tokens) and [cookie-based auth](/docs/auth#cookie-based-auth)
 - [Preview support for custom mutators](/docs/custom-mutators#custom-mutate-url) and [synced queries](/docs/synced-queries#custom-get-queries-url)
 - [Added `analyze()` to the inspector and various other improvements](/docs/debug/inspector#analyzing-queries)
-- [Improved server ZQL APIs, added `node-postgres` and Drizzle support](/docs/zql-on-the-server)
 - [Added `QueryResultType` and `QueryRowType` helpers](/docs/reading-data#type-helpers)
-- [Added support for opaque](/docs/auth#opaque-auth-tokens) and [cookie-based auth](/docs/auth#cookie-based-auth)
+- [Improved server ZQL APIs, added `node-postgres` and Drizzle support](/docs/zql-on-the-server)
+- [Support for `op-sqlite` in React Native](/docs/react-native#op-sqlite)
 - [Expose server errors from get-queries endpoint to client](/docs/synced-queries#handling-errors)
 - [New `hello-zero-cf` sample that runs entirely inside Cloudflare Workers](/docs/samples#hello-zero-cf)
 
@@ -55,9 +56,3 @@ See the [ztunes](TODO) and [zslack](TODO) updates for examples of updating to 0.
 - [Fix inability to use `--flags` with `zero-cache-dev`](https://github.com/rocicorp/mono/pull/4966) (thanks [Alizain](https://github.com/alizain)!).
 - [Reduce ping timeouts during slow queries with better time-slicing](https://github.com/rocicorp/mono/pull/4989)
 - [Improve handling of ownership changes in the change-streamer](https://github.com/rocicorp/mono/pull/4994)
-
-## Breaking Changes
-
-- [The `ZERO_ADMIN_PASSWORD` config param is now required in production](/docs/zero-cache-config#admin-password)
-- [`push.url`/`ZERO_PUSH_URL` were renamed to `mutateURL`/`ZERO_MUTATE_URL`](/docs/custom-mutators#custom-mutate-url)
-- [Queries are no longer thenable – any place you were using `await tx.query.foo` needs to change to `await tx.query.foo.run()`](/docs/reading-data#default-run)

@@ -20,7 +20,8 @@ npm install @rocicorp/zero@0.24
 1. If you are using the `push.url` param to the `Zero` constructor, rename it to `mutateURL` ([more info](/docs/custom-mutators#custom-mutate-url)).
 2. If you are using the `ZERO_PUSH_URL` config param, rename it to `ZERO_MUTATE_URL` ([more info](/docs/custom-mutators#custom-mutate-url)).
 3. If you are awaiting queries directly without calling `run()`, like `await z.query.foo.where(...)`, or `await tx.query.foo.where(...)`, add `.run()` to the end, like `await z.query.foo.where(...).run()` or `await tx.query.foo.where(...).run()`.. This is most common in custom mutator implementations ([more info](/docs/reading-data#default-run))
-4. Add a `ZERO_ADMIN_PASSWORD` env var to your production config. This is now required ([more info](/docs/zero-cache-config#admin-password))
+4. If you are building for React Native, change your import path from `@rocicorp/zero/react-native` to `@rocicorp/zero/expo-sqlite` ([more&nbsp;info](/docs/react-native))
+5. Add a `ZERO_ADMIN_PASSWORD` env var to your production config. This is now required ([more info](/docs/zero-cache-config#admin-password))
 
 ## Example Upgrades
 
@@ -32,14 +33,14 @@ npm install @rocicorp/zero@0.24
 ## Features
 
 - [Dramatically faster `whereExists()` with join flipping](/docs/reading-data#join-flipping)
-- [Added support for opaque](/docs/auth#opaque-auth-tokens) and [cookie-based auth](/docs/auth#cookie-based-auth)
-- [Preview support for custom mutators](/docs/custom-mutators#custom-mutate-url) and [synced queries](/docs/synced-queries#custom-get-queries-url)
-- [Added `analyze()` to the inspector and various other improvements](/docs/debug/inspector#analyzing-queries)
-- [Added `QueryResultType` and `QueryRowType` helpers](/docs/reading-data#type-helpers)
+- [Much simpler auth with cookies](/docs/auth#cookie-based-auth) or [opaque tokens](/docs/auth#opaque-auth-tokens)
+- [Full support for previews via custom mutators](/docs/custom-mutators#custom-mutate-url) and [synced queries](/docs/synced-queries#custom-get-queries-url)
+- [Analyze queries directly from inspector](/docs/debug/inspector#analyzing-queries), and [simplified metrics output](/docs/debug/inspector#queries)
+- [New `QueryResultType` and `QueryRowType` helpers](/docs/reading-data#type-helpers)
 - [Improved server ZQL APIs, added `node-postgres` and Drizzle support](/docs/zql-on-the-server)
-- [Support for `op-sqlite` in React Native](/docs/react-native#op-sqlite)
+- [Faster SQLite bindings for React Native via `op-sqlite`](/docs/react-native#op-sqlite)
 - [Expose server errors from get-queries endpoint to client](/docs/synced-queries#handling-errors)
-- [New `hello-zero-cf` sample that runs entirely inside Cloudflare Workers](/docs/samples#hello-zero-cf)
+- [New first-class Cloudflare Workers sample](/docs/samples#hello-zero-cf)
 
 ## Fixes
 

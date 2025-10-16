@@ -51,7 +51,7 @@ In this case, Zero will call this function to get a new JWT if verification fail
 
 ## Opaque Auth Tokens
 
-If you use only [custom mutators](/docs/custom-mutators) and [synced queries](/docs/synced-queries), you can use an opaque token instead of a JWT. This is because in this case Zero's permmision system is not used and thus Zero doesn't need to be able to decode your auth token. In this case, you do not need to set `ZERO_AUTH_SECRET`, `ZERO_AUTH_JWK`, or `ZERO_AUTH_JWKS_URL` on the server.
+If you use only [custom mutators](/docs/custom-mutators) and [synced queries](/docs/synced-queries), you can use an opaque token instead of a JWT. This is because in this case Zero's permission system is not used and thus Zero doesn't need to be able to decode your auth token. In this case, you do not need to set `ZERO_AUTH_SECRET`, `ZERO_AUTH_JWK`, or `ZERO_AUTH_JWKS_URL` on the server.
 
 You will still set the `auth` parameter to Zero on the client as described above, but Zero won't try to decode or validate it. Zero will simply forward it to your server in the `Authorization` header.
 

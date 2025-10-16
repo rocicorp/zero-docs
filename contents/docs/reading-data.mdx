@@ -339,16 +339,13 @@ z.query.issue.where({cmp, or, exists} =>
 ```
 
 <Note type="note" heading="When to use join flipping">
-  You should use `flip:true` when the query passed to `exists()` is expected to return a match only for a small subset of the rows in the parent query.
+  *Use `flip:true` when the query passed to `exists()` is expected to return a match only for a small subset of the rows in the parent query.*
 
-  By default, Zero implements `exists` by looping through all the rows of the parent query, and for each row, checking if there is a matching row in the child query. This strategy works well if the child filter is expected to match a large fraction of the parent rows. For example in [zbugs](samples#zbugs), most users can access most bugs, so using an `exists()` filter to check that would work well.
+  By default, Zero implements `exists` by looping through all the rows of the parent query, and for each row, checking if there is a matching row in the child query.
+
+  This works if the child filter is expected to match a large fraction of the parent rows. For example in [zbugs](samples#zbugs), most users can access most bugs, so using an unflipped `exists()` there would be good.
 
   But if the child query will match only a small fraction of rows in parent query, the default strategy will perform poorly. Zero will have to loop through many rows of the parent to find the few matching rows in the child query. In this case, you should  use `flip:true` to tell Zero to loop through the child query first.
-
-  A few more best practices with join flipping:
-
-  * Within an `and`, only flip the single most restrictive of the conditions being anded together.
-  * Within an `or`, you generally don't want to flip a subset of the conditions. Either flip none of them or all of them.
 </Note>
 
 We are working on an auto-planner that will make manual join flipping unnecessary in most cases.

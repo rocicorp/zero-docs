@@ -11,18 +11,20 @@ npm install @rocicorp/zero@0.24
 
 ## Features
 
-- [Dramatically faster `whereExists()` with join flipping](/docs/reading-data#join-flipping)
-- [Much simpler auth with cookies](/docs/auth#cookie-based-auth) or [opaque tokens](/docs/auth#opaque-auth-tokens)
-- [Full support for previews via custom mutators](/docs/custom-mutators#custom-mutate-url) and [synced queries](/docs/synced-queries#custom-get-queries-url)
-- [Analyze queries directly from inspector](/docs/debug/inspector#analyzing-queries), and [simplified metrics output](/docs/debug/inspector#queries)
-- [New `QueryResultType` and `QueryRowType` helpers](/docs/reading-data#type-helpers)
-- [Improved server ZQL APIs, added `node-postgres` and Drizzle support](/docs/zql-on-the-server)
-- [Faster SQLite bindings for React Native via `op-sqlite`](/docs/react-native#op-sqlite)
-- [Expose server errors from get-queries endpoint to client](/docs/synced-queries#handling-errors)
-- [New first-class Cloudflare Workers sample](/docs/samples#hello-zero-cf)
+- [**Join Flipping:**](/docs/reading-data#join-flipping) Dramatically improves the performance of `whereExists()` in many common cases. Join flipping is a form of manual query planning that tells Zero the order to evaluate joins. An automatic planner will follow in a future release.
+- [**Simplified Auth:**](/docs/auth) If you are using custom mutators and synced queries, you no longer need to use JWT auth. You can use opaque tokens or even better, plain old cookies. This even means you can use HTTP-only cookies. In our demo apps this eliminated hundreds of lines of code. It's a big improvement.
+- [**Full Preview Support:**](/docs/custom-mutators#custom-mutate-url) We tried to get this out in 0.23 but it didn't quite make it. You can now dynamically configure Zero with the location of your mutator and [query](/docs/synced-queries#custom-get-queries-url) endpoints. This allows easily using preview URLs on platforms like Vercel.
+- [**Analyze Query From Inspector:**](/docs/debug/inspector#analyzing-queries) No more `npx zero-analyze-query` or ssh'ing into production. You can analyze any query right from the dev tools of your browser. On by default in every Zero app.
+- [**Simplified Metrics Output in Inspector:**](/docs/debug/inspector#queries) No more `.metrics["long-name-i-cant-remember"].quantile(0.99)`. The most important metrics – hydration and update time – are right on the query object. Also, you don't have to `(await __zero.inspect()).client.queries` anymore. It's just `__zero.inspector.client.queries()`.
+- [**New Type helpers:**](/docs/reading-data#type-helpers) `QueryResultType` and `QueryRowType` are handy ways to get the type of a query result or one of its rows.
+- [**Faster storage for React Native via op-sqlite:**](/docs/react-native#op-sqlite) The op-sqlite bindings are faster than the expo built-in ones. We now provide this built-in to Zero.
+- [**Brand New Cloudflare Sample:**](/docs/samples#hello-zero-cf) Turned the old hello-zero-do sample into a complete Cloudflare sample using workers for everything.
+- [**Improved ZQL server-side APIs:**](/docs/zql-on-the-server) More convenient setup, and added `node-postgres` and Drizzle support.
+
 
 ## Fixes
 
+- [Expose server errors from `get-queries` endpoint to client](/docs/synced-queries#handling-errors)
 - [Correctly map primary keys to server names in some edge cases](https://github.com/rocicorp/mono/pull/4857)
 - [Reduce some OTEL error logging to `warn`](https://github.com/rocicorp/mono/pull/4867)
 - [Fix a case of deadlock related to CVR cleanup](https://github.com/rocicorp/mono/pull/4877)

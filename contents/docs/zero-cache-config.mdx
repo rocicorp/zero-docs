@@ -28,8 +28,6 @@ flag: `--upstream-db`<br/>
 env: `ZERO_UPSTREAM_DB`<br/>
 required: `true`
 
-## Optional Flags
-
 ### Admin Password
 
 A password used to administer zero-cache server, for example to access the `/statz` endpoint and the [inspector](debug/inspector).
@@ -39,6 +37,8 @@ This is required in production (when `NODE_ENV=production`) because we want all 
 flag: `--admin-password`<br/>
 env: `ZERO_ADMIN_PASSWORD`<br/>
 required: in production (when `NODE_ENV=production`)
+
+## Optional Flags
 
 ### App ID
 

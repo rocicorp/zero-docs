@@ -129,8 +129,7 @@ g.__builder = builder;
 In addition to information about queries, you can get direct access to the contents of the client side database.
 
 ```ts
-const inspector = await zero.inspect();
-const client = inspector.client;
+const client = __zero.inspector.client;
 
 // All raw k/v data currently synced to client
 console.log('client map:');
@@ -138,7 +137,7 @@ console.log(await client.map());
 
 // kv table extracted into tables
 // This is same info that is in z.query[tableName].run()
-for (const tableName of Object.keys(schema.tables)) {
+for (const tableName of Object.keys(__zero.schema.tables)) {
   console.log(`table ${tableName}:`);
   console.table(await client.rows(tableName));
 }

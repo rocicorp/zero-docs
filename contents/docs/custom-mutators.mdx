@@ -157,8 +157,8 @@ Now that we understand what client and server mutations are, let's walk through 
 By convention, the client mutators are defined with a function called `createMutators` in a file called `mutators.ts`:
 
 ```ts
-// mutators.ts
-import {schema} from './schema';
+import { Transaction } from '@rocicorp/zero'
+import { Schema } from './schema'; // Path to your schema
 
 export function createMutators() {
   return {

@@ -10,11 +10,17 @@ const zeroDocsLogo = new URL(
   '../../../public/images/zero-docs-logo.svg',
   import.meta.url,
 );
+const zeroLogo = new URL(
+  '../../../public/images/zero-logo.svg',
+  import.meta.url,
+);
 
 export async function GET(req: NextRequest) {
   const {searchParams} = new URL(req.url);
   const title = searchParams.get('title') ?? 'General Purpose Sync for the Web';
   const subtitle = searchParams.get('subtitle');
+  const logo = searchParams.get('logo') === 'zero' ? zeroLogo : zeroDocsLogo;
+  const logoWidth = logo === zeroLogo ? 292 : 424;
 
   return new ImageResponse(
     (
@@ -57,9 +63,9 @@ export async function GET(req: NextRequest) {
           </div>
         )}
         <img
-          src={await loadFileAsBase64URL(zeroDocsLogo, 'image/svg+xml')}
+          src={await loadFileAsBase64URL(logo, 'image/svg+xml')}
           alt="Zero"
-          style={{width: 424, height: 80, marginTop: 75}}
+          style={{width: logoWidth, height: 80, marginTop: 75}}
         />
       </div>
     ),

@@ -657,7 +657,7 @@ You used to be able to await a query directly without calling `run()`:
 await z.query.issue.where('foo', 'bar');
 ```
 
-This is no longer supported becuause for [synced queries](/docs/synced-queries) we needed to be able to return a ZQL query object from an async function. We didn't want this to implicitly invoke the query.
+This is no longer supported because for [synced queries](/docs/synced-queries) we needed to be able to return a ZQL query object from an async function. We didn't want this to implicitly invoke the query.
 
 You must now explicitly call `run()`:
 

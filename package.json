@@ -39,6 +39,7 @@
     "rehype-prism-plus": "^2.0.1",
     "rehype-slug": "^6.0.0",
     "remark": "^15.0.1",
+    "remark-mdx": "^3.0.1",
     "remark-gfm": "^4.0.1",
     "remark-parse": "^11.0.0",
     "remark-stringify": "^11.0.0",

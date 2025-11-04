@@ -14,6 +14,14 @@ const nextConfig = {
       },
     ];
   },
+  async rewrites() {
+    return [
+      {
+        source: '/docs/:slug*.md',
+        destination: '/docs/raw/:slug*',
+      },
+    ];
+  },
 };
 
 export default nextConfig;

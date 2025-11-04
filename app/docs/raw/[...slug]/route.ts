@@ -1,5 +1,5 @@
 import {getAllPageSlugs} from '@/lib/get-slugs';
-import {getMarkdownForSlug} from '@/lib/markdown';
+import {getMarkdownForSlug} from '@/lib/mdx-to-markdown';
 import {NextRequest, NextResponse} from 'next/server';
 
 type RouteProps = {params: Promise<{slug: string[]}>};

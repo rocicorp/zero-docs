@@ -1,7 +1,7 @@
 import Toc from '@/components/toc';
 import Pagination from '@/components/Pagination';
 import {notFound} from 'next/navigation';
-import {getDocsForSlug, getDocsTocs, getPreviousNext} from '@/lib/markdown';
+import {getDocsForSlug, getDocsTocs, getPreviousNext} from '@/lib/mdx';
 import {Typography} from '@/components/typography';
 import CopyContent from '@/components/ui/copy-content';
 import {getAllPageSlugs} from '@/lib/get-slugs';

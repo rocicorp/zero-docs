@@ -1,4 +1,4 @@
-import type {getPreviousNext} from '@/lib/markdown';
+import type {getPreviousNext} from '@/lib/mdx';
 import {cn} from '@/lib/utils';
 import {ChevronLeftIcon, ChevronRightIcon} from 'lucide-react';
 import Link from 'next/link';

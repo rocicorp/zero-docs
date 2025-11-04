@@ -19,7 +19,7 @@
 # misc
 .DS_Store
 *.pem
-/public/llms.txt
+/public/llms*.txt
 
 # debug
 npm-debug.log*
@@ -37,3 +37,6 @@ yarn-error.log*
 next-env.d.ts
 
 **/.claude/settings.local.json
+
+# build artifacts
+/dist

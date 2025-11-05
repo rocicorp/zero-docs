@@ -197,15 +197,28 @@ z.query.issue.where('priority', 'high');
 
 ### Comparing to `null`
 
-As in SQL, ZQL’s `null` is not equal to itself (`null ≠ null`).
+As in SQL, ZQL’s `null` cannot be compared with `=`, `!=`, `<`, or any other normal comparison operator. Comparing any value to `null` with such operators is always false:
+
+```ts
+// 'foo' = null => false
+// 'foo' > null => false
+// 'foo' != null => false
+// etc
+```
 
 This is required to make join semantics work: if you’re joining `employee.orgID` on `org.id` you do **not** want an employee in no organization to match an org that hasn’t yet been assigned an ID.
 
 When you purposely want to compare to `null` ZQL supports `IS` and `IS NOT` operators that work just like in SQL:
 
-```tsx
+```ts
 // Find employees not in any org.
 z.query.employee.where('orgID', 'IS', null);
+
+// Find employees in an org other than 42 OR employees in NO org
+// 'foo' IS NOT null => true
+// 'foo' IS NOT 'bar' => true
+// 'foo' IS NOT 'foo' => false
+z.query.employee.where('orgID', 'IS NOT', 42);
 ```
 
 TypeScript will prevent you from comparing to `null` with other operators.

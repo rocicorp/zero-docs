@@ -145,7 +145,7 @@ const builder = createBuilder(schema);
 
 export const myPosts = syncedQuery(
   'myPosts',
-  z.tuple([userId: z.string()]),
+  z.tuple([z.string()]),
   (userId) => {
     return builder.post.where('userID', userId);
   }

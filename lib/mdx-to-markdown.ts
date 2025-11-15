@@ -346,7 +346,13 @@ function resolveDocumentHref(href: string, currentSlug: string) {
   if (docSlug !== undefined) {
     const canonicalSlug = DOC_ROUTE_LOOKUP.get(docSlug) ?? docSlug;
     const clean = canonicalSlug.replace(/^\/+/, '');
-    absolutePath = clean ? `/docs/${clean}` : '/docs';
+    absolutePath = clean ? `/docs/${clean}.md` : '/docs';
+  } else if (
+    absolutePath &&
+    absolutePath.startsWith('/docs/') &&
+    !absolutePath.endsWith('.md')
+  ) {
+    absolutePath = `${absolutePath}.md`;
   }
 
   if (!absolutePath) {

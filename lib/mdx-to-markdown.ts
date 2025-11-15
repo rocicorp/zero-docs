@@ -85,10 +85,26 @@ function normalizeLineBreaks() {
 
       for (let index = 0; index < children.length - 1; index++) {
         const current = children[index];
+        const next = children[index + 1];
+
         if (current?.type === 'text') {
           const textNode = current as Text;
           if (textNode.value && !/[\s([{]$/.test(textNode.value.trimEnd())) {
             textNode.value = textNode.value.trimEnd() + ' ';
+          }
+        } else if (
+          (current?.type === 'link' || current?.type === 'image') &&
+          next?.type === 'text'
+        ) {
+          // ensure links/images have proper spacing before following text
+          // only add space if missing and next text starts with a letter (not punctuation)
+          const nextTextNode = next as Text;
+          if (
+            nextTextNode.value &&
+            !/^\s/.test(nextTextNode.value) &&
+            /^[a-zA-Z]/.test(nextTextNode.value)
+          ) {
+            nextTextNode.value = ' ' + nextTextNode.value;
           }
         }
       }

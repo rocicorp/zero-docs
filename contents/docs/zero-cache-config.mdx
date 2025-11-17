@@ -199,12 +199,12 @@ default: `false`
 
 The URL of the API server to which zero-cache will send synced queries. 
 
-* is allowed if you would like to allow the client to specify a subdomain to use.
+`*` is allowed if you would like to allow the client to specify a subdomain to use.
 
-For example: *.example.com/api/mutate
+For example: `*.example.com/api/mutate`
 
 You can specify multiple URLs as well which the client can choose from.                           
-e.g., ["https://api1.example.com/mutate", "https://api2.example.com/mutate"]  
+e.g., `["https://api1.example.com/mutate", "https://api2.example.com/mutate"]`  
 
 flag: `--get-queries-url`<br/>
 env: `ZERO_GET_QUERIES_URL`<br/>
@@ -287,7 +287,7 @@ default: `48`
 ### Litestream Multipart Size
 
 The size of each part when uploading or downloading the snapshot with
-`--litestream-multipart-concurrency`. Note that up to concurrency * size
+`--litestream-multipart-concurrency`. Note that up to `concurrency * size`
 bytes of memory are used when backing up or restoring the snapshot.
 
 flag: `--litestream-multipart-size`<br/>

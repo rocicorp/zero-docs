@@ -348,6 +348,91 @@ Because URLPattern is a web standard, you can test them right in your browser:
 For more information, see the [URLPattern docs](https://developer.mozilla.org/en-US/docs/Web/API/URL_Pattern_API).
 
 
+## Completeness
+
+Zero immediately returns the data for a query it has on the client, then falls back to the server for any missing data. Sometimes it's useful to know the difference between these two types of results. To do so, use the `result` from `useQuery`:
+
+```tsx
+const [issues, issuesResult] = useQuery(z.query.issues.inbox());
+if (issuesResult.type === 'complete') {
+  console.log('All data is present');
+} else {
+  console.log('Some data is missing');
+}
+```
+
+The possible values of `result.type` are currently `complete` and `unknown`.
+
+The `complete` value is currently only returned when Zero has received the server result. In the future, Zero will be able to return this result type when it _knows_ that all possible data for this query is already available locally. Additionally, we plan to add a `prefix` result for when the data is known to be a prefix of the complete result. See [Consistency](#consistency) for more information.
+
+## Handling Missing Data
+
+It is inevitable that there will be cases where the requested data cannot be found. Because Zero returns local results immediately, and server results asynchronously, displaying "not found" / 404 UI can be slightly tricky. If you just use a simple existence check, you will often see the 404 UI flicker while the server result loads:
+
+```tsx
+const [issue, issuesResult] = useQuery(
+  z.query.issues.get('some-id'),
+);
+
+// ❌ This causes flickering of the UI
+if (!issue) {
+  return <div>404 Not Found</div>;
+} else {
+  return <div>{issue}</div>;
+}
+```
+
+The way to do this correctly is to only display the "not found" UI when the result type is `complete`. This way the 404 page is slow but pages with data are still just as fast.
+
+```tsx
+const [issue, issueResult] = useQuery(
+  z.query.issues.get('some-id'),
+);
+
+if (!issue && issueResult.type === 'complete') {
+  return <div>404 Not Found</div>;
+}
+
+if (!issue) {
+  return null;
+}
+
+return <div>{issue}</div>;
+```
+
+## Granular View Updates
+
+You can use the [`materialize()`](#manually) method to create a view that you can listen to for changes.
+
+However, this will only tell you when the view has changed and give you the complete new result. It won't tell you _what_ changed.
+
+To know what changed, you can create your own custom `View` implementation:
+
+```ts
+// Inside the View class
+// Instead of storing the change, we invoke some callback
+push(change: Change): void {
+  switch (change.type) {
+    case 'add':
+      this.#onAdd?.(change)
+      break
+    case 'remove':
+      this.#onRemove?.(change)
+      break
+    case 'edit':
+      this.#onEdit?.(change)
+      break
+    case 'child':
+      this.#onChild?.(change)
+      break
+    default:
+      throw new Error(`Unknown change type: ${change['type']}`)
+  }
+}
+```
+
+For examples, see the `View` implementations in [`zero-vue`](https://github.com/danielroe/zero-vue/blob/f25808d4b7d1ef0b8e01a5670d7e3050d6a64bbf/src/view.ts#L77-L89) or [`zero-solid`](https://github.com/rocicorp/mono/blob/51995101d0657519207f1c4695a8765b9016e07c/packages/zero-solid/src/solid-view.ts#L119-L131).
+
 ## Custom Server Implementation
 
 It is possible to implement the `ZERO_QUERIES_URL` endpoint without using Zero's TypeScript libraries, or even in a different language entirely.

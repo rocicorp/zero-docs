@@ -39,9 +39,8 @@ export const ROUTES = [
     title: 'Using Zero',
     href: null,
     items: [
-      //TODO
-      //{title: 'How Zero Works', href: '/overview'},
       {title: 'Schema', href: '/zero-schema'},
+      {title: 'Reading Data', href: '/queries'},
       {title: 'Reading Data (ZQL)', href: '/reading-data'},
       {
         title: 'Writing Data (Mutators)',
@@ -50,11 +49,6 @@ export const ROUTES = [
       {
         title: 'Custom Mutators',
         href: '/custom-mutators',
-      },
-      {
-        title: 'Synced Queries',
-        href: '/synced-queries',
-        new: true,
       },
       {title: 'Authentication', href: '/auth'},
       {title: 'Permissions', href: '/permissions'},

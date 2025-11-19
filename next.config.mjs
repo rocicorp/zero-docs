@@ -12,6 +12,11 @@ const nextConfig = {
         destination: '/docs/introduction',
         permanent: false,
       },
+      {
+        source: '/docs/synced-queries',
+        destination: '/docs/queries',
+        permanent: false,
+      },
     ];
   },
   async rewrites() {

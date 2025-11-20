@@ -1,5 +1,6 @@
 import path from 'path';
 import {promises as fs} from 'fs';
+import {cache} from 'react';
 import {compileMDX} from 'next-mdx-remote/rsc';
 import {page_routes} from './routes-config';
 import remarkGfm from 'remark-gfm';
@@ -51,11 +52,43 @@ async function parseMdx<Frontmatter>(rawMdx: string) {
 }
 
 // Fetch and parse MDX content for a given slug
+const readRawDoc = cache(async (slug: string) => {
+  const contentPath = await getDocsContentPath(slug);
+  return fs.readFile(contentPath, 'utf-8');
+});
+
+const compileDoc = cache(async (slug: string) => {
+  const rawMdx = await readRawDoc(slug);
+  return parseMdx<BaseMdxFrontmatter>(rawMdx);
+});
+
+const extractHeadings = cache(async (slug: string) => {
+  const rawMdx = await readRawDoc(slug);
+  const headingsRegex = /^(#{2,4})\s(.+)$/gm;
+  let match;
+  const extractedHeadings: Array<{
+    level: number;
+    text: string;
+    href: string;
+  }> = [];
+
+  while ((match = headingsRegex.exec(rawMdx)) !== null) {
+    const headingLevel = match[1].length;
+    const headingText = match[2].trim();
+    const headingSlug = sluggify(headingText);
+    extractedHeadings.push({
+      level: headingLevel,
+      text: headingText,
+      href: `#${headingSlug}`,
+    });
+  }
+
+  return extractedHeadings;
+});
+
 export async function getDocsForSlug(slug: string) {
   try {
-    const contentPath = await getDocsContentPath(slug);
-    const rawMdx = await fs.readFile(contentPath, 'utf-8');
-    return await parseMdx<BaseMdxFrontmatter>(rawMdx);
+    return await compileDoc(slug);
   } catch (err) {
     console.error(`Error fetching docs for slug "${slug}":`, err);
     return null;
@@ -64,25 +97,8 @@ export async function getDocsForSlug(slug: string) {
 
 // Generate a Table of Contents (TOC) from markdown headings
 export async function getDocsTocs(slug: string) {
-  let rawMdx: string;
   try {
-    const contentPath = await getDocsContentPath(slug);
-    rawMdx = await fs.readFile(contentPath, 'utf-8');
-
-    const headingsRegex = /^(#{2,4})\s(.+)$/gm; // Matches headings ## to ####
-    let match;
-    const extractedHeadings = [];
-    while ((match = headingsRegex.exec(rawMdx)) !== null) {
-      const headingLevel = match[1].length;
-      const headingText = match[2].trim();
-      const slug = sluggify(headingText);
-      extractedHeadings.push({
-        level: headingLevel,
-        text: headingText,
-        href: `#${slug}`, // Create anchor links
-      });
-    }
-    return extractedHeadings;
+    return await extractHeadings(slug);
   } catch (err) {
     console.error(`Error fetching docs for slug "${slug}":`, err);
     return [];

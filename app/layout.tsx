@@ -46,6 +46,9 @@ export default async function RootLayout({
   const cookieValue = cookieStore.get(CODE_GROUP_COOKIE);
   const codeGroupSync = parseCodeGroupCookie(cookieValue?.value ?? null);
 
+  console.log('cookieValue', cookieValue);
+  console.log('codeGroupSync', codeGroupSync);
+
   return (
     <html
       lang="en"

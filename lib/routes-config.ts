@@ -41,7 +41,7 @@ export const ROUTES = [
     items: [
       {title: 'Schema', href: '/zero-schema'},
       {title: 'Reading Data', href: '/queries'},
-      {title: 'Writing Data', href: '/writing-data'},
+      {title: 'Writing Data', href: '/mutators'},
       {title: 'Authentication', href: '/auth'},
       {title: 'ZQL Reference', href: '/zql'},
       {title: 'ZQL on the Server', href: '/zql-on-the-server'},

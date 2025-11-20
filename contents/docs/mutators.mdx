@@ -1,57 +1,18 @@
 ---
-title: Custom Mutators
+title: Mutators
 ---
 
-_Custom Mutators_ are a new way to write data in Zero that is much more powerful than the original ["CRUD" mutator API](./writing-data).
+_Mutators_ are how you write data in Zero.
 
-Instead of having only the few built-in `insert`/`update`/`delete` write operations for each table, custom mutators allow you to _create your own write operations_ using arbitrary code. This makes it possible to do things that are impossible or awkward with other sync engines.
+## Architecture
 
-For example, you can create custom mutators that:
+Zero relies on a special `/mutate` endpoint on your server to implement writes.
 
-- Perform arbitrary server-side validation
-- Enforce fine-grained permissions
-- Send email notifications
-- Query LLMs
-- Use Yjs for collaborative editing
-- … and much, _much_ more – custom mutators are just code, and they can do anything code can do!
-
-Despite their increased power, custom mutators still participate fully in sync. They execute instantly on the local device, immediately updating all active queries. They are then synced in the background to the server and to other clients.
-
-<Note
-  slug="deprecating-crud"
-  heading="Custom mutators will eventually become Zero's only write API"
->
-  We're still refining the design of custom mutators. During this phase, the old
-  CRUD mutators will continue to work. But we do want to deprecate CRUD
-  mutators, and eventually remove them. So please try out custom mutators and
-  [let us know](https://discord.rocicorp.dev/) how they work for you, and what
-  improvements you need before the cutover.
-</Note>
-
-## Understanding Custom Mutators
-
-### Architecture
-
-Custom mutators introduce a new _server_ component to the Zero architecture.
+This keeps your server in control and allows you to implement arbitrary server-side logic for each mutation, including permissions, validation, and more.
 
 ![diagram](/images/mutators/overview.png)
 
-This server is implemented by you, the developer. It's typically just your existing backend, where you already put auth or other server-side functionality.
-
-The server can be a serverless function, a microservice, or a full stateful server. The only real requirement is that it expose a special _push endpoint_ that `zero-cache` can call to process mutations. This endpoint implements the [push protocol](#custom-push-implementation) and contains your custom logic for each mutation.
-
-Zero provides utilities in `@rocicorp/zero` that make it really easy implement this endpoint in TypeScript. But you can also implement it yourself if you want. As long as your endpoint fulfills the push protocol, `zero-cache` doesn't care. You can even write it in a different programming language.
-
-### What is a Mutator?
-
-Zero's custom mutators are based on [_server reconciliation_](https://www.gabrielgambetta.com/client-side-prediction-server-reconciliation.html) – a technique for robust sync that has been used by the video game industry for decades.
-
-<Note emoji="🧑‍🏫" heading="A bit of history">
-  Our previous sync engine, [Replicache](https://replicache.dev/), also used
-  server reconciliation. The ability to implement arbitrary mutators was one of
-  Replicache's most popular features. Custom mutators bring this same power to
-  Zero, but with a much better developer experience.
-</Note>
+Zero provides utilities in `@rocicorp/zero` that make it really easy implement `/mutate` in TypeScript. But you can also implement it yourself if you want. As long as your endpoint fulfills the push protocol, `zero-cache` doesn't care. You can even write it in a different programming language.
 
 A custom mutator is just a function that runs within a database transaction, and which can read and write to the database. Here's an example of a very simple custom mutator written in TypeScript:
 

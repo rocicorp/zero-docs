@@ -13,9 +13,10 @@ import Note from '@/components/note';
 import ImageLightbox from '@/components/ui/ImageLightbox';
 import Video from '@/components/ui/Video';
 import {Button} from '@/components/ui/button';
+import CodeGroup from '@/components/CodeGroup';
 import {sluggify} from './utils';
 
-const components = {Note, ImageLightbox, Video, Button};
+const components = {Note, ImageLightbox, Video, Button, CodeGroup};
 
 // Define the structure of the frontmatter
 type BaseMdxFrontmatter = {title: string; description: string};

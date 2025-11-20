@@ -2,11 +2,13 @@
 title: Queries
 ---
 
+Queries are the fundamental building block of Zero.
+
+Despite their central role, superficially there's not much to them: A Zero query is basically just a function that returns an object describing the rows to sync.
+
 ## Defining Queries
 
-A Zero _query_ is basically just a function that returns a hunk of [ZQL](reading-data) describing the data to read.
-
-Create queries with the `defineQuery` function:
+Use `defineQuery` to create a query:
 
 ```ts
 import { defineQuery } from '@rocicorp/zero';
@@ -19,11 +21,13 @@ const myPostsQuery = defineQuery(
 );
 ```
 
-## Query Parameters
+The return value of a query must be a [ZQL](zql) expression.
 
-The first argument to `defineQuery` is a *validator* that defines the query's parameters. We use [Zod](https://zod.dev/) in these examples, but you can use any validation library that implements [Standard Schema](https://standardschema.dev/).
+## Parameters
 
-Validation is needed because Zero queries also run [on your server](#server-setup), where the inputs are untrusted. These inputs are validated using the validator you provide.
+The first argument to `defineQuery` is a *validator* that determines the query's parameters. We use [Zod](https://zod.dev/) in these examples, but you can use any validation library that implements [Standard Schema](https://standardschema.dev/).
+
+Parameter validation is needed because Zero queries run on both the client and [on your server](#server-setup). In the server case, the parameters come from the client and are untrusted. These inputs are validated using the validator you provide.
 
 Zero supports only one formal parameter for each query, but it can be of any type you want. The convention is to use an object with named fields for extensibility:
 
@@ -50,7 +54,11 @@ const searchPosts = defineQuery(
 );
 ```
 
-## Query Context
+<Note emoji="🧑‍💻" heading="Queries are code">
+Although queries must ultimately return a ZQL expression, they can use any code you want to compute that expression. It's common to use `if` statements and other control flow to build the ZQL expression based on the parameters.
+</Note>
+
+## Context
 
 Query parameters are supplied by the client application and passed to the server automatically by Zero. This makes them unsuitable for authentication data, since the user could modify them.
 
@@ -77,7 +85,7 @@ const myPostsQuery = defineQueryWithContext<MyZeroContext>()(
 
 ## queries.ts
 
-Queries are conventionally defined in a central `queries.ts` file. This allows them to be easily used on both the client and server:
+By convention, queries are listed in a central `queries.ts` file. This allows them to be easily used on both the client and server:
 
 ```ts
 import { defineQuery } from '@rocicorp/zero';
@@ -120,9 +128,11 @@ export const queries = {
 }
 ```
 
-## Registering Queries
+## Registration
 
-Before you can use your queries, you need to register them with Zero. In React or SolidJS, you'll do this by passing the `queries` object to the `ZeroProvider` component:
+Before you can use your queries, you need to register them with Zero.
+
+In React or SolidJS, you'll do this by passing the `queries` object to the `ZeroProvider` component:
 
 ```tsx
 import { ZeroProvider } from '@rocicorp/zero/react';
@@ -347,7 +357,6 @@ Because URLPattern is a web standard, you can test them right in your browser:
 
 For more information, see the [URLPattern docs](https://developer.mozilla.org/en-US/docs/Web/API/URL_Pattern_API).
 
-
 ## Completeness
 
 Zero immediately returns the data for a query it has on the client, then falls back to the server for any missing data. Sometimes it's useful to know the difference between these two types of results. To do so, use the `result` from `useQuery`:
@@ -483,19 +492,19 @@ You can override the default TTL with the `ttl` parameter:
 ```ts
 // With useQuery():
 const [user] = useQuery(
-    z.query.user.where('id', userId),
+    z.query.user.byID('id', userId),
     {ttl: '5m'});
 
 // With preload():
-z.query.user.where('id', userId).preload(
+z.query.user.byID('id', userId).preload(
     {ttl: '5m'});
 
 // With run():
-const user = await z.query.user.where('id', userId).run(
+const user = await z.query.user.byID('id', userId).run(
     {ttl: '5m'});
 
 // With materialize():
-const view = z.query.user.where('id', userId).materialize(
+const view = z.query.user.byID('id', userId).materialize(
     {ttl: '5m'});
 ```
 
@@ -519,13 +528,13 @@ Because these queries run the entire time Zero runs, they do not need any TTL to
 
 **Recommendation:** `ttl: 'none'` *(the default for `preload()`)*.
 
-### Navigational Queries
+#### Navigational Queries
 
 These queries load data specific to a route. They are typically smaller and run with the `useQuery()` method. It is useful to cache them for a short time, so that they can be reactivated quickly if the user navigates back to the route.
 
 **Recommendation:** `ttl: '5m'` *(the default for `useQuery()`)*.
 
-### Ephemeral Queries
+#### Ephemeral Queries
 
 These queries load data for a specific, short-lived user interaction and often come in large numbers (e.g., typeahead search).
 
@@ -594,6 +603,27 @@ type QueriesResponseBody = ({
 })[]
 ```
 
+## Consistency
+
+Zero always syncs a consistent partial replica of the backend database to the client. This avoids many common consistency issues that come up in classic web applications. But there are still some consistency issues to be aware of when using Zero.
+
+For example, imagine that you have a bug database w/ 10k issues. You preload the first 1k issues sorted by created.
+
+The user then does a query of issues assigned to themselves, sorted by created. Among the 1k issues that were preloaded imagine 100 are found that match the query. Since the data we preloaded is in the same order as this query, we are guaranteed that any local results found will be a _prefix_ of the server results.
+
+The UX that result is nice: the user will see initial results to the query instantly. If more results are found server-side, those results are guaranteed to sort below the local results. There's no shuffling of results when the server response comes in.
+
+Now imagine that the user switches the sort to ‘sort by modified’. This new query will run locally, and will again find some local matches. But it is now unlikely that the local results found are a prefix of the server results. When the server result comes in, the user will probably see the results shuffle around.
+
+To avoid this annoying effect, what you should do in this example is also preload the first 1k issues sorted by modified desc. In general for any query shape you intend to do, you should preload the first `n` results for that query shape with no filters, in each sort you intend to use.
+
+<Note slug="no-duplicate-rows" heading="Zero does not sync duplicate rows">
+Zero syncs the *union* of all active queries' results. You don't have to worry about syncing many sorts of the same query when it's likely the results will overlap heavily.
+
+</Note>
+
+In the future, we will be implementing a consistency model that fixes these issues automatically. We will prevent Zero from returning local data when that data is not known to be a prefix of the server result. Once the consistency model is implemented, preloading can be thought of as purely a performance thing, and not required to avoid unsightly flickering.
+
 ## Disabling Old Queries
 
 If you don't want clients to be able to run arbitrary ZQL queries anymore, you can disable them with the `enableLegacyQueries` flag in your Zero schema:
@@ -624,95 +654,3 @@ You will still be able to call `useQuery(z.query.myTable)` or `useQuery(builder.
 It can sometime be useful to run queries only on the client. For example, to implement typeahead search, it really doesn't make sense to register every single keystroke with the server.
 
 See [disabling legacy queries](#disabling-old-queries) for how to do this.
-
-## How Queries Work
-
-An implementation of each query exists on both the client and on your server:
-
-<ImageLightbox
-  src="/images/custom-queries/queries1.svg"
-  caption="Query architecture"
-  className="invert dark:invert-0"
-/>
-
-Often the implementations will be the same and can share their code. This is easy with full-stack frameworks
-like [TanStack Start](https://tanstack.com/start) or [Next.js](https://nextjs.org/).
-
-But the implementations don't have to be the same, or even compute the same result. For example, the server can add extra filters to enforce permissions that the client query does not.
-
-## Life of a Query
-
-Calling a query invokes the wrapped function and returns a ZQL expression. Pass that to `useQuery` on the client:
-
-```tsx
-const [posts] = useQuery(myPostsQuery('user123'));
-
-return (
-  <ul>
-    {posts.map(post => (
-      <li key={post.id}>{post.title}</li>
-    ))}
-  </ul>
-);
-```
-
-Queries run client-side immediately. You get an instant result with any available local data:
-
-<ImageLightbox
-  src="/images/custom-queries/queries2.svg"
-  caption="Registering a query"
-  className="invert dark:invert-0"
-/>
-
-And just as with other ZQL queries, synced queries are live. Optimistic mutations are reflected immediatley and automatically:
-
-<ImageLightbox
-  src="/images/custom-queries/queries3.svg"
-  caption="Local updates"
-  className="invert dark:invert-0"
-/>
-
-### Query Subscription
-
-When you run a synced query, `zero-client` "subscribes"
-to the query by sending the query's name and arguments
-to `zero-cache`.
-
-Zero-cache then turns around and asks your server for the
-definition of that query by calling its `/get-queries` endpoint:
-
-<ImageLightbox
-  src="/images/custom-queries/queries4.svg"
-  caption="Query subscription"
-  className="invert dark:invert-0"
-/>
-
-See [Server Setup](#server-setup) for details on implementing this endpoint. We provide
-some TypeScript libraries to make it easy.
-
-### Server Hydration
-
-Once `zero-cache` has the query definition from your server, it creates an
-instance of the query on the server, computes the initial result,
-and returns the response to the client:
-
-<ImageLightbox
-  src="/images/custom-queries/queries5.svg"
-  caption="Server result"
-  className="invert dark:invert-0"
-/>
-
-These results are merged into the local datastore, updating client queries and the app as needed.
-
-### Ongoing Sync
-
-`zero-cache` receives updates from Postgres via logical replication.
-
-It feeds these changes into all open queries, which are incrementally updated. The resulting deltas are sent to the clients, which merge them into their local datastore, updating client queries and the app as needed:
-
-<ImageLightbox
-  src="/images/custom-queries/queries6.svg"
-  caption="Server result"
-  className="invert dark:invert-0"
-/>
-

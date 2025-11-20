@@ -1,4 +1,4 @@
-import ClientBoundary from '@/components/ClientBoundary'; // Add a wrapper for client components
+import ClientBoundary from '@/components/ClientBoundary';
 import {CodeGroupProvider} from '@/components/code-group-provider';
 import {ThemeProvider} from '@/components/theme-provider';
 import {CODE_GROUP_COOKIE, parseCodeGroupCookie} from '@/lib/code-group-sync';
@@ -36,6 +36,8 @@ export const metadata: Metadata = {
   title: 'Zero Docs',
   description: 'The official documentation for Zero by Rocicorp.',
 };
+
+export const dynamic = 'force-dynamic';
 
 export default async function RootLayout({
   children,

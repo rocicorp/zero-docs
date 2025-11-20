@@ -2,79 +2,287 @@
 title: Authentication
 ---
 
-Zero uses a [JWT](https://jwt.io/)-based flow to authenticate connections to zero-cache.
+You can authenticate Zero clients using either tokens or cookies.
 
-## Frontend
+## Tokens
 
-During login:
-
-1. Your API server creates a `JWT` and sends it to your client.
-2. Your client constructs a `Zero` instance with this token by passing it to the `auth` option.
-
-<Note type="note" slug="user-id">
-  When you set the `auth` option you must set the `userID` option to the same
-  value that is present in the `sub` field of the token.
-</Note>
+If you have an opaque auth token, such as a JWT or a token from your auth provider, you can pass it to Zero's `auth` parameter:
 
 ```ts
 const zero = new Zero({
   ...,
-  auth: token, // your JWT
-  userID, // this must match the `sub` field from `token`
+  auth: token,
 });
 ```
 
-## Server
-
-For `zero-cache` to be able to verify the JWT, one of the following environment variables needs to be set:
-
-1. `ZERO_AUTH_SECRET` - If your API server uses a symmetric key (secret) to create JWTs then this is that same key.
-2. `ZERO_AUTH_JWK` - If your API server uses a private key to create JWTs then this is the corresponding public key, in [JWK](https://datatracker.ietf.org/doc/html/rfc7517) format.
-3. `ZERO_AUTH_JWKS_URL` - Many auth providers host the public keys used to verify the JWTs they create at a public URL. If you use a provider that does this, or you publish your own keys publicly, set this to that URL.
-
-## Refresh
-
-The `auth` parameter to Zero can also be a function:
+Zero will forward this token to your [mutate](/docs/mutators) and [queries](/docs/queries) endpoints in the standard `Authorization` header, which you can use to authenticate the request as normal:
 
 ```ts
-const zero = new Zero({
-  ...,
-  auth: async () => {
-    const token = await fetchNewToken();
-    return token;
-  },
-  userID,
-});
+export function handleMutate(request: Request) {
+  const session = await authenticate(
+    request.headers.get('Authorization'));
+
+  if (!session) {
+    return json({error: 'Unauthorized'}, {status: 401});
+  }
+
+  // handle mutate request ...
+}
 ```
 
-In this case, Zero will call this function to get a new JWT if verification fails.
+## Cookies
 
-## Opaque Auth Tokens
+Zero also supports cookie-based auth.
 
-If you use only [custom mutators](/docs/custom-mutators) and [synced queries](/docs/synced-queries), you can use an opaque token instead of a JWT. This is because in this case Zero's permission system is not used and thus Zero doesn't need to be able to decode your auth token. In this case, you do not need to set `ZERO_AUTH_SECRET`, `ZERO_AUTH_JWK`, or `ZERO_AUTH_JWKS_URL` on the server.
-
-You will still set the `auth` parameter to Zero on the client as described above, but Zero won't try to decode or validate it. Zero will simply forward it to your server in the `Authorization` header.
-
-## Cookie-Based Auth
-
-Restricting yourself to [custom mutators](/docs/custom-mutators) and [synced queries](/docs/synced-queries) also enables standard cookie-based auth.
-
-To do this, you'll need `zero-cache` and your server to run on the same domain so that they can share cookies. This happens automatically for dev as long as your frontend and `zero-cache` are both running on localhost with different ports.
-
-For production you'll need to do two things:
-
-1. Run `zero-cache` on a subdomain of your main site (e.g., `zero.example.com` if your main site is `example.com`). Consult your hosting provider's docs, or your favorite LLM for how to configure this.
-2. Set cookies from your main site with the `Domain` attribute set to your main domain (e.g., `.example.com`). If you use a third-party auth provider, consult their docs on how to do this. For example, for Better Auth, this is done with the [`crossSubDomainCookies`](https://www.better-auth.com/docs/concepts/cookies#cross-subdomain-cookies) feature.
-
-Once you've done these two steps, tell `zero-cache` to forward cookies to your server by setting these two config vars:
+To enable it, set the [`ZERO_GET_QUERIES_FORWARD_COOKIES`](/docs/config#zero_get_queries_forward_cookies) and [`ZERO_MUTATE_FORWARD_COOKIES`](/docs/config#zero_mutate_forward_cookies) options to `true`:
 
 ```bash
 ZERO_GET_QUERIES_FORWARD_COOKIES=true
 ZERO_MUTATE_FORWARD_COOKIES=true
 ```
 
-From there, you can authenticate the user using cookies the same way you would for any other request to your server.
+Zero will then forward all cookies sent to `cacheURL` to your [mutate](/docs/mutators) and [queries](/docs/queries) endpoints:
 
+```tsx
+<ZeroProvider {...{
+  schema,
+  // Cookies sent to zero.example.com will be forwarded to
+  // api.example.com/mutate and api.example.com/queries.
+  cacheURL: 'https://zero.example.com',
+  mutateURL: 'https://api.example.com/mutate',
+  queriesURL: 'https://api.example.com/queries',
+}}>
+  <App />
+</ZeroProvider>
+```
+
+Cookies will show up in the normal HTTP `Cookie` header and you can authenticate these endpoints just like you would any API request.
+
+For this to work, the `zero-cache` server and your API server must be running on the same root domain so that they can share cookies. This happens automatically during development, as long as your frontend and `zero-cache` are both running on localhost with different ports.
+
+For production you'll need to do two things:
+
+1. Run `zero-cache` on a subdomain of your main site (e.g., `zero.example.com` if your main site is `example.com`). Consult your hosting provider's docs, or your favorite LLM for how to configure this.
+2. Set cookies from your main site with the `Domain` attribute set to your root domain (e.g., `.example.com`). If you use a third-party auth provider, consult their docs on how to do this. For example, for Better Auth, this is done with the [`crossSubDomainCookies`](https://www.better-auth.com/docs/concepts/cookies#cross-subdomain-cookies) feature.
+
+## Auth Failure and Refresh
+
+To mark a request as unauthorized, return a `401` or `403` status code from your [queries](/docs/queries) or [mutate](/docs/mutators) endpoint:
+
+```ts
+export function handleMutate(request: Request) {
+  const session = await authenticate(request);
+
+  if (!session) {
+    return json({error: 'Forbidden'}, {status: 403});
+  }
+
+  // handle mutate request ...
+}
+```
+
+This will cause Zero to disconnect from `zero-cache` and the [connection status](/docs/api/connection-state-todo) will change to `needs-auth`. You can then re-authenticate the user and call `zero.connection.connect()` to reconnect to `zero-cache`:
+
+```tsx
+function NeedsAuthDialog() {
+  const connectionState = useZeroConnectionState();
+
+  const refreshAuthToken = async () => {
+    const token = await fetchNewToken();
+    zero.connection.connect({auth: token});
+  }
+
+  if (connectionState.name === 'needs-auth') {
+    return <div>
+      <h1>Authentication Required</h1>
+      <button onClick={refreshAuthToken}>Login</button>
+    </div>;
+  }
+
+  return null;
+}
+```
+
+Or, if you use cookie auth:
+
+```tsx
+function NeedsAuthDialog() {
+  const connectionState = useZeroConnectionState();
+
+  const refreshCookie = async () => {
+    const cookie = await login();
+    // No token needed since we use cookie auth
+    zero.connection.connect();
+  }
+
+  if (connectionState.name === 'needs-auth') {
+    return <div>
+      <h1>Authentication Required</h1>
+      <button onClick={refreshCookie}>Login</button>
+    </div>;
+  }
+
+  return null;
+```
+
+## Permissions
+
+Zero does not have (or need) a first-class permission system like [RLS](https://supabase.com/docs/guides/database/postgres/row-level-security).
+
+Instead, you implement permissions by authenticating the user in your [queries](/docs/queries) and [mutators](/docs/mutators) endpoints, and creating a [Context](/docs/queries#context) object that contains the user's ID and other information. This context is passed to your queries and mutators and used to control what data the user can access.
+
+See [Query Server Setup](/docs/queries#server-setup) and [Mutator Server Setup](/docs/mutators#server-setup) for an example of how to authenticate the user and create a context object.
+
+## Permission Patterns
+
+Here are a collection of common permissions patterns and how to implement them in Zero.
+
+### Read Permisssions
+
+#### Only Owned Rows
+
+```ts
+// Use the context's `userID` to filter the rows to only the
+// ones owned by the user.
+const myPosts = defineQueryWithContext<MyZeroContext>()(
+  z.undefined(),
+  ({ context: { userID } }) => {
+    return zql.post.where('authorID', userID)
+  },
+);
+```
+
+#### Owned or Shared Rows
+
+```ts
+// Use the context's `userID` to filter the rows to only the
+// ones owned by the user or shared with the user.
+const allowedPosts = defineQueryWithContext<MyZeroContext>()(
+    z.undefined(),
+  ({ context: { userID } }) => {
+    return zql.post.where(({cmp, exists, or}) => or(
+      cmp('authorID', userID),
+      exists('sharedWith', q => q.where('userID', userID)),
+    ));
+  },
+);
+```
+
+#### Owned Rows or All if Admin
+
+```ts
+const allowedPosts = defineQueryWithContext<MyZeroContext>()(
+  z.undefined(),
+  ({ context: { userID, role } }) => {
+    if (role === 'admin') {
+      return zql.post;
+    }
+    return zql.post.where('authorID', userID);
+  },
+);
+```
+
+### Write Permissions
+
+#### Enforce Ownership
+
+```ts
+// All created items are owned by the user who created them.
+const createPost = defineMutatorWithContext<MyZeroContext>()(
+  z.object({
+    id: z.string(),
+    title: z.string(),
+    content: z.string(),
+  }),
+  (tx, { context: { userID }, args: { id, title, content } }) => {
+    return zql.post.insert({
+      id,
+      title,
+      content,
+      authorID: userID,
+    });
+  },
+);
+```
+
+#### Edit Owned Rows
+
+```ts
+const updatePost = defineMutatorWithContext<MyZeroContext>()(
+  z.object({
+    id: z.string(),
+    content: z.string().optional(),
+  }),
+  (tx, { context: { userID }, args: { id, content } }) => {
+    const prev = await tx.run(zql.post.where('id', id).one());
+    if (!prev) {
+      return;
+    }
+    if (prev.authorID !== userID) {
+      throw new Error('Access denied');
+    }
+    return zql.post.update({
+      id,
+      content,
+    });
+  },
+);
+```
+
+#### Edit Owned or Shared Rows
+
+```ts
+const updatePost = defineMutatorWithContext<MyZeroContext>()(
+  z.object({
+    id: z.string(),
+    content: z.string().optional(),
+  }),
+  (tx, { context: { userID }, args: { id, content } }) => {
+    const prev = await tx.run(
+      zql.post
+        .where('id', id)
+        .related('sharedWith',
+          q => q.where('userID', userID))
+      .one()
+    );
+    if (!prev) {
+      return;
+    }
+    if (prev.authorID !== userID &&
+        prev.sharedWith.length === 0) {
+      throw new Error('Access denied');
+    }
+    return zql.post.update({
+      id,
+      content,
+    });
+  },
+);
+```
+
+#### Edit Owned or All if Admin
+
+```ts
+const updatePost = defineMutatorWithContext<MyZeroContext>()(
+  z.object({
+    id: z.string(),
+    content: z.string().optional(),
+  }),
+  (tx, { context: { role, userID }, args: { id, content } }) => {
+    const prev = await tx.run(zql.post.where('id', id).one());
+    if (!prev) {
+      return;
+    }
+    if (role !== 'admin' && prev.authorID !== userID) {
+      throw new Error('Access denied');
+    }
+    return zql.post.update({
+      id,
+      content,
+    });
+  },
+);
+```
 ## Client-Side Data Storage
 
 Zero stores client-side data in `IndexedDB` by default, but this is customizable with the `kvStore` parameter:
@@ -156,17 +364,3 @@ import {dropAllDatabases} from '@rocicorp/zero';
 // - Any errors encountered while dropping
 const {dropped, errors} = await dropAllDatabases();
 ```
-
-## Permissions
-
-Any data placed into your JWT (claims) can be used by permission rules on the backend.
-
-```ts
-const isAdminRule = (decodedJWT, {cmp}) => cmp(decodedJWT.role, '=', 'admin');
-```
-
-See the [permissions](/docs/permissions) section for more details.
-
-## Examples
-
-See [zbugs](/docs/samples#zbugs) or [hello-zero](/docs/samples#hello-zero).

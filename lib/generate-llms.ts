@@ -46,7 +46,7 @@ async function generateLlmsFullTxt(baseUrl: string): Promise<string> {
         continue;
       }
 
-      const url = `${baseUrl}/docs/${slug}`;
+      const url = `${baseUrl}/docs/raw/${slug}`;
 
       output += '---\n\n';
 

@@ -399,7 +399,7 @@ mark {
 .prose pre {
   padding: 0 !important;
   width: inherit !important;
-  overflow-x: auto;
+  overflow-x: visible;
 }
 
 .prose pre > code {
@@ -411,6 +411,7 @@ mark {
     'liga' 0,
     'clig' 0,
     'calt' 0;
+  overflow-x: auto;
 }
 
 .code-line {
@@ -524,6 +525,7 @@ pre:hover .copy-button {
   cursor: pointer;
   opacity: 1;
   transition: opacity 0.2s ease;
+  z-index: 10;
 }
 
 pre .copy-button:hover {

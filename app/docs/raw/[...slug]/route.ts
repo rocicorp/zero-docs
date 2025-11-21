@@ -1,18 +1,20 @@
 import {getAllPageSlugs} from '@/lib/get-slugs';
-import {getMarkdownForSlug} from '@/lib/mdx-to-markdown';
+import {getDocsForSlug} from '@/lib/mdx';
 import {NextRequest, NextResponse} from 'next/server';
 
 type RouteProps = {params: Promise<{slug: string[]}>};
 
 export async function GET(_: NextRequest, {params}: RouteProps) {
-  const {slug} = await params;
-  const markdown = await getMarkdownForSlug(slug.join('/'));
+  const {slug: slugParams} = await params;
 
-  if (!markdown) {
-    return new NextResponse('Post not found', {status: 404});
+  const pathName = slugParams.join('/').replace(/\.md$/, '');
+  const res = await getDocsForSlug(pathName);
+
+  if (!res?.raw) {
+    return new NextResponse('MD not found', {status: 404});
   }
 
-  return new NextResponse(markdown, {
+  return new NextResponse(res.raw, {
     headers: {
       'Content-Type': 'text/markdown; charset=utf-8',
       'Cache-Control': 'public, max-age=0, must-revalidate',

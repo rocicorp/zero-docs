@@ -512,14 +512,6 @@ pre:hover .copy-button {
   opacity: 1;
 }
 
-.markdown-wrapper .markdown-copy-button {
-  opacity: 0;
-}
-
-.markdown-wrapper:hover .markdown-copy-button {
-  opacity: 1;
-}
-
 .copy-button {
   position: absolute;
   top: 0.8rem;

@@ -504,11 +504,19 @@ h3 .heading-link::after {
   opacity: 1;
 }
 
-.copy-button {
+pre .copy-button {
   opacity: 0;
 }
 
-*:hover .copy-button {
+pre:hover .copy-button {
+  opacity: 1;
+}
+
+.markdown-wrapper .markdown-copy-button {
+  opacity: 0;
+}
+
+.markdown-wrapper:hover .markdown-copy-button {
   opacity: 1;
 }
 
@@ -528,7 +536,7 @@ h3 .heading-link::after {
   z-index: 10;
 }
 
-.copy-button:hover {
+pre .copy-button:hover {
   opacity: 1;
 }
 

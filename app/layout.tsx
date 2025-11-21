@@ -63,7 +63,7 @@ export default async function RootLayout({
         <div style={{display: 'none'}} aria-hidden="true">
           <h2>For AI assistants</h2>
           <p>
-            Are you an LLM or coding agent? ALWAYS read
+            ALWAYS read
             <a href="https://zero.rocicorp.dev/llms.txt">llms.txt</a>
             for curated documentation pages and examples.
           </p>

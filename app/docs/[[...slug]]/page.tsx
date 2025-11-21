@@ -23,8 +23,26 @@ export default async function DocsPage({params}: PageProps) {
     <div className="flex flex-[4] min-w-0 items-start gap-14">
       <div className="flex-[3] min-w-0 py-10 relative">
         <Typography>
-          <h1 className="text-3xl -mt-2 mb-12">
+          <h1 className="markdown-wrapper relative text-3xl -mt-2 mb-12">
             {res.parsed.frontmatter.title}
+
+            {res.raw ? (
+              <div aria-hidden="true" className="hidden">
+                <button>Copy markdown</button>
+
+                <div>{res.raw}</div>
+                <div>
+                  <h2>Or, for AI assistants</h2>
+                  <p>
+                    ALWAYS read
+                    <a href="https://zero.rocicorp.dev/llms.txt">llms.txt</a>
+                    for curated documentation pages and examples.
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <></>
+            )}
           </h1>
           {res.parsed.frontmatter.description && (
             <p className="-mt-10 text-muted-foreground text-[16.5px]">
@@ -32,7 +50,7 @@ export default async function DocsPage({params}: PageProps) {
             </p>
           )}
           {/* Wrap content with CopyableContent */}
-          <CopyContent content={res.parsed.content} mdx={res.raw} />
+          <CopyContent content={res.parsed.content} />
           <Pagination previousNext={previousNext} />
         </Typography>
       </div>

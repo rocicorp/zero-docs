@@ -134,11 +134,11 @@ export default function CodeGroup({labels = [], children}: CodeGroupProps) {
 
   return (
     <div
-      className="code-group not-prose my-6"
+      className="code-group my-6"
       data-active-label={activeLabel?.text ?? ''}
     >
       <div
-        className="flex flex-wrap gap-2 rounded-t-lg border border-border/60 bg-muted/50 px-3 py-2 text-sm font-medium"
+        className="not-prose flex flex-wrap gap-2 rounded-t-lg border border-border/60 bg-accent/30 px-3 py-2.5 text-sm font-medium"
         role="tablist"
       >
         {normalizedLabels.map(({text}, index) => (
@@ -151,21 +151,21 @@ export default function CodeGroup({labels = [], children}: CodeGroupProps) {
             className={clsx(
               'rounded-md px-3 py-1 transition-colors',
               index === activeIndex
-                ? 'bg-background text-foreground shadow-sm'
-                : 'text-muted-foreground hover:text-foreground',
+                ? 'bg-accent text-accent-foreground shadow-sm'
+                : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground',
             )}
           >
             {text}
           </button>
         ))}
       </div>
-      <div className="rounded-b-lg border border-t-0 border-border/60 [&>div>pre]:m-0 [&>div>pre]:rounded-none">
+      <div className="overflow-hidden rounded-b-lg border border-t-0 border-border/60 [&_pre]:!m-0 [&_pre]:!rounded-none [&_pre]:!border-0">
         {codeBlocks.map((block, index) => (
           <div
             key={index}
             className={clsx(
               index === activeIndex ? 'block' : 'hidden',
-              'rounded-b-lg',
+              'rounded-b-lg'
             )}
             role="tabpanel"
           >

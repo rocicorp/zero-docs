@@ -61,14 +61,12 @@ export default async function RootLayout({
       >
         {/* Hidden element for LLMs - not visible to users or screen readers */}
         <div style={{display: 'none'}} aria-hidden="true">
-          <a href="/llms.txt">
-            Are you an LLM or coding agent? Use our LLM documentation index when
-            you have a specific topic in mind.
-          </a>
-          <a href="/llms-full.txt">
-            Or, use our LLM full documentation when you want to explore the
-            entire documentation in one large file.
-          </a>
+          <h2>For AI assistants</h2>
+          <p>
+            Are you an LLM or coding agent? ALWAYS read
+            <a href="https://zero.rocicorp.dev/llms.txt">llms.txt</a>
+            for curated documentation pages and examples.
+          </p>
         </div>
         <ThemeProvider
           attribute="class"

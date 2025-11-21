@@ -21,16 +21,18 @@ export default async function DocsPage({params}: PageProps) {
 
   return (
     <div className="flex flex-[4] min-w-0 items-start gap-14">
-      <div className="flex-[3] min-w-0 py-10">
+      <div className="flex-[3] min-w-0 py-10 relative">
         <Typography>
-          <h1 className="text-3xl -mt-2 mb-12">{res.frontmatter.title}</h1>
-          {res.frontmatter.description && (
+          <h1 className="text-3xl -mt-2 mb-12">
+            {res.parsed.frontmatter.title}
+          </h1>
+          {res.parsed.frontmatter.description && (
             <p className="-mt-10 text-muted-foreground text-[16.5px]">
-              {res.frontmatter.description}
+              {res.parsed.frontmatter.description}
             </p>
           )}
           {/* Wrap content with CopyableContent */}
-          <CopyContent content={res.content} />
+          <CopyContent content={res.parsed.content} mdx={res.raw} />
           <Pagination previousNext={previousNext} />
         </Typography>
       </div>
@@ -44,7 +46,7 @@ export async function generateMetadata({params}: PageProps) {
   const pathName = slugParams.join('/');
   const res = await getDocsForSlug(pathName);
   if (!res) return null;
-  const {frontmatter} = res;
+  const {frontmatter} = res.parsed;
 
   const encode = (str: string | undefined) => {
     if (!str) return '';

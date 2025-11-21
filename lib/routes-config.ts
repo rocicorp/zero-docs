@@ -50,7 +50,6 @@ export const ROUTES = [
         title: 'Old Stuff',
         href: null,
         items: [
-          {title: 'CRUD Mutators', href: '/crud-mutators'},
           {title: 'RLS Permissions', href: '/permissions'},
         ],
       },

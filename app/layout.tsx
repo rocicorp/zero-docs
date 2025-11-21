@@ -59,6 +59,17 @@ export default async function RootLayout({
         className={`${muoto.variable} ${codeFont.variable} font-regular`}
         suppressHydrationWarning
       >
+        {/* Hidden element for LLMs - not visible to users or screen readers */}
+        <div style={{display: 'none'}} aria-hidden="true">
+          <a href="/llms.txt">
+            Are you an LLM or coding agent? Use our LLM documentation index when
+            you have a specific topic in mind.
+          </a>
+          <a href="/llms-full.txt">
+            Or, use our LLM full documentation when you want to explore the
+            entire documentation in one large file.
+          </a>
+        </div>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

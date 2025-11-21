@@ -12,7 +12,7 @@ async function generateLlmsTxt(baseUrl: string): Promise<string> {
     if (!route.href) continue;
 
     const slug = route.href.replace(/^\//, '').replace(/^docs\//, '');
-    const url = `${baseUrl}/docs/${slug}`;
+    const url = `${baseUrl}/docs/raw/${slug}`;
 
     try {
       const contentPath = await getDocsContentPath(slug);

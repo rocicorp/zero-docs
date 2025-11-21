@@ -59,7 +59,7 @@ const readRawDoc = cache(async (slug: string) => {
 
 const compileDoc = cache(async (slug: string) => {
   const rawMdx = await readRawDoc(slug);
-  return parseMdx<BaseMdxFrontmatter>(rawMdx);
+  return {raw: rawMdx, parsed: await parseMdx<BaseMdxFrontmatter>(rawMdx)};
 });
 
 const extractHeadings = cache(async (slug: string) => {

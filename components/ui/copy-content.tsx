@@ -8,7 +8,7 @@ export default function CopyContent({content}: {content: React.ReactNode}) {
 
     copyButtons.forEach(button => {
       const handleClick = () => {
-        const codeBlock = button.nextElementSibling?.textContent; // Assumes the code block follows the button
+        const codeBlock = button.nextElementSibling?.textContent;
         if (codeBlock) {
           navigator.clipboard.writeText(codeBlock).then(() => {
             // Provide feedback to the user
@@ -27,7 +27,7 @@ export default function CopyContent({content}: {content: React.ReactNode}) {
         button.removeEventListener('click', handleClick);
       };
     });
-  }, [content]); // Re-run if content changes
+  }, [content]);
 
-  return <div>{content}</div>;
+  return <>{content}</>;
 }

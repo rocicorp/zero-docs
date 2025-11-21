@@ -18,45 +18,43 @@ you're using React, Vue, Svelte, Solid, or vanilla JavaScript.
 
 Install the Zero package:
 
+<CodeGroup labels={[
+  {text: 'npm', sync: {pm: 'npm'}},
+  {text: 'pnpm', sync: {pm: 'pnpm'}},
+  {text: 'bun', sync: {pm: 'bun'}},
+  {text: 'yarn', sync: {pm: 'yarn'}},
+]}>
+
 ```bash
 npm install @rocicorp/zero
 ```
 
-<details>
-<summary id="not-npm">Not using npm?</summary>
+```bash
+pnpm install @rocicorp/zero
 
-Zero's server component depends on `@rocicorp/zero-sqlite3`, which contains a
-binary that requires running a postinstall script. Most alternative package
-managers (non-npm) disable these scripts by default for security reasons. Here's
-how to enable installation for common alternatives:
+# Note: pnpm disables postinstall scripts by default for security.
+# Either approve the build:
+pnpm approve-builds
 
-### pnpm
-
-For [pnpm](https://pnpm.io/), either:
-
-- Run `pnpm approve-builds` to approve all build scripts, or
-- Add the specific dependency to your `package.json`:
-
-```json
-"pnpm": {
-  "onlyBuiltDependencies": [
-    "@rocicorp/zero-sqlite3"
-  ]
-}
+# Or add to package.json:
+# "pnpm": {
+#   "onlyBuiltDependencies": ["@rocicorp/zero-sqlite3"]
+# }
 ```
 
-### Bun
+```bash
+bun install @rocicorp/zero
 
-For [Bun](https://bun.sh/), add the dependency to your trusted dependencies
-list:
-
-```json
-"trustedDependencies": [
-  "@rocicorp/zero-sqlite3"
-],
+# Note: Bun disables postinstall scripts by default for security.
+# Add to package.json:
+# "trustedDependencies": ["@rocicorp/zero-sqlite3"]
 ```
 
-</details>
+```bash
+yarn add @rocicorp/zero
+```
+
+</CodeGroup>
 
 ## Environment Variables
 

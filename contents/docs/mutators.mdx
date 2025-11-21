@@ -1,194 +1,338 @@
 ---
 title: Mutators
+description: Writing data with Zero
 ---
 
-_Mutators_ are how you write data in Zero.
+## Introduction
+
+A Zero _mutator_ is basically just a TypeScript function that runs within a database transaction, which can read and write to the database.
+
+Here's an example of a simple mutator:
+
+```ts
+import { defineMutator } from '@rocicorp/zero';
+import { zql } from './schema.ts';
+import z from "zod";
+
+const updateIssue = defineMutator<Schema>(
+  tx,
+  z.object({
+    id: z.string(),
+    title: z.string(),
+  }),
+  async ({args: {id, title}}) => {
+    if (title.length > 100) {
+      throw new Error(`Title is too long`);
+    }
+    await tx.mutate.issue.update({id, title});
+  },
+);
+```
 
 ## Architecture
 
-Zero relies on a special `/mutate` endpoint on your server to implement writes.
+A copy of each mutator exists on both the client and on your server:
 
-This keeps your server in control and allows you to implement arbitrary server-side logic for each mutation, including permissions, validation, and more.
+<ImageLightbox
+  src="/images/mutators/overview.png"
+  className="invert dark:invert-0"
+/>
 
-![diagram](/images/mutators/overview.png)
+Often the implementations will be the same, and you can just share their code. This is easy with full-stack frameworks like TanStack Start or Next.js.
 
-Zero provides utilities in `@rocicorp/zero` that make it really easy implement `/mutate` in TypeScript. But you can also implement it yourself if you want. As long as your endpoint fulfills the push protocol, `zero-cache` doesn't care. You can even write it in a different programming language.
-
-A custom mutator is just a function that runs within a database transaction, and which can read and write to the database. Here's an example of a very simple custom mutator written in TypeScript:
-
-```ts
-async function updateIssue(
-  tx: Transaction<Schema>,
-  {id, title}: {id: string; title: string},
-) {
-  // Validate title length.
-  if (title.length > 100) {
-    throw new Error(`Title is too long`);
-  }
-
-  await tx.mutate.issue.update({id, title});
-}
-```
-
-Each custom mutator gets **two implementations**: one on the client and one on the server.
-
-The client implementation must be written in TypeScript against the Zero `Transaction` interface, using [ZQL](#read-data-on-the-client) for reads and a [CRUD-style API](#write-data-on-the-client) for writes.
-
-The server implementation runs on your server, in your push endpoint, against your database. In principle, it can be written in any language and use any data access library. For example you could have the following Go-based server implementation of the same mutator:
-
-```go
-func updateIssueOnServer(tx *sql.Tx, id string, title string) error {
-  // Validate title length.
-  if len(title) > 100 {
-    return errors.New("Title is too long")
-  }
-
-  _, err := tx.Exec("UPDATE issue SET title = $1 WHERE id = $2", title, id)
-  return err
-}
-```
-
-In practice however, most Zero apps use TypeScript on the server. For these users we provide a handy `ServerTransaction` that implements ZQL against Postgres, so that you can share code between client and server mutators naturally.
-
-So on a TypeScript server, that server mutator can just be:
-
-```ts
-async function updateIssueOnServer(
-  tx: ServerTransaction<Schema>,
-  {id, title},
-  {id: string, title: string},
-) {
-  // Delegate to client mutator.
-  // The `ServerTransaction` here has a different implementation
-  // that runs the same ZQL queries against Postgres!
-  await updateIssue(tx, {id, title});
-}
-```
-
-<Note slug="code-sharing" heading="Code sharing in mutators is optional">
-Even in TypeScript, you can do as little or as much code sharing as you like. In your server mutator, you can [use raw SQL](#dropping-down-to-raw-sql), any data access libraries you prefer, or add as much extra server-specific logic as you need.
-
-Reusing ZQL on the server is a handy – and we expect frequently used – option, but not a requirement.
-
-</Note>
+But the implementations don't have to be the same, or even compute the same result. For example, the server can add extra checks to enforce permissions, or send notifications or interact with other systems.
 
 ### Server Authority
-
-You may be wondering what happens if the client and server mutators implementations don't match.
 
 Zero is an example of a _server-authoritative_ sync engine. This means that the server mutator always takes precedence over the client mutator. The result from the client mutator is considered _speculative_ and is discarded as soon as the result from the server mutator is known. This is a very useful feature: it enables server-side validation, permissions, and other server-specific logic.
 
 Imagine that you wanted to use an LLM to detect whether an issue update is spammy, rather than a simple length check. We can just add that to our server mutator:
 
 ```ts
-async function updateIssueOnServer(
-  tx: ServerTransaction<Schema>,
-  {id, title}: {id: string; title: string},
-) {
-  const response = await llamaSession.prompt(
-    `Is this title update likely spam?\n\n${title}\n\nResponse "yes" or "no"`,
-  );
-  if (/yes/i.test(response)) {
-    throw new Error(`Title is likely spam`);
-  }
+const updateIssue = defineMutator<Schema>(
+  tx,
+  z.object({
+    id: z.string(),
+    title: z.string(),
+  }),
+  async ({args: {id, title}}) => {
+    const response = await llamaSession.prompt(
+      `Is this title update likely spam?\n\n${title}\n\nResponse "yes" or "no"`,
+    );
+    if (/yes/i.test(response)) {
+      throw new Error(`Title is likely spam`);
+    }
 
-  // delegate rest of implementation to client mutator
-  await updateIssue(tx, {id, title});
-}
+    // delegate rest of implementation to client mutator
+    await updateIssue(tx, {id, title});
+  },
+);
 ```
 
 If the server detects that the mutation is spammy, the client will see the error message and the mutation will be rolled back. If the server mutator succeeds, the client mutator will be rolled back and the server result will be applied.
 
 ### Life of a Mutation
 
-Now that we understand what client and server mutations are, let's walk through how they work together with Zero to sync changes from a source client to the server and then other clients:
+When a mutator is invoked, it initially runs on the client, against the client-side datastore. Any changes are immediately applied to open queries and the user sees the changes.
 
-1. When you call a custom mutator on the client, Zero runs your client-side mutator immediately on the local device, updating all active queries instantly.
-2. In the background, Zero then sends a _mutation_ (a record of the mutator having run with certain arguments) to your server's push endpoint.
-3. Your push endpoint runs the [push protocol](#custom-push-implementation), executing the server-side mutator in a transaction against your database and recording the fact that the mutation ran. Optionally, you use our `PushProcessor` class to handle this for you, but you can also implement it yourself.
-4. The changes to the database are replicated to `zero-cache` as normal.
-5. `zero-cache` calculates the updates to active queries and sends rows that have changed to each client. It also sends information about the mutations that have been applied to the database.
-6. Clients receive row updates and apply them to their local cache. Any pending mutations which have been applied to the server have their local effects rolled back.
-7. Client-side queries are updated and the user sees the changes.
+In the background, Zero sends a _mutation_ (a record of the mutator having run with certain arguments) to your server's push endpoint. Your push endpoint runs the [push protocol](#custom-push-implementation), executing the server-side mutator in a transaction against your database and recording the fact that the mutation ran. The `@rocicorp/zero` package contains utilities to make it easy to implement this endpoint in TypeScript.
 
-## Using Custom Mutators
+The changes to the database are then replicated to `zero-cache` using logical replication. `zero-cache` calculates the updates to active queries and sends rows that have changed to each client. It also sends information about the mutations that have been applied to the database.
 
-### Registering Client Mutators
+Clients receive row updates and apply them to their local cache. Any pending mutations which have been applied to the server have their local effects rolled back. Client-side queries are updated and the user sees the changes.
 
-By convention, the client mutators are defined with a function called `createMutators` in a file called `mutators.ts`:
+## Parameters
 
-```ts
-import { Transaction } from '@rocicorp/zero'
-import { Schema } from './schema'; // Path to your schema
+The first argument to `defineQuery` is a *validator* that determines the query's parameters. We use [Zod](https://zod.dev/) in these examples, but you can use any validation library that implements [Standard Schema](https://standardschema.dev/).
 
-export function createMutators() {
-  return {
-    issue: {
-      update: async (
-        tx: Transaction<Schema>,
-        {id, title}: {id: string; title: string}
-      ) => {
-        // Validate title length. Legacy issues are exempt.
-        if (title.length > 100) {
-          throw new Error(`Title is too long`);
-        }
-        await tx.mutate.issue.update({id, title});
-      },
-    },
-  } as const;
-}
+Parameter validation is needed because mutators run on both the client and [on your server](#server-setup). In the server case, the parameters come from the client and are untrusted. These inputs are validated using the validator you provide.
+
+Zero supports only one formal parameter for each mutator, but it can be of any type you want. The convention is to use an object with named fields for extensibility.
+
+## CRUD API
+
+With a mutator, Zero provides a CRUD-style API to insert, update, and delete rows. Access the API with `tx.mutate.<tablename>`:
+
+```tsx
+const myMutator = defineMutator<Schema>(
+  tx,
+  z.undefined(),
+  async (tx) => {
+    await tx.mutate.issue.create({
+      // ...
+    })
+  },
+);
 ```
 
-The `mutators.ts` convention allows mutator implementations to be easily [reused server-side](#setting-up-the-server). The `createMutators` function convention is used so that we can pass authentication information in to [implement permissions](#permissions).
+### Insert
 
-You are free to make different code layout choices – the only real requirement is that you register your map of mutators in the `Zero` constructor:
+Create new records with `insert`:
 
-```ts
-// main.tsx
-import {Zero} from '@rocicorp/zero';
-import {schema} from './schema';
-import {createMutators} from './mutators';
-
-const zero = new Zero({
-  schema,
-  mutators: createMutators(),
+```tsx
+tx.mutate.user.insert({
+  id: nanoid(),
+  username: 'sam',
+  language: 'js',
 });
 ```
 
-### Write Data on the Client
+Optional fields can be set to `null` to explicitly set the new field to `null`. They can also be set to `undefined` to take the default value (which is often `null` but can also be some generated value server-side):
 
-The `Transaction` interface passed to client mutators exposes the same `mutate` API as the existing [CRUD-style mutators](./writing-data):
+```tsx
+// schema.ts
+import {createTableSchema} from '@rocicorp/zero';
+
+const userSchema = createTableSchema({
+  tableName: 'user',
+  columns: {
+    id: {type: 'string'},
+    name: {type: 'string'},
+    language: {type: 'string', optional: true},
+  },
+  primaryKey: ['id'],
+  relationships: {},
+});
+
+// app.tsx
+
+// Sets language to `null` specifically
+tx.mutate.user.insert({
+  id: nanoid(),
+  username: 'sam',
+  language: null,
+});
+
+// Sets language to the default server-side value. Could be null, or some
+// generated or constant default value too.
+tx.mutate.user.insert({
+  id: nanoid(),
+  username: 'sam',
+});
+
+// Same as above
+tx.mutate.user.insert({
+  id: nanoid(),
+  username: 'sam',
+  language: undefined,
+});
+```
+
+### Upsert
+
+Create new records or update existing ones with `upsert`:
+
+```tsx
+tx.mutate.user.upsert({
+  id: samID,
+  username: 'sam',
+  language: 'ts',
+});
+```
+
+`upsert` supports the same `null` / `undefined` semantics for optional fields that `insert` does (see above).
+
+### Update
+
+Update an existing record. Does nothing if the specified record (by PK) does not exist.
+
+You can pass a partial, leaving fields out that you don’t want to change. For example here we leave the username the same:
+
+```tsx
+// Leaves username field to previous value.
+tx.mutate.user.update({
+  id: samID,
+  language: 'golang',
+});
+
+// Same as above
+tx.mutate.user.update({
+  id: samID,
+  username: undefined,
+  language: 'haskell',
+});
+
+// Reset language field to `null`
+tx.mutate.user.update({
+  id: samID,
+  language: null,
+});
+```
+
+### Delete
+
+Delete an existing record. Does nothing if specified record does not exist.
+
+```tsx
+tx.mutate.user.delete({
+  id: samID,
+});
+```
+
+## Context
+
+Mutator parameters are supplied by the client application and passed to the server automatically by Zero. This makes them unsuitable for authentication data, since the user could modify them.
+
+For this reason, mutators also support a `context` parameter. When used [on the server](#server-setup), the context is passed to the mutator function separately and not client-controlled.
+
+Use `defineMutatorWithContext` to define a mutator that takes a context parameter:
 
 ```ts
-async function myMutator(tx: Transaction<Schema>) {
-  // Insert a new issue
-  await tx.mutate.issue.insert({
-    id: 'issue-123',
-    title: 'New title',
-    description: 'New description',
-  });
+type MyZeroContext = {
+  userID: string;
+};
 
-  // Upsert a new issue
-  await tx.mutate.issue.upsert({
-    id: 'issue-123',
-    title: 'New title',
-    description: 'New description',
-  });
+const createIssue = defineMutatorWithContext<MyZeroContext>()(
+  tx,
+  z.object({
+    id: z.string(),
+    title: z.string(),
+    priority: z.number(),
+  }),
+  async ({
+    context: {userID},
+    args: {id, title, priority}
+  }) => {
+    // Note: User cannot control context.userID, so this
+    // enforces authorship of created issue.
+    await tx.mutate.issue.insert({
+      id,
+      title,
+      priority,
+      authorID: userID,
+    });
+  },
+);
+```
 
-  // Update an issue
-  await tx.mutate.issue.update({
-    id: 'issue-123',
-    title: 'New title',
-  });
+## mutators.ts
 
-  // Delete an issue
-  await tx.mutate.issue.delete({
-    id: 'issue-123',
-  });
+By convention, mutators are listed in a central `mutators.ts` file. This allows them to be easily used on both the client and server:
+
+```ts
+import { defineQuery } from '@rocicorp/zero';
+import { Schema, zql } from './schema.ts';
+import z from "zod";
+
+export const queries = {
+  posts: {
+    create: defineMutatorWithContext<MyZeroContext>()(
+      z.object({
+        id: z.string(),
+        title: z.string(),
+        priority: z.number(),
+      }),
+      async (
+        tx: Transaction<Schema>,
+        {context: {userID}, args: {id, title, priority}}
+      ) => {
+        await tx.mutate.post.insert({
+          id,
+          title,
+          priority,
+          authorID: userID,
+        });
+      },
+    ),
+    update: defineMutatorWithContext<MyZeroContext>()(
+      z.object({
+        id: z.string(),
+        title: z.string().optional(),
+        priority: z.number().optional(),
+      }),
+      async (tx: Transaction<Schema>, {context: {userID}, args: {id, title, priority}}) => {
+        const prev = await tx.query.post.where('id', id).one();
+        if (!prev) {
+          throw new Error(`Post not found`);
+        }
+        if (prev.authorID !== userID) {
+          throw new Error(`Access denied`);
+        }
+        await tx.mutate.post.update({id, title, priority, authorID: userID});
+      },
+    ),
+  } as const;
+};
+```
+
+You can use as many levels of nesting as you want to organize your queries. And as your application grows, you can move queries to different files to keep them organized:
+
+```ts
+// zero/mutators.ts
+import {postMutators} from 'zero/mutators/posts.ts';
+import {userMutators} from 'zero/mutators/users.ts';
+
+export const mutators = {
+  posts: postMutators,
+  users: userMutators,
 }
 ```
 
-See [the CRUD docs](./writing-data) for detailed semantics on these methods.
+## Registration
+
+Before you can use your mutators, you need to register them with Zero.
+
+In React or SolidJS, you'll do this by passing the `mutators` object to the `ZeroProvider` component:
+
+```tsx
+import { ZeroProvider } from '@rocicorp/zero/react';
+import { mutators } from 'zero/mutators.ts';
+
+<ZeroProvider mutators={mutators}>
+  <App />
+</ZeroProvider>
+```
+
+If you use the `Zero` class directly, you can pass the `mutators` object to the `Zero` constructor:
+
+```ts
+import { Zero } from '@rocicorp/zero';
+import { mutators } from 'zero/mutators.ts';
+
+const zero = new Zero({
+  mutators,
+});
+```
 
 ### Read Data on the Client
 

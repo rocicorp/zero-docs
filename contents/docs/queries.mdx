@@ -23,22 +23,44 @@ const myPostsQuery = defineQuery(
 
 ## Architecture
 
-A copy of each query exists on both the client and on your server:
+A copy of each query exists both on the client and on your server:
 
 <ImageLightbox
-  src="/images/custom-queries/queries4.svg"
+  src="/images/custom-queries/queries1.svg"
   className="invert dark:invert-0"
 />
 
+Often the implementations will be the same, and you can just share their code. This is easy with full-stack frameworks like TanStack Start or Next.js.
+
+But the implementations don't have to be the same, or even compute the same result. For example, the server can add extra filters to enforce permissions that the client query does not.
+
+## Life of a Query
+
 When a query is invoked, it initially runs on the client, against the client-side datastore. Any matching data is returned immediately and the user sees instant results.
 
-In the background, the query is also sent to zero-cache. Specifically what's sent is the name and arguments to the query, not the ZQL.
+<ImageLightbox
+  src="/images/custom-queries/queries2.svg"
+  caption="Client hydration"
+  className="invert dark:invert-0"
+/>
 
-Zero-cache then calls the `queries` endpoint on your server to get the ZQL for the query. Your server looks up its implementation of the query, invokes it, and returns the resulting ZQL expression to zero-cache.
+In the background, the name and arguments for the query are sent to zero-cache. Zero-cache calls the `queries` endpoint on your server to get the ZQL for the query. Your server looks up its implementation of the query, invokes it, and returns the resulting ZQL expression to zero-cache.
 
 Zero-cache then runs this ZQL against the server-side data. The initial server result is sent back to the client and the client query updates in response.
 
-If the server-side database changes, zero-cache updates the query and sends any rows changes back to the client, which again updates the client query and the user sees the changes.
+<ImageLightbox
+  src="/images/custom-queries/queries4.svg"
+  caption="Server hydration"
+  className="invert dark:invert-0"
+/>
+
+zero-cache receives updates from Postgres via logical replication. It updates affected queries and sends rows changes back to the client, which updates the client query, and the user sees the changes.
+
+<ImageLightbox
+  src="/images/custom-queries/queries6.svg"
+  caption="Incremental update"
+  className="invert dark:invert-0"
+/>
 
 ## Parameters
 
@@ -459,15 +481,14 @@ push(change: Change): void {
 
 For examples, see the `View` implementations in [`zero-vue`](https://github.com/danielroe/zero-vue/blob/f25808d4b7d1ef0b8e01a5670d7e3050d6a64bbf/src/view.ts#L77-L89) or [`zero-solid`](https://github.com/rocicorp/mono/blob/51995101d0657519207f1c4695a8765b9016e07c/packages/zero-solid/src/solid-view.ts#L119-L131).
 
-## Query Lifecycle
+## Query Caching
+
+Queries can be either _active_ or _cached_. An active query is one that is currently being used by the application. Cached queries are not currently in use, but continue syncing in case they are needed again soon.
 
 <ImageLightbox
   src="/images/reading-data/query-lifecycle.svg"
-  caption="The lifecycle of a ZQL query."
   className="invert dark:invert-0"
 />
-
-Queries can be either _active_ or _cached_. An active query is one that is currently being used by the application. Cached queries are not currently in use, but continue syncing in case they are needed again soon.
 
 Active queries are created one of four ways:
 
@@ -571,14 +592,6 @@ This means that we do not actually *want* to keep queries active unless there is
 
 The default Zero TTL values might initially seem too short, but they are designed to work well with the way Zero's TTL clock works and strike a good balance between keeping queries alive long enough to be useful, while not keeping them alive so long that they consume resources unnecessarily.
 
-<Note emoji="🧑‍🏫" type="warning" heading="Longer TTLs are disallowed">
-Previous versions of Zero allowed longer TTLs. The API still supports these, but they are clamped to `10m` and Zero prints a warning.
-
-If you think you need longer TTLs, please [let us know](https://discord.rocicorp.dev). We are still iterating on these APIs and may have missed something. Alternately we may be able to help you achieve your goal a different way.
-</Note>
-
----
-
 ## Custom Server Implementation
 
 It is possible to implement the `ZERO_QUERIES_URL` endpoint without using Zero's TypeScript libraries, or even in a different language entirely.
@@ -640,34 +653,3 @@ Zero syncs the *union* of all active queries' results. You don't have to worry a
 </Note>
 
 In the future, we will be implementing a consistency model that fixes these issues automatically. We will prevent Zero from returning local data when that data is not known to be a prefix of the server result. Once the consistency model is implemented, preloading can be thought of as purely a performance thing, and not required to avoid unsightly flickering.
-
-## Disabling Old Queries
-
-If you don't want clients to be able to run arbitrary ZQL queries anymore, you can disable them with the `enableLegacyQueries` flag in your Zero schema:
-
-```ts
-export const schema = createSchema({
-  // ...
-  enableLegacyQueries: false,
-});
-```
-
-The `schema` object itself has the same field. So if you use a generator like `drizzle-zero`, you can just add the flag yourself:
-
-```ts
-import { Schema as ZeroSchema } from '@rocicorp/zero';
-import {schema as genSchema} from './schema.gen';
-
-export const schema = {
-  ...genSchema,
-  enableLegacyQueries: false,
-} as const satisfies ZeroSchema;
-```
-
-You will still be able to call `useQuery(z.query.myTable)` or `useQuery(builder.myTable)`, but those queries won't sync. Only queries defined with `syncedQuery` will sync.
-
-## Local-Only Queries
-
-It can sometime be useful to run queries only on the client. For example, to implement typeahead search, it really doesn't make sense to register every single keystroke with the server.
-
-See [disabling legacy queries](#disabling-old-queries) for how to do this.

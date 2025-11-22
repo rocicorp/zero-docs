@@ -50,9 +50,9 @@ export const ROUTES = [
         title: 'Old Stuff',
         href: null,
         items: [
-          {title: 'Ad-Hoc Queries', href: '/adhoc-queries'},
+          {title: 'Ad-Hoc Queries', href: '/deprecated/ad-hoc-queries'},
           {title: 'CRUD Mutators', href: '/deprecated/crud-mutators'},
-          {title: 'RLS Permissions', href: '/permissions'},
+          {title: 'RLS Permissions', href: '/deprecated/rls-permissions'},
         ],
       },
     ],
@@ -102,10 +102,6 @@ export const ROUTES = [
     defaultOpen: false,
     items: [
       {title: 'Inspector', href: '/debug/inspector'},
-      {
-        title: 'Permissions',
-        href: '/debug/permissions',
-      },
       {title: 'Slow Queries', href: '/debug/slow-queries'},
       {title: 'Replication', href: '/debug/replication'},
       {title: 'Query ASTs', href: '/debug/query-asts'},

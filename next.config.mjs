@@ -19,7 +19,22 @@ const nextConfig = {
       },
       {
         source: '/docs/writing-data',
-        destination: '/docs/deprecated/crud-mutators',
+        destination: '/docs/mutators',
+        permanent: false,
+      },
+      {
+        source: '/docs/reading-data',
+        destination: '/docs/queries',
+        permanent: false,
+      },
+      {
+        source: '/docs/permissions',
+        destination: '/docs/auth#permissions',
+        permanent: false,
+      },
+      {
+        source: '/docs/debug/permissions',
+        destination: '/docs/deprecated/rls-permissions#debugging',
         permanent: false,
       },
     ];

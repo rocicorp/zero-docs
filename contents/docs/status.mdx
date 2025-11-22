@@ -39,7 +39,7 @@ This page describes the current state of Zero at a high level. To understand whe
 
 ## Performance
 
-* Zero plans single-table queries (choosing the right index, etc) by delegating to SQLite and this works well. Zero does not currently auto-plan joins. You can manually plan them using [the `flip` parameter](/docs/reading-data#join-flipping).
+* Zero plans single-table and multi-table queries. You can also manually plan queries using [the `flip` parameter](/docs/reading-data#join-flipping).
 * Zero has a basic [console-based inspector](/docs/debug/inspector) that can help to understand query and sync performance. It does not yet have a GUI inspector.
 * We share queries within a "client group" (e.g. all tabs in a browser), but not across groups. This means that if you have many users doing the same query, they will duplicate all that work server-side.
 

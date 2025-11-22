@@ -1,6 +1,6 @@
 ---
 title: Queries
-description: Reading and syncing data with Zero
+description: Syncing Data with Zero
 ---
 
 ## Introduction
@@ -321,7 +321,7 @@ function getQuery(
 
 `queryByName` looks up the query by name in the `queries` object.
 
-`withValidation` uses the `validator` function you provided when defining the query to validate the arguments passed to the query. If validation fails, invoking the synced queries throws and an error is returned to the client.
+`withValidation` uses the `validator` function you provided when defining the query to validate the arguments passed to the query. If validation fails, the invocation throws and an error is returned to the client.
 
 `withValidation` always takes a `context` argument as its first parameter, whether or not the query was defined with `defineQueryWithContext`. If the query was defined with `defineQueryWithContext`, the context is passed into the query function. Otherwise, the context is ignored and anything can be passed to it.
 
@@ -352,7 +352,7 @@ postsView.addListener((posts, resultType, error) => {
 
 ### Custom Queries URL
 
-By default, synced queries use the URL specified in the `ZERO_QUERIES_URL` parameter.
+By default, Zero sends queries to the URL specified in the `ZERO_QUERIES_URL` parameter.
 
 However you can customize this on a per-client basis. To do so, list multiple comma-separted URLs in the `ZERO_QUERIES_URL` parameter:
 

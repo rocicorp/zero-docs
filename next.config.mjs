@@ -17,13 +17,10 @@ const nextConfig = {
         destination: '/docs/queries',
         permanent: false,
       },
-    ];
-  },
-  async rewrites() {
-    return [
       {
-        source: '/docs/:slug*.md',
-        destination: '/docs/raw/:slug*',
+        source: '/docs/writing-data',
+        destination: '/docs/deprecated/crud-mutators',
+        permanent: false,
       },
     ];
   },

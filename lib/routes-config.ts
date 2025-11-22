@@ -50,6 +50,8 @@ export const ROUTES = [
         title: 'Old Stuff',
         href: null,
         items: [
+          {title: 'Ad-Hoc Queries', href: '/adhoc-queries'},
+          {title: 'CRUD Mutators', href: '/deprecated/crud-mutators'},
           {title: 'RLS Permissions', href: '/permissions'},
         ],
       },

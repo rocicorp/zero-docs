@@ -246,27 +246,6 @@ export default $config({
         },
       },
     );
-
-    // Permissions deployment
-    // Note: this setup requires your CI/CD pipeline to have access to your
-    // Postgres database. If you do not want to do this, you can also use
-    // `npx zero-deploy-permissions --output-format=sql` during build to
-    // generate a permissions.sql file, then run that file as part of your
-    // deployment within your VPC. See hello-zero-solid for an example:
-    // https://github.com/rocicorp/hello-zero-solid/blob/main/sst.config.ts#L141
-    new command.local.Command(
-      'zero-deploy-permissions',
-      {
-        create: `npx zero-deploy-permissions -p ../../src/schema.ts`,
-        // Run the Command on every deploy ...
-        triggers: [Date.now()],
-        environment: {
-          ZERO_UPSTREAM_DB: commonEnv.ZERO_UPSTREAM_DB,
-        },
-      },
-      // after the view-syncer is deployed.
-      {dependsOn: viewSyncer},
-    );
   },
 });
 ```
@@ -398,18 +377,6 @@ Then publish `zero-cache`:
 ```bash
 fly deploy
 ```
-
-### Deploy Permissions
-
-Now `zero-cache` is running on Fly.io, but there are no permissions. If you run the app against this `zero-cache`, you'll see that no data is returned from any query. To fix this, deploy your permissions:
-
-```bash
-npx zero-deploy-permissions --schema-path='./src/schema.ts'  --output-file='/tmp/permissions.sql'
-(cat /tmp/permissions.sql; echo "\q") | fly pg connect -a $PG_APP_NAME -d zstart
-```
-
-You will need to redo this step every time you change your app's permissions, likely as part of your
-CI/CD pipeline.
 
 ### Use Remote `zero-cache`
 

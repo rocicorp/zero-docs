@@ -6,52 +6,32 @@ This tutorial walks you through adding Zero to an existing web app step-by-step.
 
 You can follow along using one of our starting templates, or adapt the instructions to your own TypeScript-based web app.
 
-It should take about 15 minutes to complete. When you're done, you'll know the fundamentals of building with Zero.
+It should take about 15 minutes to complete. When you're done, you'll have the Zero sync engine integrated into your app.
 
-## Prerequisites
+## Set Up Your Database
 
-- Node 22+
-- [Docker](https://www.docker.com/) to run the local Postgres database
-- psql or some other Postgres client (TablePlus, pgcli, whatever)
-
-## Setup App
-
-The easiest way is to clone one of our starter templates:
-
-<CodeGroup
-  labels={[
-    {
-      text: 'TanStack/bun/Drizzle',
-      sync: {framework: 'tanstack', pm: 'bun', orm: 'drizzle'},
-    },
-    {
-      text: 'SolidJS/pnpm/Prisma',
-      sync: {framework: 'solidjs', pm: 'pnpm', orm: 'prisma'},
-    },
-  ]}
->
+You'll need a local Postgres database for development. If you don't have a preferred method, we recommend using [Docker](https://www.docker.com/):
 
 ```bash
-git clone https://github.com/rocicorp/tutorial-tanstack-drizzle
-cd tutorial-tanstack-drizzle
-bun install
+docker run -d --name zero-postgres \
+  -e POSTGRES_PASSWORD="password" \
+  -p 5432:5432 \
+  postgres:16-alpine \
+  # IMPORTANT: logical WAL level is required for Zero
+  # to sync data to its SQLite replica
+  postgres -c wal_level=logical
 ```
 
-```bash
-git clone https://github.com/rocicorp/tutorial-solidstart-prisma
-cd tutorial-solidstart-prisma
-pnpm install
-```
+This will start a Postgres database running in the background.
 
-</CodeGroup>
+<Note heading="Supported Postgres features">
+  See [Supported Postgres Features](/docs/postgres-support) for more details on
+  how Zero works with Postgres.
+</Note>
 
-These templates are just empty app shells with a Postgres database already setup.
+## Install and Run Zero-Cache
 
-If you're using your own web app, skip this step.
-
-## Start Database
-
-The starter templates each contain a Postgres database that models a Spotify-style music app. Start the database using the built-in script.
+Add Zero to your project:
 
 <CodeGroup
   labels={[
@@ -60,47 +40,62 @@ The starter templates each contain a Postgres database that models a Spotify-sty
     {text: 'bun', sync: {pm: 'bun'}},
     {text: 'yarn', sync: {pm: 'yarn'}},
   ]}
-  defaultLabel="bun"
 >
 
 ```bash
-npm run dev:db
+npm install @rocicorp/zero
 ```
 
 ```bash
-pnpm dev:db
+pnpm add @rocicorp/zero
 ```
 
 ```bash
-bun dev:db
+bun add @rocicorp/zero
 ```
 
 ```bash
-yarn dev:db
+yarn add @rocicorp/zero
 ```
 
 </CodeGroup>
 
-Take a minute to explore this data by connecting to `postgres://postgres:12345@localhost:5432/postgres` with any Postgres client.
-For example, using `psql`:
+Start the development `zero-cache` by running the following command:
 
-```
-video showing some commands to try with psql
-```
-
-## Start Zero-Cache
-
-Leave Postgres running, and in a separate terminal install Zero and start `zero-cache` in dev mode:
+<CodeGroup
+  labels={[
+    {text: 'npm', sync: {pm: 'npm'}},
+    {text: 'pnpm', sync: {pm: 'pnpm'}},
+    {text: 'bun', sync: {pm: 'bun'}},
+    {text: 'yarn', sync: {pm: 'yarn'}},
+  ]}
+>
 
 ```bash
-npm install @rocicorp/zero
-
-ZERO_UPSTREAM_DB=... npx zero-cache-dev
+export ZERO_UPSTREAM_DB="postgres://postgres:password@localhost:5432/postgres"
+npx zero-cache-dev # run zero-cache in dev mode on port 4848
 ```
 
-Zero works by continuously replicating your upstream database into a SQLite _replica_ called `zero.db`.
+```bash
+export ZERO_UPSTREAM_DB="postgres://postgres:password@localhost:5432/postgres"
+pnpm exec zero-cache-dev # run zero-cache in dev mode on port 4848
+```
 
-Any data that Zero clients might want to read needs to be in the replica. But if there are tables or columns that will **not** be queried by Zero clients ever, you can exclude them.
+```bash
+export ZERO_UPSTREAM_DB="postgres://postgres:password@localhost:5432/postgres"
+bunx zero-cache-dev # run zero-cache in dev mode on port 4848
+```
+
+```bash
+export ZERO_UPSTREAM_DB="postgres://postgres:password@localhost:5432/postgres"
+yarn zero-cache-dev # starts dev mode on port 4848
+```
+
+</CodeGroup>
+
+Zero works by continuously replicating your upstream database into a SQLite _replica_.
+
+Zero cache runs client queries against the replica. If there are tables or columns that will **not** be queried by Zero clients ever, you can exclude them.
 
 You can use the `zero-sqlite3` tool to explore `zero.db`. Try it out by connecting to Postgres and the Zero replica in two different terminals.
 If you change something in Postgres, you'll see it immediately show up in the replica:
@@ -109,13 +104,10 @@ If you change something in Postgres, you'll see it immediately show up in the re
 video
 ```
 
-## Generate schema.ts
+## Set Up Your Zero Schema
 
-Zero uses information about your database schema to provide a typesafe query API. This information is conventionally stored in a file called `schema.ts`.
-
-You will not usually write schema.ts yourself, but will instead generate it from your database schema. We have generators for both Drizzle and Prisma.
-
-Use the correct generator to generate schema.ts from your Postgres database:
+Zero uses information about your database schema to provide a type-safe query API.
+If you use Drizzle or Prisma, you can generate your schema using:
 
 <CodeGroup
   labels={[
@@ -130,122 +122,204 @@ Use the correct generator to generate schema.ts from your Postgres database:
   ]}
 >
 
+<SyncedCode syncKey="pm" syncValues={['npm', 'pnpm', 'bun', 'yarn']}>
+
 ```bash
-npm install drizzle-zero
-npx ...
+npx drizzle-zero generate
 ```
 
 ```bash
-npm install prisma-generator-zero
-npx ...
+pnpm dlx drizzle-zero generate
 ```
+
+```bash
+bunx drizzle-zero generate
+```
+
+```bash
+yarn dlx drizzle-zero generate
+```
+
+</SyncedCode>
+
+<SyncedCode syncKey="pm" syncValues={['npm', 'pnpm', 'bun', 'yarn']}>
+
+```bash
+npm install @passionfroot/prisma-generator-zero
+# Add this to your prisma schema:
+# generator zero {
+#   provider = "prisma-generator-zero"
+# }
+npx prisma generate
+```
+
+```bash
+pnpm add @passionfroot/prisma-generator-zero
+# Add this to your prisma schema:
+# generator zero {
+#   provider       = "prisma-generator-zero"
+# }
+pnpx prisma generate
+```
+
+```bash
+bun add @passionfroot/prisma-generator-zero
+# Add this to your prisma schema:
+# generator zero {
+#   provider       = "prisma-generator-zero"
+# }
+bunx prisma generate
+```
+
+```bash
+yarn add @passionfroot/prisma-generator-zero
+# Add this to your prisma schema:
+# generator zero {
+#   provider       = "prisma-generator-zero"
+# }
+yarn prisma generate
+```
+
+</SyncedCode>
 
 </CodeGroup>
 
-## Setup Zero Client
+If you don't use Drizzle or Prisma, you can [create a `schema.ts` file manually](/docs/zero-schema).
 
-How to instantiate Zero depends on the web framework you use.
+{/* TODO some language about schema incompatibility? */}
+{/* TODO some language about sample data? psql? */}
 
-Zero has first-class support for React and SolidJS and community support for Svelte and Vue. There is also a low-level framework-agnostic API you can in any TypeScript-based project.
+{/* TODO some setup for module augmentation? less verbose types?? */}
+
+## Set Up the Zero Client
+
+Zero has first-class support for React and SolidJS, and community support for Svelte and Vue.
+
+There is also a low-level API you can use in any TypeScript-based project.
+
+{/* TODO add some preamble for "BYOA" (Bring Your Own Auth) or cookies or whatever */}
 
 <CodeGroup
   labels={[
     {
-      text: 'React/TanStack',
-      sync: {framework: 'tanstack'},
+      text: 'React',
+      sync: {framework: 'react'},
     },
     {
       text: 'SolidJS',
       sync: {framework: 'solidjs'},
     },
     {
-      text: 'Low-level',
+      text: 'Typescript',
+      sync: {framework: 'typescript'},
     },
   ]}
 >
 
 ```tsx
-// root.ts
-import {ZeroProvider} from './zero.ts';
+// root.tsx
+import {ZeroProvider} from '@rocicorp/zero/react';
+import {schema} from './generated/schema.ts';
 
 function Root() {
   return (
-    <ZeroProvider cacheURL="https://localhost:4848">
+    <ZeroProvider cacheURL="http://localhost:4848" schema={schema}>
       <App />
     </ZeroProvider>
   );
 }
 
-// mycomponent.ts
+// mycomponent.tsx
 import {useZero} from '@rocicorp/zero/react';
-import {Schema} from 'zero/schema.ts';
 
 function MyComponent() {
-  // within any component
-  const zero = useZero<Schema>();
+  const zero = useZero();
   console.log('clientID', zero.clientID);
 }
 ```
 
 ```tsx
-// TODO: SolidJS example
+// root.tsx
+import {ZeroProvider} from '@rocicorp/zero/solid';
+import {schema} from './generated/schema.ts';
+
+function Root() {
+  return (
+    <ZeroProvider cacheURL="http://localhost:4848" schema={schema}>
+      <App />
+    </ZeroProvider>
+  );
+}
+
+// mycomponent.tsx
+import {useZero} from '@rocicorp/zero/solid';
+
+function MyComponent() {
+  const zero = useZero();
+  console.log('clientID', zero().clientID);
+}
 ```
 
 ```tsx
-// TODO: Low-level example
+import {Zero} from '@rocicorp/zero';
+import {schema} from './generated/schema.ts';
+
+const zero = new Zero({
+  cacheURL: 'http://localhost:4848',
+  schema,
+});
+console.log('clientID', zero.clientID);
 ```
 
 </CodeGroup>
 
 ## Sync Data
 
-### Define Queries
+### Define Query
 
 Alright, let's sync some data!
 
-In Zero, we do this with _queries_. Queries can be defined anywhere, but are conventionally found in a central `queries.ts` file:
+In Zero, we do this with _queries_. Queries can be defined anywhere, but are conventionally found in a shared `queries.ts` file:
 
 ```tsx
-// zero/queries.ts
-import {defineQuery} from '@rocicorp/zero';
-import {builder} from './zero/schema.ts';
-import * as v from 'valibot';
+// queries.ts
+import {defineQueries, defineQuery} from '@rocicorp/zero';
+import {zql} from './schema.ts';
+import {z} from 'zod';
 
-export const queries = {
+export const queries = defineQueries({
   albums: {
     byArtist: defineQuery(
-      v.object({artistID: v.string()}),
+      z.object({artistID: z.string()}),
       ({args: {artistID}}) => {
-        return builder.album.where('artistID', artistID);
+        return zql.album.where('artistID', artistID);
       },
     ),
   },
-};
+});
 
-// It also ends up being useful to have this around.
-export type Queries = typeof queries;
+// Register the queries type with Zero
+declare module '@rocicorp/zero' {
+  interface Register {
+    queries: typeof queries;
+  }
+}
 ```
 
-<aside>
-💡
-
-You can of course factor this into separate files as your app grows. The main point is that there's a central `queries` export that contains all the queries.
-
-</aside>
+<Note>
+  You can of course factor this into separate files as your app grows. The main point is that there's a central `queries` export that contains all the queries.
+</Note>
 
 A Zero _query_ is a function that takes some arguments and returns a ZQL (Zero Query Language) statement.
 You can think of a query like a stored procedure in other databases.
 
 The arguments for a query are defined by a _validator_. Any validator that implements Standard Schema is supported, such as Zod, Valibot, Effect Schema, etc.
 
-<aside>
-🤔
+<Note>
+  Validators are needed because Zero queries run on your server too, where we can't trust the client-provided inputs.
+</Note>
 
-Validators are needed because Zero queries run on your server too, where we can't trust the client-provided inputs.
-
-</aside>
-
-Use the `builder` from `schema.ts` to construct and return a ZQL query. ZQL is quite powerful and allows you to build
+Use `zql` from `schema.ts` to construct and return a ZQL query. ZQL is quite powerful and allows you to build
 queries with filters, sorts, relationships, and more. See the ZQL Reference for complete details.
 
 ```bash
@@ -272,7 +346,7 @@ function Root() {
 }
 ```
 
-### Invoke Queries
+### Invoke Query
 
 How to invoke your query depends on your framework. Most times you will use a helper like React's `useQuery` that integrates into your framework's reactivity system:
 
@@ -296,7 +370,7 @@ Uncaught exception. Could not get ZQL for query `listAlbums` because no queries 
 
 Let's fix that.
 
-### Implement Queries Endpoint
+### Implement Query Backend
 
 Zero doesn't allow clients to sync any arbitrary ZQL from the server – doing so would not make sense for security or performance reasons.
 
@@ -371,27 +445,32 @@ Just as with queries, we use a central `mutators.ts` file:
 
 ```tsx
 // mutators.ts
-import {defineMutator} from "@rocicorp/zero";
-import {Schema, builder} from "zero/schema.ts";
-import * as v from "valibot";
+import {defineMutators, defineMutator} from '@rocicorp/zero';
+import {zql} from 'zero/schema.ts';
+import {z} from 'zod';
 
-export const mutators = {
-    albums: {
-        create: defineMutator<Schema>(
-            v.object({
-                id: v.string(),
-                artistID: v.string(),
-                title: v.string(),
-                year: v.number(),
-            }),
-          async ({tx, args: {album}) => {
-              await tx.mutate.album.create(album);
-          },
-        ),
-    },
-};
+export const mutators = defineMutators({
+  albums: {
+    create: defineMutator(
+      z.object({
+        id: z.string(),
+        artistID: z.string(),
+        title: z.string(),
+        year: z.number(),
+      }),
+      async ({tx, args: {album}}) => {
+        await tx.mutate.album.create(album);
+      },
+    ),
+  },
+});
 
-export type Mutators = typeof mutators;
+// Register the mutators type with Zero
+declare module '@rocicorp/zero' {
+  interface Register {
+    mutators: typeof mutators;
+  }
+}
 ```
 
 Use the CRUD API on the `tx` parameter to do simple single-row read or write operations within your mutator. You can also use `tx.query` to run queries or ZQL expressions.

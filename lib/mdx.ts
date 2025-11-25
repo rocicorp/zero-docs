@@ -1,23 +1,31 @@
-import path from 'path';
-import {promises as fs} from 'fs';
-import {cache} from 'react';
-import {compileMDX} from 'next-mdx-remote/rsc';
-import {page_routes} from './routes-config';
-import remarkGfm from 'remark-gfm';
-import rehypePrism from 'rehype-prism-plus';
-import rehypeAutolinkHeadings from 'rehype-autolink-headings';
-import rehypeSlug from 'rehype-slug';
-import rehypeCodeTitles from 'rehype-code-titles';
 import rehypeAddCopyButton from '@/lib/rehype-add-copy-button';
+import {promises as fs} from 'fs';
+import {compileMDX} from 'next-mdx-remote/rsc';
+import path from 'path';
+import {cache} from 'react';
+import rehypeAutolinkHeadings from 'rehype-autolink-headings';
+import rehypeCodeTitles from 'rehype-code-titles';
+import rehypePrism from 'rehype-prism-plus';
+import rehypeSlug from 'rehype-slug';
+import remarkGfm from 'remark-gfm';
+import {page_routes} from './routes-config';
 // Custom components for MDX
+import CodeGroup from '@/components/CodeGroup';
+import SyncedCode from '@/components/SyncedCode';
 import Note from '@/components/note';
 import ImageLightbox from '@/components/ui/ImageLightbox';
 import Video from '@/components/ui/Video';
 import {Button} from '@/components/ui/button';
-import CodeGroup from '@/components/CodeGroup';
 import {sluggify} from './utils';
 
-const components = {Note, ImageLightbox, Video, Button, CodeGroup};
+const components = {
+  Note,
+  ImageLightbox,
+  Video,
+  Button,
+  CodeGroup,
+  SyncedCode,
+};
 
 // Define the structure of the frontmatter
 type BaseMdxFrontmatter = {title: string; description: string};

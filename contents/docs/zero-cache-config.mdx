@@ -172,6 +172,18 @@ flag: `--cvr-max-conns`<br/>
 env: `ZERO_CVR_MAX_CONNS`<br/>
 default: `30`
 
+### Enable Query Planner
+
+Enable the query planner for optimizing ZQL queries.
+
+The query planner analyzes and optimizes query execution by determining the most efficient join strategies.
+
+You can disable the planner if it is picking bad strategies.
+
+flag: `--enable-query-planner`<br/>
+env: `ZERO_ENABLE_QUERY_PLANNER`<br/>
+default: `true`
+
 ### Enable Telemetry
 
 Zero collects anonymous telemetry data to help us understand usage. We collect:

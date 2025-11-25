@@ -34,8 +34,6 @@ export default function SyncedCode({
     [children],
   );
 
-  if (!blocks.length) return null;
-
   const normalizedKey = normalize(syncKey);
   const normalizedValues = useMemo(
     () => syncValues.map(normalize),

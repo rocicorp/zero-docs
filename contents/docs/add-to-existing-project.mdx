@@ -109,7 +109,7 @@ video
 ### Set Up Your Zero Schema
 
 Zero uses information about your database schema to provide a type-safe query API in a shared `schema.ts` file.
-If you use Drizzle or Prisma, you can generate your schema using:
+If you use Drizzle or Prisma, you can generate your schema automatically. Otherwise, you can create the file manually.
 
 <CodeGroup
   labels={[
@@ -119,7 +119,11 @@ If you use Drizzle or Prisma, you can generate your schema using:
     },
     {
       text: 'Prisma',
-      sync: {orm: 'prisma'},
+      sync: {orm: 'prisma', pgClient: 'prisma'},
+    },
+    {
+      text: "Manual",
+      sync: {orm: 'other', pgClient: 'other'},
     },
   ]}
 >
@@ -184,9 +188,31 @@ yarn prisma generate
 
 </SyncedCode>
 
-</CodeGroup>
+```ts
+// shared/schema.ts
+import {table, string, createSchema} from '@rocicorp/zero';
 
-If you don't use Drizzle or Prisma, you can [create a `schema.ts` file manually](/docs/zero-schema).
+const user = table('user')
+  .columns({
+    id: string(),
+    name: string(),
+    // ... other columns ...
+  })
+  .primaryKey('id');
+
+export const schema = createSchema({
+  tables: [user],
+});
+
+// Register the schema for type safety
+declare module '@rocicorp/zero' {
+  interface Register {
+    schema: typeof schema;
+  }
+}
+```
+
+</CodeGroup>
 
 <Note heading="Introducing the sample schema">
   For the rest of this guide, we will reference a [sample

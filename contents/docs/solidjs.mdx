@@ -9,11 +9,11 @@ Zero has built-in support for Solid. Here’s what basic usage looks like:
 Use the `ZeroProvider` component to setup Zero. It takes care of creating and destroying `Zero` instances reactively:
 
 ```tsx
-import App from "./App.tsx";
-import { schema } from "../shared/schema.ts";
+import App from './App.tsx';
+import {schema} from '../shared/schema.ts';
 import {useSession} from 'my-auth-provider';
-import { ZeroProvider } from "@rocicorp/zero/solid";
-import { createMutators } from "../shared/mutators.ts";
+import {ZeroProvider} from '@rocicorp/zero/solid';
+import {createMutators} from '../shared/mutators.ts';
 
 function Root() {
   const session = useSession();
@@ -55,18 +55,17 @@ import {useQuery, useZero} from '@rocicorp/zero/solid';
 import {type Schema} from './schema.ts';
 
 function App() {
-  const zero = useZero<Schema, Mutators>()();
+  const zero = useZero<Schema, Mutators>();
   const userID = selectedUserID();
 
   const [posts] = useQuery(() =>
-    zero.query.posts
-      .where('author_id', userID)
-      .related('comments'));
+    zero().query.posts.where('author_id', userID).related('comments'),
+  );
 
   return (
     <div>
       <For each={posts()}>
-        {(post) => (
+        {post => (
           <div key={post.id}>
             {post.title} - ({post.comments.length} comments)
           </div>

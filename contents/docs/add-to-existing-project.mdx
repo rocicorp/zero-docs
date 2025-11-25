@@ -2,13 +2,15 @@
 title: Add to Existing Project
 ---
 
-This tutorial walks you through adding Zero to an existing web app step-by-step.
+This tutorial walks you through adding Zero to an existing web app in a few steps.
 
 You can follow along using one of our starting templates, or adapt the instructions to your own TypeScript-based web app.
 
 It should take about 15 minutes to complete. When you're done, you'll have the Zero sync engine integrated into your app.
 
-## Set Up Your Database
+## Integrate Zero
+
+### Set Up Your Database
 
 You'll need a local Postgres database for development. If you don't have a preferred method, we recommend using [Docker](https://www.docker.com/):
 
@@ -29,7 +31,7 @@ This will start a Postgres database running in the background.
   how Zero works with Postgres.
 </Note>
 
-## Install and Run Zero-Cache
+### Install and Run Zero-Cache
 
 Add Zero to your project:
 
@@ -72,30 +74,30 @@ Start the development `zero-cache` by running the following command:
 >
 
 ```bash
-export ZERO_UPSTREAM_DB="postgres://postgres:password@localhost:5432/postgres"
-npx zero-cache-dev # run zero-cache in dev mode on port 4848
+ZERO_UPSTREAM_DB="postgres://postgres:password@localhost:5432/postgres" \
+npx zero-cache-dev
 ```
 
 ```bash
-export ZERO_UPSTREAM_DB="postgres://postgres:password@localhost:5432/postgres"
-pnpm exec zero-cache-dev # run zero-cache in dev mode on port 4848
+ZERO_UPSTREAM_DB="postgres://postgres:password@localhost:5432/postgres" \
+pnpm exec zero-cache-dev
 ```
 
 ```bash
-export ZERO_UPSTREAM_DB="postgres://postgres:password@localhost:5432/postgres"
-bunx zero-cache-dev # run zero-cache in dev mode on port 4848
+ZERO_UPSTREAM_DB="postgres://postgres:password@localhost:5432/postgres" \
+bunx zero-cache-dev
 ```
 
 ```bash
-export ZERO_UPSTREAM_DB="postgres://postgres:password@localhost:5432/postgres"
-yarn zero-cache-dev # run zero-cache in dev mode on port 4848
+ZERO_UPSTREAM_DB="postgres://postgres:password@localhost:5432/postgres" \
+yarn zero-cache-dev
 ```
 
 </CodeGroup>
 
 Zero works by continuously replicating your upstream database into a SQLite _replica_.
 
-Zero cache runs client queries against the replica. If there are tables or columns that will **not** be queried by Zero clients ever, you can exclude them.
+Zero-cache runs client queries against the replica. If there are tables or columns that will **not** be queried by Zero clients ever, you can exclude them.
 
 You can use the `zero-sqlite3` tool to explore `zero.db`. Try it out by connecting to Postgres and the Zero replica in two different terminals.
 If you change something in Postgres, you'll see it immediately show up in the replica:
@@ -104,16 +106,16 @@ If you change something in Postgres, you'll see it immediately show up in the re
 video
 ```
 
-## Set Up Your Zero Schema
+### Set Up Your Zero Schema
 
-Zero uses information about your database schema to provide a type-safe query API.
+Zero uses information about your database schema to provide a type-safe query API in a shared `schema.ts` file.
 If you use Drizzle or Prisma, you can generate your schema using:
 
 <CodeGroup
   labels={[
     {
       text: 'Drizzle',
-      sync: {orm: 'drizzle'},
+      sync: {orm: 'drizzle', pgClient: 'drizzle'},
     },
     {
       text: 'Prisma',
@@ -186,12 +188,19 @@ yarn prisma generate
 
 If you don't use Drizzle or Prisma, you can [create a `schema.ts` file manually](/docs/zero-schema).
 
+<Note heading="Introducing the sample schema">
+  For the rest of this guide, we will reference a [sample
+  schema](https://github.com/rocicorp/tutorial-tanstack-drizzle/blob/main/src/schema.ts)
+  that models a Spotify-style music app. You can adapt these examples to your
+  own data model.
+</Note>
+
 {/* TODO some language about schema incompatibility? */}
 {/* TODO some language about sample data? psql? */}
 
-{/* TODO some setup for module augmentation? less verbose types?? */}
+{/* TODO some setup for module augmentation? less verbose types?? forking prisma generator?? */}
 
-## Set Up the Zero Client
+### Set Up the Zero Client
 
 Zero has first-class support for React and SolidJS, and community support for Svelte and Vue.
 
@@ -203,15 +212,15 @@ There is also a low-level API you can use in any TypeScript-based project.
   labels={[
     {
       text: 'React',
-      sync: {framework: 'react'},
+      sync: {client: 'react'},
     },
     {
       text: 'SolidJS',
-      sync: {framework: 'solidjs'},
+      sync: {client: 'solidjs'},
     },
     {
       text: 'Typescript',
-      sync: {framework: 'typescript'},
+      sync: {client: 'typescript'},
     },
   ]}
 >
@@ -219,7 +228,7 @@ There is also a low-level API you can use in any TypeScript-based project.
 ```tsx
 // root.tsx
 import {ZeroProvider} from '@rocicorp/zero/react';
-import {schema} from './generated/schema.ts';
+import {schema} from './shared/schema.ts';
 
 function Root() {
   return (
@@ -241,7 +250,7 @@ function MyComponent() {
 ```tsx
 // root.tsx
 import {ZeroProvider} from '@rocicorp/zero/solid';
-import {schema} from './generated/schema.ts';
+import {schema} from './shared/schema.ts';
 
 function Root() {
   return (
@@ -261,14 +270,18 @@ function MyComponent() {
 ```
 
 ```tsx
+// zero.ts
 import {Zero} from '@rocicorp/zero';
-import {schema} from './generated/schema.ts';
+import {schema} from './shared/schema.ts';
 
 const zero = new Zero({
   cacheURL: 'http://localhost:4848',
   schema,
 });
+
 console.log('clientID', zero.clientID);
+
+export {zero};
 ```
 
 </CodeGroup>
@@ -279,13 +292,13 @@ console.log('clientID', zero.clientID);
 
 Alright, let's sync some data!
 
-In Zero, we do this with _queries_. Queries can be defined anywhere, but are conventionally found in a shared `queries.ts` file:
+In Zero, we do this with _queries_. Queries can be defined anywhere, but are conventionally found in a shared `queries.ts` file.
 
 ```tsx
-// queries.ts
+// shared/queries.ts
 import {defineQueries, defineQuery} from '@rocicorp/zero';
-import {zql} from './schema.ts';
 import {z} from 'zod';
+import {zql} from './schema.ts';
 
 export const queries = defineQueries({
   albums: {
@@ -298,7 +311,7 @@ export const queries = defineQueries({
   },
 });
 
-// Register the queries type with Zero
+// Register the queries for type safety
 declare module '@rocicorp/zero' {
   interface Register {
     queries: typeof queries;
@@ -306,121 +319,225 @@ declare module '@rocicorp/zero' {
 }
 ```
 
-<Note>
-  You can of course factor this into separate files as your app grows. The main point is that there's a central `queries` export that contains all the queries.
-</Note>
+A Zero _query_ is a function that returns ZQL (Zero Query Language) which describes the data to retrieve. You can think of a query like a stored procedure in other databases.
 
-A Zero _query_ is a function that takes some arguments and returns a ZQL (Zero Query Language) statement.
-You can think of a query like a stored procedure in other databases.
+The arguments for a query are defined by a _validator_. Any library that implements [Standard Schema](https://standardschema.dev/) is supported, such as Zod, Valibot, Effect Schema, etc.
 
-The arguments for a query are defined by a _validator_. Any validator that implements Standard Schema is supported, such as Zod, Valibot, Effect Schema, etc.
-
-<Note>
-  Validators are needed because Zero queries run on your server too, where we can't trust the client-provided inputs.
+<Note heading="Why do we need validators?">
+  Queries and mutators run on your API server, where you can't trust the
+  client-provided inputs.
 </Note>
 
 Use `zql` from `schema.ts` to construct and return a ZQL query. ZQL is quite powerful and allows you to build
-queries with filters, sorts, relationships, and more. See the ZQL Reference for complete details.
+queries with filters, sorts, relationships, and more. See the [ZQL Reference](/docs/zql) for complete details.
 
 ```bash
 animation
 ```
 
-Once you've got some queries defined, register them with Zero:
-
-```tsx
-import {ZeroProvider} from '@rocicorp/zero';
-import {schema} from './zero/schema.ts';
-import {queries} from './zero/queries.ts';
-
-function Root() {
-  return (
-    <ZeroProvider
-      cacheURL="https://localhost:4848"
-      schema={schema}
-      queries={queries}
-    >
-      <App />
-    </ZeroProvider>
-  );
-}
-```
-
 ### Invoke Query
 
-How to invoke your query depends on your framework. Most times you will use a helper like React's `useQuery` that integrates into your framework's reactivity system:
+Querying for data is framework-specific. Most of the time, you will use a helper like `useQuery` that integrates into your framework's rendering model:
+
+<CodeGroup
+  labels={[
+    {
+      text: 'React',
+      sync: {client: 'react'},
+    },
+    {
+      text: 'SolidJS',
+      sync: {client: 'solidjs'},
+    },
+    {
+      text: 'Typescript',
+      sync: {client: 'typescript'},
+    },
+  ]}
+>
 
 ```tsx
-import {useQuery} from "@rocicorp/react/zero";
-import {Schema} from "zero/schema.ts";
-import {Queries} from "zero/queries.ts";
+// mycomponent.tsx
+import {useQuery} from '@rocicorp/zero/react';
+import {queries} from './shared/queries.ts';
 
 function MyComponent() {
-  const z = useZero<Schema, Queries>();
-    const [users] = useQuery(z.query.albums.byArtist({artistID: '...'}));
-    return users.map(u => ...);
+  const [albums] = useQuery(queries.albums.byArtist({artistID: 'artist_3'}));
+  return albums.map(a => <div key={a.id}>{a.title}</div>);
 }
 ```
 
-But if you run your app now, it still doesn't quite work. You should see an error like:
+```tsx
+// mycomponent.tsx
+import {useQuery} from '@rocicorp/zero/solid';
+import {queries} from './shared/queries.ts';
 
+function MyComponent() {
+  const [albums] = useQuery(() =>
+    queries.albums.byArtist({artistID: 'artist_3'}),
+  );
+  return albums().map(a => <div key={a.id}>{a.title}</div>);
+}
 ```
-Uncaught exception. Could not get ZQL for query `listAlbums` because no queries endpoint is specified.
+
+```tsx
+// albums.ts
+import {zero} from './zero.ts';
+import {queries} from './shared/queries.ts';
+
+const albums = await zero.run(queries.albums.byArtist({artistID: 'artist_3'}));
+console.log('albums', albums);
+```
+
+</CodeGroup>
+
+<Note heading="What is this example doing?">
+  We're querying the [sample
+  schema](/docs/add-to-existing-project#set-up-your-zero-schema) for albums by
+  the artist with ID `artist_3`.
+</Note>
+
+If you run your app now, you should see an error like:
+
+```ts
+Uncaught exception. Could not get ZQL for query `albums.byArtist` because no queries endpoint is specified.
 ```
 
 Let's fix that.
 
 ### Implement Query Backend
 
-Zero doesn't allow clients to sync any arbitrary ZQL from the server – doing so would not make sense for security or performance reasons.
+Zero doesn't allow clients to run any arbitrary ZQL against zero-cache, for both security and performance.
 
-Instead, Zero sends only the name and args of a query to a _queries endpoint_ on your server.
+Instead, Zero sends the name and arguments of the query to a _queries endpoint_ on your server.
 
-Your server finds its own implementation of the requested query and invokes it, returning the resulting ZQL to zero-cache.
+Your server returns its own implementation of the requested query and calls it, returning the ZQL expression to zero-cache.
 
-The queries endpoint can return the exact same ZQL that ran on the client, or it could be different – for example it might include additional clauses that enforce permissions.
+The queries endpoint can return the exact same ZQL that ran on the client, or it could be different – it commonly includes additional clauses that enforce permissions.
 
-You can implement the queries endpoint yourself, but `@rocicorp/zero` provides `handleQueriesRequest` and `queryByName` to makes it very easy:
+<CodeGroup
+  labels={[
+    {
+      text: 'Next.js',
+      sync: {api: 'nextjs'},
+    },
+    {
+      text: 'Hono',
+      sync: {api: 'hono'},
+    },
+    {
+      text: 'Express',
+      sync: {api: 'express'},
+    },
+  ]}
+>
 
-```tsx
-import type {
-  ReadonlyJSONValue,
-  queryByName,
-  withValidation,
-} from '@rocicorp/zero';
-import {handleQueriesRequest} from '@rocicorp/zero/server';
-import {queries} from 'zero/queries.ts';
+```ts
+// app/api/queries/route.ts
+import {handleQueryRequest} from '@rocicorp/zero/server';
+import {queries} from '../../shared/queries.ts';
 
-app.post('/queries', async req => {
-  return Response.json(await handleQueriesRequest(queryZQL, req));
-});
+export async function POST(req: Request) {
+  const result = await handleQueryRequest(req, (name, args) => {
+    const q = queries.get(name);
+    return q(args);
+  });
 
-function queryZQL(name: string, args: ReadonlyJSONValue | undefined) {
-  const query = withValidation(queryByName(queries, name));
-  return query({args});
+  return Response.json(result);
 }
 ```
 
-Set the URL of the queries endpoint with the `ZERO_QUERIES_URL` parameter to `zero-cache`:
+```ts
+// api/app.ts
+import {Hono} from 'hono';
+import {handleQueryRequest} from '@rocicorp/zero/server';
+import {queries} from '../shared/queries.ts';
 
-```tsx
-ZERO_UPSTREAM_DB=... \
-ZERO_QUERIES_URL=... \
+const app = new Hono();
+
+app.post('/api/queries', async c => {
+  const result = await handleQueryRequest(c.req, (name, args) => {
+    const q = queries.get(name);
+    return q(args);
+  });
+
+  return c.json(result);
+});
+```
+
+```ts
+// api/app.ts
+import express from 'express';
+import {handleQueryRequest} from '@rocicorp/zero/server';
+import {queries} from '../shared/queries.ts';
+
+const app = express();
+
+// Parse JSON body
+app.use(express.json());
+
+app.post('/api/queries', async (req, res, next) => {
+  try {
+    const result = await handleQueryRequest(req.body, (name, args) => {
+      const q = queries.get(name);
+      return q(args);
+    });
+
+    res.json(result);
+  } catch (err) {
+    next(err);
+  }
+});
+```
+
+</CodeGroup>
+
+Stop and re-run zero-cache with the URL of the queries endpoint:
+
+<CodeGroup
+  labels={[
+    {text: 'npm', sync: {pm: 'npm'}},
+    {text: 'pnpm', sync: {pm: 'pnpm'}},
+    {text: 'bun', sync: {pm: 'bun'}},
+    {text: 'yarn', sync: {pm: 'yarn'}},
+  ]}
+>
+
+```bash
+ZERO_UPSTREAM_DB="postgres://postgres:password@localhost:5432/postgres" \
+ZERO_QUERIES_URL="http://localhost:3000/api/queries" \
 npx zero-cache-dev
 ```
 
-Now if you run your app again, you will see your data:
+```bash
+ZERO_UPSTREAM_DB="postgres://postgres:password@localhost:5432/postgres" \
+ZERO_QUERIES_URL="http://localhost:3000/api/queries" \
+pnpm exec zero-cache-dev
+```
 
-```tsx
+```bash
+ZERO_UPSTREAM_DB="postgres://postgres:password@localhost:5432/postgres" \
+ZERO_QUERIES_URL="http://localhost:3000/api/queries" \
+bunx zero-cache-dev
+```
+
+```bash
+ZERO_UPSTREAM_DB="postgres://postgres:password@localhost:5432/postgres" \
+ZERO_QUERIES_URL="http://localhost:3000/api/queries" \
+yarn zero-cache-dev
+```
+
+</CodeGroup>
+
+Now if you reload the page, you will see data:
+
+```ts
 animation;
 ```
 
-🥳
+Zero queries update live, so if you edit data in Postgres directly, you will see it update in the Zero replica AND the UI:
 
-Zero queries update live, so if you now go back to your Postgres terminal and change some data,
-you will see it update in the Zero replica AND the UI:
-
-```tsx
+```ts
 animation;
 ```
 
@@ -439,14 +556,13 @@ But for now, let's move on to writes!
 
 ### Define Mutators
 
-Data is written in Zero apps using _mutators._
-
-Just as with queries, we use a central `mutators.ts` file:
+Data is written in Zero apps using _mutators_.
+Similar to queries, we use a shared `mutators.ts` file:
 
 ```tsx
-// mutators.ts
+// shared/mutators.ts
 import {defineMutators, defineMutator} from '@rocicorp/zero';
-import {zql} from 'zero/schema.ts';
+import {zql} from './schema.ts';
 import {z} from 'zod';
 
 export const mutators = defineMutators({
@@ -458,14 +574,14 @@ export const mutators = defineMutators({
         title: z.string(),
         year: z.number(),
       }),
-      async ({tx, args: {album}}) => {
-        await tx.mutate.album.create(album);
+      async ({tx, args: {id, artistID, title, year}}) => {
+        await tx.mutate.album.insert({id, artistID, title, year});
       },
     ),
   },
 });
 
-// Register the mutators type with Zero
+// Register the mutators for type safety
 declare module '@rocicorp/zero' {
   interface Register {
     mutators: typeof mutators;
@@ -473,32 +589,46 @@ declare module '@rocicorp/zero' {
 }
 ```
 
-Use the CRUD API on the `tx` parameter to do simple single-row read or write operations within your mutator. You can also use `tx.query` to run queries or ZQL expressions.
+You can use the [CRUD-style API](/docs/mutators#writing-data) on `tx` to write data within your mutator.
+You can also use `tx.run(q)` to run queries or ZQL expressions.
 
-<aside>
-⚠️
+<Note type="warning" heading="Always await operations in mutators">
+  Mutators almost always run in the same frame on the client, against local
+  data. The reason mutators are marked `async` is because on the server, reading
+  from the `tx` object goes over the network to Postgres. Also, in edge cases on
+  the client, `tx.get()` can go to local storage (IndexedDB or SQLite).
+</Note>
 
-Mutators almost always run instantly on the client, in the same frame. The reason mutators are marked async is because on the server,
-reading from the `tx` object goes over the network to Postgres. Also, in edge cases on the client, `tx.get()` can go to local storage (IDB).
+Unlike queries, you _must_ register your mutators with Zero before you can use them:
 
-Always `await` CRUD operations within your mutator, otherwise you will see an error about operations running after a transaction has completed.
-
-</aside>
-
-Just as with queries, you register your mutators with Zero at startup:
+<CodeGroup
+  labels={[
+    {
+      text: 'React',
+      sync: {client: 'react'},
+    },
+    {
+      text: 'SolidJS',
+      sync: {client: 'solidjs'},
+    },
+    {
+      text: 'Typescript',
+      sync: {client: 'typescript'},
+    },
+  ]}
+>
 
 ```tsx
-import {ZeroProvider} from '@rocicorp/zero';
-import {queries} from 'zero/queries';
-import {mutators} from 'zero/mutators.ts';
-import {schema} from 'zero/schema.ts';
+// root.tsx
+import {ZeroProvider} from '@rocicorp/zero/react';
+import {mutators} from './shared/mutators.ts';
+import {schema} from './shared/schema.ts';
 
 function Root() {
   return (
     <ZeroProvider
       cacheURL="http://localhost:4848"
       schema={schema}
-      queries={queries}
       mutators={mutators}
     >
       <App />
@@ -507,76 +637,352 @@ function Root() {
 }
 ```
 
-### Invoke Mutators
+```tsx
+// root.tsx
+import {ZeroProvider} from '@rocicorp/zero/solid';
+import {mutators} from './shared/mutators.ts';
+import {schema} from './shared/schema.ts';
 
-Invoke mutators via `zero.mutate`:
+function Root() {
+  return (
+    <ZeroProvider
+      cacheURL="http://localhost:4848"
+      schema={schema}
+      mutators={mutators}
+    >
+      <App />
+    </ZeroProvider>
+  );
+}
+```
 
 ```tsx
-// mycomponent.ts
+// zero.ts
+import {Zero} from '@rocicorp/zero';
+import {schema} from './shared/schema.ts';
+import {mutators} from './shared/mutators.ts';
+
+const zero = new Zero({
+  cacheURL: 'http://localhost:4848',
+  schema,
+  mutators,
+});
+
+console.log('clientID', zero.clientID);
+
+export {zero};
+```
+
+</CodeGroup>
+
+### Invoke Mutators
+
+You can now call mutators via `zero.mutate`:
+
+<CodeGroup
+  labels={[
+    {
+      text: 'React',
+      sync: {client: 'react'},
+    },
+    {
+      text: 'SolidJS',
+      sync: {client: 'solidjs'},
+    },
+    {
+      text: 'Typescript',
+      sync: {client: 'typescript'},
+    },
+  ]}
+>
+
+```tsx
+// mycomponent.tsx
 import {useZero} from '@rocicorp/zero/react';
-import {Schema} from 'zero/schema.ts';
-import {Queries} from 'zero/queries.ts';
-import {Mutators} from 'zero/mutators.ts';
+import {mutators} from './shared/mutators.ts';
 
 function MyComponent() {
   const zero = useZero();
 
   const onClick = async () => {
-      const album = { ... };
-      await zero.mutate.createAlbum({album});
+    const album = {
+      id: crypto.randomUUID(),
+      artistID: 'artist_1',
+      title: '',
+      year: 2024,
+    };
+    const result = zero.mutate(mutators.albums.create(album));
+    const clientResult = await result.client;
+
+    if (clientResult.type === 'error') {
+      console.error('Failed to create album', clientResult.error.message);
+    } else {
+      console.log('Album created!');
+    }
   };
 
-  return <button onClick={onClick}>Create Album</button>
+  return <button onClick={onClick}>Create Album</button>;
 }
 ```
 
-If you run this app now, you should be able to see the UI update optimistically, but you'll also see this error in zero-cache:
+```tsx
+// mycomponent.tsx
+import {useQuery} from '@rocicorp/zero/solid';
+import {mutators} from './shared/mutators.ts';
 
-```
-Uncaught exception. Could not execution mutation `myComponent.createIssue` because no mutate endpoint is specified.
+function MyComponent() {
+  const zero = useZero();
+
+  const onClick = async () => {
+    const album = {
+      id: crypto.randomUUID(),
+      artistID: 'artist_1',
+      title: '',
+      year: 2024,
+    };
+    const result = zero().mutate(mutators.albums.create(album));
+    const clientResult = await result.client;
+
+    if (clientResult.type === 'error') {
+      console.error('Failed to create album', clientResult.error.message);
+    } else {
+      console.log('Album created!');
+    }
+  };
+
+  return <button onClick={onClick}>Create Album</button>;
+}
 ```
 
-This is because again, we don't have a server implementation for this mutator. Let's fix it!
+```tsx
+// albums.ts
+import {zero} from './zero.ts';
+import {mutators} from './shared/mutators.ts';
+
+const album = {
+  id: crypto.randomUUID(),
+  artistID: 'artist_1',
+  title: '',
+  year: 2024,
+};
+const result = await zero.mutate(mutators.albums.create(album));
+const clientResult = await result.client;
+
+if (clientResult.type === 'error') {
+  console.error('Failed to create album', clientResult.error.message);
+} else {
+  console.log('Album created!');
+}
+```
+
+</CodeGroup>
+
+If you run this app now, you should be able to see the UI update optimistically, but you'll also see an error in zero-cache:
+
+```ts
+Uncaught exception. Could not execution mutation `albums.create` because no mutate endpoint is specified.
+```
+
+This is because, like queries, we need to implement an endpoint in our API. Let's fix it!
 
 ### Implement Mutate Endpoint
 
-Just as with the queries endpoint, you can implement the mutate endpoint yourself but Zero provides some handy utilities to make it easy:
+Zero requires a _mutate endpoint_ which runs on your server and connects directly to your Postgres database.
+Zero provides helpers to implement this easily.
 
-```tsx
-import type {
-  ReadonlyJSONValue,
-  mutatorByName,
-  withValidation,
-} from '@rocicorp/zero';
-import {handleMutateRequest, TransactFn} from '@rocicorp/zero/server';
-import {mutators} from 'zero/mutators.ts';
-import postgres from 'postgres';
+You can use the Zero Postgres adapters to create a `dbProvider` instance:
 
-const sql = postgres(process.env.ZERO_UPSTREAM_DB as string);
-const dbProvider = zeroPostgresJS(schema, sql);
+<CodeGroup
+  labels={[
+    {
+      text: 'Drizzle',
+      sync: {pgClient: 'drizzle'},
+    },
+    {
+      text: 'node-postgres',
+      sync: {pgClient: 'node-postgres'},
+    },
+    {
+      text: 'postgres.js',
+      sync: {pgClient: 'postgres-js'},
+    },
+  ]}
+>
 
-app.post('/mutate', async req => {
-  return await handleMutateRequest(dbProvider, handleMutate, req);
-});
+```ts
+// app/api/mutate/db-provider.ts
+import {zeroDrizzle} from '@rocicorp/zero/server/adapters/drizzle';
+import {schema} from '../../shared/schema.ts';
 
-async function handleMutate(transact: TransactFn, name: string) {
-  // Run any external API validation/checks before the tx
-  // if this throws, the mutation will be rejected
+// pass a drizzle client instance. for example:
+// const drizzleClient = drizzle(pool, { schema: drizzleSchema })
+export const dbProvider = zeroDrizzle(schema, drizzleClient);
 
-  const result = await transact(async ({tx, args}) => {
-    const mutator = withValidation(mutatorByName(mutators, name));
-    return await mutator({tx, args});
-  });
-
-  // Run "fire and forget" work here, like sending
-  // notifications/analytics. If it throws, it will be logged
-  // but won't change the mutation result.
-
-  return result;
+// Register the database provider for type safety
+declare module '@rocicorp/zero' {
+  interface Register {
+    dbProvider: typeof dbProvider;
+  }
 }
 ```
 
-Now if you run your app again, your mutate should work and sync to other windows:
+```ts
+// app/api/mutate/db-provider.ts
+import {zeroNodePg} from '@rocicorp/zero/server/adapters/pg';
+import {Pool} from 'pg';
+import {schema} from '../../shared/schema.ts';
+
+const pool = new Pool({
+  connectionString: process.env.ZERO_UPSTREAM_DB!,
+});
+export const dbProvider = zeroNodePg(schema, pool);
+
+// Register the database provider for type safety
+declare module '@rocicorp/zero' {
+  interface Register {
+    dbProvider: typeof dbProvider;
+  }
+}
+```
+
+```ts
+// app/api/mutate/db-provider.ts
+import {zeroPostgresJS} from '@rocicorp/zero/server/adapters/postgresjs';
+import postgres from 'postgres';
+import {schema} from '../../shared/schema.ts';
+
+const sql = postgres(process.env.ZERO_UPSTREAM_DB!);
+export const dbProvider = zeroPostgresJS(schema, sql);
+
+// Register the database provider for type safety
+declare module '@rocicorp/zero' {
+  interface Register {
+    dbProvider: typeof dbProvider;
+  }
+}
+```
+
+</CodeGroup>
+
+Then, you can use the `dbProvider` to handle the mutate request:
+
+<CodeGroup
+  labels={[
+    {
+      text: 'Next.js',
+      sync: {api: 'nextjs'},
+    },
+    {
+      text: 'Hono',
+      sync: {api: 'hono'},
+    },
+    {
+      text: 'Express',
+      sync: {api: 'express'},
+    },
+  ]}
+>
+
+```ts
+// app/api/mutate/route.ts
+import {handleMutateRequest} from '@rocicorp/zero/server';
+import {mutators} from '../../shared/mutators.ts';
+import {dbProvider} from './db-provider.ts';
+
+export async function POST(req: Request) {
+  const result = await handleMutateRequest(
+    dbProvider,
+    req,
+    (transact, mutation) => {
+      // Run any external API validation/checks before the db tx
+      // if you throw here, the mutation will be rejected.
+
+      const result = await transact(async tx => {
+        const mutator = mutators.get(mutation.name);
+        return mutator(mutation.args).run(tx); // TODO(0xcadams): no context here. correct??
+      });
+
+      // Run "fire and forget" work here, like sending
+      // notifications/analytics. If you throw here,
+      // it will be logged but won't change the mutation result.
+
+      return result;
+    },
+  );
+
+  return Response.json(result);
+}
+```
+
+```ts
+// api/app.ts
+import {handleMutateRequest} from '@rocicorp/zero/server';
+import {mutators} from '../shared/mutators.ts';
+import {dbProvider} from './db-provider.ts';
+
+app.post('/api/mutate', async c => {
+  const result = await handleMutateRequest(
+    dbProvider,
+    c.req,
+    (transact, mutation) => {
+      // Run any external API validation/checks before the db tx
+      // if you throw here, the mutation will be rejected.
+
+      const result = await transact(async tx => {
+        const mutator = mutators.get(mutation.name);
+        return mutator(mutation.args).run(tx); // TODO(0xcadams): no context here. correct??
+      });
+
+      // Run "fire and forget" work here, like sending
+      // notifications/analytics. If you throw here,
+      // it will be logged but won't change the mutation result.
+
+      return result;
+    },
+  );
+
+  return c.json(result);
+});
+```
+
+```ts
+// api/app.ts
+import {handleMutateRequest} from '@rocicorp/zero/server';
+import {mutators} from '../shared/mutators.ts';
+import {dbProvider} from './db-provider.ts';
+
+app.post('/api/mutate', async (req, res, next) => {
+  try {
+    const result = await handleMutateRequest(
+      dbProvider,
+      req.body,
+      (transact, mutation) => {
+        // Run any external API validation/checks before the db tx
+        // if you throw here, the mutation will be rejected.
+
+        const result = await transact(async tx => {
+          const mutator = mutators.get(mutation.name);
+          return mutator(mutation.args).run(tx); // TODO(0xcadams): no context here. correct??
+        });
+
+        // Run "fire and forget" work here, like sending
+        // notifications/analytics. If you throw here,
+        // it will be logged but won't change the mutation result.
+
+        return result;
+      },
+    );
+
+    res.json(result);
+  } catch (err) {
+    next(err);
+  }
+});
+```
+
+</CodeGroup>
+
+If you refresh the page, your mutation should work and sync to other clients:
 
 ```
 video

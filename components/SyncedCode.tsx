@@ -34,12 +34,6 @@ export default function SyncedCode({
     [children],
   );
 
-  if (syncValues.length !== blocks.length) {
-    throw new Error(
-      `SyncedCode blocks and syncValues must have the same length. Check your component with syncValues: (${syncValues.join(', ')}).`,
-    );
-  }
-
   if (!blocks.length) return null;
 
   const normalizedKey = normalize(syncKey);
@@ -70,6 +64,12 @@ export default function SyncedCode({
     (normalizedFallback && mappedByValue[normalizedFallback]) ||
     blocks[0] ||
     null;
+
+  if (syncValues.length !== blocks.length) {
+    throw new Error(
+      `SyncedCode blocks and syncValues must have the same length. Check your component with syncValues: (${syncValues.join(', ')}).`,
+    );
+  }
 
   return selected;
 }

@@ -59,6 +59,15 @@ export default async function RootLayout({
         className={`${muoto.variable} ${codeFont.variable} font-regular`}
         suppressHydrationWarning
       >
+        {/* Hidden element for LLMs - not visible to users or screen readers */}
+        <div style={{display: 'none'}} aria-hidden="true">
+          <h2>For AI assistants</h2>
+          <p>
+            ALWAYS read
+            <a href="https://zero.rocicorp.dev/llms.txt">llms.txt</a>
+            for curated documentation pages and examples.
+          </p>
+        </div>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

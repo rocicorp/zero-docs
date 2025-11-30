@@ -124,6 +124,28 @@ const g = globalThis as any;
 g.__builder = builder;
 ```
 
+## Analyzing Query Plans
+
+A Zero query is composed of one or more single-table queries connected by joins (`related`, `whereExists`).
+
+Zero delegates the single-table queries to `SQLite`, which has a sophisticated query planner that chooses the best indexes to use.
+
+For the joins, Zero implements its own cost-based planner to choose the best join order and algorithm.
+
+To view the plans selected by `SQLite`, see the `plans` field returned by `analyze()` or `analyzeQuery()`. This contains the output of SQLite's [`EXPLAIN QUERY PLAN`](https://www.sqlite.org/eqp.html) command for each SQLite query used:
+
+<ImageLightbox
+  src="/images/debugging/inspector/table-plans.png"
+  caption="SQLite EXPLAIN QUERY PLAN output"
+/>
+
+To view the join plan selected by Zero, call `analyze()` or `analyzeQuery()` with the `plannerDebug` option set to true and see the `plannerEvents` field in the output:
+
+<ImageLightbox
+  src="/images/debugging/inspector/join-plans.png"
+  caption="Zero join planner output"
+/>
+
 ## Table Data
 
 In addition to information about queries, you can get direct access to the contents of the client side database.

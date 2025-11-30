@@ -314,6 +314,34 @@ z.query.issue.where({cmp, or, exists} =>
 );
 ```
 
+## Type Helpers
+
+You can get the TypeScript type of the result of a query using the `QueryResultType` helper:
+
+```ts
+const complexQuery = z.query.issue.related('comments',
+  q => q.related('author'));
+type MyComplexResult = QueryResultType<typeof complexQuery>;
+
+// MyComplexResult is: readonly IssueRow & {
+//   readonly comments: readonly (CommentRow & {
+//     readonly author: readonly AuthorRow|undefined;
+//   })[];
+// }[]
+```
+
+You can get the type of a single row with `QueryRowType`:
+
+```ts
+type MySingleRow = QueryRowType<typeof complexQuery>;
+
+// MySingleRow is: readonly IssueRow & {
+//   readonly comments: readonly (CommentRow & {
+//     readonly author: readonly AuthorRow|undefined;
+//   })[];
+// }
+```
+
 ## Planning
 
 Zero automatically plans queries, selecting the best indexes and join orders in most cases.
@@ -358,31 +386,3 @@ z.query.issue.where({cmp, or, exists} =>
 ```
 
 You can manually flip just one or a few of the `whereExists` clauses in a query, leaving the rest to be planned automatically.
-
-## Type Helpers
-
-You can get the TypeScript type of the result of a query using the `QueryResultType` helper:
-
-```ts
-const complexQuery = z.query.issue.related('comments',
-  q => q.related('author'));
-type MyComplexResult = QueryResultType<typeof complexQuery>;
-
-// MyComplexResult is: readonly IssueRow & {
-//   readonly comments: readonly (CommentRow & {
-//     readonly author: readonly AuthorRow|undefined;
-//   })[];
-// }[]
-```
-
-You can get the type of a single row with `QueryRowType`:
-
-```ts
-type MySingleRow = QueryRowType<typeof complexQuery>;
-
-// MySingleRow is: readonly IssueRow & {
-//   readonly comments: readonly (CommentRow & {
-//     readonly author: readonly AuthorRow|undefined;
-//   })[];
-// }
-```

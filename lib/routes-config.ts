@@ -15,13 +15,12 @@ export const ROUTES = [
     new: false,
     items: [
       {title: 'Introduction', href: '/introduction'},
-      {title: 'Quickstart', href: '/quickstart'},
+      //      {title: 'Quickstart', href: '/quickstart'},
       {
-        title: 'Add to Existing Project',
+        title: 'Installation',
         href: '/add-to-existing-project',
       },
       {title: 'Samples', href: '/samples'},
-      {title: 'Status', href: '/status'},
     ],
   },
 
@@ -30,8 +29,9 @@ export const ROUTES = [
     href: null,
     items: [
       {title: 'What is Sync?', href: '/sync'},
+      {title: 'How Zero Works', href: '/design'},
       {title: 'When to Use', href: '/when-to-use'},
-      {title: 'Roadmap', href: '/roadmap'},
+      {title: 'Status', href: '/status'},
     ],
   },
 
@@ -46,15 +46,6 @@ export const ROUTES = [
       {title: 'ZQL Reference', href: '/zql'},
       {title: 'ZQL on the Server', href: '/zql-on-the-server'},
       {title: 'Offline', href: '/offline'},
-      {
-        title: 'Old Stuff',
-        href: null,
-        items: [
-          {title: 'Ad-Hoc Queries', href: '/deprecated/ad-hoc-queries'},
-          {title: 'CRUD Mutators', href: '/deprecated/crud-mutators'},
-          {title: 'RLS Permissions', href: '/deprecated/rls-permissions'},
-        ],
-      },
     ],
   },
 
@@ -106,6 +97,16 @@ export const ROUTES = [
       {title: 'Replication', href: '/debug/replication'},
       {title: 'Query ASTs', href: '/debug/query-asts'},
       {title: 'OpenTelemetry', href: '/debug/otel'},
+    ],
+  },
+
+  {
+    title: 'Old Stuff',
+    href: null,
+    items: [
+      {title: 'Ad-Hoc Queries', href: '/deprecated/ad-hoc-queries'},
+      {title: 'CRUD Mutators', href: '/deprecated/crud-mutators'},
+      {title: 'RLS Permissions', href: '/deprecated/rls-permissions'},
     ],
   },
 

@@ -38,6 +38,11 @@ const nextConfig = {
         destination: '/docs/deprecated/rls-permissions#debugging',
         permanent: false,
       },
+      {
+        source: '/docs/add-to-existing-project',
+        destination: '/docs/install',
+        permanent: false,
+      },
     ];
   },
   async headers() {
@@ -47,7 +52,8 @@ const nextConfig = {
         headers: [
           {
             key: 'Cache-Control',
-            value: 'public, max-age=86400, s-maxage=86400, stale-while-revalidate=43200',
+            value:
+              'public, max-age=86400, s-maxage=86400, stale-while-revalidate=43200',
           },
         ],
       },
@@ -56,7 +62,8 @@ const nextConfig = {
         headers: [
           {
             key: 'Cache-Control',
-            value: 'public, max-age=86400, s-maxage=86400, stale-while-revalidate=43200',
+            value:
+              'public, max-age=86400, s-maxage=86400, stale-while-revalidate=43200',
           },
         ],
       },
@@ -65,7 +72,8 @@ const nextConfig = {
         headers: [
           {
             key: 'Cache-Control',
-            value: 'public, max-age=86400, s-maxage=86400, stale-while-revalidate=43200',
+            value:
+              'public, max-age=86400, s-maxage=86400, stale-while-revalidate=43200',
           },
         ],
       },

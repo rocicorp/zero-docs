@@ -18,7 +18,7 @@ export const ROUTES = [
       //      {title: 'Quickstart', href: '/quickstart'},
       {
         title: 'Installation',
-        href: '/add-to-existing-project',
+        href: '/install',
       },
       {title: 'Samples', href: '/samples'},
     ],

@@ -48,6 +48,11 @@ const nextConfig = {
         destination: '/docs/schema',
         permanent: false,
       },
+      {
+        source: '/docs/zql-on-the-server',
+        destination: '/docs/server-zql',
+        permanent: false,
+      },
     ];
   },
   async headers() {

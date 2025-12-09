@@ -540,7 +540,7 @@ app.post("/api/zero/mutate", async (c) => {
 ```
 
 <Note heading="Using a different bindings library">
-Zero includes several built-in database adapters. You can also easily create your own. See [ZQL on the Server](zql-on-the-server) for more information.
+Zero includes several built-in database adapters. You can also easily create your own. See [ZQL on the Server](server-zql) for more information.
 </Note>
 
 `handleMutateRequest` accepts a standard `Request` and returns a JSON object which can be serialized and returned by your server framework of choice.
@@ -703,7 +703,7 @@ const markAllAsRead = defineMutator(
 })
 ```
 
-See [ZQL on the Server](/docs/zql-on-the-server) for more information.
+See [ZQL on the Server](/docs/server-zql) for more information.
 
 ### Notifications and Async Work
 

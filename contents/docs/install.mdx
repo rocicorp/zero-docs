@@ -144,18 +144,22 @@ If you use Drizzle or Prisma, you can generate your schema automatically. Otherw
 <SyncedCode syncKey="pm" syncValues={['npm', 'pnpm', 'bun', 'yarn']}>
 
 ```bash
+npm install -D drizzle-zero
 npx drizzle-zero generate
 ```
 
 ```bash
+pnpm add -D drizzle-zero
 pnpm dlx drizzle-zero generate
 ```
 
 ```bash
+bun add -D drizzle-zero
 bunx drizzle-zero generate
 ```
 
 ```bash
+yarn add -D drizzle-zero
 yarn dlx drizzle-zero generate
 ```
 
@@ -176,7 +180,7 @@ npx prisma generate
 pnpm add prisma-zero
 # Add this to your prisma schema:
 # generator zero {
-#   provider       = "prisma-zero"
+#   provider = "prisma-zero"
 # }
 pnpx prisma generate
 ```
@@ -185,7 +189,7 @@ pnpx prisma generate
 bun add prisma-zero
 # Add this to your prisma schema:
 # generator zero {
-#   provider       = "prisma-zero"
+#   provider = "prisma-zero"
 # }
 bunx prisma generate
 ```
@@ -194,7 +198,7 @@ bunx prisma generate
 yarn add prisma-zero
 # Add this to your prisma schema:
 # generator zero {
-#   provider       = "prisma-zero"
+#   provider = "prisma-zero"
 # }
 yarn prisma generate
 ```

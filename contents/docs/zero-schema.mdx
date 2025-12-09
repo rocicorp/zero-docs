@@ -15,25 +15,73 @@ The Zero schema is usually generated from your backend schema, but can be define
 
 If you use Drizzle ORM, you can generate `schema.ts` with [`drizzle-zero`](https://www.npmjs.com/package/drizzle-zero):
 
+<SyncedCode syncKey="pm" syncValues={['npm', 'pnpm', 'bun', 'yarn']}>
+
 ```bash
 npm install -D drizzle-zero
 npx drizzle-zero generate
 ```
 
+```bash
+pnpm add -D drizzle-zero
+pnpm dlx drizzle-zero generate
+```
+
+```bash
+bun add -D drizzle-zero
+bunx drizzle-zero generate
+```
+
+```bash
+yarn add -D drizzle-zero
+yarn dlx drizzle-zero generate
+```
+
+</SyncedCode>
+
 ## Generating from Prisma
 
 If you use Prisma, you can generate `schema.ts` with [`prisma-zero`](https://www.npmjs.com/package/prisma-zero):
 
-```bash
-npm install -D @passionfroot/prisma-generator-zero
+<SyncedCode syncKey="pm" syncValues={['npm', 'pnpm', 'bun', 'yarn']}>
 
+```bash
+npm install prisma-zero
 # Add this to your prisma schema:
 # generator zero {
-#   provider = "prisma-generator-zero"
+#   provider = "prisma-zero"
 # }
-
 npx prisma generate
 ```
+
+```bash
+pnpm add prisma-zero
+# Add this to your prisma schema:
+# generator zero {
+#   provider = "prisma-zero"
+# }
+pnpx prisma generate
+```
+
+```bash
+bun add prisma-zero
+# Add this to your prisma schema:
+# generator zero {
+#   provider = "prisma-zero"
+# }
+bunx prisma generate
+```
+
+```bash
+yarn add prisma-zero
+# Add this to your prisma schema:
+# generator zero {
+#   provider = "prisma-zero"
+# }
+yarn prisma generate
+```
+
+</SyncedCode>
 
 ## Not Seeing your Generator?
 

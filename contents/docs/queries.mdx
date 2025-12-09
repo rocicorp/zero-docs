@@ -102,23 +102,17 @@ Although queries must ultimately return a ZQL expression, they can use any code 
 
 Query parameters are supplied by the client application and passed to the server automatically by Zero. This makes them unsuitable for credentials, since the user could modify them.
 
-For this reason, Zero queries also support a `context` parameter. When used [on the server](#server-setup), the context is passed to the query function separately and not client-controlled.
+For this reason, Zero queries also support a [`context` object](/docs/auth#context).
 
-Use `defineQueryWithContext` to define a query that takes a context parameter:
+Access your context with the `ctx` parameter to your query:
 
 ```ts
-type MyZeroContext = {
-  userID: string;
-};
-
-const myPostsQuery = defineQueryWithContext<MyZeroContext>()(
-  z.object({ isDraft: z.string() }),
-  ({ context: { userID }, args: { isDraft } }) => {
+const myPostsQuery = defineQuery(
+  ({ ctx: { userID } }) => {
     // Note: User cannot control context.userID, so this safely
     // restricts the query to the user's own posts.
     return zql.post
       .where('authorID', userID)
-      .where('isDraft', isDraft);
   },
 );
 ```
@@ -128,11 +122,11 @@ const myPostsQuery = defineQueryWithContext<MyZeroContext>()(
 By convention, queries are listed in a central `queries.ts` file. This allows them to be easily used on both the client and server:
 
 ```ts
-import { defineQuery } from '@rocicorp/zero';
+import { defineQueries, defineQuery } from '@rocicorp/zero';
 import { zql } from './schema.ts';
 import z from "zod";
 
-export const queries = {
+export const queries = defineQueries({
   posts: {
     get: defineQuery(
       z.string(),
@@ -152,111 +146,100 @@ export const queries = {
       }
     ),
   }
-}
+})
 ```
 
-You can use as many levels of nesting as you want to organize your queries. And as your application grows, you can move queries to different files to keep them organized:
+You can use as many levels of nesting as you want to organize your queries.
+
+As your application grows, you can move queries to different files to keep them organized:
 
 ```ts
-// zero/queries.ts
-import {postQueries} from 'zero/queries/posts.ts';
-import {userQueries} from 'zero/queries/users.ts';
+// posts.ts
+export const postQueries = {
+  get: defineQuery(
+    z.string(),
+    id => zql.post.where('id', id)
+  ),
+  // ...
+}
 
-export const queries = {
+// users.ts
+export const userQueries = {
+  byRole: defineQuery(
+    z.string(),
+    role => zql.user.where('role', role)
+  ),
+  // ...
+}
+
+// queries.ts
+import { postQueries } from './posts.ts';
+import { userQueries } from './users.ts';
+
+export const queries = defineQueries({
   posts: postQueries,
   users: userQueries,
-}
+})
 ```
 
-## Registration
+<Note type="warning" emoji="⚠️" heading="Use `defineQueries` only at top level">
+`defineQueries` establishes the full name for each query (i.e., `posts.get`, `users.byRole`), which is later sent to the [server](#server-setup).
 
-Before you can use your queries, you need to register them with Zero.
-
-In React or SolidJS, you'll do this by passing the `queries` object to the `ZeroProvider` component:
-
-```tsx
-import { ZeroProvider } from '@rocicorp/zero/react';
-import { queries } from 'zero/queries.ts';
-
-<ZeroProvider queries={queries}>
-  <App />
-</ZeroProvider>
-```
-
-If you use the `Zero` class directly, you can pass the `queries` object to the `Zero` constructor:
-
-```ts
-import { Zero } from '@rocicorp/zero';
-import { queries } from 'zero/queries.ts';
-
-const zero = new Zero({
-  queries,
-});
-```
+So this should only be used once at the top level of your `queries.ts` file.
+</Note>
 
 ## Server Setup
 
-In order for queries to sync, you must provide an implementation of the `queries` endpoint on your server. `zero-cache` calls this endpoint to get the ZQL for each query.
+In order for queries to sync, you must provide an implementation of the `query` endpoint on your server. `zero-cache` calls this endpoint to resolve each query to [ZQL](./zql) that it can run.
 
 ### Registering the Endpoint
 
-Use [`ZERO_QUERIES_URL`](./zero-cache-config#get-queries-url) to tell `zero-cache` where to find your `get-queries` implementation:
+Use [`ZERO_QUERY_URL`](./zero-cache-config#query-url) to tell `zero-cache` where to find your `query` implementation:
 
 ```bash
-export ZERO_QUERIES_URL="http://localhost:3000/api/zero/queries"
+export ZERO_QUERY_URL="http://localhost:3000/api/zero/query"
 npx zero-cache-dev
 ```
 
 ### Implementing the Endpoint
 
-The `@rocicorp/zero` package provides the `handleGetQueriesRequest`, `queryByName`, and `withValidation` functions to make it easy to implement the endpoint.
+The `@rocicorp/zero` package provides the `handleQueryRequest` and `mustGetQuery` functions to make it easy to implement the endpoint.
 
 For example, with [Hono](https://hono.dev):
 
 ```ts
-import { withValidation, queryByName, ReadonlyJSONValue } from "@rocicorp/zero";
-import { handleGetQueriesRequest } from "@rocicorp/zero/server";
+import { mustGetQuery } from "@rocicorp/zero";
+import { handleQueryRequest } from "@rocicorp/zero/server";
 import { schema } from "schema.ts";
 import { queries } from "queries.ts";
 
-app.post("/queries", async (c) => {
+app.post("/api/zero/query", async (c) => {
   const userID = await authenticateUser(c.req.raw);
-  const context = { userID };
+  const ctx = { userID };
   return await c.json(
-    await handleGetQueriesRequest(
-      (name, args) => getQuery(context, name, args),
+    await handleQueryRequest(
+      (name, args) => {
+        const q = mustGetQuery(queries, name);
+        return q.fn({ctx, args});
+      },
       schema,
       c.req.raw
     )
   );
 });
-
-function getQuery(
-    context: { userID: string },
-    name: string,
-    args: readonly ReadonlyJSONValue[],
-  ) {
-  const q = queryByName(name);
-  if (!q) {
-    throw new Error(`No such query: ${name}`);
-  }
-  return withValidation(q)({context,args});
-}
 ```
 
-`handleGetQueriesRequest` accepts a standard `Request` and returns a JSON object which can be serialized and returned by your server framework of choice.
+`handleQueryRequest` accepts a standard `Request` and returns a JSON object which can be serialized and returned by your server framework of choice.
 
-`queryByName` looks up the query by name in the `queries` object.
+`mustGetQuery` looks up the query in the registry and throws an error if not found.
 
-`withValidation` uses the `validator` function you provided when defining the query to validate the arguments passed to the query. If validation fails, the invocation throws and an error is returned to the client.
-
-`withValidation` always takes a `context` argument as its first parameter, whether or not the query was defined with `defineQueryWithContext`. If the query was defined with `defineQueryWithContext`, the context is passed into the query function. Otherwise, the context is ignored and anything can be passed to it.
+The `query.fn` function is your query implementation wrapped in the validator you provided.
 
 ### Handling Errors
 
-If the queries endpoint returns an HTTP or network error, it will be reported to the client with using the `type` and `error` fields on the query details object:
+If the queries endpoint returns an HTTP or network error, `zero-cache` will be report it to the client using the `type` and `error` fields on the query details object:
 
-```ts
+```tsx
 const [posts, details] = useQuery(
   queries.posts.byAuthorID('user123'))
 );
@@ -277,42 +260,42 @@ postsView.addListener((posts, resultType, error) => {
 });
 ```
 
-### Custom Queries URL
+### Custom Query URL
 
-By default, Zero sends queries to the URL specified in the `ZERO_QUERIES_URL` parameter.
+By default, Zero sends queries to the URL specified in the `ZERO_QUERY_URL` parameter.
 
-However you can customize this on a per-client basis. To do so, list multiple comma-separted URLs in the `ZERO_QUERIES_URL` parameter:
+However you can customize this on a per-client basis. To do so, list multiple comma-separted URLs in the `ZERO_QUERY_URL` parameter:
 
 ```bash
-ZERO_QUERIES_URL='https://api.example.com/queries,https://api.staging.example.com/queries'
+ZERO_QUERY_URL='https://api.example.com/query,https://api.staging.example.com/query'
 ```
 
-Then choose one of those URLs by passing it to `queriesURL` on the `Zero` constructor:
+Then choose one of those URLs by passing it to `queryURL` on the `Zero` constructor:
 
 ```ts
 const zero = new Zero({
   schema,
   queries,
-  queriesURL: 'https://api.staging.example.com/queries',
+  queryURL: 'https://api.staging.example.com/query',
 });
 ```
 
 ### URL Patterns
 
-The strings listed in `ZERO_QUERIES_URL` can also be [`URLPatterns`](https://developer.mozilla.org/en-US/docs/Web/API/URL_Pattern_API):
+The strings listed in `ZERO_QUERY_URL` can also be [`URLPatterns`](https://developer.mozilla.org/en-US/docs/Web/API/URL_Pattern_API):
 
 ```bash
-ZERO_QUERIES_URL="https://mybranch-*.preview.myapp.com/queries"
+ZERO_QUERY_URL="https://mybranch-*.preview.myapp.com/query"
 ```
 
 This queries URL will allow clients to choose URLs like:
-- `https://mybranch-aaa.preview.myapp.com/queries` ✅
-- `https://mybranch-bbb.preview.myapp.com/queries` ✅
+- `https://mybranch-aaa.preview.myapp.com/query` ✅
+- `https://mybranch-bbb.preview.myapp.com/query` ✅
 
 But rejects URLs like:
-- `https://preview.myapp.com/queries` ❌ (missing subdomain)
-- `https://malicious.com/queries` ❌ (different domain)
-- `https://mybranch-123.preview.myapp.com/queries/extra` ❌ (extra path)
+- `https://preview.myapp.com/query` ❌ (missing subdomain)
+- `https://malicious.com/query` ❌ (different domain)
+- `https://mybranch-123.preview.myapp.com/query/extra` ❌ (extra path)
 - `https://mybranch-123.preview.myapp.com/other` ❌ (different path)
 
 <Note emoji="🥇" heading="Pro Tip (tm)">
@@ -323,7 +306,66 @@ Because URLPattern is a web standard, you can test them right in your browser:
 
 For more information, see the [URLPattern docs](https://developer.mozilla.org/en-US/docs/Web/API/URL_Pattern_API).
 
-## Preloading
+## Running Queries
+
+### Reactively
+
+The most common way to use queries is with the `useQuery` reactive hooks from the [React](react) or [SolidJS](solid) bindings:
+
+```tsx
+import { useZero, useQuery } from '@rocicorp/zero/react';
+import { Schema } from 'zero/schema.ts';
+import { queries, Queries } from 'zero/queries.ts';
+
+function App() {
+  const zero = useZero<Schema, Queries>();
+  const [posts] = useQuery(queries.posts.get('user123'));
+  return <div>{posts.map(post => <div key={post.id}>{post.title}</div>)}</div>;
+}
+```
+
+These functions integrate with the associated frameworks to automatically re-render the UI when a query changes.
+
+### Manually
+
+You can also call `materialize()` on a query to manually create a _view_ outside of a UI framework:
+
+```ts
+const myView = zero.queries.posts
+  .byAuthorID('user123')
+  .materialize();
+
+for (let post of myView.data) {
+  console.log(post.title);
+}
+```
+
+The view is automatically kept up to date by Zero as the underlying data changes. You can add a listener to the view to be notified when the data changes:
+
+```ts
+myView.addListener((posts) => {
+  console.log(posts);
+});
+```
+
+### Once
+
+You usually want to subscribe to a query in a reactive UI, but every so often you'll need to run a query just once. To do this, use the `run()` method:
+
+```tsx
+const results = await z.query.issues.byPriority('high').run();
+```
+
+By default, `run()` only returns results that are currently available on the client. That is, it returns the data that would be given for [`result.type === 'unknown'`](#completeness).
+
+If you want to wait for the server to return results, pass `{type: 'complete'}` to `run`:
+
+```tsx
+const results = await z.query.issues.byPriority('high')
+  .run({type: 'complete'});
+```
+
+### For Preloading
 
 Almost all Zero apps will want to preload some data in order to maximize the feel of instantaneous UI transitions.
 
@@ -451,7 +493,7 @@ The default Zero TTL values might initially seem too short, but they are designe
 
 ## Custom Server Implementation
 
-It is possible to implement the `ZERO_QUERIES_URL` endpoint without using Zero's TypeScript libraries, or even in a different language entirely.
+It is possible to implement the `ZERO_QUERY_URL` endpoint without using Zero's TypeScript libraries, or even in a different language entirely.
 
 The endpoint receives a `POST` request with a JSON body of the form:
 

@@ -16,7 +16,7 @@ See the upgrade from [hello-zero](https://github.com/rocicorp/hello-zero/pull/31
 ## Features
 
 - Queries now take an optional `ttl` argument. This argument _backgrounds_ queries for some time after the app stops using them. Background queries continue syncing so they are instantly ready if the UI re-requests them. The data from background queries is also available to be used by new queries where possible ([doc](/docs/reading-data#query-lifecycle)).
-- Structural schema versioning. This is TypeScript, why are we versioning with numbers like cave-people?? We got rid of `schemaVersion` concept entirely and now determine schema compatibility completely automatically, TS-stylie ([doc](/docs/zero-schema/#migrations)).
+- Structural schema versioning. This is TypeScript, why are we versioning with numbers like cave-people?? We got rid of `schemaVersion` concept entirely and now determine schema compatibility completely automatically, TS-stylie ([doc](/docs/schema/#migrations)).
 - Permissions now scoped to _"apps"_. You can now have different Zero "apps" talking to the same upstream database. Each app gets completely separate configuration and permissions. This should also enable previewing `zero-cache` (each preview would be its own app). Apps replace the existing "shard" concept ([doc](/docs/zero-cache-config#app-id)).
 - Initial replication is over 5x faster, up to about 50MB/second or 15k row/second in our tests.
 - Added warnings for slow hydration in both client and server ([doc](/docs/reading-data#thinking-in-queries)).

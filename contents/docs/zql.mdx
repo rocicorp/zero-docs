@@ -128,7 +128,7 @@ if (!result) {
 
 ## Relationships
 
-You can query related rows using _relationships_ that are defined in your [Zero schema](/docs/zero-schema).
+You can query related rows using _relationships_ that are defined in your [Zero schema](/docs/schema).
 
 ```tsx
 // Get all issues and their related comments
@@ -185,7 +185,7 @@ You can filter a query with `where()`:
 zql.query.issue.where('priority', '=', 'high')
 ```
 
-The first parameter is always a column name from the table being queried. TypeScript completion will offer available options (sourced from your [Zero Schema](/docs/zero-schema)).
+The first parameter is always a column name from the table being queried. TypeScript completion will offer available options (sourced from your [Zero Schema](/docs/schema)).
 
 ### Comparison Operators
 

@@ -43,6 +43,11 @@ const nextConfig = {
         destination: '/docs/install',
         permanent: false,
       },
+      {
+        source: '/docs/zero-schema',
+        destination: '/docs/schema',
+        permanent: false,
+      },
     ];
   },
   async headers() {

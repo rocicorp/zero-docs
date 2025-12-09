@@ -13,7 +13,7 @@ npm install @rocicorp/zero@0.7
 
 - **Read permissions.** You can now control read access to data using ZQL ([docs](../permissions#select-permissions)).
 - **Deployment.** We now have a single-node Docker container ([docs](../deployment/)). Future work will add multinode support.
-- **Compound FKs.** Zero already supported compound _primary_ keys, but now it also supports compound _foreign_ keys ([docs](../zero-schema#relationships-and-compound-keys)).
+- **Compound FKs.** Zero already supported compound _primary_ keys, but now it also supports compound _foreign_ keys ([docs](../schema#relationships-and-compound-keys)).
 - **Schema DX**:
   - Columns types can use bare strings now if `optional` is not needed ([example](https://github.com/rocicorp/mono/commit/212379241e27e717f1237946f3384127d06661c3#diff-01e627d4886ffc106a9f60c5ea65f35b3868ad4de898cecf7ae60329b11c22e7R13)).
   - PK can be a single string in the common case where it’s non-compound ([example](https://github.com/rocicorp/mono/commit/212379241e27e717f1237946f3384127d06661c3#diff-01e627d4886ffc106a9f60c5ea65f35b3868ad4de898cecf7ae60329b11c22e7R19)).

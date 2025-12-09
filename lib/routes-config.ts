@@ -36,7 +36,7 @@ export const ROUTES = [
     title: 'Using Zero',
     href: null,
     items: [
-      {title: 'Schema', href: '/zero-schema'},
+      {title: 'Schema', href: '/schema'},
       {title: 'Authentication', href: '/auth'},
       {title: 'Reading Data', href: '/queries'},
       {title: 'Writing Data', href: '/mutators'},

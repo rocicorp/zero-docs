@@ -11,8 +11,8 @@ npm install @rocicorp/zero@0.12
 
 ## Features
 
-- Schemas now support circular relationships ([docs](/docs/zero-schema#circular-relationships)).
-- Added `one()` and `many()` schema helpers to default relationship type ([docs](/docs/zero-schema#table-schemas)).
+- Schemas now support circular relationships ([docs](/docs/schema#circular-relationships)).
+- Added `one()` and `many()` schema helpers to default relationship type ([docs](/docs/schema#table-schemas)).
 - Support for syncing tables without a primary key as long as there is a unique index. This enables Prisma's [implicit many-to-many relations](https://www.prisma.io/docs/orm/prisma-schema/data-model/relations/many-to-many-relations#implicit-many-to-many-relations) ([docs](/docs/postgres-support#primary-keys)).
 - Zero has been confirmed to work with Aurora and Google Cloud SQL ([docs](/docs/connecting-to-postgres))
 - Client bundle size reduced from 55kb to 47kb (-15%).

@@ -85,22 +85,22 @@ Start the development `zero-cache` by running the following command:
 >
 
 ```bash
-ZERO_UPSTREAM_DB="postgres://postgres:password@localhost:5432/postgres" \
+export ZERO_UPSTREAM_DB="postgres://postgres:password@localhost:5432/postgres"
 npx zero-cache-dev
 ```
 
 ```bash
-ZERO_UPSTREAM_DB="postgres://postgres:password@localhost:5432/postgres" \
+export ZERO_UPSTREAM_DB="postgres://postgres:password@localhost:5432/postgres"
 pnpm exec zero-cache-dev
 ```
 
 ```bash
-ZERO_UPSTREAM_DB="postgres://postgres:password@localhost:5432/postgres" \
+export ZERO_UPSTREAM_DB="postgres://postgres:password@localhost:5432/postgres"
 bunx zero-cache-dev
 ```
 
 ```bash
-ZERO_UPSTREAM_DB="postgres://postgres:password@localhost:5432/postgres" \
+export ZERO_UPSTREAM_DB="postgres://postgres:password@localhost:5432/postgres"
 yarn zero-cache-dev
 ```
 
@@ -164,37 +164,37 @@ yarn dlx drizzle-zero generate
 <SyncedCode syncKey="pm" syncValues={['npm', 'pnpm', 'bun', 'yarn']}>
 
 ```bash
-npm install @passionfroot/prisma-generator-zero
+npm install prisma-zero
 # Add this to your prisma schema:
 # generator zero {
-#   provider = "prisma-generator-zero"
+#   provider = "prisma-zero"
 # }
 npx prisma generate
 ```
 
 ```bash
-pnpm add @passionfroot/prisma-generator-zero
+pnpm add prisma-zero
 # Add this to your prisma schema:
 # generator zero {
-#   provider       = "prisma-generator-zero"
+#   provider       = "prisma-zero"
 # }
 pnpx prisma generate
 ```
 
 ```bash
-bun add @passionfroot/prisma-generator-zero
+bun add prisma-zero
 # Add this to your prisma schema:
 # generator zero {
-#   provider       = "prisma-generator-zero"
+#   provider       = "prisma-zero"
 # }
 bunx prisma generate
 ```
 
 ```bash
-yarn add @passionfroot/prisma-generator-zero
+yarn add prisma-zero
 # Add this to your prisma schema:
 # generator zero {
-#   provider       = "prisma-generator-zero"
+#   provider       = "prisma-zero"
 # }
 yarn prisma generate
 ```
@@ -230,7 +230,8 @@ declare module '@rocicorp/zero' {
 <Note heading="Having trouble using your own schema?">
   Zero has some restrictions on the [Postgres features it
   supports](/docs/postgres-support). You can continue this tutorial with [a
-  sample schema and data](TODO) to evaluate it.
+  sample schema and seed data](https://github.com/rocicorp/onboarding) to
+  evaluate it.
 </Note>
 
 {/* TODO some language about schema incompatibility? */}
@@ -402,7 +403,7 @@ import {useQuery} from '@rocicorp/zero/react';
 import {queries} from './shared/queries.ts';
 
 function MyComponent() {
-  const [albums] = useQuery(queries.albums.byArtist({artistID: 'artist_3'}));
+  const [albums] = useQuery(queries.albums.byArtist({artistID: 'artist_1'}));
   return albums.map(a => <div key={a.id}>{a.title}</div>);
 }
 ```
@@ -414,7 +415,7 @@ import {queries} from './shared/queries.ts';
 
 function MyComponent() {
   const [albums] = useQuery(() =>
-    queries.albums.byArtist({artistID: 'artist_3'}),
+    queries.albums.byArtist({artistID: 'artist_1'}),
   );
   return albums().map(a => <div key={a.id}>{a.title}</div>);
 }
@@ -425,17 +426,11 @@ function MyComponent() {
 import {zero} from './zero.ts';
 import {queries} from './shared/queries.ts';
 
-const albums = await zero.run(queries.albums.byArtist({artistID: 'artist_3'}));
+const albums = await zero.run(queries.albums.byArtist({artistID: 'artist_1'}));
 console.log('albums', albums);
 ```
 
 </CodeGroup>
-
-<Note heading="What is this example doing?">
-  We're querying the [sample
-  schema](/docs/add-to-existing-project#set-up-your-zero-schema) for albums by
-  the artist with ID `artist_3`.
-</Note>
 
 If you run your app now, you should see an error like:
 
@@ -566,26 +561,26 @@ Stop and re-run zero-cache with the URL of the queries endpoint:
 >
 
 ```bash
-ZERO_UPSTREAM_DB="postgres://postgres:password@localhost:5432/postgres" \
-ZERO_QUERIES_URL="http://localhost:3000/api/queries" \
+export ZERO_UPSTREAM_DB="postgres://postgres:password@localhost:5432/postgres"
+export ZERO_QUERIES_URL="http://localhost:3000/api/queries"
 npx zero-cache-dev
 ```
 
 ```bash
-ZERO_UPSTREAM_DB="postgres://postgres:password@localhost:5432/postgres" \
-ZERO_QUERIES_URL="http://localhost:3000/api/queries" \
+export ZERO_UPSTREAM_DB="postgres://postgres:password@localhost:5432/postgres"
+export ZERO_QUERIES_URL="http://localhost:3000/api/queries"
 pnpm exec zero-cache-dev
 ```
 
 ```bash
-ZERO_UPSTREAM_DB="postgres://postgres:password@localhost:5432/postgres" \
-ZERO_QUERIES_URL="http://localhost:3000/api/queries" \
+export ZERO_UPSTREAM_DB="postgres://postgres:password@localhost:5432/postgres"
+export ZERO_QUERIES_URL="http://localhost:3000/api/queries"
 bunx zero-cache-dev
 ```
 
 ```bash
-ZERO_UPSTREAM_DB="postgres://postgres:password@localhost:5432/postgres" \
-ZERO_QUERIES_URL="http://localhost:3000/api/queries" \
+export ZERO_UPSTREAM_DB="postgres://postgres:password@localhost:5432/postgres"
+export ZERO_QUERIES_URL="http://localhost:3000/api/queries"
 yarn zero-cache-dev
 ```
 
@@ -1097,30 +1092,30 @@ Restart zero-cache to tell it about this new endpoint:
 >
 
 ```bash
-ZERO_UPSTREAM_DB="postgres://postgres:password@localhost:5432/postgres" \
-ZERO_QUERIES_URL="http://localhost:3000/api/queries" \
-ZERO_MUTATE_URL="http://localhost:3000/api/mutate" \
+export ZERO_UPSTREAM_DB="postgres://postgres:password@localhost:5432/postgres"
+export ZERO_QUERIES_URL="http://localhost:3000/api/queries"
+export ZERO_MUTATE_URL="http://localhost:3000/api/mutate"
 npx zero-cache-dev
 ```
 
 ```bash
-ZERO_UPSTREAM_DB="postgres://postgres:password@localhost:5432/postgres" \
-ZERO_QUERIES_URL="http://localhost:3000/api/queries" \
-ZERO_MUTATE_URL="http://localhost:3000/api/mutate" \
+export ZERO_UPSTREAM_DB="postgres://postgres:password@localhost:5432/postgres"
+export ZERO_QUERIES_URL="http://localhost:3000/api/queries"
+export ZERO_MUTATE_URL="http://localhost:3000/api/mutate"
 pnpm exec zero-cache-dev
 ```
 
 ```bash
-ZERO_UPSTREAM_DB="postgres://postgres:password@localhost:5432/postgres" \
-ZERO_QUERIES_URL="http://localhost:3000/api/queries" \
-ZERO_MUTATE_URL="http://localhost:3000/api/mutate" \
+export ZERO_UPSTREAM_DB="postgres://postgres:password@localhost:5432/postgres"
+export ZERO_QUERIES_URL="http://localhost:3000/api/queries"
+export ZERO_MUTATE_URL="http://localhost:3000/api/mutate"
 bunx zero-cache-dev
 ```
 
 ```bash
-ZERO_UPSTREAM_DB="postgres://postgres:password@localhost:5432/postgres" \
-ZERO_QUERIES_URL="http://localhost:3000/api/queries" \
-ZERO_MUTATE_URL="http://localhost:3000/api/mutate" \
+export ZERO_UPSTREAM_DB="postgres://postgres:password@localhost:5432/postgres"
+export ZERO_QUERIES_URL="http://localhost:3000/api/queries"
+export ZERO_MUTATE_URL="http://localhost:3000/api/mutate"
 yarn zero-cache-dev
 ```
 

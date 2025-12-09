@@ -40,9 +40,9 @@ export const ROUTES = [
     href: null,
     items: [
       {title: 'Schema', href: '/zero-schema'},
+      {title: 'Authentication', href: '/auth'},
       {title: 'Reading Data', href: '/queries'},
       {title: 'Writing Data', href: '/mutators'},
-      {title: 'Authentication', href: '/auth'},
       {title: 'ZQL Reference', href: '/zql'},
       {title: 'ZQL on the Server', href: '/zql-on-the-server'},
       {title: 'Offline', href: '/offline'},

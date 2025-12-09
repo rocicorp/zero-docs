@@ -2,37 +2,70 @@
 title: Authentication
 ---
 
-You can authenticate Zero clients using either tokens or cookies.
+Setting up Auth in Zero apps has a few main steps:
 
-## Tokens
+1. Setting the `userID` on the client
+2. Sending credentials to the [mutate](/docs/mutators) and [queries](/docs/queries) endpoints
+3. Setting the `Context` type to implement permissions
+4. Logging out if desired
 
-If you have an opaque auth token, such as a JWT or a token from your auth provider, you can pass it to Zero's `auth` parameter:
+## Setting userID
+
+Because multiple users can share the same browser, Zero requires that you provide a `userID` parameter on construction:
 
 ```ts
 const zero = new Zero({
   ...,
-  auth: token,
+  userID: "user-123",
 });
 ```
 
-Zero will forward this token to your [mutate](/docs/mutators) and [queries](/docs/queries) endpoints in the standard `Authorization` header, which you can use to authenticate the request as normal:
+If the user is not logged in, just pass empty string or some other constant value:
 
 ```ts
-export function handleMutate(request: Request) {
-  const session = await authenticate(
-    request.headers.get('Authorization'));
-
-  if (!session) {
-    return json({error: 'Unauthorized'}, {status: 401});
-  }
-
-  // handle mutate request ...
-}
+const zero = new Zero({
+  ...,
+  userID: "anon",
+});
 ```
 
-## Cookies
+Zero segregates the client-side storage for each user. This allows users to quickly switch between multiple users and accounts without resyncing.
 
-Zero also supports cookie-based auth.
+<Note
+  emoji="🧑‍🏫"
+  type="warning"
+  heading="`userID` is not a security boundary"
+  slug="user-id-is-not-a-security-boundary"
+>
+  All users that have access to a browser profile have access to the same
+  IndexedDB instances. There is nothing that Zero can do about this – users can
+  just open the folder where the data is stored and look inside it.
+</Note>
+
+If you have more than one set of Zero data per-user (i.e., for different apps in the same domain), you can additionally use the `storageKey` parameter:
+
+```ts
+const zero = new Zero({
+  ...,
+  userID: "user-123",
+  storageKey: "my-app",
+});
+```
+
+If specified, `storageKey` is concatenated along with `userID` and other internal Zero information to form a unique IndexedDB database name.
+
+<ImageLightbox
+  src="/images/auth/indexeddb.png"
+  caption="Zero's IndexedDB databases are prefixed with 'rep' or 'replicache' because reasons."
+/>
+
+## Sending Credentials
+
+You can send credentials using either cookies or tokens.
+
+### Cookies
+
+The most common way to authenticate Zero is with cookies.
 
 To enable it, set the [`ZERO_GET_QUERIES_FORWARD_COOKIES`](/docs/config#zero_get_queries_forward_cookies) and [`ZERO_MUTATE_FORWARD_COOKIES`](/docs/config#zero_mutate_forward_cookies) options to `true`:
 
@@ -58,12 +91,44 @@ Zero will then forward all cookies sent to `cacheURL` to your [mutate](/docs/mut
 
 Cookies will show up in the normal HTTP `Cookie` header and you can authenticate these endpoints just like you would any API request.
 
-For this to work, the `zero-cache` server and your API server must be running on the same root domain so that they can share cookies. This happens automatically during development, as long as your frontend and `zero-cache` are both running on localhost with different ports.
+#### Deployment
+
+In order for cookie auth to work, the browser must send your frontend's cookies to `zero-cache`, so that `zero-cache` can forward them to your API.
+
+During development, this works automatically as long as your frontend and `zero-cache` are both running on `localhost` with different ports. Browsers send cookies based on domain name, not port number, so cookies set by `localhost:3000` are also sent to `localhost:4848`.
 
 For production you'll need to do two things:
 
 1. Run `zero-cache` on a subdomain of your main site (e.g., `zero.example.com` if your main site is `example.com`). Consult your hosting provider's docs, or your favorite LLM for how to configure this.
 2. Set cookies from your main site with the `Domain` attribute set to your root domain (e.g., `.example.com`). If you use a third-party auth provider, consult their docs on how to do this. For example, for Better Auth, this is done with the [`crossSubDomainCookies`](https://www.better-auth.com/docs/concepts/cookies#cross-subdomain-cookies) feature.
+
+### Tokens
+
+Zero also supports token-based authentication.
+
+If you have an opaque auth token, such as a JWT or a token from your auth provider, you can pass it to Zero's `auth` parameter:
+
+```ts
+const zero = new Zero({
+  ...,
+  auth: token,
+});
+```
+
+Zero will forward this token to your [mutate](/docs/mutators) and [queries](/docs/queries) endpoints in the standard `Authorization` header, which you can use to authenticate the request as normal:
+
+```ts
+export function handleMutate(request: Request) {
+  const session = await authenticate(
+    request.headers.get('Authorization'));
+
+  if (!session) {
+    return json({error: 'Unauthorized'}, {status: 401});
+  }
+
+  // handle mutate request ...
+}
+```
 
 ## Auth Failure and Refresh
 
@@ -81,7 +146,7 @@ export function handleMutate(request: Request) {
 }
 ```
 
-This will cause Zero to disconnect from `zero-cache` and the [connection status](/docs/api/connection-state-todo) will change to `needs-auth`. You can then re-authenticate the user and call `zero.connection.connect()` to reconnect to `zero-cache`:
+This will cause Zero to disconnect from `zero-cache` and the [connection status](/docs/TODO) will change to `needs-auth`. You can then re-authenticate the user and call `zero.connection.connect()` to reconnect to `zero-cache`:
 
 ```tsx
 function NeedsAuthDialog() {
@@ -125,15 +190,60 @@ function NeedsAuthDialog() {
   return null;
 ```
 
-## Permissions
+## Context
+
+When a user is authenticated, you will want to know who they are in your [queries](/docs/queries) and [mutators](/docs/mutators) to enforce permissions.
+
+To do this, define a `Context` type that includes the user's ID and any other relevant information, then register that type with Zero:
+
+```ts
+export type ZeroContext = {
+  userID: string;
+  role: 'admin' | 'user';
+};
+
+declare module '@rocicorp/zero' {
+  interface DefaultTypes {
+    ctx: ZeroContext;
+  }
+}
+```
+
+Then pass an instance of this context when instantiating Zero:
+
+```tsx
+const context = {
+  userID: 'user-123',
+  role: 'admin',
+};
+
+return <ZeroProvider {...{
+  ...,
+  context,
+}}>
+  <App />
+</ZeroProvider>
+```
+
+On the server-side, you will also pass an instance of this context when invoking your [queries](/docs/queries#implementing-the-endpoint) and [mutators](/docs/mutators#implementing-the-endpoint):
+
+```ts
+const query = mustGetQuery(queries, name);
+query.fn({args, ctx});
+
+// or
+
+const mutator = mustGetMutator(mutators, name);
+mutator.fn({tx, args, ctx});
+```
+
+You can then access the context within your [queries](TODO) and [mutators](TODO) to implement permissions.
+
+## Permission Patterns
 
 Zero does not have (or need) a first-class permission system like [RLS](https://supabase.com/docs/guides/database/postgres/row-level-security).
 
 Instead, you implement permissions by authenticating the user in your [queries](/docs/queries) and [mutators](/docs/mutators) endpoints, and creating a [Context](/docs/queries#context) object that contains the user's ID and other information. This context is passed to your queries and mutators and used to control what data the user can access.
-
-See [Query Server Setup](/docs/queries#server-setup) and [Mutator Server Setup](/docs/mutators#server-setup) for an example of how to authenticate the user and create a context object.
-
-## Permission Patterns
 
 Here are a collection of common permissions patterns and how to implement them in Zero.
 
@@ -144,9 +254,8 @@ Here are a collection of common permissions patterns and how to implement them i
 ```ts
 // Use the context's `userID` to filter the rows to only the
 // ones owned by the user.
-const myPosts = defineQueryWithContext<MyZeroContext>()(
-  z.undefined(),
-  ({ context: { userID } }) => {
+const myPosts = defineQuery(
+  ({ ctx: { userID } }) => {
     return zql.post.where('authorID', userID)
   },
 );
@@ -157,9 +266,8 @@ const myPosts = defineQueryWithContext<MyZeroContext>()(
 ```ts
 // Use the context's `userID` to filter the rows to only the
 // ones owned by the user or shared with the user.
-const allowedPosts = defineQueryWithContext<MyZeroContext>()(
-    z.undefined(),
-  ({ context: { userID } }) => {
+const allowedPosts = defineQuery(
+  ({ ctx: { userID } }) => {
     return zql.post.where(({cmp, exists, or}) => or(
       cmp('authorID', userID),
       exists('sharedWith', q => q.where('userID', userID)),
@@ -171,9 +279,8 @@ const allowedPosts = defineQueryWithContext<MyZeroContext>()(
 #### Owned Rows or All if Admin
 
 ```ts
-const allowedPosts = defineQueryWithContext<MyZeroContext>()(
-  z.undefined(),
-  ({ context: { userID, role } }) => {
+const allowedPosts = defineQuery(
+  ({ ctx: { userID, role } }) => {
     if (role === 'admin') {
       return zql.post;
     }
@@ -188,13 +295,13 @@ const allowedPosts = defineQueryWithContext<MyZeroContext>()(
 
 ```ts
 // All created items are owned by the user who created them.
-const createPost = defineMutatorWithContext<MyZeroContext>()(
+const createPost = defineMutator(
   z.object({
     id: z.string(),
     title: z.string(),
     content: z.string(),
   }),
-  (tx, { context: { userID }, args: { id, title, content } }) => {
+  (tx, { ctx: { userID }, args: { id, title, content } }) => {
     return zql.post.insert({
       id,
       title,
@@ -208,12 +315,12 @@ const createPost = defineMutatorWithContext<MyZeroContext>()(
 #### Edit Owned Rows
 
 ```ts
-const updatePost = defineMutatorWithContext<MyZeroContext>()(
+const updatePost = defineMutator(
   z.object({
     id: z.string(),
     content: z.string().optional(),
   }),
-  (tx, { context: { userID }, args: { id, content } }) => {
+  (tx, { ctx: { userID }, args: { id, content } }) => {
     const prev = await tx.run(zql.post.where('id', id).one());
     if (!prev) {
       return;
@@ -232,12 +339,12 @@ const updatePost = defineMutatorWithContext<MyZeroContext>()(
 #### Edit Owned or Shared Rows
 
 ```ts
-const updatePost = defineMutatorWithContext<MyZeroContext>()(
+const updatePost = defineMutator(
   z.object({
     id: z.string(),
     content: z.string().optional(),
   }),
-  (tx, { context: { userID }, args: { id, content } }) => {
+  (tx, { ctx: { userID }, args: { id, content } }) => {
     const prev = await tx.run(
       zql.post
         .where('id', id)
@@ -263,12 +370,12 @@ const updatePost = defineMutatorWithContext<MyZeroContext>()(
 #### Edit Owned or All if Admin
 
 ```ts
-const updatePost = defineMutatorWithContext<MyZeroContext>()(
+const updatePost = defineMutator(
   z.object({
     id: z.string(),
     content: z.string().optional(),
   }),
-  (tx, { context: { role, userID }, args: { id, content } }) => {
+  (tx, { ctx: { role, userID }, args: { id, content } }) => {
     const prev = await tx.run(zql.post.where('id', id).one());
     if (!prev) {
       return;
@@ -283,71 +390,6 @@ const updatePost = defineMutatorWithContext<MyZeroContext>()(
   },
 );
 ```
-## Client-Side Data Storage
-
-Zero stores client-side data in `IndexedDB` by default, but this is customizable with the `kvStore` parameter:
-
-```ts
-const zero = new Zero({
-  // Store data in React Native's SQLite database
-  // See https://zero.rocicorp.dev/docs/react-native
-  kvStore: expoSQLiteStoreProvider(),
-});
-
-const zero = new Zero({
-  // Store data in memory, it disappears on refresh
-  kvStore: 'mem',
-});
-```
-
-Because multiple users can share the same browser, Zero requires that you provide a `userID` parameter on construction:
-
-```ts
-const zero = new Zero({
-  ...,
-  userID: "user-123",
-});
-```
-
-Zero stores each user's data in a different IndexedDB instance. This allows users to quickly switch between multiple users and accounts without resyncing.
-
-<Note
-  emoji="🧑‍🏫"
-  type="warning"
-  heading="`userID` is not a security boundary"
-  slug="user-id-is-not-a-security-boundary"
->
-  All users that have access to a browser profile have access to the same
-  IndexedDB instances. There is nothing that Zero can do about this – users can
-  just open the folder where the data is stored and look inside it.
-</Note>
-
-If your application is unauthenticated, or if you don't need fast user switching, you can just set `userID` to a constant like `anon` or `guest`:
-
-```ts
-const zero = new Zero({
-  ...,
-  userID: "anon",
-});
-```
-
-Alternately, if you have more than one set of Zero data per-user (i.e., for different apps in the same domain), you can additionally use the `storageKey` parameter:
-
-```ts
-const zero = new Zero({
-  ...,
-  userID: "user-123",
-  storageKey: "my-app",
-});
-```
-
-If specified, `storageKey` is concatenated along with `userID` and other internal Zero information to form a unique IndexedDB database name.
-
-<ImageLightbox
-  src="/images/auth/indexeddb.png"
-  caption="Zero's IndexedDB databases are prefixed with 'rep' or 'replicache' because ... well because we haven't fixed this yet."
-/>
-
 ## Logging Out
 
 When a user logs out, you should consider what should happen to the synced data.

@@ -404,7 +404,7 @@ The possible values of `result.type` are currently `complete` and `unknown`.
 
 The `complete` value is currently only returned when Zero has received the server result. In the future, Zero will be able to return this result type when it _knows_ that all possible data for this query is already available locally. Additionally, we plan to add a `prefix` result for when the data is known to be a prefix of the complete result. See [Consistency](#consistency) for more information.
 
-## Missing Data
+## 404 / Not Found
 
 It is inevitable that there will be cases where the requested data cannot be found. Because Zero returns local results immediately, and server results asynchronously, displaying "not found" / 404 UI can be slightly tricky. If you just use a simple existence check, you will often see the 404 UI flicker while the server result loads:
 
@@ -481,14 +481,7 @@ Queries can be either _active_ or _cached_. An active query is one that is curre
   className="invert dark:invert-0"
 />
 
-Active queries are created one of four ways:
-
-1. The app calls `q.materialize()` to get a `View`.
-2. The app uses a framework binding like React's `useQuery(q)`.
-3. The app calls [`preload()`](#preloading) to sync larger queries without a view.
-4. The app calls `q.run()` to get a single result.
-
-Active queries can be _deactivated_ according to how they were created:
+Queries are _deactivated_ according to how they were created:
 
 1. For `materialize()` queries, the UI calls `destroy()` on the view.
 2. For `useQuery()`, the UI unmounts the component (which calls `destroy()` under the covers).
@@ -521,20 +514,20 @@ You can override the default TTL with the `ttl` parameter:
 ```ts
 // With useQuery():
 const [user] = useQuery(
-    queries.user.byID('id', userId),
-    {ttl: '5m'})
+  queries.user.byID('id', userId),
+  {ttl: '5m'})
 
 // With preload():
 queries.user.byID('id', userId).preload(
-    {ttl: '5m'})
+  {ttl: '5m'})
 
 // With run():
 const user = await queries.user.byID('id', userId).run(
-    {ttl: '5m'})
+  {ttl: '5m'})
 
 // With materialize():
 const view = queries.user.byID('id', userId).materialize(
-    {ttl: '5m'})
+  {ttl: '5m'})
 ```
 
 TTLs up to `10m` (ten minutes) are currently supported. The following formats are allowed:
@@ -544,32 +537,6 @@ TTLs up to `10m` (ten minutes) are currently supported. The following formats ar
 | `none`    | No caching. Query will immediately stop when deactivated. |
 | `%ds`     | Number of seconds.                                        |
 | `%dm`     | Number of minutes.                                        |
-
-### Choosing a TTL
-
-If you choose a different TTL, you should consider how likely it is that the query will be reused, and how far into the future this reuse will occur. Here are some guidelines to help you choose a TTL for common query types:
-
-#### Preload Queries
-
-These queries load the most commonly needed data for your app. They are typically larger, run with the `preload()` method, and stay running the entire time your app is running.
-
-Because these queries run the entire time Zero runs, they do not need any TTL to keep them alive. And using a `ttl` for them is wasteful since when your app changes its preload query, it will end up running the old preload query *and* the new preload query, even though the app only cares about the new one.
-
-**Recommendation:** `ttl: 'none'` *(the default for `preload()`)*.
-
-#### Navigational Queries
-
-These queries load data specific to a route. They are typically smaller and run with the `useQuery()` method. It is useful to cache them for a short time, so that they can be reactivated quickly if the user navigates back to the route.
-
-**Recommendation:** `ttl: '5m'` *(the default for `useQuery()`)*.
-
-#### Ephemeral Queries
-
-These queries load data for a specific, short-lived user interaction and often come in large numbers (e.g., typeahead search).
-
-The chance of any specific ephemeral query being reused is low, so the benefit of caching them is also low.
-
-**Recommendation:** `useQuery(..., {ttl: 'none'})`)*.
 
 ### Why Zero TTLs are Short
 
@@ -623,3 +590,24 @@ type QueriesResponseBody = ({
     details: ReadonlyJSONValue
 })[]
 ```
+
+## Consistency
+
+Zero always syncs a consistent partial replica of the backend database to the client. This avoids many common consistency issues that come up in classic web applications. But there are still some consistency issues to be aware of when using Zero.
+
+For example, imagine that you have a bug database w/ 10k issues. You preload the first 1k issues sorted by created.
+
+The user then does a query of issues assigned to themselves, sorted by created. Among the 1k issues that were preloaded imagine 100 are found that match the query. Since the data we preloaded is in the same order as this query, we are guaranteed that any local results found will be a _prefix_ of the server results.
+
+The UX that result is nice: the user will see initial results to the query instantly. If more results are found server-side, those results are guaranteed to sort below the local results. There's no shuffling of results when the server response comes in.
+
+Now imagine that the user switches the sort to ‘sort by modified’. This new query will run locally, and will again find some local matches. But it is now unlikely that the local results found are a prefix of the server results. When the server result comes in, the user will probably see the results shuffle around.
+
+To avoid this annoying effect, what you should do in this example is also preload the first 1k issues sorted by modified desc. In general for any query shape you intend to do, you should preload the first `n` results for that query shape with no filters, in each sort you intend to use.
+
+<Note slug="no-duplicate-rows" heading="Zero does not sync duplicate rows">
+Zero syncs the *union* of all active queries' results. You don't have to worry about syncing many sorts of the same query when it's likely the results will overlap heavily.
+
+</Note>
+
+In the future, we will be implementing a consistency model that fixes these issues automatically. We will prevent Zero from returning local data when that data is not known to be a prefix of the server result. Once the consistency model is implemented, preloading can be thought of as purely a performance thing, and not required to avoid unsightly flickering.

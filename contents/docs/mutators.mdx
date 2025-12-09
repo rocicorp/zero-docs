@@ -3,30 +3,28 @@ title: Mutators
 description: Writing Data
 ---
 
-## Introduction
+Mutators are how you write data with Zero. Here's a simple example:
 
-A Zero _mutator_ is basically just a TypeScript function that runs within a database transaction, which can read and write to the database.
-
-Here's an example of a simple mutator:
 
 ```ts
-import { defineMutator } from '@rocicorp/zero';
-import { zql } from './schema.ts';
-import z from "zod";
+import { defineMutators, defineMutator } from '@rocicorp/zero'
+import { zql } from './schema.ts'
+import z from "zod"
 
-const updateIssue = defineMutator<Schema>(
-  tx,
-  z.object({
-    id: z.string(),
-    title: z.string(),
-  }),
-  async ({args: {id, title}}) => {
-    if (title.length > 100) {
-      throw new Error(`Title is too long`);
+export const mutators = defineMutators({
+  updateIssue: defineMutator(
+    z.object({
+      id: z.string(),
+      title: z.string(),
+    }),
+    async ({tx, args: {id, title}}) => {
+      if (title.length > 100) {
+        throw new Error(`Title is too long`)
+      }
+      await tx.mutate.issue.update({id, title})
     }
-    await tx.mutate.issue.update({id, title});
-  },
-);
+  ),
+})
 ```
 
 ## Architecture
@@ -49,24 +47,23 @@ Zero is an example of a _server-authoritative_ sync engine. This means that the 
 Imagine that you wanted to use an LLM to detect whether an issue update is spammy, rather than a simple length check. We can just add that to our server mutator:
 
 ```ts
-const updateIssue = defineMutator<Schema>(
-  tx,
+const updateIssue = defineMutator(
   z.object({
     id: z.string(),
     title: z.string(),
   }),
-  async ({args: {id, title}}) => {
+  async ({tx, args: {id, title}}) => {
     const response = await llamaSession.prompt(
       `Is this title update likely spam?\n\n${title}\n\nResponse "yes" or "no"`,
-    );
+    )
     if (/yes/i.test(response)) {
-      throw new Error(`Title is likely spam`);
+      throw new Error(`Title is likely spam`)
     }
 
     // delegate rest of implementation to client mutator
-    await updateIssue(tx, {id, title});
+    await updateIssue(tx, {id, title})
   },
-);
+)
 ```
 
 If the server detects that the mutation is spammy, the client will see the error message and the mutation will be rolled back. If the server mutator succeeds, the client mutator will be rolled back and the server result will be applied.
@@ -83,7 +80,7 @@ Clients receive row updates and apply them to their local cache. Any pending mut
 
 ## Parameters
 
-The first argument to `defineQuery` is a *validator* that determines the query's parameters. We use [Zod](https://zod.dev/) in these examples, but you can use any validation library that implements [Standard Schema](https://standardschema.dev/).
+The first argument to `defineMutator` is a *validator* that determines the mutators's parameters. We use [Zod](https://zod.dev/) in these examples, but you can use any validation library that implements [Standard Schema](https://standardschema.dev/).
 
 Parameter validation is needed because mutators run on both the client and [on your server](#server-setup). In the server case, the parameters come from the client and are untrusted. These inputs are validated using the validator you provide.
 
@@ -91,38 +88,34 @@ Zero supports only one formal parameter for each mutator, but it can be of any t
 
 ## Context
 
-Mutator parameters are supplied by the client application and passed to the server automatically by Zero. This makes them unsuitable for authentication data, since the user could modify them.
+Mutator parameters are supplied by the client application and passed to the server automatically by Zero. This makes them unsuitable for credentials, since the user could modify them.
 
-For this reason, mutators also support a `context` parameter. When used [on the server](#server-setup), the context is passed to the mutator function separately and not client-controlled.
+For this reason, Zero mutators also support a [`context` object](/docs/auth#context).
 
-Use `defineMutatorWithContext` to define a mutator that takes a context parameter:
+Access your context with the `ctx` parameter to your mutator:
 
 ```ts
-type MyZeroContext = {
-  userID: string;
-};
-
-const createIssue = defineMutatorWithContext<MyZeroContext>()(
-  tx,
+const createIssue =defineMutator(
   z.object({
     id: z.string(),
     title: z.string(),
     priority: z.number(),
   }),
   async ({
-    context: {userID},
+    tx,
+    ctx: {userID},
     args: {id, title, priority}
   }) => {
-    // Note: User cannot control context.userID, so this
+    // Note: User cannot control ctx.userID, so this
     // enforces authorship of created issue.
     await tx.mutate.issue.insert({
       id,
       title,
       priority,
       authorID: userID,
-    });
+    })
   },
-);
+)
 ```
 
 ## Writing Data
@@ -130,15 +123,13 @@ const createIssue = defineMutatorWithContext<MyZeroContext>()(
 With a mutator, Zero provides a CRUD-style API to insert, update, and delete rows. Access the API with `tx.mutate.<tablename>`:
 
 ```tsx
-const myMutator = defineMutator<Schema>(
-  tx,
-  z.undefined(),
-  async (tx) => {
+const createIssue = defineMutator(
+  async ({tx}) => {
     await tx.mutate.issue.create({
       // ...
     })
   },
-);
+)
 ```
 
 ### Insert
@@ -150,14 +141,14 @@ tx.mutate.user.insert({
   id: nanoid(),
   username: 'sam',
   language: 'js',
-});
+})
 ```
 
 Optional fields can be set to `null` to explicitly set the new field to `null`. They can also be set to `undefined` to take the default value (which is often `null` but can also be some generated value server-side):
 
 ```tsx
 // schema.ts
-import {createTableSchema} from '@rocicorp/zero';
+import {createTableSchema} from '@rocicorp/zero'
 
 const userSchema = createTableSchema({
   tableName: 'user',
@@ -168,7 +159,7 @@ const userSchema = createTableSchema({
   },
   primaryKey: ['id'],
   relationships: {},
-});
+})
 
 // app.tsx
 
@@ -177,21 +168,21 @@ tx.mutate.user.insert({
   id: nanoid(),
   username: 'sam',
   language: null,
-});
+})
 
 // Sets language to the default server-side value. Could be null, or some
 // generated or constant default value too.
 tx.mutate.user.insert({
   id: nanoid(),
   username: 'sam',
-});
+})
 
 // Same as above
 tx.mutate.user.insert({
   id: nanoid(),
   username: 'sam',
   language: undefined,
-});
+})
 ```
 
 ### Upsert
@@ -203,7 +194,7 @@ tx.mutate.user.upsert({
   id: samID,
   username: 'sam',
   language: 'ts',
-});
+})
 ```
 
 `upsert` supports the same `null` / `undefined` semantics for optional fields that `insert` does (see above).
@@ -219,20 +210,20 @@ You can pass a partial, leaving fields out that you don’t want to change. For 
 tx.mutate.user.update({
   id: samID,
   language: 'golang',
-});
+})
 
 // Same as above
 tx.mutate.user.update({
   id: samID,
   username: undefined,
   language: 'haskell',
-});
+})
 
 // Reset language field to `null`
 tx.mutate.user.update({
   id: samID,
   language: null,
-});
+})
 ```
 
 ### Delete
@@ -242,32 +233,31 @@ Delete an existing record. Does nothing if specified record does not exist.
 ```tsx
 tx.mutate.user.delete({
   id: samID,
-});
+})
 ```
 
 ## Reading Data
 
-You can read data within a mutator using [ZQL](./reading-data):
+You can read data within a mutator by passing [ZQL](./reading-data) to `tx.run`:
 
 ```ts
-const updateIssue = defineMutatorWithContext<MyZeroContext>()(
-  tx,
+const updateIssue = defineMutator(
   z.object({
     id: z.string(),
     title: z.string().optional(),
     priority: z.number().optional(),
   }),
-  async (tx) => {
-    const issue = await tx.local(zql.issue.where('id', id).one());
+  async ({tx, args: {id, title, priority}}) => {
+    const issue = await tx.run(zql.issue.where('id', id).one())
     if (!issue) {
-      throw new Error(`Issue not found`);
+      throw new Error(`Issue not found`)
     }
     if (issue.priority !== priority) {
-      throw new Error(`Priority mismatch`);
+      throw new Error(`Priority mismatch`)
     }
-    return issue;
+    return issue
   },
-);
+)
 ```
 
 You have the full power of ZQL at your disposal, including relationships, filters, ordering, and limits.
@@ -275,9 +265,9 @@ You have the full power of ZQL at your disposal, including relationships, filter
 Reads and writes within a mutator are transactional, meaning that the datastore is guaranteed to not change while your mutator is running. And if the mutator throws, the entire mutation is rolled back.
 
 <Note type="note" heading="Reading in Mutators is Always Local">
-When you call `z.query.foo.run()` outside of a mutator, there is a `type` parameter that can be used to wait for server results.
+Unlike `z.run()`, there is no `type` parameter that can be used to wait for server results inside mutators.
 
-There's no equivalent of this inside mutators, because waiting for server results in mutators makes no sense – it would defeat the purpose of running optimistically to begin with.
+This is because waiting for server results in mutators makes no sense – it would defeat the purpose of running optimistically to begin with.
 
 When a mutator runs on the client (`tx.location === "client"`), ZQL reads only return data already cached on the client. When mutators run on the server (`tx.location === "server"`), ZQL reads always return all data.
 </Note>
@@ -287,63 +277,101 @@ When a mutator runs on the client (`tx.location === "client"`), ZQL reads only r
 By convention, mutators are listed in a central `mutators.ts` file. This allows them to be easily used on both the client and server:
 
 ```ts
-import { defineMutatorWithContext } from '@rocicorp/zero';
-import { Schema, zql } from './schema.ts';
-import z from "zod";
+import { defineMutators, defineMutator } from '@rocicorp/zero'
+import { zql } from './schema.ts'
+import z from "zod"
 
-export const mutators = {
+export const mutators = defineMutators({
   posts: {
-    create: defineMutatorWithContext<MyZeroContext>()(
+    create: defineMutator(
       z.object({
         id: z.string(),
         title: z.string(),
         priority: z.number(),
       }),
       async (
-        tx: Transaction<Schema>,
-        {context: {userID}, args: {id, title, priority}}
+        {tx, context: {userID}, args: {id, title, priority}}
       ) => {
         await tx.mutate.post.insert({
           id,
           title,
           priority,
           authorID: userID,
-        });
+        })
       },
     ),
-    update: defineMutatorWithContext<MyZeroContext>()(
+    update: defineMutator(
       z.object({
         id: z.string(),
         title: z.string().optional(),
         priority: z.number().optional(),
       }),
-      async (tx: Transaction<Schema>, {context: {userID}, args: {id, title, priority}}) => {
-        const prev = await tx.query.post.where('id', id).one();
+      async ({tx, context: {userID}, args: {id, title, priority}}) => {
+        const prev = await tx.run(zql.post.where('id', id).one())
         if (!prev) {
-          throw new Error(`Post not found`);
+          throw new Error(`Post not found`)
         }
         if (prev.authorID !== userID) {
-          throw new Error(`Access denied`);
+          throw new Error(`Access denied`)
         }
-        await tx.mutate.post.update({id, title, priority, authorID: userID});
+        await tx.mutate.post.update({id, title, priority, authorID: userID})
       },
     ),
-  } as const;
-};
-```
-
-You can use as many levels of nesting as you want to organize your queries. And as your application grows, you can move queries to different files to keep them organized:
-
-```ts
-// zero/mutators.ts
-import {postMutators} from 'zero/mutators/posts.ts';
-import {userMutators} from 'zero/mutators/users.ts';
-
-export const mutators = {
-  posts: postMutators,
-  users: userMutators,
+  } as const
 }
 ```
+
+You can use as many levels of nesting as you want to organize your queries.
+
+As your application grows, you can move queries to different files to keep them organized:
+
+```ts
+// posts.ts
+export const postMutators = {
+  create: defineMutator(
+    z.object({
+      id: z.string(),
+      title: z.string(),
+    }),
+    async (
+      {tx, context: {userID}, args: {id, title}}
+    ) => {
+      await tx.mutate.post.insert({
+        id,
+        title,
+        authorID: userID,
+      })
+    },
+  ),
+}
+
+// user.ts
+export const userMutators = {
+  updateRole: defineMutator(
+    z.object({
+      role: z.string(),
+    }),
+    async ({tx, ctx: {userID}, args: {role}}) => {
+      await tx.mutate.user.update({id: userID, role})
+    },
+  ),
+}
+
+// mutators.ts
+import {postMutators} from 'zero/mutators/posts.ts'
+import {userMutators} from 'zero/mutators/users.ts'
+
+export const mutators = defineMutators{{ 
+  posts: postMutators,
+  users: userMutators,
+})
+```
+
+<Note type="warning" emoji="⚠️" heading="Use `defineMutators` at top level only">
+`defineMutators` establishes the full name for each mutator (i.e., `posts.create`, `users.updateRole`), which is later sent to the [server](#server-setup).
+
+So this should only be used once at the top level of your `mutators.ts` file.
+</Note>
 
 ## Registration
 
@@ -352,8 +380,8 @@ Before you can use your mutators, you need to register them with Zero.
 In React or SolidJS, you'll do this by passing the `mutators` object to the `ZeroProvider` component:
 
 ```tsx
-import { ZeroProvider } from '@rocicorp/zero/react';
-import { mutators } from 'zero/mutators.ts';
+import { ZeroProvider } from '@rocicorp/zero/react'
+import { mutators } from 'zero/mutators.ts'
 
 <ZeroProvider mutators={mutators}>
   <App />
@@ -363,13 +391,17 @@ import { mutators } from 'zero/mutators.ts';
 If you use the `Zero` class directly, you can pass the `mutators` object to the `Zero` constructor:
 
 ```ts
-import { Zero } from '@rocicorp/zero';
-import { mutators } from 'zero/mutators.ts';
+import { Zero } from '@rocicorp/zero'
+import { mutators } from 'zero/mutators.ts'
 
 const zero = new Zero({
   mutators,
-});
+})
 ```
+
+<Note emoji="🌈" heading="The more you know">
+Mutators need to be registered with Zero because Zero calls them during sync for conflict resolution.
+</Note>
 
 ## Invoking Mutators
 
@@ -379,7 +411,7 @@ Once you have registered your mutators, you can call them through `zero.mutate`:
 zero.mutate.issue.update({
   id: 'issue-123',
   title: 'New title',
-});
+})
 ```
 
 ## Waiting for Mutator Result
@@ -399,19 +431,19 @@ try {
   const write = zero.mutate.issue.insert({
     id: 'issue-123',
     title: 'New title',
-  });
+  })
 
   // issue-123 not guaranteed to be present here. read1 may be undefined.
-  const read1 = await zero.query.issue.byId('issue-123').one();
+  const read1 = await zero.query.issue.byId('issue-123').one()
 
   // Await client write – almost always less than 1 frame, and same
   // macrotask, so no browser paint will occur here.
-  await write.client;
+  await write.client
 
   // issue-123 definitely can be read now.
-  const read2 = await zero.query.issue.byId('issue-123').one();
+  const read2 = await zero.query.issue.byId('issue-123').one()
 } catch (e) {
-  console.error('Mutator failed on client', e);
+  console.error('Mutator failed on client', e)
 }
 ```
 
@@ -422,24 +454,24 @@ try {
   const write = zero.mutate.issue.insert({
     id: 'issue-123',
     title: 'New title',
-  });
+  })
 
-  await write.client;
+  await write.client
 
   // optimistic write guaranteed to be present here, but not
   // server write.
-  const read1 = await zero.query.issue.byId('issue-123').one();
+  const read1 = await zero.query.issue.byId('issue-123').one()
 
   // Await server write – this involves a round-trip.
-  await write.server;
+  await write.server
 
   // issue-123 is written to server and any results are
   // synced to this client.
   // read2 could potentially be undefined here, for example if the
   // server mutator rejected the write.
-  const read2 = await zero.query.issue.byId('issue-123').one();
+  const read2 = await zero.query.issue.byId('issue-123').one()
 } catch (e) {
-  console.error('Mutator failed on client or server', e);
+  console.error('Mutator failed on client or server', e)
 }
 ```
 
@@ -469,14 +501,14 @@ The `@rocicorp/zero` package provides the `handleMutationRequest`, `mutatorByNam
 For example, with [Hono](https://hono.dev):
 
 ```ts
-import { withValidation, getMutation, ReadonlyJSONValue } from "@rocicorp/zero";
-import { handleMutationRequest } from "@rocicorp/zero/server";
-import { schema } from "schema.ts";
-import { mutators } from "mutators.ts";
+import { withValidation, getMutation, ReadonlyJSONValue } from "@rocicorp/zero"
+import { handleMutationRequest } from "@rocicorp/zero/server"
+import { schema } from "schema.ts"
+import { mutators } from "mutators.ts"
 
 app.post("/mutate", async (c) => {
-  const userID = await authenticateUser(c.req.raw);
-  const context = { userID };
+  const userID = await authenticateUser(c.req.raw)
+  const context = { userID }
   return await c.json(
     await handleMutationRequest(
       transact =>
@@ -485,8 +517,8 @@ app.post("/mutate", async (c) => {
         ),
       c.req.raw
     )
-  );
-});
+  )
+})
 ```
 
 <Note heading="Using a different bindings library">
@@ -505,11 +537,11 @@ app.post('/mutate', async c => {
     transact =>
       transact(dbProvider, (tx, name, args) =>
           // The mutation is skipped and the next mutation runs as normal.
-          throw new Error('bonk');
+          throw new Error('bonk')
       ),
     c.req.raw
-  );
-  return await c.json(result);
+  )
+  return await c.json(result)
 })
 ```
 
@@ -520,7 +552,7 @@ It is also of course possible for the entire push endpoint to return an HTTP err
 ```ts
 app.post('/mutate', async c => {
   // This will cause the client to resend all queued mutations.
-  throw new Error('zonk');
+  throw new Error('zonk')
 })
 ```
 
@@ -547,7 +579,7 @@ const zero = new Zero({
   schema,
   mutators,
   mutateURL: 'https://api.staging.example.com/mutate',
-});
+})
 ```
 
 ### URL Patterns
@@ -568,10 +600,10 @@ An approach we like is to create a separate `server-mutators.ts` file that wraps
 
 ```ts
 // server-mutators.ts
-import { defineMutatorWithContext } from '@rocicorp/zero';
-import { Schema, zql } from 'schema.ts';
-import z from "zod";
-import { mutators as sharedMutators } from 'mutators.ts';
+import { defineMutatorWithContext } from '@rocicorp/zero'
+import { Schema, zql } from 'schema.ts'
+import z from "zod"
+import { mutators as sharedMutators } from 'mutators.ts'
 
 export const serverMutators = {
   ... sharedMutators,
@@ -590,18 +622,18 @@ export const serverMutators = {
         await sharedMutators.posts.update(
           tx,
           context: {context, args},
-        );
+        )
 
         // Record a history of this operation happening in an audit log table.
         await tx.mutate.auditLog.insert({
           issueId: id,
           action: 'update-title',
           timestamp: Date.getTime(),
-        });
+        })
       },
     ),
-  } as const;
-};
+  } as const
+}
 ```
 
 For simple things, we also expose a `location` field on the transaction object that you can use to branch your code:
@@ -616,7 +648,7 @@ const myMutator = defineMutator(
       // Server-side code
     }
   },
-);
+)
 ```
 
 ### Permissions
@@ -649,9 +681,9 @@ const markAllAsRead = defineMutator(
       WHERE user_id = $1
     `,
       [userId],
-    );
+    )
   }
-});
+})
 ```
 
 See [ZQL on the Server](/docs/zql-on-the-server) for more information.
@@ -664,9 +696,9 @@ To do this, you can do your async work after closing the transaction inside `han
 
 ```ts
 // server-mutators.ts
-import { defineMutator } from '@rocicorp/zero';
-import { Schema, zql } from 'schema.ts';
-import z from "zod";
+import { defineMutator } from '@rocicorp/zero'
+import { Schema, zql } from 'schema.ts'
+import z from "zod"
 
 export const mutators = {
   issue: {
@@ -676,28 +708,28 @@ export const mutators = {
         title: z.string(),
       }),
       async (tx, {id, title}) => {
-        await tx.mutate.issue.update({id, title});
-        await sendEmailToSubscribers(id);
+        await tx.mutate.issue.update({id, title})
+        await sendEmailToSubscribers(id)
       },
     ),
   } as const,
-};
+}
 ```
 
 Then in your push handler:
 
 ```ts
 app.post('/push', async c => {
-  const asyncTasks: Array<() => Promise<void>> = [];
+  const asyncTasks: Array<() => Promise<void>> = []
   const result = await processor.process(
     createMutators(authData, asyncTasks),
     c.req.query(),
     await c.req.json(),
-  );
+  )
 
-  await Promise.all(asyncTasks.map(task => task()));
-  return await c.json(result);
-});
+  await Promise.all(asyncTasks.map(task => task()))
+  return await c.json(result)
+})
 ```
 
 ### Custom Push Implementation

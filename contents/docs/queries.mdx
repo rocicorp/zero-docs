@@ -180,7 +180,7 @@ export const queries = defineQueries({
 })
 ```
 
-<Note type="warning" emoji="⚠️" heading="Use `defineQueries` only at top level">
+<Note type="warning" emoji="⚠️" heading="Use `defineQueries` at top level only">
 `defineQueries` establishes the full name for each query (i.e., `posts.get`, `users.byRole`), which is later sent to the [server](#server-setup).
 
 So this should only be used once at the top level of your `queries.ts` file.

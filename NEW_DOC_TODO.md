@@ -1,0 +1,8 @@
+- Factor out separate quickstarts doc
+- Doc defaulting schema type
+- Doc local-only queries
+- ask claude to find:
+  - cases where we said 'query' inside mutator doc and vice versa
+  - referred to tx.query.tableName or z.query.tableName
+  - referred to query.run or similar
+  - semicolons

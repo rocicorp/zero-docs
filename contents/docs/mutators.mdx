@@ -405,80 +405,98 @@ Mutators need to be registered with Zero because Zero calls them during sync for
 
 ## Invoking Mutators
 
-Once you have registered your mutators, you can call them through `zero.mutate`:
+Once you have registered your mutators, you can invoke them with `zero.mutate`:
 
 ```ts
-zero.mutate.issue.update({
-  id: 'issue-123',
-  title: 'New title',
-})
+import {mutators} from 'mutators.ts'
+
+zero.mutate(
+  mutators.issue.update({
+    id: 'issue-123',
+    title: 'New title',
+  })
+)
 ```
 
 ## Waiting for Mutator Result
 
 We typically recommend that you "fire and forget" mutators.
 
-Optimistic mutations make sense when the common case is that a mutation succeeds. If a mutation frequently fails, then showing the user an optimistic result doesn't make sense, because it will likely be wrong.
+Optimistic mutations make sense when the common case is that a mutation succeeds. If a mutation frequently fails, then showing the user an optimistic result isn't very useful, because it will likely be wrong.
 
-That said there are cases where it is useful to know when a write succeeded on either the client or server.
+That said there are cases where it is nice to know when a write succeeded on either the client or server.
 
 One example is if you need to read a row directly after writing it. Zero's local writes are very fast (almost always < 1 frame), but because Zero is backed by IndexedDB, writes are still _technically_ asynchronous and reads directly after a write may not return the new data.
 
 You can use the `.client` promise in this case to wait for a write to complete on the client side:
 
 ```ts
-try {
-  const write = zero.mutate.issue.insert({
+const write = zero.mutate(
+  mutators.issue.insert({
     id: 'issue-123',
     title: 'New title',
   })
+)
 
-  // issue-123 not guaranteed to be present here. read1 may be undefined.
-  const read1 = await zero.query.issue.byId('issue-123').one()
+// issue-123 not guaranteed to be present here. read1 may be undefined.
+const read1 = await zero.run(
+  queries.issue.byId('issue-123').one()
+)
 
-  // Await client write – almost always less than 1 frame, and same
-  // macrotask, so no browser paint will occur here.
-  await write.client
+// Await client write – almost always less than 1 frame, and same
+// macrotask, so no browser paint will occur here.
+const res = await write.client
 
-  // issue-123 definitely can be read now.
-  const read2 = await zero.query.issue.byId('issue-123').one()
-} catch (e) {
-  console.error('Mutator failed on client', e)
+if (res.type === 'error') {
+  console.error('Mutator failed on client', res.error)
 }
+
+// issue-123 definitely can be read now.
+const read2 = await zero.run(
+  queries.issue.byId('issue-123').one()
+)
 ```
 
 You can also wait for the server write to succeed:
 
 ```ts
-try {
-  const write = zero.mutate.issue.insert({
+const write = zero.mutate(
+  mutators.issue.insert({
     id: 'issue-123',
     title: 'New title',
   })
+)
 
-  await write.client
-
-  // optimistic write guaranteed to be present here, but not
-  // server write.
-  const read1 = await zero.query.issue.byId('issue-123').one()
-
-  // Await server write – this involves a round-trip.
-  await write.server
-
-  // issue-123 is written to server and any results are
-  // synced to this client.
-  // read2 could potentially be undefined here, for example if the
-  // server mutator rejected the write.
-  const read2 = await zero.query.issue.byId('issue-123').one()
-} catch (e) {
-  console.error('Mutator failed on client or server', e)
+const clientRes = await write.client
+if (clientRes.type === 'error') {
+  throw new Error(`Mutator failed on client: ${clientRes.error}`)
 }
+
+// optimistic write guaranteed to be present here, but not
+// server write.
+const read1 = await zero.run(
+  queries.issue.byId('issue-123').one()
+)
+
+// Await server write – this involves a round-trip.
+const serverRes = await write.server
+if (serverRes.type === 'error') {
+  throw new Error(`Mutator failed on server: ${serverRes.error}`)
+}
+
+// issue-123 is written to server and any results are
+// synced to this client.
+// read2 could potentially be undefined here, for example if the
+// server mutator rejected the write.
+const read2 = await zero.run(
+  queries.issue.byId('issue-123').one()
+)
 ```
 
 If the client-side mutator fails, the `.server` promise is also rejected with the same error. You don't have to listen to both promises, the server promise covers both cases.
 
 <Note heading="Returning data from mutators" slug="returning-data">
-  There is not yet a way to return data from mutators in the success case – the type of `.client` and `.server` is always `Promise<void>`. [Let us know](https://discord.rocicorp.dev/) if you need this.
+  There is not yet a way to return data from mutators in the success case. [Let us know](https://discord.rocicorp.dev/) if you need this.
 </Note>
 
 ## Server Setup
@@ -496,25 +514,25 @@ npx zero-cache-dev
 
 ### Implementing the Endpoint
 
-The `@rocicorp/zero` package provides the `handleMutationRequest`, `mutatorByName`, and `withValidation` functions to make it easy to implement the endpoint.
+The `@rocicorp/zero` package provides the `handleMutateRequest` and `mustGetMutator` functions to make it easy to implement the endpoint.
 
 For example, with [Hono](https://hono.dev):
 
 ```ts
-import { withValidation, getMutation, ReadonlyJSONValue } from "@rocicorp/zero"
-import { handleMutationRequest } from "@rocicorp/zero/server"
-import { schema } from "schema.ts"
+import { mustGetMutator } from "@rocicorp/zero"
+import { handleMutateRequest } from "@rocicorp/zero/server"
 import { mutators } from "mutators.ts"
 
-app.post("/mutate", async (c) => {
+app.post("/api/zero/mutate", async (c) => {
   const userID = await authenticateUser(c.req.raw)
-  const context = { userID }
+  const ctx = { userID }
   return await c.json(
-    await handleMutationRequest(
+    await handleMutateRequest(
       transact =>
-        transact(dbProvider, (tx, name, args) =>
-          getMutation(mutators, name)(tx, {context, args}),
-        ),
+        transact(dbProvider, (tx, name, args) => {
+          const mutator = mustGetMutator(mutators, name)
+          return mutator.fn({tx, ctx, args})
+        }),
       c.req.raw
     )
   )
@@ -525,18 +543,22 @@ app.post("/mutate", async (c) => {
 Zero includes several built-in database adapters. You can also easily create your own. See [ZQL on the Server](zql-on-the-server) for more information.
 </Note>
 
-`handleMutationRequest` accepts a standard `Request` and returns a JSON object which can be serialized and returned by your server framework of choice.
+`handleMutateRequest` accepts a standard `Request` and returns a JSON object which can be serialized and returned by your server framework of choice.
+
+`mustGetMutator` looks up the mutator in the registry and throws an error if not found.
+
+The `mutator.fn` function is your mutator implementation wrapped in the validator you provided.
 
 ### Handling Errors
 
-The `handleMutationRequest` function skips any mutations that throw:
-
+The `handleMutateRequest` function skips any mutations that throw:
 ```ts
-app.post('/mutate', async c => {
-  const result = await handleMutationRequest(
+app.post('/api/zero/mutate', async c => {
+  const result = await handleMutateRequest(
     transact =>
       transact(dbProvider, (tx, name, args) =>
           // The mutation is skipped and the next mutation runs as normal.
+          // The optimistic mutation on the client will be reverted.
           throw new Error('bonk')
       ),
     c.req.raw
@@ -545,18 +567,18 @@ app.post('/mutate', async c => {
 })
 ```
 
-`handleMutationRequest` catches such errors and turns them into a structured response that gets sent back to the client. You can [recover the errors](#waiting-for-mutator-result) and show UI if you want.
+`handleMutateRequest` catches such errors and turns them into a structured response that gets sent back to the client. You can [recover the errors](#waiting-for-mutator-result) and show UI if you want.
 
 It is also of course possible for the entire push endpoint to return an HTTP error, or to not reply at all:
 
 ```ts
-app.post('/mutate', async c => {
+app.post('/api/zero/mutate', async c => {
   // This will cause the client to resend all queued mutations.
   throw new Error('zonk')
 })
 ```
 
-If Zero receives any response from the mutate endpoint other than HTTP 200, 401, or 403, it will disconnect, wait a few moments, reconnect, and then retry all unprocessed mutations.
+If Zero receives any response from the mutate endpoint other than HTTP 200, 401, or 403, it will disconnect and enter the [error state](TODO).
 
 If Zero receives HTTP 401 or 403, the client [refreshes the `auth` token](./auth#auth-failure-and-refresh) if possible, then retries all queued mutations.
 
@@ -594,37 +616,33 @@ For more information, see the [URLPattern section of the Queries docs](/docs/que
 
 ### Server-Specific Code
 
-To implement server-specific code, just run different mutators in your mutate endpoint!
+To implement server-specific code, just run different mutators in your mutate endpoint. Server authority to the rescue!
 
-An approach we like is to create a separate `server-mutators.ts` file that wraps the shared mutators:
+`defineMutators` accepts a _baseMutators_ parameter that makes this easy. The returned mutator registry will contain all the mutators from _baseMutators_, plus any new ones you define or override:
 
 ```ts
 // server-mutators.ts
-import { defineMutatorWithContext } from '@rocicorp/zero'
-import { Schema, zql } from 'schema.ts'
+import { defineMutators, defineMutator } from '@rocicorp/zero'
+import { zql } from 'schema.ts'
 import z from "zod"
 import { mutators as sharedMutators } from 'mutators.ts'
 
-export const serverMutators = {
-  ... sharedMutators,
+export const serverMutators = defineMutators(sharedMutators, {
   posts: {
-    ... sharedMutators.posts,
-    update: defineMutatorWithContext<MyZeroContext>()(
+    // Overrides the shared mutator definition with same name.
+    update: defineMutator(
       z.object({
         id: z.string(),
         title: z.string().optional(),
         priority: z.number().optional(),
       }),
       async (
-          tx: Transaction<Schema>,
-          {context: {userID}, args: {id, title, priority}}) => {
+        {tx, ctx: {userID}, args: {id, title, priority}}
+      ) => {
         // Run the shared mutator first.
-        await sharedMutators.posts.update(
-          tx,
-          context: {context, args},
-        )
+        await sharedMutators.posts.update.fn({tx, ctx, args})
 
-        // Record a history of this operation happening in an audit log table.
+        // Record a history of this operation happening inz an audit log table.
         await tx.mutate.auditLog.insert({
           issueId: id,
           action: 'update-title',
@@ -632,16 +650,15 @@ export const serverMutators = {
         })
       },
     ),
-  } as const
-}
+  }
+})
 ```
 
 For simple things, we also expose a `location` field on the transaction object that you can use to branch your code:
 
 ```ts
 const myMutator = defineMutator(
-  z.undefined(),
-  async (tx) => {
+  async ({tx}) => {
     if (tx.location === 'client') {
       // Client-side code
     } else {
@@ -668,7 +685,7 @@ const markAllAsRead = defineMutator(
   z.object({
     userId: z.string(),
   }),
-  async (tx, {userId}) => {
+  async ({tx, args: {userId}}) => {
   // shared stuff ...
 
   if (tx.location === 'server') {

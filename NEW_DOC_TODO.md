@@ -6,3 +6,6 @@
   - referred to tx.query.tableName or z.query.tableName
   - referred to query.run or similar
   - semicolons
+- Fix error handling in queries doc
+- outbox pattern
+- work outside of mutator

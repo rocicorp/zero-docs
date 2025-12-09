@@ -3,9 +3,7 @@ title: Queries
 description: Reading and Syncing Data
 ---
 
-Queries are how you read and sync data with Zero.
-
-Here's a simple example:
+Queries are how you read and sync data with Zero. Here's a simple example:
 
 
 ```ts
@@ -359,7 +357,7 @@ const results = await zero.run(
 )
 ```
 
-By default, `run()` only returns results that are currently available on the client. That is, it returns the data that would be given for [`result.type === 'unknown'`](#completeness).
+By default, `run()` only returns results that are currently available on the client. That is, it returns the data that would be given for [`result.type === 'unknown'`](#partial-data).
 
 If you want to wait for the server to return results, pass `{type: 'complete'}` to `run`:
 
@@ -387,26 +385,11 @@ zero.preload(
 )
 ```
 
-## Completeness
+## Missing Data
 
-Zero immediately returns the data for a query it has on the client, then falls back to the server for any missing data. Sometimes it's useful to know the difference between these two types of results. To do so, use the `result` from `useQuery`:
+Because Zero returns local results immediately and server results asynchronously, displaying "not found" / 404 UI can be slightly tricky.
 
-```tsx
-const [issues, issuesResult] = useQuery(queries.issues.inbox());
-if (issuesResult.type === 'complete') {
-  console.log('All data is present');
-} else {
-  console.log('Some data is missing');
-}
-```
-
-The possible values of `result.type` are currently `complete` and `unknown`.
-
-The `complete` value is currently only returned when Zero has received the server result. In the future, Zero will be able to return this result type when it _knows_ that all possible data for this query is already available locally. Additionally, we plan to add a `prefix` result for when the data is known to be a prefix of the complete result. See [Consistency](#consistency) for more information.
-
-## 404 / Not Found
-
-It is inevitable that there will be cases where the requested data cannot be found. Because Zero returns local results immediately, and server results asynchronously, displaying "not found" / 404 UI can be slightly tricky. If you just use a simple existence check, you will often see the 404 UI flicker while the server result loads:
+If you just use a simple existence check, you will often see the 404 UI flicker while the server result loads:
 
 ```tsx
 const [issue, issuesResult] = useQuery(
@@ -421,7 +404,7 @@ if (!issue) {
 }
 ```
 
-The way to do this correctly is to only display the "not found" UI when the result type is `complete`. This way the 404 page is slow but pages with data are still just as fast.
+To do this correctly, only display the "not found" UI when the result type is `complete`. This way the 404 page is slow but pages with data are still just as fast:
 
 ```tsx
 const [issue, issueResult] = useQuery(
@@ -438,6 +421,25 @@ if (!issue) {
 
 return <div>{issue}</div>;
 ```
+
+## Partial Data
+
+Zero immediately returns the data for a query it has on the client, then falls back to the server for any missing data. 
+
+Sometimes it's useful to know the difference between these two types of results. To do so, use the `result` from `useQuery`:
+
+```tsx
+const [issues, issuesResult] = useQuery(queries.issues.inbox());
+if (issuesResult.type === 'complete') {
+  console.log('All data is present');
+} else {
+  console.log('Some data is missing');
+}
+```
+
+The possible values of `result.type` are currently `complete` and `unknown`.
+
+The `complete` value is currently only returned when Zero has received the server result. In the future, Zero will be able to return this result type when it _knows_ that all possible data for this query is already available locally. Additionally, we plan to add a `prefix` result for when the data is known to be a prefix of the complete result. See [Consistency](#consistency) for more information.
 
 ## Granular Updates
 
@@ -518,16 +520,22 @@ const [user] = useQuery(
   {ttl: '5m'})
 
 // With preload():
-queries.user.byID('id', userId).preload(
-  {ttl: '5m'})
+zero.preload(
+  queries.user.byID('id', userId),
+  {ttl: '5m'}
+)
 
 // With run():
-const user = await queries.user.byID('id', userId).run(
-  {ttl: '5m'})
+const user = await zero.run(
+  queries.user.byID('id', userId),
+  {ttl: '5m'}
+)
 
 // With materialize():
-const view = queries.user.byID('id', userId).materialize(
-  {ttl: '5m'})
+const view = zero.materialize(
+  queries.user.byID('id', userId),
+  {ttl: '5m'}
+)
 ```
 
 TTLs up to `10m` (ten minutes) are currently supported. The following formats are allowed:

@@ -1,4 +1,3 @@
-- Factor out separate quickstarts doc
 - Doc defaulting schema type
 - Doc local-only queries
 - ask claude to find:
@@ -7,8 +6,10 @@
   - referred to query.run or similar
   - semicolons
 - Fix error handling in queries doc
-- outbox pattern
+- document outbox pattern
 - work outside of mutator
-- update ZQL on the server
+- update ZQL on the server to show defaulting ServerTx
 - update offline / connection status doc
 - release notes
+- update hello-zero to be custom mutators and queries (and maybe TanStack)?
+- design doc

@@ -15,11 +15,8 @@ export const ROUTES = [
     new: false,
     items: [
       {title: 'Introduction', href: '/introduction'},
-      //      {title: 'Quickstart', href: '/quickstart'},
-      {
-        title: 'Installation',
-        href: '/install',
-      },
+      {title: 'Installation', href: '/install'},
+      {title: 'Quickstart', href: '/quickstart'},
       {title: 'Samples', href: '/samples'},
     ],
   },

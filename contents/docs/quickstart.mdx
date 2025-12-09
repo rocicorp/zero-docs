@@ -1,63 +1,56 @@
 ---
-title: Quickstart
+title: Quickstarts
 ---
 
-## Prerequisites
+Minimal starter apps for Zero with a variety of stacks.
 
-- Docker
-- Node 20+
+## hello-zero-solid
 
-<Note type="note" slug="other-frameworks">
-  This quickstart uses React, but we also have [one available for SolidJS](/docs/solidjs).
-</Note>
+Simple quickstart for Zero/SolidJS.
 
-## Run
+<a href="https://github.com/rocicorp/hello-zero-solid">
+  <img
+    src="/images/samples/hello-zero-solid.png"
+    alt="Hello Solid!"
+    style={{border: 'none', padding: 'none'}}
+  />
+</a>
 
-First, install and start a Postgres database:
+**Stack:** Vite/Hono/SolidJS<br/>
+**Source:** https://github.com/rocicorp/hello-zero-solid<br/>
+**Features:** Instant reads and writes, realtime updates, custom mutators.
 
-```bash
-git clone https://github.com/rocicorp/hello-zero.git
-cd hello-zero
-npm install
+## hello-zero-cf
 
-npm run dev:db-up
-```
-
-In a separate terminal, start `zero-cache`:
-
-```bash
-cd hello-zero
-npm run dev:zero-cache
-```
-
-In a final terminal, start the application:
-
-```bash
-cd hello-zero
-npm run dev:ui
-```
-
-## Quick Overview
-
-`hello-zero` is a demo app that allows querying over a small dataset of fake messages between early Zero users.
-
-Here are some things to try:
-
-- Press the **Add Messages** button to add messages to the UI. Any logged-in or anonymous users are allowed to add messages.
-- Press the **Remove Messages** button to remove messages. Only logged-in users are allowed to remove messages. You can **hold shift** to bypass the UI warning and see that write access control is being enforced server-side – the UI flickers as the optimistic write happens instantly and is then reverted by the server. Press **login** to login as a random user, then the remove button will work.
-- Open two different browsers and see how fast sync propagates changes.
-- Add a filter using the **From** and **Contains** controls. Notice that filters are fully dynamic and synced.
-- Edit a message by pressing the **pencil icon**. You can only edit messages from the user you’re logged in as. Similar to the remove button, you can attempt to bypass by holding shift.
-- Check out the SQL schema for this database in `seed.sql`.
-- Login to the database with `psql postgresql://user:password@127.0.0.1:5430/postgres` (or any other pg viewer) and delete or alter a row. Observe that it deletes from UI automatically.
-
-## Detailed Walkthrough
+Shows how to use the Zero in a Cloudflare Worker environment.
 
 <Video
-  src="/video/detailed-walkthrough.mp4"
-  alt="Detailed UI and code walkthrough"
+  src="/video/hello-zero-do.mp4"
+  alt="hello-zero-do demo"
 />
 
-## Deployment
+This sample runs Zero in a React/Hono app, within the Cloudflare worker environment. It uses Hono to implement authentication and Zero's API endpoints.
 
-You can deploy Zero apps to most cloud providers that support Docker and Postgres. See [Deployment](/docs/deployment) for more information.
+It also runs `zero-client` within a Durable Object and monitors changes to a Zero query. This can be used to do things like send notifications, update external services, etc.
+
+**Stack:** pnpm/Vite/Hono/React/Cloudflare Workers<br/>
+**Source:** [https://github.com/rocicorp/hello-zero-cf](https://github.com/rocicorp/hello-zero-cf)
+
+## hello-zero
+
+Old quickstart for Zero/React using legacy query/mutation/permissions APIs.
+
+This sample is maintained for testing old APIs we still support. You should not use it as a basis for new projects. Use [ztunes](#ztunes), [zslack](#zslack), [hello-zero-solid](#hello-zero-solid), or [hello-zero-cf](#hello-zero-cf) instead.
+
+<a href="https://github.com/rocicorp/hello-zero">
+  <img
+    src="/images/samples/quickstart.png"
+    alt="Hello Zero!"
+    style={{border: 'none', padding: 'none'}}
+  />
+</a>
+
+**Stack:** Vite/Hono/React<br/>
+**Source:** https://github.com/rocicorp/hello-zero<br/>
+**Docs:** [Quickstart](/docs/quickstart)<br/>
+**Features:** Instant reads and writes, realtime updates.

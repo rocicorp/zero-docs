@@ -2,30 +2,50 @@
 title: Zero Schema
 ---
 
-Zero applications have both a _database schema_ (the normal backend database schema that all web apps have) and a _Zero schema_. The purpose of the Zero schema is to:
+Zero applications have both a _database schema_ (the normal backend schema all web apps have) and a _Zero schema_.
+
+The Zero Schema is conventionally located in `schema.ts` in your app's source code. The Zero schema serves two purposes:
 
 1. Provide typesafety for ZQL queries
 2. Define first-class relationships between tables
-3. Define permissions for access control
 
-<Note
-  type="note"
-  slug="generating"
-  heading="You do not need to define the Zero schema by hand"
->
-  [Community-contributed converters](/docs/community#database-tools) exist for
-  Prisma and Drizzle that generate the tables and relationships. It is good to
-  know how the underlying Zero schemas work, however, for debugging and
-  conceptual understanding.
-</Note>
+The Zero schema is usually generated from your backend schema, but can be defined by hand for more control.
 
-This page describes using the schema to define your tables, columns, and relationships.
+## Generating from Drizzle
 
-## Defining the Zero Schema
+If you use Drizzle ORM, you can generate `schema.ts` with [`drizzle-zero`](https://www.npmjs.com/package/drizzle-zero):
 
-The Zero schema is encoded in a TypeScript file that is conventionally named `schema.ts`. For example, see [the schema file for `hello-zero`](https://github.com/rocicorp/hello-zero/blob/main/src/schema.ts).
+```bash
+npm install -D drizzle-zero
+npx drizzle-zero generate
+```
 
-## Table Schemas
+## Generating from Prisma
+
+If you use Prisma, you can generate `schema.ts` with [`prisma-zero`](https://www.npmjs.com/package/prisma-zero):
+
+```bash
+npm install -D @passionfroot/prisma-generator-zero
+
+# Add this to your prisma schema:
+# generator zero {
+#   provider = "prisma-generator-zero"
+# }
+
+npx prisma generate
+```
+
+## Not Seeing your Generator?
+
+<Note emoji="🧑‍💻" heading="Both `drizzle-zero` and `prisma-zero` were community contributions" slug="contributing">
+ We'd love more! See the source for [drizzle-zero](TODO) and [prismal-zero](TODO) as a guide, or reach out on [Discord](https://discord.rocicorp.dev/) with questions.
+ </Note>
+
+## Writing by Hand
+
+You can also write Zero schemas by hand for full control.
+
+### Table Schemas
 
 Use the `table` function to define each table in your Zero schema:
 
@@ -43,7 +63,7 @@ const user = table('user')
 
 Column types are defined with the `boolean()`, `number()`, `string()`, `json()`, and `enumeration()` helpers. See [Column Types](/docs/postgres-support#column-types) for how database types are mapped to these types.
 
-### Name Mapping
+#### Name Mapping
 
 Use `from()` to map a TypeScript table or column name to a different database name:
 
@@ -58,7 +78,7 @@ const userPref = table('userPref')
   });
 ```
 
-### Multiple Schemas
+#### Multiple Schemas
 
 You can also use `from()` to access other Postgres schemas:
 
@@ -67,7 +87,7 @@ You can also use `from()` to access other Postgres schemas:
 const event = table('event').from('analytics.event');
 ```
 
-### Optional Columns
+#### Optional Columns
 
 Columns can be marked _optional_. This corresponds to the SQL concept `nullable`.
 
@@ -92,7 +112,7 @@ An optional column can store a value of the specified type or `null` to mean _no
 
 </Note>
 
-### Enumerations
+#### Enumerations
 
 Use the `enumeration` helper to define a column that can only take on a specific set of values. This is most often used alongside an [`enum` Postgres column type](/docs/postgres-support#column-types).
 
@@ -108,7 +128,7 @@ const user = table('user')
   .primaryKey('id');
 ```
 
-### Custom JSON Types
+#### Custom JSON Types
 
 Use the `json` helper to define a column that stores a JSON-compatible value:
 
@@ -124,7 +144,7 @@ const user = table('user')
   .primaryKey('id');
 ```
 
-### Compound Primary Keys
+#### Compound Primary Keys
 
 Pass multiple columns to `primaryKey` to define a compound primary key:
 
@@ -138,7 +158,7 @@ const user = table('user')
   .primaryKey('orgID', 'userID');
 ```
 
-## Relationships
+### Relationships
 
 Use the `relationships` function to define relationships between tables. Use the `one` and `many` helpers to define singular and plural relationships, respectively:
 
@@ -167,7 +187,7 @@ const messagesWithSenderAndReplies = z.query.messages
 
 This will return an object for each message row. Each message will have a `sender` field that is a single `User` object or `null`, and a `replies` field that is an array of `Message` objects.
 
-### Many-to-Many Relationships
+#### Many-to-Many Relationships
 
 You can create many-to-many relationships by chaining the relationship definitions. Assuming `issue` and `label` tables, along with an `issueLabel` junction table, you can define a `labels` relationship like this:
 
@@ -192,7 +212,7 @@ const issueRelationships = relationships(issue, ({many}) => ({
   See https://bugs.rocicorp.dev/issue/3454.
 </Note>
 
-### Compound Keys Relationships
+#### Compound Keys Relationships
 
 Relationships can traverse compound keys. Imagine a `user` table with a compound primary key of `orgID` and `userID`, and a `message` table with a related `senderOrgID` and `senderUserID`. This can be represented in your schema with:
 
@@ -206,7 +226,7 @@ const messageRelationships = relationships(message, ({one}) => ({
 }));
 ```
 
-### Circular Relationships
+#### Circular Relationships
 
 Circular relationships are fully supported:
 
@@ -220,7 +240,7 @@ const commentRelationships = relationships(comment, ({one}) => ({
 }));
 ```
 
-## Database Schemas
+### Database Schemas
 
 Use `createSchema` to define the entire Zero schema:
 
@@ -269,7 +289,7 @@ If the schema changes in an incompatible way while a client is running, `zero-ca
 
 ### Schema Change Process
 
-Like other database-backed applications, Zero schema migrations generally follow an “expand/migrate/contract” pattern:
+Like other database-backed applications, Zero schema migrations generally follow an "expand/migrate/contract" pattern:
 
 1. Implement and run an “expand” migration on the backend that is backwards compatible with existing schemas. Add new rows, tables, as well as any defaults and triggers needed for backwards compatibility.
 2. Add any new permissions required for the new tables/columns by running [`zero-deploy-permissions`](/docs/permissions#permission-deployment).

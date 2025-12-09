@@ -3,9 +3,7 @@ title: Queries
 description: Reading and Syncing Data
 ---
 
-## Introduction
-
-Queries are how you read and sync data with Zero, and are a core primitive used to build Zero apps.
+Queries are how you read and sync data with Zero.
 
 Here's a simple example:
 
@@ -15,10 +13,13 @@ import { defineQueries, defineQuery } from '@rocicorp/zero';
 import { zql } from './schema.ts';
 import z from "zod";
 
-const myPostsQuery = defineQuery(
-  z.object({ id: z.string() }),
-  ({ args: { id } }) => zql.post.where('authorID', id),
-);
+export const queries = defineQueries({
+  postsByAuthor: defineQuery(
+    z.object({ authorID: z.string() }),
+    ({ args: { authorID } }) =>
+      zql.post.where('authorID', authorID),
+  ),
+});
 ```
 
 ## Architecture
@@ -34,7 +35,7 @@ Often the implementations will be the same, and you can just share their code. T
 
 But the implementations don't have to be the same, or even compute the same result. For example, the server can add extra filters to enforce permissions that the client query does not.
 
-## Life of a Query
+### Life of a Query
 
 When a query is invoked, it initially runs on the client, against the client-side datastore. Any matching data is returned immediately and the user sees instant results.
 
@@ -99,7 +100,7 @@ Although queries must ultimately return a ZQL expression, they can use any code 
 
 ## Context
 
-Query parameters are supplied by the client application and passed to the server automatically by Zero. This makes them unsuitable for authentication data, since the user could modify them.
+Query parameters are supplied by the client application and passed to the server automatically by Zero. This makes them unsuitable for credentials, since the user could modify them.
 
 For this reason, Zero queries also support a `context` parameter. When used [on the server](#server-setup), the context is passed to the query function separately and not client-controlled.
 

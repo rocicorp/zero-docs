@@ -9,3 +9,7 @@
 - Fix error handling in queries doc
 - outbox pattern
 - work outside of mutator
+- update ZQL reference
+- update ZQL on the server
+- update offline / connection status doc
+- release notes

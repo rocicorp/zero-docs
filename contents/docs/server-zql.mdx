@@ -30,7 +30,7 @@ The industry standard [`node-postgres`](https://node-postgres.com/) library is s
 ```ts
 import {Pool} from 'pg'
 import {zeroNodePg} from '@rocicorp/zero/server/adapters/pg'
-import {schema} from '../shared/schema'
+import {schema} from '../zero/schema'
 
 const db = zeroNodePg(
   schema,
@@ -45,7 +45,7 @@ You can also pass a `Client`:
 ```ts
 import {Client} from 'pg'
 import {zeroNodePg} from '@rocicorp/zero/server/adapters/pg'
-import {schema} from '../shared/schema'
+import {schema} from '../zero/schema'
 const client = new Client({
   connectionString: process.env.ZERO_UPSTREAM_DB!
 })
@@ -60,7 +60,7 @@ The popular [`Postgres.js`](https://github.com/porsager/postgres) library is sup
 ```ts
 import postgres from 'postgres'
 import {zeroPostgresJS} from '@rocicorp/zero/server/adapters/postgresjs'
-import {schema} from '../shared/schema'
+import {schema} from '../zero/schema'
 
 const db = zeroPostgresJS(
   schema,

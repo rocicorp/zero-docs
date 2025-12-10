@@ -296,8 +296,8 @@ import {createFileRoute} from '@tanstack/react-router'
 import {json} from '@tanstack/react-start'
 import {handleQueryRequest} from '@rocicorp/zero/server'
 import {mustGetQuery} from '@rocicorp/zero'
-import {queries} from '../../shared/queries.ts'
-import {schema} from '../../shared/schema.ts'
+import {queries} from '../../zero/queries.ts'
+import {schema} from '../../zero/schema.ts'
 
 export const Route = createFileRoute('/api/query')({
   server: {
@@ -323,8 +323,8 @@ export const Route = createFileRoute('/api/query')({
 // app/api/query/route.ts
 import {handleQueryRequest} from '@rocicorp/zero/server'
 import {mustGetQuery} from '@rocicorp/zero'
-import {queries} from '../../shared/queries.ts'
-import {schema} from '../../shared/schema.ts'
+import {queries} from '../../zero/queries.ts'
+import {schema} from '../../zero/schema.ts'
 
 export async function POST(req: Request) {
   const result = await handleQueryRequest(
@@ -345,8 +345,8 @@ export async function POST(req: Request) {
 import type {APIEvent} from '@solidjs/start/server'
 import {handleQueryRequest} from '@rocicorp/zero/server'
 import {mustGetQuery} from '@rocicorp/zero'
-import {queries} from '../../shared/queries.ts'
-import {schema} from '../../shared/schema.ts'
+import {queries} from '../../zero/queries.ts'
+import {schema} from '../../zero/schema.ts'
 
 export async function POST(event: APIEvent) {
   const body = await event.request.json()
@@ -371,8 +371,8 @@ export async function POST(event: APIEvent) {
 import {Hono} from 'hono'
 import {handleQueryRequest} from '@rocicorp/zero/server'
 import {mustGetQuery} from '@rocicorp/zero'
-import {queries} from '../shared/queries.ts'
-import {schema} from '../shared/schema.ts'
+import {queries} from '../zero/queries.ts'
+import {schema} from '../zero/schema.ts'
 
 const app = new Hono()
 

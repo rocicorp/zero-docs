@@ -394,7 +394,8 @@ In React or SolidJS, you'll do this by passing the `mutators` object to the `Zer
 ```tsx
 import {ZeroProvider} from '@rocicorp/zero/react'
 import {mutators} from 'zero/mutators.ts'
-;<ZeroProvider mutators={mutators}>
+
+<ZeroProvider mutators={mutators}>
   <App />
 </ZeroProvider>
 ```
@@ -461,7 +462,7 @@ import {createFileRoute} from '@tanstack/react-router'
 import {json} from '@tanstack/react-start'
 import {handleMutateRequest} from '@rocicorp/zero/server'
 import {mustGetMutator} from '@rocicorp/zero'
-import {mutators} from '../../shared/mutators.ts'
+import {mutators} from '../../zero/mutators.ts'
 import {dbProvider} from '../../db-provider.ts'
 
 export const Route = createFileRoute('/api/mutate')({
@@ -498,7 +499,7 @@ export const Route = createFileRoute('/api/mutate')({
 ```ts
 // app/api/mutate/route.ts
 import {handleMutateRequest} from '@rocicorp/zero/server'
-import {mutators} from '../../shared/mutators.ts'
+import {mutators} from '../../zero/mutators.ts'
 import {dbProvider} from '../../db-provider.ts'
 import {mustGetMutator} from '@rocicorp/zero'
 
@@ -532,7 +533,7 @@ export async function POST(req: Request) {
 import type {APIEvent} from '@solidjs/start/server'
 import {handleMutateRequest} from '@rocicorp/zero/server'
 import {mustGetMutator} from '@rocicorp/zero'
-import {mutators} from '../../shared/mutators.ts'
+import {mutators} from '../../zero/mutators.ts'
 import {dbProvider} from '../../db-provider.ts'
 
 export async function POST(event: APIEvent) {
@@ -568,7 +569,7 @@ export async function POST(event: APIEvent) {
 // api/app.ts
 import {handleMutateRequest} from '@rocicorp/zero/server'
 import {mustGetMutator} from '@rocicorp/zero'
-import {mutators} from '../shared/mutators.ts'
+import {mutators} from '../zero/mutators.ts'
 import {dbProvider} from './db-provider.ts'
 
 app.post('/api/mutate', async c => {

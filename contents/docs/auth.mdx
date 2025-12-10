@@ -15,18 +15,18 @@ Because multiple users can share the same browser, Zero requires that you provid
 
 ```ts
 const zero = new Zero({
-  ...,
-  userID: "user-123",
-});
+  // ...
+  userID: 'user-123'
+})
 ```
 
 If the user is not logged in, just pass empty string or some other constant value:
 
 ```ts
 const zero = new Zero({
-  ...,
-  userID: "anon",
-});
+  // ...
+  userID: 'anon'
+})
 ```
 
 Zero segregates the client-side storage for each user. This allows users to quickly switch between multiple users and accounts without resyncing.
@@ -47,10 +47,10 @@ If you have more than one set of Zero data per-user (i.e., for different apps in
 
 ```ts
 const zero = new Zero({
-  ...,
-  userID: "user-123",
-  storageKey: "my-app",
-});
+  // ...
+  userID: 'user-123',
+  storageKey: 'my-app'
+})
 ```
 
 If specified, `storageKey` is concatenated along with `userID` and other internal Zero information to form a unique IndexedDB database name.
@@ -75,7 +75,7 @@ ZERO_QUERY_FORWARD_COOKIES=true
 ZERO_MUTATE_FORWARD_COOKIES=true
 ```
 
-Zero cache will then forward all cookies sent to `cacheURL` to your [mutate](/docs/mutators) and [queries](/docs/queries) endpoints:
+Zero-cache will then forward all cookies sent to `cacheURL` to your [mutate](/docs/mutators) and [queries](/docs/queries) endpoints:
 
 ```tsx
 <ZeroProvider
@@ -111,9 +111,9 @@ If you have an opaque auth token, such as a JWT or a token from your auth provid
 
 ```ts
 const zero = new Zero({
-  ...,
-  auth: token,
-});
+  // ...
+  auth: token
+})
 ```
 
 Zero will forward this token to your [mutate](/docs/mutators) and [queries](/docs/queries) endpoints in a `Authorization: Bearer <token>` header, which you can use to authenticate the request as normal:
@@ -140,22 +140,25 @@ This will cause Zero to disconnect from `zero-cache` and the [connection status]
 ```tsx
 function NeedsAuthDialog() {
   const zero = useZero()
-  const connectionState = useZeroConnectionState();
+  const connectionState = useZeroConnectionState()
 
   const refreshCookie = async () => {
-    const cookie = await login();
+    await login()
     // no token needed since we use cookie auth
-    zero.connection.connect();
+    zero.connection.connect()
   }
 
   if (connectionState.name === 'needs-auth') {
-    return <div>
-      <h1>Authentication Required</h1>
-      <button onClick={refreshCookie}>Login</button>
-    </div>;
+    return (
+      <div>
+        <h1>Authentication Required</h1>
+        <button onClick={refreshCookie}>Login</button>
+      </div>
+    )
   }
 
-  return null;
+  return null
+}
 ```
 
 Or, if you aren't using cookie auth:
@@ -208,15 +211,17 @@ Then pass an instance of this context when instantiating Zero:
 ```tsx
 const context = {
   userID: 'user-123',
-  role: 'admin',
-};
+  role: 'admin'
+}
 
-return <ZeroProvider {...{
-  ...,
-  context,
-}}>
-  <App />
-</ZeroProvider>
+return (
+  <ZeroProvider
+    // ...
+    context={context}
+  >
+    <App />
+  </ZeroProvider>
+)
 ```
 
 On the server-side, you will also pass an instance of this context when invoking your [queries](/docs/queries#implementing-the-endpoint) and [mutators](/docs/mutators#implementing-the-endpoint):

@@ -17,7 +17,7 @@ import ImageLightbox from '@/components/ui/ImageLightbox';
 import Video from '@/components/ui/Video';
 import {Button} from '@/components/ui/button';
 import {sluggify} from './utils';
-import { convertMdxToMarkdown } from './mdx-to-markdown';
+import {convertMdxToMarkdown} from './mdx-to-markdown';
 
 const components = {
   Note,
@@ -68,7 +68,10 @@ const readRawDoc = cache(async (slug: string) => {
 
 const compileDoc = cache(async (slug: string) => {
   const rawMdx = await readRawDoc(slug);
-  return {raw: await convertMdxToMarkdown(rawMdx, slug), parsed: await parseMdx<BaseMdxFrontmatter>(rawMdx)};
+  return {
+    raw: await convertMdxToMarkdown(rawMdx, slug),
+    parsed: await parseMdx<BaseMdxFrontmatter>(rawMdx),
+  };
 });
 
 const extractHeadings = cache(async (slug: string) => {

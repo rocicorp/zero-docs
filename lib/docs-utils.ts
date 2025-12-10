@@ -23,4 +23,3 @@ export async function getDocsContentPath(slug: string) {
     return path.join(process.cwd(), '/contents/docs/', `${slug}/index.mdx`);
   }
 }
-

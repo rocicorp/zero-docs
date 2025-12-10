@@ -16,7 +16,10 @@ This page describes how to deploy `zero-cache`.
 
 You don't have to know the details of how `zero-cache` works to run it, but it helps to know the basic structure.
 
-<ImageLightbox src="/images/deployment/arch.png" caption="Zero deployment architecture" />
+<ImageLightbox
+  src="/images/deployment/arch.png"
+  caption="Zero deployment architecture"
+/>
 
 A running `zero-cache` is composed of a single `replication-manager` node and multiple `view-syncer` nodes. It also depends on Postgres, S3, and attached SSD storage.
 
@@ -68,8 +71,8 @@ To upgrade Zero to a new major version, first deploy the new zero-cache, then th
 The `zero-cache` image is configured via environment variables. See [zero-cache Config](/docs/zero-cache-config) for available options.
 
 <Note heading="Custom mutators" slug="push-url">
-  When using custom mutators, don't forget to set the push api url with
-  `ZERO_PUSH_URL`
+  When using custom mutators, don't forget to set the push api
+  url with `ZERO_PUSH_URL`
 </Note>
 
 ## Guide: Multi-Node on SST+AWS
@@ -288,8 +291,9 @@ Create an account on [Fly.io](https://fly.io) and [install the Fly CLI](https://
 ### Create Postgres app
 
 <Note type="warning" slug="fly-app-names">
-  **Note:** Fly.io requires app names to be unique across all Fly.io users.
-  Change the `INITIALS` environment variable below to something unique.
+  **Note:** Fly.io requires app names to be unique across all
+  Fly.io users. Change the `INITIALS` environment variable below
+  to something unique.
 </Note>
 
 ```bash

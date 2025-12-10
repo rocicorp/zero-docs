@@ -23,7 +23,7 @@ Otherwise, create an instance manually:
 ```ts
 // schema.ts
 // ...
-export const crud = createCRUDBuilder(schema)
+export const crud = createCRUDBuilder(schema);
 ```
 
 ## Insert
@@ -36,15 +36,15 @@ tx.mutate(
     id: nanoid(),
     username: 'sam',
     language: 'js',
-  })
-)
+  }),
+);
 ```
 
 Optional fields can be set to `null` to explicitly set the new field to `null`. They can also be set to `undefined` to take the default value (which is often `null` but can also be some generated value server-side):
 
 ```tsx
 // schema.ts
-import {createTableSchema} from '@rocicorp/zero'
+import {createTableSchema} from '@rocicorp/zero';
 
 const userSchema = createTableSchema({
   tableName: 'user',
@@ -55,7 +55,7 @@ const userSchema = createTableSchema({
   },
   primaryKey: ['id'],
   relationships: {},
-})
+});
 
 // app.tsx
 
@@ -65,8 +65,8 @@ tx.mutate(
     id: nanoid(),
     username: 'sam',
     language: null,
-  })
-)
+  }),
+);
 
 // Sets language to the default server-side value. Could be null, or some
 // generated or constant default value too.
@@ -74,8 +74,8 @@ tx.mutate(
   crud.user.insert({
     id: nanoid(),
     username: 'sam',
-  })
-)
+  }),
+);
 
 // Same as above
 tx.mutate(
@@ -83,8 +83,8 @@ tx.mutate(
     id: nanoid(),
     username: 'sam',
     language: undefined,
-  })
-)
+  }),
+);
 ```
 
 ## Upsert
@@ -97,8 +97,8 @@ tx.mutate(
     id: samID,
     username: 'sam',
     language: 'ts',
-  })
-)
+  }),
+);
 ```
 
 `upsert` supports the same `null` / `undefined` semantics for optional fields that `insert` does (see above).
@@ -115,8 +115,8 @@ tx.mutate(
   crud.user.update({
     id: samID,
     language: 'golang',
-  })
-)
+  }),
+);
 
 // Same as above
 tx.mutate(
@@ -124,15 +124,15 @@ tx.mutate(
     id: samID,
     username: undefined,
     language: 'haskell',
-  })
-)
+  }),
+);
 // Reset language field to `null`
 tx.mutate(
   crud.user.update({
     id: samID,
     language: null,
-  })
-)
+  }),
+);
 ```
 
 ## Delete
@@ -143,7 +143,6 @@ Delete an existing record. Does nothing if specified record does not exist.
 tx.mutate(
   crud.user.delete({
     id: samID,
-  })
-)
+  }),
+);
 ```
-

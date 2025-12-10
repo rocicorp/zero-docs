@@ -19,7 +19,8 @@ For convenience, `Zero` automatically injects itself as `__zero` on the global s
   Access to the inspector is gated behind the
   [`ZERO_ADMIN_PASSWORD`](/docs/zero-cache-config#admin-password) config variable in production (when `NODE_ENV` is set to "production").
 
-  We require this variable to be set to a non-empty value in production because we want the inspector enabled in all Zero apps without requiring a restart.
+We require this variable to be set to a non-empty value in production because we want the inspector enabled in all Zero apps without requiring a restart.
+
 </Note>
 
 ## Clients and Groups
@@ -41,11 +42,11 @@ console.table(qs);
 <Note heading="Clients vs Groups">
 In Zero, each instance of the `Zero` class is a *client*. Each client belongs to a *group*, which is a set of clients that share the same `clientGroupID` (typically all clients within a browser profile).
 
-Zero syncs all clients in a group together, so they all see the same data. So if you are debugging performance, you often want to look at the queries for the *group*, since that is what Zero is actually syncing.
+Zero syncs all clients in a group together, so they all see the same data. So if you are debugging performance, you often want to look at the queries for the _group_, since that is what Zero is actually syncing.
 
-But if you are trying to understand when particular queries get added, it's convenient to look at the queries for just the current *client* so that queries from other clients aren't mixed in.
+But if you are trying to understand when particular queries get added, it's convenient to look at the queries for just the current _client_ so that queries from other clients aren't mixed in.
+
 </Note>
-
 
 ## Queries
 
@@ -65,20 +66,20 @@ This outputs something like:
 
 Here are some of the more useful fields:
 
-| Field  | Description |
-|--------|-------------|
-| `name`, `args` | The name and arguments of the synced query. |
-| `clientZQL` | The client-side ZQL run to give optimistic results. |
-| `serverZQL` | The server-side ZQL that your `get-queries` endpoint returned for this query. |
-| `got` | Whether the first authoritative result has been returned. |
-| `hydrateClient` | How long the client took to hydrate the first optimistic result. |
-| `hydrateServer` | How long the server took to hydrate the first authoritative result. |
-| `hydrateTotal` | Total time to hydrate the first authoritative result, including network. |
-| `rowCount` | Number of rows the query returns. |
-| `ttl` | The ttl specified when the query was created. |
-| `inactivatedAt` | If non-null, the UI is no longer actively using this query, but it's still running due to `ttl`. |
+| Field                                    | Description                                                                                         |
+| ---------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `name`, `args`                           | The name and arguments of the synced query.                                                         |
+| `clientZQL`                              | The client-side ZQL run to give optimistic results.                                                 |
+| `serverZQL`                              | The server-side ZQL that your `get-queries` endpoint returned for this query.                       |
+| `got`                                    | Whether the first authoritative result has been returned.                                           |
+| `hydrateClient`                          | How long the client took to hydrate the first optimistic result.                                    |
+| `hydrateServer`                          | How long the server took to hydrate the first authoritative result.                                 |
+| `hydrateTotal`                           | Total time to hydrate the first authoritative result, including network.                            |
+| `rowCount`                               | Number of rows the query returns.                                                                   |
+| `ttl`                                    | The ttl specified when the query was created.                                                       |
+| `inactivatedAt`                          | If non-null, the UI is no longer actively using this query, but it's still running due to `ttl`.    |
 | `updateClientP50`,<br/>`updateClientP95` | Median and 95th percentile time to update the client-side result after a mutation (optimistically). |
-| `updateServerP50`,<br/>`updateServerP95` | Median and 95th percentile time to update the server-side result after a mutation. |
+| `updateServerP50`,<br/>`updateServerP95` | Median and 95th percentile time to update the server-side result after a mutation.                  |
 
 ## Analyzing Queries
 
@@ -95,14 +96,14 @@ await qs[0].analyze();
 
 Here are some of the most useful fields in the output:
 
-| Field  | Description |
-|--------|-------------|
-| `elapsed` | Total time to run the analysis in milliseconds. This is a good proxy for to how long the query will takes to hydrate in your app. |
-| `readRowCount` | Total number of rows read from the replica to find the synced rows. This is often the most important number for performance, since it reflects how much work Zero has to do to hydrate the query. We generally want this to be a small single-digit multiple of `syncedRowCount`. |
-| `readRowCountsByQuery` | Number of rows read by each SQLite query. |
-| `syncedRowCount` | Number of rows actually synced to the client for this query. |
-| `syncedRows` | The actual rows synced. |
-| `plans` | The output from SQLite's [`EXPLAIN QUERY PLAN`](https://www.sqlite.org/eqp.html) for each SQLite query used, which can help you understand why the query is reading more rows than necessary |
+| Field                  | Description                                                                                                                                                                                                                                                                       |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `elapsed`              | Total time to run the analysis in milliseconds. This is a good proxy for to how long the query will takes to hydrate in your app.                                                                                                                                                 |
+| `readRowCount`         | Total number of rows read from the replica to find the synced rows. This is often the most important number for performance, since it reflects how much work Zero has to do to hydrate the query. We generally want this to be a small single-digit multiple of `syncedRowCount`. |
+| `readRowCountsByQuery` | Number of rows read by each SQLite query.                                                                                                                                                                                                                                         |
+| `syncedRowCount`       | Number of rows actually synced to the client for this query.                                                                                                                                                                                                                      |
+| `syncedRows`           | The actual rows synced.                                                                                                                                                                                                                                                           |
+| `plans`                | The output from SQLite's [`EXPLAIN QUERY PLAN`](https://www.sqlite.org/eqp.html) for each SQLite query used, which can help you understand why the query is reading more rows than necessary                                                                                      |
 
 ## Analyzing Arbitrary ZQL
 
@@ -110,7 +111,10 @@ You can also analyze arbitrary ZQL, not just queries that are currently active:
 
 ```ts
 await __zero.inspector.analyzeQuery(
-  __builder.issues.whereExists('labels', q => q.id.equals('sync')));
+  __builder.issues.whereExists('labels', q =>
+    q.id.equals('sync'),
+  ),
+);
 ```
 
 This is useful for exploring alternative query constructions to optimize performance.

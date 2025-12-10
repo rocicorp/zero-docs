@@ -2,8 +2,14 @@
 title: RLS Permissions (Deprecated)
 ---
 
-<Note emoji="🧟" type="danger" slug="deprecation" heading="This API is deprecated">
-  It will be removed in a future release of Zero. See [Permissions](/docs/auth#permissions) for more information.
+<Note
+  emoji="🧟"
+  type="danger"
+  slug="deprecation"
+  heading="This API is deprecated"
+>
+  It will be removed in a future release of Zero. See
+  [Permissions](/docs/auth#permissions) for more information.
 </Note>
 
 Permissions are expressed using [ZQL](reading-data) and run automatically with every read and write.
@@ -23,31 +29,34 @@ type AuthData = {
   sub: string;
 };
 
-export const permissions = definePermissions<AuthData, Schema>(schema, () => {
-  // Checks if the user exists in a related organization
-  const allowIfInOrganization = (
-    authData: AuthData,
-    eb: ExpressionBuilder<Schema, 'issue'>,
-  ) =>
-    eb.exists('organization', q =>
-      q.whereExists('user', q => q.where('id', authData.sub)),
-    );
+export const permissions = definePermissions<AuthData, Schema>(
+  schema,
+  () => {
+    // Checks if the user exists in a related organization
+    const allowIfInOrganization = (
+      authData: AuthData,
+      eb: ExpressionBuilder<Schema, 'issue'>,
+    ) =>
+      eb.exists('organization', q =>
+        q.whereExists('user', q => q.where('id', authData.sub)),
+      );
 
-  // Checks if the user is the creator
-  const allowIfIssueCreator = (
-    authData: AuthData,
-    {cmp}: ExpressionBuilder<Schema, 'issue'>,
-  ) => cmp('creatorID', authData.sub);
+    // Checks if the user is the creator
+    const allowIfIssueCreator = (
+      authData: AuthData,
+      {cmp}: ExpressionBuilder<Schema, 'issue'>,
+    ) => cmp('creatorID', authData.sub);
 
-  return {
-    issue: {
-      row: {
-        select: [allowIfInOrganization],
-        delete: [allowIfIssueCreator],
+    return {
+      issue: {
+        row: {
+          select: [allowIfInOrganization],
+          delete: [allowIfIssueCreator],
+        },
       },
-    },
-  } satisfies PermissionsConfig<AuthData, Schema>;
-});
+    } satisfies PermissionsConfig<AuthData, Schema>;
+  },
+);
 ```
 
 `definePermission` returns a _policy_ object for each table in the schema. Each policy defines a _ruleset_ for the _operations_ that are possible on a table: `select`, `insert`, `update`, and `delete`.
@@ -61,17 +70,20 @@ To enable full access to an action (i.e., during development) use the `ANYONE_CA
 ```ts
 import {ANYONE_CAN} from '@rocicorp/zero';
 
-const permissions = definePermissions<AuthData, Schema>(schema, () => {
-  return {
-    issue: {
-      row: {
-        select: ANYONE_CAN,
-        // Other operations are denied by default.
+const permissions = definePermissions<AuthData, Schema>(
+  schema,
+  () => {
+    return {
+      issue: {
+        row: {
+          select: ANYONE_CAN,
+          // Other operations are denied by default.
+        },
       },
-    },
-    // Other tables are denied by default.
-  } satisfies PermissionsConfig<AuthData, Schema>;
-});
+      // Other tables are denied by default.
+    } satisfies PermissionsConfig<AuthData, Schema>;
+  },
+);
 ```
 
 To do this for all actions, use `ANYONE_CAN_DO_ANYTHING`:
@@ -79,14 +91,17 @@ To do this for all actions, use `ANYONE_CAN_DO_ANYTHING`:
 ```ts
 import {ANYONE_CAN_DO_ANYTHING} from '@rocicorp/zero';
 
-const permissions = definePermissions<AuthData, Schema>(schema, () => {
-  return {
-    // All operations on issue are allowed to all users.
-    issue: ANYONE_CAN_DO_ANYTHING,
+const permissions = definePermissions<AuthData, Schema>(
+  schema,
+  () => {
+    return {
+      // All operations on issue are allowed to all users.
+      issue: ANYONE_CAN_DO_ANYTHING,
 
-    // Other tables are denied by default.
-  } satisfies PermissionsConfig<AuthData, Schema>;
-});
+      // Other tables are denied by default.
+    } satisfies PermissionsConfig<AuthData, Schema>;
+  },
+);
 ```
 
 ## Permission Evaluation
@@ -169,6 +184,7 @@ If the issue table has two rows, one created by the user and one by someone else
 Select permission applies to every column. The recommended approach for now is to factor out private fields into a separate table, e.g. `user_private`. Column permissions are planned but currently not a high priority.
 
 Note that although the same limitation applies to declarative insert/update permissions, [custom mutators](/docs/custom-mutators) support arbitrary server-side logic and so can easily control which columns are writable.
+
 </Note>
 
 ## Insert Permissions
@@ -326,9 +342,9 @@ npx analyze-query
 ```
 
 <Note type="note" slug="decompilation">
-  The printed query can be different than the source ZQL string, because it is
-  rebuilt from the query AST. But it should be logically equivalent to the query
-  you wrote.
+  The printed query can be different than the source ZQL string,
+  because it is rebuilt from the query AST. But it should be
+  logically equivalent to the query you wrote.
 </Note>
 
 ### Write Permissions
@@ -342,6 +358,6 @@ Permission check failed for {"op":"update","tableName":"message",...}, action up
 Zero prints the row, auth data, and permission policies that was applied to any failed writes.
 
 <Note slug="ast-format">
-  The ZQL query is printed in AST format. See [Query ASTs](./query-asts) to
-  convert it to a more readable format.
+  The ZQL query is printed in AST format. See [Query
+  ASTs](./query-asts) to convert it to a more readable format.
 </Note>

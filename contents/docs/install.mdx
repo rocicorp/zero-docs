@@ -25,8 +25,9 @@ docker run -d --name zero-postgres \
 This will start a Postgres database running in the background.
 
 <Note heading="More Information">
-  See [Connecting to Postgres](/docs/connecting-to-postgres) for more details on
-  what Postgres features are required for Zero to work.
+  See [Connecting to Postgres](/docs/connecting-to-postgres) for
+  more details on what Postgres features are required for Zero to
+  work.
 </Note>
 
 ### Install and Run Zero-Cache
@@ -237,9 +238,9 @@ declare module '@rocicorp/zero' {
 
 <Note heading="Having trouble using your own schema?">
   Zero has some restrictions on the [Postgres features it
-  supports](/docs/postgres-support). You can continue this tutorial with [a
-  sample schema and seed data](https://github.com/rocicorp/onboarding) to
-  evaluate it.
+  supports](/docs/postgres-support). You can continue this
+  tutorial with [a sample schema and seed
+  data](https://github.com/rocicorp/onboarding) to evaluate it.
 </Note>
 
 {/* TODO some language about schema incompatibility? */}
@@ -277,7 +278,10 @@ import {schema} from './shared/schema.ts';
 
 function Root() {
   return (
-    <ZeroProvider cacheURL="http://localhost:4848" schema={schema}>
+    <ZeroProvider
+      cacheURL="http://localhost:4848"
+      schema={schema}
+    >
       <App />
     </ZeroProvider>
   );
@@ -299,7 +303,10 @@ import {schema} from './shared/schema.ts';
 
 function Root() {
   return (
-    <ZeroProvider cacheURL="http://localhost:4848" schema={schema}>
+    <ZeroProvider
+      cacheURL="http://localhost:4848"
+      schema={schema}
+    >
       <App />
     </ZeroProvider>
   );
@@ -400,8 +407,8 @@ import {queries} from './shared/queries.ts';
 
 function MyComponent() {
   const [albums] = useQuery(
-    queries.albums.byArtist({artistID: 'artist_1'})
-  )
+    queries.albums.byArtist({artistID: 'artist_1'}),
+  );
   return albums.map(a => <div key={a.id}>{a.title}</div>);
 }
 ```
@@ -425,7 +432,7 @@ import {zero} from './zero.ts';
 import {queries} from './shared/queries.ts';
 
 const albums = await zero.run(
-  queries.albums.byArtist({artistID: 'artist_1'})
+  queries.albums.byArtist({artistID: 'artist_1'}),
 );
 console.log('albums', albums);
 ```
@@ -671,11 +678,15 @@ You can use the [CRUD-style API](/docs/crud) with `tx.mutate(crud.<table>.<metho
 to write data within your mutator.
 You can also use `tx.run(zql.<table>.<method>)` to run ZQL expressions.
 
-<Note type="warning" heading="Always await operations in mutators">
-  Mutators almost always run in the same frame on the client, against local
-  data. The reason mutators are marked `async` is because on the server, reading
-  from the `tx` object goes over the network to Postgres. Also, in edge cases on
-  the client, reads and writes can go to local storage (IndexedDB or SQLite).
+<Note
+  type="warning"
+  heading="Always await operations in mutators"
+>
+  Mutators almost always run in the same frame on the client,
+  against local data. The reason mutators are marked `async` is
+  because on the server, reading from the `tx` object goes over
+  the network to Postgres. Also, in edge cases on the client,
+  reads and writes can go to local storage (IndexedDB or SQLite).
 </Note>
 
 Once you've defined your mutators, you must register them with Zero before you can use them:
@@ -797,7 +808,10 @@ function MyComponent() {
     const clientResult = await result.client;
 
     if (clientResult.type === 'error') {
-      console.error('Failed to create album', clientResult.error.message);
+      console.error(
+        'Failed to create album',
+        clientResult.error.message,
+      );
     } else {
       console.log('Album created!');
     }
@@ -828,7 +842,10 @@ function MyComponent() {
     const clientResult = await result.client;
 
     if (clientResult.type === 'error') {
-      console.error('Failed to create album', clientResult.error.message);
+      console.error(
+        'Failed to create album',
+        clientResult.error.message,
+      );
     } else {
       console.log('Album created!');
     }
@@ -855,7 +872,10 @@ const result = await zero.mutate(
 const clientResult = await result.client;
 
 if (clientResult.type === 'error') {
-  console.error('Failed to create album', clientResult.error.message);
+  console.error(
+    'Failed to create album',
+    clientResult.error.message,
+  );
 } else {
   console.log('Album created!');
 }
@@ -990,7 +1010,10 @@ export const Route = createFileRoute('/api/mutate')({
           dbProvider,
           async (transact, mutation) => {
             const result = await transact(async tx => {
-              const mutator = mustGetMutator(mutators, mutation.name);
+              const mutator = mustGetMutator(
+                mutators,
+                mutation.name,
+              );
               return mutator.fn({
                 args: mutation.args,
                 tx,
@@ -1169,4 +1192,3 @@ Possible next steps:
 - [Learn about authentication and permissions](/docs/auth)
 - [See some samples of built-out Zero apps](/docs/samples)
 - [Learn how to deploy your app to production](/docs/deployment)
-

@@ -37,9 +37,10 @@ Zero segregates the client-side storage for each user. This allows users to quic
   heading="`userID` is not a security boundary"
   slug="user-id-is-not-a-security-boundary"
 >
-  All users that have access to a browser profile have access to the same
-  IndexedDB instances. There is nothing that Zero can do about this – users can
-  just open the folder where the data is stored and look inside it.
+  All users that have access to a browser profile have access to
+  the same IndexedDB instances. There is nothing that Zero can do
+  about this – users can just open the folder where the data is
+  stored and look inside it.
 </Note>
 
 If you have more than one set of Zero data per-user (i.e., for different apps in the same domain), you can additionally use the `storageKey` parameter:
@@ -77,14 +78,16 @@ ZERO_MUTATE_FORWARD_COOKIES=true
 Zero will then forward all cookies sent to `cacheURL` to your [mutate](/docs/mutators) and [queries](/docs/queries) endpoints:
 
 ```tsx
-<ZeroProvider {...{
-  schema,
-  // Cookies sent to zero.example.com will be forwarded to
-  // api.example.com/mutate and api.example.com/queries.
-  cacheURL: 'https://zero.example.com',
-  mutateURL: 'https://api.example.com/mutate',
-  queriesURL: 'https://api.example.com/queries',
-}}>
+<ZeroProvider
+  {...{
+    schema,
+    // Cookies sent to zero.example.com will be forwarded to
+    // api.example.com/mutate and api.example.com/queries.
+    cacheURL: 'https://zero.example.com',
+    mutateURL: 'https://api.example.com/mutate',
+    queriesURL: 'https://api.example.com/queries',
+  }}
+>
   <App />
 </ZeroProvider>
 ```
@@ -120,7 +123,8 @@ Zero will forward this token to your [mutate](/docs/mutators) and [queries](/doc
 ```ts
 export function handleMutate(request: Request) {
   const session = await authenticate(
-    request.headers.get('Authorization'));
+    request.headers.get('Authorization'),
+  );
 
   if (!session) {
     return json({error: 'Unauthorized'}, {status: 401});
@@ -155,13 +159,15 @@ function NeedsAuthDialog() {
   const refreshAuthToken = async () => {
     const token = await fetchNewToken();
     zero.connection.connect({auth: token});
-  }
+  };
 
   if (connectionState.name === 'needs-auth') {
-    return <div>
-      <h1>Authentication Required</h1>
-      <button onClick={refreshAuthToken}>Login</button>
-    </div>;
+    return (
+      <div>
+        <h1>Authentication Required</h1>
+        <button onClick={refreshAuthToken}>Login</button>
+      </div>
+    );
   }
 
   return null;
@@ -254,11 +260,9 @@ Here are a collection of common permissions patterns and how to implement them i
 ```ts
 // Use the context's `userID` to filter the rows to only the
 // ones owned by the user.
-const myPosts = defineQuery(
-  ({ ctx: { userID } }) => {
-    return zql.post.where('authorID', userID)
-  },
-);
+const myPosts = defineQuery(({ctx: {userID}}) => {
+  return zql.post.where('authorID', userID);
+});
 ```
 
 #### Owned or Shared Rows
@@ -266,27 +270,25 @@ const myPosts = defineQuery(
 ```ts
 // Use the context's `userID` to filter the rows to only the
 // ones owned by the user or shared with the user.
-const allowedPosts = defineQuery(
-  ({ ctx: { userID } }) => {
-    return zql.post.where(({cmp, exists, or}) => or(
+const allowedPosts = defineQuery(({ctx: {userID}}) => {
+  return zql.post.where(({cmp, exists, or}) =>
+    or(
       cmp('authorID', userID),
       exists('sharedWith', q => q.where('userID', userID)),
-    ));
-  },
-);
+    ),
+  );
+});
 ```
 
 #### Owned Rows or All if Admin
 
 ```ts
-const allowedPosts = defineQuery(
-  ({ ctx: { userID, role } }) => {
-    if (role === 'admin') {
-      return zql.post;
-    }
-    return zql.post.where('authorID', userID);
-  },
-);
+const allowedPosts = defineQuery(({ctx: {userID, role}}) => {
+  if (role === 'admin') {
+    return zql.post;
+  }
+  return zql.post.where('authorID', userID);
+});
 ```
 
 ### Write Permissions
@@ -301,7 +303,7 @@ const createPost = defineMutator(
     title: z.string(),
     content: z.string(),
   }),
-  (tx, { ctx: { userID }, args: { id, title, content } }) => {
+  (tx, {ctx: {userID}, args: {id, title, content}}) => {
     return zql.post.insert({
       id,
       title,
@@ -320,7 +322,7 @@ const updatePost = defineMutator(
     id: z.string(),
     content: z.string().optional(),
   }),
-  (tx, { ctx: { userID }, args: { id, content } }) => {
+  (tx, {ctx: {userID}, args: {id, content}}) => {
     const prev = await tx.run(zql.post.where('id', id).one());
     if (!prev) {
       return;
@@ -344,19 +346,20 @@ const updatePost = defineMutator(
     id: z.string(),
     content: z.string().optional(),
   }),
-  (tx, { ctx: { userID }, args: { id, content } }) => {
+  (tx, {ctx: {userID}, args: {id, content}}) => {
     const prev = await tx.run(
       zql.post
         .where('id', id)
-        .related('sharedWith',
-          q => q.where('userID', userID))
-      .one()
+        .related('sharedWith', q => q.where('userID', userID))
+        .one(),
     );
     if (!prev) {
       return;
     }
-    if (prev.authorID !== userID &&
-        prev.sharedWith.length === 0) {
+    if (
+      prev.authorID !== userID &&
+      prev.sharedWith.length === 0
+    ) {
       throw new Error('Access denied');
     }
     return zql.post.update({
@@ -375,7 +378,7 @@ const updatePost = defineMutator(
     id: z.string(),
     content: z.string().optional(),
   }),
-  (tx, { ctx: { role, userID }, args: { id, content } }) => {
+  (tx, {ctx: {role, userID}, args: {id, content}}) => {
     const prev = await tx.run(zql.post.where('id', id).one());
     if (!prev) {
       return;
@@ -390,6 +393,7 @@ const updatePost = defineMutator(
   },
 );
 ```
+
 ## Logging Out
 
 When a user logs out, you should consider what should happen to the synced data.

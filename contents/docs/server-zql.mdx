@@ -11,9 +11,10 @@ This is useful for many reasons:
 - In the future ([but not yet implemented](#ssr)), this can support server-side rendering.
 
 <Note type="warning" slug="schema-read">
-  `ZQLDatabase` currently does a read of your postgres schema before every
-  transaction. This is fine for most usages, but for high scale it may become a
-  problem. [Let us know](https://bugs.rocicorp.dev/issue/3799) if you need a fix
+  `ZQLDatabase` currently does a read of your postgres schema
+  before every transaction. This is fine for most usages, but for
+  high scale it may become a problem. [Let us
+  know](https://bugs.rocicorp.dev/issue/3799) if you need a fix
   for this.
 </Note>
 
@@ -27,26 +28,29 @@ several built-in factories for popular Postgres bindings libraries.
 The industry standard [`node-postgres`](https://node-postgres.com/) library is supported via `zeroNodePg`:
 
 ```ts
-import {Pool} from 'pg'
-import {zeroNodePg} from '@rocicorp/zero/server/adapters/pg'
-import {schema} from '../shared/schema'
+import {Pool} from 'pg';
+import {zeroNodePg} from '@rocicorp/zero/server/adapters/pg';
+import {schema} from '../shared/schema';
 
-const db = zeroNodePg(schema, new Pool({
-  connectionString: process.env.ZERO_UPSTREAM_DB!,
-}))
+const db = zeroNodePg(
+  schema,
+  new Pool({
+    connectionString: process.env.ZERO_UPSTREAM_DB!,
+  }),
+);
 ```
 
 You can also pass a `Client`:
 
 ```ts
-import {Client} from 'pg'
-import {zeroNodePg} from '@rocicorp/zero/server/adapters/pg'
-import {schema} from '../shared/schema'  
+import {Client} from 'pg';
+import {zeroNodePg} from '@rocicorp/zero/server/adapters/pg';
+import {schema} from '../shared/schema';
 const client = new Client({
   connectionString: process.env.ZERO_UPSTREAM_DB!,
-})
-await client.connect()
-const db = zeroNodePg(schema, client)
+});
+await client.connect();
+const db = zeroNodePg(schema, client);
 ```
 
 ### Postgres.js
@@ -54,14 +58,14 @@ const db = zeroNodePg(schema, client)
 The popular [`Postgres.js`](https://github.com/porsager/postgres) library is supported via `zeroPostgresJS`:
 
 ```ts
-import postgres from 'postgres'
-import {zeroPostgresJS} from '@rocicorp/zero/server/adapters/postgresjs'
-import {schema} from '../shared/schema'
+import postgres from 'postgres';
+import {zeroPostgresJS} from '@rocicorp/zero/server/adapters/postgresjs';
+import {schema} from '../shared/schema';
 
 const db = zeroPostgresJS(
   schema,
   postgres(process.env.ZERO_UPSTREAM_DB!),
-)
+);
 ```
 
 ### Drizzle
@@ -69,13 +73,13 @@ const db = zeroPostgresJS(
 Zero also includes an adapter for [Drizzle ORM](https://orm.drizzle.team/):
 
 ```ts
-import {Pool} from 'pg'
-import {drizzle} from 'drizzle-orm/node-postgres'
-import {zeroDrizzle} from '@rocicorp/zero/server/adapters/drizzle'
-import * as drizzleSchema from './drizzle-schema'
+import {Pool} from 'pg';
+import {drizzle} from 'drizzle-orm/node-postgres';
+import {zeroDrizzle} from '@rocicorp/zero/server/adapters/drizzle';
+import * as drizzleSchema from './drizzle-schema';
 
-const drizzleDb = drizzle(pool, { schema: drizzleSchema })
-const db = zeroDrizzle(schema, drizzleDb)
+const drizzleDb = drizzle(pool, {schema: drizzleSchema});
+const db = zeroDrizzle(schema, drizzleDb);
 ```
 
 Within your custom mutators, you can access the underlying `drizzleDb` via `tx.wrappedTransaction`:
@@ -83,22 +87,22 @@ Within your custom mutators, you can access the underlying `drizzleDb` via `tx.w
 ```ts
 // server-mutators.ts
 // Use a type helper for the server transaction type
-import type {ServerTransaction} from '@rocicorp/zero/server'
-import type {DrizzleTransaction} from '@rocicorp/zero/server/adapters/drizzle'
+import type {ServerTransaction} from '@rocicorp/zero/server';
+import type {DrizzleTransaction} from '@rocicorp/zero/server/adapters/drizzle';
 
 type ServerTx = ServerTransaction<
   Schema,
   DrizzleTransaction<typeof drizzleDb>
->
+>;
 
 async function createUser(
   tx: ServerTx,
-  { id, name }: { id: string; name: string },
+  {id, name}: {id: string; name: string},
 ) {
   // this is then fully typed w/ drizzle
   await tx.dbTransaction.wrappedTransaction
     .insert(drizzleSchema.user)
-    .values({ id, name })
+    .values({id, name});
 }
 ```
 
@@ -117,7 +121,7 @@ await db.transaction(async tx => {
   // await tx.mutate...
   // await tx.query...
   // await myMutator(tx, ...args)
-})
+});
 ```
 
 ## SSR

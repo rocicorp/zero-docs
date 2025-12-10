@@ -9,23 +9,23 @@ Zero has built-in support for Solid. Here’s what basic usage looks like:
 Use the `ZeroProvider` component to setup Zero. It takes care of creating and destroying `Zero` instances reactively:
 
 ```tsx
-import {ZeroProvider} from '@rocicorp/zero/solid'
-import {useSession} from 'my-auth-provider'
-import App from 'App.tsx'
-import {schema} from 'schema.ts'
-import {mutators} from 'mutators.ts'
+import {ZeroProvider} from '@rocicorp/zero/solid';
+import {useSession} from 'my-auth-provider';
+import App from 'App.tsx';
+import {schema} from 'schema.ts';
+import {mutators} from 'mutators.ts';
 
 function Root() {
-  const session = useSession()
-  const {userID} = session
-  const ctx = {userID}
-  const cacheURL = import.meta.env.VITE_PUBLIC_ZERO_CACHE_URL!
+  const session = useSession();
+  const {userID} = session;
+  const ctx = {userID};
+  const cacheURL = import.meta.env.VITE_PUBLIC_ZERO_CACHE_URL!;
 
   return (
     <ZeroProvider {...{userID, ctx, cacheURL, schema, mutators}}>
       <App />
     </ZeroProvider>
-  )
+  );
 }
 ```
 
@@ -44,15 +44,15 @@ You can also pass a `Zero` instance to the `ZeroProvider` if you want to control
 Use `useQuery` to run queries:
 
 ```tsx
-import {useQuery} from '@rocicorp/zero/solid'
-import {queries} from 'queries.ts'
+import {useQuery} from '@rocicorp/zero/solid';
+import {queries} from 'queries.ts';
 
 function App() {
-  const userID = selectedUserID()
+  const userID = selectedUserID();
 
   const [posts] = useQuery(
-    queries.posts.byStatus({status: "draft"})
-  )
+    queries.posts.byStatus({status: 'draft'}),
+  );
 
   return (
     <div>
@@ -64,26 +64,24 @@ function App() {
         )}
       </For>
     </div>
-  )
+  );
 }
 ```
 
 Use `useZero` to get access to the `Zero` instance, for example to run mutators:
 
 ```tsx
-import { useZero } from "@rocicorp/zero/solid"
-import { mutators } from "mutators.ts"
+import {useZero} from '@rocicorp/zero/solid';
+import {mutators} from 'mutators.ts';
 
-function CompleteButton({ issueID }: { issueID: string }) {
-  const zero = useZero()
+function CompleteButton({issueID}: {issueID: string}) {
+  const zero = useZero();
 
   const onClick = () => {
-    zero().mutate(
-      mutators.issues.complete({ id: issueID })
-    )
-  }
+    zero().mutate(mutators.issues.complete({id: issueID}));
+  };
 
-  return <button onClick={onClick}>Complete Issue</button>
+  return <button onClick={onClick}>Complete Issue</button>;
 }
 ```
 

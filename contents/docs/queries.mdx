@@ -8,7 +8,7 @@ Queries are how you read and sync data with Zero. Here's a simple example:
 
 ```ts
 import { defineQueries, defineQuery } from '@rocicorp/zero'
-import { zql } from './schema.ts'
+import { zql } from 'schema.ts'
 import z from "zod"
 
 export const queries = defineQueries({
@@ -61,53 +61,124 @@ zero-cache receives updates from Postgres via logical replication. It updates af
   className="invert dark:invert-0"
 />
 
-## Parameters
+## Defining Queries
 
-The first argument to `defineQuery` is a *validator* that determines the query's parameters. We use [Zod](https://zod.dev/) in these examples, but you can use any validation library that implements [Standard Schema](https://standardschema.dev/).
+### Basics
 
-Parameter validation is needed because Zero queries run on both the client and [on your server](#server-setup). In the server case, the parameters come from the client and are untrusted. These inputs are validated using the validator you provide.
-
-Zero supports only one formal parameter for each query, but it can be of any type you want. The convention is to use an object with named fields for extensibility:
+A query is defined using `defineQuery`. The only required argument is a `QueryFn`, which must return a [ZQL](./zql) expression:
 
 ```ts
-const searchPosts = defineQuery(
-  z.object({
-    title: z.string().optional(),
-    authorID: z.string().optional(),
-    isOpen: z.boolean().optional(),
-  }),
-  ({ args: { title, authorID, isOpen } }) => {
-    let q = zql.post
-    if (title !== undefined) {
-      q = q.where('title', title)
-    }
-    if (authorID !== undefined) {
-      q = q.where('authorID', authorID)
-    }
-    if (isOpen !== undefined) {
-      q = q.where('isOpen', isOpen)
-    }
-    return q
-  },
+import {zql} from 'schema.ts'
+
+const allPostsQueryDef = defineQuery(
+  () => zql.post
 )
 ```
 
-<Note emoji="🧑‍💻" heading="Queries are code">
-Although queries must ultimately return a ZQL expression, they can use any code you want to compute that expression. It's common to use `if` statements and other control flow to build the ZQL expression based on the parameters.
+The `QueryFn` can take a single `args` parameter of any type, and can use arbitrary logic to compute the ZQL expression from those parameters.
+
+```ts
+import {zql} from 'schema.ts'
+
+const postsByAuthor = defineQuery(
+  ({args}: {args: {authorID?: string|undefined}}) => {
+    let q = zql.post
+    if (args.authorID !== undefined) {
+      q = q.where('authorID', args.authorID)
+    }
+    return q
+  }
+)
+```
+
+<Note emoji="😈" heading="Queries don't have to be pure" slug="purity">
+It's most common to compute the ZQL expression using only the parameters. But it's not *required*.
+
+Impure queries can be useful, e.g., to consult some external system on the server for authorization or validation.
 </Note>
 
-## Context
+### Query Registries
+
+The result of `defineQuery` is a `QueryDefinition`. By itself this isn't super useful. You need to register it using `defineQueries`:
+
+```ts
+export const queries = defineQueries({
+  posts: {
+    all: allPosts,
+  }
+})
+```
+
+Typically these are done together in one step:
+
+```ts
+export const queries = defineQueries({
+  posts: {
+    all: defineQuery(
+      () => zql.post
+    ),
+  }
+})
+```
+
+The result of `defineQueries` is called a `QueryRegistry`. Each field in the registry is a callable `Query` that you can use to read data:
+
+```ts
+import { useQuery } from '@rocicorp/zero/react'
+import { queries } from 'queries.ts'
+
+const [allPosts] = useQuery(
+  queries.posts.all()
+)
+```
+
+### Query Names
+
+Each `Query` has a `queryName` which is computed by `defineQueries`. This name is later sent to your server to identify the query to run:
+
+```ts
+console.log(queries.posts.all.queryName) // "posts.all"
+```
+
+### Validators
+
+You can optionally pass a *validator* to `defineQuery` as the first argument:
+
+```ts
+import {zql} from 'schema.ts'
+
+const postsByAuthor = defineQuery(
+  z.object({authorID: z.string().optional()}),
+  ({args: {authorID}}) => {
+    let q = zql.post
+    if (authorID !== undefined) {
+      q = q.where('authorID', authorID)
+    }
+    return q
+  }
+)
+```
+
+We use [Zod](https://zod.dev/) in these examples, but you can use any validation library that implements [Standard Schema](https://standardschema.dev/).
+
+<Note type="warning" emoji="⚠️" heading="Always use validation in production">
+Although validators are *technically* optional, you should consider them required.
+
+This is because Zero queries run on both the client and [on your server](#server-setup). In the server case, the parameters come from the client and are untrusted. These inputs are validated using the validator you provide.
+</Note>
+
+### Context
 
 Query parameters are supplied by the client application and passed to the server automatically by Zero. This makes them unsuitable for credentials, since the user could modify them.
 
-For this reason, Zero queries also support a [`context` object](/docs/auth#context).
+For this reason, Zero queries also support the concept of a [`context` object](/docs/auth#context).
 
 Access your context with the `ctx` parameter to your query:
 
 ```ts
 const myPostsQuery = defineQuery(
   ({ ctx: { userID } }) => {
-    // Note: User cannot control context.userID, so this safely
+    // User cannot control context.userID, so this safely
     // restricts the query to the user's own posts.
     return zql.post
       .where('authorID', userID)
@@ -115,9 +186,9 @@ const myPostsQuery = defineQuery(
 )
 ```
 
-## queries.ts
+### queries.ts
 
-By convention, queries are listed in a central `queries.ts` file. This allows them to be easily used on both the client and server:
+By convention, all queries for an application are listed in a central `queries.ts` file. This allows them to be easily used on both the client and server:
 
 ```ts
 import { defineQueries, defineQuery } from '@rocicorp/zero'
@@ -181,9 +252,7 @@ export const queries = defineQueries({
 ```
 
 <Note type="warning" emoji="⚠️" heading="Use `defineQueries` at top level only">
-`defineQueries` establishes the full name for each query (i.e., `posts.get`, `users.byRole`), which is later sent to the [server](#server-setup).
-
-So this should only be used once at the top level of your `queries.ts` file.
+Because `defineQueries` establishes the full name for each query (i.e., `posts.get`, `users.byRole`), it should only be used once at the top level of your `queries.ts` file.
 </Note>
 
 ## Server Setup

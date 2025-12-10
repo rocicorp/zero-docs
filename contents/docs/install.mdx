@@ -24,7 +24,7 @@ docker run -d --name zero-postgres \
 
 This will start a Postgres database running in the background.
 
-<Note>
+<Note heading="More Information">
   See [Connecting to Postgres](/docs/connecting-to-postgres) for more details on
   what Postgres features are required for Zero to work.
 </Note>
@@ -121,8 +121,9 @@ If you change something in Postgres, you'll see it immediately show up in the re
 
 ### Set Up Your Zero Schema
 
-Zero uses information about your database schema to provide a type-safe query API in a shared `schema.ts` file.
-If you use Drizzle or Prisma, you can generate your schema automatically. Otherwise, you can create the file manually.
+Zero uses a file called `schema.ts` to provide a type-safe query API.
+
+If you use Drizzle or Prisma, you can generate `schema.ts` automatically. Otherwise, you can create it manually.
 
 <CodeGroup
   labels={[
@@ -216,6 +217,9 @@ const user = table('user')
     // ... other columns ...
   })
   .primaryKey('id');
+
+// ... more tables and relationships ...
+// See "Schema" page in left nav for complete schema API.
 
 export const schema = createSchema({
   tables: [user],
@@ -357,23 +361,16 @@ export const queries = defineQueries({
 });
 ```
 
-A Zero _query_ is a function that returns ZQL (Zero Query Language) which describes the data to retrieve. You can think of a query like a stored procedure in other databases.
-
-The arguments for a query are defined by a _validator_. Any library that implements [Standard Schema](https://standardschema.dev/) is supported, such as Zod, Valibot, Effect Schema, etc.
-
-<Note heading="Why do we need validators?">
-  Queries and mutators run on your API server, where you can't trust the
-  client-provided inputs.
-</Note>
-
 Use `zql` from `schema.ts` to construct and return a ZQL query. ZQL is quite powerful and allows you to build
-queries with filters, sorts, relationships, and more. See the [ZQL Reference](/docs/zql) for complete details.
+queries with filters, sorts, relationships, and more:
 
 <Video
   src="/video/onboarding/onboarding-zql-autocomplete.mp4"
   alt="Code editor with ZQL autocomplete"
   animation
 />
+
+See [queries](/doc/queries) for more information on defining queries.
 
 ### Invoke Query
 
@@ -402,7 +399,9 @@ import {useQuery} from '@rocicorp/zero/react';
 import {queries} from './shared/queries.ts';
 
 function MyComponent() {
-  const [albums] = useQuery(queries.albums.byArtist({artistID: 'artist_1'}));
+  const [albums] = useQuery(
+    queries.albums.byArtist({artistID: 'artist_1'})
+  )
   return albums.map(a => <div key={a.id}>{a.title}</div>);
 }
 ```
@@ -425,7 +424,9 @@ function MyComponent() {
 import {zero} from './zero.ts';
 import {queries} from './shared/queries.ts';
 
-const albums = await zero.run(queries.albums.byArtist({artistID: 'artist_1'}));
+const albums = await zero.run(
+  queries.albums.byArtist({artistID: 'artist_1'})
+);
 console.log('albums', albums);
 ```
 
@@ -441,13 +442,11 @@ Let's fix that.
 
 ### Implement Query Backend
 
-Zero doesn't allow clients to run any arbitrary ZQL against zero-cache, for both security and performance.
+Zero doesn't allow clients to run any arbitrary ZQL against zero-cache, for both security and performance reasons.
 
-Instead, Zero sends the name and arguments of the query to a _queries endpoint_ on your server.
+Instead, Zero sends the name and arguments of the query to a _queries endpoint_ on your server that is responsible for transforming the named query into ZQL.
 
-Your server returns its own implementation of the requested query and calls it, returning the ZQL expression to zero-cache.
-
-The queries endpoint can return the exact same ZQL that ran on the client, or it could be different – it commonly includes additional clauses that enforce permissions.
+Zero provides utilities to make it easy to implement the queries endpoint in any full-stack framework:
 
 <CodeGroup
   labels={[
@@ -622,10 +621,10 @@ Zero queries update live, so if you edit data in Postgres directly, you will see
 
 You now know the basics, but there are a few more important pieces you'll need to learn for your first real app:
 
-- How authentication and permissions work.
-- Preloading queries to create instantly responsive UI.
+- [How authentication and permissions work](/docs/auth).
+- [Preloading queries to create instantly responsive UI](/docs/queries#for-preloading).
 
-For these details and more, see Reading Data with Queries.
+For these details and more, see [Reading Data](/docs/queries).
 
 But for now, let's move on to writes!
 
@@ -668,7 +667,7 @@ export const mutators = defineMutators({
 });
 ```
 
-You can use the [CRUD-style API](/docs/mutators#writing-data) with `tx.mutate(crud.<table>.<method>)`
+You can use the [CRUD-style API](/docs/crud) with `tx.mutate(crud.<table>.<method>)`
 to write data within your mutator.
 You can also use `tx.run(zql.<table>.<method>)` to run ZQL expressions.
 
@@ -676,10 +675,10 @@ You can also use `tx.run(zql.<table>.<method>)` to run ZQL expressions.
   Mutators almost always run in the same frame on the client, against local
   data. The reason mutators are marked `async` is because on the server, reading
   from the `tx` object goes over the network to Postgres. Also, in edge cases on
-  the client, `tx.get()` can go to local storage (IndexedDB or SQLite).
+  the client, reads and writes can go to local storage (IndexedDB or SQLite).
 </Note>
 
-You _must_ register your mutators with Zero before you can use them:
+Once you've defined your mutators, you must register them with Zero before you can use them:
 
 <CodeGroup
   labels={[
@@ -877,7 +876,7 @@ This is because, like queries, we need to implement an endpoint in our API. Let'
 Zero requires a _mutate endpoint_ which runs on your server and connects directly to your Postgres database.
 Zero provides helpers to implement this easily.
 
-You can use the Zero Postgres adapters to create a `dbProvider` instance:
+Use the Zero Postgres adapters to create a `dbProvider` instance:
 
 <CodeGroup
   labels={[
@@ -951,7 +950,7 @@ declare module '@rocicorp/zero' {
 
 </CodeGroup>
 
-Then, you can use the `dbProvider` to handle the mutate request:
+Then, use the `dbProvider` to handle the mutate request:
 
 <CodeGroup
   labels={[
@@ -1159,7 +1158,7 @@ If you refresh the page, your mutation should commit to the database and sync to
 Just as with queries, the separate server implementation of mutators extends elegantly to enable write permissions.
 Zero also has built-in helpers to do work after a mutator runs on the server, like send notifications.
 
-For these details and more, see Writing Data with Mutators.
+For these details and more, see [Writing Data](/docs/mutators).
 
 ## That's It!
 
@@ -1167,7 +1166,7 @@ Congratulations! You now know the basics for building with Zero 🤯.
 
 Possible next steps:
 
-- Learn about authentication and permissions
-- See some samples of built-out Zero apps
-- Learn how to deploy your app to production
-- Learn the big picture design of Zero
+- [Learn about authentication and permissions](/docs/auth)
+- [See some samples of built-out Zero apps](/docs/samples)
+- [Learn how to deploy your app to production](/docs/deployment)
+

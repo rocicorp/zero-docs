@@ -68,25 +68,23 @@ You can send credentials using either cookies or tokens.
 
 The most common way to authenticate Zero is with cookies.
 
-To enable it, set the [`ZERO_GET_QUERIES_FORWARD_COOKIES`](/docs/config#zero_get_queries_forward_cookies) and [`ZERO_MUTATE_FORWARD_COOKIES`](/docs/config#zero_mutate_forward_cookies) options to `true`:
+To enable it, set the [`ZERO_GET_QUERIES_FORWARD_COOKIES`](/docs/zero-cache-config#zero_get_queries_forward_cookies) and [`ZERO_MUTATE_FORWARD_COOKIES`](/docs/zero-cache-config#zero_mutate_forward_cookies) options to `true`:
 
 ```bash
 ZERO_GET_QUERIES_FORWARD_COOKIES=true
 ZERO_MUTATE_FORWARD_COOKIES=true
 ```
 
-Zero will then forward all cookies sent to `cacheURL` to your [mutate](/docs/mutators) and [queries](/docs/queries) endpoints:
+Zero cache will then forward all cookies sent to `cacheURL` to your [mutate](/docs/mutators) and [queries](/docs/queries) endpoints:
 
 ```tsx
 <ZeroProvider
-  {...{
-    schema,
-    // Cookies sent to zero.example.com will be forwarded to
-    // api.example.com/mutate and api.example.com/queries.
-    cacheURL: 'https://zero.example.com',
-    mutateURL: 'https://api.example.com/mutate',
-    queriesURL: 'https://api.example.com/queries'
-  }}
+  schema={schema}
+  // Cookies sent to zero.example.com will be forwarded to
+  // api.example.com/mutate and api.example.com/queries.
+  cacheURL="https://zero.example.com"
+  mutateURL="https://api.example.com/mutate"
+  queriesURL="https://api.example.com/queries"
 >
   <App />
 </ZeroProvider>
@@ -118,7 +116,7 @@ const zero = new Zero({
 });
 ```
 
-Zero will forward this token to your [mutate](/docs/mutators) and [queries](/docs/queries) endpoints in the standard `Authorization` header, which you can use to authenticate the request as normal:
+Zero will forward this token to your [mutate](/docs/mutators) and [queries](/docs/queries) endpoints in a `Authorization: Bearer <token>` header, which you can use to authenticate the request as normal:
 
 ```ts
 export function handleMutate(request: Request) {
@@ -127,6 +125,7 @@ export function handleMutate(request: Request) {
   )
 
   if (!session) {
+    // can be 401 or 403
     return json({error: 'Unauthorized'}, {status: 401})
   }
 
@@ -134,30 +133,41 @@ export function handleMutate(request: Request) {
 }
 ```
 
-## Auth Failure and Refresh
-
-To mark a request as unauthorized, return a `401` or `403` status code from your [queries](/docs/queries) or [mutate](/docs/mutators) endpoint:
-
-```ts
-export function handleMutate(request: Request) {
-  const session = await authenticate(request)
-
-  if (!session) {
-    return json({error: 'Forbidden'}, {status: 403})
-  }
-
-  // handle mutate request ...
-}
-```
+To mark a request as unauthorized, return a `401` or `403` status code from your [queries](/docs/queries) or [mutate](/docs/mutators) endpoint.
 
 This will cause Zero to disconnect from `zero-cache` and the [connection status](/docs/TODO) will change to `needs-auth`. You can then re-authenticate the user and call `zero.connection.connect()` to reconnect to `zero-cache`:
 
 ```tsx
 function NeedsAuthDialog() {
+  const zero = useZero()
+  const connectionState = useZeroConnectionState();
+
+  const refreshCookie = async () => {
+    const cookie = await login();
+    // no token needed since we use cookie auth
+    zero.connection.connect();
+  }
+
+  if (connectionState.name === 'needs-auth') {
+    return <div>
+      <h1>Authentication Required</h1>
+      <button onClick={refreshCookie}>Login</button>
+    </div>;
+  }
+
+  return null;
+```
+
+Or, if you aren't using cookie auth:
+
+```tsx
+function NeedsAuthDialog() {
+  const zero = useZero()
   const connectionState = useZeroConnectionState()
 
   const refreshAuthToken = async () => {
     const token = await fetchNewToken()
+    // pass a new token to reconnect to zero-cache
     zero.connection.connect({auth: token})
   }
 
@@ -174,28 +184,6 @@ function NeedsAuthDialog() {
 }
 ```
 
-Or, if you use cookie auth:
-
-```tsx
-function NeedsAuthDialog() {
-  const connectionState = useZeroConnectionState();
-
-  const refreshCookie = async () => {
-    const cookie = await login();
-    // No token needed since we use cookie auth
-    zero.connection.connect();
-  }
-
-  if (connectionState.name === 'needs-auth') {
-    return <div>
-      <h1>Authentication Required</h1>
-      <button onClick={refreshCookie}>Login</button>
-    </div>;
-  }
-
-  return null;
-```
-
 ## Context
 
 When a user is authenticated, you will want to know who they are in your [queries](/docs/queries) and [mutators](/docs/mutators) to enforce permissions.
@@ -210,7 +198,7 @@ export type ZeroContext = {
 
 declare module '@rocicorp/zero' {
   interface DefaultTypes {
-    ctx: ZeroContext
+    context: ZeroContext
   }
 }
 ```
@@ -243,17 +231,17 @@ const mutator = mustGetMutator(mutators, name)
 mutator.fn({tx, args, ctx})
 ```
 
-You can then access the context within your [queries](TODO) and [mutators](TODO) to implement permissions.
+You can then access the context within your [queries](/docs/queries#context) and [mutators](/docs/mutators#context) to implement permissions.
 
 ## Permission Patterns
 
 Zero does not have (or need) a first-class permission system like [RLS](https://supabase.com/docs/guides/database/postgres/row-level-security).
 
-Instead, you implement permissions by authenticating the user in your [queries](/docs/queries) and [mutators](/docs/mutators) endpoints, and creating a [Context](/docs/queries#context) object that contains the user's ID and other information. This context is passed to your queries and mutators and used to control what data the user can access.
+Instead, you implement permissions by authenticating the user in your [queries](/docs/queries) and [mutators](/docs/mutators) endpoints, and creating a [Context](#context) object that contains the user's ID and other information. This context is passed to your queries and mutators and used to control what data the user can access.
 
 Here are a collection of common permissions patterns and how to implement them in Zero.
 
-### Read Permisssions
+### Read Permissions
 
 #### Only Owned Rows
 

@@ -37,27 +37,27 @@ export const permissions = definePermissions<
   // Checks if the user exists in a related organization
   const allowIfInOrganization = (
     authData: AuthData,
-    eb: ExpressionBuilder<Schema, 'issue'>,
+    eb: ExpressionBuilder<Schema, 'issue'>
   ) =>
     eb.exists('organization', q =>
       q.whereExists('user', q =>
-        q.where('id', authData.sub),
-      ),
+        q.where('id', authData.sub)
+      )
     )
 
   // Checks if the user is the creator
   const allowIfIssueCreator = (
     authData: AuthData,
-    {cmp}: ExpressionBuilder<Schema, 'issue'>,
+    {cmp}: ExpressionBuilder<Schema, 'issue'>
   ) => cmp('creatorID', authData.sub)
 
   return {
     issue: {
       row: {
         select: [allowIfInOrganization],
-        delete: [allowIfIssueCreator],
-      },
-    },
+        delete: [allowIfIssueCreator]
+      }
+    }
   } satisfies PermissionsConfig<AuthData, Schema>
 })
 ```
@@ -79,13 +79,13 @@ const permissions = definePermissions<AuthData, Schema>(
     return {
       issue: {
         row: {
-          select: ANYONE_CAN,
+          select: ANYONE_CAN
           // Other operations are denied by default.
-        },
-      },
+        }
+      }
       // Other tables are denied by default.
     } satisfies PermissionsConfig<AuthData, Schema>
-  },
+  }
 )
 ```
 
@@ -99,11 +99,11 @@ const permissions = definePermissions<AuthData, Schema>(
   () => {
     return {
       // All operations on issue are allowed to all users.
-      issue: ANYONE_CAN_DO_ANYTHING,
+      issue: ANYONE_CAN_DO_ANYTHING
 
       // Other tables are denied by default.
     } satisfies PermissionsConfig<AuthData, Schema>
-  },
+  }
 )
 ```
 
@@ -140,11 +140,11 @@ new command.local.Command(
     environment: {
       ZERO_UPSTREAM_DB: commonEnv.ZERO_UPSTREAM_DB,
       // If the application has a non-default App ID ...
-      ZERO_APP_ID: commonEnv.ZERO_APP_ID,
-    },
+      ZERO_APP_ID: commonEnv.ZERO_APP_ID
+    }
   },
   // after the view-syncer is deployed.
-  {dependsOn: viewSyncer},
+  {dependsOn: viewSyncer}
 )
 ```
 
@@ -168,15 +168,15 @@ For example, imagine a select permission that restricts reads to only issues cre
 definePermissions<AuthData, Schema>(schema, () => {
   const allowIfIssueCreator = (
     authData: AuthData,
-    {cmp}: ExpressionBuilder<Schema, 'issue'>,
+    {cmp}: ExpressionBuilder<Schema, 'issue'>
   ) => cmp('creatorID', authData.sub)
 
   return {
     issue: {
       row: {
-        select: [allowIfIssueCreator],
-      },
-    },
+        select: [allowIfIssueCreator]
+      }
+    }
   } satisfies PermissionsConfig<AuthData, Schema>
 })
 ```
@@ -202,15 +202,15 @@ Here's an example of an insert rule that disallows inserting users that have the
 definePermissions<AuthData, Schema>(schema, () => {
   const allowIfNonAdmin = (
     authData: AuthData,
-    {cmp}: ExpressionBuilder<Schema, 'user'>,
+    {cmp}: ExpressionBuilder<Schema, 'user'>
   ) => cmp('role', '!=', 'admin')
 
   return {
     user: {
       row: {
-        insert: [allowIfNonAdmin],
-      },
-    },
+        insert: [allowIfNonAdmin]
+      }
+    }
   } satisfies PermissionsConfig<AuthData, Schema>
 })
 ```
@@ -231,7 +231,7 @@ For example, the following ruleset allows an issue's owner to edit, but **not** 
 definePermissions<AuthData, Schema>(schema, () => {
   const allowIfIssueOwner = (
     authData: AuthData,
-    {cmp}: ExpressionBuilder<Schema, 'issue'>,
+    {cmp}: ExpressionBuilder<Schema, 'issue'>
   ) => cmp('ownerID', authData.sub)
 
   return {
@@ -239,10 +239,10 @@ definePermissions<AuthData, Schema>(schema, () => {
       row: {
         update: {
           preMutation: [allowIfIssueOwner],
-          postMutation: [allowIfIssueOwner],
-        },
-      },
-    },
+          postMutation: [allowIfIssueOwner]
+        }
+      }
+    }
   } satisfies PermissionsConfig<AuthData, Schema>
 })
 ```
@@ -253,7 +253,7 @@ This ruleset allows an issue's owner to edit and re-assign the issue:
 definePermissions<AuthData, Schema>(schema, () => {
   const allowIfIssueOwner = (
     authData: AuthData,
-    {cmp}: ExpressionBuilder<Schema, 'issue'>,
+    {cmp}: ExpressionBuilder<Schema, 'issue'>
   ) => cmp('ownerID', authData.sub)
 
   return {
@@ -261,10 +261,10 @@ definePermissions<AuthData, Schema>(schema, () => {
       row: {
         update: {
           preMutation: [allowIfIssueOwner],
-          postMutation: ANYONE_CAN,
-        },
-      },
-    },
+          postMutation: ANYONE_CAN
+        }
+      }
+    }
   } satisfies PermissionsConfig<AuthData, Schema>
 })
 ```
@@ -275,7 +275,7 @@ And this allows anyone to edit an issue, but only if they also assign it to them
 definePermissions<AuthData, Schema>(schema, () => {
   const allowIfIssueOwner = (
     authData: AuthData,
-    {cmp}: ExpressionBuilder<Schema, 'issue'>,
+    {cmp}: ExpressionBuilder<Schema, 'issue'>
   ) => cmp('ownerID', authData.sub)
 
   return {
@@ -283,10 +283,10 @@ definePermissions<AuthData, Schema>(schema, () => {
       row: {
         update: {
           preMutation: ANYONE_CAN,
-          postMutation: [allowIfIssueOwner],
-        },
-      },
-    },
+          postMutation: [allowIfIssueOwner]
+        }
+      }
+    }
   } satisfies PermissionsConfig<AuthData, Schema>
 })
 ```
@@ -303,15 +303,15 @@ You can use the [`cmpLit` helper](reading-data#comparing-literal-values) to defi
 definePermissions<AuthData, Schema>(schema, () => {
   const allowIfAdmin = (
     authData: AuthData,
-    {cmpLit}: ExpressionBuilder<Schema, 'issue'>,
+    {cmpLit}: ExpressionBuilder<Schema, 'issue'>
   ) => cmpLit(authData.role, 'admin')
 
   return {
     issue: {
       row: {
-        select: [allowIfAdmin],
-      },
-    },
+        select: [allowIfAdmin]
+      }
+    }
   } satisfies PermissionsConfig<AuthData, Schema>
 })
 ```

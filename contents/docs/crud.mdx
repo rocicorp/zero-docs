@@ -35,8 +35,8 @@ tx.mutate(
   crud.user.insert({
     id: nanoid(),
     username: 'sam',
-    language: 'js',
-  }),
+    language: 'js'
+  })
 )
 ```
 
@@ -51,10 +51,10 @@ const userSchema = createTableSchema({
   columns: {
     id: {type: 'string'},
     name: {type: 'string'},
-    language: {type: 'string', optional: true},
+    language: {type: 'string', optional: true}
   },
   primaryKey: ['id'],
-  relationships: {},
+  relationships: {}
 })
 
 // app.tsx
@@ -64,8 +64,8 @@ tx.mutate(
   crud.user.insert({
     id: nanoid(),
     username: 'sam',
-    language: null,
-  }),
+    language: null
+  })
 )
 
 // Sets language to the default server-side value. Could be null, or some
@@ -73,8 +73,8 @@ tx.mutate(
 tx.mutate(
   crud.user.insert({
     id: nanoid(),
-    username: 'sam',
-  }),
+    username: 'sam'
+  })
 )
 
 // Same as above
@@ -82,8 +82,8 @@ tx.mutate(
   crud.user.insert({
     id: nanoid(),
     username: 'sam',
-    language: undefined,
-  }),
+    language: undefined
+  })
 )
 ```
 
@@ -96,8 +96,8 @@ tx.mutate(
   crud.user.upsert({
     id: samID,
     username: 'sam',
-    language: 'ts',
-  }),
+    language: 'ts'
+  })
 )
 ```
 
@@ -114,8 +114,8 @@ You can pass a partial, leaving fields out that you don’t want to change. For 
 tx.mutate(
   crud.user.update({
     id: samID,
-    language: 'golang',
-  }),
+    language: 'golang'
+  })
 )
 
 // Same as above
@@ -123,15 +123,15 @@ tx.mutate(
   crud.user.update({
     id: samID,
     username: undefined,
-    language: 'haskell',
-  }),
+    language: 'haskell'
+  })
 )
 // Reset language field to `null`
 tx.mutate(
   crud.user.update({
     id: samID,
-    language: null,
-  }),
+    language: null
+  })
 )
 ```
 
@@ -142,7 +142,7 @@ Delete an existing record. Does nothing if specified record does not exist.
 ```tsx
 tx.mutate(
   crud.user.delete({
-    id: samID,
-  }),
+    id: samID
+  })
 )
 ```

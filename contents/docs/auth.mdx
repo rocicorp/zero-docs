@@ -85,7 +85,7 @@ Zero will then forward all cookies sent to `cacheURL` to your [mutate](/docs/mut
     // api.example.com/mutate and api.example.com/queries.
     cacheURL: 'https://zero.example.com',
     mutateURL: 'https://api.example.com/mutate',
-    queriesURL: 'https://api.example.com/queries',
+    queriesURL: 'https://api.example.com/queries'
   }}
 >
   <App />
@@ -123,7 +123,7 @@ Zero will forward this token to your [mutate](/docs/mutators) and [queries](/doc
 ```ts
 export function handleMutate(request: Request) {
   const session = await authenticate(
-    request.headers.get('Authorization'),
+    request.headers.get('Authorization')
   )
 
   if (!session) {
@@ -274,8 +274,8 @@ const allowedPosts = defineQuery(({ctx: {userID}}) => {
   return zql.post.where(({cmp, exists, or}) =>
     or(
       cmp('authorID', userID),
-      exists('sharedWith', q => q.where('userID', userID)),
-    ),
+      exists('sharedWith', q => q.where('userID', userID))
+    )
   )
 })
 ```
@@ -289,7 +289,7 @@ const allowedPosts = defineQuery(
       return zql.post
     }
     return zql.post.where('authorID', userID)
-  },
+  }
 )
 ```
 
@@ -303,16 +303,16 @@ const createPost = defineMutator(
   z.object({
     id: z.string(),
     title: z.string(),
-    content: z.string(),
+    content: z.string()
   }),
   (tx, {ctx: {userID}, args: {id, title, content}}) => {
     return zql.post.insert({
       id,
       title,
       content,
-      authorID: userID,
+      authorID: userID
     })
-  },
+  }
 )
 ```
 
@@ -322,11 +322,11 @@ const createPost = defineMutator(
 const updatePost = defineMutator(
   z.object({
     id: z.string(),
-    content: z.string().optional(),
+    content: z.string().optional()
   }),
   (tx, {ctx: {userID}, args: {id, content}}) => {
     const prev = await tx.run(
-      zql.post.where('id', id).one(),
+      zql.post.where('id', id).one()
     )
     if (!prev) {
       return
@@ -336,9 +336,9 @@ const updatePost = defineMutator(
     }
     return zql.post.update({
       id,
-      content,
+      content
     })
-  },
+  }
 )
 ```
 
@@ -348,16 +348,16 @@ const updatePost = defineMutator(
 const updatePost = defineMutator(
   z.object({
     id: z.string(),
-    content: z.string().optional(),
+    content: z.string().optional()
   }),
   (tx, {ctx: {userID}, args: {id, content}}) => {
     const prev = await tx.run(
       zql.post
         .where('id', id)
         .related('sharedWith', q =>
-          q.where('userID', userID),
+          q.where('userID', userID)
         )
-        .one(),
+        .one()
     )
     if (!prev) {
       return
@@ -370,9 +370,9 @@ const updatePost = defineMutator(
     }
     return zql.post.update({
       id,
-      content,
+      content
     })
-  },
+  }
 )
 ```
 
@@ -382,11 +382,11 @@ const updatePost = defineMutator(
 const updatePost = defineMutator(
   z.object({
     id: z.string(),
-    content: z.string().optional(),
+    content: z.string().optional()
   }),
   (tx, {ctx: {role, userID}, args: {id, content}}) => {
     const prev = await tx.run(
-      zql.post.where('id', id).one(),
+      zql.post.where('id', id).one()
     )
     if (!prev) {
       return
@@ -396,9 +396,9 @@ const updatePost = defineMutator(
     }
     return zql.post.update({
       id,
-      content,
+      content
     })
-  },
+  }
 )
 ```
 

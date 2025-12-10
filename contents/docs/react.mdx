@@ -26,7 +26,7 @@ createRoot(document.getElementById('root')!).render(
     {...{userID, ctx, cacheURL, schema, mutators}}
   >
     <App />
-  </ZeroProvider>,
+  </ZeroProvider>
 )
 ```
 
@@ -50,7 +50,7 @@ import {queries} from 'queries.ts'
 
 function Posts() {
   const [posts] = useQuery(
-    queries.posts.byStatus({status: 'draft'}),
+    queries.posts.byStatus({status: 'draft'})
   )
 
   return (
@@ -88,7 +88,7 @@ The `useSuspenseQuery` hook is exactly like `useQuery`, except it support React 
 
 ```tsx
 const [issues] = useSuspenseQuery(issueQuery, {
-  suspendUntil: 'complete', // 'partial' or 'complete'
+  suspendUntil: 'complete' // 'partial' or 'complete'
 })
 ```
 

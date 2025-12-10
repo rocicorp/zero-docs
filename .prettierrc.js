@@ -7,6 +7,8 @@ module.exports = {
         printWidth: 60,
         proseWrap: 'preserve',
         semi: false,
+        trailingComma: 'none',
+        arrowParens: 'avoid',
       },
     },
   ],

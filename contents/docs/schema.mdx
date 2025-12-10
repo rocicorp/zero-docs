@@ -112,7 +112,7 @@ const user = table('user')
   .columns({
     id: string(),
     name: string(),
-    partner: boolean(),
+    partner: boolean()
   })
   .primaryKey('id')
 ```
@@ -130,7 +130,7 @@ const userPref = table('userPref')
   .columns({
     id: string(),
     // Map TS "orgID" to DB name "org_id"
-    orgID: string().from('org_id'),
+    orgID: string().from('org_id')
   })
 ```
 
@@ -152,7 +152,7 @@ const user = table('user')
   .columns({
     id: string(),
     name: string(),
-    nickName: string().optional(),
+    nickName: string().optional()
   })
   .primaryKey('id')
 ```
@@ -179,7 +179,7 @@ const user = table('user')
   .columns({
     id: string(),
     name: string(),
-    mood: enumeration<'happy' | 'sad' | 'taco'>(),
+    mood: enumeration<'happy' | 'sad' | 'taco'>()
   })
   .primaryKey('id')
 ```
@@ -195,7 +195,7 @@ const user = table('user')
   .columns({
     id: string(),
     name: string(),
-    settings: json<{theme: 'light' | 'dark'}>(),
+    settings: json<{theme: 'light' | 'dark'}>()
   })
   .primaryKey('id')
 ```
@@ -209,7 +209,7 @@ const user = table('user')
   .columns({
     orgID: string(),
     userID: string(),
-    name: string(),
+    name: string()
   })
   .primaryKey('orgID', 'userID')
 ```
@@ -225,14 +225,14 @@ const messageRelationships = relationships(
     sender: one({
       sourceField: ['senderID'],
       destField: ['id'],
-      destSchema: user,
+      destSchema: user
     }),
     replies: many({
       sourceField: ['id'],
       destSchema: message,
-      destField: ['parentMessageID'],
-    }),
-  }),
+      destField: ['parentMessageID']
+    })
+  })
 )
 ```
 
@@ -258,15 +258,15 @@ const issueRelationships = relationships(
       {
         sourceField: ['id'],
         destSchema: issueLabel,
-        destField: ['issueID'],
+        destField: ['issueID']
       },
       {
         sourceField: ['labelID'],
         destSchema: label,
-        destField: ['id'],
-      },
-    ),
-  }),
+        destField: ['id']
+      }
+    )
+  })
 )
 ```
 
@@ -288,9 +288,9 @@ const messageRelationships = relationships(
     sender: one({
       sourceField: ['senderOrgID', 'senderUserID'],
       destSchema: user,
-      destField: ['orgID', 'userID'],
-    }),
-  }),
+      destField: ['orgID', 'userID']
+    })
+  })
 )
 ```
 
@@ -305,9 +305,9 @@ const commentRelationships = relationships(
     parent: one({
       sourceField: ['parentID'],
       destSchema: comment,
-      destField: ['id'],
-    }),
-  }),
+      destField: ['id']
+    })
+  })
 )
 ```
 
@@ -323,8 +323,8 @@ export const schema = createSchema({
   relationships: [
     userRelationships,
     mediumRelationships,
-    messageRelationships,
-  ],
+    messageRelationships
+  ]
 })
 ```
 
@@ -354,7 +354,7 @@ const z = new Zero({
       // Do something custom here, like show a banner.
       // When you're ready, call `location.reload()`.
     }
-  },
+  }
 })
 ```
 

@@ -35,8 +35,8 @@ import {schema} from '../shared/schema'
 const db = zeroNodePg(
   schema,
   new Pool({
-    connectionString: process.env.ZERO_UPSTREAM_DB!,
-  }),
+    connectionString: process.env.ZERO_UPSTREAM_DB!
+  })
 )
 ```
 
@@ -47,7 +47,7 @@ import {Client} from 'pg'
 import {zeroNodePg} from '@rocicorp/zero/server/adapters/pg'
 import {schema} from '../shared/schema'
 const client = new Client({
-  connectionString: process.env.ZERO_UPSTREAM_DB!,
+  connectionString: process.env.ZERO_UPSTREAM_DB!
 })
 await client.connect()
 const db = zeroNodePg(schema, client)
@@ -64,7 +64,7 @@ import {schema} from '../shared/schema'
 
 const db = zeroPostgresJS(
   schema,
-  postgres(process.env.ZERO_UPSTREAM_DB!),
+  postgres(process.env.ZERO_UPSTREAM_DB!)
 )
 ```
 
@@ -97,7 +97,7 @@ type ServerTx = ServerTransaction<
 
 async function createUser(
   tx: ServerTx,
-  {id, name}: {id: string; name: string},
+  {id, name}: {id: string; name: string}
 ) {
   // this is then fully typed w/ drizzle
   await tx.dbTransaction.wrappedTransaction

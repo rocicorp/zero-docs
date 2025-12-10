@@ -14,8 +14,8 @@ export const queries = defineQueries({
   postsByAuthor: defineQuery(
     z.object({authorID: z.string()}),
     ({args: {authorID}}) =>
-      zql.post.where('authorID', authorID),
-  ),
+      zql.post.where('authorID', authorID)
+  )
 })
 ```
 
@@ -86,7 +86,7 @@ const postsByAuthor = defineQuery(
       q = q.where('authorID', args.authorID)
     }
     return q
-  },
+  }
 )
 ```
 
@@ -104,8 +104,8 @@ The result of `defineQuery` is a `QueryDefinition`. By itself this isn't super u
 ```ts
 export const queries = defineQueries({
   posts: {
-    all: allPosts,
-  },
+    all: allPosts
+  }
 })
 ```
 
@@ -114,8 +114,8 @@ Typically these are done together in one step:
 ```ts
 export const queries = defineQueries({
   posts: {
-    all: defineQuery(() => zql.post),
-  },
+    all: defineQuery(() => zql.post)
+  }
 })
 ```
 
@@ -151,7 +151,7 @@ const postsByAuthor = defineQuery(
       q = q.where('authorID', authorID)
     }
     return q
-  },
+  }
 )
 ```
 
@@ -192,12 +192,12 @@ import z from 'zod'
 export const queries = defineQueries({
   posts: {
     get: defineQuery(z.string(), id =>
-      zql.post.where('id', id),
+      zql.post.where('id', id)
     ),
     byAuthor: defineQuery(
       z.object({
         authorID: z.string(),
-        includeDrafts: z.boolean().optional(),
+        includeDrafts: z.boolean().optional()
       }),
       ({args: {authorID, includeDrafts}}) => {
         let q = zql.post.where('authorID', authorID)
@@ -205,9 +205,9 @@ export const queries = defineQueries({
           q = q.where('isDraft', false)
         }
         return q
-      },
-    ),
-  },
+      }
+    )
+  }
 })
 ```
 
@@ -219,16 +219,16 @@ As your application grows, you can move queries to different files to keep them 
 // posts.ts
 export const postQueries = {
   get: defineQuery(z.string(), id =>
-    zql.post.where('id', id),
-  ),
+    zql.post.where('id', id)
+  )
   // ...
 }
 
 // users.ts
 export const userQueries = {
   byRole: defineQuery(z.string(), role =>
-    zql.user.where('role', role),
-  ),
+    zql.user.where('role', role)
+  )
   // ...
 }
 
@@ -238,7 +238,7 @@ import {userQueries} from './users.ts'
 
 export const queries = defineQueries({
   posts: postQueries,
-  users: userQueries,
+  users: userQueries
 })
 ```
 
@@ -287,8 +287,8 @@ app.post('/api/zero/query', async c => {
         return q.fn({ctx, args})
       },
       schema,
-      c.req.raw,
-    ),
+      c.req.raw
+    )
   )
 })
 ```
@@ -305,7 +305,7 @@ If the queries endpoint returns an HTTP or network error, `zero-cache` will be r
 
 ```tsx
 const [posts, details] = useQuery(
-  queries.posts.byAuthorID('user123'),
+  queries.posts.byAuthorID('user123')
 )
 if (details.type === 'error') {
   return (
@@ -344,7 +344,7 @@ Then choose one of those URLs by passing it to `queryURL` on the `Zero` construc
 const zero = new Zero({
   schema,
   queries,
-  queryURL: 'https://api.staging.example.com/query',
+  queryURL: 'https://api.staging.example.com/query'
 })
 ```
 
@@ -411,7 +411,7 @@ You can use `zero.materialize()` to run and subscribe to a query result outside 
 import {queries} from 'zero/queries.ts'
 
 const myView = zero.materialize(
-  queries.posts.byAuthorID('user123'),
+  queries.posts.byAuthorID('user123')
 )
 
 for (let post of myView.data) {
@@ -433,7 +433,7 @@ You usually want to subscribe to a query in a reactive UI, but every so often yo
 
 ```tsx
 const results = await zero.run(
-  queries.issues.byPriority('high'),
+  queries.issues.byPriority('high')
 )
 ```
 
@@ -461,8 +461,8 @@ zero.preload(
   queries.issues.inbox({
     sort: 'created',
     sortDirection: 'desc',
-    limit: 1000,
-  }),
+    limit: 1000
+  })
 )
 ```
 
@@ -474,7 +474,7 @@ If you just use a simple existence check, you will often see the 404 UI flicker 
 
 ```tsx
 const [issue, issuesResult] = useQuery(
-  queries.issues.get('some-id'),
+  queries.issues.get('some-id')
 )
 
 // ❌ This causes flickering of the UI
@@ -489,7 +489,7 @@ To do this correctly, only display the "not found" UI when the result type is `c
 
 ```tsx
 const [issue, issueResult] = useQuery(
-  queries.issues.get('some-id'),
+  queries.issues.get('some-id')
 )
 
 if (!issue && issueResult.type === 'complete') {
@@ -511,7 +511,7 @@ Sometimes it's useful to know the difference between these two types of results.
 
 ```tsx
 const [issues, issuesResult] = useQuery(
-  queries.issues.inbox(),
+  queries.issues.inbox()
 )
 if (issuesResult.type === 'complete') {
   console.log('All data is present')
@@ -600,7 +600,7 @@ You can override the default TTL with the `ttl` parameter:
 ```ts
 // With useQuery():
 const [user] = useQuery(queries.user.byID('id', userId), {
-  ttl: '5m',
+  ttl: '5m'
 })
 
 // With preload():
@@ -610,16 +610,16 @@ zero.preload(queries.user.byID('id', userId), {ttl: '5m'})
 const user = await zero.run(
   queries.user.byID('id', userId),
   {
-    ttl: '5m',
-  },
+    ttl: '5m'
+  }
 )
 
 // With materialize():
 const view = zero.materialize(
   queries.user.byID('id', userId),
   {
-    ttl: '5m',
-  },
+    ttl: '5m'
+  }
 )
 ```
 

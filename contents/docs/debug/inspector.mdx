@@ -112,8 +112,8 @@ You can also analyze arbitrary ZQL, not just queries that are currently active:
 ```ts
 await __zero.inspector.analyzeQuery(
   __builder.issues.whereExists('labels', q =>
-    q.id.equals('sync'),
-  ),
+    q.id.equals('sync')
+  )
 )
 ```
 
@@ -176,6 +176,6 @@ Ask the server to confirm what version it is:
 ```ts
 console.log(
   'server version: ',
-  await inspector.serverVersion(),
+  await inspector.serverVersion()
 )
 ```

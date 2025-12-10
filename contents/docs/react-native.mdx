@@ -26,7 +26,7 @@ export default function RootLayout() {
       kvStore,
       server: 'http://localhost:4848',
       schema,
-      mutators: createMutators(authData),
+      mutators: createMutators(authData)
     } as const satisfies ZeroOptions<Schema, Mutators>
   }, [])
 
@@ -52,7 +52,7 @@ import {opSQLiteStoreProvider} from '@rocicorp/zero/op-sqlite'
 export default function RootLayout() {
   const zeroProps = useMemo(() => {
     return {
-      kvStore: opSQLiteStoreProvider(),
+      kvStore: opSQLiteStoreProvider()
       // ...
     } as const satisfies ZeroOptions<Schema, Mutators>
   }, [])

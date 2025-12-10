@@ -214,7 +214,7 @@ import {table, string, createSchema} from '@rocicorp/zero'
 const user = table('user')
   .columns({
     id: string(),
-    name: string(),
+    name: string()
     // ... other columns ...
   })
   .primaryKey('id')
@@ -223,7 +223,7 @@ const user = table('user')
 // See "Schema" page in left nav for complete schema API.
 
 export const schema = createSchema({
-  tables: [user],
+  tables: [user]
 })
 
 // Register the schema for type safety
@@ -329,7 +329,7 @@ import {schema} from './shared/schema.ts'
 
 const zero = new Zero({
   cacheURL: 'http://localhost:4848',
-  schema,
+  schema
 })
 
 console.log('clientID', zero.clientID)
@@ -363,9 +363,9 @@ export const queries = defineQueries({
           .where('artistId', artistID)
           .orderBy('createdAt', 'asc')
           .limit(10)
-          .related('artist', q => q.one()),
-    ),
-  },
+          .related('artist', q => q.one())
+    )
+  }
 })
 ```
 
@@ -408,7 +408,7 @@ import {queries} from './shared/queries.ts'
 
 function MyComponent() {
   const [albums] = useQuery(
-    queries.albums.byArtist({artistID: 'artist_1'}),
+    queries.albums.byArtist({artistID: 'artist_1'})
   )
   return albums.map(a => <div key={a.id}>{a.title}</div>)
 }
@@ -421,7 +421,7 @@ import {queries} from './shared/queries.ts'
 
 function MyComponent() {
   const [albums] = useQuery(() =>
-    queries.albums.byArtist({artistID: 'artist_1'}),
+    queries.albums.byArtist({artistID: 'artist_1'})
   )
   return albums().map(a => <div key={a.id}>{a.title}</div>)
 }
@@ -433,7 +433,7 @@ import {zero} from './zero.ts'
 import {queries} from './shared/queries.ts'
 
 const albums = await zero.run(
-  queries.albums.byArtist({artistID: 'artist_1'}),
+  queries.albums.byArtist({artistID: 'artist_1'})
 )
 console.log('albums', albums)
 ```
@@ -496,13 +496,13 @@ export const Route = createFileRoute('/api/query')({
             return query.fn({args, ctx: {userId: 'anon'}})
           },
           schema,
-          request,
+          request
         )
 
         return json(result)
-      },
-    },
-  },
+      }
+    }
+  }
 })
 ```
 
@@ -520,7 +520,7 @@ export async function POST(req: Request) {
       return query.fn({args, ctx: {userId: 'anon'}})
     },
     schema,
-    req,
+    req
   )
 
   return Response.json(result)
@@ -544,11 +544,11 @@ export async function POST(event: APIEvent) {
       return query.fn({args, ctx: {userId: 'anon'}})
     },
     schema,
-    body,
+    body
   )
 
   return new Response(JSON.stringify(result), {
-    headers: {'Content-Type': 'application/json'},
+    headers: {'Content-Type': 'application/json'}
   })
 }
 ```
@@ -570,7 +570,7 @@ app.post('/api/query', async c => {
       return query.fn({args, ctx: {userId: 'anon'}})
     },
     schema,
-    c.req,
+    c.req
   )
 
   return c.json(result)
@@ -657,7 +657,7 @@ export const mutators = defineMutators({
         artistID: z.string(),
         title: z.string(),
         year: z.number(),
-        createdAt: z.number(),
+        createdAt: z.number()
       }),
       async ({args, tx, ctx: _ctx}) => {
         await tx.mutate(
@@ -666,12 +666,12 @@ export const mutators = defineMutators({
             artistId: args.artistID,
             title: args.title,
             releaseYear: args.year,
-            createdAt: args.createdAt,
-          }),
+            createdAt: args.createdAt
+          })
         )
-      },
-    ),
-  },
+      }
+    )
+  }
 })
 ```
 
@@ -757,7 +757,7 @@ import {mutators} from './shared/mutators.ts'
 const zero = new Zero({
   cacheURL: 'http://localhost:4848',
   schema,
-  mutators,
+  mutators
 })
 
 console.log('clientID', zero.clientID)
@@ -803,8 +803,8 @@ function MyComponent() {
         artistID: 'artist_1',
         title: 'Please Please Me',
         year: 1963,
-        createdAt: Date.now(),
-      }),
+        createdAt: Date.now()
+      })
     )
 
     const clientResult = await result.client
@@ -812,7 +812,7 @@ function MyComponent() {
     if (clientResult.type === 'error') {
       console.error(
         'Failed to create album',
-        clientResult.error.message,
+        clientResult.error.message
       )
     } else {
       console.log('Album created!')
@@ -838,15 +838,15 @@ function MyComponent() {
         artistID: 'artist_1',
         title: 'Please Please Me',
         year: 1963,
-        createdAt: Date.now(),
-      }),
+        createdAt: Date.now()
+      })
     )
     const clientResult = await result.client
 
     if (clientResult.type === 'error') {
       console.error(
         'Failed to create album',
-        clientResult.error.message,
+        clientResult.error.message
       )
     } else {
       console.log('Album created!')
@@ -868,15 +868,15 @@ const result = await zero.mutate(
     artistID: 'artist_1',
     title: 'Please Please Me',
     year: 1963,
-    createdAt: Date.now(),
-  }),
+    createdAt: Date.now()
+  })
 )
 const clientResult = await result.client
 
 if (clientResult.type === 'error') {
   console.error(
     'Failed to create album',
-    clientResult.error.message,
+    clientResult.error.message
   )
 } else {
   console.log('Album created!')
@@ -941,7 +941,7 @@ import {Pool} from 'pg'
 import {schema} from '../../shared/schema.ts'
 
 const pool = new Pool({
-  connectionString: process.env.ZERO_UPSTREAM_DB!,
+  connectionString: process.env.ZERO_UPSTREAM_DB!
 })
 export const dbProvider = zeroNodePg(schema, pool)
 
@@ -1014,24 +1014,24 @@ export const Route = createFileRoute('/api/mutate')({
             const result = await transact(async tx => {
               const mutator = mustGetMutator(
                 mutators,
-                mutation.name,
+                mutation.name
               )
               return mutator.fn({
                 args: mutation.args,
                 tx,
-                ctx: {userId: 'anon'},
+                ctx: {userId: 'anon'}
               })
             })
 
             return result
           },
-          request,
+          request
         )
 
         return json(result)
-      },
-    },
-  },
+      }
+    }
+  }
 })
 ```
 
@@ -1049,18 +1049,18 @@ export async function POST(req: Request) {
       const result = await transact(async tx => {
         const mutator = mustGetMutator(
           mutators,
-          mutation.name,
+          mutation.name
         )
         return mutator.fn({
           args: mutation.args,
           tx,
-          ctx: {userId: 'anon'},
+          ctx: {userId: 'anon'}
         })
       })
 
       return result
     },
-    req,
+    req
   )
 
   return Response.json(result)
@@ -1084,22 +1084,22 @@ export async function POST(event: APIEvent) {
       const result = await transact(async tx => {
         const mutator = mustGetMutator(
           mutators,
-          mutation.name,
+          mutation.name
         )
         return mutator.fn({
           args: mutation.args,
           tx,
-          ctx: {userId: 'anon'},
+          ctx: {userId: 'anon'}
         })
       })
 
       return result
     },
-    body,
+    body
   )
 
   return new Response(JSON.stringify(result), {
-    headers: {'Content-Type': 'application/json'},
+    headers: {'Content-Type': 'application/json'}
   })
 }
 ```
@@ -1118,18 +1118,18 @@ app.post('/api/mutate', async c => {
       const result = await transact(async tx => {
         const mutator = mustGetMutator(
           mutators,
-          mutation.name,
+          mutation.name
         )
         return mutator.fn({
           args: mutation.args,
           tx,
-          ctx: {userId: 'anon'},
+          ctx: {userId: 'anon'}
         })
       })
 
       return result
     },
-    c.req,
+    c.req
   )
 
   return c.json(result)

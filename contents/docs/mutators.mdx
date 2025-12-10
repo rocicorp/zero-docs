@@ -14,7 +14,7 @@ export const mutators = defineMutators({
   updateIssue: defineMutator(
     z.object({
       id: z.string(),
-      title: z.string(),
+      title: z.string()
     }),
     async ({tx, args: {id, title}}) => {
       if (title.length > 100) {
@@ -23,11 +23,11 @@ export const mutators = defineMutators({
       await tx.mutate(
         crud.issue.update({
           id,
-          title,
-        }),
+          title
+        })
       )
-    },
-  ),
+    }
+  )
 })
 ```
 
@@ -70,8 +70,8 @@ const initStats = defineMutator(async ({tx}) => {
   await tx.mutate(
     crud.stats.insert({
       id: 'global',
-      issueCount: 0,
-    }),
+      issueCount: 0
+    })
   )
 })
 ```
@@ -105,10 +105,10 @@ const initStats = defineMutator<{issueCount: number}>(
     await tx.mutate(
       crud.stats.insert({
         id: 'global',
-        issueCount,
-      }),
+        issueCount
+      })
     )
-  },
+  }
 )
 ```
 
@@ -132,7 +132,7 @@ const updateIssue = defineMutator<{
   title: string
 }>(async ({tx, args: {id, title}}) => {
   const issue = await tx.run(
-    zql.issue.where('id', id).one(),
+    zql.issue.where('id', id).one()
   )
 
   if (issue?.status === 'closed') {
@@ -142,8 +142,8 @@ const updateIssue = defineMutator<{
   await tx.mutate(
     crud.issue.update({
       id,
-      title,
-    }),
+      title
+    })
   )
 })
 ```
@@ -179,7 +179,7 @@ const createIssue = defineMutator<{
   await tx.mutate.issue.insert({
     id,
     title,
-    authorID: userID,
+    authorID: userID
   })
 })
 ```
@@ -191,8 +191,8 @@ The result of `defineMutator` is a `MutatorDefinition`. By itself this isn't sup
 ```ts
 export const mutators = defineMutators({
   issue: {
-    update: updateIssue,
-  },
+    update: updateIssue
+  }
 })
 ```
 
@@ -206,12 +206,12 @@ export const mutators = defineMutators({
         await tx.mutate(
           crud.issue.update({
             id,
-            title,
-          }),
+            title
+          })
         )
-      },
-    ),
-  },
+      }
+    )
+  }
 })
 ```
 
@@ -223,8 +223,8 @@ import {mutators} from 'mutators.ts'
 const [updateIssue] = zero.mutate(
   mutators.issue.update({
     id: 'issue-123',
-    title: 'New title',
-  }),
+    title: 'New title'
+  })
 )
 ```
 
@@ -286,44 +286,44 @@ export const mutators = defineMutators({
     create: defineMutator(
       z.object({
         id: z.string(),
-        title: z.string(),
+        title: z.string()
       }),
       async ({
         tx,
         context: {userID},
-        args: {id, title},
+        args: {id, title}
       }) => {
         await tx.mutate(
           crud.post.insert({
             id,
             title,
-            authorID: userID,
-          }),
+            authorID: userID
+          })
         )
-      },
+      }
     ),
     update: defineMutator(
       z.object({
         id: z.string(),
-        title: z.string().optional(),
+        title: z.string().optional()
       }),
       async ({
         tx,
         context: {userID},
-        args: {id, title},
+        args: {id, title}
       }) => {
         const prev = await tx.run(
-          zql.post.where('id', id).one(),
+          zql.post.where('id', id).one()
         )
         if (prev?.authorID !== userID) {
           throw new Error(`Access denied`)
         }
         await tx.mutate(
-          crud.post.update({id, title, authorID: userID}),
+          crud.post.update({id, title, authorID: userID})
         )
-      },
-    ),
-  },
+      }
+    )
+  }
 })
 ```
 
@@ -394,7 +394,6 @@ In React or SolidJS, you'll do this by passing the `mutators` object to the `Zer
 ```tsx
 import {ZeroProvider} from '@rocicorp/zero/react'
 import {mutators} from 'zero/mutators.ts'
-
 ;<ZeroProvider mutators={mutators}>
   <App />
 </ZeroProvider>
@@ -407,7 +406,7 @@ import {Zero} from '@rocicorp/zero'
 import {mutators} from 'zero/mutators.ts'
 
 const zero = new Zero({
-  mutators,
+  mutators
 })
 ```
 
@@ -452,8 +451,8 @@ app.post('/api/zero/mutate', async c => {
           const mutator = mustGetMutator(mutators, name)
           return mutator.fn({tx, ctx, args})
         }),
-      c.req.raw,
-    ),
+      c.req.raw
+    )
   )
 })
 ```
@@ -522,7 +521,7 @@ Then choose one of those URLs by passing it to `mutateURL` on the `Zero` constru
 const zero = new Zero({
   schema,
   mutators,
-  mutateURL: 'https://api.staging.example.com/mutate',
+  mutateURL: 'https://api.staging.example.com/mutate'
 })
 ```
 
@@ -600,8 +599,8 @@ import {mutators} from 'mutators.ts'
 zero.mutate(
   mutators.issue.update({
     id: 'issue-123',
-    title: 'New title',
-  }),
+    title: 'New title'
+  })
 )
 ```
 
@@ -621,13 +620,13 @@ You can use the `.client` promise in this case to wait for a write to complete o
 const write = zero.mutate(
   mutators.issue.insert({
     id: 'issue-123',
-    title: 'New title',
-  }),
+    title: 'New title'
+  })
 )
 
 // issue-123 not guaranteed to be present here. read1 may be undefined.
 const read1 = await zero.run(
-  queries.issue.byId('issue-123').one(),
+  queries.issue.byId('issue-123').one()
 )
 
 // Await client write – almost always less than 1 frame, and same
@@ -640,7 +639,7 @@ if (res.type === 'error') {
 
 // issue-123 definitely can be read now.
 const read2 = await zero.run(
-  queries.issue.byId('issue-123').one(),
+  queries.issue.byId('issue-123').one()
 )
 ```
 
@@ -650,28 +649,28 @@ You can also wait for the server write to succeed:
 const write = zero.mutate(
   mutators.issue.insert({
     id: 'issue-123',
-    title: 'New title',
-  }),
+    title: 'New title'
+  })
 )
 
 const clientRes = await write.client
 if (clientRes.type === 'error') {
   throw new Error(
-    `Mutator failed on client: ${clientRes.error}`,
+    `Mutator failed on client: ${clientRes.error}`
   )
 }
 
 // optimistic write guaranteed to be present here, but not
 // server write.
 const read1 = await zero.run(
-  queries.issue.byId('issue-123').one(),
+  queries.issue.byId('issue-123').one()
 )
 
 // Await server write – this involves a round-trip.
 const serverRes = await write.server
 if (serverRes.type === 'error') {
   throw new Error(
-    `Mutator failed on server: ${serverRes.error}`,
+    `Mutator failed on server: ${serverRes.error}`
   )
 }
 
@@ -680,7 +679,7 @@ if (serverRes.type === 'error') {
 // read2 could potentially be undefined here, for example if the
 // server mutator rejected the write.
 const read2 = await zero.run(
-  queries.issue.byId('issue-123').one(),
+  queries.issue.byId('issue-123').one()
 )
 ```
 
@@ -710,7 +709,7 @@ This is useful for complex queries, or for using Postgres features that Zero doe
 ```ts
 const markAllAsRead = defineMutator(
   z.object({
-    userId: z.string(),
+    userId: z.string()
   }),
   async ({tx, args: {userId}}) => {
     // shared stuff ...
@@ -724,10 +723,10 @@ const markAllAsRead = defineMutator(
       SET read = true
       WHERE user_id = $1
     `,
-        [userId],
+        [userId]
       )
     }
-  },
+  }
 )
 ```
 
@@ -750,14 +749,14 @@ export const mutators = {
     update: defineMutator(
       z.object({
         id: z.string(),
-        title: z.string(),
+        title: z.string()
       }),
       async (tx, {id, title}) => {
         await tx.mutate(crud.issue.update({id, title}))
         await sendEmailToSubscribers(id)
-      },
-    ),
-  } as const,
+      }
+    )
+  } as const
 }
 ```
 
@@ -769,7 +768,7 @@ app.post('/push', async c => {
   const result = await processor.process(
     createMutators(authData, asyncTasks),
     c.req.query(),
-    await c.req.json(),
+    await c.req.json()
   )
 
   await Promise.all(asyncTasks.map(task => task()))

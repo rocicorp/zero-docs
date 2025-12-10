@@ -54,7 +54,7 @@ function App() {
   const userID = selectedUserID()
 
   const [posts] = useQuery(
-    queries.posts.byStatus({status: 'draft'}),
+    queries.posts.byStatus({status: 'draft'})
   )
 
   return (

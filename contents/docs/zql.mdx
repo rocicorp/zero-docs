@@ -166,7 +166,7 @@ zql.query.issue.related(
     q
       .orderBy('modified', 'desc')
       .limit(100)
-      .start(lastSeenComment),
+      .start(lastSeenComment)
 )
 ```
 
@@ -190,7 +190,7 @@ zql.query.issue.related('comments', q =>
   q
     .orderBy('modified', 'desc')
     .limit(100)
-    .related('reactions'),
+    .related('reactions')
 )
 ```
 
@@ -270,9 +270,9 @@ zql.query.issue.where(({cmp, and, or, not}) =>
     cmp('priority', 'critical'),
     and(
       cmp('priority', 'medium'),
-      not(cmp('numVotes', '>', 100)),
-    ),
-  ),
+      not(cmp('numVotes', '>', 100))
+    )
+  )
 )
 ```
 
@@ -331,7 +331,7 @@ The argument to `whereExists` is a relationship, so just like other relationship
 ```tsx
 // Find all orgs that have at least one cool employee
 zql.query.organization.whereExists('employees', q =>
-  q.where('location', 'Hawaii'),
+  q.where('location', 'Hawaii')
 )
 ```
 
@@ -340,7 +340,7 @@ As with querying relationships, relationship filters can be arbitrarily nested:
 ```tsx
 // Get all issues that have comments that have reactions
 zql.query.issue.whereExists('comments', q =>
-  q.whereExists('reactions'),
+  q.whereExists('reactions')
 )
 ```
 
@@ -363,7 +363,7 @@ You can get the TypeScript type of the result of a query using the `QueryResultT
 ```ts
 const complexQuery = zql.query.issue.related(
   'comments',
-  q => q.related('author'),
+  q => q.related('author')
 )
 type MyComplexResult = QueryResultType<typeof complexQuery>
 

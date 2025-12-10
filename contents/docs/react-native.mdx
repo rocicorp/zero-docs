@@ -8,15 +8,17 @@ Usage is identical to [React on the web](./react), except you must provide
 the Expo implementation of Zero's `kvStore` interface:
 
 ```tsx
-import type {ZeroOptions} from '@rocicorp/zero';
-import {ZeroProvider} from '@rocicorp/zero/react';
-import {expoSQLiteStoreProvider} from '@rocicorp/zero/expo-sqlite';
-import {type Schema} from './schema.ts';
-import {type Mutators} from './mutators.ts';
+import type {ZeroOptions} from '@rocicorp/zero'
+import {ZeroProvider} from '@rocicorp/zero/react'
+import {expoSQLiteStoreProvider} from '@rocicorp/zero/expo-sqlite'
+import {type Schema} from './schema.ts'
+import {type Mutators} from './mutators.ts'
 
 // on web, we use the browser's IndexedDB
 const kvStore =
-  Platform.OS === 'web' ? undefined : expoSQLiteStoreProvider();
+  Platform.OS === 'web'
+    ? undefined
+    : expoSQLiteStoreProvider()
 
 export default function RootLayout() {
   const zeroProps = useMemo(() => {
@@ -25,8 +27,8 @@ export default function RootLayout() {
       server: 'http://localhost:4848',
       schema,
       mutators: createMutators(authData),
-    } as const satisfies ZeroOptions<Schema, Mutators>;
-  }, []);
+    } as const satisfies ZeroOptions<Schema, Mutators>
+  }, [])
 
   return (
     <ZeroProvider {...zeroProps}>
@@ -34,7 +36,7 @@ export default function RootLayout() {
         <App />
       </SafeAreaProvider>
     </ZeroProvider>
-  );
+  )
 }
 ```
 
@@ -45,15 +47,15 @@ For a complete example, see [zslack](./samples#zslack).
 Zero includes support for using the [`op-sqlite`](https://github.com/OP-Engineering/op-sqlite) bindings to SQLite:
 
 ```tsx
-import {opSQLiteStoreProvider} from '@rocicorp/zero/op-sqlite';
+import {opSQLiteStoreProvider} from '@rocicorp/zero/op-sqlite'
 
 export default function RootLayout() {
   const zeroProps = useMemo(() => {
     return {
       kvStore: opSQLiteStoreProvider(),
       // ...
-    } as const satisfies ZeroOptions<Schema, Mutators>;
-  }, []);
+    } as const satisfies ZeroOptions<Schema, Mutators>
+  }, [])
 
   return (
     <ZeroProvider {...zeroProps}>
@@ -61,7 +63,7 @@ export default function RootLayout() {
         <App />
       </SafeAreaProvider>
     </ZeroProvider>
-  );
+  )
 }
 ```
 

@@ -8,8 +8,8 @@ title: Ad-Hoc Queries (Deprecated)
   slug="deprecation"
   heading="This API is deprecated"
 >
-  It will be removed in a future release of Zero. Please move to
-  the new [queries](/docs/queries) API.
+  It will be removed in a future release of Zero. Please
+  move to the new [queries](/docs/queries) API.
 </Note>
 
 ## Overview
@@ -20,7 +20,7 @@ Zero generates a query API for every table you sync. To enable, set the `enableL
 const schema = createSchema({
   // ...
   enableLegacyQueries: true,
-});
+})
 ```
 
 Once enabled, queries are available at `z.query.<tablename>`.

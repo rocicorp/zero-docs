@@ -8,8 +8,8 @@ title: CRUD Mutators (Deprecated)
   slug="deprecation"
   heading="This API is deprecated"
 >
-  It will be removed in a future release of Zero. Please move to
-  the new [mutator](/docs/mutators) API.
+  It will be removed in a future release of Zero. Please
+  move to the new [mutator](/docs/mutators) API.
 </Note>
 
 ## Overview
@@ -20,7 +20,7 @@ Zero generates basic CRUD mutators for every table you sync. To enable, set the 
 const schema = createSchema({
   // ...
   enableLegacyMutators: true,
-});
+})
 ```
 
 Once enabled, mutators are available at `z.mutate.<tablename>`:

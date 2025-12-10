@@ -37,10 +37,10 @@ Zero segregates the client-side storage for each user. This allows users to quic
   heading="`userID` is not a security boundary"
   slug="user-id-is-not-a-security-boundary"
 >
-  All users that have access to a browser profile have access to
-  the same IndexedDB instances. There is nothing that Zero can do
-  about this – users can just open the folder where the data is
-  stored and look inside it.
+  All users that have access to a browser profile have
+  access to the same IndexedDB instances. There is nothing
+  that Zero can do about this – users can just open the
+  folder where the data is stored and look inside it.
 </Note>
 
 If you have more than one set of Zero data per-user (i.e., for different apps in the same domain), you can additionally use the `storageKey` parameter:
@@ -124,10 +124,10 @@ Zero will forward this token to your [mutate](/docs/mutators) and [queries](/doc
 export function handleMutate(request: Request) {
   const session = await authenticate(
     request.headers.get('Authorization'),
-  );
+  )
 
   if (!session) {
-    return json({error: 'Unauthorized'}, {status: 401});
+    return json({error: 'Unauthorized'}, {status: 401})
   }
 
   // handle mutate request ...
@@ -140,10 +140,10 @@ To mark a request as unauthorized, return a `401` or `403` status code from your
 
 ```ts
 export function handleMutate(request: Request) {
-  const session = await authenticate(request);
+  const session = await authenticate(request)
 
   if (!session) {
-    return json({error: 'Forbidden'}, {status: 403});
+    return json({error: 'Forbidden'}, {status: 403})
   }
 
   // handle mutate request ...
@@ -154,12 +154,12 @@ This will cause Zero to disconnect from `zero-cache` and the [connection status]
 
 ```tsx
 function NeedsAuthDialog() {
-  const connectionState = useZeroConnectionState();
+  const connectionState = useZeroConnectionState()
 
   const refreshAuthToken = async () => {
-    const token = await fetchNewToken();
-    zero.connection.connect({auth: token});
-  };
+    const token = await fetchNewToken()
+    zero.connection.connect({auth: token})
+  }
 
   if (connectionState.name === 'needs-auth') {
     return (
@@ -167,10 +167,10 @@ function NeedsAuthDialog() {
         <h1>Authentication Required</h1>
         <button onClick={refreshAuthToken}>Login</button>
       </div>
-    );
+    )
   }
 
-  return null;
+  return null
 }
 ```
 
@@ -204,13 +204,13 @@ To do this, define a `Context` type that includes the user's ID and any other re
 
 ```ts
 export type ZeroContext = {
-  userID: string;
-  role: 'admin' | 'user';
-};
+  userID: string
+  role: 'admin' | 'user'
+}
 
 declare module '@rocicorp/zero' {
   interface DefaultTypes {
-    ctx: ZeroContext;
+    ctx: ZeroContext
   }
 }
 ```
@@ -234,13 +234,13 @@ return <ZeroProvider {...{
 On the server-side, you will also pass an instance of this context when invoking your [queries](/docs/queries#implementing-the-endpoint) and [mutators](/docs/mutators#implementing-the-endpoint):
 
 ```ts
-const query = mustGetQuery(queries, name);
-query.fn({args, ctx});
+const query = mustGetQuery(queries, name)
+query.fn({args, ctx})
 
 // or
 
-const mutator = mustGetMutator(mutators, name);
-mutator.fn({tx, args, ctx});
+const mutator = mustGetMutator(mutators, name)
+mutator.fn({tx, args, ctx})
 ```
 
 You can then access the context within your [queries](TODO) and [mutators](TODO) to implement permissions.
@@ -261,8 +261,8 @@ Here are a collection of common permissions patterns and how to implement them i
 // Use the context's `userID` to filter the rows to only the
 // ones owned by the user.
 const myPosts = defineQuery(({ctx: {userID}}) => {
-  return zql.post.where('authorID', userID);
-});
+  return zql.post.where('authorID', userID)
+})
 ```
 
 #### Owned or Shared Rows
@@ -276,19 +276,21 @@ const allowedPosts = defineQuery(({ctx: {userID}}) => {
       cmp('authorID', userID),
       exists('sharedWith', q => q.where('userID', userID)),
     ),
-  );
-});
+  )
+})
 ```
 
 #### Owned Rows or All if Admin
 
 ```ts
-const allowedPosts = defineQuery(({ctx: {userID, role}}) => {
-  if (role === 'admin') {
-    return zql.post;
-  }
-  return zql.post.where('authorID', userID);
-});
+const allowedPosts = defineQuery(
+  ({ctx: {userID, role}}) => {
+    if (role === 'admin') {
+      return zql.post
+    }
+    return zql.post.where('authorID', userID)
+  },
+)
 ```
 
 ### Write Permissions
@@ -309,9 +311,9 @@ const createPost = defineMutator(
       title,
       content,
       authorID: userID,
-    });
+    })
   },
-);
+)
 ```
 
 #### Edit Owned Rows
@@ -323,19 +325,21 @@ const updatePost = defineMutator(
     content: z.string().optional(),
   }),
   (tx, {ctx: {userID}, args: {id, content}}) => {
-    const prev = await tx.run(zql.post.where('id', id).one());
+    const prev = await tx.run(
+      zql.post.where('id', id).one(),
+    )
     if (!prev) {
-      return;
+      return
     }
     if (prev.authorID !== userID) {
-      throw new Error('Access denied');
+      throw new Error('Access denied')
     }
     return zql.post.update({
       id,
       content,
-    });
+    })
   },
-);
+)
 ```
 
 #### Edit Owned or Shared Rows
@@ -350,24 +354,26 @@ const updatePost = defineMutator(
     const prev = await tx.run(
       zql.post
         .where('id', id)
-        .related('sharedWith', q => q.where('userID', userID))
+        .related('sharedWith', q =>
+          q.where('userID', userID),
+        )
         .one(),
-    );
+    )
     if (!prev) {
-      return;
+      return
     }
     if (
       prev.authorID !== userID &&
       prev.sharedWith.length === 0
     ) {
-      throw new Error('Access denied');
+      throw new Error('Access denied')
     }
     return zql.post.update({
       id,
       content,
-    });
+    })
   },
-);
+)
 ```
 
 #### Edit Owned or All if Admin
@@ -379,19 +385,21 @@ const updatePost = defineMutator(
     content: z.string().optional(),
   }),
   (tx, {ctx: {role, userID}, args: {id, content}}) => {
-    const prev = await tx.run(zql.post.where('id', id).one());
+    const prev = await tx.run(
+      zql.post.where('id', id).one(),
+    )
     if (!prev) {
-      return;
+      return
     }
     if (role !== 'admin' && prev.authorID !== userID) {
-      throw new Error('Access denied');
+      throw new Error('Access denied')
     }
     return zql.post.update({
       id,
       content,
-    });
+    })
   },
-);
+)
 ```
 
 ## Logging Out
@@ -403,10 +411,10 @@ If you do nothing, the synced data will be left on the device. The next login wi
 If you instead want to clear data on logout, Zero provides the `dropAllDatabases` function:
 
 ```ts
-import {dropAllDatabases} from '@rocicorp/zero';
+import {dropAllDatabases} from '@rocicorp/zero'
 
 // Returns an object with:
 // - The names of the successfully dropped databases
 // - Any errors encountered while dropping
-const {dropped, errors} = await dropAllDatabases();
+const {dropped, errors} = await dropAllDatabases()
 ```

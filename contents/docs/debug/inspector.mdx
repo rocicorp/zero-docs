@@ -28,15 +28,15 @@ We require this variable to be set to a non-empty value in production because we
 Once you have an inspector, you can inspect the current client and client group. For example to see active queries for the current client:
 
 ```ts
-let qs = await inspector.client.queries();
-console.table(qs);
+let qs = await inspector.client.queries()
+console.table(qs)
 ```
 
 To see active queries for the entire group:
 
 ```ts
-let qs = await inspector.client.queries();
-console.table(qs);
+let qs = await inspector.client.queries()
+console.table(qs)
 ```
 
 <Note heading="Clients vs Groups">
@@ -53,8 +53,8 @@ But if you are trying to understand when particular queries get added, it's conv
 The inspector exposes a bunch of useful information about queries. For example, to see the first query for the current client:
 
 ```ts
-let qs = await inspector.client.queries();
-console.log(qs[0]);
+let qs = await inspector.client.queries()
+console.log(qs[0])
 ```
 
 This outputs something like:
@@ -86,7 +86,7 @@ Here are some of the more useful fields:
 Use the `analyze` method to get information about how a query hydrates:
 
 ```ts
-await qs[0].analyze();
+await qs[0].analyze()
 ```
 
 <ImageLightbox
@@ -114,7 +114,7 @@ await __zero.inspector.analyzeQuery(
   __builder.issues.whereExists('labels', q =>
     q.id.equals('sync'),
   ),
-);
+)
 ```
 
 This is useful for exploring alternative query constructions to optimize performance.
@@ -124,8 +124,8 @@ To use this, you will first have to expose your `builder` as a property of the g
 ```ts
 // schema.ts
 // ...
-const g = globalThis as any;
-g.__builder = builder;
+const g = globalThis as any
+g.__builder = builder
 ```
 
 ## Analyzing Query Plans
@@ -155,17 +155,17 @@ To view the join plan selected by Zero, call `analyze()` or `analyzeQuery()` wit
 In addition to information about queries, you can get direct access to the contents of the client side database.
 
 ```ts
-const client = __zero.inspector.client;
+const client = __zero.inspector.client
 
 // All raw k/v data currently synced to client
-console.log('client map:');
-console.log(await client.map());
+console.log('client map:')
+console.log(await client.map())
 
 // kv table extracted into tables
 // This is same info that is in z.query[tableName].run()
 for (const tableName of Object.keys(__zero.schema.tables)) {
-  console.log(`table ${tableName}:`);
-  console.table(await client.rows(tableName));
+  console.log(`table ${tableName}:`)
+  console.table(await client.rows(tableName))
 }
 ```
 
@@ -174,5 +174,8 @@ for (const tableName of Object.keys(__zero.schema.tables)) {
 Ask the server to confirm what version it is:
 
 ```ts
-console.log('server version: ', await inspector.serverVersion());
+console.log(
+  'server version: ',
+  await inspector.serverVersion(),
+)
 ```

@@ -91,10 +91,10 @@ yarn prisma generate
   slug="contributing"
 >
   We'd love more! See the source for
-  [drizzle-zero](https://github.com/rocicorp/drizzle-zero) and
-  [prisma-zero](https://github.com/rocicorp/prisma-zero) as a
-  guide, or reach out on [Discord](https://discord.rocicorp.dev/)
-  with questions.
+  [drizzle-zero](https://github.com/rocicorp/drizzle-zero)
+  and [prisma-zero](https://github.com/rocicorp/prisma-zero)
+  as a guide, or reach out on
+  [Discord](https://discord.rocicorp.dev/) with questions.
 </Note>
 
 ## Writing by Hand
@@ -106,7 +106,7 @@ You can also write Zero schemas by hand for full control.
 Use the `table` function to define each table in your Zero schema:
 
 ```tsx
-import {table, string, boolean} from '@rocicorp/zero';
+import {table, string, boolean} from '@rocicorp/zero'
 
 const user = table('user')
   .columns({
@@ -114,7 +114,7 @@ const user = table('user')
     name: string(),
     partner: boolean(),
   })
-  .primaryKey('id');
+  .primaryKey('id')
 ```
 
 Column types are defined with the `boolean()`, `number()`, `string()`, `json()`, and `enumeration()` helpers. See [Column Types](/docs/postgres-support#column-types) for how database types are mapped to these types.
@@ -131,7 +131,7 @@ const userPref = table('userPref')
     id: string(),
     // Map TS "orgID" to DB name "org_id"
     orgID: string().from('org_id'),
-  });
+  })
 ```
 
 #### Multiple Schemas
@@ -140,7 +140,7 @@ You can also use `from()` to access other Postgres schemas:
 
 ```ts
 // Sync the "event" table from the "analytics" schema.
-const event = table('event').from('analytics.event');
+const event = table('event').from('analytics.event')
 ```
 
 #### Optional Columns
@@ -154,7 +154,7 @@ const user = table('user')
     name: string(),
     nickName: string().optional(),
   })
-  .primaryKey('id');
+  .primaryKey('id')
 ```
 
 An optional column can store a value of the specified type or `null` to mean _no value_.
@@ -173,7 +173,7 @@ An optional column can store a value of the specified type or `null` to mean _no
 Use the `enumeration` helper to define a column that can only take on a specific set of values. This is most often used alongside an [`enum` Postgres column type](/docs/postgres-support#column-types).
 
 ```tsx
-import {table, string, enumeration} from '@rocicorp/zero';
+import {table, string, enumeration} from '@rocicorp/zero'
 
 const user = table('user')
   .columns({
@@ -181,7 +181,7 @@ const user = table('user')
     name: string(),
     mood: enumeration<'happy' | 'sad' | 'taco'>(),
   })
-  .primaryKey('id');
+  .primaryKey('id')
 ```
 
 #### Custom JSON Types
@@ -189,7 +189,7 @@ const user = table('user')
 Use the `json` helper to define a column that stores a JSON-compatible value:
 
 ```tsx
-import {table, string, json} from '@rocicorp/zero';
+import {table, string, json} from '@rocicorp/zero'
 
 const user = table('user')
   .columns({
@@ -197,7 +197,7 @@ const user = table('user')
     name: string(),
     settings: json<{theme: 'light' | 'dark'}>(),
   })
-  .primaryKey('id');
+  .primaryKey('id')
 ```
 
 #### Compound Primary Keys
@@ -211,7 +211,7 @@ const user = table('user')
     userID: string(),
     name: string(),
   })
-  .primaryKey('orgID', 'userID');
+  .primaryKey('orgID', 'userID')
 ```
 
 ### Relationships
@@ -233,7 +233,7 @@ const messageRelationships = relationships(
       destField: ['parentMessageID'],
     }),
   }),
-);
+)
 ```
 
 This creates "sender" and "replies" relationships that can later be queried with the [`related` ZQL clause](/docs/reading-data#relationships):
@@ -241,7 +241,7 @@ This creates "sender" and "replies" relationships that can later be queried with
 ```ts
 const messagesWithSenderAndReplies = z.query.messages
   .related('sender')
-  .related('replies');
+  .related('replies')
 ```
 
 This will return an object for each message row. Each message will have a `sender` field that is a single `User` object or `null`, and a `replies` field that is an array of `Message` objects.
@@ -251,20 +251,23 @@ This will return an object for each message row. Each message will have a `sende
 You can create many-to-many relationships by chaining the relationship definitions. Assuming `issue` and `label` tables, along with an `issueLabel` junction table, you can define a `labels` relationship like this:
 
 ```ts
-const issueRelationships = relationships(issue, ({many}) => ({
-  labels: many(
-    {
-      sourceField: ['id'],
-      destSchema: issueLabel,
-      destField: ['issueID'],
-    },
-    {
-      sourceField: ['labelID'],
-      destSchema: label,
-      destField: ['id'],
-    },
-  ),
-}));
+const issueRelationships = relationships(
+  issue,
+  ({many}) => ({
+    labels: many(
+      {
+        sourceField: ['id'],
+        destSchema: issueLabel,
+        destField: ['issueID'],
+      },
+      {
+        sourceField: ['labelID'],
+        destSchema: label,
+        destField: ['id'],
+      },
+    ),
+  }),
+)
 ```
 
 <Note
@@ -279,13 +282,16 @@ const issueRelationships = relationships(issue, ({many}) => ({
 Relationships can traverse compound keys. Imagine a `user` table with a compound primary key of `orgID` and `userID`, and a `message` table with a related `senderOrgID` and `senderUserID`. This can be represented in your schema with:
 
 ```ts
-const messageRelationships = relationships(message, ({one}) => ({
-  sender: one({
-    sourceField: ['senderOrgID', 'senderUserID'],
-    destSchema: user,
-    destField: ['orgID', 'userID'],
+const messageRelationships = relationships(
+  message,
+  ({one}) => ({
+    sender: one({
+      sourceField: ['senderOrgID', 'senderUserID'],
+      destSchema: user,
+      destField: ['orgID', 'userID'],
+    }),
   }),
-}));
+)
 ```
 
 #### Circular Relationships
@@ -293,13 +299,16 @@ const messageRelationships = relationships(message, ({one}) => ({
 Circular relationships are fully supported:
 
 ```tsx
-const commentRelationships = relationships(comment, ({one}) => ({
-  parent: one({
-    sourceField: ['parentID'],
-    destSchema: comment,
-    destField: ['id'],
+const commentRelationships = relationships(
+  comment,
+  ({one}) => ({
+    parent: one({
+      sourceField: ['parentID'],
+      destSchema: comment,
+      destField: ['id'],
+    }),
   }),
-}));
+)
 ```
 
 ### Database Schemas
@@ -307,7 +316,7 @@ const commentRelationships = relationships(comment, ({one}) => ({
 Use `createSchema` to define the entire Zero schema:
 
 ```tsx
-import {createSchema} from '@rocicorp/zero';
+import {createSchema} from '@rocicorp/zero'
 
 export const schema = createSchema({
   tables: [user, medium, message],
@@ -316,7 +325,7 @@ export const schema = createSchema({
     mediumRelationships,
     messageRelationships,
   ],
-});
+})
 ```
 
 ## Migrations
@@ -346,7 +355,7 @@ const z = new Zero({
       // When you're ready, call `location.reload()`.
     }
   },
-});
+})
 ```
 
 If the schema changes in a compatible way while a client is running, `zero-cache` syncs the schema change to the client so that it's ready when the app reloads.
@@ -365,7 +374,8 @@ Like other database-backed applications, Zero schema migrations generally follow
 Steps 1-3 can generally be done as part of a single deploy in your CI pipeline, but step 4 should be weeks later, when most open clients have refreshed the application.
 
 <Note type="warning" slug="postgres-special-cases">
-  Certain schema changes require special handling in Postgres.
-  See [Schema Changes](/docs/postgres-support#schema-changes) for
+  Certain schema changes require special handling in
+  Postgres. See [Schema
+  Changes](/docs/postgres-support#schema-changes) for
   details.
 </Note>

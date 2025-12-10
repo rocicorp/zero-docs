@@ -2,8 +2,15 @@
 title: RLS Permissions (Deprecated)
 ---
 
-<Note emoji="🧟" type="danger" slug="deprecation" heading="This API is deprecated">
-  It will be removed in a future release of Zero. See [Permissions](/docs/auth#permissions) for more information.
+<Note
+  emoji="🧟"
+  type="danger"
+  slug="deprecation"
+  heading="This API is deprecated"
+>
+  It will be removed in a future release of Zero. See
+  [Permissions](/docs/auth#permissions) for more
+  information.
 </Note>
 
 Permissions are expressed using [ZQL](reading-data) and run automatically with every read and write.
@@ -20,34 +27,39 @@ Here's an example of limiting reads to members of an organization and deletes to
 // The decoded value of your JWT.
 type AuthData = {
   // The logged-in user.
-  sub: string;
-};
+  sub: string
+}
 
-export const permissions = definePermissions<AuthData, Schema>(schema, () => {
+export const permissions = definePermissions<
+  AuthData,
+  Schema
+>(schema, () => {
   // Checks if the user exists in a related organization
   const allowIfInOrganization = (
     authData: AuthData,
-    eb: ExpressionBuilder<Schema, 'issue'>,
+    eb: ExpressionBuilder<Schema, 'issue'>
   ) =>
     eb.exists('organization', q =>
-      q.whereExists('user', q => q.where('id', authData.sub)),
-    );
+      q.whereExists('user', q =>
+        q.where('id', authData.sub)
+      )
+    )
 
   // Checks if the user is the creator
   const allowIfIssueCreator = (
     authData: AuthData,
-    {cmp}: ExpressionBuilder<Schema, 'issue'>,
-  ) => cmp('creatorID', authData.sub);
+    {cmp}: ExpressionBuilder<Schema, 'issue'>
+  ) => cmp('creatorID', authData.sub)
 
   return {
     issue: {
       row: {
         select: [allowIfInOrganization],
-        delete: [allowIfIssueCreator],
-      },
-    },
-  } satisfies PermissionsConfig<AuthData, Schema>;
-});
+        delete: [allowIfIssueCreator]
+      }
+    }
+  } satisfies PermissionsConfig<AuthData, Schema>
+})
 ```
 
 `definePermission` returns a _policy_ object for each table in the schema. Each policy defines a _ruleset_ for the _operations_ that are possible on a table: `select`, `insert`, `update`, and `delete`.
@@ -59,34 +71,40 @@ If you don't specify any rules for an operation, it is denied by default. This i
 To enable full access to an action (i.e., during development) use the `ANYONE_CAN` helper:
 
 ```ts
-import {ANYONE_CAN} from '@rocicorp/zero';
+import {ANYONE_CAN} from '@rocicorp/zero'
 
-const permissions = definePermissions<AuthData, Schema>(schema, () => {
-  return {
-    issue: {
-      row: {
-        select: ANYONE_CAN,
-        // Other operations are denied by default.
-      },
-    },
-    // Other tables are denied by default.
-  } satisfies PermissionsConfig<AuthData, Schema>;
-});
+const permissions = definePermissions<AuthData, Schema>(
+  schema,
+  () => {
+    return {
+      issue: {
+        row: {
+          select: ANYONE_CAN
+          // Other operations are denied by default.
+        }
+      }
+      // Other tables are denied by default.
+    } satisfies PermissionsConfig<AuthData, Schema>
+  }
+)
 ```
 
 To do this for all actions, use `ANYONE_CAN_DO_ANYTHING`:
 
 ```ts
-import {ANYONE_CAN_DO_ANYTHING} from '@rocicorp/zero';
+import {ANYONE_CAN_DO_ANYTHING} from '@rocicorp/zero'
 
-const permissions = definePermissions<AuthData, Schema>(schema, () => {
-  return {
-    // All operations on issue are allowed to all users.
-    issue: ANYONE_CAN_DO_ANYTHING,
+const permissions = definePermissions<AuthData, Schema>(
+  schema,
+  () => {
+    return {
+      // All operations on issue are allowed to all users.
+      issue: ANYONE_CAN_DO_ANYTHING
 
-    // Other tables are denied by default.
-  } satisfies PermissionsConfig<AuthData, Schema>;
-});
+      // Other tables are denied by default.
+    } satisfies PermissionsConfig<AuthData, Schema>
+  }
+)
 ```
 
 ## Permission Evaluation
@@ -122,12 +140,12 @@ new command.local.Command(
     environment: {
       ZERO_UPSTREAM_DB: commonEnv.ZERO_UPSTREAM_DB,
       // If the application has a non-default App ID ...
-      ZERO_APP_ID: commonEnv.ZERO_APP_ID,
-    },
+      ZERO_APP_ID: commonEnv.ZERO_APP_ID
+    }
   },
   // after the view-syncer is deployed.
-  {dependsOn: viewSyncer},
-);
+  {dependsOn: viewSyncer}
+)
 ```
 
 See the [SST Deployment Guide](deployment#guide-multi-node-on-sstaws) for more details.
@@ -150,17 +168,17 @@ For example, imagine a select permission that restricts reads to only issues cre
 definePermissions<AuthData, Schema>(schema, () => {
   const allowIfIssueCreator = (
     authData: AuthData,
-    {cmp}: ExpressionBuilder<Schema, 'issue'>,
-  ) => cmp('creatorID', authData.sub);
+    {cmp}: ExpressionBuilder<Schema, 'issue'>
+  ) => cmp('creatorID', authData.sub)
 
   return {
     issue: {
       row: {
-        select: [allowIfIssueCreator],
-      },
-    },
-  } satisfies PermissionsConfig<AuthData, Schema>;
-});
+        select: [allowIfIssueCreator]
+      }
+    }
+  } satisfies PermissionsConfig<AuthData, Schema>
+})
 ```
 
 If the issue table has two rows, one created by the user and one by someone else, the user will only see the row they created in any queries.
@@ -169,6 +187,7 @@ If the issue table has two rows, one created by the user and one by someone else
 Select permission applies to every column. The recommended approach for now is to factor out private fields into a separate table, e.g. `user_private`. Column permissions are planned but currently not a high priority.
 
 Note that although the same limitation applies to declarative insert/update permissions, [custom mutators](/docs/custom-mutators) support arbitrary server-side logic and so can easily control which columns are writable.
+
 </Note>
 
 ## Insert Permissions
@@ -183,17 +202,17 @@ Here's an example of an insert rule that disallows inserting users that have the
 definePermissions<AuthData, Schema>(schema, () => {
   const allowIfNonAdmin = (
     authData: AuthData,
-    {cmp}: ExpressionBuilder<Schema, 'user'>,
-  ) => cmp('role', '!=', 'admin');
+    {cmp}: ExpressionBuilder<Schema, 'user'>
+  ) => cmp('role', '!=', 'admin')
 
   return {
     user: {
       row: {
-        insert: [allowIfNonAdmin],
-      },
-    },
-  } satisfies PermissionsConfig<AuthData, Schema>;
-});
+        insert: [allowIfNonAdmin]
+      }
+    }
+  } satisfies PermissionsConfig<AuthData, Schema>
+})
 ```
 
 ## Update Permissions
@@ -212,20 +231,20 @@ For example, the following ruleset allows an issue's owner to edit, but **not** 
 definePermissions<AuthData, Schema>(schema, () => {
   const allowIfIssueOwner = (
     authData: AuthData,
-    {cmp}: ExpressionBuilder<Schema, 'issue'>,
-  ) => cmp('ownerID', authData.sub);
+    {cmp}: ExpressionBuilder<Schema, 'issue'>
+  ) => cmp('ownerID', authData.sub)
 
   return {
     issue: {
       row: {
         update: {
           preMutation: [allowIfIssueOwner],
-          postMutation: [allowIfIssueOwner],
-        },
-      },
-    },
-  } satisfies PermissionsConfig<AuthData, Schema>;
-});
+          postMutation: [allowIfIssueOwner]
+        }
+      }
+    }
+  } satisfies PermissionsConfig<AuthData, Schema>
+})
 ```
 
 This ruleset allows an issue's owner to edit and re-assign the issue:
@@ -234,20 +253,20 @@ This ruleset allows an issue's owner to edit and re-assign the issue:
 definePermissions<AuthData, Schema>(schema, () => {
   const allowIfIssueOwner = (
     authData: AuthData,
-    {cmp}: ExpressionBuilder<Schema, 'issue'>,
-  ) => cmp('ownerID', authData.sub);
+    {cmp}: ExpressionBuilder<Schema, 'issue'>
+  ) => cmp('ownerID', authData.sub)
 
   return {
     issue: {
       row: {
         update: {
           preMutation: [allowIfIssueOwner],
-          postMutation: ANYONE_CAN,
-        },
-      },
-    },
-  } satisfies PermissionsConfig<AuthData, Schema>;
-});
+          postMutation: ANYONE_CAN
+        }
+      }
+    }
+  } satisfies PermissionsConfig<AuthData, Schema>
+})
 ```
 
 And this allows anyone to edit an issue, but only if they also assign it to themselves. Useful for enforcing _"patches welcome"_? 🙃
@@ -256,20 +275,20 @@ And this allows anyone to edit an issue, but only if they also assign it to them
 definePermissions<AuthData, Schema>(schema, () => {
   const allowIfIssueOwner = (
     authData: AuthData,
-    {cmp}: ExpressionBuilder<Schema, 'issue'>,
-  ) => cmp('ownerID', authData.sub);
+    {cmp}: ExpressionBuilder<Schema, 'issue'>
+  ) => cmp('ownerID', authData.sub)
 
   return {
     issue: {
       row: {
         update: {
           preMutation: ANYONE_CAN,
-          postMutation: [allowIfIssueOwner],
-        },
-      },
-    },
-  } satisfies PermissionsConfig<AuthData, Schema>;
-});
+          postMutation: [allowIfIssueOwner]
+        }
+      }
+    }
+  } satisfies PermissionsConfig<AuthData, Schema>
+})
 ```
 
 ## Delete Permissions
@@ -284,17 +303,17 @@ You can use the [`cmpLit` helper](reading-data#comparing-literal-values) to defi
 definePermissions<AuthData, Schema>(schema, () => {
   const allowIfAdmin = (
     authData: AuthData,
-    {cmpLit}: ExpressionBuilder<Schema, 'issue'>,
-  ) => cmpLit(authData.role, 'admin');
+    {cmpLit}: ExpressionBuilder<Schema, 'issue'>
+  ) => cmpLit(authData.role, 'admin')
 
   return {
     issue: {
       row: {
-        select: [allowIfAdmin],
-      },
-    },
-  } satisfies PermissionsConfig<AuthData, Schema>;
-});
+        select: [allowIfAdmin]
+      }
+    }
+  } satisfies PermissionsConfig<AuthData, Schema>
+})
 ```
 
 ## Debugging
@@ -326,9 +345,9 @@ npx analyze-query
 ```
 
 <Note type="note" slug="decompilation">
-  The printed query can be different than the source ZQL string, because it is
-  rebuilt from the query AST. But it should be logically equivalent to the query
-  you wrote.
+  The printed query can be different than the source ZQL
+  string, because it is rebuilt from the query AST. But it
+  should be logically equivalent to the query you wrote.
 </Note>
 
 ### Write Permissions
@@ -342,6 +361,7 @@ Permission check failed for {"op":"update","tableName":"message",...}, action up
 Zero prints the row, auth data, and permission policies that was applied to any failed writes.
 
 <Note slug="ast-format">
-  The ZQL query is printed in AST format. See [Query ASTs](./query-asts) to
-  convert it to a more readable format.
+  The ZQL query is printed in AST format. See [Query
+  ASTs](./query-asts) to convert it to a more readable
+  format.
 </Note>

@@ -4,8 +4,11 @@ module.exports = {
     {
       files: ['*.md', '*.mdx'],
       options: {
-        printWidth: 65,
+        printWidth: 60,
         proseWrap: 'preserve',
+        semi: false,
+        trailingComma: 'none',
+        arrowParens: 'avoid',
       },
     },
   ],

@@ -5,18 +5,17 @@ description: Reading and Syncing Data
 
 Queries are how you read and sync data with Zero. Here's a simple example:
 
-
 ```ts
-import { defineQueries, defineQuery } from '@rocicorp/zero'
-import { zql } from 'schema.ts'
-import z from "zod"
+import {defineQueries, defineQuery} from '@rocicorp/zero'
+import {zql} from 'schema.ts'
+import z from 'zod'
 
 export const queries = defineQueries({
   postsByAuthor: defineQuery(
-    z.object({ authorID: z.string() }),
-    ({ args: { authorID } }) =>
-      zql.post.where('authorID', authorID),
-  ),
+    z.object({authorID: z.string()}),
+    ({args: {authorID}}) =>
+      zql.post.where('authorID', authorID)
+  )
 })
 ```
 
@@ -70,9 +69,7 @@ A query is defined using `defineQuery`. The only required argument is a `QueryFn
 ```ts
 import {zql} from 'schema.ts'
 
-const allPostsQueryDef = defineQuery(
-  () => zql.post
-)
+const allPostsQueryDef = defineQuery(() => zql.post)
 ```
 
 ### Arguments
@@ -83,7 +80,7 @@ The `QueryFn` can take a single `args` parameter of any type, and can use arbitr
 import {zql} from 'schema.ts'
 
 const postsByAuthor = defineQuery(
-  ({args}: {args: {authorID?: string|undefined}}) => {
+  ({args}: {args: {authorID?: string | undefined}}) => {
     let q = zql.post
     if (args.authorID !== undefined) {
       q = q.where('authorID', args.authorID)
@@ -97,6 +94,7 @@ const postsByAuthor = defineQuery(
 It's most common to compute the ZQL expression using only the arguments. But it's not *required*.
 
 Impure queries can be useful, e.g., to consult some external system on the server for authorization or validation.
+
 </Note>
 
 ### Query Registries
@@ -106,7 +104,7 @@ The result of `defineQuery` is a `QueryDefinition`. By itself this isn't super u
 ```ts
 export const queries = defineQueries({
   posts: {
-    all: allPosts,
+    all: allPosts
   }
 })
 ```
@@ -116,9 +114,7 @@ Typically these are done together in one step:
 ```ts
 export const queries = defineQueries({
   posts: {
-    all: defineQuery(
-      () => zql.post
-    ),
+    all: defineQuery(() => zql.post)
   }
 })
 ```
@@ -126,12 +122,10 @@ export const queries = defineQueries({
 The result of `defineQueries` is called a `QueryRegistry`. Each field in the registry is a callable `Query` that you can use to read data:
 
 ```ts
-import { useQuery } from '@rocicorp/zero/react'
-import { queries } from 'queries.ts'
+import {useQuery} from '@rocicorp/zero/react'
+import {queries} from 'queries.ts'
 
-const [allPosts] = useQuery(
-  queries.posts.all()
-)
+const [allPosts] = useQuery(queries.posts.all())
 ```
 
 ### Query Names
@@ -144,7 +138,7 @@ console.log(queries.posts.all.queryName) // "posts.all"
 
 ### Validators
 
-You can optionally pass a *validator* to `defineQuery` as the first argument:
+You can optionally pass a _validator_ to `defineQuery` as the first argument:
 
 ```ts
 import {zql} from 'schema.ts'
@@ -167,6 +161,7 @@ We use [Zod](https://zod.dev/) in these examples, but you can use any validation
 Although validators are *technically* optional, you should consider them required.
 
 This is because Zero queries run on both the client and [on your server](#server-setup). In the server case, the parameters come from the client and are untrusted. These inputs are validated using the validator you provide.
+
 </Note>
 
 ### Context
@@ -178,14 +173,11 @@ For this reason, Zero queries also support the concept of a [`context` object](/
 Access your context with the `ctx` parameter to your query:
 
 ```ts
-const myPostsQuery = defineQuery(
-  ({ ctx: { userID } }) => {
-    // User cannot control context.userID, so this safely
-    // restricts the query to the user's own posts.
-    return zql.post
-      .where('authorID', userID)
-  },
-)
+const myPostsQuery = defineQuery(({ctx: {userID}}) => {
+  // User cannot control context.userID, so this safely
+  // restricts the query to the user's own posts.
+  return zql.post.where('authorID', userID)
+})
 ```
 
 ### queries.ts
@@ -193,29 +185,28 @@ const myPostsQuery = defineQuery(
 By convention, all queries for an application are listed in a central `queries.ts` file. This allows them to be easily used on both the client and server:
 
 ```ts
-import { defineQueries, defineQuery } from '@rocicorp/zero'
-import { zql } from './schema.ts'
-import z from "zod"
+import {defineQueries, defineQuery} from '@rocicorp/zero'
+import {zql} from './schema.ts'
+import z from 'zod'
 
 export const queries = defineQueries({
   posts: {
-    get: defineQuery(
-      z.string(),
-      id => zql.post.where('id', id)
+    get: defineQuery(z.string(), id =>
+      zql.post.where('id', id)
     ),
     byAuthor: defineQuery(
       z.object({
         authorID: z.string(),
-        includeDrafts: z.boolean().optional(),
+        includeDrafts: z.boolean().optional()
       }),
-      ({ args: { authorID, includeDrafts } }) => {
+      ({args: {authorID, includeDrafts}}) => {
         let q = zql.post.where('authorID', authorID)
         if (!includeDrafts) {
           q = q.where('isDraft', false)
         }
         return q
       }
-    ),
+    )
   }
 })
 ```
@@ -227,34 +218,38 @@ As your application grows, you can move queries to different files to keep them 
 ```ts
 // posts.ts
 export const postQueries = {
-  get: defineQuery(
-    z.string(),
-    id => zql.post.where('id', id)
-  ),
+  get: defineQuery(z.string(), id =>
+    zql.post.where('id', id)
+  )
   // ...
 }
 
 // users.ts
 export const userQueries = {
-  byRole: defineQuery(
-    z.string(),
-    role => zql.user.where('role', role)
-  ),
+  byRole: defineQuery(z.string(), role =>
+    zql.user.where('role', role)
+  )
   // ...
 }
 
 // queries.ts
-import { postQueries } from './posts.ts'
-import { userQueries } from './users.ts'
+import {postQueries} from './posts.ts'
+import {userQueries} from './users.ts'
 
 export const queries = defineQueries({
   posts: postQueries,
-  users: userQueries,
+  users: userQueries
 })
 ```
 
-<Note type="warning" emoji="⚠️" heading="Use `defineQueries` at top level only">
-Because `defineQueries` establishes the full name for each query (i.e., `posts.get`, `users.byRole`), it should only be used once at the top level of your `queries.ts` file.
+<Note
+  type="warning"
+  emoji="⚠️"
+  heading="Use `defineQueries` at top level only"
+>
+  Because `defineQueries` establishes the full name for each
+  query (i.e., `posts.get`, `users.byRole`), it should only
+  be used once at the top level of your `queries.ts` file.
 </Note>
 
 ## Server Setup
@@ -277,14 +272,14 @@ The `@rocicorp/zero` package provides the `handleQueryRequest` and `mustGetQuery
 For example, with [Hono](https://hono.dev):
 
 ```ts
-import { mustGetQuery } from "@rocicorp/zero"
-import { handleQueryRequest } from "@rocicorp/zero/server"
-import { schema } from "schema.ts"
-import { queries } from "queries.ts"
+import {mustGetQuery} from '@rocicorp/zero'
+import {handleQueryRequest} from '@rocicorp/zero/server'
+import {schema} from 'schema.ts'
+import {queries} from 'queries.ts'
 
-app.post("/api/zero/query", async (c) => {
+app.post('/api/zero/query', async c => {
   const userID = await authenticateUser(c.req.raw)
-  const ctx = { userID }
+  const ctx = {userID}
   return await c.json(
     await handleQueryRequest(
       (name, args) => {
@@ -310,9 +305,12 @@ If the queries endpoint returns an HTTP or network error, `zero-cache` will be r
 
 ```tsx
 const [posts, details] = useQuery(
-  queries.posts.byAuthorID('user123'))
+  queries.posts.byAuthorID('user123')
+)
 if (details.type === 'error') {
-  return <div>Error loading posts: {details.error.message}</div>
+  return (
+    <div>Error loading posts: {details.error.message}</div>
+  )
 }
 ```
 
@@ -320,7 +318,9 @@ Or using the low-level API:
 
 ```ts
 // Materialize a view of a query
-const postsView = queries.posts.byAuthorID('user123').materialize()
+const postsView = queries.posts
+  .byAuthorID('user123')
+  .materialize()
 postsView.addListener((posts, resultType, error) => {
   if (resultType === 'error') {
     console.error('Error loading posts', error)
@@ -344,7 +344,7 @@ Then choose one of those URLs by passing it to `queryURL` on the `Zero` construc
 const zero = new Zero({
   schema,
   queries,
-  queryURL: 'https://api.staging.example.com/query',
+  queryURL: 'https://api.staging.example.com/query'
 })
 ```
 
@@ -357,19 +357,24 @@ ZERO_QUERY_URL="https://mybranch-*.preview.myapp.com/query"
 ```
 
 This queries URL will allow clients to choose URLs like:
+
 - `https://mybranch-aaa.preview.myapp.com/query` ✅
 - `https://mybranch-bbb.preview.myapp.com/query` ✅
 
 But rejects URLs like:
+
 - `https://preview.myapp.com/query` ❌ (missing subdomain)
 - `https://malicious.com/query` ❌ (different domain)
 - `https://mybranch-123.preview.myapp.com/query/extra` ❌ (extra path)
 - `https://mybranch-123.preview.myapp.com/other` ❌ (different path)
 
 <Note emoji="🥇" heading="Pro Tip (tm)">
-Because URLPattern is a web standard, you can test them right in your browser:
-  <img alt="URL Pattern"
-    src="/images/mutators/url-pattern.png"/>
+  Because URLPattern is a web standard, you can test them
+  right in your browser:
+  <img
+    alt="URL Pattern"
+    src="/images/mutators/url-pattern.png"
+  />
 </Note>
 
 For more information, see the [URLPattern docs](https://developer.mozilla.org/en-US/docs/Web/API/URL_Pattern_API).
@@ -381,14 +386,18 @@ For more information, see the [URLPattern docs](https://developer.mozilla.org/en
 The most common way to use queries is with the `useQuery` reactive hooks from the [React](react) or [SolidJS](solid) bindings:
 
 ```tsx
-import { useQuery } from '@rocicorp/zero/react'
-import { queries } from 'zero/queries.ts'
+import {useQuery} from '@rocicorp/zero/react'
+import {queries} from 'zero/queries.ts'
 
 function App() {
   const [posts] = useQuery(queries.posts.get('user123'))
-  return <div>{posts.map(post =>
-    <div key={post.id}>{post.title}</div>)}
-  </div>
+  return (
+    <div>
+      {posts.map(post => (
+        <div key={post.id}>{post.title}</div>
+      ))}
+    </div>
+  )
 }
 ```
 
@@ -399,7 +408,7 @@ These functions integrate with the associated frameworks to automatically re-ren
 You can use `zero.materialize()` to run and subscribe to a query result outside of a UI framework:
 
 ```ts
-import { queries } from 'zero/queries.ts'
+import {queries} from 'zero/queries.ts'
 
 const myView = zero.materialize(
   queries.posts.byAuthorID('user123')
@@ -413,7 +422,7 @@ for (let post of myView.data) {
 The view is automatically kept up to date by Zero as the underlying data changes. You can add a listener to the view to be notified when the data changes:
 
 ```ts
-myView.addListener((posts) => {
+myView.addListener(posts => {
   console.log(posts)
 })
 ```
@@ -433,7 +442,8 @@ By default, `run()` only returns results that are currently available on the cli
 If you want to wait for the server to return results, pass `{type: 'complete'}` to `run`:
 
 ```tsx
-const results = await queries.issues.byPriority('high')
+const results = await queries.issues
+  .byPriority('high')
   .run({type: 'complete'})
 ```
 
@@ -444,14 +454,14 @@ Almost all Zero apps will want to preload some data in order to maximize the fee
 Because preload queries are often much larger than a screenful of UI, Zero provides a special `zero.preload()` method to avoid the overhead of materializing the result into JS objects:
 
 ```tsx
-import { queries } from 'zero/queries.ts'
+import {queries} from 'zero/queries.ts'
 
 // Preload a large number of the inbox query results.
 zero.preload(
   queries.issues.inbox({
     sort: 'created',
     sortDirection: 'desc',
-    limit: 1000,
+    limit: 1000
   })
 )
 ```
@@ -464,14 +474,14 @@ If you just use a simple existence check, you will often see the 404 UI flicker 
 
 ```tsx
 const [issue, issuesResult] = useQuery(
-  queries.issues.get('some-id'),
-);
+  queries.issues.get('some-id')
+)
 
 // ❌ This causes flickering of the UI
 if (!issue) {
-  return <div>404 Not Found</div>;
+  return <div>404 Not Found</div>
 } else {
-  return <div>{issue}</div>;
+  return <div>{issue}</div>
 }
 ```
 
@@ -479,32 +489,34 @@ To do this correctly, only display the "not found" UI when the result type is `c
 
 ```tsx
 const [issue, issueResult] = useQuery(
-  queries.issues.get('some-id'),
-);
+  queries.issues.get('some-id')
+)
 
 if (!issue && issueResult.type === 'complete') {
-  return <div>404 Not Found</div>;
+  return <div>404 Not Found</div>
 }
 
 if (!issue) {
-  return null;
+  return null
 }
 
-return <div>{issue}</div>;
+return <div>{issue}</div>
 ```
 
 ## Partial Data
 
-Zero immediately returns the data for a query it has on the client, then falls back to the server for any missing data. 
+Zero immediately returns the data for a query it has on the client, then falls back to the server for any missing data.
 
 Sometimes it's useful to know the difference between these two types of results. To do so, use the `result` from `useQuery`:
 
 ```tsx
-const [issues, issuesResult] = useQuery(queries.issues.inbox());
+const [issues, issuesResult] = useQuery(
+  queries.issues.inbox()
+)
 if (issuesResult.type === 'complete') {
-  console.log('All data is present');
+  console.log('All data is present')
 } else {
-  console.log('Some data is missing');
+  console.log('Some data is missing')
 }
 ```
 
@@ -570,15 +582,16 @@ Each query has a `ttl` that controls how long it stays cached.
 <Note emoji="💡" heading="The TTL clock only ticks while Zero is running">
 If the user closes all tabs for your app, Zero stops running and the time that elapses doesn't count toward any TTLs.
 
-You do not need to account for such time when choosing a TTL – you only need to account for time your app is running *without* a query.
+You do not need to account for such time when choosing a TTL – you only need to account for time your app is running _without_ a query.
+
 </Note>
 
 ### TTL Defaults
 
 In most cases, the default TTL should work well:
 
-* `preload()` queries default to `ttl:'none'`, meaning they are not cached at all, and will stop syncing immediately when deactivated. But because `preload()` queries are typically registered at app startup and never shutdown, and [because the ttl clock only ticks while Zero is running](#the-ttl-clock-only-ticks-while-zero-is-running), this means that preload queries never get unregistered.
-* Other queries have a default `ttl` of `5m` (five minutes).
+- `preload()` queries default to `ttl:'none'`, meaning they are not cached at all, and will stop syncing immediately when deactivated. But because `preload()` queries are typically registered at app startup and never shutdown, and [because the ttl clock only ticks while Zero is running](#the-ttl-clock-only-ticks-while-zero-is-running), this means that preload queries never get unregistered.
+- Other queries have a default `ttl` of `5m` (five minutes).
 
 ### Setting Different TTLs
 
@@ -586,36 +599,37 @@ You can override the default TTL with the `ttl` parameter:
 
 ```ts
 // With useQuery():
-const [user] = useQuery(
-  queries.user.byID('id', userId),
-  {ttl: '5m'})
+const [user] = useQuery(queries.user.byID('id', userId), {
+  ttl: '5m'
+})
 
 // With preload():
-zero.preload(
-  queries.user.byID('id', userId),
-  {ttl: '5m'}
-)
+zero.preload(queries.user.byID('id', userId), {ttl: '5m'})
 
 // With run():
 const user = await zero.run(
   queries.user.byID('id', userId),
-  {ttl: '5m'}
+  {
+    ttl: '5m'
+  }
 )
 
 // With materialize():
 const view = zero.materialize(
   queries.user.byID('id', userId),
-  {ttl: '5m'}
+  {
+    ttl: '5m'
+  }
 )
 ```
 
 TTLs up to `10m` (ten minutes) are currently supported. The following formats are allowed:
 
-| Format    | Meaning                                                   |
-| --------- | --------------------------------------------------------- |
-| `none`    | No caching. Query will immediately stop when deactivated. |
-| `%ds`     | Number of seconds.                                        |
-| `%dm`     | Number of minutes.                                        |
+| Format | Meaning                                                   |
+| ------ | --------------------------------------------------------- |
+| `none` | No caching. Query will immediately stop when deactivated. |
+| `%ds`  | Number of seconds.                                        |
+| `%dm`  | Number of minutes.                                        |
 
 ### Why Zero TTLs are Short
 
@@ -625,7 +639,7 @@ Just as in any database, queries consume resources on both the client and server
 
 We do drop this state after we haven't heard from a client for awhile, but this is only a partial improvement. If the client returns, we have to re-run the query to get the latest data.
 
-This means that we do not actually *want* to keep queries active unless there is a good chance they will be needed again soon.
+This means that we do not actually _want_ to keep queries active unless there is a good chance they will be needed again soon.
 
 The default Zero TTL values might initially seem too short, but they are designed to work well with the way Zero's TTL clock works and strike a good balance between keeping queries alive long enough to be useful, while not keeping them alive so long that they consume resources unnecessarily.
 
@@ -637,37 +651,42 @@ The endpoint receives a `POST` request with a JSON body of the form:
 
 ```ts
 type QueriesRequestBody = {
-    id: string
-    name: string
-    args: readonly ReadonlyJSONValue[]
+  id: string
+  name: string
+  args: readonly ReadonlyJSONValue[]
 }[]
 ```
 
 And responds with:
 
 ```ts
-type QueriesResponseBody = ({
-    id: string
-    name: string
-    // See https://github.com/rocicorp/mono/blob/main/packages/zero-protocol/src/ast.ts
-    ast: AST
-} | {
-    error: "app"
-    id: string
-    name: string
-    details: ReadonlyJSONValue
-} | {
-    error: "zero"
-    id: string
-    name: string
-    details: ReadonlyJSONValue
-} | {
-    error: "http"
-    id: string
-    name: string
-    status: number
-    details: ReadonlyJSONValue
-})[]
+type QueriesResponseBody = (
+  | {
+      id: string
+      name: string
+      // See https://github.com/rocicorp/mono/blob/main/packages/zero-protocol/src/ast.ts
+      ast: AST
+    }
+  | {
+      error: 'app'
+      id: string
+      name: string
+      details: ReadonlyJSONValue
+    }
+  | {
+      error: 'zero'
+      id: string
+      name: string
+      details: ReadonlyJSONValue
+    }
+  | {
+      error: 'http'
+      id: string
+      name: string
+      status: number
+      details: ReadonlyJSONValue
+    }
+)[]
 ```
 
 ## Consistency

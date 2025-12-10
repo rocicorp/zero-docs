@@ -153,7 +153,6 @@ flag: `--change-streamer-uri`<br/>
 env: `ZERO_CHANGE_STREAMER_URI`<br/>
 required: `false`
 
-
 ### CVR DB
 
 The Postgres database used to store CVRs. CVRs (client view records) keep track of the data synced to clients in order to determine the diff to send on reconnect. If unspecified, the upstream-db will be used.
@@ -209,14 +208,14 @@ default: `false`
 
 ### Get Queries URL
 
-The URL of the API server to which zero-cache will send synced queries. 
+The URL of the API server to which zero-cache will send synced queries.
 
 `*` is allowed if you would like to allow the client to specify a subdomain to use.
 
 For example: `*.example.com/api/mutate`
 
-You can specify multiple URLs as well which the client can choose from.                           
-e.g., `["https://api1.example.com/mutate", "https://api2.example.com/mutate"]`  
+You can specify multiple URLs as well which the client can choose from.  
+e.g., `["https://api1.example.com/mutate", "https://api2.example.com/mutate"]`
 
 flag: `--get-queries-url`<br/>
 env: `ZERO_GET_QUERIES_URL`<br/>
@@ -286,7 +285,6 @@ The interval between incremental backups of the replica. Shorter intervals reduc
 flag: `--litestream-incremental-backup-interval-minutes`<br/>
 env: `ZERO_LITESTREAM_INCREMENTAL_BACKUP_INTERVAL_MINUTES`<br/>
 default: `15`
-
 
 ### Litestream Multipart Concurrency
 
@@ -454,11 +452,11 @@ Can also be a pattern, or set of patterns, which is used in conjunction with the
 
 Examples:
 
-* `https://*.example.com` matches `https://api.example.com` and `https://www.example.com`
-* `https://*.example.com` does not match `https://example.com` (no subdomain)
-* `https://*.example.com` does not match `https://api.example.com/path` (no trailing path)
-* `https://*.*.example.com` matches `https://api.v1.example.com` and `https://www.v2.example.com`
-* `https://*.*.example.com` does not match `https://api.example.com` (only one subdomain)
+- `https://*.example.com` matches `https://api.example.com` and `https://www.example.com`
+- `https://*.example.com` does not match `https://example.com` (no subdomain)
+- `https://*.example.com` does not match `https://api.example.com/path` (no trailing path)
+- `https://*.*.example.com` matches `https://api.v1.example.com` and `https://www.v2.example.com`
+- `https://*.*.example.com` does not match `https://api.example.com` (only one subdomain)
 
 Currently, wildcards are only allowed for subdomains.
 

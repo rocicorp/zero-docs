@@ -11,10 +11,11 @@ This is useful for many reasons:
 - In the future ([but not yet implemented](#ssr)), this can support server-side rendering.
 
 <Note type="warning" slug="schema-read">
-  `ZQLDatabase` currently does a read of your postgres schema before every
-  transaction. This is fine for most usages, but for high scale it may become a
-  problem. [Let us know](https://bugs.rocicorp.dev/issue/3799) if you need a fix
-  for this.
+  `ZQLDatabase` currently does a read of your postgres
+  schema before every transaction. This is fine for most
+  usages, but for high scale it may become a problem. [Let
+  us know](https://bugs.rocicorp.dev/issue/3799) if you need
+  a fix for this.
 </Note>
 
 ## Creating a Database
@@ -31,9 +32,12 @@ import {Pool} from 'pg'
 import {zeroNodePg} from '@rocicorp/zero/server/adapters/pg'
 import {schema} from '../shared/schema'
 
-const db = zeroNodePg(schema, new Pool({
-  connectionString: process.env.ZERO_UPSTREAM_DB!,
-}))
+const db = zeroNodePg(
+  schema,
+  new Pool({
+    connectionString: process.env.ZERO_UPSTREAM_DB!
+  })
+)
 ```
 
 You can also pass a `Client`:
@@ -41,9 +45,9 @@ You can also pass a `Client`:
 ```ts
 import {Client} from 'pg'
 import {zeroNodePg} from '@rocicorp/zero/server/adapters/pg'
-import {schema} from '../shared/schema'  
+import {schema} from '../shared/schema'
 const client = new Client({
-  connectionString: process.env.ZERO_UPSTREAM_DB!,
+  connectionString: process.env.ZERO_UPSTREAM_DB!
 })
 await client.connect()
 const db = zeroNodePg(schema, client)
@@ -60,7 +64,7 @@ import {schema} from '../shared/schema'
 
 const db = zeroPostgresJS(
   schema,
-  postgres(process.env.ZERO_UPSTREAM_DB!),
+  postgres(process.env.ZERO_UPSTREAM_DB!)
 )
 ```
 
@@ -74,7 +78,7 @@ import {drizzle} from 'drizzle-orm/node-postgres'
 import {zeroDrizzle} from '@rocicorp/zero/server/adapters/drizzle'
 import * as drizzleSchema from './drizzle-schema'
 
-const drizzleDb = drizzle(pool, { schema: drizzleSchema })
+const drizzleDb = drizzle(pool, {schema: drizzleSchema})
 const db = zeroDrizzle(schema, drizzleDb)
 ```
 
@@ -93,12 +97,12 @@ type ServerTx = ServerTransaction<
 
 async function createUser(
   tx: ServerTx,
-  { id, name }: { id: string; name: string },
+  {id, name}: {id: string; name: string}
 ) {
   // this is then fully typed w/ drizzle
   await tx.dbTransaction.wrappedTransaction
     .insert(drizzleSchema.user)
-    .values({ id, name })
+    .values({id, name})
 }
 ```
 

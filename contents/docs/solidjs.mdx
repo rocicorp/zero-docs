@@ -19,10 +19,13 @@ function Root() {
   const session = useSession()
   const {userID} = session
   const ctx = {userID}
-  const cacheURL = import.meta.env.VITE_PUBLIC_ZERO_CACHE_URL!
+  const cacheURL = import.meta.env
+    .VITE_PUBLIC_ZERO_CACHE_URL!
 
   return (
-    <ZeroProvider {...{userID, ctx, cacheURL, schema, mutators}}>
+    <ZeroProvider
+      {...{userID, ctx, cacheURL, schema, mutators}}
+    >
       <App />
     </ZeroProvider>
   )
@@ -51,7 +54,7 @@ function App() {
   const userID = selectedUserID()
 
   const [posts] = useQuery(
-    queries.posts.byStatus({status: "draft"})
+    queries.posts.byStatus({status: 'draft'})
   )
 
   return (
@@ -71,16 +74,14 @@ function App() {
 Use `useZero` to get access to the `Zero` instance, for example to run mutators:
 
 ```tsx
-import { useZero } from "@rocicorp/zero/solid"
-import { mutators } from "mutators.ts"
+import {useZero} from '@rocicorp/zero/solid'
+import {mutators} from 'mutators.ts'
 
-function CompleteButton({ issueID }: { issueID: string }) {
+function CompleteButton({issueID}: {issueID: string}) {
   const zero = useZero()
 
   const onClick = () => {
-    zero().mutate(
-      mutators.issues.complete({ id: issueID })
-    )
+    zero().mutate(mutators.issues.complete({id: issueID}))
   }
 
   return <button onClick={onClick}>Complete Issue</button>

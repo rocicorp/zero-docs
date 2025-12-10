@@ -5,8 +5,9 @@ title: Offline
 Zero currently supports offline reads, but not writes. We plan to support offline writes in the future, but we don't have a timeline for that yet.
 
 <Note emoji="🤓" type="warning" heading="Well actually…">
-  Offline writes *are* currently accepted by Zero, and sent when you come back
-  online. But we plan to disable this soon.
+  Offline writes *are* currently accepted by Zero, and sent
+  when you come back online. But we plan to disable this
+  soon.
 </Note>
 
 The lack of offline writes is often surprising to people familiar with sync engines, because offline is usually touted as something that comes for free with these tools.
@@ -64,19 +65,17 @@ We would like to revisit this in the future and really think through how to desi
 Until Zero disables offline writes automatically, use `useZeroOnline` to detect connection loss and manually disable writes in your UI:
 
 ```tsx
-const {online} = useZeroOnline();
+const {online} = useZeroOnline()
 
-return <button disabled={!online}>
-  Add to cart
-</button>;
+return <button disabled={!online}>Add to cart</button>
 ```
 
 ... or use the underlying `zero.onOnline` event:
 
 ```tsx
 const unsubscribe = zero.onOnline(online => {
-  console.log('Online:', online);
-});
+  console.log('Online:', online)
+})
 ```
 
 ## Even More Information

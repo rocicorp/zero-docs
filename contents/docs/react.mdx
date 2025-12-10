@@ -9,20 +9,22 @@ Zero has built-in support for React. Here's what basic usage looks like.
 Use the `ZeroProvider` component to setup Zero. It takes care of creating and destroying `Zero` instances reactively:
 
 ```tsx
-import { createRoot } from "react-dom/client"
-import { ZeroProvider } from "@rocicorp/zero/react"
-import { useSession } from "my-session-provider"
-import App from "./App.tsx"
-import { schema } from "schema.ts"
-import { mutators } from "mutators.ts"
+import {createRoot} from 'react-dom/client'
+import {ZeroProvider} from '@rocicorp/zero/react'
+import {useSession} from 'my-session-provider'
+import App from './App.tsx'
+import {schema} from 'schema.ts'
+import {mutators} from 'mutators.ts'
 
 const session = useSession()
 const {userID} = session
 const ctx = {userID}
 const cacheURL = import.meta.env.VITE_PUBLIC_ZERO_CACHE_URL!
 
-createRoot(document.getElementById("root")!).render(
-  <ZeroProvider {...{ userID, ctx, cacheURL, schema, mutators }}>
+createRoot(document.getElementById('root')!).render(
+  <ZeroProvider
+    {...{userID, ctx, cacheURL, schema, mutators}}
+  >
     <App />
   </ZeroProvider>
 )
@@ -43,37 +45,37 @@ You can also pass a `Zero` instance to the `ZeroProvider` if you want to control
 Use `useQuery` to run queries:
 
 ```tsx
-import { useQuery } from "@rocicorp/zero/react"
-import { queries } from "queries.ts"
+import {useQuery} from '@rocicorp/zero/react'
+import {queries} from 'queries.ts'
 
 function Posts() {
   const [posts] = useQuery(
-    queries.posts.byStatus({status: "draft"})
+    queries.posts.byStatus({status: 'draft'})
   )
 
-  return <>
-    {posts.map((p) => (
-      <div key={p.id}>
-        {p.title} ({p.comments.length} comments)
-      </div>
-    ))}
-  </>
+  return (
+    <>
+      {posts.map(p => (
+        <div key={p.id}>
+          {p.title} ({p.comments.length} comments)
+        </div>
+      ))}
+    </>
+  )
 }
 ```
 
 Use `useZero` to get access to the `Zero` instance, for example to run mutators:
 
 ```tsx
-import { useZero } from "@rocicorp/zero/react"
-import { mutators } from "mutators.ts"
+import {useZero} from '@rocicorp/zero/react'
+import {mutators} from 'mutators.ts'
 
-function CompleteButton({ issueID }: { issueID: string }) {
+function CompleteButton({issueID}: {issueID: string}) {
   const zero = useZero()
 
   const onClick = () => {
-    zero.mutate(
-      mutators.issues.complete({ id: issueID })
-    )
+    zero.mutate(mutators.issues.complete({id: issueID}))
   }
 
   return <button onClick={onClick}>Complete Issue</button>
@@ -86,7 +88,7 @@ The `useSuspenseQuery` hook is exactly like `useQuery`, except it support React 
 
 ```tsx
 const [issues] = useSuspenseQuery(issueQuery, {
-  suspendUntil: 'complete', // 'partial' or 'complete'
+  suspendUntil: 'complete' // 'partial' or 'complete'
 })
 ```
 

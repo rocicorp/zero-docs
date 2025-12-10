@@ -6,19 +6,19 @@ In the future, Zero will work with many different backend databases. Today only 
 
 Here are some common Postgres options and what we know about their support level:
 
-| Postgres                          | Support Status                                                                                   |
-| --------------------------------- | ------------------------------------------------------------------------------------------------ |
-| AWS RDS                           | ✅                                                                                               |
-| AWS Aurora                        | ✅&nbsp;&nbsp;v15.6+                                                                             |
-| Google Cloud SQL                  | ✅&nbsp;&nbsp;See [notes below](#google-cloud-sql)                                               |
-| [Fly.io](https://fly.io) Postgres  | ✅&nbsp;&nbsp;See [notes below](#flyio)                                                          |
-| Neon                              | ✅&nbsp;&nbsp;See [notes below](#neon)                                                           |
+| Postgres                          | Support Status                                             |
+| --------------------------------- | ---------------------------------------------------------- |
+| AWS RDS                           | ✅                                                         |
+| AWS Aurora                        | ✅&nbsp;&nbsp;v15.6+                                       |
+| Google Cloud SQL                  | ✅&nbsp;&nbsp;See [notes below](#google-cloud-sql)         |
+| [Fly.io](https://fly.io) Postgres | ✅&nbsp;&nbsp;See [notes below](#flyio)                    |
+| Neon                              | ✅&nbsp;&nbsp;See [notes below](#neon)                     |
 | PlanetScale for Postgres          | ✅&nbsp;&nbsp;See [notes below](#planetscale-for-postgres) |
-| Postgres.app                      | ✅                                                                                               |
-| postgres:16.2-alpine docker image | ✅                                                                                               |
-| Supabase                          | ✅&nbsp;&nbsp;See [notes below](#supabase)                                                       |
-| Render                            | 🤷‍♂️&nbsp;&nbsp;No [event triggers](#event-triggers)                                               |
-| Heroku                            | 🤷‍♂️&nbsp;&nbsp;No [event triggers](#event-triggers)                                               |
+| Postgres.app                      | ✅                                                         |
+| postgres:16.2-alpine docker image | ✅                                                         |
+| Supabase                          | ✅&nbsp;&nbsp;See [notes below](#supabase)                 |
+| Render                            | 🤷‍♂️&nbsp;&nbsp;No [event triggers](#event-triggers)         |
+| Heroku                            | 🤷‍♂️&nbsp;&nbsp;No [event triggers](#event-triggers)         |
 
 ## Event Triggers
 
@@ -76,9 +76,8 @@ Zero works with Google Cloud SQL out of the box. In many configurations, when yo
 If your Cloud SQL user does not have permission to create publications, you can still use Zero by [creating a publication manually](/docs/postgres-support#limiting-replication) and then specifying that publication name in [App Publications](/docs/zero-cache-config#app-publications) when running `zero-cache`.
 
 On Google Cloud SQL for PostgreSQL, enable logical decoding by turning on the instance flag `cloudsql.logical_decoding`.
-You do not set `wal_level` directly on Cloud SQL. 
+You do not set `wal_level` directly on Cloud SQL.
 See Google's documentation for details: [Configure logical replication](https://cloud.google.com/sql/docs/postgres/replication/configure-logical-replication).
-
 
 ### Fly.io
 

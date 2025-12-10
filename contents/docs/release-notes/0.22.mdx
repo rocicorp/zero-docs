@@ -29,7 +29,7 @@ Worse, the prevalence of infinite TTLs in turns meant we needed some way to limi
 
 ### How TTLs Work Now
 
-Now, query TTLs measure *"TTL time"* which ***only elapses while Zero is running***. This means that preload queries usually don't need a TTL at all, since they run the entire time Zero is active. This in turn means we can clamp TTLs to low values, which means queries evict naturally, which means we no longer need the client row limit either.
+Now, query TTLs measure _"TTL time"_ which **_only elapses while Zero is running_**. This means that preload queries usually don't need a TTL at all, since they run the entire time Zero is active. This in turn means we can clamp TTLs to low values, which means queries evict naturally, which means we no longer need the client row limit either.
 
 ### Using New TTLs
 

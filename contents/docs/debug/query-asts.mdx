@@ -20,7 +20,8 @@ cat ast.json | npx ast-to-zql --schema schema.ts
 This comes into play if, in your schema.ts, you use the `from` feature to have different names on the client than your backend DB.
 
 <Note slug="decompilation" type="note">
-  The `ast-to-zql` process is a de-compilation of sorts. Given that, the ZQL
-  string you get back will not be identical to the one you wrote in your
-  application. Regardless, the queries will be semantically equivalent.
+  The `ast-to-zql` process is a de-compilation of sorts.
+  Given that, the ZQL string you get back will not be
+  identical to the one you wrote in your application.
+  Regardless, the queries will be semantically equivalent.
 </Note>

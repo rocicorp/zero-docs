@@ -241,8 +241,6 @@ declare module '@rocicorp/zero' {
 {/* TODO some language about schema incompatibility? */}
 {/* TODO some language about sample data? psql? */}
 
-{/* TODO some setup for module augmentation? less verbose types?? forking prisma generator?? */}
-
 ### Set Up the Zero Client
 
 Zero has first-class support for React and SolidJS, and community support for Svelte and Vue.
@@ -335,9 +333,8 @@ export {zero};
 
 Alright, let's sync some data!
 
-In Zero, we do this with _queries_. Queries can be defined anywhere, but are conventionally found in a shared `queries.ts` file.
-
-{/* Add something like "obviously adapt this to your own schema" */}
+In Zero, we do this with _queries_. Queries are conventionally found in a `queries.ts` file.
+Here is an example of how queries are defined - you can adapt this to your own schema:
 
 ```tsx
 // shared/queries.ts
@@ -349,19 +346,15 @@ export const queries = defineQueries({
   albums: {
     byArtist: defineQuery(
       z.object({artistID: z.string()}),
-      ({args: {artistID}}) => {
-        return zql.album.where('artistID', artistID);
-      },
+      ({args: {artistID}}) =>
+        zql.albums
+          .where('artistId', artistID)
+          .orderBy('createdAt', 'asc')
+          .limit(10)
+          .related('artist', q => q.one()),
     ),
   },
 });
-
-// Register the queries for type safety
-declare module '@rocicorp/zero' {
-  interface Types {
-    queries: typeof queries;
-  }
-}
 ```
 
 A Zero _query_ is a function that returns ZQL (Zero Query Language) which describes the data to retrieve. You can think of a query like a stored procedure in other databases.
@@ -376,9 +369,11 @@ The arguments for a query are defined by a _validator_. Any library that impleme
 Use `zql` from `schema.ts` to construct and return a ZQL query. ZQL is quite powerful and allows you to build
 queries with filters, sorts, relationships, and more. See the [ZQL Reference](/docs/zql) for complete details.
 
-```bash
-TODO(0xcadams): add animation showing the zql autocompletion (pending a canary for the defineQuery changes)
-```
+<Video
+  src="/video/onboarding/onboarding-zql-autocomplete.mp4"
+  alt="Code editor with ZQL autocomplete"
+  animation
+/>
 
 ### Invoke Query
 
@@ -439,7 +434,7 @@ console.log('albums', albums);
 If you run your app now, you should see an error like:
 
 ```ts
-Uncaught exception. Could not get ZQL for query `albums.byArtist` because no queries endpoint is specified.
+Uncaught exception. Could not get ZQL for query `albumsByArtist` because no query endpoint is specified.
 ```
 
 Let's fix that.
@@ -476,20 +471,26 @@ The queries endpoint can return the exact same ZQL that ran on the client, or it
 >
 
 ```ts
-// src/routes/api/queries.ts
+// src/routes/api/query.ts
 import {createFileRoute} from '@tanstack/react-router';
 import {json} from '@tanstack/react-start';
 import {handleQueryRequest} from '@rocicorp/zero/server';
+import {mustGetQuery} from '@rocicorp/zero';
 import {queries} from '../../shared/queries.ts';
+import {schema} from '../../shared/schema.ts';
 
-export const Route = createFileRoute('/api/queries')({
+export const Route = createFileRoute('/api/query')({
   server: {
     handlers: {
       POST: async ({request}) => {
-        const result = await handleQueryRequest(request, (name, args) => {
-          const q = queries.get(name);
-          return q(args);
-        });
+        const result = await handleQueryRequest(
+          (name, args) => {
+            const query = mustGetQuery(queries, name);
+            return query.fn({args, ctx: {userId: 'anon'}});
+          },
+          schema,
+          request,
+        );
 
         return json(result);
       },
@@ -499,33 +500,45 @@ export const Route = createFileRoute('/api/queries')({
 ```
 
 ```ts
-// app/api/queries/route.ts
+// app/api/query/route.ts
 import {handleQueryRequest} from '@rocicorp/zero/server';
+import {mustGetQuery} from '@rocicorp/zero';
 import {queries} from '../../shared/queries.ts';
+import {schema} from '../../shared/schema.ts';
 
 export async function POST(req: Request) {
-  const result = await handleQueryRequest(req, (name, args) => {
-    const q = queries.get(name);
-    return q(args);
-  });
+  const result = await handleQueryRequest(
+    (name, args) => {
+      const query = mustGetQuery(queries, name);
+      return query.fn({args, ctx: {userId: 'anon'}});
+    },
+    schema,
+    req,
+  );
 
   return Response.json(result);
 }
 ```
 
 ```ts
-// src/routes/api/queries.ts
+// src/routes/api/query.ts
 import type {APIEvent} from '@solidjs/start/server';
 import {handleQueryRequest} from '@rocicorp/zero/server';
+import {mustGetQuery} from '@rocicorp/zero';
 import {queries} from '../../shared/queries.ts';
+import {schema} from '../../shared/schema.ts';
 
 export async function POST(event: APIEvent) {
   const body = await event.request.json();
 
-  const result = await handleQueryRequest(body, (name, args) => {
-    const q = queries.get(name);
-    return q(args);
-  });
+  const result = await handleQueryRequest(
+    (name, args) => {
+      const query = mustGetQuery(queries, name);
+      return query.fn({args, ctx: {userId: 'anon'}});
+    },
+    schema,
+    body,
+  );
 
   return new Response(JSON.stringify(result), {
     headers: {'Content-Type': 'application/json'},
@@ -537,15 +550,21 @@ export async function POST(event: APIEvent) {
 // api/app.ts
 import {Hono} from 'hono';
 import {handleQueryRequest} from '@rocicorp/zero/server';
+import {mustGetQuery} from '@rocicorp/zero';
 import {queries} from '../shared/queries.ts';
+import {schema} from '../shared/schema.ts';
 
 const app = new Hono();
 
-app.post('/api/queries', async c => {
-  const result = await handleQueryRequest(c.req, (name, args) => {
-    const q = queries.get(name);
-    return q(args);
-  });
+app.post('/api/query', async c => {
+  const result = await handleQueryRequest(
+    (name, args) => {
+      const query = mustGetQuery(queries, name);
+      return query.fn({args, ctx: {userId: 'anon'}});
+    },
+    schema,
+    c.req,
+  );
 
   return c.json(result);
 });
@@ -566,25 +585,25 @@ Stop and re-run zero-cache with the URL of the queries endpoint:
 
 ```bash
 export ZERO_UPSTREAM_DB="postgres://postgres:password@localhost:5432/postgres"
-export ZERO_QUERIES_URL="http://localhost:3000/api/queries"
+export ZERO_QUERY_URL="http://localhost:3000/api/query"
 npx zero-cache-dev
 ```
 
 ```bash
 export ZERO_UPSTREAM_DB="postgres://postgres:password@localhost:5432/postgres"
-export ZERO_QUERIES_URL="http://localhost:3000/api/queries"
+export ZERO_QUERY_URL="http://localhost:3000/api/query"
 pnpm exec zero-cache-dev
 ```
 
 ```bash
 export ZERO_UPSTREAM_DB="postgres://postgres:password@localhost:5432/postgres"
-export ZERO_QUERIES_URL="http://localhost:3000/api/queries"
+export ZERO_QUERY_URL="http://localhost:3000/api/query"
 bunx zero-cache-dev
 ```
 
 ```bash
 export ZERO_UPSTREAM_DB="postgres://postgres:password@localhost:5432/postgres"
-export ZERO_QUERIES_URL="http://localhost:3000/api/queries"
+export ZERO_QUERY_URL="http://localhost:3000/api/query"
 yarn zero-cache-dev
 ```
 
@@ -620,7 +639,7 @@ Similar to queries, we use a shared `mutators.ts` file:
 ```tsx
 // shared/mutators.ts
 import {defineMutators, defineMutator} from '@rocicorp/zero';
-import {zql} from './schema.ts';
+import {crud} from './schema.ts';
 import {z} from 'zod';
 
 export const mutators = defineMutators({
@@ -631,24 +650,27 @@ export const mutators = defineMutators({
         artistID: z.string(),
         title: z.string(),
         year: z.number(),
+        createdAt: z.number(),
       }),
-      async ({tx, args: {id, artistID, title, year}}) => {
-        await tx.mutate.album.insert({id, artistID, title, year});
+      async ({args, tx, ctx: _ctx}) => {
+        await tx.mutate(
+          crud.albums.insert({
+            id: args.id,
+            artistId: args.artistID,
+            title: args.title,
+            releaseYear: args.year,
+            createdAt: args.createdAt,
+          }),
+        );
       },
     ),
   },
 });
-
-// Register the mutators for type safety
-declare module '@rocicorp/zero' {
-  interface Types {
-    mutators: typeof mutators;
-  }
-}
 ```
 
-You can use the [CRUD-style API](/docs/mutators#writing-data) on `tx` to write data within your mutator.
-You can also use `tx.run(q)` to run queries or ZQL expressions.
+You can use the [CRUD-style API](/docs/mutators#writing-data) with `tx.mutate(crud.<table>.<method>)`
+to write data within your mutator.
+You can also use `tx.run(zql.<table>.<method>)` to run ZQL expressions.
 
 <Note type="warning" heading="Always await operations in mutators">
   Mutators almost always run in the same frame on the client, against local
@@ -657,7 +679,7 @@ You can also use `tx.run(q)` to run queries or ZQL expressions.
   the client, `tx.get()` can go to local storage (IndexedDB or SQLite).
 </Note>
 
-Unlike queries, you _must_ register your mutators with Zero before you can use them:
+You _must_ register your mutators with Zero before you can use them:
 
 <CodeGroup
   labels={[
@@ -763,13 +785,16 @@ function MyComponent() {
   const zero = useZero();
 
   const onClick = async () => {
-    const album = {
-      id: 'album_6',
-      artistID: 'artist_1',
-      title: 'Please Please Me',
-      year: 1963,
-    };
-    const result = zero.mutate(mutators.albums.create(album));
+    const result = zero.mutate(
+      mutators.albums.create({
+        id: 'album_6',
+        artistID: 'artist_1',
+        title: 'Please Please Me',
+        year: 1963,
+        createdAt: Date.now(),
+      }),
+    );
+
     const clientResult = await result.client;
 
     if (clientResult.type === 'error') {
@@ -792,13 +817,15 @@ function MyComponent() {
   const zero = useZero();
 
   const onClick = async () => {
-    const album = {
-      id: 'album_6',
-      artistID: 'artist_1',
-      title: 'Please Please Me',
-      year: 1963,
-    };
-    const result = zero().mutate(mutators.albums.create(album));
+    const result = zero().mutate(
+      mutators.albums.create({
+        id: 'album_6',
+        artistID: 'artist_1',
+        title: 'Please Please Me',
+        year: 1963,
+        createdAt: Date.now(),
+      }),
+    );
     const clientResult = await result.client;
 
     if (clientResult.type === 'error') {
@@ -817,13 +844,15 @@ function MyComponent() {
 import {zero} from './zero.ts';
 import {mutators} from './shared/mutators.ts';
 
-const album = {
-  id: 'album_6',
-  artistID: 'artist_1',
-  title: 'Please Please Me',
-  year: 1963,
-};
-const result = await zero.mutate(mutators.albums.create(album));
+const result = await zero.mutate(
+  mutators.albums.create({
+    id: 'album_6',
+    artistID: 'artist_1',
+    title: 'Please Please Me',
+    year: 1963,
+    createdAt: Date.now(),
+  }),
+);
 const clientResult = await result.client;
 
 if (clientResult.type === 'error') {
@@ -950,6 +979,7 @@ Then, you can use the `dbProvider` to handle the mutate request:
 import {createFileRoute} from '@tanstack/react-router';
 import {json} from '@tanstack/react-start';
 import {handleMutateRequest} from '@rocicorp/zero/server';
+import {mustGetMutator} from '@rocicorp/zero';
 import {mutators} from '../../shared/mutators.ts';
 import {dbProvider} from '../../db-provider.ts';
 
@@ -959,22 +989,19 @@ export const Route = createFileRoute('/api/mutate')({
       POST: async ({request}) => {
         const result = await handleMutateRequest(
           dbProvider,
-          request,
-          (transact, mutation) => {
-            // Run any external API validation/checks before the db tx.
-            // If you throw here, the mutation will be rejected.
-
+          async (transact, mutation) => {
             const result = await transact(async tx => {
-              const mutator = mutators.get(mutation.name);
-              return mutator(mutation.args).run(tx); // TODO(0xcadams): no context here
+              const mutator = mustGetMutator(mutators, mutation.name);
+              return mutator.fn({
+                args: mutation.args,
+                tx,
+                ctx: {userId: 'anon'},
+              });
             });
-
-            // Run "fire and forget" work here, like sending
-            // notifications/analytics. If you throw here,
-            // it will be logged but won't change the mutation result.
 
             return result;
           },
+          request,
         );
 
         return json(result);
@@ -989,26 +1016,24 @@ export const Route = createFileRoute('/api/mutate')({
 import {handleMutateRequest} from '@rocicorp/zero/server';
 import {mutators} from '../../shared/mutators.ts';
 import {dbProvider} from '../../db-provider.ts';
+import {mustGetMutator} from '@rocicorp/zero';
 
 export async function POST(req: Request) {
   const result = await handleMutateRequest(
     dbProvider,
-    req,
-    (transact, mutation) => {
-      // Run any external API validation/checks before the db tx.
-      // If you throw here, the mutation will be rejected.
-
+    async (transact, mutation) => {
       const result = await transact(async tx => {
-        const mutator = mutators.get(mutation.name);
-        return mutator(mutation.args).run(tx); // TODO(0xcadams): no context here. correct??
+        const mutator = mustGetMutator(mutators, mutation.name);
+        return mutator.fn({
+          args: mutation.args,
+          tx,
+          ctx: {userId: 'anon'},
+        });
       });
-
-      // Run "fire and forget" work here, like sending
-      // notifications/analytics. If you throw here,
-      // it will be logged but won't change the mutation result.
 
       return result;
     },
+    req,
   );
 
   return Response.json(result);
@@ -1019,6 +1044,7 @@ export async function POST(req: Request) {
 // src/routes/api/mutate.ts
 import type {APIEvent} from '@solidjs/start/server';
 import {handleMutateRequest} from '@rocicorp/zero/server';
+import {mustGetMutator} from '@rocicorp/zero';
 import {mutators} from '../../shared/mutators.ts';
 import {dbProvider} from '../../db-provider.ts';
 
@@ -1027,22 +1053,19 @@ export async function POST(event: APIEvent) {
 
   const result = await handleMutateRequest(
     dbProvider,
-    req,
-    (transact, mutation) => {
-      // Run any external API validation/checks before the db tx.
-      // If you throw here, the mutation will be rejected.
-
+    async (transact, mutation) => {
       const result = await transact(async tx => {
-        const mutator = mutators.get(mutation.name);
-        return mutator(mutation.args).run(tx); // TODO(0xcadams): no context here. correct??
+        const mutator = mustGetMutator(mutators, mutation.name);
+        return mutator.fn({
+          args: mutation.args,
+          tx,
+          ctx: {userId: 'anon'},
+        });
       });
-
-      // Run "fire and forget" work here, like sending
-      // notifications/analytics. If you throw here,
-      // it will be logged but won't change the mutation result.
 
       return result;
     },
+    body,
   );
 
   return new Response(JSON.stringify(result), {
@@ -1054,28 +1077,26 @@ export async function POST(event: APIEvent) {
 ```ts
 // api/app.ts
 import {handleMutateRequest} from '@rocicorp/zero/server';
+import {mustGetMutator} from '@rocicorp/zero';
 import {mutators} from '../shared/mutators.ts';
 import {dbProvider} from './db-provider.ts';
 
 app.post('/api/mutate', async c => {
   const result = await handleMutateRequest(
     dbProvider,
-    c.req,
-    (transact, mutation) => {
-      // Run any external API validation/checks before the db tx.
-      // If you throw here, the mutation will be rejected.
-
+    async (transact, mutation) => {
       const result = await transact(async tx => {
-        const mutator = mutators.get(mutation.name);
-        return mutator(mutation.args).run(tx); // TODO(0xcadams): no context here. correct??
+        const mutator = mustGetMutator(mutators, mutation.name);
+        return mutator.fn({
+          args: mutation.args,
+          tx,
+          ctx: {userId: 'anon'},
+        });
       });
-
-      // Run "fire and forget" work here, like sending
-      // notifications/analytics. If you throw here,
-      // it will be logged but won't change the mutation result.
 
       return result;
     },
+    c.req,
   );
 
   return c.json(result);
@@ -1097,28 +1118,28 @@ Restart zero-cache to tell it about this new endpoint:
 
 ```bash
 export ZERO_UPSTREAM_DB="postgres://postgres:password@localhost:5432/postgres"
-export ZERO_QUERIES_URL="http://localhost:3000/api/queries"
+export ZERO_QUERY_URL="http://localhost:3000/api/query"
 export ZERO_MUTATE_URL="http://localhost:3000/api/mutate"
 npx zero-cache-dev
 ```
 
 ```bash
 export ZERO_UPSTREAM_DB="postgres://postgres:password@localhost:5432/postgres"
-export ZERO_QUERIES_URL="http://localhost:3000/api/queries"
+export ZERO_QUERY_URL="http://localhost:3000/api/query"
 export ZERO_MUTATE_URL="http://localhost:3000/api/mutate"
 pnpm exec zero-cache-dev
 ```
 
 ```bash
 export ZERO_UPSTREAM_DB="postgres://postgres:password@localhost:5432/postgres"
-export ZERO_QUERIES_URL="http://localhost:3000/api/queries"
+export ZERO_QUERY_URL="http://localhost:3000/api/query"
 export ZERO_MUTATE_URL="http://localhost:3000/api/mutate"
 bunx zero-cache-dev
 ```
 
 ```bash
 export ZERO_UPSTREAM_DB="postgres://postgres:password@localhost:5432/postgres"
-export ZERO_QUERIES_URL="http://localhost:3000/api/queries"
+export ZERO_QUERY_URL="http://localhost:3000/api/query"
 export ZERO_MUTATE_URL="http://localhost:3000/api/mutate"
 yarn zero-cache-dev
 ```

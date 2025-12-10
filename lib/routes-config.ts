@@ -26,7 +26,7 @@ export const ROUTES = [
     href: null,
     items: [
       {title: 'What is Sync?', href: '/sync'},
-      {title: 'How Zero Works', href: '/design'},
+      //{title: 'How Zero Works', href: '/design'},
       {title: 'When to Use', href: '/when-to-use'},
       {title: 'Status', href: '/status'},
     ],

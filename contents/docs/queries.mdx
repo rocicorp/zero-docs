@@ -75,6 +75,8 @@ const allPostsQueryDef = defineQuery(
 )
 ```
 
+### Arguments
+
 The `QueryFn` can take a single `args` parameter of any type, and can use arbitrary logic to compute the ZQL expression from those parameters.
 
 ```ts
@@ -92,7 +94,7 @@ const postsByAuthor = defineQuery(
 ```
 
 <Note emoji="😈" heading="Queries don't have to be pure" slug="purity">
-It's most common to compute the ZQL expression using only the parameters. But it's not *required*.
+It's most common to compute the ZQL expression using only the arguments. But it's not *required*.
 
 Impure queries can be useful, e.g., to consult some external system on the server for authorization or validation.
 </Note>

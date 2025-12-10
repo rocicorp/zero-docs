@@ -8,8 +8,11 @@
     "build:search": "tsx lib/generateSearchIndex.ts",
     "build:llms": "npx --yes tsdown lib/generate-llms.ts --outDir dist --skipLibCheck && node dist/generate-llms.mjs",
     "start": "npm run build:search && next start",
-    "lint": "next lint",
     "format": "prettier --write **/*.{ts,tsx,js,json,md,mdx}",
+    "check-format": "prettier --check **/*.{ts,tsx,js,json,md,mdx}",
+    "check-types": "tsc",
+    "lint": "oxlint --type-aware --quiet",
+    "lint:next": "next lint",
     "links": "blc http://localhost:3000/ -ro --exclude 'https://discord.rocicorp.dev/' --exclude 'https://bsky.app/profile/zero.rocicorp.dev' --exclude 'https://x.com/rocicorp_zero'  --exclude 'https://x.com/zero__ms'"
   },
   "dependencies": {
@@ -61,12 +64,14 @@
     "eslint": "^9",
     "eslint-config-next": "^15.4.6",
     "highlight.js": "^11.11.1",
+    "oxlint": "^1.32.0",
+    "oxlint-tsgolint": "^0.8.3",
     "postcss": "^8",
+    "prettier": "^3.7.4",
     "react-highlight": "^0.15.0",
     "tailwindcss": "^3.4.10",
     "ts-node": "^10.9.2",
     "tsx": "^4.20.3",
     "typescript": "^5"
-  },
-  "prettier": "@rocicorp/prettier-config"
+  }
 }

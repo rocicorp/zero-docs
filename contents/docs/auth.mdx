@@ -68,10 +68,10 @@ You can send credentials using either cookies or tokens.
 
 The most common way to authenticate Zero is with cookies.
 
-To enable it, set the [`ZERO_GET_QUERIES_FORWARD_COOKIES`](/docs/zero-cache-config#zero_get_queries_forward_cookies) and [`ZERO_MUTATE_FORWARD_COOKIES`](/docs/zero-cache-config#zero_mutate_forward_cookies) options to `true`:
+To enable it, set the [`ZERO_QUERY_FORWARD_COOKIES`](/docs/zero-cache-config#query-forward-cookies) and [`ZERO_MUTATE_FORWARD_COOKIES`](/docs/zero-cache-config#mutate-forward-cookies) options to `true`:
 
 ```bash
-ZERO_GET_QUERIES_FORWARD_COOKIES=true
+ZERO_QUERY_FORWARD_COOKIES=true
 ZERO_MUTATE_FORWARD_COOKIES=true
 ```
 

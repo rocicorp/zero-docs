@@ -501,7 +501,7 @@ app.post('/api/zero/mutate', async c => {
 
 If Zero receives any response from the mutate endpoint other than HTTP 200, 401, or 403, it will disconnect and enter the [error state](TODO).
 
-If Zero receives HTTP 401 or 403, the client [refreshes the `auth` token](./auth#auth-failure-and-refresh) if possible, then retries all queued mutations.
+If Zero receives HTTP 401 or 403, the client will enter the needs auth state and require a manual reconnect with `zero.connection.connect()`, then it will retry all queued mutations.
 
 If you want a different behavior, it is possible to [implement the mutate endpoint](#custom-push-implementation) yourself and handle errors differently.
 
@@ -509,7 +509,7 @@ If you want a different behavior, it is possible to [implement the mutate endpoi
 
 By default, Zero sends mutations to the URL specified in the `ZERO_MUTATE_URL` parameter.
 
-However you can customize this on a per-client basis. To do so, list multiple comma-separted URLs in the `ZERO_MUTATE_URL` parameter:
+However you can customize this on a per-client basis. To do so, list multiple comma-separated URLs in the `ZERO_MUTATE_URL` parameter:
 
 ```bash
 ZERO_MUTATE_URL='https://api.example.com/mutate,https://api.staging.example.com/mutate'

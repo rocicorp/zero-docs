@@ -394,8 +394,7 @@ In React or SolidJS, you'll do this by passing the `mutators` object to the `Zer
 ```tsx
 import {ZeroProvider} from '@rocicorp/zero/react'
 import {mutators} from 'zero/mutators.ts'
-
-<ZeroProvider mutators={mutators}>
+;<ZeroProvider mutators={mutators}>
   <App />
 </ZeroProvider>
 ```
@@ -435,169 +434,28 @@ npx zero-cache-dev
 
 The `@rocicorp/zero` package provides the `handleMutateRequest` and `mustGetMutator` functions to make it easy to implement the endpoint.
 
-<CodeGroup
-  labels={[
-    {
-      text: 'Tanstack Start',
-      sync: {api: 'tanstack'},
-    },
-    {
-      text: 'Next.js',
-      sync: {api: 'nextjs'},
-    },
-    {
-      text: 'Solid Start',
-      sync: {api: 'solid'},
-    },
-    {
-      text: 'Hono',
-      sync: {api: 'hono'},
-    },
-  ]}
->
+For example, with [Hono](https://hono.dev):
 
 ```ts
-// src/routes/api/mutate.ts
-import {createFileRoute} from '@tanstack/react-router'
-import {json} from '@tanstack/react-start'
-import {handleMutateRequest} from '@rocicorp/zero/server'
 import {mustGetMutator} from '@rocicorp/zero'
-import {mutators} from '../../zero/mutators.ts'
-import {dbProvider} from '../../db-provider.ts'
+import {handleMutateRequest} from '@rocicorp/zero/server'
+import {mutators} from 'mutators.ts'
 
-export const Route = createFileRoute('/api/mutate')({
-  server: {
-    handlers: {
-      POST: async ({request}) => {
-        const result = await handleMutateRequest(
-          dbProvider,
-          async (transact, mutation) => {
-            const result = await transact(async tx => {
-              const mutator = mustGetMutator(
-                mutators,
-                mutation.name
-              )
-              return mutator.fn({
-                args: mutation.args,
-                tx,
-                ctx: {userId: 'anon'}
-              })
-            })
-
-            return result
-          },
-          request
-        )
-
-        return json(result)
-      }
-    }
-  }
+app.post('/api/zero/mutate', async c => {
+  const userID = await authenticateUser(c.req.raw)
+  const ctx = {userID}
+  return await c.json(
+    await handleMutateRequest(
+      transact =>
+        transact(dbProvider, (tx, name, args) => {
+          const mutator = mustGetMutator(mutators, name)
+          return mutator.fn({tx, ctx, args})
+        }),
+      c.req.raw
+    )
+  )
 })
 ```
-
-```ts
-// app/api/mutate/route.ts
-import {handleMutateRequest} from '@rocicorp/zero/server'
-import {mutators} from '../../zero/mutators.ts'
-import {dbProvider} from '../../db-provider.ts'
-import {mustGetMutator} from '@rocicorp/zero'
-
-export async function POST(req: Request) {
-  const result = await handleMutateRequest(
-    dbProvider,
-    async (transact, mutation) => {
-      const result = await transact(async tx => {
-        const mutator = mustGetMutator(
-          mutators,
-          mutation.name
-        )
-        return mutator.fn({
-          args: mutation.args,
-          tx,
-          ctx: {userId: 'anon'}
-        })
-      })
-
-      return result
-    },
-    req
-  )
-
-  return Response.json(result)
-}
-```
-
-```ts
-// src/routes/api/mutate.ts
-import type {APIEvent} from '@solidjs/start/server'
-import {handleMutateRequest} from '@rocicorp/zero/server'
-import {mustGetMutator} from '@rocicorp/zero'
-import {mutators} from '../../zero/mutators.ts'
-import {dbProvider} from '../../db-provider.ts'
-
-export async function POST(event: APIEvent) {
-  const body = await event.request.json()
-
-  const result = await handleMutateRequest(
-    dbProvider,
-    async (transact, mutation) => {
-      const result = await transact(async tx => {
-        const mutator = mustGetMutator(
-          mutators,
-          mutation.name
-        )
-        return mutator.fn({
-          args: mutation.args,
-          tx,
-          ctx: {userId: 'anon'}
-        })
-      })
-
-      return result
-    },
-    body
-  )
-
-  return new Response(JSON.stringify(result), {
-    headers: {'Content-Type': 'application/json'}
-  })
-}
-```
-
-```ts
-// api/app.ts
-import {handleMutateRequest} from '@rocicorp/zero/server'
-import {mustGetMutator} from '@rocicorp/zero'
-import {mutators} from '../zero/mutators.ts'
-import {dbProvider} from './db-provider.ts'
-
-app.post('/api/mutate', async c => {
-  const result = await handleMutateRequest(
-    dbProvider,
-    async (transact, mutation) => {
-      const result = await transact(async tx => {
-        const mutator = mustGetMutator(
-          mutators,
-          mutation.name
-        )
-        return mutator.fn({
-          args: mutation.args,
-          tx,
-          ctx: {userId: 'anon'}
-        })
-      })
-
-      return result
-    },
-    c.req
-  )
-
-  return c.json(result)
-})
-```
-
-</CodeGroup>
 
 <Note heading="Using a different bindings library">
   Zero includes several built-in database adapters. You can
@@ -651,7 +509,7 @@ If you want a different behavior, it is possible to [implement the mutate endpoi
 
 By default, Zero sends mutations to the URL specified in the `ZERO_MUTATE_URL` parameter.
 
-However you can customize this on a per-client basis. To do so, list multiple comma-separated URLs in the `ZERO_MUTATE_URL` parameter:
+However you can customize this on a per-client basis. To do so, list multiple comma-separted URLs in the `ZERO_MUTATE_URL` parameter:
 
 ```bash
 ZERO_MUTATE_URL='https://api.example.com/mutate,https://api.staging.example.com/mutate'

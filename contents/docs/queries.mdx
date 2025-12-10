@@ -269,128 +269,29 @@ npx zero-cache-dev
 
 The `@rocicorp/zero` package provides the `handleQueryRequest` and `mustGetQuery` functions to make it easy to implement the endpoint.
 
-<CodeGroup
-  labels={[
-    {
-      text: 'Tanstack Start',
-      sync: {api: 'tanstack'},
-    },
-    {
-      text: 'Next.js',
-      sync: {api: 'nextjs'},
-    },
-    {
-      text: 'Solid Start',
-      sync: {api: 'solid'},
-    },
-    {
-      text: 'Hono',
-      sync: {api: 'hono'},
-    },
-  ]}
->
+For example, with [Hono](https://hono.dev):
 
 ```ts
-// src/routes/api/query.ts
-import {createFileRoute} from '@tanstack/react-router'
-import {json} from '@tanstack/react-start'
-import {handleQueryRequest} from '@rocicorp/zero/server'
 import {mustGetQuery} from '@rocicorp/zero'
-import {queries} from '../../zero/queries.ts'
-import {schema} from '../../zero/schema.ts'
+import {handleQueryRequest} from '@rocicorp/zero/server'
+import {schema} from 'schema.ts'
+import {queries} from 'queries.ts'
 
-export const Route = createFileRoute('/api/query')({
-  server: {
-    handlers: {
-      POST: async ({request}) => {
-        const result = await handleQueryRequest(
-          (name, args) => {
-            const query = mustGetQuery(queries, name)
-            return query.fn({args, ctx: {userId: 'anon'}})
-          },
-          schema,
-          request
-        )
-
-        return json(result)
-      }
-    }
-  }
+app.post('/api/zero/query', async c => {
+  const userID = await authenticateUser(c.req.raw)
+  const ctx = {userID}
+  return await c.json(
+    await handleQueryRequest(
+      (name, args) => {
+        const q = mustGetQuery(queries, name)
+        return q.fn({ctx, args})
+      },
+      schema,
+      c.req.raw
+    )
+  )
 })
 ```
-
-```ts
-// app/api/query/route.ts
-import {handleQueryRequest} from '@rocicorp/zero/server'
-import {mustGetQuery} from '@rocicorp/zero'
-import {queries} from '../../zero/queries.ts'
-import {schema} from '../../zero/schema.ts'
-
-export async function POST(req: Request) {
-  const result = await handleQueryRequest(
-    (name, args) => {
-      const query = mustGetQuery(queries, name)
-      return query.fn({args, ctx: {userId: 'anon'}})
-    },
-    schema,
-    req
-  )
-
-  return Response.json(result)
-}
-```
-
-```ts
-// src/routes/api/query.ts
-import type {APIEvent} from '@solidjs/start/server'
-import {handleQueryRequest} from '@rocicorp/zero/server'
-import {mustGetQuery} from '@rocicorp/zero'
-import {queries} from '../../zero/queries.ts'
-import {schema} from '../../zero/schema.ts'
-
-export async function POST(event: APIEvent) {
-  const body = await event.request.json()
-
-  const result = await handleQueryRequest(
-    (name, args) => {
-      const query = mustGetQuery(queries, name)
-      return query.fn({args, ctx: {userId: 'anon'}})
-    },
-    schema,
-    body
-  )
-
-  return new Response(JSON.stringify(result), {
-    headers: {'Content-Type': 'application/json'}
-  })
-}
-```
-
-```ts
-// api/app.ts
-import {Hono} from 'hono'
-import {handleQueryRequest} from '@rocicorp/zero/server'
-import {mustGetQuery} from '@rocicorp/zero'
-import {queries} from '../zero/queries.ts'
-import {schema} from '../zero/schema.ts'
-
-const app = new Hono()
-
-app.post('/api/query', async c => {
-  const result = await handleQueryRequest(
-    (name, args) => {
-      const query = mustGetQuery(queries, name)
-      return query.fn({args, ctx: {userId: 'anon'}})
-    },
-    schema,
-    c.req
-  )
-
-  return c.json(result)
-})
-```
-
-</CodeGroup>
 
 `handleQueryRequest` accepts a standard `Request` and returns a JSON object which can be serialized and returned by your server framework of choice.
 
@@ -483,7 +384,7 @@ For more information, see the [URLPattern docs](https://developer.mozilla.org/en
 
 ### Reactively
 
-The most common way to use queries is with the `useQuery` reactive hooks from the [React](react) or [SolidJS](solidjs) bindings:
+The most common way to use queries is with the `useQuery` reactive hooks from the [React](react) or [SolidJS](solid) bindings:
 
 ```tsx
 import {useQuery} from '@rocicorp/zero/react'

@@ -57,6 +57,10 @@ Additionally, the old `hello-zero` sample has been updated from the original CRU
 
 ## Performance
 
+- [Only cache for duration of `fetch` in `exists`](https://github.com/rocicorp/mono/pull/5259): 60% improvement on sparse `exists` queries.
+- [Do not fetch on `null` constraint](https://github.com/rocicorp/mono/pull/5271): 33% improvement on some queries.
+- [Remove join storage](https://github.com/rocicorp/mono/pull/5264): ~25% improvement in queries with related calls.
+
 ## Fixes
 
 - [**ZERO_REPLICA_FILE now defaults to zero.db**](/docs/zero-cache-config#zero_replica_file)

@@ -152,7 +152,7 @@ You have the full power of ZQL at your disposal, including relationships, filter
 
 Reads and writes within a mutator are transactional, meaning that the datastore is guaranteed to not change while your mutator is running. And if the mutator throws, the entire mutation is rolled back.
 
-<Note type="note" heading="Reading in Mutators is Always Local">
+<Note type="note" heading="Reading in mutators is always local">
 Unlike [`zero.run()`](queries#once), there is no `type` parameter that can be used to wait for server results inside mutators.
 
 This is because waiting for server results in mutators makes no sense – it would defeat the purpose of running optimistically to begin with.

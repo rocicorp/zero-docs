@@ -152,7 +152,7 @@ This will cause Zero to disconnect from `zero-cache` and the [connection status]
 ```tsx
 function NeedsAuthDialog() {
   const zero = useZero()
-  const connectionState = useZeroConnectionState()
+  const connectionState = useConnectionState()
 
   const refreshCookie = async () => {
     await login()
@@ -178,7 +178,7 @@ Or, if you aren't using cookie auth:
 ```tsx
 function NeedsAuthDialog() {
   const zero = useZero()
-  const connectionState = useZeroConnectionState()
+  const connectionState = useConnectionState()
 
   const refreshAuthToken = async () => {
     const token = await fetchNewToken()

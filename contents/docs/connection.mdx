@@ -33,10 +33,10 @@ The current connection state is available in the `zero.connection.state` propert
 >
 
 ```tsx
-import {useZeroConnectionState} from '@rocicorp/zero/react'
+import {useConnectionState} from '@rocicorp/zero/react'
 
 function ConnectionStatus() {
-  const state = useZeroConnectionState()
+  const state = useConnectionState()
 
   switch (state.name) {
     case 'connecting':
@@ -56,10 +56,10 @@ function ConnectionStatus() {
 ```
 
 ```tsx
-import {useZeroConnectionState} from '@rocicorp/zero/solid'
+import {useConnectionState} from '@rocicorp/zero/solid'
 
 function ConnectionStatus() {
-  const state = useZeroConnectionState()
+  const state = useConnectionState()
 
   return (
     <Switch>

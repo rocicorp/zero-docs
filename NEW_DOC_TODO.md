@@ -9,7 +9,7 @@
 - document outbox pattern
 - work outside of mutator
 - update ZQL on the server to show defaulting ServerTx
-- update offline / connection status doc
+- update offline doc in connection page
 - release notes
 - update hello-zero to be custom mutators and queries (and maybe TanStack)?
 - design doc

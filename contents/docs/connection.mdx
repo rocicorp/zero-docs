@@ -33,11 +33,11 @@ The current connection state is available in the `zero.connection.state` propert
 >
 
 ```tsx
-import { useZeroConnectionState } from '@rocicorp/zero/react';
+import {useZeroConnectionState} from '@rocicorp/zero/react'
 
 function ConnectionStatus() {
-  const connectionState = useZeroConnectionState();
-  
+  const connectionState = useZeroConnectionState()
+
   switch (state.name) {
     case 'connecting':
       return <div title={state.reason}>Connecting...</div>
@@ -50,38 +50,42 @@ function ConnectionStatus() {
     case 'needs-auth':
       return <div>Session expired</div>
     default:
-      throw new Error('Unexpected connection state: ' + state.name)
+      throw new Error(
+        'Unexpected connection state: ' + state.name
+      )
   }
 }
 ```
 
 ```tsx
-import { useZeroConnectionState } from '@rocicorp/zero/solid';
+import {useZeroConnectionState} from '@rocicorp/zero/solid'
 
 function ConnectionStatus() {
-  const state = useZeroConnectionState();
+  const state = useZeroConnectionState()
 
   return (
     <>
       {(() => {
         const s = state()
         switch (s.name) {
-          case "connecting":
+          case 'connecting':
             return <div title={s.reason}>Connecting...</div>
-          case "connected":
+          case 'connected':
             return <div>Connected</div>
-          case "disconnected":
+          case 'disconnected':
             return <div title={s.reason}>Offline</div>
-          case "error":
+          case 'error':
             return <div title={s.reason}>Error</div>
-          case "needs-auth":
+          case 'needs-auth':
             return <div>Session expired</div>
           default:
-            throw new Error(`Unexpected connection state: ${s.name}`)
+            throw new Error(
+              `Unexpected connection state: ${s.name}`
+            )
         }
       })()}
     </>
-  );
+  )
 }
 ```
 
@@ -104,9 +108,11 @@ zero.connection.state.subscribe(state => {
       console.log('Session expired')
       break
     default:
-      throw new Error(`Unexpected connection state: ${state.name}`)
+      throw new Error(
+        `Unexpected connection state: ${state.name}`
+      )
   }
-});
+})
 ```
 
 </CodeGroup>
@@ -150,8 +156,7 @@ function Root() {
 ```
 
 ```tsx
-import { ZeroProvider } from '@rocicorp/zero/solid'
-import { schema } from './schema'
+import {ZeroProvider} from '@rocicorp/zero/solid'
 
 function Root() {
   return (
@@ -166,12 +171,11 @@ function Root() {
 ```
 
 ```ts
-import { Zero } from '@rocicorp/zero'
-import { schema } from './schema'
+import {Zero} from '@rocicorp/zero'
 
 const zero = new Zero({
   // ...
-  disconnectTimeoutMs: 1000 * 60 * 5, // 5 minutes
+  disconnectTimeoutMs: 1000 * 60 * 5 // 5 minutes
 })
 ```
 
@@ -181,8 +185,16 @@ Reads and writes are allowed to Zero mutators while `connecting`. The writes are
 
 This is intended to paper over short connectivity glitches, such as server restarts, walking into an elevator, etc.
 
-<Note type="warning" emoji="🦖" heading="Zero is not designed for long periods offline" slug="offline-warning">
-While you can increase the `disconnectTimeoutMs` to allow for longer periods of offline operation, this has caveats that you should understand carefully. Please see [offline](#offline-support) for more information.
+<Note
+  type="warning"
+  emoji="🦖"
+  heading="Zero is not designed for long periods offline"
+  slug="offline-warning"
+>
+  While you can increase the `disconnectTimeoutMs` to allow
+  for longer periods of offline operation, this has caveats
+  that you should understand carefully. Please see
+  [offline](#offline-support) for more information.
 </Note>
 
 ### Disconnecting
@@ -197,7 +209,7 @@ Reads are allowed while `disconnected`, but writes are not.
 
 If `zero-cache` itself crashes, or if the [mutate](/docs/mutators) or [query](/docs/queries) endpoints return a network or HTTP error, Zero transitions to the `error` state.
 
-This type of error is unlikely to resolve just by retrying, so Zero doesn't try. The app can retry the connection manually   by calling `zero.connection.connect()`.
+This type of error is unlikely to resolve just by retrying, so Zero doesn't try. The app can retry the connection manually by calling `zero.connection.connect()`.
 
 ### Auth Required
 
@@ -225,7 +237,7 @@ If you want to build an application that supports offline writes, you have three
 
 1. Make the logical datamodel append-only (i.e., users can create and mark tasks done, but cannot edit or delete them).
 2. Support custom UX to allow users to fork and merge conflicts when they occur.
-3. Only support editing from a single device. Even a single-user application can experience conflicts as soon as there are multiple *devices*.
+3. Only support editing from a single device. Even a single-user application can experience conflicts as soon as there are multiple _devices_.
 
 ### Writes Can be Lost Across Schema Changes
 
@@ -239,9 +251,9 @@ In [Replicache](https://replicache.dev/), our prior sync engine on which Zero is
 
 When Zero starts, it sends all queued mutations to the server and simultaneously pulls updates from the server. When the server updates are applied, any queued mutations are "rebased" (re-run locally) to resolve conflicts.
 
-If there are many locally queued changes, this process can be slow. 
+If there are many locally queued changes, this process can be slow.
 
-To effectively support long periods offline, Zero should probably have a mode where it first sends all queued mutations, then replays them after the server updates are applied. But this would conflict with the goal to startup and get server updates fast when there *aren't* many queued mutations, so some work would be needed to balance these two goals.
+To effectively support long periods offline, Zero should probably have a mode where it first sends all queued mutations, then replays them after the server updates are applied. But this would conflict with the goal to startup and get server updates fast when there _aren't_ many queued mutations, so some work would be needed to balance these two goals.
 
 ### Offline Mutations Must Never Be Rejected
 

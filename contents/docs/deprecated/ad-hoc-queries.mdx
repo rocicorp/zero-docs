@@ -26,8 +26,8 @@ const schema = createSchema({
 Once enabled, queries are available at `z.query.<tablename>`.
 
 ```tsx
-const z = new Zero(...);
-const issues = await z.query.issue.where('priority', 'high').run();
+const zero = new Zero(...);
+const issues = await zero.query.issue.where('priority', 'high').run();
 ```
 
 Each table is a ZQL builder object. See [ZQL](/docs/zql) for details.

@@ -36,7 +36,7 @@ The current connection state is available in the `zero.connection.state` propert
 import {useZeroConnectionState} from '@rocicorp/zero/react'
 
 function ConnectionStatus() {
-  const connectionState = useZeroConnectionState()
+  const state = useZeroConnectionState()
 
   switch (state.name) {
     case 'connecting':
@@ -50,9 +50,7 @@ function ConnectionStatus() {
     case 'needs-auth':
       return <div>Session expired</div>
     default:
-      throw new Error(
-        'Unexpected connection state: ' + state.name
-      )
+      return null
   }
 }
 ```
@@ -64,27 +62,27 @@ function ConnectionStatus() {
   const state = useZeroConnectionState()
 
   return (
-    <>
-      {(() => {
-        const s = state()
-        switch (s.name) {
-          case 'connecting':
-            return <div title={s.reason}>Connecting...</div>
-          case 'connected':
-            return <div>Connected</div>
-          case 'disconnected':
-            return <div title={s.reason}>Offline</div>
-          case 'error':
-            return <div title={s.reason}>Error</div>
-          case 'needs-auth':
-            return <div>Session expired</div>
-          default:
-            throw new Error(
-              `Unexpected connection state: ${s.name}`
-            )
-        }
-      })()}
-    </>
+    <Switch>
+      <Match when={state().name === 'connecting'}>
+        <div title={state().reason}>Connecting...</div>
+      </Match>
+
+      <Match when={state().name === 'connected'}>
+        <div>Connected</div>
+      </Match>
+
+      <Match when={state().name === 'disconnected'}>
+        <div title={state().reason}>Offline</div>
+      </Match>
+
+      <Match when={state().name === 'error'}>
+        <div title={state().reason}>Error</div>
+      </Match>
+
+      <Match when={state().name === 'needs-auth'}>
+        <div>Session expired</div>
+      </Match>
+    </Switch>
   )
 }
 ```
@@ -108,9 +106,7 @@ zero.connection.state.subscribe(state => {
       console.log('Session expired')
       break
     default:
-      throw new Error(
-        `Unexpected connection state: ${state.name}`
-      )
+      return null
   }
 })
 ```
@@ -121,7 +117,7 @@ zero.connection.state.subscribe(state => {
 
 ### Connecting
 
-Zero starts in the `connecting` state. Once the connnection is established, it transitions to `connected`.
+Zero starts in the `connecting` state. Once the connection is established, it transitions to `connected`.
 
 While `connecting`, Zero repeatedly tries to connect to `zero-cache` for up to 1 minute by default. This timeout can be configured with the `disconnectTimeoutMs` constructor parameter:
 
@@ -156,8 +152,6 @@ function Root() {
 ```
 
 ```tsx
-import {ZeroProvider} from '@rocicorp/zero/solid'
-
 function Root() {
   return (
     <ZeroProvider
@@ -171,8 +165,6 @@ function Root() {
 ```
 
 ```ts
-import {Zero} from '@rocicorp/zero'
-
 const zero = new Zero({
   // ...
   disconnectTimeoutMs: 1000 * 60 * 5 // 5 minutes

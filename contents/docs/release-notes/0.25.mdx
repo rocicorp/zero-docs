@@ -11,13 +11,13 @@ npm install @rocicorp/zero@0.25
 
 ## Overview
 
-This release massively overhauls and simplifies the entire Zero API.  
+This release massively overhauls and simplifies the entire Zero API.
 
 Conceptually, Zero is now just [schemas](/docs/schema), [queries](/docs/queries), and [mutators](/docs/mutators).
 
 There are no longer first-class auth or permission systems, or a need for them.
 
-There are no longer "custom mutators" and "crud mutators" – or "synced queries" and "zql queries". There are just "mutators" and "queries". 
+There are no longer "custom mutators" and "crud mutators" – or "synced queries" and "zql queries". There are just "mutators" and "queries".
 
 All the old APIs have been deprecated, and the docs have been rewritten and simpilfied to reflect these changes.
 
@@ -31,15 +31,15 @@ We have implemented both "minimal" and "maximal" sample upgrades.
 
 The minimal upgrades show how to update to 0.25 with very little work, by opting into deprecated APIs:
 
-* [ztunes minimal](https://github.com/rocicorp/ztunes/pull/25): Minimal React upgrade.
-* [hello-zero-solid minimal](https://github.com/rocicorp/hello-zero-solid/pull/30): Minimal SolidJS upgrade.
+- [ztunes minimal](https://github.com/rocicorp/ztunes/pull/25): Minimal React upgrade.
+- [hello-zero-solid minimal](https://github.com/rocicorp/hello-zero-solid/pull/30): Minimal SolidJS upgrade.
 
 The maximal upgrades show how to use all the new features. Refer to the commit log of each PR for step-by-step examples of how to upgrade:
 
-* [ztunes](https://github.com/rocicorp/ztunes/pull/24): Maximal React upgrade.
-* [zslack](TODO): Maximal React Native upgrade.
-* [hello-zero-solid](https://github.com/rocicorp/hello-zero-solid/pull/31): Maximal SolidJS upgrade.
-* [hello-zero-cf](TODO): Maximal Cloudflare upgrade.
+- [ztunes](https://github.com/rocicorp/ztunes/pull/24): Maximal React upgrade.
+- [zslack](TODO): Maximal React Native upgrade.
+- [hello-zero-solid](https://github.com/rocicorp/hello-zero-solid/pull/31): Maximal SolidJS upgrade.
+- [hello-zero-cf](TODO): Maximal Cloudflare upgrade.
 
 Additionally, the old `hello-zero` sample has been updated from the original CRUD mutators and queries [all the way to the latest hotness](TODO). So if you were still using those APIs, you can use this as a guide to upgrade.
 

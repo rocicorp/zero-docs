@@ -11,8 +11,6 @@ the Expo implementation of Zero's `kvStore` interface:
 import type {ZeroOptions} from '@rocicorp/zero'
 import {ZeroProvider} from '@rocicorp/zero/react'
 import {expoSQLiteStoreProvider} from '@rocicorp/zero/expo-sqlite'
-import {type Schema} from './schema.ts'
-import {type Mutators} from './mutators.ts'
 
 // on web, we use the browser's IndexedDB
 const kvStore =
@@ -27,7 +25,7 @@ export default function RootLayout() {
       server: 'http://localhost:4848',
       schema,
       mutators: createMutators(authData)
-    } as const satisfies ZeroOptions<Schema, Mutators>
+    } as const satisfies ZeroOptions
   }, [])
 
   return (
@@ -54,7 +52,7 @@ export default function RootLayout() {
     return {
       kvStore: opSQLiteStoreProvider()
       // ...
-    } as const satisfies ZeroOptions<Schema, Mutators>
+    } as const satisfies ZeroOptions
   }, [])
 
   return (

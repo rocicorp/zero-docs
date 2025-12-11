@@ -515,7 +515,7 @@ export async function POST(req: Request) {
       return query.fn({args, ctx: {userId: 'anon'}})
     },
     schema,
-    req.raw
+    req
   )
 
   return Response.json(result)
@@ -561,7 +561,7 @@ app.post('/api/query', async c => {
       return query.fn({args, ctx: {userId: 'anon'}})
     },
     schema,
-    c.req
+    c.req.raw
   )
 
   return c.json(result)
@@ -1118,7 +1118,7 @@ app.post('/api/mutate', async c => {
 
       return result
     },
-    c.req
+    c.req.raw
   )
 
   return c.json(result)

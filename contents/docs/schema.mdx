@@ -344,7 +344,7 @@ Use `DefaultTypes` to register the your `Schema` type with Zero:
 ```ts
 declare module '@rocicorp/zero' {
   interface DefaultTypes {
-    schema: Schema;
+    schema: Schema
   }
 }
 ```
@@ -371,7 +371,7 @@ If a reload loop does occur, Zero uses exponential backoff to avoid overloading 
 If you want to change or delay this reload, you can do so by providing the `onUpdateNeeded` constructor parameter:
 
 ```ts
-const z = new Zero({
+new Zero({
   onUpdateNeeded: updateReason => {
     if (reason.type === 'SchemaVersionNotSupported') {
       // Do something custom here, like show a banner.

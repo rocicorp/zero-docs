@@ -90,6 +90,7 @@ zql.issue.orderBy('created', 'desc').limit(100)
 
 You can start the results at or after a particular row with `start()`:
 
+{/* prettier-ignore */}
 ```tsx
 let start: IssueRow | undefined
 while (true) {
@@ -119,6 +120,7 @@ zql.issue.start(row, {inclusive: true})
 
 If you want exactly zero or one results, use the `one()` clause. This causes ZQL to return `Row|undefined` rather than `Row[]`.
 
+{/* prettier-ignore */}
 ```tsx
 const result = await zql.issue
   .where('id', 42)
@@ -279,6 +281,7 @@ zql.issue.where(({cmp, and, or, not}) =>
 
 Note that chaining `where()` is also a one-level `and`:
 
+{/* prettier-ignore */}
 ```tsx
 // Find issues with priority 3 or higher, owned by aa
 zql.issue
@@ -359,6 +362,7 @@ zql.issue.where({cmp, or, exists} =>
 
 You can get the TypeScript type of the result of a query using the `QueryResultType` helper:
 
+{/* prettier-ignore */}
 ```ts
 const complexQuery = zql.issue.related(
   'comments',

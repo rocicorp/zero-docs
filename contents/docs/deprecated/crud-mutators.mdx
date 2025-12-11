@@ -26,8 +26,8 @@ const schema = createSchema({
 Once enabled, mutators are available at `z.mutate.<tablename>`:
 
 ```tsx
-const z = new Zero(...);
-z.mutate.user.insert({
+const zero = new Zero(...);
+zero.mutate.user.insert({
 	id: nanoid(),
 	username: 'abby',
 	language: 'en-us',

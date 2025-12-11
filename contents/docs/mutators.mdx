@@ -8,7 +8,7 @@ Mutators are how you write data with Zero. Here's a simple example:
 ```ts
 import {defineMutators, defineMutator} from '@rocicorp/zero'
 import {crud} from 'schema.ts'
-import z from 'zod'
+import {z} from 'zod'
 
 export const mutators = defineMutators({
   updateIssue: defineMutator(
@@ -178,7 +178,7 @@ const createIssue = defineMutator<{
   // enforces authorship of created issue.
   await tx.mutate(
     crud.issue.insert({
-    id,
+      id,
       title,
       authorID: userID
     })
@@ -281,7 +281,7 @@ By convention, mutators are listed in a central `mutators.ts` file. This allows 
 ```ts
 import {defineMutators, defineMutator} from '@rocicorp/zero'
 import {crud, zql} from './schema.ts'
-import z from 'zod'
+import {z} from 'zod'
 
 export const mutators = defineMutators({
   posts: {
@@ -397,9 +397,11 @@ In React or SolidJS, you'll do this by passing the `mutators` object to the `Zer
 import {ZeroProvider} from '@rocicorp/zero/react'
 import {mutators} from 'zero/mutators.ts'
 
-<ZeroProvider mutators={mutators}>
-  <App />
-</ZeroProvider>
+return (
+  <ZeroProvider mutators={mutators}>
+    <App />
+  </ZeroProvider>
+)
 ```
 
 If you use the `Zero` class directly, you can pass the `mutators` object to the `Zero` constructor:
@@ -546,38 +548,47 @@ To implement server-specific code, just run different mutators in your mutate en
 
 ```ts
 // server-mutators.ts
-import { defineMutators, defineMutator } from '@rocicorp/zero'
-import { zql } from 'schema.ts'
-import z from "zod"
-import { mutators as sharedMutators } from 'mutators.ts'
+import {defineMutators, defineMutator} from '@rocicorp/zero'
+import {z} from 'zod'
+import {zql} from 'schema.ts'
+import {mutators as sharedMutators} from 'mutators.ts'
 
-export const serverMutators = defineMutators(sharedMutators, {
-  posts: {
-    // Overrides the shared mutator definition with same name.
-    update: defineMutator(
-      z.object({
-        id: z.string(),
-        title: z.string().optional(),
-        priority: z.number().optional(),
-      }),
-      async (
-        {tx, ctx: {userID}, args: {id, title, priority}}
-      ) => {
-        // Run the shared mutator first.
-        await sharedMutators.posts.update.fn({tx, ctx, args})
-
-        // Record a history of this operation happening in an audit log table.
-        await tx.mutate(
-          crud.auditLog.insert({
-            issueId: id,
-            action: 'update-title',
-            timestamp: Date.getTime(),
+export const serverMutators = defineMutators(
+  sharedMutators,
+  {
+    posts: {
+      // Overrides the shared mutator definition with same name.
+      update: defineMutator(
+        z.object({
+          id: z.string(),
+          title: z.string().optional(),
+          priority: z.number().optional()
+        }),
+        async ({
+          tx,
+          ctx: {userID},
+          args: {id, title, priority}
+        }) => {
+          // Run the shared mutator first.
+          await sharedMutators.posts.update.fn({
+            tx,
+            ctx,
+            args
           })
-        )
-      },
-    ),
+
+          // Record a history of this operation happening in an audit log table.
+          await tx.mutate(
+            crud.auditLog.insert({
+              issueId: id,
+              action: 'update-title',
+              timestamp: Date.getTime()
+            })
+          )
+        }
+      )
+    }
   }
-})
+)
 ```
 
 For simple things, we also expose a `location` field on the transaction object that you can use to branch your code:
@@ -743,11 +754,11 @@ To do this, you can do your async work after closing the transaction inside `han
 
 ```ts
 // server-mutators.ts
-import {defineMutator} from '@rocicorp/zero'
-import {Schema, zql} from 'schema.ts'
-import z from 'zod'
+import {defineMutators, defineMutator} from '@rocicorp/zero'
+import {z} from 'zod'
+import {crud} from 'schema.ts'
 
-export const mutators = {
+export const mutators = defineMutators({
   issue: {
     update: defineMutator(
       z.object({
@@ -759,11 +770,13 @@ export const mutators = {
         await sendEmailToSubscribers(id)
       }
     )
-  } as const
-}
+  }
+})
 ```
 
 Then in your push handler:
+
+{/* TODO: this needs to be updated with the latest handleMutateRequest */}
 
 ```ts
 app.post('/push', async c => {

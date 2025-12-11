@@ -540,9 +540,7 @@ export async function POST(event: APIEvent) {
     event.request
   )
 
-  return new Response(JSON.stringify(result), {
-    headers: {'Content-Type': 'application/json'}
-  })
+  return new Response.json(result)
 }
 ```
 
@@ -818,7 +816,7 @@ function MyComponent() {
 
 ```tsx
 // mycomponent.tsx
-import {useQuery} from '@rocicorp/zero/solid'
+import {useZero} from '@rocicorp/zero/solid'
 import {mutators} from './zero/mutators.ts'
 
 function MyComponent() {
@@ -1091,9 +1089,7 @@ export async function POST(event: APIEvent) {
     event.request
   )
 
-  return new Response(JSON.stringify(result), {
-    headers: {'Content-Type': 'application/json'}
-  })
+  return new Response.json(result)
 }
 ```
 

@@ -6,8 +6,8 @@ The Zero package includes utilities to run ZQL on the server directly against yo
 
 This is useful for many reasons:
 
-- It allows [Custom Mutators](custom-mutators) to read data using ZQL to check permissions or invariants.
-- You can use ZQL to implement standard REST endpoints, allowing you to share code with custom mutators.
+- It allows [Mutators](/docs/mutators) to read data using ZQL to check permissions or invariants.
+- You can use ZQL to implement standard REST endpoints, allowing you to share code with Mutators.
 - In the future ([but not yet implemented](#ssr)), this can support server-side rendering.
 
 <Note type="warning" slug="schema-read">
@@ -105,7 +105,7 @@ declare module '@rocicorp/zero' {
 
 </CodeGroup>
 
-Within your custom mutators, you can access the underlying transaction via `tx.dbTransaction.wrappedTransaction`:
+Within your Mutators, you can access the underlying transaction via `tx.dbTransaction.wrappedTransaction`:
 
 <CodeGroup
   labels={[

@@ -439,6 +439,8 @@ npx zero-cache-dev
 
 The `@rocicorp/zero` package provides the `handleMutateRequest` and `mustGetMutator` functions to make it easy to implement the endpoint.
 
+{/* TODO update to create and register the dbProvider with DefaultTypes */}
+
 For example, with [Hono](https://hono.dev):
 
 ```ts
@@ -751,6 +753,8 @@ See [ZQL on the Server](/docs/server-zql) for more information.
 It is bad practice to hold open database transactions while talking over the network, for example to send notifications. Instead, you should let the db transaction commit and do the work asynchronously.
 
 To do this, you can do your async work after closing the transaction inside `handleMutationRequest`:
+
+{/* TODO: sendEmailToSubscribers should not be in a defineMutator? */}
 
 ```ts
 // server-mutators.ts

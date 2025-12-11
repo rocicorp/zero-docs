@@ -124,6 +124,20 @@ export function handleMutate(request: Request) {
     request.headers.get('Authorization')
   )
 
+  // handle mutate request using the session ...
+}
+```
+
+## Auth Failure and Refresh
+
+To mark a request as unauthorized, return a `401` or `403` status code from your [queries](/docs/queries) or [mutate](/docs/mutators) endpoint.
+
+```ts
+export function handleMutate(request: Request) {
+  const session = await authenticate(
+    request.headers.get('Authorization')
+  )
+
   if (!session) {
     // can be 401 or 403
     return json({error: 'Unauthorized'}, {status: 401})
@@ -132,8 +146,6 @@ export function handleMutate(request: Request) {
   // handle mutate request ...
 }
 ```
-
-To mark a request as unauthorized, return a `401` or `403` status code from your [queries](/docs/queries) or [mutate](/docs/mutators) endpoint.
 
 This will cause Zero to disconnect from `zero-cache` and the [connection status](/docs/TODO) will change to `needs-auth`. You can then re-authenticate the user and call `zero.connection.connect()` to reconnect to `zero-cache`:
 

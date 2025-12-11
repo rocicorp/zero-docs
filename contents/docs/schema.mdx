@@ -94,11 +94,9 @@ yarn prisma generate
 
 </CodeGroup>
 
-### Not Seeing your Generator?
-
 <Note
   emoji="🧑‍💻"
-  heading="Both `drizzle-zero` and `prisma-zero` were community contributions"
+  heading="Not seeing your generator?"
   slug="contributing"
 >
   We'd love more! See the source for
@@ -338,6 +336,20 @@ export const schema = createSchema({
   ]
 })
 ```
+
+### Default Type Parameter
+
+Use `DefaultTypes` to register the your `Schema` type with Zero:
+
+```ts
+declare module '@rocicorp/zero' {
+  interface DefaultTypes {
+    schema: Schema;
+  }
+}
+```
+
+This prevents having to pass `Schema` manually to every Zero API.
 
 ## Migrations
 

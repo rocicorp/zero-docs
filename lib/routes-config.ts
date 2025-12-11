@@ -95,6 +95,7 @@ export const ROUTES = [
       {title: 'Replication', href: '/debug/replication'},
       {title: 'Query ASTs', href: '/debug/query-asts'},
       {title: 'OpenTelemetry', href: '/debug/otel'},
+      {title: 'zero-out', href: '/debug/zero-out'},
     ],
   },
 

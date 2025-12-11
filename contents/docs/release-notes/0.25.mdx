@@ -1,6 +1,6 @@
 ---
 title: Zero 0.25
-description: Query Planning, New Query and Mutator DX
+description: Query Planning, DX Overhaul
 ---
 
 ## Installation
@@ -9,12 +9,58 @@ description: Query Planning, New Query and Mutator DX
 npm install @rocicorp/zero@0.25
 ```
 
+## Overview
+
+This release massively overhauls and simplifies the entire Zero API.  
+
+Conceptually, Zero is now just [schemas](/docs/schema), [queries](/docs/queries), and [mutators](/docs/mutators).
+
+There are no longer first-class auth or permission systems, or a need for them.
+
+There are no longer "custom mutators" and "crud mutators" – or "synced queries" and "zql queries". There are just "mutators" and "queries". 
+
+All the old APIs have been deprecated, and the docs have been rewritten and simpilfied to reflect these changes.
+
+Additionally, this release introduces a [raft of big new features](5#features), listed below.
+
+To ease the transition, and allow access to new features without a ton of work, you can still use the old APIs via the `enableLegacyQueries` and `enableLegacyMutators` flags. Note that support for these older APIs will be removed for the Zero beta early next year.
+
+## Upgrading
+
+We have implemented both "minimal" and "maximal" sample upgrades.
+
+The minimal upgrades show how to update to 0.25 with very little work, by opting into deprecated APIs:
+
+* [ztunes minimal](https://github.com/rocicorp/ztunes/pull/25): Minimal React upgrade.
+* [hello-zero-solid minimal](https://github.com/rocicorp/hello-zero-solid/pull/30): Minimal SolidJS upgrade.
+
+The maximal upgrades show how to use all the new features. Refer to the commit log of each PR for step-by-step examples of how to upgrade:
+
+* [ztunes](https://github.com/rocicorp/ztunes/pull/24): Maximal React upgrade.
+* [zslack](TODO): Maximal React Native upgrade.
+* [hello-zero-solid](https://github.com/rocicorp/hello-zero-solid/pull/31): Maximal SolidJS upgrade.
+* [hello-zero-cf](TODO): Maximal Cloudflare upgrade.
+
+Additionally, the old `hello-zero` sample has been updated from the original CRUD mutators and queries [all the way to the latest hotness](TODO). So if you were still using those APIs, you can use this as a guide to upgrade.
+
 ## Features
 
 - [**Query Planning:**](/docs/zql#planning) Zero now automatically plans joins, similar to other databases. You no longer need to specify `flip:true` to optimize `whereExists()` calls.
+- [**Reworked Query DX:**](/docs/queries) Queries now receive a `Context` automatically – you don't have to pass it at the call site. Also, any [Standard Schema](https://standardschema.dev/) conforming library can be used for validation and the API has been generally simplified and streamlined.
+- [**Reworked Mutator DX:**](/docs/mutators) The mutator API has been overhauled to match queries. Mutators now also support validation.
+- [**drizzle-zero and prisma-zero are now first-class:**](/docs/schema#generating-from-database) They have moved into the rocicorp org and are now officially supported.
+- [**Default Schema Type:**](/docs/schema#default-type-parameter) The `Schema` type can now be registered as a default with Zero. You can just say `useZero()` – `useZero<Schema>` is no longer needed. You can also delete your `createUseZero()` helper if you have one. This registration happens by default if you use the new `drizzle-zero` or `prisma-zero` packages.
+- [**New Connection Status API:**](/docs/connection) Brand new connection status API with overhauled error-handling and reconnection behavior.
+- [**Mutator promises now return structured errors:**](/docs/mutators#waiting-for-mutator-result) The `client` and `server` promises now always resolve. In the case of an error, they now return a structured error object.
+- [**New Install Guide:**](/docs/install) Rewritten guide to add Zero to an existing project.
+- [**New zero-out tool:**](/docs/debug/zero-out) Removes all trace of Zero from Postgres.
+
+## Performance
 
 ## Fixes
 
-## Breaking Changes
+- [**ZERO_REPLICA_FILE now defaults to zero.db**](/docs/zero-cache-config#zero_replica_file)
+- [**`serverURL` was renamed to `cacheURL`:**](/docs/install#set-up-the-zero-client) The old name is still supported but deprecated.
+- [**`GET_QUERIES` was renamed to `QUERY` throughout:**](/docs/zero-cache-config#QUERY_URL) The corresponding `getQueriesURL` constructor param was renamed to `queryURL` to match.
 
-## Example Upgrades
+## Breaking Changes

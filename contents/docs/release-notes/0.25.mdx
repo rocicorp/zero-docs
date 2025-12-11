@@ -54,6 +54,7 @@ Additionally, the old `hello-zero` sample has been updated from the original CRU
 - [**Mutator promises now return structured errors:**](/docs/mutators#waiting-for-mutator-result) The `client` and `server` promises now always resolve. In the case of an error, they now return a structured error object.
 - [**New Install Guide:**](/docs/install) Rewritten guide to add Zero to an existing project.
 - [**New zero-out tool:**](/docs/debug/zero-out) Removes all trace of Zero from Postgres.
+- [**Support for Generated Columns:**](/docs/postgres-support#object-types) In Postgres 18+, `generated stored` columns are now synced. This is useful for denormalizing data from JSON columns to support filtering in Zero.
 
 ## Performance
 

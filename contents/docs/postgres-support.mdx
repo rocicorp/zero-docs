@@ -13,10 +13,10 @@ Postgres has a massive feature set, and Zero supports a growing subset of it.
 
 ## Object Types
 
-- Tables are synced
-- Views are not synced
-- `identity` generated columns are synced
-- All other generated columns are not synced
+- Tables are synced.
+- Views are not synced.
+- `generated as identity` columns are synced.
+- In Postgres 18+, `generated stored` columns are synced. In lower Postgres versions they aren't.
 - Indexes aren't _synced_ per-se, but we do implicitly add indexes to the replica that match the upstream indexes. In the future, this will be customizable.
 
 ## Column Types

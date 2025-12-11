@@ -756,54 +756,72 @@ See [ZQL on the Server](/docs/server-zql) for more information.
 
 ## Notifications and Async Work
 
-It is bad practice to hold open database transactions while talking over the network, for example to send notifications. Instead, you should let the db transaction commit and do the work asynchronously.
+The best way to handle notifications and async work is a [transactional outbox](https://docs.aws.amazon.com/prescriptive-guidance/latest/cloud-design-patterns/transactional-outbox.html). This ensures that notifications actually do eventually get sent, without holding open database transactions to talk over the network. This can be implemented very easily in Zero by writing notifications to an `outbox` table as part of your mutator, then processing that table periodically with a background job.
 
-To do this, you can do your async work after closing the transaction inside `handleMutationRequest`:
+However sometimes it's still nice to do a quick and dirty async send as part of a mutation, for example early on in development, or to record metrics. For this, the `createMutators` pattern is useful:
 
 {/* TODO: sendEmailToSubscribers should not be in a defineMutator? */}
 
 ```ts
 // server-mutators.ts
-import {defineMutators, defineMutator} from '@rocicorp/zero'
-import {z} from 'zod'
-import {crud} from 'schema.ts'
+import {defineMutator} from '@rocicorp/zero'
+import z from 'zod'
+import {Schema, zql} from 'schema.ts'
+import { mutators as clientMutators } from 'mutators.ts'
 
-export const mutators = defineMutators({
-  issue: {
-    update: defineMutator(
-      z.object({
-        id: z.string(),
-        title: z.string()
-      }),
-      async (tx, {id, title}) => {
-        await tx.mutate(crud.issue.update({id, title}))
-        await sendEmailToSubscribers(id)
-      }
-    )
-  }
-})
+// Instead of defining server mutators as a constant,
+// define them as a function of a list of async tasks.
+export function createMutators(
+    asyncTasks: Array<() => Promise<void>>) {
+  return defineMutators(clientMutators, {
+    issue: {
+      update: defineMutator(
+        z.object({
+          id: z.string(),
+          title: z.string()
+        }),
+        async (tx, {id, title}) => {
+          await tx.mutate(crud.issue.update({id, title}))
+          asyncTasks.push(() => sendEmailToSubscribers(id))
+        }
+      )
+    } as const
+  })
+}
 ```
 
-Then in your push handler:
+Then in your mutate handler:
 
 {/* TODO: this needs to be updated with the latest handleMutateRequest */}
 
 ```ts
-app.post('/push', async c => {
+app.post('/api/zero/mutate', async c => {
+  const userID = await authenticateUser(c.req.raw)
+  const ctx = {userID}
   const asyncTasks: Array<() => Promise<void>> = []
-  const result = await processor.process(
-    createMutators(authData, asyncTasks),
-    c.req.query(),
-    await c.req.json()
+
+  // Create mutators dynamically, passing task list.
+  const mutators = createMutators(asyncTasks)
+
+  // Run mutators as normal.
+  return await c.json(
+    await handleMutateRequest(
+      transact =>
+        transact(dbProvider, (tx, name, args) => {
+          const mutator = mustGetMutator(mutators, name)
+          return mutator.fn({tx, ctx, args})
+        }),
+      c.req.raw
+    )
   )
 
+  // Run all async tasks
   await Promise.all(asyncTasks.map(task => task()))
-  return await c.json(result)
 })
 ```
 
-## Custom Push Implementation
+## Custom Mutate Implementation
 
-You can manually implement the push protocol in any programming language.
+You can manually implement the mutate endpoint in any programming language.
 
-This will be documented in the future, but you can refer to the [PushProcessor](https://github.com/rocicorp/mono/blob/1a3741fbdad6dbdd56aa1f48cc2cc83938a61b16/packages/zero-pg/src/web.ts#L33) source code for an example for now.
+This will be documented in the future, but you can refer to the [handleMutateRequest](https://github.com/rocicorp/mono/blob/main/packages/zero-server/src/process-mutations.ts) source code for an example for now.

@@ -41,7 +41,7 @@ export function IntroductionLanding() {
             const particle = document.createElement('div');
             particle.className = 'hero-spark-particle';
 
-            const leftPadding = 80;
+            const leftPadding = 0;
             const rightPadding = 10;
             const randomX =
               instantRect.left -

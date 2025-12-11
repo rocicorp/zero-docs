@@ -23,94 +23,162 @@ This is useful for many reasons:
 To run ZQL on the database, you will create a `ZQLDatabase` instance. Zero ships with
 several built-in factories for popular Postgres bindings libraries.
 
-### node-postgres
-
-The industry standard [`node-postgres`](https://node-postgres.com/) library is supported via `zeroNodePg`:
-
-```ts
-import {Pool} from 'pg'
-import {zeroNodePg} from '@rocicorp/zero/server/adapters/pg'
-import {schema} from '../shared/schema'
-
-const db = zeroNodePg(
-  schema,
-  new Pool({
-    connectionString: process.env.ZERO_UPSTREAM_DB!
-  })
-)
-```
-
-You can also pass a `Client`:
-
-```ts
-import {Client} from 'pg'
-import {zeroNodePg} from '@rocicorp/zero/server/adapters/pg'
-import {schema} from '../shared/schema'
-const client = new Client({
-  connectionString: process.env.ZERO_UPSTREAM_DB!
-})
-await client.connect()
-const db = zeroNodePg(schema, client)
-```
-
-### Postgres.js
-
-The popular [`Postgres.js`](https://github.com/porsager/postgres) library is supported via `zeroPostgresJS`:
-
-```ts
-import postgres from 'postgres'
-import {zeroPostgresJS} from '@rocicorp/zero/server/adapters/postgresjs'
-import {schema} from '../shared/schema'
-
-const db = zeroPostgresJS(
-  schema,
-  postgres(process.env.ZERO_UPSTREAM_DB!)
-)
-```
-
-### Drizzle
-
-Zero also includes an adapter for [Drizzle ORM](https://orm.drizzle.team/):
-
-```ts
-import {Pool} from 'pg'
-import {drizzle} from 'drizzle-orm/node-postgres'
-import {zeroDrizzle} from '@rocicorp/zero/server/adapters/drizzle'
-import * as drizzleSchema from './drizzle-schema'
-
-const drizzleDb = drizzle(pool, {schema: drizzleSchema})
-const db = zeroDrizzle(schema, drizzleDb)
-```
-
-Within your custom mutators, you can access the underlying `drizzleDb` via `tx.wrappedTransaction`:
-
-```ts
-// server-mutators.ts
-// Use a type helper for the server transaction type
-import type {ServerTransaction} from '@rocicorp/zero/server'
-import type {DrizzleTransaction} from '@rocicorp/zero/server/adapters/drizzle'
-
-type ServerTx = ServerTransaction<
-  Schema,
-  DrizzleTransaction<typeof drizzleDb>
+<CodeGroup
+  labels={[
+    {
+      text: 'Drizzle',
+      sync: {pgClient: 'drizzle'},
+    },
+    {
+      text: 'node-postgres',
+      sync: {pgClient: 'node-postgres'},
+    },
+    {
+      text: 'postgres.js',
+      sync: {pgClient: 'postgres-js'},
+    },
+  ]}
 >
 
-async function createUser(
-  tx: ServerTx,
-  {id, name}: {id: string; name: string}
-) {
-  // this is then fully typed w/ drizzle
-  await tx.dbTransaction.wrappedTransaction
-    .insert(drizzleSchema.user)
-    .values({id, name})
+```ts
+// app/api/mutate/db-provider.ts
+import {zeroDrizzle} from '@rocicorp/zero/server/adapters/drizzle'
+import {schema} from '../../zero/schema.ts'
+
+// pass a drizzle client instance. for example:
+export const drizzleClient = drizzle(pool, {
+  schema: drizzleSchema
+})
+export const dbProvider = zeroDrizzle(schema, drizzleClient)
+
+// Register the database provider for type safety
+declare module '@rocicorp/zero' {
+  interface DefaultTypes {
+    dbProvider: typeof dbProvider
+  }
 }
 ```
+
+```ts
+// app/api/mutate/db-provider.ts
+import {zeroNodePg} from '@rocicorp/zero/server/adapters/pg'
+import {Pool} from 'pg'
+import {schema} from '../../zero/schema.ts'
+
+const pool = new Pool({
+  connectionString: process.env.ZERO_UPSTREAM_DB!
+})
+export const dbProvider = zeroNodePg(schema, pool)
+
+// You can also pass a client instead of a pool:
+//
+// const client = new Client({
+//   connectionString: process.env.ZERO_UPSTREAM_DB!
+// })
+// await client.connect()
+// export const dbProvider = zeroNodePg(schema, client)
+
+// Register the database provider for type safety
+declare module '@rocicorp/zero' {
+  interface DefaultTypes {
+    dbProvider: typeof dbProvider
+  }
+}
+```
+
+```ts
+// app/api/mutate/db-provider.ts
+import {zeroPostgresJS} from '@rocicorp/zero/server/adapters/postgresjs'
+import postgres from 'postgres'
+import {schema} from '../../zero/schema.ts'
+
+const sql = postgres(process.env.ZERO_UPSTREAM_DB!)
+export const dbProvider = zeroPostgresJS(schema, sql)
+
+// Register the database provider for type safety
+declare module '@rocicorp/zero' {
+  interface DefaultTypes {
+    dbProvider: typeof dbProvider
+  }
+}
+```
+
+</CodeGroup>
+
+Within your custom mutators, you can access the underlying transaction via `tx.dbTransaction.wrappedTransaction`:
+
+<CodeGroup
+  labels={[
+    {
+      text: 'Drizzle',
+      sync: {pgClient: 'drizzle'},
+    },
+    {
+      text: 'node-postgres',
+      sync: {pgClient: 'node-postgres'},
+    },
+    {
+      text: 'postgres.js',
+      sync: {pgClient: 'postgres-js'},
+    },
+  ]}
+>
+
+```ts
+// mutators.ts
+export const mutators = defineMutators({
+  createUser: defineMutator(
+    async ({tx, args: {id, name}}) => {
+      if (tx.location === 'server') {
+        await tx.dbTransaction.wrappedTransaction
+          .insert(drizzleSchema.user)
+          .values({id, name})
+      }
+    }
+  )
+})
+```
+
+```ts
+// mutators.ts
+export const mutators = defineMutators({
+  createUser: defineMutator(
+    async ({tx, args: {id, name}}) => {
+      if (tx.location === 'server') {
+        await tx.dbTransaction.wrappedTransaction.query(
+          'insert into "user" (id, name) values ($1, $2) returning *',
+          [id, name]
+        )
+      }
+    }
+  )
+})
+```
+
+```ts
+// mutators.ts
+export const mutators = defineMutators({
+  createUser: defineMutator(
+    async ({tx, args: {id, name}}) => {
+      if (tx.location === 'server') {
+        await tx.dbTransaction.wrappedTransaction<
+          {id: string; name: string}[]
+        >`insert into "user" (id, name)
+          values (${id}, ${name})
+          returning *`
+      }
+    }
+  )
+})
+```
+
+</CodeGroup>
 
 ### Custom Database
 
 To implement support for some other Postgres bindings library, you will implement the `DBConnection` interface.
 
-See the implementations for the [existing adapters](https://github.com/rocicorp/mono/tree/6c27d88ce5a052fb8e1be90d072ddd0ebc13622a/packages/zero-server/src/adapters) for examples.
+See the implementations for the [existing adapters](https://github.com/rocicorp/mono/tree/main/packages/zero-server/src/adapters) for examples.
 
 ## Running ZQL
 
@@ -120,7 +188,7 @@ Once you have an instance of `ZQLDatabase`, use the `transaction()` method to ru
 await db.transaction(async tx => {
   // await tx.mutate...
   // await tx.query...
-  // await myMutator(tx, ...args)
+  // await myMutator.fn({tx, ctx, args})
 })
 ```
 

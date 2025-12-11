@@ -52,7 +52,7 @@ Zero-cache then runs this ZQL against the server-side data. The initial server r
   className="invert dark:invert-0"
 />
 
-zero-cache receives updates from Postgres via logical replication. It updates affected queries and sends rows changes back to the client, which updates the client query, and the user sees the changes.
+zero-cache receives updates from Postgres via logical replication. It updates affected queries and sends row changes back to the client, which updates the client query, and the user sees the changes.
 
 <ImageLightbox
   src="/images/custom-queries/queries6.svg"
@@ -104,7 +104,7 @@ The result of `defineQuery` is a `QueryDefinition`. By itself this isn't super u
 ```ts
 export const queries = defineQueries({
   posts: {
-    all: allPosts
+    all: allPostsQueryDef
   }
 })
 ```
@@ -321,6 +321,7 @@ Or using the low-level API:
 const postsView = queries.posts
   .byAuthorID('user123')
   .materialize()
+
 postsView.addListener((posts, resultType, error) => {
   if (resultType === 'error') {
     console.error('Error loading posts', error)
@@ -330,9 +331,9 @@ postsView.addListener((posts, resultType, error) => {
 
 ### Custom Query URL
 
-By default, Zero sends queries to the URL specified in the `ZERO_QUERY_URL` parameter.
+By default, Zero sends queries to the URL specified in the `ZERO_QUERY_URL` parameter in the zero-cache config.
 
-However you can customize this on a per-client basis. To do so, list multiple comma-separted URLs in the `ZERO_QUERY_URL` parameter:
+However you can customize this on a per-client basis. To do so, list multiple comma-separated URLs in `ZERO_QUERY_URL`:
 
 ```bash
 ZERO_QUERY_URL='https://api.example.com/query,https://api.staging.example.com/query'

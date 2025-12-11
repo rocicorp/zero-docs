@@ -198,29 +198,6 @@ flag: `--enable-telemetry`<br/>
 env: `ZERO_ENABLE_TELEMETRY`<br/>
 default: `true`
 
-### Get Queries Forward Cookies
-
-If true, zero-cache will forward cookies from the request to your get-queries endpoint. This is useful for passing authentication cookies to the API server. If false, cookies are not forwarded.
-
-flag: `--get-queries-forward-cookies`<br/>
-env: `ZERO_GET_QUERIES_FORWARD_COOKIES`<br/>
-default: `false`
-
-### Get Queries URL
-
-The URL of the API server to which zero-cache will send synced queries.
-
-`*` is allowed if you would like to allow the client to specify a subdomain to use.
-
-For example: `*.example.com/api/mutate`
-
-You can specify multiple URLs as well which the client can choose from.  
-e.g., `["https://api1.example.com/mutate", "https://api2.example.com/mutate"]`
-
-flag: `--get-queries-url`<br/>
-env: `ZERO_GET_QUERIES_URL`<br/>
-required: `false`
-
 ### Initial Sync Table Copy Workers
 
 The number of parallel workers used to copy tables during initial sync. Each worker copies a single table at a time, fetching rows in batches of `initial-sync-row-batch-size`.
@@ -515,3 +492,26 @@ Note that this number must allow for at least one connection per sync worker, or
 flag: `--upstream-max-conns`<br/>
 env: `ZERO_UPSTREAM_MAX_CONNS`<br/>
 default: `20`
+
+### Query Forward Cookies
+
+If true, zero-cache will forward cookies from the request to your query endpoint. This is useful for passing authentication cookies to the API server. If false, cookies are not forwarded.
+
+flag: `--query-forward-cookies`<br/>
+env: `ZERO_QUERY_FORWARD_COOKIES`<br/>
+default: `false`
+
+### Query URL
+
+The URL of the API server to which zero-cache will send query requests.
+
+`*` is allowed if you would like to allow the client to specify a subdomain to use.
+
+For example: `*.example.com/api/query`
+
+You can specify multiple URLs as well which the client can choose from.  
+e.g., `["https://api1.example.com/query", "https://api2.example.com/query"]`
+
+flag: `--query-url`<br/>
+env: `ZERO_QUERY_URL`<br/>
+required: `false`

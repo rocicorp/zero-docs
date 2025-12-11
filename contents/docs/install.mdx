@@ -116,7 +116,7 @@ If you change something in Postgres, you'll see it immediately show up in the re
 
 <Video
   src="/video/onboarding/zero-cache-sync.mp4"
-  alt="Zero cache syncing between Postgres and SQLite"
+  alt="Zero-cache syncing between Postgres and SQLite"
   animation
 />
 
@@ -208,7 +208,7 @@ yarn prisma generate
 </SyncedCode>
 
 ```ts
-// shared/schema.ts
+// zero/schema.ts
 import {table, string, createSchema} from '@rocicorp/zero'
 
 const user = table('user')
@@ -228,7 +228,7 @@ export const schema = createSchema({
 
 // Register the schema for type safety
 declare module '@rocicorp/zero' {
-  interface Types {
+  interface DefaultTypes {
     schema: typeof schema
   }
 }
@@ -244,16 +244,11 @@ declare module '@rocicorp/zero' {
   it.
 </Note>
 
-{/* TODO some language about schema incompatibility? */}
-{/* TODO some language about sample data? psql? */}
-
 ### Set Up the Zero Client
 
 Zero has first-class support for React and SolidJS, and community support for Svelte and Vue.
 
 There is also a low-level API you can use in any TypeScript-based project.
-
-{/* TODO add some preamble for "BYOA" (Bring Your Own Auth) or cookies or whatever */}
 
 <CodeGroup
   labels={[
@@ -275,7 +270,7 @@ There is also a low-level API you can use in any TypeScript-based project.
 ```tsx
 // root.tsx
 import {ZeroProvider} from '@rocicorp/zero/react'
-import {schema} from './shared/schema.ts'
+import {schema} from './zero/schema.ts'
 
 function Root() {
   return (
@@ -300,7 +295,7 @@ function MyComponent() {
 ```tsx
 // root.tsx
 import {ZeroProvider} from '@rocicorp/zero/solid'
-import {schema} from './shared/schema.ts'
+import {schema} from './zero/schema.ts'
 
 function Root() {
   return (
@@ -325,7 +320,7 @@ function MyComponent() {
 ```tsx
 // zero.ts
 import {Zero} from '@rocicorp/zero'
-import {schema} from './shared/schema.ts'
+import {schema} from './zero/schema.ts'
 
 const zero = new Zero({
   cacheURL: 'http://localhost:4848',
@@ -349,7 +344,7 @@ In Zero, we do this with _queries_. Queries are conventionally found in a `queri
 Here is an example of how queries are defined - you can adapt this to your own schema:
 
 ```tsx
-// shared/queries.ts
+// zero/queries.ts
 import {defineQueries, defineQuery} from '@rocicorp/zero'
 import {z} from 'zod'
 import {zql} from './schema.ts'
@@ -404,7 +399,7 @@ Querying for data is framework-specific. Most of the time, you will use a helper
 ```tsx
 // mycomponent.tsx
 import {useQuery} from '@rocicorp/zero/react'
-import {queries} from './shared/queries.ts'
+import {queries} from './zero/queries.ts'
 
 function MyComponent() {
   const [albums] = useQuery(
@@ -417,7 +412,7 @@ function MyComponent() {
 ```tsx
 // mycomponent.tsx
 import {useQuery} from '@rocicorp/zero/solid'
-import {queries} from './shared/queries.ts'
+import {queries} from './zero/queries.ts'
 
 function MyComponent() {
   const [albums] = useQuery(() =>
@@ -430,7 +425,7 @@ function MyComponent() {
 ```tsx
 // albums.ts
 import {zero} from './zero.ts'
-import {queries} from './shared/queries.ts'
+import {queries} from './zero/queries.ts'
 
 const albums = await zero.run(
   queries.albums.byArtist({artistID: 'artist_1'})
@@ -483,8 +478,8 @@ import {createFileRoute} from '@tanstack/react-router'
 import {json} from '@tanstack/react-start'
 import {handleQueryRequest} from '@rocicorp/zero/server'
 import {mustGetQuery} from '@rocicorp/zero'
-import {queries} from '../../shared/queries.ts'
-import {schema} from '../../shared/schema.ts'
+import {queries} from '../../zero/queries.ts'
+import {schema} from '../../zero/schema.ts'
 
 export const Route = createFileRoute('/api/query')({
   server: {
@@ -510,8 +505,8 @@ export const Route = createFileRoute('/api/query')({
 // app/api/query/route.ts
 import {handleQueryRequest} from '@rocicorp/zero/server'
 import {mustGetQuery} from '@rocicorp/zero'
-import {queries} from '../../shared/queries.ts'
-import {schema} from '../../shared/schema.ts'
+import {queries} from '../../zero/queries.ts'
+import {schema} from '../../zero/schema.ts'
 
 export async function POST(req: Request) {
   const result = await handleQueryRequest(
@@ -532,24 +527,20 @@ export async function POST(req: Request) {
 import type {APIEvent} from '@solidjs/start/server'
 import {handleQueryRequest} from '@rocicorp/zero/server'
 import {mustGetQuery} from '@rocicorp/zero'
-import {queries} from '../../shared/queries.ts'
-import {schema} from '../../shared/schema.ts'
+import {queries} from '../../zero/queries.ts'
+import {schema} from '../../zero/schema.ts'
 
 export async function POST(event: APIEvent) {
-  const body = await event.request.json()
-
   const result = await handleQueryRequest(
     (name, args) => {
       const query = mustGetQuery(queries, name)
       return query.fn({args, ctx: {userId: 'anon'}})
     },
     schema,
-    body
+    event.request
   )
 
-  return new Response(JSON.stringify(result), {
-    headers: {'Content-Type': 'application/json'}
-  })
+  return new Response.json(result)
 }
 ```
 
@@ -558,8 +549,8 @@ export async function POST(event: APIEvent) {
 import {Hono} from 'hono'
 import {handleQueryRequest} from '@rocicorp/zero/server'
 import {mustGetQuery} from '@rocicorp/zero'
-import {queries} from '../shared/queries.ts'
-import {schema} from '../shared/schema.ts'
+import {queries} from '../zero/queries.ts'
+import {schema} from '../zero/schema.ts'
 
 const app = new Hono()
 
@@ -621,7 +612,7 @@ Zero queries update live, so if you edit data in Postgres directly, you will see
 
 <Video
   src="/video/onboarding/zero-cache-ui-sync.mp4"
-  alt="Zero cache syncing between Postgres and SQLite and UI"
+  alt="Zero-cache syncing between Postgres and SQLite and UI"
   animation
 />
 
@@ -644,7 +635,7 @@ Data is written in Zero apps using _mutators_.
 Similar to queries, we use a shared `mutators.ts` file:
 
 ```tsx
-// shared/mutators.ts
+// zero/mutators.ts
 import {defineMutators, defineMutator} from '@rocicorp/zero'
 import {crud} from './schema.ts'
 import {z} from 'zod'
@@ -713,8 +704,8 @@ Once you've defined your mutators, you must register them with Zero before you c
 ```tsx
 // root.tsx
 import {ZeroProvider} from '@rocicorp/zero/react'
-import {mutators} from './shared/mutators.ts'
-import {schema} from './shared/schema.ts'
+import {mutators} from './zero/mutators.ts'
+import {schema} from './zero/schema.ts'
 
 function Root() {
   return (
@@ -732,8 +723,8 @@ function Root() {
 ```tsx
 // root.tsx
 import {ZeroProvider} from '@rocicorp/zero/solid'
-import {mutators} from './shared/mutators.ts'
-import {schema} from './shared/schema.ts'
+import {mutators} from './zero/mutators.ts'
+import {schema} from './zero/schema.ts'
 
 function Root() {
   return (
@@ -751,8 +742,8 @@ function Root() {
 ```tsx
 // zero.ts
 import {Zero} from '@rocicorp/zero'
-import {schema} from './shared/schema.ts'
-import {mutators} from './shared/mutators.ts'
+import {schema} from './zero/schema.ts'
+import {mutators} from './zero/mutators.ts'
 
 const zero = new Zero({
   cacheURL: 'http://localhost:4848',
@@ -791,7 +782,7 @@ You can now call mutators via `zero.mutate`:
 ```tsx
 // mycomponent.tsx
 import {useZero} from '@rocicorp/zero/react'
-import {mutators} from './shared/mutators.ts'
+import {mutators} from './zero/mutators.ts'
 
 function MyComponent() {
   const zero = useZero()
@@ -825,8 +816,8 @@ function MyComponent() {
 
 ```tsx
 // mycomponent.tsx
-import {useQuery} from '@rocicorp/zero/solid'
-import {mutators} from './shared/mutators.ts'
+import {useZero} from '@rocicorp/zero/solid'
+import {mutators} from './zero/mutators.ts'
 
 function MyComponent() {
   const zero = useZero()
@@ -860,7 +851,7 @@ function MyComponent() {
 ```tsx
 // albums.ts
 import {zero} from './zero.ts'
-import {mutators} from './shared/mutators.ts'
+import {mutators} from './zero/mutators.ts'
 
 const result = await zero.mutate(
   mutators.albums.create({
@@ -920,15 +911,17 @@ Use the Zero Postgres adapters to create a `dbProvider` instance:
 ```ts
 // app/api/mutate/db-provider.ts
 import {zeroDrizzle} from '@rocicorp/zero/server/adapters/drizzle'
-import {schema} from '../../shared/schema.ts'
+import {schema} from '../../zero/schema.ts'
 
 // pass a drizzle client instance. for example:
-// const drizzleClient = drizzle(pool, { schema: drizzleSchema })
+export const drizzleClient = drizzle(pool, {
+  schema: drizzleSchema
+})
 export const dbProvider = zeroDrizzle(schema, drizzleClient)
 
 // Register the database provider for type safety
 declare module '@rocicorp/zero' {
-  interface Types {
+  interface DefaultTypes {
     dbProvider: typeof dbProvider
   }
 }
@@ -938,7 +931,7 @@ declare module '@rocicorp/zero' {
 // app/api/mutate/db-provider.ts
 import {zeroNodePg} from '@rocicorp/zero/server/adapters/pg'
 import {Pool} from 'pg'
-import {schema} from '../../shared/schema.ts'
+import {schema} from '../../zero/schema.ts'
 
 const pool = new Pool({
   connectionString: process.env.ZERO_UPSTREAM_DB!
@@ -947,7 +940,7 @@ export const dbProvider = zeroNodePg(schema, pool)
 
 // Register the database provider for type safety
 declare module '@rocicorp/zero' {
-  interface Types {
+  interface DefaultTypes {
     dbProvider: typeof dbProvider
   }
 }
@@ -957,14 +950,14 @@ declare module '@rocicorp/zero' {
 // app/api/mutate/db-provider.ts
 import {zeroPostgresJS} from '@rocicorp/zero/server/adapters/postgresjs'
 import postgres from 'postgres'
-import {schema} from '../../shared/schema.ts'
+import {schema} from '../../zero/schema.ts'
 
 const sql = postgres(process.env.ZERO_UPSTREAM_DB!)
 export const dbProvider = zeroPostgresJS(schema, sql)
 
 // Register the database provider for type safety
 declare module '@rocicorp/zero' {
-  interface Types {
+  interface DefaultTypes {
     dbProvider: typeof dbProvider
   }
 }
@@ -1001,7 +994,7 @@ import {createFileRoute} from '@tanstack/react-router'
 import {json} from '@tanstack/react-start'
 import {handleMutateRequest} from '@rocicorp/zero/server'
 import {mustGetMutator} from '@rocicorp/zero'
-import {mutators} from '../../shared/mutators.ts'
+import {mutators} from '../../zero/mutators.ts'
 import {dbProvider} from '../../db-provider.ts'
 
 export const Route = createFileRoute('/api/mutate')({
@@ -1038,7 +1031,7 @@ export const Route = createFileRoute('/api/mutate')({
 ```ts
 // app/api/mutate/route.ts
 import {handleMutateRequest} from '@rocicorp/zero/server'
-import {mutators} from '../../shared/mutators.ts'
+import {mutators} from '../../zero/mutators.ts'
 import {dbProvider} from '../../db-provider.ts'
 import {mustGetMutator} from '@rocicorp/zero'
 
@@ -1072,12 +1065,10 @@ export async function POST(req: Request) {
 import type {APIEvent} from '@solidjs/start/server'
 import {handleMutateRequest} from '@rocicorp/zero/server'
 import {mustGetMutator} from '@rocicorp/zero'
-import {mutators} from '../../shared/mutators.ts'
+import {mutators} from '../../zero/mutators.ts'
 import {dbProvider} from '../../db-provider.ts'
 
 export async function POST(event: APIEvent) {
-  const body = await event.request.json()
-
   const result = await handleMutateRequest(
     dbProvider,
     async (transact, mutation) => {
@@ -1095,12 +1086,10 @@ export async function POST(event: APIEvent) {
 
       return result
     },
-    body
+    event.request
   )
 
-  return new Response(JSON.stringify(result), {
-    headers: {'Content-Type': 'application/json'}
-  })
+  return new Response.json(result)
 }
 ```
 
@@ -1108,7 +1097,7 @@ export async function POST(event: APIEvent) {
 // api/app.ts
 import {handleMutateRequest} from '@rocicorp/zero/server'
 import {mustGetMutator} from '@rocicorp/zero'
-import {mutators} from '../shared/mutators.ts'
+import {mutators} from '../zero/mutators.ts'
 import {dbProvider} from './db-provider.ts'
 
 app.post('/api/mutate', async c => {

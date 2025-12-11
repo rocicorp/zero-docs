@@ -147,7 +147,7 @@ export function handleMutate(request: Request) {
 }
 ```
 
-This will cause Zero to disconnect from `zero-cache` and the [connection status](/docs/TODO) will change to `needs-auth`. You can then re-authenticate the user and call `zero.connection.connect()` to reconnect to `zero-cache`:
+This will cause Zero to disconnect from `zero-cache` and the [connection status](/docs/connection) will change to `needs-auth`. You can then re-authenticate the user and call `zero.connection.connect()` to reconnect to `zero-cache`:
 
 ```tsx
 function NeedsAuthDialog() {

@@ -307,18 +307,10 @@ To compare to a literal value, use the `cmpLit` helper:
 zql.issue.where(cmpLit('foobar', 'foo' + 'bar'))
 ```
 
-By itself this is not very useful, but the first parameter can also be a JavaScript variable:
+This is particularly useful for implementing [permissions](/docs/auth#read-permissions), because the first parameter can be a field of your [context](/docs/auth#context):
 
 ```ts
-zql.issue.where(cmpLit(role, 'admin'))
-```
-
-{/* TODO this needs to be updated to not reference permissions */}
-
-Or, within a [permission rule](/docs/permissions#permissions-based-on-auth-data), you can compare to a field of the `authData` parameter:
-
-```ts
-zql.issue.where(cmpLit(authData.role, 'admin'))
+zql.issue.where(cmpLit(ctx.role, 'admin'))
 ```
 
 ### Relationship Filters

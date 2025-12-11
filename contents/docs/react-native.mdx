@@ -7,12 +7,11 @@ Zero has built-in support for React Native and Expo.
 Usage is identical to [React on the web](./react), except you must provide
 the Expo implementation of Zero's `kvStore` interface:
 
-{/* TODO: this needs to be updated to not use createMutators(authData) */}
-
 ```tsx
 import type {ZeroOptions} from '@rocicorp/zero'
 import {ZeroProvider} from '@rocicorp/zero/react'
 import {expoSQLiteStoreProvider} from '@rocicorp/zero/expo-sqlite'
+import {mutators} from 'mutators.ts'
 
 // on web, we use the browser's IndexedDB
 const kvStore =
@@ -20,18 +19,10 @@ const kvStore =
     ? undefined
     : expoSQLiteStoreProvider()
 
-export default function RootLayout() {
-  const zeroProps = useMemo(() => {
-    return {
-      kvStore,
-      server: 'http://localhost:4848',
-      schema,
-      mutators: createMutators(authData)
-    } as const satisfies ZeroOptions
-  }, [])
+  const cacheURL = import.meta.env.VITE_PUBLIC_ZERO_CACHE_URL!
 
   return (
-    <ZeroProvider {...zeroProps}>
+    <ZeroProvider {...{kvStore, cacheURL, schema, mutators}}>
       <SafeAreaProvider>
         <App />
       </SafeAreaProvider>

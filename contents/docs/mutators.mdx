@@ -512,7 +512,7 @@ app.post('/api/zero/mutate', async c => {
 })
 ```
 
-If Zero receives any response from the mutate endpoint other than HTTP 200, 401, or 403, it will disconnect and enter the [error state](TODO).
+If Zero receives any response from the mutate endpoint other than HTTP 200, 401, or 403, it will disconnect and enter the [error state](/docs/connection#errors).
 
 If Zero receives HTTP 401 or 403, the client will enter the needs auth state and require a manual reconnect with `zero.connection.connect()`, then it will retry all queued mutations.
 
@@ -760,8 +760,6 @@ The best way to handle notifications and async work is a [transactional outbox](
 
 However sometimes it's still nice to do a quick and dirty async send as part of a mutation, for example early on in development, or to record metrics. For this, the `createMutators` pattern is useful:
 
-{/* TODO: sendEmailToSubscribers should not be in a defineMutator? */}
-
 ```ts
 // server-mutators.ts
 import {defineMutator} from '@rocicorp/zero'
@@ -791,8 +789,6 @@ export function createMutators(
 ```
 
 Then in your mutate handler:
-
-{/* TODO: this needs to be updated with the latest handleMutateRequest */}
 
 ```ts
 app.post('/api/zero/mutate', async c => {

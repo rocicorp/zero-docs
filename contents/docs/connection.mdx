@@ -1,0 +1,218 @@
+---
+title: Connection Status
+---
+
+## Overview
+
+Zero manages a persistent connection to `zero-cache` with the following lifecycle:
+
+<ImageLightbox
+  src="/images/connection-state/lifecycle.png"
+  caption="Zero's connection lifecycle"
+/>
+
+## Usage
+
+The current connection state is available in the `zero.connection.state` property. This is subscribable and also has reactive hooks for React and SolidJS:
+
+<CodeGroup
+  labels={[
+    {
+      text: 'React',
+      sync: {client: 'react'},
+    },
+    {
+      text: 'SolidJS',
+      sync: {client: 'solidjs'},
+    },
+    {
+      text: 'TypeScript',
+      sync: {client: 'typescript'},
+    },
+  ]}
+>
+
+```tsx
+import { useZeroConnectionState } from '@rocicorp/zero/react';
+
+function ConnectionStatus() {
+  const connectionState = useZeroConnectionState();
+  
+  switch (state.name) {
+    case 'connecting':
+      return <div title={state.reason}>Connecting...</div>
+    case 'connected':
+      return <div>Connected</div>
+    case 'disconnected':
+      return <div title={state.reason}>Offline</div>
+    case 'error':
+      return <div title={state.reason}>Error</div>
+    case 'needs-auth':
+      return <div>Session expired</div>
+    default:
+      throw new Error('Unexpected connection state: ' + state.name)
+  }
+}
+```
+
+```tsx
+import { useZeroConnectionState } from '@rocicorp/zero/solid';
+
+function ConnectionStatus() {
+  const state = useZeroConnectionState();
+
+  return (
+    <>
+      {(() => {
+        const s = state()
+        switch (s.name) {
+          case "connecting":
+            return <div title={s.reason}>Connecting...</div>
+          case "connected":
+            return <div>Connected</div>
+          case "disconnected":
+            return <div title={s.reason}>Offline</div>
+          case "error":
+            return <div title={s.reason}>Error</div>
+          case "needs-auth":
+            return <div>Session expired</div>
+          default:
+            throw new Error(`Unexpected connection state: ${s.name}`)
+        }
+      })()}
+    </>
+  );
+}
+```
+
+```ts
+zero.connection.state.subscribe(state => {
+  switch (state.name) {
+    case 'connecting':
+      console.log(`Connecting... ${state.reason}`)
+      break
+    case 'connected':
+      console.log('Connected')
+      break
+    case 'disconnected':
+      console.log(`Disconnected ${state.reason}`)
+      break
+    case 'error':
+      console.log(`Error ${state.reason}`)
+      break
+    case 'needs-auth':
+      console.log('Session expired')
+      break
+    default:
+      throw new Error(`Unexpected connection state: ${state.name}`)
+  }
+});
+```
+
+</CodeGroup>
+
+## Details
+
+### Connecting
+
+Zero starts in the `connecting` state. Once the connnection is established, it transitions to `connected`.
+
+While `connecting`, Zero repeatedly tries to connect to `zero-cache` for up to 1 minute by default. This timeout can be configured with the `disconnectTimeoutMs` constructor parameter:
+
+<CodeGroup
+  labels={[
+    {
+      text: 'React',
+      sync: {client: 'react'},
+    },
+    {
+      text: 'SolidJS',
+      sync: {client: 'solidjs'},
+    },
+    {
+      text: 'TypeScript',
+      sync: {client: 'typescript'},
+    },
+  ]}
+>
+
+```tsx
+function Root() {
+  return (
+    <ZeroProvider
+      // ...
+      disconnectTimeoutMs={1000 * 60 * 5} // 5 minutes
+    >
+      <App />
+    </ZeroProvider>
+  )
+}
+```
+
+```tsx
+import { ZeroProvider } from '@rocicorp/zero/solid'
+import { schema } from './schema'
+
+function Root() {
+  return (
+    <ZeroProvider
+      // ...
+      disconnectTimeoutMs={1000 * 60 * 5} // 5 minutes
+    >
+      <App />
+    </ZeroProvider>
+  )
+}
+```
+
+```ts
+import { Zero } from '@rocicorp/zero'
+import { schema } from './schema'
+
+const zero = new Zero({
+  // ...
+  disconnectTimeoutMs: 1000 * 60 * 5, // 5 minutes
+})
+```
+
+</CodeGroup>
+
+Reads and writes are allowed to Zero mutators while `connecting`. The writes are queued and will be sent when the connection succeeds.
+
+This is intended to paper over short connectivity glitches, such as server restarts, walking into an elevator, etc.
+
+<Note type="warning" emoji="🦖" heading="Zero is not designed for long periods offline" slug="offline-warning">
+While you can increase the `disconnectTimeoutMs` to allow for longer periods of offline operation, this has caveats that you should understand carefully. Please see [offline](#offline-support) for more information.
+</Note>
+
+### Disconnecting
+
+After the `disconnectTimeoutMs` elapses, Zero transitions to `disconnected`.
+
+While `disconnected`, Zero continues to try to reconnect to `zero-cache` every 5 seconds.
+
+Reads are allowed while `disconnected`, but writes are not.
+
+### Errors
+
+If `zero-cache` itself crashes, or if the [mutate](/docs/mutators) or [query](/docs/queries) endpoints return a network or HTTP error, Zero transitions to the `error` state.
+
+This type of error is unlikely to resolve just by retrying, so Zero doesn't try. The app can retry the connection manually   by calling `zero.connection.connect()`.
+
+### Auth Required
+
+If the [mutate](/docs/mutators) or [query](/docs/queries) endpoints return a 401 or 403 status code, Zero transitions to the `needs-auth` state.
+
+The app should refresh the cookie or auth token and retry the connection manually by calling `zero.connection.connect()`.
+
+See [Authentication](/docs/auth#auth-failure-and-refresh) for more information.
+
+## Offline Support
+
+Zero supports offline reads.
+
+While offline, Zero tries to reconnect for up to 1 minute by default. During this `connecting` periods, writes are allowed.
+
+After the `disconnectTimeoutMs` elapses, Zero transitions to `disconnected` and writes are not allowed.
+
+TODO: flesh this out again from old docs

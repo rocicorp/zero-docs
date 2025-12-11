@@ -43,7 +43,7 @@ export const ROUTES = [
       {title: 'ZQL Reference', href: '/zql'},
       {title: 'CRUD Reference', href: '/crud'},
       {title: 'ZQL on the Server', href: '/server-zql'},
-      {title: 'Offline', href: '/offline'},
+      {title: 'Connection Status', href: '/connection'},
     ],
   },
 

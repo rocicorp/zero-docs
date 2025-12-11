@@ -515,7 +515,7 @@ export async function POST(req: Request) {
       return query.fn({args, ctx: {userId: 'anon'}})
     },
     schema,
-    req
+    req.raw
   )
 
   return Response.json(result)

@@ -565,7 +565,7 @@ export const serverMutators = defineMutators(sharedMutators, {
 
         // Record a history of this operation happening in an audit log table.
         await tx.mutate(
-          crud..auditLog.insert({
+          crud.auditLog.insert({
             issueId: id,
             action: 'update-title',
             timestamp: Date.getTime(),

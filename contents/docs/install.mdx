@@ -531,15 +531,13 @@ import {queries} from '../../zero/queries.ts'
 import {schema} from '../../zero/schema.ts'
 
 export async function POST(event: APIEvent) {
-  const body = await event.request.json()
-
   const result = await handleQueryRequest(
     (name, args) => {
       const query = mustGetQuery(queries, name)
       return query.fn({args, ctx: {userId: 'anon'}})
     },
     schema,
-    body
+    event.request
   )
 
   return new Response(JSON.stringify(result), {
@@ -1073,8 +1071,6 @@ import {mutators} from '../../zero/mutators.ts'
 import {dbProvider} from '../../db-provider.ts'
 
 export async function POST(event: APIEvent) {
-  const body = await event.request.json()
-
   const result = await handleMutateRequest(
     dbProvider,
     async (transact, mutation) => {
@@ -1092,7 +1088,7 @@ export async function POST(event: APIEvent) {
 
       return result
     },
-    body
+    event.request
   )
 
   return new Response(JSON.stringify(result), {

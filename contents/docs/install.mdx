@@ -1003,21 +1003,15 @@ export const Route = createFileRoute('/api/mutate')({
       POST: async ({request}) => {
         const result = await handleMutateRequest(
           dbProvider,
-          async (transact, mutation) => {
-            const result = await transact(async tx => {
-              const mutator = mustGetMutator(
-                mutators,
-                mutation.name
-              )
+          transact =>
+            transact((tx, name, args) => {
+              const mutator = mustGetMutator(mutators, name)
               return mutator.fn({
-                args: mutation.args,
+                args,
                 tx,
                 ctx: {userId: 'anon'}
               })
-            })
-
-            return result
-          },
+            }),
           request
         )
 
@@ -1038,21 +1032,11 @@ import {mustGetMutator} from '@rocicorp/zero'
 export async function POST(req: Request) {
   const result = await handleMutateRequest(
     dbProvider,
-    async (transact, mutation) => {
-      const result = await transact(async tx => {
-        const mutator = mustGetMutator(
-          mutators,
-          mutation.name
-        )
-        return mutator.fn({
-          args: mutation.args,
-          tx,
-          ctx: {userId: 'anon'}
-        })
-      })
-
-      return result
-    },
+    transact =>
+      transact((tx, name, args) => {
+        const mutator = mustGetMutator(mutators, name)
+        return mutator.fn({args, tx, ctx: {userId: 'anon'}})
+      }),
     req
   )
 
@@ -1071,21 +1055,11 @@ import {dbProvider} from '../../db-provider.ts'
 export async function POST(event: APIEvent) {
   const result = await handleMutateRequest(
     dbProvider,
-    async (transact, mutation) => {
-      const result = await transact(async tx => {
-        const mutator = mustGetMutator(
-          mutators,
-          mutation.name
-        )
-        return mutator.fn({
-          args: mutation.args,
-          tx,
-          ctx: {userId: 'anon'}
-        })
-      })
-
-      return result
-    },
+    transact =>
+      transact((tx, name, args) => {
+        const mutator = mustGetMutator(mutators, name)
+        return mutator.fn({args, tx, ctx: {userId: 'anon'}})
+      }),
     event.request
   )
 
@@ -1103,21 +1077,11 @@ import {dbProvider} from './db-provider.ts'
 app.post('/api/mutate', async c => {
   const result = await handleMutateRequest(
     dbProvider,
-    async (transact, mutation) => {
-      const result = await transact(async tx => {
-        const mutator = mustGetMutator(
-          mutators,
-          mutation.name
-        )
-        return mutator.fn({
-          args: mutation.args,
-          tx,
-          ctx: {userId: 'anon'}
-        })
-      })
-
-      return result
-    },
+    transact =>
+      transact((tx, name, args) => {
+        const mutator = mustGetMutator(mutators, name)
+        return mutator.fn({args, tx, ctx: {userId: 'anon'}})
+      }),
     c.req.raw
   )
 

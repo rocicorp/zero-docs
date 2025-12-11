@@ -453,10 +453,15 @@ app.post('/api/zero/mutate', async c => {
   const ctx = {userID}
   return await c.json(
     await handleMutateRequest(
+      dbProvider,
       transact =>
-        transact(dbProvider, (tx, name, args) => {
+        transact((tx, name, args) => {
           const mutator = mustGetMutator(mutators, name)
-          return mutator.fn({tx, ctx, args})
+          return mutator.fn({
+            args,
+            tx,
+            ctx: {userId: 'anon'}
+          })
         }),
       c.req.raw
     )
@@ -483,8 +488,9 @@ The `handleMutateRequest` function skips any mutations that throw:
 ```ts
 app.post('/api/zero/mutate', async c => {
   const result = await handleMutateRequest(
+    dbProvider,
     transact =>
-      transact(dbProvider, (tx, name, args) => {
+      transact(async (tx, name, args) => {
         // The mutation is skipped and the next mutation runs as normal.
         // The optimistic mutation on the client will be reverted.
         throw new Error('bonk')

@@ -176,11 +176,13 @@ const createIssue = defineMutator<{
 }>(async ({tx, ctx: {userID}, args: {id, title}}) => {
   // Note: User cannot control ctx.userID, so this
   // enforces authorship of created issue.
-  await tx.mutate.issue.insert({
+  await tx.mutate(
+    crud.issue.insert({
     id,
-    title,
-    authorID: userID
-  })
+      title,
+      authorID: userID
+    })
+  )
 })
 ```
 

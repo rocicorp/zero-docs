@@ -17,7 +17,7 @@ If you use [`drizzle-zero`](https://www.npmjs.com/package/drizzle-zero) or [`pri
 import {zql} from 'schema.ts'
 
 // zql is ready to use!
-zql.query
+zql.myTable.where(...)
 ```
 
 Otherwise, create an instance manually:
@@ -37,7 +37,7 @@ import {zql} from 'zero.ts'
 
 // Returns a query that selects all rows and columns from the
 // issue table.
-zql.query.issue
+zql.issue
 ```
 
 This is a design tradeoff that allows Zero to better reuse the row locally for future queries. This also makes it easier to share types between different parts of the code.
@@ -56,7 +56,7 @@ JavaScript and TypeScript lack true immutable types so we use `readonly` to help
 You can sort query results by adding an `orderBy` clause:
 
 ```tsx
-zql.query.issue.orderBy('created', 'desc')
+zql.issue.orderBy('created', 'desc')
 ```
 
 Multiple `orderBy` clauses can be present, in which case the data is sorted by those clauses in order:
@@ -64,7 +64,7 @@ Multiple `orderBy` clauses can be present, in which case the data is sorted by t
 ```tsx
 // Order by priority descending. For any rows with same priority,
 // then order by created desc.
-zql.query.issue
+zql.issue
   .orderBy('priority', 'desc')
   .orderBy('created', 'desc')
 ```
@@ -72,11 +72,11 @@ zql.query.issue
 All queries in ZQL have a default final order of their primary key. Assuming the `issue` table has a primary key on the `id` column, then:
 
 ```tsx
-// Actually means: zql.query.issue.orderBy('id', 'asc');
-zql.query.issue
+// Actually means: zql.issue.orderBy('id', 'asc');
+zql.issue
 
-// Actually means: zql.query.issue.orderBy('priority', 'desc').orderBy('id', 'asc');
-zql.query.issue.orderBy('priority', 'desc')
+// Actually means: zql.issue.orderBy('priority', 'desc').orderBy('id', 'asc');
+zql.issue.orderBy('priority', 'desc')
 ```
 
 ## Limit
@@ -84,7 +84,7 @@ zql.query.issue.orderBy('priority', 'desc')
 You can limit the number of rows to return with `limit()`:
 
 ```tsx
-zql.query.issue.orderBy('created', 'desc').limit(100)
+zql.issue.orderBy('created', 'desc').limit(100)
 ```
 
 ## Paging
@@ -94,7 +94,7 @@ You can start the results at or after a particular row with `start()`:
 ```tsx
 let start: IssueRow | undefined
 while (true) {
-  let q = zql.query.issue
+  let q = zql.issue
     .orderBy('created', 'desc')
     .limit(100)
   if (start) {
@@ -113,7 +113,7 @@ while (true) {
 By default `start()` is _exclusive_ - it returns rows starting **after** the supplied reference row. This is what you usually want for paging. If you want _inclusive_ results, you can do:
 
 ```tsx
-zql.query.issue.start(row, {inclusive: true})
+zql.issue.start(row, {inclusive: true})
 ```
 
 ## Getting a Single Result
@@ -121,7 +121,7 @@ zql.query.issue.start(row, {inclusive: true})
 If you want exactly zero or one results, use the `one()` clause. This causes ZQL to return `Row|undefined` rather than `Row[]`.
 
 ```tsx
-const result = await zql.query.issue
+const result = await zql.issue
   .where('id', 42)
   .one()
   .run()
@@ -138,7 +138,7 @@ You can query related rows using _relationships_ that are defined in your [Zero 
 
 ```tsx
 // Get all issues and their related comments
-zql.query.issue.related('comments')
+zql.issue.related('comments')
 ```
 
 Relationships are returned as hierarchical data. In the above example, each row will have a `comments` field, which is an array of the corresponding comments rows.
@@ -146,7 +146,7 @@ Relationships are returned as hierarchical data. In the above example, each row 
 You can fetch multiple relationships in a single query:
 
 ```tsx
-zql.query.issue
+zql.issue
   .related('comments')
   .related('reactions')
   .related('assignees')
@@ -157,11 +157,11 @@ zql.query.issue
 By default all matching relationship rows are returned, but this can be refined. The `related` method accepts an optional second function which is itself a query.
 
 ```tsx
-zql.query.issue.related(
+zql.issue.related(
   'comments',
   // It is common to use the 'q' shorthand variable for this parameter,
   // but it is a _comment_ query in particular here, exactly as if you
-  // had done zql.query.comment.
+  // had done zql.comment.
   q =>
     q
       .orderBy('modified', 'desc')
@@ -186,7 +186,7 @@ You can nest relationships arbitrarily:
 ```tsx
 // Get all issues, first 100 comments for each (ordered by modified,desc),
 // and for each comment all of its reactions.
-zql.query.issue.related('comments', q =>
+zql.issue.related('comments', q =>
   q
     .orderBy('modified', 'desc')
     .limit(100)
@@ -199,7 +199,7 @@ zql.query.issue.related('comments', q =>
 You can filter a query with `where()`:
 
 ```tsx
-zql.query.issue.where('priority', '=', 'high')
+zql.issue.where('priority', '=', 'high')
 ```
 
 The first parameter is always a column name from the table being queried. TypeScript completion will offer available options (sourced from your [Zero Schema](/docs/schema)).
@@ -228,7 +228,7 @@ TypeScript will restrict you from using operators with types that don’t make s
 Because comparing by `=` is so common, you can leave it out and `where` defaults to `=`.
 
 ```tsx
-zql.query.issue.where('priority', 'high')
+zql.issue.where('priority', 'high')
 ```
 
 ### Comparing to `null`
@@ -250,10 +250,10 @@ For when you purposely do want to compare to `null` ZQL supports `IS` and `IS NO
 
 ```ts
 // Find employees not in any org.
-zql.query.employee.where('orgID', 'IS', null)
+zql.employee.where('orgID', 'IS', null)
 
 // Find employees in an org other than 42 OR employees in NO org
-zql.query.employee.where('orgID', 'IS NOT', 42)
+zql.employee.where('orgID', 'IS NOT', 42)
 ```
 
 TypeScript will prevent you from comparing to `null` with other operators.
@@ -265,7 +265,7 @@ The argument to `where` can also be a callback that returns a complex expression
 ```tsx
 // Get all issues that have priority 'critical' or else have both
 // priority 'medium' and not more than 100 votes.
-zql.query.issue.where(({cmp, and, or, not}) =>
+zql.issue.where(({cmp, and, or, not}) =>
   or(
     cmp('priority', 'critical'),
     and(
@@ -282,7 +282,7 @@ Note that chaining `where()` is also a one-level `and`:
 
 ```tsx
 // Find issues with priority 3 or higher, owned by aa
-zql.query.issue
+zql.issue
   .where('priority', '>=', 3)
   .where('owner', 'aa')
 ```
@@ -293,28 +293,28 @@ The `where` clause always expects its first parameter to be a column name as a s
 
 ```ts
 // "foo" is a column name, not a string:
-zql.query.issue.where('foo', 'bar')
+zql.issue.where('foo', 'bar')
 
 // "foo" is a column name, not a string:
-zql.query.issue.where(({cmp}) => cmp('foo', 'bar'))
+zql.issue.where(({cmp}) => cmp('foo', 'bar'))
 ```
 
 To compare to a literal value, use the `cmpLit` helper:
 
 ```ts
-zql.query.issue.where(cmpLit('foobar', 'foo' + 'bar'))
+zql.issue.where(cmpLit('foobar', 'foo' + 'bar'))
 ```
 
 By itself this is not very useful, but the first parameter can also be a JavaScript variable:
 
 ```ts
-zql.query.issue.where(cmpLit(role, 'admin'))
+zql.issue.where(cmpLit(role, 'admin'))
 ```
 
 Or, within a [permission rule](/docs/permissions#permissions-based-on-auth-data), you can compare to a field of the `authData` parameter:
 
 ```ts
-zql.query.issue.where(cmpLit(authData.role, 'admin'))
+zql.issue.where(cmpLit(authData.role, 'admin'))
 ```
 
 ### Relationship Filters
@@ -323,14 +323,14 @@ Your filter can also test properties of relationships. Currently the only suppor
 
 ```tsx
 // Find all orgs that have at least one employee
-zql.query.organization.whereExists('employees')
+zql.organization.whereExists('employees')
 ```
 
 The argument to `whereExists` is a relationship, so just like other relationships, it can be refined with a query:
 
 ```tsx
 // Find all orgs that have at least one cool employee
-zql.query.organization.whereExists('employees', q =>
+zql.organization.whereExists('employees', q =>
   q.where('location', 'Hawaii')
 )
 ```
@@ -339,7 +339,7 @@ As with querying relationships, relationship filters can be arbitrarily nested:
 
 ```tsx
 // Get all issues that have comments that have reactions
-zql.query.issue.whereExists('comments', q =>
+zql.issue.whereExists('comments', q =>
   q.whereExists('reactions')
 )
 ```
@@ -348,7 +348,7 @@ The `exists` helper is also provided which can be used with `and`, `or`, `cmp`, 
 
 ```tsx
 // Find issues that have at least one comment or are high priority
-zql.query.issue.where({cmp, or, exists} =>
+zql.issue.where({cmp, or, exists} =>
   or(
     cmp('priority', 'high'),
     exists('comments'),
@@ -361,7 +361,7 @@ zql.query.issue.where({cmp, or, exists} =>
 You can get the TypeScript type of the result of a query using the `QueryResultType` helper:
 
 ```ts
-const complexQuery = zql.query.issue.related(
+const complexQuery = zql.issue.related(
   'comments',
   q => q.related('author')
 )
@@ -405,7 +405,7 @@ Typically the Zero planner will pick the joins to flip automatically. But in som
 // ordered by created desc. Because each user is an editor
 // of only a few documents, flip:true is much faster than
 // flip:false.
-zql.query.documents.whereExists('editors',
+zql.documents.whereExists('editors',
     e => e.where('userID', 42),
     {flip: true}
   ),
@@ -419,7 +419,7 @@ Or with `exists`:
 // Find issues created by user 42 or that have a comment
 // by user 42. Because user 42 has commented on only a
 // few issues, flip:true is much faster than flip:false.
-zql.query.issue.where({cmp, or, exists} =>
+zql.issue.where({cmp, or, exists} =>
   or(
     cmp('creatorID', 42),
     exists('comments',

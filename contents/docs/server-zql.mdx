@@ -185,7 +185,7 @@ See the implementations for the [existing adapters](https://github.com/rocicorp/
 Once you have an instance of `ZQLDatabase`, use the `transaction()` method to run ZQL:
 
 ```ts
-await db.transaction(async tx => {
+await dbProvider.transaction(async tx => {
   // await tx.mutate...
   // await tx.query...
   // await myMutator.fn({tx, ctx, args})
@@ -198,23 +198,65 @@ Zero doesn't yet have the wiring setup in its bindings layers to really nicely s
 
 For now, we don't recommend using Zero with SSR. Use your framework's recommended pattern to prevent SSR execution:
 
-### Next.js
+<CodeGroup
+  labels={[
+    {text: 'TanStack Start', sync: {api: 'tanstack'}},
+    {text: 'Next.js', sync: {api: 'nextjs'}},
+    {text: 'SolidStart', sync: {api: 'solid'}},
+  ]}
+>
 
-Add the `use client`
-[directive](https://nextjs.org/docs/app/api-reference/directives/use-client).
+```tsx
+import {lazy} from 'react'
 
-### SolidStart
+// Use React lazy to defer loading the ZeroProvider
+const ZeroProvider = lazy(() =>
+  import('@rocicorp/zero/react').then(mod => ({
+    default: mod.ZeroProvider
+  }))
+)
 
-Wrap components that use Zero with the
-[`clientOnly`](https://docs.solidjs.com/solid-start/reference/client/client-only)
-higher-order component.
+function Root() {
+  return (
+    <ZeroProvider>
+      <App />
+    </ZeroProvider>
+  )
+}
+```
 
-The standard `clientOnly` pattern uses dynamic imports, but note that this
-approach (similar to [React's `lazy`](https://react.dev/reference/react/lazy))
-works with any function returning a `Promise<{default: () => JSX.Element}>`. If
-code splitting is unnecessary, you can skip the dynamic import.
+```tsx
+// Mark client-only components
+'use client'
 
-### TanStack Start
+import {ZeroProvider} from '@rocicorp/zero/react'
 
-Use [React's `lazy`](https://react.dev/reference/react/lazy) for dynamic
-imports.
+export default function Root() {
+  return (
+    <ZeroProvider>
+      <App />
+    </ZeroProvider>
+  )
+}
+```
+
+```tsx
+import {clientOnly} from '@solidjs/start'
+
+const ZeroProvider = clientOnly(async () => {
+  // Optionally dynamic import to code-split
+  return import('@rocicorp/zero/solid').then(mod => ({
+    default: mod.ZeroProvider
+  }))
+})
+
+export default function Root() {
+  return (
+    <ZeroProvider>
+      <App />
+    </ZeroProvider>
+  )
+}
+```
+
+</CodeGroup>

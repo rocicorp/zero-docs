@@ -13,20 +13,67 @@ Setting up auth in Zero apps has a few steps:
 
 Because multiple users can share the same browser, Zero requires that you provide a `userID` parameter on construction:
 
-```ts
-const zero = new Zero({
+<CodeGroup
+  labels={[
+    {text: 'React', sync: {client: 'react'}},
+    {text: 'SolidJS', sync: {client: 'solidjs'}},
+    {text: 'TypeScript', sync: {client: 'typescript'}},
+  ]}
+>
+
+```tsx
+import {ZeroProvider} from '@rocicorp/zero/react'
+import type {ZeroOptions} from '@rocicorp/zero'
+
+const opts: ZeroOptions = {
   // ...
   userID: 'user-123'
-})
+}
+
+return (
+  <ZeroProvider {...opts}>
+    <App />
+  </ZeroProvider>
+)
 ```
+
+```tsx
+import {ZeroProvider} from '@rocicorp/zero/solid'
+import type {ZeroOptions} from '@rocicorp/zero'
+
+const opts: ZeroOptions = {
+  // ...
+  userID: 'user-123'
+}
+
+return (
+  <ZeroProvider {...opts}>
+    <App />
+  </ZeroProvider>
+)
+```
+
+```ts
+import {Zero} from '@rocicorp/zero'
+import type {ZeroOptions} from '@rocicorp/zero'
+
+const opts: ZeroOptions = {
+  // ...
+  userID: 'user-123'
+}
+
+const zero = new Zero(opts)
+```
+
+</CodeGroup>
 
 If the user is not logged in, just pass empty string or some other constant value:
 
 ```ts
-const zero = new Zero({
+const opts: ZeroOptions = {
   // ...
   userID: 'anon'
-})
+}
 ```
 
 Zero segregates the client-side storage for each user. This allows users to quickly switch between multiple users and accounts without resyncing.
@@ -46,11 +93,11 @@ Zero segregates the client-side storage for each user. This allows users to quic
 If you have more than one set of Zero data per-user (i.e., for different apps in the same domain), you can additionally use the `storageKey` parameter:
 
 ```ts
-const zero = new Zero({
+const opts: ZeroOptions = {
   // ...
   userID: 'user-123',
   storageKey: 'my-app'
-})
+}
 ```
 
 If specified, `storageKey` is concatenated along with `userID` and other internal Zero information to form a unique IndexedDB database name.
@@ -71,23 +118,22 @@ The most common way to authenticate Zero is with cookies.
 To enable it, set the [`ZERO_QUERY_FORWARD_COOKIES`](/docs/zero-cache-config#query-forward-cookies) and [`ZERO_MUTATE_FORWARD_COOKIES`](/docs/zero-cache-config#mutate-forward-cookies) options to `true`:
 
 ```bash
-ZERO_QUERY_FORWARD_COOKIES=true
-ZERO_MUTATE_FORWARD_COOKIES=true
+export ZERO_QUERY_FORWARD_COOKIES="true"
+export ZERO_MUTATE_FORWARD_COOKIES="true"
+# run zero-cache, e.g. `npx zero-cache-dev`
 ```
 
 Zero-cache will then forward all cookies sent to `cacheURL` to your [mutate](/docs/mutators) and [queries](/docs/queries) endpoints:
 
 ```tsx
-<ZeroProvider
-  schema={schema}
+const opts: ZeroOptions = {
+  schema,
   // Cookies sent to zero.example.com will be forwarded to
   // api.example.com/mutate and api.example.com/queries.
-  cacheURL="https://zero.example.com"
-  mutateURL="https://api.example.com/mutate"
-  queriesURL="https://api.example.com/queries"
->
-  <App />
-</ZeroProvider>
+  cacheURL: 'https://zero.example.com',
+  mutateURL: 'https://api.example.com/mutate',
+  queriesURL: 'https://api.example.com/queries'
+}
 ```
 
 Cookies will show up in the normal HTTP `Cookie` header and you can authenticate these endpoints just like you would any API request.
@@ -110,21 +156,21 @@ Zero also supports token-based authentication.
 If you have an opaque auth token, such as a JWT or a token from your auth provider, you can pass it to Zero's `auth` parameter:
 
 ```ts
-const zero = new Zero({
+const opts: ZeroOptions = {
   // ...
   auth: token
-})
+}
 ```
 
-Zero will forward this token to your [mutate](/docs/mutators) and [queries](/docs/queries) endpoints in a `Authorization: Bearer <token>` header, which you can use to authenticate the request as normal:
+Zero will forward this token to your [mutate](/docs/mutators) and [queries](/docs/queries) endpoints in an `Authorization: Bearer <token>` header, which you can use to authenticate the request as normal:
 
 ```ts
-export function handleMutate(request: Request) {
+export async function handleMutate(request: Request) {
   const session = await authenticate(
     request.headers.get('Authorization')
   )
 
-  // handle mutate request using the session ...
+  // handle mutate request ...
 }
 ```
 
@@ -133,7 +179,7 @@ export function handleMutate(request: Request) {
 To mark a request as unauthorized, return a `401` or `403` status code from your [queries](/docs/queries) or [mutate](/docs/mutators) endpoint.
 
 ```ts
-export function handleMutate(request: Request) {
+export async function handleMutate(request: Request) {
   const session = await authenticate(
     request.headers.get('Authorization')
   )
@@ -151,7 +197,6 @@ This will cause Zero to disconnect from `zero-cache` and the [connection status]
 
 ```tsx
 function NeedsAuthDialog() {
-  const zero = useZero()
   const connectionState = useConnectionState()
 
   const refreshCookie = async () => {
@@ -177,7 +222,6 @@ Or, if you aren't using cookie auth:
 
 ```tsx
 function NeedsAuthDialog() {
-  const zero = useZero()
   const connectionState = useConnectionState()
 
   const refreshAuthToken = async () => {
@@ -221,19 +265,13 @@ declare module '@rocicorp/zero' {
 Then pass an instance of this context when instantiating Zero:
 
 ```tsx
-const context = {
-  userID: 'user-123',
-  role: 'admin'
+const opts: ZeroOptions = {
+  // ...
+  context: {
+    userID: 'user-123',
+    role: 'admin'
+  }
 }
-
-return (
-  <ZeroProvider
-    // ...
-    context={context}
-  >
-    <App />
-  </ZeroProvider>
-)
 ```
 
 On the server-side, you will also pass an instance of this context when invoking your [queries](/docs/queries#implementing-the-endpoint) and [mutators](/docs/mutators#implementing-the-endpoint):

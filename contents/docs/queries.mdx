@@ -64,7 +64,9 @@ zero-cache receives updates from Postgres via logical replication. It updates af
 
 ### Basics
 
-A query is defined using `defineQuery`. The only required argument is a `QueryFn`, which must return a [ZQL](./zql) expression:
+Create a query using `defineQuery`.
+
+The only required argument is a `QueryFn`, which must return a [ZQL](./zql) expression:
 
 ```ts
 import {zql} from 'schema.ts'
@@ -79,15 +81,15 @@ The `QueryFn` can take a single `args` parameter of any type, and can use arbitr
 ```ts
 import {zql} from 'schema.ts'
 
-const postsByAuthor = defineQuery(
-  ({args}: {args: {authorID?: string | undefined}}) => {
-    let q = zql.post
-    if (args.authorID !== undefined) {
-      q = q.where('authorID', args.authorID)
-    }
-    return q
+const postsByAuthor = defineQuery<{
+  authorID: string | undefined
+}>(({args: {authorID}}) => {
+  let q = zql.post
+  if (args.authorID !== undefined) {
+    q = q.where('authorID', args.authorID)
   }
-)
+  return q
+})
 ```
 
 <Note emoji="😈" heading="Queries don't have to be pure" slug="purity">

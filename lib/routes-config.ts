@@ -41,7 +41,6 @@ export const ROUTES = [
       {title: 'Reading Data', href: '/queries'},
       {title: 'Writing Data', href: '/mutators'},
       {title: 'ZQL Reference', href: '/zql'},
-      {title: 'CRUD Reference', href: '/crud'},
       {title: 'ZQL on the Server', href: '/server-zql'},
       {title: 'Connection Status', href: '/connection'},
     ],

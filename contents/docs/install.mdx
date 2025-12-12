@@ -637,7 +637,6 @@ Similar to queries, we use a shared `mutators.ts` file:
 ```tsx
 // zero/mutators.ts
 import {defineMutators, defineMutator} from '@rocicorp/zero'
-import {crud} from './schema.ts'
 import {z} from 'zod'
 
 export const mutators = defineMutators({
@@ -650,23 +649,21 @@ export const mutators = defineMutators({
         year: z.number(),
         createdAt: z.number()
       }),
-      async ({args, tx, ctx: _ctx}) => {
-        await tx.mutate(
-          crud.albums.insert({
-            id: args.id,
-            artistId: args.artistID,
-            title: args.title,
-            releaseYear: args.year,
-            createdAt: args.createdAt
-          })
-        )
+      async ({args, tx}) => {
+        await tx.mutate.albums.insert({
+          id: args.id,
+          artistId: args.artistID,
+          title: args.title,
+          releaseYear: args.year,
+          createdAt: args.createdAt
+        })
       }
     )
   }
 })
 ```
 
-You can use the [CRUD-style API](/docs/crud) with `tx.mutate(crud.<table>.<method>)`
+You can use the [CRUD-style API](/docs/mutators#writing-data) with `tx.mutate.<table>.<method>()`
 to write data within your mutator.
 You can also use `tx.run(zql.<table>.<method>)` to run ZQL expressions.
 

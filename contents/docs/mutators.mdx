@@ -7,7 +7,6 @@ Mutators are how you write data with Zero. Here's a simple example:
 
 ```ts
 import {defineMutators, defineMutator} from '@rocicorp/zero'
-import {crud} from 'schema.ts'
 import {z} from 'zod'
 
 export const mutators = defineMutators({
@@ -20,12 +19,10 @@ export const mutators = defineMutators({
       if (title.length > 100) {
         throw new Error(`Title is too long`)
       }
-      await tx.mutate(
-        crud.issue.update({
-          id,
-          title
-        })
-      )
+      await tx.mutate.issue.update({
+        id,
+        title
+      })
     }
   )
 })
@@ -60,34 +57,130 @@ Clients receive row updates and apply them to their local cache. Any pending mut
 
 Create a mutator using `defineMutator`.
 
-The only required argument is a `MutatorFn`, which receives a `tx` that can used along with the [CRUD API](crud) to write data:
+The only required argument is a `MutatorFn`, which must be `async`:
 
 ```ts
 import {defineMutator} from '@rocicorp/zero'
-import {crud} from 'schema.ts'
 
-const initStats = defineMutator(async ({tx}) => {
-  await tx.mutate(
-    crud.stats.insert({
-      id: 'global',
-      issueCount: 0
-    })
-  )
+const initStats = defineMutator(async () => {
+  // ...
+})
+```
+
+<Note emoji="🤔" type="note" heading="`async` !== slow">
+  Mutators almost always complete in the same frame on the
+  client, within milliseconds. The reason they are marked
+  `async` is because on the server, reading from the `tx`
+  object goes over the network to Postgres.
+</Note>
+
+### Writing Data
+
+The `MutatorFn` receives a `tx` parameter which can be used to write data with a CRUD-style API. Each table in your Zero schema has a corresponding field on `tx.mutate`:
+
+```ts
+const initSam = defineMutator(async ({tx}) => {
+  // This is here because there's a `user` table in your schema.
+  await tx.mutate.user.insert(...)
 })
 ```
 
 <Note
-  emoji="✋"
   type="warning"
-  heading="Always await operations in mutators"
+  emoji="⚠️"
+  heading="Always await writes in mutators"
 >
-  Mutators almost always complete in the same frame on the
-  client, within milliseconds. The reason they are marked
-  `async` is because on the server, reading from the `tx`
-  object goes over the network to Postgres. Also, in edge
-  cases on the client, operations can go to local storage
-  (IndexedDB or SQLite).
+  Failing to do so allows the transaction to commit early,
+  causing runtime errors when writes are attempted later.
 </Note>
+
+#### Insert
+
+Create new records with `insert`:
+
+```tsx
+tx.mutate.user.insert({
+  id: 'user-123',
+  username: 'sam',
+  language: 'js'
+})
+```
+
+Optional fields can be set to `null` to explicitly set the new field to `null`. They can also be set to `undefined` to take the default value (which is often `null` but can also be some generated value server-side):
+
+```tsx
+// Sets language to `null` specifically
+tx.mutate.user.insert({
+  id: 'user-123',
+  username: 'sam',
+  language: null
+})
+
+// Sets language to the default server-side value.
+// Could be null, or some generated or constant default value too.
+tx.mutate.user.insert({
+  id: 'user-123',
+  username: 'sam'
+})
+
+// Same as above
+tx.mutate.user.insert({
+  id: 'user-123',
+  username: 'sam',
+  language: undefined
+})
+```
+
+#### Upsert
+
+Create new records or update existing ones with `upsert`:
+
+```tsx
+tx.mutate.user.upsert({
+  id: samID,
+  username: 'sam',
+  language: 'ts'
+})
+```
+
+`upsert` supports the same `null` / `undefined` semantics for optional fields that `insert` does (see above).
+
+#### Update
+
+Update an existing record. Does nothing if the specified record (by PK) does not exist.
+
+You can pass a partial object, leaving fields out that you don’t want to change. For example here we leave the username the same:
+
+```tsx
+// Leaves username field to previous value.
+tx.mutate.user.update({
+  id: samID,
+  language: 'golang'
+})
+
+// Same as above
+tx.mutate.user.update({
+  id: samID,
+  username: undefined,
+  language: 'haskell'
+})
+
+// Reset language field to `null`
+tx.mutate.user.update({
+  id: samID,
+  language: null
+})
+```
+
+#### Delete
+
+Delete an existing record. Does nothing if specified record does not exist.
+
+```tsx
+tx.mutate.user.delete({
+  id: samID
+})
+```
 
 ### Arguments
 
@@ -95,19 +188,16 @@ The `MutatorFn` can take a single `args` parameter of any type, and can use arbi
 
 ```ts
 import {defineMutator} from '@rocicorp/zero'
-import {crud} from 'schema.ts'
 
 const initStats = defineMutator<{issueCount: number}>(
   async ({tx, args: {issueCount}}) => {
     if (issueCount < 0) {
       throw new Error(`issueCount cannot be negative`)
     }
-    await tx.mutate(
-      crud.stats.insert({
-        id: 'global',
-        issueCount
-      })
-    )
+    await tx.mutate.stats.insert({
+      id: 'global',
+      issueCount
+    })
   }
 )
 ```
@@ -125,7 +215,7 @@ You can read data within a mutator by passing [ZQL](zql) to `tx.run`:
 
 ```ts
 import {defineMutator} from '@rocicorp/zero'
-import {crud, zql} from 'schema.ts'
+import {zql} from 'schema.ts'
 
 const updateIssue = defineMutator<{
   id: string
@@ -139,12 +229,10 @@ const updateIssue = defineMutator<{
     throw new Error(`Cannot update closed issue`)
   }
 
-  await tx.mutate(
-    crud.issue.update({
-      id,
-      title
-    })
-  )
+  await tx.mutate.issue.update({
+    id,
+    title
+  })
 })
 ```
 
@@ -176,13 +264,11 @@ const createIssue = defineMutator<{
 }>(async ({tx, ctx: {userID}, args: {id, title}}) => {
   // Note: User cannot control ctx.userID, so this
   // enforces authorship of created issue.
-  await tx.mutate(
-    crud.issue.insert({
-      id,
-      title,
-      authorID: userID
-    })
-  )
+  await tx.mutate.issue.insert({
+    id,
+    title,
+    authorID: userID
+  })
 })
 ```
 
@@ -205,12 +291,10 @@ export const mutators = defineMutators({
   issue: {
     update: defineMutator<{id: string; title: string}>(
       async ({tx, args: {id, title}}) => {
-        await tx.mutate(
-          crud.issue.update({
-            id,
-            title
-          })
-        )
+        await tx.mutate.issue.update({
+          id,
+          title
+        })
       }
     )
   }
@@ -244,8 +328,6 @@ console.log(mutators.issue.update.mutatorName)
 You can optionally pass a _validator_ to `defineMutator` as the first argument:
 
 ```ts
-import {crud} from 'schema.ts'
-
 export const mutators = defineMutators({
   z.object({
     id: z.string(),
@@ -254,12 +336,10 @@ export const mutators = defineMutators({
   issue: {
     update: defineMutator(
       async ({tx, args: {id, title}}) => {
-        await tx.mutate(
-          crud.issue.update({
-            id,
-            title,
-          })
-        )
+        await tx.mutate.issue.update({
+          id,
+          title,
+        })
       },
     )
   }
@@ -281,7 +361,7 @@ By convention, mutators are listed in a central `mutators.ts` file. This allows 
 
 ```ts
 import {defineMutators, defineMutator} from '@rocicorp/zero'
-import {crud, zql} from './schema.ts'
+import {zql} from './schema.ts'
 import {z} from 'zod'
 
 export const mutators = defineMutators({
@@ -296,13 +376,11 @@ export const mutators = defineMutators({
         context: {userID},
         args: {id, title}
       }) => {
-        await tx.mutate(
-          crud.post.insert({
-            id,
-            title,
-            authorID: userID
-          })
-        )
+        await tx.mutate.post.insert({
+          id,
+          title,
+          authorID: userID
+        })
       }
     ),
     update: defineMutator(
@@ -321,9 +399,11 @@ export const mutators = defineMutators({
         if (prev?.authorID !== userID) {
           throw new Error(`Access denied`)
         }
-        await tx.mutate(
-          crud.post.update({id, title, authorID: userID})
-        )
+        await tx.mutate.post.update({
+          id,
+          title,
+          authorID: userID
+        })
       }
     )
   }
@@ -343,13 +423,11 @@ export const postMutators = {
       title: z.string(),
     }),
     async ({tx, context: {userID}, args: {id, title}}) => {
-      await tx.mutate(
-        crud.post.insert({
-          id,
-          title,
-          authorID: userID,
-        })
-      )
+      await tx.mutate.post.insert({
+        id,
+        title,
+        authorID: userID,
+      })
     },
   ),
 }
@@ -361,12 +439,10 @@ export const userMutators = {
       role: z.string(),
     }),
     async ({tx, ctx: {userID}, args: {role}}) => {
-      await tx.mutate(
-        crud.user.update({
-          id: userID,
-          role,
-        })
-      )
+      await tx.mutate.user.update({
+        id: userID,
+        role,
+      })
     },
   ),
 }
@@ -739,13 +815,11 @@ export const serverMutators = defineMutators(
           })
 
           // Record a history of this operation happening in an audit log table.
-          await tx.mutate(
-            crud.auditLog.insert({
-              issueId: id,
-              action: 'update-title',
-              timestamp: Date.getTime()
-            })
-          )
+          await tx.mutate.auditLog.insert({
+            issueId: id,
+            action: 'update-title',
+            timestamp: Date.getTime()
+          })
         }
       )
     }
@@ -936,7 +1010,7 @@ export function createMutators(
           title: z.string()
         }),
         async (tx, {id, title}) => {
-          await tx.mutate(crud.issue.update({id, title}))
+          await tx.mutate.issue.update({id, title})
           asyncTasks.push(() => sendEmailToSubscribers(id))
         }
       )

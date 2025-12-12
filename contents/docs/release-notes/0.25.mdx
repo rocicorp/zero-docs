@@ -15,13 +15,9 @@ This release massively overhauls and simplifies the entire Zero API.
 
 Conceptually, Zero is now just [schemas](/docs/schema), [queries](/docs/queries), and [mutators](/docs/mutators).
 
-There are no longer first-class auth or permission systems, or a need for them.
+There are no longer first-class auth or permission systems (or a need for them). There are no longer "custom mutators" and "crud mutators", or "synced queries" and "zql queries". There are just "mutators" and "queries".
 
-There are no longer "custom mutators" and "crud mutators" – or "synced queries" and "zql queries". There are just "mutators" and "queries".
-
-All the old APIs have been deprecated, and the docs have been rewritten and simpilfied to reflect these changes.
-
-Additionally, this release introduces a [raft of big new features](5#features), listed below.
+All the old APIs have been deprecated, and the docs have been rewritten and simpilfied. Additionally, this release introduces a [raft of big new features](#features).
 
 To ease the transition, and allow access to new features without a ton of work, you can still use the old APIs via the `enableLegacyQueries` and `enableLegacyMutators` flags. Note that support for these older APIs will be removed for the Zero beta early next year.
 
@@ -64,8 +60,42 @@ Additionally, the old `hello-zero` sample has been updated from the original CRU
 
 ## Fixes
 
-- [**ZERO_REPLICA_FILE now defaults to zero.db**](/docs/zero-cache-config#zero_replica_file)
-- [**`serverURL` was renamed to `cacheURL`:**](/docs/install#set-up-the-zero-client) The old name is still supported but deprecated.
-- [**`GET_QUERIES` was renamed to `QUERY` throughout:**](/docs/zero-cache-config#QUERY_URL) The corresponding `getQueriesURL` constructor param was renamed to `queryURL` to match.
+- [ZERO_REPLICA_FILE now defaults to zero.db](https://github.com/rocicorp/mono/pull/5227)
+- [`serverURL` renamed to `cacheURL`](https://github.com/rocicorp/mono/pull/5228)
+- [`GET_QUERIES` renamed to `QUERY` throughout](https://github.com/rocicorp/mono/pull/5230)
+- [Ping timeouts now configurable in constructor](https://github.com/rocicorp/mono/pull/5114) and [at runtime](https://github.com/rocicorp/mono/pull/5116)
+- [Add configurable WebSocket compression](https://github.com/rocicorp/mono/pull/5071)
+- [tx.upsert should not overwrite w/ null on missing value](https://github.com/rocicorp/mono/pull/5031)
+- [`sourceField` in schema wasn't strongly typed](https://github.com/rocicorp/mono/pull/5041)
+- [Avoid unique violations during push caused by history compression](https://github.com/rocicorp/mono/pull/5030)
+- [Invalid SQL was being generated for arrays](https://github.com/rocicorp/mono/pull/5042)
+- [Handle connections to a view-syncer that has shut down properly](https://github.com/rocicorp/mono/pull/5101)
+- [Process pending messages on closed websocket](https://github.com/rocicorp/mono/pull/5110)
+- [Do not hydrate queries if no clients initialized](https://github.com/rocicorp/mono/pull/5107)
+- [Inspector.analyzeQuery() wasn't mapping names](https://github.com/rocicorp/mono/pull/5096)
+- [Add flow control to subscriber catchup](https://github.com/rocicorp/mono/pull/5125)
+- [Migrate TTL/inactivatedAt to DOUBLE PRECISION with clamping](https://github.com/rocicorp/mono/pull/5130)
+- [Continuous change-log cleanup for single-node](https://github.com/rocicorp/mono/pull/5135)
+- [Count SQLite row scans, not what is returned to us](https://github.com/rocicorp/mono/pull/5119)
+- [Make schema path optional for zero-cache-dev](https://github.com/rocicorp/mono/pull/5137) (thanks [@mattkinnersley](https://github.com/mattkinnersley)!)
+- [Export context types](https://github.com/rocicorp/mono/pull/5102) (thanks [@awkweb](https://github.com/tmm)!)
+- [Suppress deprecation warnings for unset options](https://github.com/rocicorp/mono/pull/5155)
+- [Fixed closing expo-sqlite DB before deleting](https://github.com/rocicorp/mono/pull/5149)
+- [Catch errors from async/pipelined db calls](https://github.com/rocicorp/mono/pull/5163)
+- [Expliclty set isolation level in CVR transactions](https://github.com/rocicorp/mono/pull/5165)
+- [Change when/where we check advance progress to catch slow change](https://github.com/rocicorp/mono/pull/5161)
+- [Fix desync caused by client/server inconsistency in keys used to identify rows](https://github.com/rocicorp/mono/pull/5191)
+- [Send name/args for named queries to enable auth context](https://github.com/rocicorp/mono/pull/5197)
+- [Re-transform queries on every reconnect](https://github.com/rocicorp/mono/pull/5189)
+- [Defer completing orderBy(s) until pipeline build and use client primary key](https://github.com/rocicorp/mono/pull/5194)
+- [Pipeline-driver was in invalid state after ResetPipelinesSignal error](https://github.com/rocicorp/mono/pull/5213)
+- [Fix pipeline storage db collision](https://github.com/rocicorp/mono/pull/5214)
+- [SolidJS connection state not updating](https://github.com/rocicorp/mono/pull/5171) (thanks [@fezproof](https://github.com/fezproof))
+- [Corrects the error semantics of the mutate callback](https://github.com/rocicorp/mono/pull/5207)
+- [Delay resolving ViewSyncer#initialized until cvr.clientSchema is ensured](https://github.com/rocicorp/mono/pull/5236)
+- [Use memo to ensure minimal updates in SolidJS](https://github.com/rocicorp/mono/pull/5241)
+- [Sort queries by hydrateServer desc](https://github.com/rocicorp/mono/pull/5242)
+- [Delay the replication-manager handoff for loadbalancer task registration](https://github.com/rocicorp/mono/pull/5250)
+- [Use `zql_root` as root table name instead of `root`](https://github.com/rocicorp/mono/pull/5308) (thanks [@tjenkinson](https://github.com/tjenkinson)!)
 
 ## Breaking Changes

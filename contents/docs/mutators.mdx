@@ -765,12 +765,13 @@ However sometimes it's still nice to do a quick and dirty async send as part of 
 import {defineMutator} from '@rocicorp/zero'
 import z from 'zod'
 import {Schema, zql} from 'schema.ts'
-import { mutators as clientMutators } from 'mutators.ts'
+import {mutators as clientMutators} from 'mutators.ts'
 
 // Instead of defining server mutators as a constant,
 // define them as a function of a list of async tasks.
 export function createMutators(
-    asyncTasks: Array<() => Promise<void>>) {
+  asyncTasks: Array<() => Promise<void>>
+) {
   return defineMutators(clientMutators, {
     issue: {
       update: defineMutator(

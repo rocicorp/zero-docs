@@ -644,6 +644,60 @@ This means that we do not actually _want_ to keep queries active unless there is
 
 The default Zero TTL values might initially seem too short, but they are designed to work well with the way Zero's TTL clock works and strike a good balance between keeping queries alive long enough to be useful, while not keeping them alive so long that they consume resources unnecessarily.
 
+## Local-Only Queries
+
+It can sometimes be useful to run queries only on the client. For example, to implement typeahead search, it really doesn't make sense to register a query with the server for every single keystroke.
+
+Zero doesn't yet have a way to run named queries local-only, but you can run ZQL expressions locally by passing them anywhere a query is supported.
+
+For example, to subscribe to a local-only query:
+
+<CodeGroup
+  labels={[
+    {
+      text: 'React',
+      sync: {client: 'react'},
+    },
+    {
+      text: 'SolidJS',
+      sync: {client: 'solidjs'},
+    },
+    {
+      text: 'Typescript',
+      sync: {client: 'typescript'},
+    },
+  ]}
+>
+
+```tsx
+// Queries the already synced data for issues,
+// without syncing more data.
+const [issues] = useQuery(
+  zql.issue.orderBy('created', 'desc').limit(10)
+)
+```
+
+```tsx
+// Queries the already synced data for issues,
+// without syncing more data.
+const [issues] = useQuery(() =>
+  zql.issue.orderBy('created', 'desc').limit(10)
+)
+```
+
+```ts
+// Queries the already synced data for issues,
+// without syncing more data.
+const view = z.materialize(
+  zql.issue.orderBy('created', 'desc').limit(10)
+)
+view.addListener(issues => {
+  console.log('issues', issues)
+})
+```
+
+</CodeGroup>
+
 ## Custom Server Implementation
 
 It is possible to implement the `ZERO_QUERY_URL` endpoint without using Zero's TypeScript libraries, or even in a different language entirely.

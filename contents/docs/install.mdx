@@ -270,14 +270,16 @@ There is also a low-level API you can use in any TypeScript-based project.
 ```tsx
 // root.tsx
 import {ZeroProvider} from '@rocicorp/zero/react'
-import {schema} from './zero/schema.ts'
+import {schema, type ZeroOptions} from './zero/schema.ts'
+
+const opts: ZeroOptions = {
+  cacheURL: 'http://localhost:4848',
+  schema
+}
 
 function Root() {
   return (
-    <ZeroProvider
-      cacheURL="http://localhost:4848"
-      schema={schema}
-    >
+    <ZeroProvider {...opts}>
       <App />
     </ZeroProvider>
   )
@@ -295,14 +297,16 @@ function MyComponent() {
 ```tsx
 // root.tsx
 import {ZeroProvider} from '@rocicorp/zero/solid'
-import {schema} from './zero/schema.ts'
+import {schema, type ZeroOptions} from './zero/schema.ts'
+
+const opts: ZeroOptions = {
+  cacheURL: 'http://localhost:4848',
+  schema
+}
 
 function Root() {
   return (
-    <ZeroProvider
-      cacheURL="http://localhost:4848"
-      schema={schema}
-    >
+    <ZeroProvider {...opts}>
       <App />
     </ZeroProvider>
   )
@@ -322,10 +326,12 @@ function MyComponent() {
 import {Zero} from '@rocicorp/zero'
 import {schema} from './zero/schema.ts'
 
-const zero = new Zero({
+const opts: ZeroOptions = {
   cacheURL: 'http://localhost:4848',
   schema
-})
+}
+
+const zero = new Zero(opts)
 
 console.log('clientID', zero.clientID)
 
@@ -418,7 +424,11 @@ function MyComponent() {
   const [albums] = useQuery(() =>
     queries.albums.byArtist({artistID: 'artist_1'})
   )
-  return albums().map(a => <div key={a.id}>{a.title}</div>)
+  return (
+    <For each={albums()}>
+      {album => <div key={album.id}>{album.title}</div>}
+    </For>
+  )
 }
 ```
 
@@ -681,79 +691,15 @@ You can also use `tx.run(zql.<table>.<method>)` to run ZQL expressions.
 
 Once you've defined your mutators, you must register them with Zero before you can use them:
 
-<CodeGroup
-  labels={[
-    {
-      text: 'React',
-      sync: {client: 'react'},
-    },
-    {
-      text: 'SolidJS',
-      sync: {client: 'solidjs'},
-    },
-    {
-      text: 'Typescript',
-      sync: {client: 'typescript'},
-    },
-  ]}
->
-
 ```tsx
-// root.tsx
-import {ZeroProvider} from '@rocicorp/zero/react'
-import {mutators} from './zero/mutators.ts'
-import {schema} from './zero/schema.ts'
-
-function Root() {
-  return (
-    <ZeroProvider
-      cacheURL="http://localhost:4848"
-      schema={schema}
-      mutators={mutators}
-    >
-      <App />
-    </ZeroProvider>
-  )
-}
-```
-
-```tsx
-// root.tsx
-import {ZeroProvider} from '@rocicorp/zero/solid'
-import {mutators} from './zero/mutators.ts'
-import {schema} from './zero/schema.ts'
-
-function Root() {
-  return (
-    <ZeroProvider
-      cacheURL="http://localhost:4848"
-      schema={schema}
-      mutators={mutators}
-    >
-      <App />
-    </ZeroProvider>
-  )
-}
-```
-
-```tsx
-// zero.ts
-import {Zero} from '@rocicorp/zero'
-import {schema} from './zero/schema.ts'
 import {mutators} from './zero/mutators.ts'
 
-const zero = new Zero({
-  cacheURL: 'http://localhost:4848',
-  schema,
+const opts: ZeroOptions = {
+  // ... cacheURL, schema, etc.
+  // add mutators
   mutators
-})
-
-console.log('clientID', zero.clientID)
-
-export {zero}
+}
 ```
-
-</CodeGroup>
 
 ### Invoke Mutators
 

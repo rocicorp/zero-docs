@@ -56,15 +56,13 @@ function App() {
   )
 
   return (
-    <div>
-      <For each={posts()}>
-        {post => (
-          <div key={post.id}>
-            {post.title} - ({post.comments.length} comments)
-          </div>
-        )}
-      </For>
-    </div>
+    <For each={posts()}>
+      {post => (
+        <div key={post.id}>
+          {post.title} - ({post.comments.length} comments)
+        </div>
+      )}
+    </For>
   )
 }
 ```

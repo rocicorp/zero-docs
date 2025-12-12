@@ -15,16 +15,16 @@ import App from 'App.tsx'
 import {schema} from 'schema.ts'
 import {mutators} from 'mutators.ts'
 
+const cacheURL = import.meta.env.VITE_PUBLIC_ZERO_CACHE_URL!
+
 function Root() {
   const session = useSession()
   const {userID} = session
-  const ctx = {userID}
-  const cacheURL = import.meta.env
-    .VITE_PUBLIC_ZERO_CACHE_URL!
+  const context = {userID}
 
   return (
     <ZeroProvider
-      {...{userID, ctx, cacheURL, schema, mutators}}
+      {...{userID, context, cacheURL, schema, mutators}}
     >
       <App />
     </ZeroProvider>
@@ -51,9 +51,7 @@ import {useQuery} from '@rocicorp/zero/solid'
 import {queries} from 'queries.ts'
 
 function App() {
-  const userID = selectedUserID()
-
-  const [posts] = useQuery(
+  const [posts] = useQuery(() =>
     queries.posts.byStatus({status: 'draft'})
   )
 

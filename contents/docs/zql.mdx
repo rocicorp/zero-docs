@@ -16,7 +16,7 @@ If you use [`drizzle-zero`](https://www.npmjs.com/package/drizzle-zero) or [`pri
 ```ts
 import {zql} from 'schema.ts'
 
-zql.myTable.where(...)
+// zql.myTable.where(...)
 ```
 
 Otherwise, create an instance manually:
@@ -358,6 +358,8 @@ You can get the TypeScript type of the result of a query using the `QueryResultT
 
 {/* prettier-ignore */}
 ```ts
+import type {QueryResultType} from '@rocicorp/zero'
+
 const complexQuery = zql.issue.related(
   'comments',
   q => q.related('author')
@@ -374,6 +376,8 @@ type MyComplexResult = QueryResultType<typeof complexQuery>
 You can get the type of a single row with `QueryRowType`:
 
 ```ts
+import type {QueryRowType} from '@rocicorp/zero'
+
 type MySingleRow = QueryRowType<typeof complexQuery>
 
 // MySingleRow is: readonly IssueRow & {

@@ -16,18 +16,21 @@ import App from './App.tsx'
 import {schema} from 'schema.ts'
 import {mutators} from 'mutators.ts'
 
-const session = useSession()
-const {userID} = session
-const ctx = {userID}
 const cacheURL = import.meta.env.VITE_PUBLIC_ZERO_CACHE_URL!
 
-createRoot(document.getElementById('root')!).render(
-  <ZeroProvider
-    {...{userID, ctx, cacheURL, schema, mutators}}
-  >
-    <App />
-  </ZeroProvider>
-)
+export default function Root() {
+  const session = useSession()
+  const {userID} = session
+  const context = {userID}
+
+  return (
+    <ZeroProvider
+      {...{userID, context, cacheURL, schema, mutators}}
+    >
+      <App />
+    </ZeroProvider>
+  )
+}
 ```
 
 You can also pass a `Zero` instance to the `ZeroProvider` if you want to control the lifecycle of the `Zero` instance yourself:

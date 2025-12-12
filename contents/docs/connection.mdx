@@ -121,57 +121,12 @@ Zero starts in the `connecting` state. Once the connection is established, it tr
 
 While `connecting`, Zero repeatedly tries to connect to `zero-cache` for 5 minutes by default. This timeout can be configured with the `disconnectTimeoutMs` constructor parameter:
 
-<CodeGroup
-  labels={[
-    {
-      text: 'React',
-      sync: {client: 'react'},
-    },
-    {
-      text: 'SolidJS',
-      sync: {client: 'solidjs'},
-    },
-    {
-      text: 'TypeScript',
-      sync: {client: 'typescript'},
-    },
-  ]}
->
-
 ```tsx
-function Root() {
-  return (
-    <ZeroProvider
-      // ...
-      disconnectTimeoutMs={1000 * 60 * 10} // 10 minutes
-    >
-      <App />
-    </ZeroProvider>
-  )
-}
-```
-
-```tsx
-function Root() {
-  return (
-    <ZeroProvider
-      // ...
-      disconnectTimeoutMs={1000 * 60 * 10} // 10 minutes
-    >
-      <App />
-    </ZeroProvider>
-  )
-}
-```
-
-```ts
-const zero = new Zero({
+const opts: ZeroOptions = {
   // ...
   disconnectTimeoutMs: 1000 * 60 * 10 // 10 minutes
-})
+}
 ```
-
-</CodeGroup>
 
 Reads and writes are allowed to Zero mutators while `connecting`. The writes are queued and will be sent when the connection succeeds.
 

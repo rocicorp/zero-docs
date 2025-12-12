@@ -122,10 +122,10 @@ export const queries = defineQueries({
 The result of `defineQueries` is called a `QueryRegistry`. Each field in the registry is a callable `Query` that you can use to read data:
 
 ```ts
-import {useQuery} from '@rocicorp/zero/react'
+import {zero} from 'zero.ts'
 import {queries} from 'queries.ts'
 
-const [allPosts] = useQuery(queries.posts.all())
+const allPosts = await zero.run(queries.posts.all())
 ```
 
 ### Query Names
@@ -133,7 +133,8 @@ const [allPosts] = useQuery(queries.posts.all())
 Each `Query` has a `queryName` which is computed by `defineQueries`. This name is later sent to your server to identify the query to run:
 
 ```ts
-console.log(queries.posts.all.queryName) // "posts.all"
+console.log(queries.posts.all.queryName)
+// "posts.all"
 ```
 
 ### Validators
@@ -262,72 +263,122 @@ Use [`ZERO_QUERY_URL`](./zero-cache-config#query-url) to tell `zero-cache` where
 
 ```bash
 export ZERO_QUERY_URL="http://localhost:3000/api/zero/query"
-npx zero-cache-dev
+# run zero-cache, e.g. `npx zero-cache-dev`
 ```
 
 ### Implementing the Endpoint
 
 The `@rocicorp/zero` package provides the `handleQueryRequest` and `mustGetQuery` functions to make it easy to implement the endpoint.
 
-For example, with [Hono](https://hono.dev):
+<CodeGroup
+  labels={[
+    {text: 'Tanstack Start', sync: {api: 'tanstack'}},
+    {text: 'Next.js', sync: {api: 'nextjs'}},
+    {text: 'Solid Start', sync: {api: 'solid'}},
+    {text: 'Hono', sync: {api: 'hono'}},
+  ]}
+>
 
 ```ts
-import {mustGetQuery} from '@rocicorp/zero'
+// src/routes/api/zero/query.ts
+import {createFileRoute} from '@tanstack/react-router'
+import {json} from '@tanstack/react-start'
 import {handleQueryRequest} from '@rocicorp/zero/server'
-import {schema} from 'schema.ts'
+import {mustGetQuery} from '@rocicorp/zero'
 import {queries} from 'queries.ts'
+import {schema} from 'schema.ts'
 
-app.post('/api/zero/query', async c => {
-  const userID = await authenticateUser(c.req.raw)
-  const ctx = {userID}
-  return await c.json(
-    await handleQueryRequest(
-      (name, args) => {
-        const q = mustGetQuery(queries, name)
-        return q.fn({ctx, args})
-      },
-      schema,
-      c.req.raw
-    )
-  )
+export const Route = createFileRoute('/api/zero/query')({
+  server: {
+    handlers: {
+      POST: async ({request}) => {
+        const result = await handleQueryRequest(
+          (name, args) => {
+            const query = mustGetQuery(queries, name)
+            return query.fn({args, ctx: {userId: 'anon'}})
+          },
+          schema,
+          request
+        )
+
+        return json(result)
+      }
+    }
+  }
 })
 ```
+
+```ts
+// app/api/zero/query/route.ts
+import {handleQueryRequest} from '@rocicorp/zero/server'
+import {mustGetQuery} from '@rocicorp/zero'
+import {queries} from 'queries.ts'
+import {schema} from 'schema.ts'
+
+export async function POST(req: Request) {
+  const result = await handleQueryRequest(
+    (name, args) => {
+      const query = mustGetQuery(queries, name)
+      return query.fn({args, ctx: {userId: 'anon'}})
+    },
+    schema,
+    req
+  )
+
+  return Response.json(result)
+}
+```
+
+```ts
+// src/routes/api/zero/query.ts
+import type {APIEvent} from '@solidjs/start/server'
+import {handleQueryRequest} from '@rocicorp/zero/server'
+import {mustGetQuery} from '@rocicorp/zero'
+import {queries} from 'queries.ts'
+import {schema} from 'schema.ts'
+
+export async function POST(event: APIEvent) {
+  const result = await handleQueryRequest(
+    (name, args) => {
+      const query = mustGetQuery(queries, name)
+      return query.fn({args, ctx: {userId: 'anon'}})
+    },
+    schema,
+    event.request
+  )
+
+  return new Response.json(result)
+}
+```
+
+```ts
+// api/app.ts
+import {handleQueryRequest} from '@rocicorp/zero/server'
+import {mustGetQuery} from '@rocicorp/zero'
+import {queries} from 'queries.ts'
+import {schema} from 'schema.ts'
+
+app.post('/api/zero/query', async c => {
+  const result = await handleQueryRequest(
+    (name, args) => {
+      const query = mustGetQuery(queries, name)
+      return query.fn({args, ctx: {userId: 'anon'}})
+    },
+    schema,
+    c.req.raw
+  )
+
+  return c.json(result)
+})
+```
+
+</CodeGroup>
 
 `handleQueryRequest` accepts a standard `Request` and returns a JSON object which can be serialized and returned by your server framework of choice.
 
 `mustGetQuery` looks up the query in the registry and throws an error if not found.
 
 The `query.fn` function is your query implementation wrapped in the validator you provided.
-
-### Handling Errors
-
-If the queries endpoint returns an HTTP or network error, `zero-cache` will be report it to the client using the `type` and `error` fields on the query details object:
-
-```tsx
-const [posts, details] = useQuery(
-  queries.posts.byAuthorID('user123')
-)
-if (details.type === 'error') {
-  return (
-    <div>Error loading posts: {details.error.message}</div>
-  )
-}
-```
-
-Or using the low-level API:
-
-```ts
-// Materialize a view of a query
-const postsView = queries.posts
-  .byAuthorID('user123')
-  .materialize()
-
-postsView.addListener((posts, resultType, error) => {
-  if (resultType === 'error') {
-    console.error('Error loading posts', error)
-  }
-})
-```
 
 ### Custom Query URL
 
@@ -384,7 +435,15 @@ For more information, see the [URLPattern docs](https://developer.mozilla.org/en
 
 ### Reactively
 
-The most common way to use queries is with the `useQuery` reactive hooks from the [React](react) or [SolidJS](solid) bindings:
+The most common way to use queries is with the `useQuery` reactive hooks from the [React](react) or [SolidJS](solid) bindings (or the equivalent low-level API):
+
+<CodeGroup
+  labels={[
+    {text: 'React', sync: {client: 'react'}},
+    {text: 'SolidJS', sync: {client: 'solidjs'}},
+    {text: 'TypeScript', sync: {client: 'typescript'}},
+  ]}
+>
 
 ```tsx
 import {useQuery} from '@rocicorp/zero/react'
@@ -402,31 +461,46 @@ function App() {
 }
 ```
 
-These functions integrate with the associated frameworks to automatically re-render the UI when a query changes.
-
-### Manually
-
-You can use `zero.materialize()` to run and subscribe to a query result outside of a UI framework:
-
-```ts
+```tsx
+import {useQuery} from '@rocicorp/zero/solid'
 import {queries} from 'zero/queries.ts'
 
-const myView = zero.materialize(
-  queries.posts.byAuthorID('user123')
-)
+function App() {
+  const [posts] = useQuery(() =>
+    queries.posts.get('user123')
+  )
 
-for (let post of myView.data) {
-  console.log(post.title)
+  return (
+    <div>
+      <For each={posts()}>
+        {post => <div key={post.id}>{post.title}</div>}
+      </For>
+    </div>
+  )
 }
 ```
 
-The view is automatically kept up to date by Zero as the underlying data changes. You can add a listener to the view to be notified when the data changes:
-
 ```ts
-myView.addListener(posts => {
-  console.log(posts)
+import {queries} from 'zero/queries.ts'
+import {zero} from 'zero.ts'
+
+const postsView = zero.materialize(
+  queries.posts.byAuthorID('user123')
+)
+
+for (let post of postsView.data) {
+  console.log(post.title)
+}
+
+// updates as the underlying data changes
+postsView.addListener(posts => {
+  console.log('posts', posts)
 })
 ```
+
+</CodeGroup>
+
+These functions allow you to automatically re-render UI when a query changes.
 
 ### Once
 
@@ -443,9 +517,10 @@ By default, `run()` only returns results that are currently available on the cli
 If you want to wait for the server to return results, pass `{type: 'complete'}` to `run`:
 
 ```tsx
-const results = await queries.issues
-  .byPriority('high')
-  .run({type: 'complete'})
+const results = await zero.run(
+  queries.issues.byPriority('high'),
+  {type: 'complete'}
+)
 ```
 
 ### For Preloading
@@ -455,8 +530,6 @@ Almost all Zero apps will want to preload some data in order to maximize the fee
 Because preload queries are often much larger than a screenful of UI, Zero provides a special `zero.preload()` method to avoid the overhead of materializing the result into JS objects:
 
 ```tsx
-import {queries} from 'zero/queries.ts'
-
 // Preload a large number of the inbox query results.
 zero.preload(
   queries.issues.inbox({
@@ -473,6 +546,14 @@ Because Zero returns local results immediately and server results asynchronously
 
 If you just use a simple existence check, you will often see the 404 UI flicker while the server result loads:
 
+<CodeGroup
+  labels={[
+    {text: 'React', sync: {client: 'react'}},
+    {text: 'SolidJS', sync: {client: 'solidjs'}},
+    {text: 'TypeScript', sync: {client: 'typescript'}},
+  ]}
+>
+
 ```tsx
 const [issue, issuesResult] = useQuery(
   queries.issues.get('some-id')
@@ -486,7 +567,41 @@ if (!issue) {
 }
 ```
 
+```tsx
+const [issue, issuesResult] = useQuery(() =>
+  queries.issues.get('some-id')
+)
+
+// ❌ This causes flickering of the UI
+if (!issue()) {
+  return <div>404 Not Found</div>
+} else {
+  return <div>{issue()}</div>
+}
+```
+
+```ts
+const postsView = zero.materialize(
+  queries.posts.byAuthorID('user123')
+)
+
+postsView.addListener(posts => {
+  // ❌ This is updated as data comes in
+  console.log('posts', posts)
+})
+```
+
+</CodeGroup>
+
 To do this correctly, only display the "not found" UI when the result type is `complete`. This way the 404 page is slow but pages with data are still just as fast:
+
+<CodeGroup
+  labels={[
+    {text: 'React', sync: {client: 'react'}},
+    {text: 'SolidJS', sync: {client: 'solidjs'}},
+    {text: 'TypeScript', sync: {client: 'typescript'}},
+  ]}
+>
 
 ```tsx
 const [issue, issueResult] = useQuery(
@@ -504,11 +619,49 @@ if (!issue) {
 return <div>{issue}</div>
 ```
 
+```tsx
+const [issue, issueResult] = useQuery(() =>
+  queries.issues.get('some-id')
+)
+
+if (!issue() && issueResult.type === 'complete') {
+  return <div>404 Not Found</div>
+}
+
+if (!issue()) {
+  return null
+}
+
+return <div>{issue()}</div>
+```
+
+```ts
+const postsView = zero.materialize(
+  queries.posts.byAuthorID('user123')
+)
+
+postsView.addListener((posts, resultType) => {
+  if (resultType === 'complete') {
+    console.log('posts', posts)
+  }
+})
+```
+
+</CodeGroup>
+
 ## Partial Data
 
 Zero immediately returns the data for a query it has on the client, then falls back to the server for any missing data.
 
 Sometimes it's useful to know the difference between these two types of results. To do so, use the `result` from `useQuery`:
+
+<CodeGroup
+  labels={[
+    {text: 'React', sync: {client: 'react'}},
+    {text: 'SolidJS', sync: {client: 'solidjs'}},
+    {text: 'TypeScript', sync: {client: 'typescript'}},
+  ]}
+>
 
 ```tsx
 const [issues, issuesResult] = useQuery(
@@ -521,9 +674,94 @@ if (issuesResult.type === 'complete') {
 }
 ```
 
+```tsx
+const [issues, issuesResult] = useQuery(() =>
+  queries.issues.inbox()
+)
+if (issuesResult.type === 'complete') {
+  console.log('All data is present')
+} else {
+  console.log('Some data is missing')
+}
+```
+
+```ts
+const view = zero.materialize(queries.issues.inbox())
+
+view.addListener((issues, resultType) => {
+  if (resultType === 'complete') {
+    console.log('All data is present')
+  } else {
+    console.log('Some data is missing')
+  }
+})
+```
+
+</CodeGroup>
+
 The possible values of `result.type` are currently `complete` and `unknown`.
 
 The `complete` value is currently only returned when Zero has received the server result. In the future, Zero will be able to return this result type when it _knows_ that all possible data for this query is already available locally. Additionally, we plan to add a `prefix` result for when the data is known to be a prefix of the complete result. See [Consistency](#consistency) for more information.
+
+## Handling Errors
+
+If the queries endpoint throws an application or parse error, `zero-cache` will report it to the client using the `type` and `error` fields on the query details object:
+
+<CodeGroup
+  labels={[
+    {text: 'React', sync: {client: 'react'}},
+    {text: 'SolidJS', sync: {client: 'solidjs'}},
+    {text: 'TypeScript', sync: {client: 'typescript'}},
+  ]}
+>
+
+```tsx
+const [posts, details] = useQuery(
+  queries.posts.byAuthorID('user123')
+)
+
+if (details.type === 'error') {
+  return (
+    <div>Error loading posts: {details.error.message}</div>
+  )
+}
+```
+
+```tsx
+const [posts, details] = useQuery(() =>
+  queries.posts.byAuthorID('user123')
+)
+
+if (details().type === 'error') {
+  return (
+    <div>Error loading posts: {details.error.message}</div>
+  )
+}
+```
+
+```ts
+// Materialize a view of a query
+const postsView = queries.posts
+  .byAuthorID('user123')
+  .materialize()
+
+postsView.addListener((posts, resultType, error) => {
+  if (resultType === 'error') {
+    console.error('Error loading posts', error)
+  }
+})
+```
+
+</CodeGroup>
+
+<Note
+  type="note"
+  emoji="🤔"
+  heading="Query endpoint failures are not shown here"
+>
+  See [Connection Status](connection) for how HTTP or
+  network errors from the queries endpoint are handled.
+</Note>
 
 ## Granular Updates
 
@@ -569,10 +807,10 @@ Queries can be either _active_ or _cached_. An active query is one that is curre
 
 Queries are _deactivated_ according to how they were created:
 
-1. For `materialize()` queries, the UI calls `destroy()` on the view.
-2. For `useQuery()`, the UI unmounts the component (which calls `destroy()` under the covers).
-3. For `preload()`, the UI calls `cleanup()` on the return value of `preload()`.
-4. For `run()`, queries are automatically deactivated immediately after the result is returned.
+1. For `useQuery()`, the UI unmounts the component (which calls `destroy()` under the covers).
+2. For `preload()`, the UI calls `cleanup()` on the return value of `preload()`.
+3. For `run()`, queries are automatically deactivated immediately after the result is returned.
+4. For `materialize()` queries, the UI calls `destroy()` on the view.
 
 Additionally when a Zero instance closes, all active queries are automatically deactivated. This also happens when the containing page or script is unloaded.
 
@@ -598,31 +836,58 @@ In most cases, the default TTL should work well:
 
 You can override the default TTL with the `ttl` parameter:
 
-```ts
-// With useQuery():
-const [user] = useQuery(queries.user.byID('id', userId), {
+<CodeGroup
+  labels={[
+    {text: 'React', sync: {client: 'react'}},
+    {text: 'SolidJS', sync: {client: 'solidjs'}},
+    {text: 'TypeScript', sync: {client: 'typescript'}},
+  ]}
+>
+
+```tsx
+const [user] = useQuery(
+  queries.posts.byAuthorID('user123'),
+  {ttl: '5m'}
+)
+
+// preload()
+zero.preload(queries.posts.byAuthorID('user123'), {
   ttl: '5m'
 })
-
-// With preload():
-zero.preload(queries.user.byID('id', userId), {ttl: '5m'})
-
-// With run():
-const user = await zero.run(
-  queries.user.byID('id', userId),
-  {
-    ttl: '5m'
-  }
-)
-
-// With materialize():
-const view = zero.materialize(
-  queries.user.byID('id', userId),
-  {
-    ttl: '5m'
-  }
-)
 ```
+
+```tsx
+const [user] = useQuery(
+  () => queries.posts.byAuthorID('user123'),
+  {ttl: '5m'}
+)
+
+// preload()
+zero().preload(queries.posts.byAuthorID('user123'), {
+  ttl: '5m'
+})
+```
+
+```ts
+// run()
+const user = await zero.run(
+  queries.posts.byAuthorID('user123'),
+  {ttl: '5m'}
+)
+
+// materialize()
+const view = zero.materialize(
+  queries.posts.byAuthorID('user123'),
+  {ttl: '5m'}
+)
+
+// preload()
+zero.preload(queries.posts.byAuthorID('user123'), {
+  ttl: '5m'
+})
+```
+
+</CodeGroup>
 
 TTLs up to `10m` (ten minutes) are currently supported. The following formats are allowed:
 

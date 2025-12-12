@@ -15,7 +15,7 @@ This release massively overhauls and simplifies the entire Zero API.
 
 Conceptually, Zero is now just [schemas](/docs/schema), [queries](/docs/queries), and [mutators](/docs/mutators).
 
-There are no longer first-class auth or permission systems (or a need for them). There are no longer "custom mutators" and "crud mutators", or "synced queries" and "zql queries". There are just "mutators" and "queries".
+There are no longer first-class auth or permission systems. There are no longer "custom mutators" and "crud mutators", or "synced queries" and "zql queries".
 
 All the old APIs have been deprecated, and the docs have been rewritten and simpilfied. Additionally, this release introduces a [raft of big new features](#features).
 
@@ -103,7 +103,7 @@ Queries should be 0.2x to 4x faster, depending on the query. Some highlights:
 
 ## Breaking Changes
 
-Despite the massive DX update, we tried to make the upgrade as smooth as possible. However, there are a few breaking changes we could not easily avoid.
+Despite the large DX update, we tried to make the upgrade as smooth as possible. However, there are a few breaking changes we could not easily avoid.
 
 1. If you do not want to immediately opt-in to the new query and mutator APIs, set [`enableLegacyQueries`](/docs/deprecated/ad-hoc-queries) and [`enableLegacyMutators`](/docs/deprecated/crud-mutators) to `true` in your schema.ts.
 1. If you are using the `.client` or `.server` promises with custom mutators, these no longer ever reject. [They now always resolve with a result type that has success/error cases](/docs/mutators#waiting-for-results)

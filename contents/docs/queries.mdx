@@ -453,13 +453,9 @@ import {queries} from 'zero/queries.ts'
 
 function App() {
   const [posts] = useQuery(queries.posts.get('user123'))
-  return (
-    <div>
-      {posts.map(post => (
-        <div key={post.id}>{post.title}</div>
-      ))}
-    </div>
-  )
+  return posts.map(post => (
+    <div key={post.id}>{post.title}</div>
+  ))
 }
 ```
 
@@ -473,11 +469,9 @@ function App() {
   )
 
   return (
-    <div>
-      <For each={posts()}>
-        {post => <div key={post.id}>{post.title}</div>}
-      </For>
-    </div>
+    <For each={posts()}>
+      {post => <div key={post.id}>{post.title}</div>}
+    </For>
   )
 }
 ```
@@ -557,29 +551,33 @@ If you just use a simple existence check, you will often see the 404 UI flicker 
 >
 
 ```tsx
-const [issue, issuesResult] = useQuery(
-  queries.issues.get('some-id')
-)
+const [issue] = useQuery(queries.issues.get('some-id'))
 
 // ❌ This causes flickering of the UI
 if (!issue) {
   return <div>404 Not Found</div>
 } else {
-  return <div>{issue}</div>
+  return <div>{issue.title}</div>
 }
 ```
 
 ```tsx
-const [issue, issuesResult] = useQuery(() =>
+const [issue] = useQuery(() =>
   queries.issues.get('some-id')
 )
 
-// ❌ This causes flickering of the UI
-if (!issue()) {
-  return <div>404 Not Found</div>
-} else {
-  return <div>{issue()}</div>
-}
+return (
+  <Show when={issue()}>
+    {resolved => (
+      <Show
+        when={resolved}
+        fallback={<div>404 Not Found</div>}
+      >
+        <div>{resolved.title}</div>
+      </Show>
+    )}
+  </Show>
+)
 ```
 
 ```ts
@@ -618,7 +616,7 @@ if (!issue) {
   return null
 }
 
-return <div>{issue}</div>
+return <div>{issue.title}</div>
 ```
 
 ```tsx
@@ -626,15 +624,16 @@ const [issue, issueResult] = useQuery(() =>
   queries.issues.get('some-id')
 )
 
-if (!issue() && issueResult.type === 'complete') {
-  return <div>404 Not Found</div>
-}
-
-if (!issue()) {
-  return null
-}
-
-return <div>{issue()}</div>
+return (
+  <Switch fallback={null}>
+    <Match when={issue()}>
+      {resolved => <div>{resolved.title}</div>}
+    </Match>
+    <Match when={issueResult().type === 'complete'}>
+      <div>404 Not Found</div>
+    </Match>
+  </Switch>
+)
 ```
 
 ```ts
@@ -680,7 +679,7 @@ if (issuesResult.type === 'complete') {
 const [issues, issuesResult] = useQuery(() =>
   queries.issues.inbox()
 )
-if (issuesResult.type === 'complete') {
+if (issuesResult().type === 'complete') {
   console.log('All data is present')
 } else {
   console.log('Some data is missing')
@@ -718,27 +717,33 @@ If the queries endpoint throws an application or parse error, `zero-cache` will 
 >
 
 ```tsx
-const [posts, details] = useQuery(
+const [posts, postsResult] = useQuery(
   queries.posts.byAuthorID('user123')
 )
 
-if (details.type === 'error') {
+if (postsResult.type === 'error') {
   return (
-    <div>Error loading posts: {details.error.message}</div>
+    <div>
+      Error loading posts: {postsResult.error.message}
+    </div>
   )
 }
 ```
 
 ```tsx
-const [posts, details] = useQuery(() =>
+const [posts, postsResult] = useQuery(() =>
   queries.posts.byAuthorID('user123')
 )
 
-if (details().type === 'error') {
-  return (
-    <div>Error loading posts: {details.error.message}</div>
-  )
-}
+return (
+  <Switch>
+    <Match when={postsResult().type === 'error'}>
+      <div>
+        Error loading posts: {postsResult().error.message}
+      </div>
+    </Match>
+  </Switch>
+)
 ```
 
 ```ts

@@ -1,6 +1,6 @@
 ---
 title: Zero 0.25
-description: Query Planning, DX Overhaul
+description: DX Overhaul, Query Planning
 ---
 
 ## Installation
@@ -54,12 +54,15 @@ Additionally, the old `hello-zero` sample has been updated from the original CRU
 
 ## Performance
 
+Queries should be 0.2x to 4x faster, depending on the query. Some highlights:
+
 - [Only cache for duration of `fetch` in `exists`](https://github.com/rocicorp/mono/pull/5259): 60% improvement on sparse `exists` queries.
 - [Do not fetch on `null` constraint](https://github.com/rocicorp/mono/pull/5271): 33% improvement on some queries.
 - [Remove join storage](https://github.com/rocicorp/mono/pull/5264): ~25% improvement in queries with related calls.
 
 ## Fixes
 
+- [Cooperative concurrency for queries](https://github.com/rocicorp/mono/pull/5267)
 - [ZERO_REPLICA_FILE now defaults to zero.db](https://github.com/rocicorp/mono/pull/5227)
 - [`serverURL` renamed to `cacheURL`](https://github.com/rocicorp/mono/pull/5228)
 - [`GET_QUERIES` renamed to `QUERY` throughout](https://github.com/rocicorp/mono/pull/5230)
@@ -99,3 +102,11 @@ Additionally, the old `hello-zero` sample has been updated from the original CRU
 - [Use `zql_root` as root table name instead of `root`](https://github.com/rocicorp/mono/pull/5308) (thanks [@tjenkinson](https://github.com/tjenkinson)!)
 
 ## Breaking Changes
+
+Despite the massive DX update, we tried to make the upgrade as smooth as possible. However, there are a few breaking changes we could not easily avoid.
+
+1. If you do not want to immediately opt-in to the new query and mutator APIs, set [`enableLegacyQueries`](/docs/deprecated/ad-hoc-queries) and [`enableLegacyMutators`](/docs/deprecated/crud-mutators) to `true` in your schema.ts.
+1. If you are using the `.client` or `.server` promises with custom mutators, these no longer ever reject. [They now always resolve with a result type that has success/error cases](/docs/mutators#waiting-for-results)
+1. [Mutators now reject while Zero is offline](/docs/connection#disconnecting). You may want to use the new [Connection Status API](/docs/connection) to detect this and display custom UI to users.
+1. The pattern for reauthentication has changed. The `auth` parameter is now always a `string` – the `function` form is no longer supported. Instead, [call `zero.connection.connect({auth: token})` to reconnect](/docs/auth#auth-failure-and-refresh). This was done to simplify the API and support reauth via cookies consistently.
+1. The `onError` feature of `Zero` has been removed. It was undocumented and only half-working. Please use the new [Connection Status API](/docs/connection) to detect errors and display custom UI to users.

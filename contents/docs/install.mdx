@@ -270,7 +270,8 @@ There is also a low-level API you can use in any TypeScript-based project.
 ```tsx
 // root.tsx
 import {ZeroProvider} from '@rocicorp/zero/react'
-import {schema, type ZeroOptions} from './zero/schema.ts'
+import type {ZeroOptions} from '@rocicorp/zero'
+import {schema} from './zero/schema.ts'
 
 const opts: ZeroOptions = {
   cacheURL: 'http://localhost:4848',
@@ -297,7 +298,8 @@ function MyComponent() {
 ```tsx
 // root.tsx
 import {ZeroProvider} from '@rocicorp/zero/solid'
-import {schema, type ZeroOptions} from './zero/schema.ts'
+import type {ZeroOptions} from '@rocicorp/zero'
+import {schema} from './zero/schema.ts'
 
 const opts: ZeroOptions = {
   cacheURL: 'http://localhost:4848',

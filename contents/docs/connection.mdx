@@ -119,7 +119,7 @@ zero.connection.state.subscribe(state => {
 
 Zero starts in the `connecting` state. Once the connection is established, it transitions to `connected`.
 
-While `connecting`, Zero repeatedly tries to connect to `zero-cache` for 5 minutes by default. This timeout can be configured with the `disconnectTimeoutMs` constructor parameter:
+While `connecting`, Zero repeatedly tries to connect to `zero-cache` for 1 minute by default. This timeout can be configured with the `disconnectTimeoutMs` constructor parameter:
 
 ```tsx
 const opts: ZeroOptions = {

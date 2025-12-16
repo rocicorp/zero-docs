@@ -1,23 +1,13 @@
-import hljs from 'highlight.js';
+import {parseMdx} from '@/lib/mdx';
 
 type CodeBlockProps = {
-  code: string;
-  language: string; // Highlight.js language name (e.g., "javascript", "typescript")
+  mdx: string;
 };
 
-const CodeBlock = ({code, language}: CodeBlockProps) => {
-  const validLanguage = hljs.getLanguage(language) ? language : 'plaintext';
-  const highlightedCode = hljs.highlight(code, {language: validLanguage}).value;
+const CodeBlock = async ({mdx}: CodeBlockProps) => {
+  const highlightedCode = await parseMdx(mdx);
 
-  return (
-    <pre className={`language-${validLanguage}`} tabIndex={0}>
-      {/* Render pre-highlighted HTML */}
-      <code
-        className={`hljs language-${validLanguage}`}
-        dangerouslySetInnerHTML={{__html: highlightedCode}}
-      />
-    </pre>
-  );
+  return <div className="prose w-full">{highlightedCode.content}</div>;
 };
 
 export default CodeBlock;

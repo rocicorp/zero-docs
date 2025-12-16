@@ -187,7 +187,7 @@ export default function CodeGroup({
           <Tabs.Content
             key={index}
             value={String(index)}
-            className="rounded-b-lg"
+            className="rounded-b-lg code-group-content"
           >
             {block}
           </Tabs.Content>

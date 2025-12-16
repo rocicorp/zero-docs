@@ -8,7 +8,8 @@ import Link from 'next/link';
 import styles from './page.module.css';
 
 export default function Home() {
-  const exampleCode = `function Playlist({id}: {id: string}) {
+  const exampleCode = `\`\`\`tsx
+function Playlist({id}: {id: string}) {
   // This usually resolves *instantly*, and updates reactively
   // as server data changes. Just wire it directly to your UI –
   // no HTTP APIs, no state management no realtime goop.
@@ -41,7 +42,9 @@ export default function Home() {
       </div>
     </>
   );
-}`;
+}
+\`\`\`
+`;
 
   return (
     <div className={styles.main}>
@@ -110,7 +113,7 @@ export default function Home() {
       </p>
 
       {/* Code Block */}
-      <CodeBlock code={exampleCode} language="typescript" />
+      <CodeBlock mdx={exampleCode} />
 
       <p>This architecture provides:</p>
 

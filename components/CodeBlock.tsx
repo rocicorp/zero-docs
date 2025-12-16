@@ -1,6 +1,3 @@
-'use client';
-
-import React from 'react';
 import hljs from 'highlight.js';
 
 type CodeBlockProps = {
@@ -8,18 +5,15 @@ type CodeBlockProps = {
   language: string; // Highlight.js language name (e.g., "javascript", "typescript")
 };
 
-const CodeBlock: React.FC<CodeBlockProps> = ({code, language}) => {
-  const highlightedCode = React.useMemo(() => {
-    // Pre-highlight the code before rendering
-    const validLanguage = hljs.getLanguage(language) ? language : 'plaintext';
-    return hljs.highlight(code, {language: validLanguage}).value;
-  }, [code, language]);
+const CodeBlock = ({code, language}: CodeBlockProps) => {
+  const validLanguage = hljs.getLanguage(language) ? language : 'plaintext';
+  const highlightedCode = hljs.highlight(code, {language: validLanguage}).value;
 
   return (
-    <pre>
+    <pre className={`language-${validLanguage}`} tabIndex={0}>
       {/* Render pre-highlighted HTML */}
       <code
-        className={`hljs language-${language}`}
+        className={`hljs language-${validLanguage}`}
         dangerouslySetInnerHTML={{__html: highlightedCode}}
       />
     </pre>

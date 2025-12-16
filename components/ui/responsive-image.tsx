@@ -39,10 +39,11 @@ const ResponsiveImage: FC<ResponsiveImageProps> = ({
       <Image
         src={src}
         alt={alt}
-        layout="fill"
-        objectFit="cover"
+        fill
+        sizes="(min-width: 1024px) 100vw, 100vw"
         priority
         style={{
+          objectFit: 'cover',
           cursor: 'pointer',
         }}
         className={className}
@@ -69,7 +70,6 @@ const ResponsiveImage: FC<ResponsiveImageProps> = ({
           <Image
             src={src}
             alt={alt}
-            layout="intrinsic" // Intrinsic layout to allow natural sizing
             width={width}
             height={height}
             style={{

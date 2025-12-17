@@ -37,7 +37,6 @@ const Video: React.FC<VideoProps> = ({src, alt, animation}) => {
         loop={Boolean(animation)}
         muted={Boolean(animation)}
         playsInline
-        webkit-playsinline
       >
         <track kind="captions" />
         Your browser does not support the video tag.

@@ -1,11 +1,10 @@
 import rehypeAddCopyButton from '@/lib/rehype-add-copy-button';
 import {promises as fs} from 'fs';
 import {compileMDX} from 'next-mdx-remote/rsc';
-import path from 'path';
-import {cache} from 'react';
+import path from 'node:path';
 import rehypeAutolinkHeadings from 'rehype-autolink-headings';
 import rehypeCodeTitles from 'rehype-code-titles';
-import rehypePrism from 'rehype-prism-plus';
+import {transformerTwoslash, rendererRich} from '@shikijs/twoslash';
 import rehypeSlug from 'rehype-slug';
 import remarkGfm from 'remark-gfm';
 import {page_routes} from './routes-config';
@@ -18,6 +17,8 @@ import Video from '@/components/ui/Video';
 import {Button} from '@/components/ui/button';
 import {sluggify} from './utils';
 import {convertMdxToMarkdown} from './mdx-to-markdown';
+import rehypePrettyCode from 'rehype-pretty-code';
+import highlighter from './themes/highlighter';
 
 const components = {
   Note,
@@ -32,7 +33,7 @@ const components = {
 type BaseMdxFrontmatter = {title: string; description: string};
 
 // Parse MDX content with the given plugins
-async function parseMdx<Frontmatter>(rawMdx: string) {
+export async function parseMdx<Frontmatter>(rawMdx: string) {
   return await compileMDX<Frontmatter>({
     source: rawMdx,
     options: {
@@ -40,7 +41,6 @@ async function parseMdx<Frontmatter>(rawMdx: string) {
       mdxOptions: {
         rehypePlugins: [
           rehypeCodeTitles, // Adds titles to code blocks
-          rehypePrism, // Adds syntax highlighting
           rehypeSlug, // Adds slugs to headings
           [
             rehypeAutolinkHeadings, // Makes headings clickable
@@ -49,6 +49,24 @@ async function parseMdx<Frontmatter>(rawMdx: string) {
               properties: {
                 className: 'heading-link', // Add a class for styling
               },
+            },
+          ],
+          [
+            rehypePrettyCode,
+            {
+              theme: {
+                dark: 'roci-dark',
+                light: 'roci-light',
+              },
+              // inline: 'tailing-curly-colon',
+              keepBackground: false,
+              transformers: [
+                transformerTwoslash({
+                  explicitTrigger: true,
+                  renderer: rendererRich(),
+                }),
+              ],
+              getHighlighter: () => highlighter,
             },
           ],
           rehypeAddCopyButton, // Adds "copy" buttons to code blocks
@@ -61,20 +79,20 @@ async function parseMdx<Frontmatter>(rawMdx: string) {
 }
 
 // Fetch and parse MDX content for a given slug
-const readRawDoc = cache(async (slug: string) => {
+const readRawDoc = async (slug: string) => {
   const contentPath = await getDocsContentPath(slug);
   return fs.readFile(contentPath, 'utf-8');
-});
+};
 
-const compileDoc = cache(async (slug: string) => {
+const compileDoc = async (slug: string) => {
   const rawMdx = await readRawDoc(slug);
   return {
     raw: await convertMdxToMarkdown(rawMdx, slug),
     parsed: await parseMdx<BaseMdxFrontmatter>(rawMdx),
   };
-});
+};
 
-const extractHeadings = cache(async (slug: string) => {
+const extractHeadings = async (slug: string) => {
   const rawMdx = await readRawDoc(slug);
   const headingsRegex = /^(#{2,4})\s(.+)$/gm;
   let match;
@@ -96,7 +114,7 @@ const extractHeadings = cache(async (slug: string) => {
   }
 
   return extractedHeadings;
-});
+};
 
 export async function getDocsForSlug(slug: string) {
   try {

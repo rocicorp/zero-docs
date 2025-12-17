@@ -273,12 +273,6 @@ mark {
   color: var(--foreground) !important;
 }
 
-.prose pre code {
-  color: unset !important;
-  padding-left: unset !important;
-  padding-right: unset !important;
-}
-
 .note-container {
   scroll-margin: 5rem;
 }
@@ -323,76 +317,30 @@ mark {
 
 /* Syntax highlighting */
 
-/* Dark Mode */
-:root.dark .keyword {
-  color: #ff79c6;
+html.light [data-theme~='roci-light'],
+html.light [data-theme~='roci-light'] code {
+  background-color: rgb(245 245 245 / var(--tw-bg-opacity, 1)) !important;
 }
 
-:root.dark .function {
-  color: #27fcae;
-  /* Sky Blue */
+html.dark [data-theme~='roci-dark'],
+html.dark [data-theme~='roci-dark'] code {
+  background-color: rgb(23 23 23 / var(--tw-bg-opacity, 1)) !important;
 }
 
-:root.dark .string,
-:root.dark .constant,
-:root.dark .annotation {
-  color: #f1fa8c;
+html.light [data-theme~='roci-light'],
+html.light [data-theme~='roci-light'] code span {
+  color: var(--shiki-light) !important;
+  font-style: var(--bg-accent) / 30 !important;
+  font-weight: var(--shiki-light-font-weight) !important;
+  text-decoration: var(--shiki-light-text-decoration) !important;
 }
 
-:root.dark .boolean {
-  color: #bd93f9;
-}
-
-:root.dark .number {
-  color: #ffb86c;
-}
-
-:root.dark .tag {
-  color: #bd93f9;
-}
-
-:root.dark .attr-name {
-  color: #8be9fd;
-}
-
-:root.dark .attr-value {
-  color: #ffb86c;
-}
-
-/* Light Mode */
-.keyword {
-  color: #fc218a;
-}
-
-.function {
-  color: #19ad68;
-  /* Sky Blue */
-}
-
-.string,
-.constant,
-.annotation {
-  color: #be9f17;
-}
-
-.boolean {
-  color: #6f42c1;
-}
-
-.number {
-  color: #fd7e14;
-}
-
-.tag {
-  color: #2b3287;
-}
-
-.attr-name {
-  color: #0d6efd;
-}
-
-.attr-value {
-  color: #fd7e14;
+html.dark [data-theme~='roci-dark'],
+html.dark [data-theme~='roci-dark'] code span {
+  color: var(--shiki-dark) !important;
+  font-style: var(--shiki-dark-font-style) !important;
+  font-weight: var(--shiki-dark-font-weight) !important;
+  text-decoration: var(--shiki-dark-text-decoration) !important;
 }
 
 .prose pre {
@@ -401,10 +349,10 @@ mark {
   overflow-x: visible;
 }
 
-.prose pre > code {
+.prose pre code {
   display: grid;
   max-width: inherit !important;
-  padding: 14px 0 !important;
+  padding: 14px !important;
   font-variant-ligatures: none;
   font-feature-settings:
     'liga' 0,
@@ -413,32 +361,8 @@ mark {
   overflow-x: auto;
 }
 
-.code-line {
-  padding: 0.75px 12.5px;
-}
-
-.line-number::before {
-  display: inline-block;
-  width: 1rem;
-  margin-right: 22px;
-  margin-left: -2px;
-  color: rgb(110, 110, 110);
-  content: attr(line);
-  font-size: 13.5px;
-  text-align: right;
-}
-
-.highlight-line {
-  @apply dark:bg-neutral-800/90;
-  @apply bg-neutral-200/90;
-}
-
-.punctuation {
-  color: #6272a4;
-}
-
-.comment {
-  color: #6272a4;
+.code-group-content figure {
+  margin: 0 !important;
 }
 
 .rehype-code-title {
@@ -557,7 +481,7 @@ pre .copy-button:hover {
 }
 
 .hljs-string {
-  color: #be9f17;
+  color: #7d5c00;
 }
 
 .hljs-number {
@@ -565,7 +489,7 @@ pre .copy-button:hover {
 }
 
 .hljs-name {
-  color: #be9f17;
+  color: #7d5c00;
   font-weight: 700;
 }
 

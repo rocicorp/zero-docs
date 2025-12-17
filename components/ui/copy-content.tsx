@@ -1,33 +1,10 @@
-'use client';
-
-import {useEffect} from 'react';
+import CopyButtonListener from './copy-button-listener';
 
 export default function CopyContent({content}: {content: React.ReactNode}) {
-  useEffect(() => {
-    const copyButtons = document.querySelectorAll('.copy-button');
-
-    copyButtons.forEach(button => {
-      const handleClick = () => {
-        const codeBlock = button.nextElementSibling?.textContent;
-        if (codeBlock) {
-          navigator.clipboard.writeText(codeBlock).then(() => {
-            // Provide feedback to the user
-            button.textContent = 'Copied!';
-            setTimeout(() => {
-              button.textContent = 'Copy';
-            }, 2000);
-          });
-        }
-      };
-
-      button.addEventListener('click', handleClick);
-
-      // Cleanup listener
-      return () => {
-        button.removeEventListener('click', handleClick);
-      };
-    });
-  }, [content]);
-
-  return <>{content}</>;
+  return (
+    <>
+      <CopyButtonListener />
+      {content}
+    </>
+  );
 }

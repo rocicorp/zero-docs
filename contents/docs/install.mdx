@@ -102,7 +102,7 @@ bunx zero-cache-dev
 
 ```bash
 export ZERO_UPSTREAM_DB="postgres://postgres:password@localhost:5432/postgres"
-yarn zero-cache-dev
+yarn exec zero-cache-dev
 ```
 
 </CodeGroup>
@@ -449,9 +449,40 @@ console.log('albums', albums)
 
 If you run your app now, you should see an error like:
 
-```
+<CodeGroup
+  labels={[
+    {text: 'npm', sync: {pm: 'npm'}},
+    {text: 'pnpm', sync: {pm: 'pnpm'}},
+    {text: 'bun', sync: {pm: 'bun'}},
+    {text: 'yarn', sync: {pm: 'yarn'}},
+  ]}
+>
+
+```console
+> npx zero-cache-dev
+...
 Uncaught exception. Could not get ZQL for query `albumsByArtist` because no query endpoint is specified.
 ```
+
+```console
+> pnpm exec zero-cache-dev
+...
+Uncaught exception. Could not get ZQL for query `albumsByArtist` because no query endpoint is specified.
+```
+
+```console
+> bunx zero-cache-dev
+...
+Uncaught exception. Could not get ZQL for query `albumsByArtist` because no query endpoint is specified.
+```
+
+```console
+> yarn exec zero-cache-dev
+...
+Uncaught exception. Could not get ZQL for query `albumsByArtist` because no query endpoint is specified.
+```
+
+</CodeGroup>
 
 Let's fix that.
 
@@ -614,7 +645,7 @@ bunx zero-cache-dev
 ```bash
 export ZERO_UPSTREAM_DB="postgres://postgres:password@localhost:5432/postgres"
 export ZERO_QUERY_URL="http://localhost:3000/api/query"
-yarn zero-cache-dev
+yarn exec zero-cache-dev
 ```
 
 </CodeGroup>
@@ -823,9 +854,40 @@ if (clientResult.type === 'error') {
 
 If you run this app now, you should be able to see the UI update optimistically, but you'll also see an error in zero-cache:
 
-```ts
+<CodeGroup
+  labels={[
+    {text: 'npm', sync: {pm: 'npm'}},
+    {text: 'pnpm', sync: {pm: 'pnpm'}},
+    {text: 'bun', sync: {pm: 'bun'}},
+    {text: 'yarn', sync: {pm: 'yarn'}},
+  ]}
+>
+
+```console
+> npx zero-cache-dev
+...
 Uncaught exception. Could not execution mutation `albums.create` because no mutate endpoint is specified.
 ```
+
+```console
+> pnpm exec zero-cache-dev
+...
+Uncaught exception. Could not execution mutation `albums.create` because no mutate endpoint is specified.
+```
+
+```console
+> bunx zero-cache-dev
+...
+Uncaught exception. Could not execution mutation `albums.create` because no mutate endpoint is specified.
+```
+
+```console
+> yarn exec zero-cache-dev
+...
+Uncaught exception. Could not execution mutation `albums.create` because no mutate endpoint is specified.
+```
+
+</CodeGroup>
 
 This is because, like queries, we need to implement an endpoint in our API. Let's fix it!
 
@@ -1072,7 +1134,7 @@ bunx zero-cache-dev
 export ZERO_UPSTREAM_DB="postgres://postgres:password@localhost:5432/postgres"
 export ZERO_QUERY_URL="http://localhost:3000/api/query"
 export ZERO_MUTATE_URL="http://localhost:3000/api/mutate"
-yarn zero-cache-dev
+yarn exec zero-cache-dev
 ```
 
 </CodeGroup>

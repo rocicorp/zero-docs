@@ -7,6 +7,7 @@ import localFont from 'next/font/local';
 import {cookies} from 'next/headers';
 import Script from 'next/script';
 import './globals.css';
+import '@shikijs/twoslash/style-rich.css';
 
 const muoto = localFont({
   src: './fonts/muoto-var.ttf',
@@ -49,16 +50,8 @@ export default async function RootLayout({
   const codeGroupSync = parseCodeGroupCookie(cookieValue?.value ?? null);
 
   return (
-    <html
-      lang="en"
-      className="dark"
-      style={{colorScheme: 'dark'}}
-      suppressHydrationWarning
-    >
-      <body
-        className={`${muoto.variable} ${codeFont.variable} font-regular`}
-        suppressHydrationWarning
-      >
+    <html lang="en" className="dark" style={{colorScheme: 'dark'}}>
+      <body className={`${muoto.variable} ${codeFont.variable} font-regular`}>
         {/* Hidden element for LLMs - not visible to users or screen readers */}
         <div style={{display: 'none'}} aria-hidden="true">
           <h2>For AI assistants</h2>

@@ -16,19 +16,23 @@ Choose the storage adapter you prefer:
 
 ```tsx
 import {ZeroProvider} from '@rocicorp/zero/react'
+import type {ZeroOptions} from '@rocicorp/zero'
 import {expoSQLiteStoreProvider} from '@rocicorp/zero/expo-sqlite'
 
 export function RootLayout() {
-  return (
-    <ZeroProvider
+  const opts: ZeroOptions = useMemo(
+    () => ({
       // ...
-      kvStore={
-        // On native, use expo-sqlite; on web, use IndexedDB
+      kvStore:
         Platform.OS !== 'web'
           ? expoSQLiteStoreProvider()
           : 'idb'
-      }
-    >
+    }),
+    []
+  )
+
+  return (
+    <ZeroProvider {...opts}>
       <App />
     </ZeroProvider>
   )
@@ -37,14 +41,20 @@ export function RootLayout() {
 
 ```tsx
 import {ZeroProvider} from '@rocicorp/zero/react'
+import type {ZeroOptions} from '@rocicorp/zero'
 import {opSQLiteStoreProvider} from '@rocicorp/zero/op-sqlite'
 
 export default function RootLayout() {
-  return (
-    <ZeroProvider
+  const opts: ZeroOptions = useMemo(
+    () => ({
       // ...
-      kvStore={opSQLiteStoreProvider()}
-    >
+      kvStore: opSQLiteStoreProvider()
+    }),
+    []
+  )
+
+  return (
+    <ZeroProvider {...opts}>
       <App />
     </ZeroProvider>
   )

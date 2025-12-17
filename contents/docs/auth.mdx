@@ -25,10 +25,13 @@ Because multiple users can share the same browser, Zero requires that you provid
 import {ZeroProvider} from '@rocicorp/zero/react'
 import type {ZeroOptions} from '@rocicorp/zero'
 
-const opts: ZeroOptions = {
-  // ...
-  userID: 'user-123'
-}
+const opts: ZeroOptions = useMemo(
+  () => ({
+    // ...
+    userID: 'user-123'
+  }),
+  []
+)
 
 return (
   <ZeroProvider {...opts}>
@@ -41,13 +44,13 @@ return (
 import {ZeroProvider} from '@rocicorp/zero/solid'
 import type {ZeroOptions} from '@rocicorp/zero'
 
-const opts: ZeroOptions = {
+const opts: ZeroOptions = createMemo(() => ({
   // ...
   userID: 'user-123'
-}
+}))
 
 return (
-  <ZeroProvider {...opts}>
+  <ZeroProvider {...opts()}>
     <App />
   </ZeroProvider>
 )

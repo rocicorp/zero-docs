@@ -481,10 +481,10 @@ import {ZeroProvider} from '@rocicorp/zero/react'
 import type {ZeroOptions} from '@rocicorp/zero'
 import {mutators} from 'zero/mutators.ts'
 
-const opts: ZeroOptions = {
+const opts: ZeroOptions = useMemo(() => ({
   // ... cacheURL, schema, etc.
   mutators
-}
+}), [])
 
 return (
   <ZeroProvider {...opts}>
@@ -498,13 +498,13 @@ import {ZeroProvider} from '@rocicorp/zero/solid'
 import type {ZeroOptions} from '@rocicorp/zero'
 import {mutators} from 'zero/mutators.ts'
 
-const opts: ZeroOptions = {
+const opts: ZeroOptions = createMemo(() => ({
   // ... cacheURL, schema, etc.
   mutators
-}
+}))
 
 return (
-  <ZeroProvider {...opts}>
+  <ZeroProvider {...opts()}>
     <App />
   </ZeroProvider>
 )

@@ -9,8 +9,10 @@ Zero has built-in support for React. Here's what basic usage looks like.
 Use the `ZeroProvider` component to setup Zero. It takes care of creating and destroying `Zero` instances reactively:
 
 ```tsx
-import {createRoot} from 'react-dom/client'
 import {ZeroProvider} from '@rocicorp/zero/react'
+import type {ZeroOptions} from '@rocicorp/zero'
+import {createRoot} from 'react-dom/client'
+
 import {useSession} from 'my-session-provider'
 import App from './App.tsx'
 import {schema} from 'schema.ts'
@@ -20,13 +22,20 @@ const cacheURL = import.meta.env.VITE_PUBLIC_ZERO_CACHE_URL!
 
 export default function Root() {
   const session = useSession()
-  const {userID} = session
-  const context = {userID}
+
+  const opts: ZeroOptions = useMemo(
+    () => ({
+      userID: session.userID,
+      context: {userID: session.userID},
+      cacheURL,
+      schema,
+      mutators
+    }),
+    [session]
+  )
 
   return (
-    <ZeroProvider
-      {...{userID, context, cacheURL, schema, mutators}}
-    >
+    <ZeroProvider {...opts}>
       <App />
     </ZeroProvider>
   )

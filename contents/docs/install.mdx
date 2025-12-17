@@ -271,14 +271,18 @@ There is also a low-level API you can use in any TypeScript-based project.
 // root.tsx
 import {ZeroProvider} from '@rocicorp/zero/react'
 import type {ZeroOptions} from '@rocicorp/zero'
+import {useMemo} from 'react'
 import {schema} from './zero/schema.ts'
 
-const opts: ZeroOptions = {
-  cacheURL: 'http://localhost:4848',
-  schema
-}
-
 function Root() {
+  const opts: ZeroOptions = useMemo(
+    () => ({
+      cacheURL: 'http://localhost:4848',
+      schema
+    }),
+    []
+  )
+
   return (
     <ZeroProvider {...opts}>
       <App />
@@ -299,16 +303,17 @@ function MyComponent() {
 // root.tsx
 import {ZeroProvider} from '@rocicorp/zero/solid'
 import type {ZeroOptions} from '@rocicorp/zero'
+import {createMemo} from 'solid-js'
 import {schema} from './zero/schema.ts'
 
-const opts: ZeroOptions = {
-  cacheURL: 'http://localhost:4848',
-  schema
-}
-
 function Root() {
+  const opts: ZeroOptions = createMemo(() => ({
+    cacheURL: 'http://localhost:4848',
+    schema
+  }))
+
   return (
-    <ZeroProvider {...opts}>
+    <ZeroProvider {...opts()}>
       <App />
     </ZeroProvider>
   )

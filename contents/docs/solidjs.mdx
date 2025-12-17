@@ -10,6 +10,9 @@ Use the `ZeroProvider` component to setup Zero. It takes care of creating and de
 
 ```tsx
 import {ZeroProvider} from '@rocicorp/zero/solid'
+import type {ZeroOptions} from '@rocicorp/zero'
+import {createMemo} from 'solid-js'
+
 import {useSession} from 'my-auth-provider'
 import App from 'App.tsx'
 import {schema} from 'schema.ts'
@@ -19,13 +22,20 @@ const cacheURL = import.meta.env.VITE_PUBLIC_ZERO_CACHE_URL!
 
 function Root() {
   const session = useSession()
-  const {userID} = session
-  const context = {userID}
+
+  const opts: ZeroOptions = createMemo(
+    () => ({
+      userID: session.userID,
+      context: {userID: session.userID},
+      cacheURL,
+      schema,
+      mutators
+    }),
+    [session]
+  )
 
   return (
-    <ZeroProvider
-      {...{userID, context, cacheURL, schema, mutators}}
-    >
+    <ZeroProvider {...opts()}>
       <App />
     </ZeroProvider>
   )
@@ -37,7 +47,7 @@ You can also pass a `Zero` instance to the `ZeroProvider` if you want to control
 ```tsx
 // ZeroProvider just sets up the context, it doesn't manage
 // the lifecycle of the Zero instance.
-<ZeroProvider zero={zero}>
+<ZeroProvider zero={zero()}>
   <App />
 </ZeroProvider>
 ```

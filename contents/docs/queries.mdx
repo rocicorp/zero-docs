@@ -8,7 +8,7 @@ Queries are how you read and sync data with Zero. Here's a simple example:
 ```ts
 import {defineQueries, defineQuery} from '@rocicorp/zero'
 import {z} from 'zod'
-import {zql} from 'schema'
+import {zql} from 'schema.ts'
 
 export const queries = defineQueries({
   postsByAuthor: defineQuery(

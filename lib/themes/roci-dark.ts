@@ -195,25 +195,48 @@ export const rociDark: ThemeRegistration = {
     {
       scope: ['comment', 'punctuation.definition.comment', 'string.comment'],
       settings: {
-        foreground: '#6a737d',
+        foreground: '#6272a4',
       },
     },
     {
       scope: [
         'constant',
+        'constant.language',
         'entity.name.constant',
         'variable.other.constant',
         'variable.other.enummember',
         'variable.language',
       ],
       settings: {
-        foreground: '#79b8ff',
+        foreground: '#f1fa8c',
       },
     },
     {
-      scope: ['entity', 'entity.name'],
+      scope: ['constant.language.boolean'],
       settings: {
-        foreground: '#b392f0',
+        foreground: '#bd93f9',
+      },
+    },
+    {
+      scope: ['constant.numeric', 'constant.language.numeric'],
+      settings: {
+        foreground: '#ffb86c',
+      },
+    },
+    {
+      scope: ['entity', 'entity.name', 'entity.name.type', 'entity.name.class'],
+      settings: {
+        foreground: '#bd93f9',
+      },
+    },
+    {
+      scope: [
+        'entity.name.function',
+        'meta.function-call',
+        'support.function',
+      ],
+      settings: {
+        foreground: '#27fcae',
       },
     },
     {
@@ -223,21 +246,27 @@ export const rociDark: ThemeRegistration = {
       },
     },
     {
-      scope: 'entity.name.tag',
+      scope: ['entity.name.tag', 'meta.tag'],
       settings: {
-        foreground: '#85e89d',
+        foreground: '#bd93f9',
+      },
+    },
+    {
+      scope: ['entity.other.attribute-name', 'meta.attribute'],
+      settings: {
+        foreground: '#8be9fd',
       },
     },
     {
       scope: 'keyword',
       settings: {
-        foreground: '#f97583',
+        foreground: '#ff79c6',
       },
     },
     {
       scope: ['storage', 'storage.type'],
       settings: {
-        foreground: '#f97583',
+        foreground: '#ff79c6',
       },
     },
     {
@@ -253,29 +282,53 @@ export const rociDark: ThemeRegistration = {
     {
       scope: [
         'string',
+        'string.quoted',
+        'string.template',
         'punctuation.definition.string',
         'string punctuation.section.embedded source',
       ],
       settings: {
-        foreground: '#9ecbff',
+        foreground: '#f1fa8c',
+      },
+    },
+    {
+      scope: [
+        'punctuation',
+        'punctuation.separator',
+        'punctuation.terminator',
+        'punctuation.accessor',
+        'punctuation.definition.tag',
+        'punctuation.definition.parameters',
+        'punctuation.definition.block',
+        'punctuation.section.embedded',
+        'meta.brace',
+      ],
+      settings: {
+        foreground: '#6272a4',
+      },
+    },
+    {
+      scope: ['storage.type.annotation', 'punctuation.definition.annotation'],
+      settings: {
+        foreground: '#f1fa8c',
       },
     },
     {
       scope: 'support',
       settings: {
-        foreground: '#79b8ff',
+        foreground: '#8be9fd',
       },
     },
     {
       scope: 'meta.property-name',
       settings: {
-        foreground: '#79b8ff',
+        foreground: '#8be9fd',
       },
     },
     {
       scope: 'variable',
       settings: {
-        foreground: '#ffab70',
+        foreground: '#ffb86c',
       },
     },
     {
@@ -329,13 +382,13 @@ export const rociDark: ThemeRegistration = {
     {
       scope: 'string variable',
       settings: {
-        foreground: '#79b8ff',
+        foreground: '#f1fa8c',
       },
     },
     {
       scope: ['source.regexp', 'string.regexp'],
       settings: {
-        foreground: '#dbedff',
+        foreground: '#f1fa8c',
       },
     },
     {
@@ -346,51 +399,51 @@ export const rociDark: ThemeRegistration = {
         'string.regexp string.regexp.arbitrary-repitition',
       ],
       settings: {
-        foreground: '#dbedff',
+        foreground: '#f1fa8c',
       },
     },
     {
       scope: 'string.regexp constant.character.escape',
       settings: {
         fontStyle: 'bold',
-        foreground: '#85e89d',
+        foreground: '#27fcae',
       },
     },
     {
       scope: 'support.constant',
       settings: {
-        foreground: '#79b8ff',
+        foreground: '#f1fa8c',
       },
     },
     {
       scope: 'support.variable',
       settings: {
-        foreground: '#79b8ff',
+        foreground: '#8be9fd',
       },
     },
     {
       scope: 'meta.module-reference',
       settings: {
-        foreground: '#79b8ff',
+        foreground: '#8be9fd',
       },
     },
     {
       scope: 'punctuation.definition.list.begin.markdown',
       settings: {
-        foreground: '#ffab70',
+        foreground: '#ffb86c',
       },
     },
     {
       scope: ['markup.heading', 'markup.heading entity.name'],
       settings: {
         fontStyle: 'bold',
-        foreground: '#79b8ff',
+        foreground: '#bd93f9',
       },
     },
     {
       scope: 'markup.quote',
       settings: {
-        foreground: '#85e89d',
+        foreground: '#27fcae',
       },
     },
     {
@@ -422,7 +475,7 @@ export const rociDark: ThemeRegistration = {
     {
       scope: 'markup.inline.raw',
       settings: {
-        foreground: '#79b8ff',
+        foreground: '#f1fa8c',
       },
     },
     {
@@ -444,20 +497,20 @@ export const rociDark: ThemeRegistration = {
       ],
       settings: {
         background: '#144620',
-        foreground: '#85e89d',
+        foreground: '#27fcae',
       },
     },
     {
       scope: ['markup.changed', 'punctuation.definition.changed'],
       settings: {
         background: '#c24e00',
-        foreground: '#ffab70',
+        foreground: '#ffb86c',
       },
     },
     {
       scope: ['markup.ignored', 'markup.untracked'],
       settings: {
-        background: '#79b8ff',
+        background: '#6272a4',
         foreground: '#2f363d',
       },
     },
@@ -465,26 +518,26 @@ export const rociDark: ThemeRegistration = {
       scope: 'meta.diff.range',
       settings: {
         fontStyle: 'bold',
-        foreground: '#b392f0',
+        foreground: '#bd93f9',
       },
     },
     {
       scope: 'meta.diff.header',
       settings: {
-        foreground: '#79b8ff',
+        foreground: '#8be9fd',
       },
     },
     {
       scope: 'meta.separator',
       settings: {
         fontStyle: 'bold',
-        foreground: '#79b8ff',
+        foreground: '#8be9fd',
       },
     },
     {
       scope: 'meta.output',
       settings: {
-        foreground: '#79b8ff',
+        foreground: '#8be9fd',
       },
     },
     {
@@ -510,101 +563,8 @@ export const rociDark: ThemeRegistration = {
       scope: ['constant.other.reference.link', 'string.other.link'],
       settings: {
         fontStyle: 'underline',
-        foreground: '#dbedff',
+        foreground: '#8be9fd',
       },
-    },
-
-    // === Overrides for Github Dark ===
-
-    // keyword -> #ff79c6
-    {
-      scope: ['keyword', 'storage', 'storage.type', 'storage.modifier'],
-      settings: {foreground: '#ff79c6'},
-    },
-
-    // function -> #27fcae
-    {
-      scope: [
-        'entity.name.function',
-        'support.function',
-        'variable.function',
-        'meta.function-call',
-        'keyword.other.special-method',
-      ],
-      settings: {foreground: '#27fcae'},
-    },
-
-    // string / constant / annotation -> #f1fa8c
-    {
-      scope: [
-        'string',
-        'punctuation.definition.string',
-        'string punctuation.section.embedded source',
-        'constant',
-        'entity.name.constant',
-        'variable.other.constant',
-        'variable.other.enummember',
-        'support.constant',
-        'meta.annotation',
-        'meta.decorator',
-        'punctuation.definition.decorator',
-      ],
-      settings: {foreground: '#f1fa8c'},
-    },
-
-    // boolean -> #bd93f9
-    {
-      scope: ['constant.language.boolean'],
-      settings: {foreground: '#bd93f9'},
-    },
-
-    // number -> #ffb86c
-    {
-      scope: ['constant.numeric'],
-      settings: {foreground: '#ffb86c'},
-    },
-
-    // tag -> #bd93f9
-    {
-      scope: ['entity.name.tag'],
-      settings: {foreground: '#bd93f9'},
-    },
-
-    // attr-name -> #8be9fd
-    {
-      scope: ['entity.other.attribute-name'],
-      settings: {foreground: '#8be9fd'},
-    },
-
-    // attr-value -> #ffb86c (only inside attributes so normal strings stay yellow)
-    {
-      scope: [
-        'meta.tag.attributes string.quoted',
-        'meta.tag.attributes string.quoted.double',
-        'meta.tag.attributes string.quoted.single',
-        'meta.attribute-value string.quoted',
-        'meta.attribute-value string.quoted.double',
-        'meta.attribute-value string.quoted.single',
-      ],
-      settings: {foreground: '#ffb86c'},
-    },
-
-    // punctuation -> #6272a4
-    {
-      scope: [
-        'punctuation',
-        'punctuation.definition',
-        'punctuation.separator',
-        'punctuation.terminator',
-        'punctuation.accessor',
-      ],
-      settings: {foreground: '#6272a4'},
-    },
-
-    // comment -> #6272a4
-    {
-      scope: ['comment', 'punctuation.definition.comment', 'string.comment'],
-      settings: {foreground: '#6272a4'},
     },
   ],
   type: 'dark',

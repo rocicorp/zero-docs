@@ -191,25 +191,48 @@ export const rociLight: ThemeRegistration = {
     {
       scope: ['comment', 'punctuation.definition.comment', 'string.comment'],
       settings: {
-        foreground: '#6a737d',
+        foreground: '#6272a4',
       },
     },
     {
       scope: [
         'constant',
+        'constant.language',
         'entity.name.constant',
         'variable.other.constant',
         'variable.other.enummember',
         'variable.language',
       ],
       settings: {
-        foreground: '#005cc5',
+        foreground: '#be9f17',
       },
     },
     {
-      scope: ['entity', 'entity.name'],
+      scope: ['constant.language.boolean'],
       settings: {
         foreground: '#6f42c1',
+      },
+    },
+    {
+      scope: ['constant.numeric', 'constant.language.numeric'],
+      settings: {
+        foreground: '#fd7e14',
+      },
+    },
+    {
+      scope: ['entity', 'entity.name', 'entity.name.type', 'entity.name.class'],
+      settings: {
+        foreground: '#2b3287',
+      },
+    },
+    {
+      scope: [
+        'entity.name.function',
+        'meta.function-call',
+        'support.function',
+      ],
+      settings: {
+        foreground: '#19ad68',
       },
     },
     {
@@ -219,21 +242,27 @@ export const rociLight: ThemeRegistration = {
       },
     },
     {
-      scope: 'entity.name.tag',
+      scope: ['entity.name.tag', 'meta.tag'],
       settings: {
-        foreground: '#22863a',
+        foreground: '#2b3287',
+      },
+    },
+    {
+      scope: ['entity.other.attribute-name', 'meta.attribute'],
+      settings: {
+        foreground: '#0d6efd',
       },
     },
     {
       scope: 'keyword',
       settings: {
-        foreground: '#d73a49',
+        foreground: '#fc218a',
       },
     },
     {
       scope: ['storage', 'storage.type'],
       settings: {
-        foreground: '#d73a49',
+        foreground: '#fc218a',
       },
     },
     {
@@ -249,29 +278,53 @@ export const rociLight: ThemeRegistration = {
     {
       scope: [
         'string',
+        'string.quoted',
+        'string.template',
         'punctuation.definition.string',
         'string punctuation.section.embedded source',
       ],
       settings: {
-        foreground: '#032f62',
+        foreground: '#be9f17',
+      },
+    },
+    {
+      scope: [
+        'punctuation',
+        'punctuation.separator',
+        'punctuation.terminator',
+        'punctuation.accessor',
+        'punctuation.definition.tag',
+        'punctuation.definition.parameters',
+        'punctuation.definition.block',
+        'punctuation.section.embedded',
+        'meta.brace',
+      ],
+      settings: {
+        foreground: '#6272a4',
+      },
+    },
+    {
+      scope: ['storage.type.annotation', 'punctuation.definition.annotation'],
+      settings: {
+        foreground: '#be9f17',
       },
     },
     {
       scope: 'support',
       settings: {
-        foreground: '#005cc5',
+        foreground: '#0d6efd',
       },
     },
     {
       scope: 'meta.property-name',
       settings: {
-        foreground: '#005cc5',
+        foreground: '#0d6efd',
       },
     },
     {
       scope: 'variable',
       settings: {
-        foreground: '#e36209',
+        foreground: '#fd7e14',
       },
     },
     {
@@ -325,13 +378,13 @@ export const rociLight: ThemeRegistration = {
     {
       scope: 'string variable',
       settings: {
-        foreground: '#005cc5',
+        foreground: '#be9f17',
       },
     },
     {
       scope: ['source.regexp', 'string.regexp'],
       settings: {
-        foreground: '#032f62',
+        foreground: '#be9f17',
       },
     },
     {
@@ -342,51 +395,51 @@ export const rociLight: ThemeRegistration = {
         'string.regexp string.regexp.arbitrary-repitition',
       ],
       settings: {
-        foreground: '#032f62',
+        foreground: '#be9f17',
       },
     },
     {
       scope: 'string.regexp constant.character.escape',
       settings: {
         fontStyle: 'bold',
-        foreground: '#22863a',
+        foreground: '#19ad68',
       },
     },
     {
       scope: 'support.constant',
       settings: {
-        foreground: '#005cc5',
+        foreground: '#be9f17',
       },
     },
     {
       scope: 'support.variable',
       settings: {
-        foreground: '#005cc5',
+        foreground: '#0d6efd',
       },
     },
     {
       scope: 'meta.module-reference',
       settings: {
-        foreground: '#005cc5',
+        foreground: '#0d6efd',
       },
     },
     {
       scope: 'punctuation.definition.list.begin.markdown',
       settings: {
-        foreground: '#e36209',
+        foreground: '#fd7e14',
       },
     },
     {
       scope: ['markup.heading', 'markup.heading entity.name'],
       settings: {
         fontStyle: 'bold',
-        foreground: '#005cc5',
+        foreground: '#2b3287',
       },
     },
     {
       scope: 'markup.quote',
       settings: {
-        foreground: '#22863a',
+        foreground: '#19ad68',
       },
     },
     {
@@ -418,7 +471,7 @@ export const rociLight: ThemeRegistration = {
     {
       scope: 'markup.inline.raw',
       settings: {
-        foreground: '#005cc5',
+        foreground: '#be9f17',
       },
     },
     {
@@ -440,20 +493,20 @@ export const rociLight: ThemeRegistration = {
       ],
       settings: {
         background: '#f0fff4',
-        foreground: '#22863a',
+        foreground: '#19ad68',
       },
     },
     {
       scope: ['markup.changed', 'punctuation.definition.changed'],
       settings: {
         background: '#ffebda',
-        foreground: '#e36209',
+        foreground: '#fd7e14',
       },
     },
     {
       scope: ['markup.ignored', 'markup.untracked'],
       settings: {
-        background: '#005cc5',
+        background: '#6272a4',
         foreground: '#f6f8fa',
       },
     },
@@ -461,26 +514,26 @@ export const rociLight: ThemeRegistration = {
       scope: 'meta.diff.range',
       settings: {
         fontStyle: 'bold',
-        foreground: '#6f42c1',
+        foreground: '#2b3287',
       },
     },
     {
       scope: 'meta.diff.header',
       settings: {
-        foreground: '#005cc5',
+        foreground: '#0d6efd',
       },
     },
     {
       scope: 'meta.separator',
       settings: {
         fontStyle: 'bold',
-        foreground: '#005cc5',
+        foreground: '#0d6efd',
       },
     },
     {
       scope: 'meta.output',
       settings: {
-        foreground: '#005cc5',
+        foreground: '#0d6efd',
       },
     },
     {
@@ -506,97 +559,8 @@ export const rociLight: ThemeRegistration = {
       scope: ['constant.other.reference.link', 'string.other.link'],
       settings: {
         fontStyle: 'underline',
-        foreground: '#032f62',
+        foreground: '#0d6efd',
       },
-    },
-
-    // === Overrides for Roci Light ===
-
-    // keyword -> #fc218a
-    {
-      scope: ['keyword', 'storage', 'storage.type', 'storage.modifier'],
-      settings: {foreground: '#fc218a'},
-    },
-
-    // function -> #19ad68
-    {
-      scope: [
-        'entity.name.function',
-        'support.function',
-        'variable.function',
-        'meta.function-call',
-        'keyword.other.special-method',
-      ],
-      settings: {foreground: '#19ad68'},
-    },
-
-    // string / constant / annotation -> #be9f17
-    {
-      scope: [
-        'string',
-        'punctuation.definition.string',
-        'string punctuation.section.embedded source',
-        'variable.other.enummember',
-        'meta.annotation',
-        'meta.decorator',
-        'punctuation.definition.decorator',
-      ],
-      settings: {foreground: '#be9f17'},
-    },
-
-    // boolean -> #6f42c1
-    {
-      scope: ['constant.language.boolean'],
-      settings: {foreground: '#6f42c1'},
-    },
-
-    // number -> #fd7e14
-    {
-      scope: ['constant.numeric'],
-      settings: {foreground: '#fd7e14'},
-    },
-
-    // tag -> #2b3287
-    {
-      scope: ['entity.name.tag'],
-      settings: {foreground: '#2b3287'},
-    },
-
-    // attr-name -> #0d6efd
-    {
-      scope: ['entity.other.attribute-name'],
-      settings: {foreground: '#0d6efd'},
-    },
-
-    // attr-value -> #fd7e14 (only inside attributes)
-    {
-      scope: [
-        'meta.tag.attributes string.quoted',
-        'meta.tag.attributes string.quoted.double',
-        'meta.tag.attributes string.quoted.single',
-        'meta.attribute-value string.quoted',
-        'meta.attribute-value string.quoted.double',
-        'meta.attribute-value string.quoted.single',
-      ],
-      settings: {foreground: '#fd7e14'},
-    },
-
-    // punctuation -> #6272a4
-    {
-      scope: [
-        'punctuation',
-        'punctuation.definition',
-        'punctuation.separator',
-        'punctuation.terminator',
-        'punctuation.accessor',
-      ],
-      settings: {foreground: '#6272a4'},
-    },
-
-    // comment -> #6272a4
-    {
-      scope: ['comment', 'punctuation.definition.comment', 'string.comment'],
-      settings: {foreground: '#6272a4'},
     },
   ],
   type: 'light',

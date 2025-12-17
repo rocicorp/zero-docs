@@ -204,13 +204,13 @@ export const rociLight: ThemeRegistration = {
         'variable.language',
       ],
       settings: {
-        foreground: '#be9f17',
+        foreground: '#7d5c00',
       },
     },
     {
       scope: ['constant.language.boolean'],
       settings: {
-        foreground: '#6f42c1',
+        foreground: '#7c3aed',
       },
     },
     {
@@ -222,7 +222,7 @@ export const rociLight: ThemeRegistration = {
     {
       scope: ['entity', 'entity.name', 'entity.name.type', 'entity.name.class'],
       settings: {
-        foreground: '#2b3287',
+        foreground: '#7c3aed',
       },
     },
     {
@@ -244,13 +244,13 @@ export const rociLight: ThemeRegistration = {
     {
       scope: ['entity.name.tag', 'meta.tag'],
       settings: {
-        foreground: '#2b3287',
+        foreground: '#7c3aed',
       },
     },
     {
       scope: ['entity.other.attribute-name', 'meta.attribute'],
       settings: {
-        foreground: '#0d6efd',
+        foreground: '#0891b2',
       },
     },
     {
@@ -284,7 +284,7 @@ export const rociLight: ThemeRegistration = {
         'string punctuation.section.embedded source',
       ],
       settings: {
-        foreground: '#be9f17',
+        foreground: '#7d5c00',
       },
     },
     {
@@ -306,19 +306,19 @@ export const rociLight: ThemeRegistration = {
     {
       scope: ['storage.type.annotation', 'punctuation.definition.annotation'],
       settings: {
-        foreground: '#be9f17',
+        foreground: '#7d5c00',
       },
     },
     {
       scope: 'support',
       settings: {
-        foreground: '#0d6efd',
+        foreground: '#0891b2',
       },
     },
     {
       scope: 'meta.property-name',
       settings: {
-        foreground: '#0d6efd',
+        foreground: '#0891b2',
       },
     },
     {
@@ -378,13 +378,13 @@ export const rociLight: ThemeRegistration = {
     {
       scope: 'string variable',
       settings: {
-        foreground: '#be9f17',
+        foreground: '#7d5c00',
       },
     },
     {
       scope: ['source.regexp', 'string.regexp'],
       settings: {
-        foreground: '#be9f17',
+        foreground: '#7d5c00',
       },
     },
     {
@@ -395,7 +395,7 @@ export const rociLight: ThemeRegistration = {
         'string.regexp string.regexp.arbitrary-repitition',
       ],
       settings: {
-        foreground: '#be9f17',
+        foreground: '#7d5c00',
       },
     },
     {
@@ -408,19 +408,19 @@ export const rociLight: ThemeRegistration = {
     {
       scope: 'support.constant',
       settings: {
-        foreground: '#be9f17',
+        foreground: '#7d5c00',
       },
     },
     {
       scope: 'support.variable',
       settings: {
-        foreground: '#0d6efd',
+        foreground: '#0891b2',
       },
     },
     {
       scope: 'meta.module-reference',
       settings: {
-        foreground: '#0d6efd',
+        foreground: '#0891b2',
       },
     },
     {
@@ -433,7 +433,7 @@ export const rociLight: ThemeRegistration = {
       scope: ['markup.heading', 'markup.heading entity.name'],
       settings: {
         fontStyle: 'bold',
-        foreground: '#2b3287',
+        foreground: '#7c3aed',
       },
     },
     {
@@ -471,7 +471,7 @@ export const rociLight: ThemeRegistration = {
     {
       scope: 'markup.inline.raw',
       settings: {
-        foreground: '#be9f17',
+        foreground: '#7d5c00',
       },
     },
     {
@@ -514,26 +514,26 @@ export const rociLight: ThemeRegistration = {
       scope: 'meta.diff.range',
       settings: {
         fontStyle: 'bold',
-        foreground: '#2b3287',
+        foreground: '#7c3aed',
       },
     },
     {
       scope: 'meta.diff.header',
       settings: {
-        foreground: '#0d6efd',
+        foreground: '#0891b2',
       },
     },
     {
       scope: 'meta.separator',
       settings: {
         fontStyle: 'bold',
-        foreground: '#0d6efd',
+        foreground: '#0891b2',
       },
     },
     {
       scope: 'meta.output',
       settings: {
-        foreground: '#0d6efd',
+        foreground: '#0891b2',
       },
     },
     {

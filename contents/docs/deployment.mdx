@@ -369,9 +369,7 @@ services:
       # S3 creds + Mini S3 endpoint (view-syncers restore from backup on startup)
       AWS_ACCESS_KEY_ID: minioadmin
       AWS_SECRET_ACCESS_KEY: minioadmin
-      LITESTREAM_S3_ENDPOINT: http://mini-s3:9000
-      # LITESTREAM_S3_FORCE_PATH_STYLE: true
-      # LITESTREAM_S3_REGION: us-east-1
+      ZERO_LITESTREAM_ENDPOINT: http://mini-s3:9000
     volumes:
       # storage for the SQLite replica should be high IOPS
       - replication_data:/data

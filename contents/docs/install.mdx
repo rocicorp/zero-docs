@@ -925,7 +925,7 @@ import {drizzleSchema} from '../../drizzle/schema.ts'
 
 // pass a drizzle client instance. for example:
 const pool = new Pool({
-  connectionString: process.env.ZERO_UPSTREAM_DB as string
+  connectionString: process.env.ZERO_UPSTREAM_DB!
 })
 export const drizzleClient = drizzle(pool, {
   schema: drizzleSchema

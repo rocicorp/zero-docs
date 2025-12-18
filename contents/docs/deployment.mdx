@@ -2,445 +2,660 @@
 title: Deploying Zero
 ---
 
-To deploy a Zero app, you need to:
+So you've built your app with Zero - congratulations! Now you need to run it on a server somewhere.
 
-1. Deploy your backend database. Most standard Postgres hosts [work with Zero](/docs/connecting-to-postgres).
-1. Deploy `zero-cache`. We provide a [Docker image](https://hub.docker.com/r/rocicorp/zero) that can work with most Docker hosts.
-1. Deploy your frontend. You can use any hosting service like Vercel or Netlify.
+You will need to deploy zero-cache, a Postgres database, your frontend, and your API server.
 
-This page describes how to deploy `zero-cache`.
+Zero-cache is made up of two main components:
 
-## Architecture
+1. One or more _view-syncers_: serving clients by running IVM-driven queries using a SQLite replica and proxying mutations to your API server.
+2. One _replication-manager_: backup replication service that bridges Postgres and your view-syncers by consuming the replication stream and distributing it.
 
-`zero-cache` is a horizontally scalable, stateful web service that maintains a SQLite replica of your Postgres database. It uses this replica to sync ZQL queries to clients over WebSockets.
+By default, these are run on the same node, but you can split the services to run on different nodes.
 
-You don't have to know the details of how `zero-cache` works to run it, but it helps to know the basic structure.
+You will also need to deploy a Postgres database, your frontend, and your API server for the [query](/docs/queries#server-setup) and [mutate](/docs/mutators#server-setup) endpoints.
 
-<ImageLightbox
-  src="/images/deployment/arch.png"
-  caption="Zero deployment architecture"
-/>
+## Strategies
 
-A running `zero-cache` is composed of a single `replication-manager` node and multiple `view-syncer` nodes. It also depends on Postgres, S3, and attached SSD storage.
+There are two main ways to run zero-cache in production.
 
-**Upstream:** Your application's Postgres database.
+### Minimum Viable Strategy
 
-**Change DB:** A Postgres DB used by Zero to store a recent subset of the Postgres replication log.
+The simplest way to deploy Zero is to run everything on a single node. This is the least expensive way to run Zero, and it can take you surprisingly far.
 
-**CVR DB:** A Postgres DB used by Zero to store Client View Records (CVRs). CVRs track the state of each synced client.
-
-<Note type="note" slug="pg-dbs">
-The Change DB and CVR DBs are typically the same physical Postgres database as the Upstream DB. Zero stores their tables in separate Postgres schemas so they won't conflict with your application data.
-
-We allow separate DBs so that they can be scaled and tuned independently if desired.
-
-</Note>
-
-**S3:** Stores a canonical copy of the SQLite replica.
-
-**File System:** Used by both node types to store local copies of the SQLite replica. Can be ephemeral – Zero will re-initialize from S3 on startup. Recommended to use attached SSD storage for best performance.
-
-**Replication Manager:** Serves as the single consumer of the Postgres replication log. Stores a recent subset of the Postgres changelog in the _Change DB_ for catching up ViewSyncers when they initialize. Also maintains the canonical replica, which ViewSyncers initialize from.
-
-**View Syncers:** Handle WebSocket connections from clients and run ZQL queries. Updates CVR DB with the latest state of each client as queries run. Uses CVR DB on client connection to compute the initial diff to catch clients up.
-
-## Topology
-
-You should deploy `zero-cache` close to your database because the mutation implementation is chatty.
-
-In the future, mutations will [move out of `zero-cache`](https://bugs.rocicorp.dev/issue/3045#comment-5a3BKxP8RfJ9njHLgx5e3).
-When that happens you can deploy `zero-cache` geographically distributed and it will double as a read-replica.
-
-## Updating
-
-When run with multiple View Syncer nodes, `zero-cache` supports rolling, downtime-free updates. A new Replication Manager takes over the replication stream from the old Replication Manager, and connections from the old View Syncers are gradually drained and absorbed by active View Syncers.
-
-## Client/Server Version Compatibility
-
-Servers are compatible with any client of same major version, and with clients one major version back. So for example:
-
-- Server `0.2.*` is compatible with client `0.2.*`
-- Server `0.2.*` is compatible with client `0.1.*`
-- Server `2.*.*` is compatible with client `2.*.*`
-- Server `2.*.*` is compatible with client `1.*.*`
-
-To upgrade Zero to a new major version, first deploy the new zero-cache, then the new frontend.
-
-## Configuration
-
-The `zero-cache` image is configured via environment variables. See [zero-cache Config](/docs/zero-cache-config) for available options.
-
-## Guide: Multi-Node on SST+AWS
-
-[SST](https://sst.dev/) is our recommended way to deploy Zero.
-
-The setup below costs about $35/month. You can scale it up or down as needed by adjusting the amount of vCPUs and memory in each task.
-
-### Setup Upstream
-
-Create an upstream Postgres database server somewhere. See [Connecting to Postgres](/docs/connecting-to-postgres) for details. Populate the schema and any initial data for your application.
-
-### Setup AWS
-
-See [AWS setup guide](https://v2.sst.dev/setting-up-aws). The end result should be that you have a dev profile and SSO session defined in your `~/.aws/config` file.
-
-### Initialize SST
-
-```bash
-npx sst init --yes
+```json
+┌──────────────────────────────────────────────────────────────────────────┐
+│                              Client Layer                                 │
+│                                                                           │
+│  ┌───────────┐  ┌───────────┐  ┌───────────┐  ┌───────────┐            │
+│  │ Browser 1 │  │ Browser 2 │  │ Browser 3 │  │ Browser N │            │
+│  │ (React)   │  │ (React)   │  │ (Svelte)  │  │ (Mobile)  │            │
+│  └───────────┘  └───────────┘  └───────────┘  └───────────┘            │
+│        │              │              │              │                    │
+│        │ WebSocket    │ WebSocket    │ WebSocket    │ WebSocket         │
+│        │ (queries)    │ (queries)    │ (queries)    │ (queries)         │
+│        └──────────────┴──────────────┴──────────────┘                    │
+└───────────────────────────────────────┬──────────────────────────────────┘
+                                        │
+                                        ↓
+┌──────────────────────────────────────────────────────────────────────────┐
+│                         Zero Cache (Single Node)                          │
+│                          ZERO_NUM_SYNC_WORKERS=default                    │
+│                                Port 4848                                  │
+│                                                                           │
+│  ┌─────────────────────────────────────────────────────────────────────┐ │
+│  │ Syncer Workers (M = cores - 1)                                      │ │
+│  │  - Handle client WebSocket connections                              │ │
+│  │  - Compute query diffs (IVM)                                        │ │
+│  │  - Send mutations to API server  ─────────────┐                    │ │
+│  │  - Send custom queries to Query API ────────┐ │                    │ │
+│  └─────────────────────────────────────────────────────────────────────┘ │
+│                         ↑                       │ │                      │
+│                         │ notifies              │ │                      │
+│  ┌─────────────────────────────────────────────────────────────────────┐ │
+│  │ Replicator Worker                                                   │ │
+│  │  - Owns Postgres replication slot                                   │ │
+│  │  - Writes to SQLite replica                                         │ │
+│  │  - Does initial-sync from Postgres                                  │ │
+│  └─────────────────────────────────────────────────────────────────────┘ │
+│         ↑                                       │ │                      │
+│         │ replication stream                    │ │                      │
+│  ┌─────────────────────────────────────────────────────────────────────┐ │
+│  │ SQLite Replica (zero.db)                                            │ │
+│  │  - Stores replicated tables from Postgres                           │ │
+│  │  - Read by all syncer workers                                       │ │
+│  │  - Written only by replicator                                       │ │
+│  └─────────────────────────────────────────────────────────────────────┘ │
+│         ↑                                       │ │                      │
+└─────────┼───────────────────────────────────────┼─┼──────────────────────┘
+          │                                       │ │
+          │                     HTTP POST         │ │ HTTP POST
+          │                     (custom queries)  │ │ (mutations)
+          │                                       ↓ ↓
+┌─────────┴──────────────────────────────────────────────────────────────┐
+│                         Your Infrastructure                              │
+│                                                                          │
+│  ┌─────────────────────────────────────┐  ┌─────────────────────────┐  │
+│  │  Postgres (Upstream DB)             │  │  Your API Server        │  │
+│  │                                     │  │                         │  │
+│  │  ┌──────────────────────────────┐  │  │  POST /api/mutate       │  │
+│  │  │ Your Tables                  │  │  │  - Validates mutations  │  │
+│  │  │  - users                     │  │  │  - Writes to Postgres   │  │
+│  │  │  - posts                     │  │  │  - Auth/business logic  │  │
+│  │  │  - comments                  │◄─┼──┼─                        │  │
+│  │  └──────────────────────────────┘  │  │                         │  │
+│  │                                     │  │  POST /api/query        │  │
+│  │  ┌──────────────────────────────┐  │  │  - Transform queries    │  │
+│  │  │ Zero Metadata                │  │  │  - Add custom data      │  │
+│  │  │  - zero_0/cvr (CVR data)     │  │  │  - Auth checks          │  │
+│  │  │  - zero.clients              │  │  │  - Call external APIs   │  │
+│  │  │  - zero.instances            │  │  └─────────────────────────┘  │
+│  │  └──────────────────────────────┘  │                                │
+│  │                                     │                                │
+│  │  Replication Slot: zero_0           │                                │
+│  └─────────────────────────────────────┘                                │
+└──────────────────────────────────────────────────────────────────────────┘
 ```
 
-Choose "aws" for where to deploy.
+Here is an example `docker-compose.yml` file for a single-node deployment ([try it out!](https://github.com/rocicorp/onboarding/blob/maximal/docker-compose.single-node.yml)):
 
-Then overwrite `/sst.config.ts` with the following code:
+```yaml
+services:
+  upstream_db:
+    image: postgres:18
+    environment:
+      POSTGRES_DB: zero
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    ports:
+      - 5432:5432
+    command: postgres -c wal_level=logical
+    healthcheck:
+      test: 'pg_isready -U user --dbname=postgres'
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
-```ts
-/// <reference path="./.sst/platform/config.d.ts" />
-import {execSync} from 'child_process';
+  your_api:
+    build: ./your_api
+    ports:
+      - 3000:3000
+    environment:
+      # your API writes mutations to the database
+      ZERO_UPSTREAM_DB: 'postgres://user:password@upstream_db:5432/zero'
+    depends_on:
+      upstream_db:
+        condition: service_healthy
 
-export default $config({
-  app(input) {
-    return {
-      name: 'hello-zero',
-      removal: input?.stage === 'production' ? 'retain' : 'remove',
-      home: 'aws',
-      region: process.env.AWS_REGION || 'us-east-1',
-      providers: {
-        command: true,
-      },
-    };
-  },
-  async run() {
-    const zeroVersion = execSync('cat package.json | jq '.dependencies["@rocicorp/zero"]')
-      .toString()
-      .trim();
+  zero-cache:
+    image: rocicorp/zero:{version}
+    ports:
+      - 4848:4848
+    depends_on:
+      upstream_db:
+        condition: service_healthy
+      your_api:
+        condition: service_started
+    environment:
+      # used for replication from postgres
+      ZERO_UPSTREAM_DB: 'postgres://user:password@upstream_db:5432/zero'
+      # path to the SQLite replica
+      ZERO_REPLICA_FILE: '/data/replica.db'
+      # password used to access the inspector and /statz
+      ZERO_ADMIN_PASSWORD: 'pickanewpassword'
+      # URLs for your API's query and mutate endpoints
+      ZERO_QUERY_URL: 'http://your_api:3000/api/zero/query'
+      ZERO_MUTATE_URL: 'http://your_api:3000/api/zero/mutate'
+    volumes:
+      # storage for the SQLite replica should be high IOPS
+      - zero_cache_data:/data
+    healthcheck:
+      test:
+        [
+          'CMD-SHELL',
+          'curl -f http://localhost:4848/ || exit 1'
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 3
 
-    // S3 Bucket
-    const replicationBucket = new sst.aws.Bucket(`replication-bucket`);
-
-    // VPC Configuration
-    const vpc = new sst.aws.Vpc(`vpc`, {
-      az: 2,
-    });
-
-    // ECS Cluster
-    const cluster = new sst.aws.Cluster(`cluster`, {
-      vpc,
-    });
-
-    const conn = new sst.Secret('PostgresConnectionString');
-    const zeroAuthSecret = new sst.Secret('ZeroAuthSecret');
-
-    // Common environment variables
-    const commonEnv = {
-      ZERO_PUSH_URL: '', // Your push api url
-      ZERO_UPSTREAM_DB: conn.value,
-      ZERO_CVR_DB: conn.value,
-      ZERO_CHANGE_DB: conn.value,
-      ZERO_AUTH_SECRET: zeroAuthSecret.value,
-      ZERO_REPLICA_FILE: 'sync-replica.db',
-      ZERO_IMAGE_URL: `rocicorp/zero:${zeroVersion}`,
-      ZERO_CVR_MAX_CONNS: '10',
-      ZERO_UPSTREAM_MAX_CONNS: '10',
-    };
-
-    // Replication Manager Service
-    const replicationManager = cluster.addService(`replication-manager`, {
-      cpu: '0.5 vCPU',
-      memory: '1 GB',
-      architecture: 'arm64',
-      image: commonEnv.ZERO_IMAGE_URL,
-      link: [replicationBucket],
-      wait: true,
-      health: {
-        command: ['CMD-SHELL', 'curl -f http://localhost:4849/ || exit 1'],
-        interval: '5 seconds',
-        retries: 3,
-        startPeriod: '300 seconds',
-      },
-      environment: {
-        ...commonEnv,
-        ZERO_LITESTREAM_BACKUP_URL: $interpolate`s3://${replicationBucket.name}/backup`,
-        ZERO_NUM_SYNC_WORKERS: '0',
-      },
-      loadBalancer: {
-        public: false,
-        ports: [
-          {
-            listen: '80/http',
-            forward: '4849/http',
-          },
-        ],
-      },
-      transform: {
-        service: {
-          // e.g. extend the grace period for initial sync of large databases
-          healthCheckGracePeriodSeconds: 600,
-        }
-        target: {
-          healthCheck: {
-            enabled: true,
-            path: '/keepalive',
-            protocol: 'HTTP',
-            interval: 5,
-            healthyThreshold: 2,
-            timeout: 3,
-          },
-        },
-      },
-    });
-
-    // View Syncer Service
-    const viewSyncer = cluster.addService(
-      `view-syncer`,
-      {
-        cpu: '1 vCPU',
-        memory: '2 GB',
-        architecture: 'arm64',
-        image: commonEnv.ZERO_IMAGE_URL,
-        link: [replicationBucket],
-        health: {
-          command: ['CMD-SHELL', 'curl -f http://localhost:4848/ || exit 1'],
-          interval: '5 seconds',
-          retries: 3,
-          startPeriod: '300 seconds',
-        },
-        environment: {
-          ...commonEnv,
-          ZERO_CHANGE_STREAMER_URI: replicationManager.url,
-        },
-        loadBalancer: {
-          ports: [
-            {
-              listen: '80/http',
-              forward: '4848/http',
-            },
-          ],
-        },
-        logging: {
-          retention: '1 month',
-        },
-        transform: {
-          service: {
-            // e.g. extend the grace period for initial sync of large databases
-            healthCheckGracePeriodSeconds: 600,
-          }
-          target: {
-            healthCheck: {
-              enabled: true,
-              path: '/keepalive',
-              protocol: 'HTTP',
-              interval: 5,
-              healthyThreshold: 2,
-              timeout: 3,
-            },
-            stickiness: {
-              enabled: true,
-              type: 'lb_cookie',
-              cookieDuration: 120,
-            },
-          },
-        },
-      },
-    );
-  },
-});
+volumes:
+  zero_cache_data: {}
 ```
 
-### Set SST Secrets
+### Maximal Strategy
 
-Configure SST with your Postgres connection string and [Zero Auth Secret](/docs/auth#server).
+Once you reach the limits of the single-node deployment, you can split zero-cache into a multi-node topology. This is more expensive to run, but it gives you more flexibility and scalability.
 
-Note that if you use JWT-based auth, you'll need to change the environment variables in the `sst.config.ts` file above, then set a different secret here.
-
-```bash
-npx sst secret set PostgresConnectionString "YOUR-PG-CONN-STRING"
-npx sst secret set ZeroAuthSecret "YOUR-ZERO-AUTH-SECRET"
+```json
+┌──────────────────────────────────────────────────────────────────────────┐
+│                              Client Layer                                 │
+│  ┌───────────┐  ┌───────────┐  ┌───────────┐  ┌───────────┐            │
+│  │ Browser 1 │  │ Browser 2 │  │ Browser 3 │  │ Browser N │            │
+│  └───────────┘  └───────────┘  └───────────┘  └───────────┘            │
+│        │              │              │              │                    │
+│        │ WebSocket    │ WebSocket    │ WebSocket    │ WebSocket         │
+│        └──────────────┴──────────────┴──────────────┘                    │
+└───────────────────────────────────────┬──────────────────────────────────┘
+                                        │
+                                        ↓
+                            ┌───────────────────────┐
+                            │   Load Balancer       │
+                            └───────────────────────┘
+                                        │
+                    ┌───────────────────┼───────────────────┐
+                    ↓                   ↓                   ↓
+┌──────────────────────────┐ ┌──────────────────────┐ ┌──────────────────────┐
+│ View-Syncer Node 1       │ │ View-Syncer Node 2   │ │ View-Syncer Node N   │
+│ Port 4848                │ │ Port 4848            │ │ Port 4848            │
+│                          │ │                      │ │                      │
+│ ┌──────────────────────┐ │ │ ┌──────────────────┐│ │ ┌──────────────────┐ │
+│ │ Syncer Workers       │ │ │ │ Syncer Workers   ││ │ │ Syncer Workers   │ │
+│ │ (M = cores - 1)      │ │ │ │ (M = cores - 1)  ││ │ │ (M = cores - 1)  │ │
+│ │ - Serve client conns │ │ │ │ - Serve clients  ││ │ │ - Serve clients  │ │
+│ │ - Compute diffs ─────┼─┼─┼─┼──────────────────┼┼─┼─┼──────────────────┼─┼─┐
+│ │ - Forward mutations ─┼─┼─┼─┼──────────────────┼┼─┼─┼──────────────────┼─┼─┼─┐
+│ └──────────────────────┘ │ │ └──────────────────┘│ │ └──────────────────┘ │ │ │
+│          ↑               │ │          ↑          │ │          ↑           │ │ │
+│ ┌──────────────────────┐ │ │ ┌──────────────────┐│ │ ┌──────────────────┐ │ │ │
+│ │ Replicator           │ │ │ │ Replicator       ││ │ │ Replicator       │ │ │ │
+│ │ - Subscribe to       │ │ │ │ - Subscribe to   ││ │ │ - Subscribe to   │ │ │ │
+│ │   repl-manager WS    │ │ │ │   repl-mgr WS    ││ │ │   repl-mgr WS    │ │ │ │
+│ │ - Write to SQLite    │ │ │ │ - Write to SQLite││ │ │ - Write to SQLite│ │ │ │
+│ └──────────────────────┘ │ │ └──────────────────┘│ │ └──────────────────┘ │ │ │
+│          ↑               │ │          ↑          │ │          ↑           │ │ │
+│ ┌──────────────────────┐ │ │ ┌──────────────────┐│ │ ┌──────────────────┐ │ │ │
+│ │ SQLite Replica       │ │ │ │ SQLite Replica   ││ │ │ SQLite Replica   │ │ │ │
+│ │ (ephemeral)          │ │ │ │ (ephemeral)      ││ │ │ (ephemeral)      │ │ │ │
+│ │ Restored from S3     │ │ │ │ Restored from S3 ││ │ │ Restored from S3 │ │ │ │
+│ └──────────────────────┘ │ │ └──────────────────┘│ │ └──────────────────┘ │ │ │
+│                          │ │                      │ │                      │ │ │
+│ ┌──────────────────────┐ │ │ ┌──────────────────┐│ │ ┌──────────────────┐ │ │ │
+│ │ Reaper (CVR GC)      │ │ │ │ Reaper (CVR GC)  ││ │ │ Reaper (CVR GC)  │ │ │ │
+│ └──────────────────────┘ │ │ └──────────────────┘│ │ └──────────────────┘ │ │ │
+└──────────────────────────┘ └──────────────────────┘ └──────────────────────┘ │ │
+            │                           │                           │           │ │
+            │ WebSocket                 │ WebSocket                 │ WebSocket │ │
+            └───────────────────────────┴───────────────────────────┘           │ │
+                                        ↓                                        │ │
+┌──────────────────────────────────────────────────────────────────────────────┐│ │
+│                    Replication-Manager (Single Instance)                      ││ │
+│                                                                               ││ │
+│  ┌─────────────────────────────────────────────────────────────────────────┐││ │
+│  │ change-streamer                                         Port 4849        │││ │
+│  │  - Consumes Postgres replication slot                                   │││ │
+│  │  - Writes to Change DB                                                  │││ │
+│  │  - Serves N view-syncers via WebSocket                                  │││ │
+│  │  - Coordinates change-log cleanup                                       │││ │
+│  └─────────────────────────────────────────────────────────────────────────┘││ │
+│                                                                               ││ │
+│  ┌─────────────────────────────────────────────────────────────────────────┐││ │
+│  │ backup replicator                                                        │││ │
+│  │  - Keeps SQLite replica current for litestream                          │││ │
+│  └─────────────────────────────────────────────────────────────────────────┘││ │
+│                                   ↓                                          ││ │
+│  ┌─────────────────────────────────────────────────────────────────────────┐││ │
+│  │ SQLite Backup Replica (zero.db)                                          │││ │
+│  └─────────────────────────────────────────────────────────────────────────┘││ │
+│                                   ↓                                          ││ │
+│  ┌─────────────────────────────────────────────────────────────────────────┐││ │
+│  │ litestream                                              Port 4850        │││ │
+│  │  - Backs up SQLite to object storage                                    │││ │
+│  │  - Creates incremental snapshots                                        │││ │
+│  │  - Exports Prometheus metrics                                           │││ │
+│  └─────────────────────────────────────────────────────────────────────────┘││ │
+└───────────────────────────────────────────────────────────────────────────────┘│ │
+                                  ↓                                             │ │
+┌──────────────────────────────────────────────────────────────────────────────┐│ │
+│                     Object Storage (S3-compatible)                            ││ │
+│                                                                               ││ │
+│  s3://my-bucket/zero/                                                         ││ │
+│    ├── snapshots/                                                             ││ │
+│    │   ├── 00000001/zero.db                                                   ││ │
+│    │   └── 00000050/zero.db                                                   ││ │
+│    └── wal/                                                                   ││ │
+│        ├── 00000001-00000010.wal                                              ││ │
+│        └── 00000041-00000050.wal                                              ││ │
+│                                                                               ││ │
+│  View-syncers restore from here on startup                                   ││ │
+└───────────────────────────────────────────────────────────────────────────────┘│ │
+                                                                                │ │
+                                                          HTTP POST              │ │
+                                                          (mutations)            │ │
+                                                                    HTTP POST   │ │
+                                                                    (queries)   │ │
+                                                                          ↓ ↓   │ │
+┌──────────────────────────────────────────────────────────────────────────────┐│ │
+│                              Your Infrastructure                              ││ │
+│                                                                               ││ │
+│  ┌─────────────────────────────────────┐  ┌─────────────────────────────┐   ││ │
+│  │  Postgres Cluster                   │  │  Your API Servers           │   ││ │
+│  │                                     │  │  (horizontally scaled)       │   ││ │
+│  │  ┌──────────────────────────────┐  │  │                              │   ││ │
+│  │  │ Primary (read-write)         │  │  │  POST /api/mutate            │◄──┼┼─┘
+│  │  │                              │  │  │  - Auth & validation         │   ││
+│  │  │  Your Schemas:               │  │  │  - Business logic            │   ││
+│  │  │  - public.users              │  │  │  - Writes to Postgres        │   ││
+│  │  │  - public.posts              │◄─┼──┼─                             │   ││
+│  │  │  - public.comments           │  │  │  POST /api/query             │◄──┼┘
+│  │  │  - ...                       │  │  │  - Transform queries         │   │
+│  │  │                              │  │  │  - Add custom data           │   │
+│  │  │  Zero Metadata Schemas:      │  │  │  - Auth checks               │   │
+│  │  │  - zero_0                    │  │  └─────────────────────────────┘   │
+│  │  │  - zero_0/cvr (CVR DB)       │  │                                     │
+│  │  │  - zero_0/cdc (Change DB)    │  │                                     │
+│  │  │                              │  │                                     │
+│  │  │  Replication Slot: zero_0    │  │                                     │
+│  │  └──────────────────────────────┘  │                                     │
+│  │            ↓                        │                                     │
+│  │  ┌──────────────────────────────┐  │                                     │
+│  │  │ Replicas (read-only)         │  │                                     │
+│  │  └──────────────────────────────┘  │                                     │
+│  └─────────────────────────────────────┘                                     │
+└───────────────────────────────────────────────────────────────────────────────┘
 ```
 
-### Deploy
+Here is an example `docker-compose.yml` file for a multi-node deployment:
 
-```bash
-npx sst deploy
+```yaml
+services:
+  upstream_db:
+    image: postgres:18
+    environment:
+      POSTGRES_DB: zero
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    ports:
+      - 5432:5432
+    command: postgres -c wal_level=logical
+    healthcheck:
+      test: 'pg_isready -U user --dbname=postgres'
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  your_api:
+    build: ./your_api
+    ports:
+      - 3000:3000
+    environment:
+      # your API writes mutations to the database
+      ZERO_UPSTREAM_DB: 'postgres://user:password@upstream_db:5432/zero'
+    depends_on:
+      upstream_db:
+        condition: service_healthy
+
+  replication-manager:
+    # use the replication-manager tag
+    image: rocicorp/zero:{version}-replication-manager
+    ports:
+      - 4849:4849
+    depends_on:
+      upstream_db:
+        condition: service_healthy
+      your_api:
+        condition: service_started
+    environment:
+      # used for replication from postgres
+      ZERO_UPSTREAM_DB: 'postgres://user:password@upstream_db:5432/zero'
+      # path to the SQLite replica
+      ZERO_REPLICA_FILE: '/data/replica.db'
+      # password used to access the inspector and /statz
+      ZERO_ADMIN_PASSWORD: 'pickanewpassword'
+      # used for storing recent replication log entries
+      ZERO_CHANGE_DB: 'postgres://user:password@upstream_db:5432/zero'
+      # URL for backing up the SQLite replica
+      ZERO_LITESTREAM_BACKUP_URL: 's3://'
+    volumes:
+      # storage for the SQLite replica should be high IOPS
+      - replication_data:/data
+    healthcheck:
+      test:
+        [
+          'CMD-SHELL',
+          'curl -f http://localhost:4849/ || exit 1'
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+
+  # only one view-syncer in this example, but there can be N
+  view-syncer:
+    image: rocicorp/zero:{version}-view-syncer
+    ports:
+      - 4848:4848
+    depends_on:
+      replication-manager:
+        condition: service_healthy
+    environment:
+      # path to the SQLite replica
+      ZERO_REPLICA_FILE: '/data/replica.db'
+      # password used to access the inspector and /statz
+      ZERO_ADMIN_PASSWORD: 'pickanewpassword'
+      # URLs for your API's query and mutate endpoints
+      ZERO_QUERY_URL: 'http://your_api:3000/api/zero/query'
+      ZERO_MUTATE_URL: 'http://your_api:3000/api/zero/mutate'
+      # URL for connecting to the replication-manager
+      ZERO_CHANGE_STREAMER_URI: 'http://replication-manager:4849'
+    volumes:
+      - view_syncer_data:/data
+    healthcheck:
+      test:
+        [
+          'CMD-SHELL',
+          'curl -f http://localhost:4848/ || exit 1'
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+
+volumes:
+  view_syncer_data: {}
+  replication_data: {}
 ```
 
-This takes about 5-10 minutes.
+#### Scaling
 
-If successful, you should see a URL for the `view-syncer` service. This is the URL to pass to the `server` parameter of the `Zero` constructor on the client.
+The view-syncers in the multi-node topology can be horizontally scaled as needed.
 
-If unsuccessful, you can get detailed logs with `npx sst deploy --verbose`. [Come find us on Discord](https://discord.rocicorp.dev/) and we'll help get you sorted out.
+TODO PG connection budget
 
-## Guide: Single-Node on Fly.io
+You can also override the number of sync workers _per view-syncer_ with `ZERO_NUM_SYNC_WORKERS` (see [#components](Components) for more information on sync workers).
 
-Let's deploy the [Quickstart](/docs/quickstart) app to [Fly.io](https://fly.io). We'll use Fly.io for both the database and `zero-cache`.
+#### Performance expectations
 
-### Setup Quickstart
+TODO??
 
-Go through the [Quickstart](/docs/quickstart) guide to get the app running locally.
+## Replica Lifecycle
 
-### Setup Fly.io
+Zero-cache is backed by a SQLite replica of your database. Well, technically, it can be multiple SQLite replicas.
+The replication-manager always has its own _source_ replica file, and the view-syncers can either share the same file or have their own _serving_ replica file:
 
-Create an account on [Fly.io](https://fly.io) and [install the Fly CLI](https://fly.io/docs/flyctl/install/).
+1. On single-node deployments without litestream backups, the view-syncers share the same replica file as the replication-manager, and source and serving are the same file.
+2. On single-node deployments with litestream backups, the view-syncers use an ephemeral serving fork of the source replica file.
+3. On multi-node deployments, the view-syncers are on entirely different nodes and similarly must have their own serving replica file.
 
-### Create Postgres app
+The replication-manager's source replica can be replicated to S3 using [litestream](https://github.com/benbjohnson/litestream).
+This is optional, but allows for fast recovery from restarts and failures, instead of doing a full initial sync from upstream.
 
-<Note type="warning" slug="fly-app-names">
-  Fly.io requires app names to be unique across all Fly.io
-  users. Change the `INITIALS` environment variable below to
-  something unique.
-</Note>
+The important thing to note is that in any case, there is always upstream Postgres as the source of truth. If the SQLite replica is somehow corrupted or the litestream backup disappears, the replication-manager can resync its source replica from it.
 
-```bash
-INITIALS=aa
-PG_APP_NAME=$INITIALS-zstart-pg
+If the litestream backup URL is changed (by, for example, appending a number to the [`ZERO_LITESTREAM_BACKUP_URL`](/docs/zero-cache-config#litestream-backup-url) value), it will force a resync from upstream.
 
-PG_PASSWORD="$(head -c 256 /dev/urandom | od -An -t x1 | tr -d ' \n' | tr -dc 'a-zA-Z' | head -c 16)"
+### IVM Performance
 
-fly postgres create \
-  --name $PG_APP_NAME \
-  --region lax \
-  --initial-cluster-size 1 \
-  --vm-size shared-cpu-2x \
-  --volume-size 40 \
-  --password=$PG_PASSWORD
+You want to optimize disk IOPS for the serving replica, since this is the file that is read by the view-syncers to run IVM-based queries, and one of the main bottlenecks for query hydration performance.
+View syncer's IVM is "hydrate once, then incrementally push diffs" against the ZQL pipeline, so performance is mostly about:
+
+1. How fast the server can materialize a subscription the first time (hydration).
+2. How fast it can keep it up to date (IVM advancement).
+
+Different bottlenecks dominate each phase.
+
+#### Hydration
+
+- **SQLite read cost**: hydration is essentially "run the query against the replica and stream all matching rows into the pipeline", so it's bounded by [SQLite scan/index performance](/docs/debug/inspector#analyzing-queries) + result size.
+- **Churn / TTL eviction**: if queries get [evicted](/docs/reading-data#query-caching) (inactive long enough) and then get re-requested, you pay hydration again.
+- **Custom query transform latency**: the HTTP request from zero-cache to your API at [`ZERO_QUERY_URL`](/docs/zero-cache-config#query-url) does transform/authorization for queries, adding network + CPU before hydration starts.
+
+#### IVM advancement
+
+- **Replication throughput**: the view-syncer can only advance when the replicator commits and emits version-ready. If upstream replication is behind, query advancement is capped by how fast the replica advances.
+- **Change volume per transaction**: advancement cost scales with number of changed _rows_, not number of queries.
+- **Circuit breaker behavior**: if advancement looks like it'll take longer than rehydrating, zero-cache intentionally aborts and resets pipelines (which trades "slow incremental" for "rehydrate").
+
+#### System-level
+
+- **Number of client groups per sync worker**: each client group has its own pipelines; CPU and memory per group limits how many can be "fast" at once. Since Node is single-threaded, one client group can technically starve other groups. This is handled with time slicing and can be configured with the yield parameters, e.g. [`ZERO_YIELD_THRESHOLD_MS`](/docs/zero-cache-config#yield-threshold-ms).
+- **SQLite concurrency limits**: it's designed here for one writer (replicator) + many concurrent readers (view-syncer snapshots). It scales, but very heavy read workloads can still contend on cache/IO.
+- **Network to clients**: even if IVM is fast, it can take time to send large patches over websocket and the client must apply them.
+
+## Networking and Routing
+
+### Credentials
+
+#### Cookie Based
+
+If your app relies on [cookie auth](/docs/auth#cookies), you need to make sure that the view-syncers are on the same root domain as your web app. Since they are typically available on a subdomain, auth cookies must be set with the `Domain` attribute set to your root domain (e.g., `.example.com`).
+
+#### Token
+
+Networking for [token auth](/docs/auth#tokens) is simpler. You can run the view-syncer on any domain, and the client will pass the token to zero-cache in the `Sec-WebSocket-Protocol` header.
+
+### Load Balancing
+
+View syncers must be publicly reachable by port 4848 by clients, and the replication-manager can have internal networking with the view-syncers on port 4849.
+
+The external load balancer must support websockets, and can use the health check at `/keepalive` to verify view-syncers and replication-managers are healthy.
+
+#### Sticky Sessions
+
+View syncers are designed to be disposable, but since they keep hydrated query pipelines in memory, it's important to try to keep clients connected to the same instance.
+If a reconnect/refresh lands on a different instance, that instance usually has to rehydrate instead of reusing warm state.
+
+If you are seeing a lot of Rehome errors, you may need to enable sticky sessions. Two instances can end up doing redundant hydration/advancement work for the same `clientGroupID`, and the "loser" will eventually force clients to reconnect.
+
+### Single Region
+
+For a single-region deployment, all services can be colocated. Configure `zero-cache` to point to your primary Postgres database for all three database connections (`ZERO_UPSTREAM_DB`, `ZERO_CVR_DB`, and `ZERO_CHANGE_DB`).
+
+### Geo-Replicated
+
+For multi-region deployments, we recommend a "1 replication-manager + N view-syncer clusters" topology:
+
+- One replication-manager in your primary region owns the Postgres replication slots.
+- View syncer clusters in every region restore the SQLite replica from the replication-manager's litestream backup and subscribe to its change-streamer.
+
+The database configuration should follow these guidelines:
+
+- All clusters connect to the same `ZERO_UPSTREAM_DB` (your primary Postgres database). The view-syncers use this only for garbage collection of `.mutations` rows.
+- Each region/cluster can use a local Postgres database for `ZERO_CVR_DB`. It can start empty; it's region-local state.
+- `ZERO_CHANGE_DB` is only required for clusters that run a replication-manager. If a cluster is view-syncer-only and you configure it with an explicit `ZERO_CHANGE_STREAMER_URI`, the change DB is not used and can be the same as the `ZERO_CVR_DB`.
+- Use the same `ZERO_APP_ID` for a single logical app across all regions. Don't make it "per region" unless you intentionally want isolated, separate deployments.
+- Size `max_replication_slots` based on how many replication-managers you run - budget 2 slots per replication-manager per shard (steady state uses 1; non-disruptive resyncs can temporarily consume 2).
+
+The API endpoints should be distributed differently:
+
+- The [mutate endpoint](/docs/mutators#server-setup) should be colocated with your primary Postgres database to minimize write latency.
+- The [query endpoint](/docs/queries#server-setup) should be geographically distributed close to your view-syncer clusters, because view-syncers call it during query transform/hydration and it does read/write to the primary Postgres database.
+
+The routing must be configured to route the frontend WebSocket traffic to the closest view-syncer cluster (geo DNS/CDN), and prefer sticky routing for a given clientGroupID to avoid cross-region "rehome" or cold-start behavior (a different region won't have the same CVR state if `ZERO_CVR_DB` is region-local).
+
+## Upgrades and Rollouts
+
+The replication-manager and view-syncers have different upgrade patterns, since they have different runtime characteristics. The replication-manager requires a full handoff, since it is the single owner of the changelog DB state. The view-syncers can simply be drained and reconnected, since they are designed to be disposable.
+
+### Replication Manager
+
+- The replication-manager's change-streamer is the single owner of the changelog DB state. Ownership is tracked in the change DB and is set when the new instance starts.
+- A new replication-manager does not immediately take over the stream. The HTTP server delays by [`ZERO_CHANGE_STREAMER_STARTUP_DELAY_MS`](/docs/zero-cache-config#change-streamer-startup-delay-ms) so a load balancer can mark it healthy first.
+
+### View Syncer
+
+- View-syncers are designed to be disposable: clients reconnect to another instance if they get kicked off.
+- On `SIGTERM`, the sync worker does a paced drain: it shuts down view-syncers one at a time, waiting roughly "a hydration time" between them to avoid a thundering herd of rehydrations on the available servers.
+
+Implication for upgrades: if the replication protocol changes (or the change-streamer only exists at an older version), a new view-syncer/replicator can’t talk to an old replication-manager. The system handles this by retrying: restore/snapshot reservation
+logic explicitly retries until a “compatible replication-manager has been rolled out”, allowing parallel rollout (packages/zero-cache/src/services/litestream/commands.ts:259).
+
+### Client and View Syncer Compatibility
+
+Clients and view-syncers have a compatibility contract that is versioned by the `PROTOCOL_VERSION`. It checks the client's requested version and rejects anything outside its supported range (defined by `MIN_SERVER_SUPPORTED_SYNC_PROTOCOL`) with a `VersionNotSupported` error.
+
+In practice this means: new view-syncer versions can keep accepting older clients for some window, but an older view-syncer will not understand a newer client.
+
+Client storage is also versioned by the `PROTOCOL_VERSION`. When the protocol/schema changes, the client will effectively create a new local store and re-sync.
+
+### View Syncer and Replication Manager Compatibility
+
+The view-syncer and replication-manager have their own internal versioning between each other. The replication-manager HTTP server accepts a range `[MIN_SUPPORTED_PROTOCOL_VERSION ... PROTOCOL_VERSION]`. The view-syncer is hard-coded to use it's own `PROTOCOL_VERSION`.
+
+### Rollout Strategy
+
+1. Upgrade the API servers (your mutate and query endpoints) first.
+2. Upgrade replication-manager next, so it can serve the newer replication protocol and snapshot semantics.
+3. Upgrade view-syncers. If they come up before the replication-manager, they'll sit in retry loops until the manager is updated.
+4. Upgrade clients last.
+
+## Zero-cache Components
+
+| Component             | Replication Manager | View Syncer          |
+| --------------------- | ------------------- | -------------------- |
+| Owns replication slot | ✅                  | ❌                   |
+| Serves client queries | ❌                  | ✅                   |
+| Backs up replica      | ✅ (if URL set)     | ❌                   |
+| Restores from backup  | Optional            | Required             |
+| Subscribes to changes | N/A (produces)      | ✅                   |
+| CVR management        | ❌                  | ✅                   |
+| Number deployed       | 1                   | N (horizontal scale) |
+
+### Replication Manager
+
+The replication-manager is made up of the following components:
+
+1. **Change Streamer**: owns the Postgres replication slot, reads changes from Postgres, stores changes in change DB, serves changes to `N` view-syncers via WS, manages change-log cleanup. PG replication → change streamer → changelog table → purging after litestream backup.
+2. **Backup Replicator**: subscribes to change-streamer and maintains a read-only copy of SQLite replica for litestream.
+3. **Litestream**: backs up the SQLite replica to S3.
+
+```json
+  ┌────────────────────────────────────────────────────────────────────────────┐
+  │                       Replication-Manager (1 instance)                      │
+  │                                                                             │
+  │  ┌──────────────────────────┐ ┌─────────────────┐ ┌──────────────────┐   │
+  │  │   change-streamer        │ │ backup          │ │ litestream       │   │
+  │  │   Worker Process         │ │ replicator      │ │ Subprocess       │   │
+  │  │ ┌──────────────────────┐ │ │ Worker Process  │ │                  │   │
+  │  │ │ ChangeSource         │ │ │                 │ │ (only if         │   │
+  │  │ │ - Postgres repl slot │ │ │ ┌─────────────┐ │ │ backupURL set)   │   │
+  │  │ │ - OR custom source   │ │ │ │ Reads SQLite│ │ │                  │   │
+  │  │ └──────────────────────┘ │ │ │ replica     │ │ │ - Backs up to    │   │
+  │  │          ↓               │ │ │             │ │ │   S3/storage     │   │
+  │  │ ┌──────────────────────┐ │ │ │ Subscribes  │ │ │ - Exports        │   │
+  │  │ │ ChangeStreamerImpl   │ │ │ │ to change-  │ │ │   Prometheus     │   │
+  │  │ │ ┌──────────────────┐ │ │ │ │ streamer WS │ │ │   metrics        │   │
+  │  │ │ │ Storer           │ │ │ │ │             │ │ │   (port 4850)    │   │
+  │  │ │ │ - Writes to      │ │ │ │ │ Applies     │ │ │                  │   │
+  │  │ │ │   change DB      │ │ │ │ │ changes to  │ │ └──────────────────┘   │
+  │  │ │ │ - Catchup subs   │ │ │ │ │ backup copy │ │       ↑                │
+  │  │ │ │ - Purge old logs │ │ │ │ └─────────────┘ │       │ polls metrics  │
+  │  │ │ └──────────────────┘ │ │ └─────────────────┘       │                │
+  │  │ │ ┌──────────────────┐ │ │        ↑                  │                │
+  │  │ │ │ Forwarder        │ │ │        │ subscribes       │                │
+  │  │ │ │ - Live forward   │ │ │        │                  │                │
+  │  │ │ └──────────────────┘ │ │        │                  │                │
+  │  │ └──────────────────────┘ │ │        │                  │                │
+  │  │          ↓               │ │        │                  │                │
+  │  │ ┌──────────────────────┐ │ │        │                  │                │
+  │  │ │ BackupMonitor        │─┼─┼────────┘                  │                │
+  │  │ │ - Polls litestream   │─┼─┼─────────────────────────┘                │
+  │  │ │   metrics            │ │ │                                            │
+  │  │ │ - Schedules cleanup  │ │ │                                            │
+  │  │ │ - Handles /snapshot  │ │ │                                            │
+  │  │ └──────────────────────┘ │ │                                            │
+  │  │          ↓               │ │                                            │
+  │  │ ┌──────────────────────┐ │ │                                            │
+  │  │ │ChangeStreamerHttp    │ │ │                                            │
+  │  │ │ Server (port 4849)   │ │ │                                            │
+  │  │ │                      │ │ │                                            │
+  │  │ │ GET /snapshot   [WS] │ │ │                                            │
+  │  │ │ GET /changes    [WS] │ │ │                                            │
+  │  │ └──────────────────────┘ │ │                                            │
+  │  └──────────────────────────┘ └────────────────────────────────────────────┘
+  │            ↓ ↓ ↓                                                            │
+  └────────────┼─┼─┼──────────────────────────────────────────────────────────┘
+              │ │ │
+              │ │ └──── WebSocket to backup replicator (internal)
+              │ │
+              │ └────── WebSocket N to view-syncer N
+              └──────── WebSocket 1 to view-syncer 1
 ```
 
-### Seed Upstream database
+### View Syncer(s)
 
-Populate the database with initial data and set its `wal_level` to `logical` to support replication to `zero-cache`. Then restart the database to apply the changes.
+The (`N`) view-syncers are made up of the following components:
 
-```bash
-(cat ./docker/seed.sql; echo "\q") | fly pg connect -a $PG_APP_NAME
-echo "ALTER SYSTEM SET wal_level = logical; \q" | fly pg connect -a $PG_APP_NAME
-fly postgres restart --app $PG_APP_NAME
+1. **Sync Workers**: runs IVM for client groups, handles websocket connections, and pushes mutations to the upstream API. The default number of sync workers per view-syncer is `M` = number of cores - 1.
+2. **Serving Replicator**: maintains a serving SQLite replica, subscribes to the remote change streamer via WS, and notifies the sync workers with new changes.
+3. **Reaper**: garbage collects inactive CVRs.
+
+```json
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                      Replication-Manager (1 instance)                        │
+│  ┌────────────────────────────────────────────────────────────────────────┐  │
+│  │              ChangeStreamerHttpServer (port 4849)                       │  │
+│  └────────────────────────────────────────────────────────────────────────┘  │
+└──────────────────────────────────────────────────────────────────────────────┘
+          ↑                         ↑                         ↑
+          │ WebSocket 1             │ WebSocket 2             │ WebSocket N
+          │                         │                         │
+┌───────────────────────┐  ┌───────────────────────┐  ┌───────────────────────┐
+│   View-Syncer Node 1   │  │   View-Syncer Node 2   │  │   View-Syncer Node N   │
+│                       │  │                       │  │                       │
+│  ┌─────────────────┐  │  │  ┌─────────────────┐  │  │  ┌─────────────────┐  │
+│  │   Dispatcher    │  │  │  │   Dispatcher    │  │  │  │   Dispatcher    │  │
+│  └─────────────────┘  │  │  └─────────────────┘  │  │  └─────────────────┘  │
+│                       │  │                       │  │                       │
+│  ┌─────────────────┐  │  │  ┌─────────────────┐  │  │  ┌─────────────────┐  │
+│  │     Reaper      │  │  │  │     Reaper      │  │  │  │     Reaper      │  │
+│  │    (CVR GC)     │  │  │  │    (CVR GC)     │  │  │  │    (CVR GC)     │  │
+│  └─────────────────┘  │  │  └─────────────────┘  │  │  └─────────────────┘  │
+│                       │  │                       │  │                       │
+│  ┌───────────────────────────────────────────────────────────────────────┐  │
+│  │                                 Replicator                             │  │
+│  │  - Owns SQLite                                                         │  │
+│  └──────────────────────────────────────────────────────────────────────-─┘  │
+│          │ notifies                                                          │
+│          ↓                                                                   │
+│  ┌───────────────────────────────────────────────────────────────────────┐  │
+│  │                              Syncer Workers                            │  │
+│  │                           (serve clients)                               │  │
+│  │  ┌──────────────────┐  ┌──────────────────┐  ┌──────────────────┐      │  │
+│  │  │  Syncer Worker 1  │  │  Syncer Worker 2  │  │  Syncer Worker 3  │      │  │
+│  │  ├──────────────────┤  ├──────────────────┤  ├──────────────────┤      │  │
+│  │  │       ...        │  │       ...        │  │       ...        │      │  │
+│  │  ├──────────────────┤  ├──────────────────┤  ├──────────────────┤      │  │
+│  │  │  Syncer Worker M  │  │  Syncer Worker M  │  │  Syncer Worker M  │      │  │
+│  │  └──────────────────┘  └──────────────────┘  └──────────────────┘      │  │
+│  └───────────────────────────────────────────────────────────────────────┘  │
+└───────────────────────┘  └───────────────────────┘  └───────────────────────┘
 ```
-
-### Create `zero-cache` Fly.io app
-
-```bash
-CACHE_APP_NAME=$INITIALS-zstart-cache
-fly app create $CACHE_APP_NAME
-```
-
-### Publish `zero-cache`
-
-Create a `fly.toml` file.
-
-```bash
-CONNECTION_STRING="postgres://postgres:$PG_PASSWORD@$PG_APP_NAME.flycast:5432"
-ZERO_VERSION=$(npm list @rocicorp/zero | grep @rocicorp/zero | cut -f 3 -d @)
-
-cat <<EOF > fly.toml
-app = "$CACHE_APP_NAME"
-primary_region = 'lax'
-
-[build]
-image = "registry.hub.docker.com/rocicorp/zero:${ZERO_VERSION}"
-
-[http_service]
-internal_port = 4848
-force_https = true
-auto_stop_machines = 'off'
-min_machines_running = 1
-
-[[http_service.checks]]
-grace_period = "10s"
-interval = "30s"
-method = "GET"
-timeout = "5s"
-path = "/"
-
-[[vm]]
-memory = '2gb'
-cpu_kind = 'shared'
-cpus = 2
-
-[mounts]
-source = "sqlite_db"
-destination = "/data"
-
-[env]
-ZERO_REPLICA_FILE = "/data/sync-replica.db"
-ZERO_UPSTREAM_DB="${CONNECTION_STRING}/zstart?sslmode=disable"
-ZERO_CVR_DB="${CONNECTION_STRING}/zstart_cvr?sslmode=disable"
-ZERO_CHANGE_DB="${CONNECTION_STRING}/zstart_cdb?sslmode=disable"
-ZERO_PUSH_URL=""
-ZERO_AUTH_SECRET="secretkey"
-LOG_LEVEL = "debug"
-EOF
-```
-
-Then publish `zero-cache`:
-
-```bash
-fly deploy
-```
-
-### Use Remote `zero-cache`
-
-```bash
-VITE_PUBLIC_SERVER="https://${CACHE_APP_NAME}.fly.dev/" npm run dev:ui
-```
-
-Now restart the frontend to pick up the env change, and refresh the app. You can stop your local database and `zero-cache` as we're not using them anymore. Open the web inspector to verify the app is talking to the remote `zero-cache`!
-
-You can deploy the frontend to any standard hosting service like Vercel or Netlify, or even to Fly.io!
-
-### Deploy Frontend to Vercel
-
-If you've followed the above guide and deployed `zero-cache` to fly, you can simply run:
-
-```sh
-vercel deploy --prod \
-  -e ZERO_AUTH_SECRET="secretkey" \
-  -e VITE_PUBLIC_SERVER='https://${CACHE_APP_NAME}.fly.dev/'
-```
-
-to deploy your frontend to Vercel.
-
-Explaining the arguments above --
-
-- `ZERO_AUTH_SECRET` - The secret to create and verify JWTs. This is the same secret that was used when deploying zero-cache to fly.
-- `VITE_PUBLIC_SERVER` - The URL the frontend will call to talk to the zero-cache server. This is the URL of the fly app.
-
-## Guide: Multi-Node on Raw AWS
-
-### S3 Bucket
-
-Create an S3 bucket. `zero-cache` uses S3 to backup its SQLite replica so that it survives task restarts.
-
-### Fargate Services
-
-Run `zero-cache` as two Fargate services (using the same [rocicorp/zero](https://hub.docker.com/r/rocicorp/zero) docker image):
-
-#### replication-manager
-
-- `zero-cache` config:
-  - `ZERO_LITESTREAM_BACKUP_URL=s3://{bucketName}/{generation}`
-  - `ZERO_NUM_SYNC_WORKERS=0`
-- Task count: **1**
-
-#### view-syncer
-
-- `zero-cache` config:
-  - `ZERO_CHANGE_STREAMER_URI=http://{replication-manager}`
-- Task count: **N**
-  - You can also use dynamic scaling
-
-### Notes
-
-- Standard rolling restarts are fine for both services
-- Set `ZERO_CVR_MAX_CONNS` and `ZERO_UPSTREAM_MAX_CONNS` appropriately so that the total connections from both running and updating `view-syncers` (e.g. DesiredCount \* MaximumPercent) do not exceed your database’s `max_connections`.
-- The `{generation}` component of the `s3://{bucketName}/{generation}` URL is an arbitrary path component that can be modified to reset the replica (e.g. a date, a number, etc.). Setting this to a new path is the multi-node equivalent of deleting the replica file to resync.
-  - Note: `zero-cache` does not manage cleanup of old generations.
-- The `replication-manager` serves requests on port **4849**. Routing from the `view-syncer` to the `http://{replication-manager}` can be achieved using the following mechanisms (in order of preference):
-  - An internal load balancer
-  - [Service Connect](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-connect.html)
-  - [Service Discovery](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-discovery.html)
-- Fargate ephemeral storage is used for the replica.
-  - The default size is 20GB. This can be increased up to 200GB
-  - Allocate at least twice the size of the database to support the internal VACUUM operation.
-
-## Guide: $PLATFORM
-
-Where should we deploy Zero next?? Let us know on [Discord](https://discord.rocicorp.dev)!

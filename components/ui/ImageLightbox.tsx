@@ -1,5 +1,6 @@
 'use client';
 
+import {cn} from '@/lib/utils';
 import React, {useState, CSSProperties} from 'react';
 
 const ImageLightbox: React.FC<{
@@ -7,7 +8,8 @@ const ImageLightbox: React.FC<{
   caption: string;
   style?: CSSProperties;
   className?: string;
-}> = ({src, caption, style, className}) => {
+  invert?: 'light' | 'dark';
+}> = ({src, caption, style, className, invert}) => {
   const [isOpen, setIsOpen] = useState(false);
 
   if (!src) {
@@ -37,7 +39,11 @@ const ImageLightbox: React.FC<{
           margin: '0 auto',
           ...style,
         }}
-        className={className}
+        className={cn(
+          className,
+          invert === 'light' && 'invert-0 dark:invert',
+          invert === 'dark' && 'invert dark:invert-0',
+        )}
         onClick={toggleLightbox}
       />
       {caption && (
@@ -79,6 +85,7 @@ const ImageLightbox: React.FC<{
               boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.5)',
               border: 'none',
             }}
+            className={cn(invert === 'light' && 'invert-0 dark:invert')}
           />
         </div>
       )}

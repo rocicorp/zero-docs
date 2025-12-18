@@ -19,6 +19,7 @@ import {sluggify} from './utils';
 import {convertMdxToMarkdown} from './mdx-to-markdown';
 import rehypePrettyCode from 'rehype-pretty-code';
 import highlighter from './themes/highlighter';
+import {getLatestNpmVersions} from './get-latest-npm-versions';
 
 const components = {
   Note,
@@ -85,7 +86,22 @@ const readRawDoc = async (slug: string) => {
 };
 
 const compileDoc = async (slug: string) => {
-  const rawMdx = await readRawDoc(slug);
+  let rawMdx = await readRawDoc(slug);
+  const npmVersions = await getLatestNpmVersions();
+
+  rawMdx = rawMdx.replace(
+    /rocicorp\/zero([:@])\{version\}/g,
+    `rocicorp/zero$1${npmVersions['@rocicorp/zero']}`,
+  );
+  rawMdx = rawMdx.replace(
+    /drizzle-zero([:@])\{version\}/g,
+    `drizzle-zero$1${npmVersions['drizzle-zero']}`,
+  );
+  rawMdx = rawMdx.replace(
+    /prisma-zero([:@])\{version\}/g,
+    `prisma-zero$1${npmVersions['prisma-zero']}`,
+  );
+
   return {
     raw: await convertMdxToMarkdown(rawMdx, slug),
     parsed: await parseMdx<BaseMdxFrontmatter>(rawMdx),

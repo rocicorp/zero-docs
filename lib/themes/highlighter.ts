@@ -15,6 +15,7 @@ const highlighter = await createHighlighter({
     'docker',
     'sql',
     'console',
+    'yaml',
   ],
 });
 

@@ -111,18 +111,16 @@ services:
       - 5432:5432
     command: postgres -c wal_level=logical
     healthcheck:
-      test: 'pg_isready -U user --dbname=postgres'
+      test: pg_isready -U user --dbname=postgres
       interval: 10s
-      timeout: 5s
-      retries: 5
 
-  your_api:
-    build: ./your_api
+  api:
+    build: ./api
     ports:
       - 3000:3000
     environment:
-      # your API writes mutations to the database
-      ZERO_UPSTREAM_DB: 'postgres://user:password@upstream_db:5432/zero'
+      # your API handles mutations and writes to the PG db
+      ZERO_UPSTREAM_DB: postgres://user:password@upstream_db:5432/zero
     depends_on:
       upstream_db:
         condition: service_healthy
@@ -131,36 +129,27 @@ services:
     image: rocicorp/zero:{version}
     ports:
       - 4848:4848
+    environment:
+      # used for replication from postgres
+      ZERO_UPSTREAM_DB: postgres://user:password@upstream_db:5432/zero
+      # path to the SQLite replica
+      ZERO_REPLICA_FILE: /data/zero.db
+      # password used to access the inspector and /statz
+      ZERO_ADMIN_PASSWORD: pickanewpassword
+      # URLs for your API's query and mutate endpoints
+      ZERO_QUERY_URL: http://api:3000/api/zero/query
+      ZERO_MUTATE_URL: http://api:3000/api/zero/mutate
+    volumes:
+      # disk for the SQLite replica should be high IOPS
+      - zero_cache_data:/data
     depends_on:
       upstream_db:
         condition: service_healthy
-      your_api:
+      api:
         condition: service_started
-    environment:
-      # used for replication from postgres
-      ZERO_UPSTREAM_DB: 'postgres://user:password@upstream_db:5432/zero'
-      # path to the SQLite replica
-      ZERO_REPLICA_FILE: '/data/replica.db'
-      # password used to access the inspector and /statz
-      ZERO_ADMIN_PASSWORD: 'pickanewpassword'
-      # URLs for your API's query and mutate endpoints
-      ZERO_QUERY_URL: 'http://your_api:3000/api/zero/query'
-      ZERO_MUTATE_URL: 'http://your_api:3000/api/zero/mutate'
-    volumes:
-      # storage for the SQLite replica should be high IOPS
-      - zero_cache_data:/data
     healthcheck:
-      test:
-        [
-          'CMD-SHELL',
-          'curl -f http://localhost:4848/ || exit 1'
-        ]
+      test: curl -f http://localhost:4848/keepalive
       interval: 5s
-      timeout: 3s
-      retries: 3
-
-volumes:
-  zero_cache_data: {}
 ```
 
 ### Maximal Strategy
@@ -309,10 +298,8 @@ services:
       - 5432:5432
     command: postgres -c wal_level=logical
     healthcheck:
-      test: 'pg_isready -U user --dbname=postgres'
+      test: pg_isready -U user --dbname=postgres
       interval: 10s
-      timeout: 5s
-      retries: 5
 
   your_api:
     build: ./your_api
@@ -320,10 +307,36 @@ services:
       - 3000:3000
     environment:
       # your API writes mutations to the database
-      ZERO_UPSTREAM_DB: 'postgres://user:password@upstream_db:5432/zero'
+      ZERO_UPSTREAM_DB: postgres://user:password@upstream_db:5432/zero
     depends_on:
       upstream_db:
         condition: service_healthy
+
+  # "Mini S3" (MinIO) provides a working s3://... `ZERO_LITESTREAM_BACKUP_URL`
+  # This should be an S3-compatible object storage service in production.
+  mini-s3:
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    ports:
+      - 9000:9000 # S3 API
+      - 9001:9001 # Console UI
+    volumes:
+      - s3_data:/data
+    healthcheck:
+      test: curl -f http://localhost:9000/minio/health/live
+      interval: 5s
+
+  # Creates the bucket used by `ZERO_LITESTREAM_BACKUP_URL`
+  # This is only needed for local development.
+  mini-s3-create-bucket:
+    image: minio/mc:latest
+    depends_on:
+      mini-s3:
+        condition: service_healthy
+    entrypoint: ['/bin/sh', '-lc']
+    command: |
+      mc alias set local http://mini-s3:9000 "minioadmin" "minioadmin"
+      mc mb -p local/zero-backups || true
 
   replication-manager:
     # use the replication-manager tag
@@ -335,29 +348,36 @@ services:
         condition: service_healthy
       your_api:
         condition: service_started
+      mini-s3-create-bucket:
+        condition: service_started
     environment:
       # used for replication from postgres
-      ZERO_UPSTREAM_DB: 'postgres://user:password@upstream_db:5432/zero'
-      # path to the SQLite replica
-      ZERO_REPLICA_FILE: '/data/replica.db'
-      # password used to access the inspector and /statz
-      ZERO_ADMIN_PASSWORD: 'pickanewpassword'
+      ZERO_UPSTREAM_DB: postgres://user:password@upstream_db:5432/zero
+      # used for storing client view records
+      ZERO_CVR_DB: postgres://user:password@upstream_db:5432/zero
       # used for storing recent replication log entries
-      ZERO_CHANGE_DB: 'postgres://user:password@upstream_db:5432/zero'
-      # URL for backing up the SQLite replica
-      ZERO_LITESTREAM_BACKUP_URL: 's3://'
+      ZERO_CHANGE_DB: postgres://user:password@upstream_db:5432/zero
+
+      # path to the SQLite replica
+      ZERO_REPLICA_FILE: /data/replica.db
+      # password used to access the inspector and /statz
+      ZERO_ADMIN_PASSWORD: pickanewpassword
+
+      # URL for backing up the SQLite replica (include a simple version number for future cleanup)
+      ZERO_LITESTREAM_BACKUP_URL: s3://zero-backups/litestream-v1
+
+      # S3 creds + Mini S3 endpoint (view-syncers restore from backup on startup)
+      AWS_ACCESS_KEY_ID: minioadmin
+      AWS_SECRET_ACCESS_KEY: minioadmin
+      LITESTREAM_S3_ENDPOINT: http://mini-s3:9000
+      # LITESTREAM_S3_FORCE_PATH_STYLE: true
+      # LITESTREAM_S3_REGION: us-east-1
     volumes:
       # storage for the SQLite replica should be high IOPS
       - replication_data:/data
     healthcheck:
-      test:
-        [
-          'CMD-SHELL',
-          'curl -f http://localhost:4849/ || exit 1'
-        ]
+      test: curl -f http://localhost:4849/keepalive
       interval: 5s
-      timeout: 3s
-      retries: 3
 
   # only one view-syncer in this example, but there can be N
   view-syncer:
@@ -369,29 +389,28 @@ services:
         condition: service_healthy
     environment:
       # path to the SQLite replica
-      ZERO_REPLICA_FILE: '/data/replica.db'
+      ZERO_REPLICA_FILE: /data/replica.db
       # password used to access the inspector and /statz
-      ZERO_ADMIN_PASSWORD: 'pickanewpassword'
+      ZERO_ADMIN_PASSWORD: pickanewpassword
       # URLs for your API's query and mutate endpoints
-      ZERO_QUERY_URL: 'http://your_api:3000/api/zero/query'
-      ZERO_MUTATE_URL: 'http://your_api:3000/api/zero/mutate'
+      ZERO_QUERY_URL: http://your_api:3000/api/zero/query
+      ZERO_MUTATE_URL: http://your_api:3000/api/zero/mutate
+
       # URL for connecting to the replication-manager
-      ZERO_CHANGE_STREAMER_URI: 'http://replication-manager:4849'
+      ZERO_CHANGE_STREAMER_URI: http://replication-manager:4849
+
+      # S3 creds + Mini S3 endpoint (view-syncers restore from backup on startup)
+      AWS_ACCESS_KEY_ID: minioadmin
+      AWS_SECRET_ACCESS_KEY: minioadmin
+      LITESTREAM_S3_ENDPOINT: http://mini-s3:9000
+      # LITESTREAM_S3_FORCE_PATH_STYLE: true
+      # LITESTREAM_S3_REGION: us-east-1
     volumes:
+      # storage for the SQLite replica should be high IOPS
       - view_syncer_data:/data
     healthcheck:
-      test:
-        [
-          'CMD-SHELL',
-          'curl -f http://localhost:4848/ || exit 1'
-        ]
+      test: curl -f http://localhost:4848/keepalive
       interval: 5s
-      timeout: 3s
-      retries: 3
-
-volumes:
-  view_syncer_data: {}
-  replication_data: {}
 ```
 
 #### Scaling

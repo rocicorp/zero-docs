@@ -918,9 +918,15 @@ Use the Zero Postgres adapters to create a `dbProvider` instance:
 ```ts
 // app/api/mutate/db-provider.ts
 import {zeroDrizzle} from '@rocicorp/zero/server/adapters/drizzle'
+import {drizzle} from 'drizzle-orm/node-postgres'
+import {Pool} from 'pg'
 import {schema} from '../../zero/schema.ts'
+import {drizzleSchema} from '../../drizzle/schema.ts'
 
 // pass a drizzle client instance. for example:
+const pool = new Pool({
+  connectionString: process.env.ZERO_UPSTREAM_DB as string
+})
 export const drizzleClient = drizzle(pool, {
   schema: drizzleSchema
 })

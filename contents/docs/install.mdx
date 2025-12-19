@@ -728,6 +728,7 @@ You can now call mutators via `zero.mutate`:
 // mycomponent.tsx
 import {useZero} from '@rocicorp/zero/react'
 import {mutators} from './zero/mutators.ts'
+import { nanoid } from 'nanoid'
 
 function MyComponent() {
   const zero = useZero()
@@ -735,7 +736,7 @@ function MyComponent() {
   const onClick = async () => {
     const result = zero.mutate(
       mutators.albums.create({
-        id: 'album_6',
+        id: nanoid(),
         artistID: 'artist_1',
         title: 'Please Please Me',
         year: 1963,
@@ -763,6 +764,7 @@ function MyComponent() {
 // mycomponent.tsx
 import {useZero} from '@rocicorp/zero/solid'
 import {mutators} from './zero/mutators.ts'
+import { nanoid } from 'nanoid'
 
 function MyComponent() {
   const zero = useZero()
@@ -770,7 +772,7 @@ function MyComponent() {
   const onClick = async () => {
     const result = zero().mutate(
       mutators.albums.create({
-        id: 'album_6',
+        id: nanoid(),
         artistID: 'artist_1',
         title: 'Please Please Me',
         year: 1963,
@@ -797,10 +799,11 @@ function MyComponent() {
 // albums.ts
 import {zero} from './zero.ts'
 import {mutators} from './zero/mutators.ts'
+import { nanoid } from 'nanoid'
 
 const result = await zero.mutate(
   mutators.albums.create({
-    id: 'album_6',
+    id: nanoid(),
     artistID: 'artist_1',
     title: 'Please Please Me',
     year: 1963,
@@ -820,6 +823,10 @@ if (clientResult.type === 'error') {
 ```
 
 </CodeGroup>
+
+<Note heading="Client-generated random IDs recommended" emoji="🎲">
+  Client-generated random IDs from libraries like [uuid](https://www.npmjs.com/package/uuid), [ulid](https://www.npmjs.com/package/ulid), or [nanoid](https://www.npmjs.com/package/nanoid) work much better with sync engines like Zero. See [IDs](/docs/postgres-support#ids) for more details.
+</Note>
 
 If you run this app now, you should be able to see the UI update optimistically, but you'll also see an error in zero-cache:
 

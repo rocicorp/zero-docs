@@ -154,131 +154,99 @@ services:
 Once you reach the limits of the single-node deployment, you can split zero-cache into a multi-node topology. This is more expensive to run, but it gives you more flexibility and scalability.
 
 ```json
-┌──────────────────────────────────────────────────────────────────────────┐
-│                              Client Layer                                 │
-│  ┌───────────┐  ┌───────────┐  ┌───────────┐  ┌───────────┐            │
-│  │ Browser 1 │  │ Browser 2 │  │ Browser 3 │  │ Browser N │            │
-│  └───────────┘  └───────────┘  └───────────┘  └───────────┘            │
-│        │              │              │              │                    │
-│        │ WebSocket    │ WebSocket    │ WebSocket    │ WebSocket         │
-│        └──────────────┴──────────────┴──────────────┘                    │
-└───────────────────────────────────────┬──────────────────────────────────┘
-                                        │
-                                        ↓
-                            ┌───────────────────────┐
-                            │   Load Balancer       │
-                            └───────────────────────┘
-                                        │
-                    ┌───────────────────┼───────────────────┐
-                    ↓                   ↓                   ↓
-┌──────────────────────────┐ ┌──────────────────────┐ ┌──────────────────────┐
-│ View-Syncer Node 1       │ │ View-Syncer Node 2   │ │ View-Syncer Node N   │
-│ Port 4848                │ │ Port 4848            │ │ Port 4848            │
-│                          │ │                      │ │                      │
-│ ┌──────────────────────┐ │ │ ┌──────────────────┐│ │ ┌──────────────────┐ │
-│ │ Syncer Workers       │ │ │ │ Syncer Workers   ││ │ │ Syncer Workers   │ │
-│ │ (M = cores - 1)      │ │ │ │ (M = cores - 1)  ││ │ │ (M = cores - 1)  │ │
-│ │ - Serve client conns │ │ │ │ - Serve clients  ││ │ │ - Serve clients  │ │
-│ │ - Compute diffs ─────┼─┼─┼─┼──────────────────┼┼─┼─┼──────────────────┼─┼─┐
-│ │ - Forward mutations ─┼─┼─┼─┼──────────────────┼┼─┼─┼──────────────────┼─┼─┼─┐
-│ └──────────────────────┘ │ │ └──────────────────┘│ │ └──────────────────┘ │ │ │
-│          ↑               │ │          ↑          │ │          ↑           │ │ │
-│ ┌──────────────────────┐ │ │ ┌──────────────────┐│ │ ┌──────────────────┐ │ │ │
-│ │ Replicator           │ │ │ │ Replicator       ││ │ │ Replicator       │ │ │ │
-│ │ - Subscribe to       │ │ │ │ - Subscribe to   ││ │ │ - Subscribe to   │ │ │ │
-│ │   repl-manager WS    │ │ │ │   repl-mgr WS    ││ │ │   repl-mgr WS    │ │ │ │
-│ │ - Write to SQLite    │ │ │ │ - Write to SQLite││ │ │ - Write to SQLite│ │ │ │
-│ └──────────────────────┘ │ │ └──────────────────┘│ │ └──────────────────┘ │ │ │
-│          ↑               │ │          ↑          │ │          ↑           │ │ │
-│ ┌──────────────────────┐ │ │ ┌──────────────────┐│ │ ┌──────────────────┐ │ │ │
-│ │ SQLite Replica       │ │ │ │ SQLite Replica   ││ │ │ SQLite Replica   │ │ │ │
-│ │ (ephemeral)          │ │ │ │ (ephemeral)      ││ │ │ (ephemeral)      │ │ │ │
-│ │ Restored from S3     │ │ │ │ Restored from S3 ││ │ │ Restored from S3 │ │ │ │
-│ └──────────────────────┘ │ │ └──────────────────┘│ │ └──────────────────┘ │ │ │
-│                          │ │                      │ │                      │ │ │
-│ ┌──────────────────────┐ │ │ ┌──────────────────┐│ │ ┌──────────────────┐ │ │ │
-│ │ Reaper (CVR GC)      │ │ │ │ Reaper (CVR GC)  ││ │ │ Reaper (CVR GC)  │ │ │ │
-│ └──────────────────────┘ │ │ └──────────────────┘│ │ └──────────────────┘ │ │ │
-└──────────────────────────┘ └──────────────────────┘ └──────────────────────┘ │ │
-            │                           │                           │           │ │
-            │ WebSocket                 │ WebSocket                 │ WebSocket │ │
-            └───────────────────────────┴───────────────────────────┘           │ │
-                                        ↓                                        │ │
-┌──────────────────────────────────────────────────────────────────────────────┐│ │
-│                    Replication-Manager (Single Instance)                      ││ │
-│                                                                               ││ │
-│  ┌─────────────────────────────────────────────────────────────────────────┐││ │
-│  │ change-streamer                                         Port 4849        │││ │
-│  │  - Consumes Postgres replication slot                                   │││ │
-│  │  - Writes to Change DB                                                  │││ │
-│  │  - Serves N view-syncers via WebSocket                                  │││ │
-│  │  - Coordinates change-log cleanup                                       │││ │
-│  └─────────────────────────────────────────────────────────────────────────┘││ │
-│                                                                               ││ │
-│  ┌─────────────────────────────────────────────────────────────────────────┐││ │
-│  │ backup replicator                                                        │││ │
-│  │  - Keeps SQLite replica current for litestream                          │││ │
-│  └─────────────────────────────────────────────────────────────────────────┘││ │
-│                                   ↓                                          ││ │
-│  ┌─────────────────────────────────────────────────────────────────────────┐││ │
-│  │ SQLite Backup Replica (zero.db)                                          │││ │
-│  └─────────────────────────────────────────────────────────────────────────┘││ │
-│                                   ↓                                          ││ │
-│  ┌─────────────────────────────────────────────────────────────────────────┐││ │
-│  │ litestream                                              Port 4850        │││ │
-│  │  - Backs up SQLite to object storage                                    │││ │
-│  │  - Creates incremental snapshots                                        │││ │
-│  │  - Exports Prometheus metrics                                           │││ │
-│  └─────────────────────────────────────────────────────────────────────────┘││ │
-└───────────────────────────────────────────────────────────────────────────────┘│ │
-                                  ↓                                             │ │
-┌──────────────────────────────────────────────────────────────────────────────┐│ │
-│                     Object Storage (S3-compatible)                            ││ │
-│                                                                               ││ │
-│  s3://my-bucket/zero/                                                         ││ │
-│    ├── snapshots/                                                             ││ │
-│    │   ├── 00000001/zero.db                                                   ││ │
-│    │   └── 00000050/zero.db                                                   ││ │
-│    └── wal/                                                                   ││ │
-│        ├── 00000001-00000010.wal                                              ││ │
-│        └── 00000041-00000050.wal                                              ││ │
-│                                                                               ││ │
-│  View-syncers restore from here on startup                                   ││ │
-└───────────────────────────────────────────────────────────────────────────────┘│ │
-                                                                                │ │
-                                                          HTTP POST              │ │
-                                                          (mutations)            │ │
-                                                                    HTTP POST   │ │
-                                                                    (queries)   │ │
-                                                                          ↓ ↓   │ │
-┌──────────────────────────────────────────────────────────────────────────────┐│ │
-│                              Your Infrastructure                              ││ │
-│                                                                               ││ │
-│  ┌─────────────────────────────────────┐  ┌─────────────────────────────┐   ││ │
-│  │  Postgres Cluster                   │  │  Your API Servers           │   ││ │
-│  │                                     │  │  (horizontally scaled)       │   ││ │
-│  │  ┌──────────────────────────────┐  │  │                              │   ││ │
-│  │  │ Primary (read-write)         │  │  │  POST /api/mutate            │◄──┼┼─┘
-│  │  │                              │  │  │  - Auth & validation         │   ││
-│  │  │  Your Schemas:               │  │  │  - Business logic            │   ││
-│  │  │  - public.users              │  │  │  - Writes to Postgres        │   ││
-│  │  │  - public.posts              │◄─┼──┼─                             │   ││
-│  │  │  - public.comments           │  │  │  POST /api/query             │◄──┼┘
-│  │  │  - ...                       │  │  │  - Transform queries         │   │
-│  │  │                              │  │  │  - Add custom data           │   │
-│  │  │  Zero Metadata Schemas:      │  │  │  - Auth checks               │   │
-│  │  │  - zero_0                    │  │  └─────────────────────────────┘   │
-│  │  │  - zero_0/cvr (CVR DB)       │  │                                     │
-│  │  │  - zero_0/cdc (Change DB)    │  │                                     │
-│  │  │                              │  │                                     │
-│  │  │  Replication Slot: zero_0    │  │                                     │
-│  │  └──────────────────────────────┘  │                                     │
-│  │            ↓                        │                                     │
-│  │  ┌──────────────────────────────┐  │                                     │
-│  │  │ Replicas (read-only)         │  │                                     │
-│  │  └──────────────────────────────┘  │                                     │
-│  └─────────────────────────────────────┘                                     │
-└───────────────────────────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────────────────┐
+  │                                  Clients                                     │
+  │  Browsers connect via WebSocket                                               │
+  └──────────────────────────────────────────────────────────────────────────────┘
+  │
+  ▼
+  ┌──────────────────────┐
+  │   Load Balancer      │
+  └──────────────────────┘
+  │
+  ┌─────────────────────┼─────────────────────┐
+  ▼                     ▼                     ▼
+  ┌──────────────────────────┐ ┌──────────────────────────┐ ┌──────────────────────────┐
+  │ View‑Syncer Cluster A     │ │ View‑Syncer Cluster B     │ │ View‑Syncer Cluster N     │
+  │ (ports configurable)      │ │ (ports configurable)      │ │ (ports configurable)      │
+  │                           │ │                           │ │                           │
+  │  ┌─────────────────────┐  │ │  ┌─────────────────────┐  │ │  ┌─────────────────────┐  │
+  │  │ Syncer workers       │  │ │  │ Syncer workers       │  │ │  │ Syncer workers       │  │
+  │  │ (ZERO_NUM_SYNC_)    │  │ │  │ (ZERO_NUM_SYNC_)    │  │ │  │ (ZERO_NUM_SYNC_*)    │  │
+  │  │ - Serve WS clients   │  │ │  │ - Serve WS clients   │  │ │  │ - Serve WS clients   │  │
+  │  │ - IVM + CVR updates  │  │ │  │ - IVM + CVR updates  │  │ │  │ - IVM + CVR updates  │  │
+  │  │ - Forward mutations  │  │ │  │ - Forward mutations  │  │ │  │ - Forward mutations  │  │
+  │  └─────────────────────┘  │ │  └─────────────────────┘  │ │  └─────────────────────┘  │
+  │  │ Replicator           │  │ │  │ Replicator           │  │ │  │ Replicator           │  │
+  │  │ - Subscribes to       │  │ │  │ - Subscribes to       │  │ │  │ - Subscribes to       │  │
+  │  │   replication‑mgr WS │  │ │  │   replication‑mgr WS │  │ │  │   replication‑mgr WS │  │
+  │  │ - Writes to SQLite   │  │ │  │ - Writes to SQLite   │  │ │  │ - Writes to SQLite   │  │
+  │  └─────────────────────┘  │ │  └─────────────────────┘  │ │  └─────────────────────┘  │
+  │            ▲               │ │            ▲               │ │            ▲               │
+  │  ┌─────────────────────┐  │ │  ┌─────────────────────┐  │ │  ┌─────────────────────┐  │
+  │  │ SQLite replica       │  │ │  │ SQLite replica       │  │ │  │ SQLite replica       │  │
+  │  │ (local disk;         │  │ │  │ (local disk;         │  │ │  │ (local disk;         │  │
+  │  │  restore from S3 if  │  │ │  │  restore from S3 if  │  │ │  │  restore from S3 if  │  │
+  │  │  empty)              │  │ │  │  empty)              │  │ │  │  empty)              │  │
+  │  └─────────────────────┘  │ │  └─────────────────────┘  │ │  └─────────────────────┘  │
+  │                           │ │                           │ │                           │
+  │  ┌─────────────────────┐  │ │  ┌─────────────────────┐  │ │  ┌─────────────────────┐  │
+  │  │ CVR DB (local PG)    │  │ │  │ CVR DB (local PG)    │  │ │  │ CVR DB (local PG)    │  │
+  │  └─────────────────────┘  │ │  └─────────────────────┘  │ │  └─────────────────────┘  │
+  │  ┌─────────────────────┐  │ │  ┌─────────────────────┐  │ │  ┌─────────────────────┐  │
+  │  │ Reaper (CVR GC)      │  │ │  │ Reaper (CVR GC)      │  │ │  │ Reaper (CVR GC)      │  │
+  │  └─────────────────────┘  │ │  └─────────────────────┘  │ │  └─────────────────────┘  │
+  └──────────────────────────┘ └──────────────────────────┘ └──────────────────────────┘
+  │                     │                     │
+  └────────── WS (changes/snapshot) ──────────┘
+  ▼
+  ┌──────────────────────────────────────────────────────────────────────────────┐
+  │                    Replication‑Manager (single logical instance)              │
+  │  (ports configurable)                                                         │
+  │                                                                              │
+  │  ┌─────────────────────────────────────────────────────────────────────────┐ │
+  │  │ Change‑streamer                                                          │ │
+  │  │ - Consumes upstream replication slot                                     │ │
+  │  │ - Writes to Change DB (local PG)                                         │ │
+  │  │ - Serves view‑syncers via WebSocket                                      │ │
+  │  │ - Coordinates change‑log cleanup                                         │ │
+  │  └─────────────────────────────────────────────────────────────────────────┘ │
+  │                                                                              │
+  │  ┌─────────────────────────────────────────────────────────────────────────┐ │
+  │  │ Backup replicator                                                        │ │
+  │  │ - Keeps SQLite replica current for litestream                            │ │
+  │  └─────────────────────────────────────────────────────────────────────────┘ │
+  │                   ▼                                                           │
+  │  ┌─────────────────────────────────────────────────────────────────────────┐ │
+  │  │ SQLite backup replica (zero.db)                                           │ │
+  │  └─────────────────────────────────────────────────────────────────────────┘ │
+  │                   ▼                                                           │
+  │  ┌─────────────────────────────────────────────────────────────────────────┐ │
+  │  │ Litestream                                                               │ │
+  │  │ - Backs up SQLite to object storage                                       │ │
+  │  │ - Exports metrics                                                        │ │
+  │  └─────────────────────────────────────────────────────────────────────────┘ │
+  └──────────────────────────────────────────────────────────────────────────────┘
+  ▼
+  ┌──────────────────────────────────────────────────────────────────────────────┐
+  │                     Object Storage (S3‑compatible)                           │
+  │  snapshots/ + wal/                                                           │
+  └──────────────────────────────────────────────────────────────────────────────┘
+
+                                          ▼
+
+  ┌──────────────────────────────────────────────────────────────────────────────┐
+  │                          Your Infrastructure                                 │
+  │                                                                              │
+  │  ┌────────────────────────────────────┐   ┌──────────────────────────────┐   │
+  │  │ Primary Postgres (RW)              │   │ API Servers                   │   │
+  │  │ - app schemas (public.*)           │   │ - POST /api/mutate             │   │
+  │  │ - upstream metadata schema         │◄──┤ - POST /api/query              │   │
+  │  │   ({appID}_{shard}: clients,       │   │   (custom query transform)     │   │
+  │  │    mutations, permissions)         │   └──────────────────────────────┘   │
+  │  │ - replication slot(s)              │                                     │
+  │  └────────────────────────────────────┘                                     │
+  └──────────────────────────────────────────────────────────────────────────────┘
 ```
 
 Here is an example `docker-compose.yml` file for a multi-node deployment  ([try it out!](https://github.com/rocicorp/onboarding/tree/2-deploy/docker-compose.multi-node.yml)):

@@ -351,6 +351,7 @@ html.dark [data-theme~='roci-dark'] code span {
 
 .prose pre code {
   display: grid;
+  max-height: 630px;
   max-width: inherit !important;
   padding: 14px !important;
   font-variant-ligatures: none;
@@ -358,7 +359,7 @@ html.dark [data-theme~='roci-dark'] code span {
     'liga' 0,
     'clig' 0,
     'calt' 0;
-  overflow-x: auto;
+  overflow: auto;
 }
 
 .code-group-content figure {

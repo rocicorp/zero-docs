@@ -856,14 +856,13 @@ if (clientResult.type === 'error') {
 </CodeGroup>
 
 <Note
-  heading="Client-generated random IDs recommended"
-  emoji="🎲"
+  heading="Client-generated IDs strongly recommended"
+  type="warning"
 >
-  Client-generated random IDs from libraries like
+  Client-generated random IDs (from libraries like
   [uuid](https://www.npmjs.com/package/uuid),
   [ulid](https://www.npmjs.com/package/ulid), or
-  [nanoid](https://www.npmjs.com/package/nanoid) work much
-  better with sync engines like Zero. See
+  [nanoid](https://www.npmjs.com/package/nanoid)) work much better than auto-incrementing integers in all sync engines, including Zero. See
   [IDs](/docs/postgres-support#ids) for more details.
 </Note>
 

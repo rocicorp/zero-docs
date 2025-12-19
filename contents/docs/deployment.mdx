@@ -97,7 +97,7 @@ The simplest way to deploy Zero is to run everything on a single node. This is t
 └──────────────────────────────────────────────────────────────────────────┘
 ```
 
-Here is an example `docker-compose.yml` file for a single-node deployment ([try it out!](https://github.com/rocicorp/onboarding/blob/maximal/docker-compose.single-node.yml)):
+Here is an example `docker-compose.yml` file for a single-node deployment ([try it out!](https://github.com/rocicorp/onboarding/tree/2-deploy/docker-compose.single-node.yml)):
 
 ```yaml
 services:
@@ -114,8 +114,8 @@ services:
       test: pg_isready -U user --dbname=postgres
       interval: 10s
 
-  api:
-    build: ./api
+  your_api:
+    build: ./your_api
     ports:
       - 3000:3000
     environment:
@@ -137,15 +137,15 @@ services:
       # password used to access the inspector and /statz
       ZERO_ADMIN_PASSWORD: pickanewpassword
       # URLs for your API's query and mutate endpoints
-      ZERO_QUERY_URL: http://api:3000/api/zero/query
-      ZERO_MUTATE_URL: http://api:3000/api/zero/mutate
+      ZERO_QUERY_URL: http://your_api:3000/api/zero/query
+      ZERO_MUTATE_URL: http://your_api:3000/api/zero/mutate
     volumes:
       # disk for the SQLite replica should be high IOPS
-      - zero_cache_data:/data
+      - zero-cache-data:/data
     depends_on:
       upstream_db:
         condition: service_healthy
-      api:
+      your_api:
         condition: service_started
     healthcheck:
       test: curl -f http://localhost:4848/keepalive
@@ -284,7 +284,7 @@ Once you reach the limits of the single-node deployment, you can split zero-cach
 └───────────────────────────────────────────────────────────────────────────────┘
 ```
 
-Here is an example `docker-compose.yml` file for a multi-node deployment:
+Here is an example `docker-compose.yml` file for a multi-node deployment  ([try it out!](https://github.com/rocicorp/onboarding/tree/2-deploy/docker-compose.multi-node.yml)):
 
 ```yaml
 services:
@@ -306,7 +306,7 @@ services:
     ports:
       - 3000:3000
     environment:
-      # your API writes mutations to the database
+      # your API handles mutations and writes to the PG db
       ZERO_UPSTREAM_DB: postgres://user:password@upstream_db:5432/zero
     depends_on:
       upstream_db:
@@ -317,11 +317,6 @@ services:
   mini-s3:
     image: minio/minio:latest
     command: server /data --console-address ":9001"
-    ports:
-      - 9000:9000 # S3 API
-      - 9001:9001 # Console UI
-    volumes:
-      - s3_data:/data
     healthcheck:
       test: curl -f http://localhost:9000/minio/health/live
       interval: 5s
@@ -333,10 +328,11 @@ services:
     depends_on:
       mini-s3:
         condition: service_healthy
-    entrypoint: ['/bin/sh', '-lc']
-    command: |
-      mc alias set local http://mini-s3:9000 "minioadmin" "minioadmin"
-      mc mb -p local/zero-backups || true
+    entrypoint:
+      - /bin/sh
+      - -lc
+      - mc alias set local http://mini-s3:9000 "minioadmin" "minioadmin" &&
+        mc mb -p local/zero-backups || true
 
   replication-manager:
     # use the replication-manager tag
@@ -363,16 +359,17 @@ services:
       # password used to access the inspector and /statz
       ZERO_ADMIN_PASSWORD: pickanewpassword
 
-      # URL for backing up the SQLite replica (include a simple version number for future cleanup)
-      ZERO_LITESTREAM_BACKUP_URL: s3://zero-backups/litestream-v1
+      # URL for backing up the SQLite replica
+      # (include a simple version number for future cleanup)
+      ZERO_LITESTREAM_BACKUP_URL: s3://zero-backups/replica-v1
 
-      # S3 creds + Mini S3 endpoint (view-syncers restore from backup on startup)
+      # S3 creds + Mini S3 endpoint (replication-manager backs up to S3)
       AWS_ACCESS_KEY_ID: minioadmin
       AWS_SECRET_ACCESS_KEY: minioadmin
       ZERO_LITESTREAM_ENDPOINT: http://mini-s3:9000
     volumes:
       # storage for the SQLite replica should be high IOPS
-      - replication_data:/data
+      - replication-manager-data:/data
     healthcheck:
       test: curl -f http://localhost:4849/keepalive
       interval: 5s
@@ -386,6 +383,13 @@ services:
       replication-manager:
         condition: service_healthy
     environment:
+      # used for replication from postgres
+      ZERO_UPSTREAM_DB: postgres://user:password@upstream_db:5432/zero
+      # used for storing client view records
+      ZERO_CVR_DB: postgres://user:password@upstream_db:5432/zero
+      # used for storing recent replication log entries
+      ZERO_CHANGE_DB: postgres://user:password@upstream_db:5432/zero
+
       # path to the SQLite replica
       ZERO_REPLICA_FILE: /data/replica.db
       # password used to access the inspector and /statz
@@ -397,15 +401,13 @@ services:
       # URL for connecting to the replication-manager
       ZERO_CHANGE_STREAMER_URI: http://replication-manager:4849
 
-      # S3 creds + Mini S3 endpoint (view-syncers restore from backup on startup)
+      # S3 creds + Mini S3 endpoint (view-syncers restore from S3 on startup)
       AWS_ACCESS_KEY_ID: minioadmin
       AWS_SECRET_ACCESS_KEY: minioadmin
-      LITESTREAM_S3_ENDPOINT: http://mini-s3:9000
-      # LITESTREAM_S3_FORCE_PATH_STYLE: true
-      # LITESTREAM_S3_REGION: us-east-1
+      ZERO_LITESTREAM_ENDPOINT: http://mini-s3:9000
     volumes:
       # storage for the SQLite replica should be high IOPS
-      - view_syncer_data:/data
+      - view-syncer-data:/data
     healthcheck:
       test: curl -f http://localhost:4848/keepalive
       interval: 5s

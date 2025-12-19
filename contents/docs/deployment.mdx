@@ -101,28 +101,27 @@ Here is an example `docker-compose.yml` file for a single-node deployment ([try 
 
 ```yaml
 services:
-  upstream_db:
+  upstream-db:
     image: postgres:18
     environment:
       POSTGRES_DB: zero
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
+      POSTGRES_PASSWORD: pass
     ports:
       - 5432:5432
     command: postgres -c wal_level=logical
     healthcheck:
-      test: pg_isready -U user --dbname=postgres
+      test: pg_isready
       interval: 10s
 
-  your_api:
-    build: ./your_api
+  your-api:
+    build: ./your-api
     ports:
       - 3000:3000
     environment:
       # your API handles mutations and writes to the PG db
-      ZERO_UPSTREAM_DB: postgres://user:password@upstream_db:5432/zero
+      ZERO_UPSTREAM_DB: postgres://postgres:pass@upstream-db:5432/zero
     depends_on:
-      upstream_db:
+      upstream-db:
         condition: service_healthy
 
   zero-cache:
@@ -131,21 +130,19 @@ services:
       - 4848:4848
     environment:
       # used for replication from postgres
-      ZERO_UPSTREAM_DB: postgres://user:password@upstream_db:5432/zero
+      ZERO_UPSTREAM_DB: postgres://postgres:pass@upstream-db:5432/zero
       # path to the SQLite replica
       ZERO_REPLICA_FILE: /data/zero.db
       # password used to access the inspector and /statz
       ZERO_ADMIN_PASSWORD: pickanewpassword
       # URLs for your API's query and mutate endpoints
-      ZERO_QUERY_URL: http://your_api:3000/api/zero/query
-      ZERO_MUTATE_URL: http://your_api:3000/api/zero/mutate
+      ZERO_QUERY_URL: http://your-api:3000/api/zero/query
+      ZERO_MUTATE_URL: http://your-api:3000/api/zero/mutate
     volumes:
       # disk for the SQLite replica should be high IOPS
       - zero-cache-data:/data
     depends_on:
-      upstream_db:
-        condition: service_healthy
-      your_api:
+      your-api:
         condition: service_started
     healthcheck:
       test: curl -f http://localhost:4848/keepalive
@@ -288,28 +285,27 @@ Here is an example `docker-compose.yml` file for a multi-node deployment  ([try 
 
 ```yaml
 services:
-  upstream_db:
+  upstream-db:
     image: postgres:18
     environment:
       POSTGRES_DB: zero
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
+      POSTGRES_PASSWORD: pass
     ports:
       - 5432:5432
     command: postgres -c wal_level=logical
     healthcheck:
-      test: pg_isready -U user --dbname=postgres
+      test: pg_isready
       interval: 10s
 
-  your_api:
-    build: ./your_api
+  your-api:
+    build: ./your-api
     ports:
       - 3000:3000
     environment:
       # your API handles mutations and writes to the PG db
-      ZERO_UPSTREAM_DB: postgres://user:password@upstream_db:5432/zero
+      ZERO_UPSTREAM_DB: postgres://postgres:pass@upstream-db:5432/zero
     depends_on:
-      upstream_db:
+      upstream-db:
         condition: service_healthy
 
   # "Mini S3" (MinIO) provides a working s3://... `ZERO_LITESTREAM_BACKUP_URL`
@@ -340,19 +336,19 @@ services:
     ports:
       - 4849:4849
     depends_on:
-      upstream_db:
+      upstream-db:
         condition: service_healthy
-      your_api:
+      your-api:
         condition: service_started
       mini-s3-create-bucket:
         condition: service_started
     environment:
       # used for replication from postgres
-      ZERO_UPSTREAM_DB: postgres://user:password@upstream_db:5432/zero
+      ZERO_UPSTREAM_DB: postgres://postgres:pass@upstream-db:5432/zero
       # used for storing client view records
-      ZERO_CVR_DB: postgres://user:password@upstream_db:5432/zero
+      ZERO_CVR_DB: postgres://postgres:pass@upstream-db:5432/zero
       # used for storing recent replication log entries
-      ZERO_CHANGE_DB: postgres://user:password@upstream_db:5432/zero
+      ZERO_CHANGE_DB: postgres://postgres:pass@upstream-db:5432/zero
 
       # path to the SQLite replica
       ZERO_REPLICA_FILE: /data/replica.db
@@ -384,19 +380,19 @@ services:
         condition: service_healthy
     environment:
       # used for replication from postgres
-      ZERO_UPSTREAM_DB: postgres://user:password@upstream_db:5432/zero
+      ZERO_UPSTREAM_DB: postgres://postgres:pass@upstream-db:5432/zero
       # used for storing client view records
-      ZERO_CVR_DB: postgres://user:password@upstream_db:5432/zero
+      ZERO_CVR_DB: postgres://postgres:pass@upstream-db:5432/zero
       # used for storing recent replication log entries
-      ZERO_CHANGE_DB: postgres://user:password@upstream_db:5432/zero
+      ZERO_CHANGE_DB: postgres://postgres:pass@upstream-db:5432/zero
 
       # path to the SQLite replica
       ZERO_REPLICA_FILE: /data/replica.db
       # password used to access the inspector and /statz
       ZERO_ADMIN_PASSWORD: pickanewpassword
       # URLs for your API's query and mutate endpoints
-      ZERO_QUERY_URL: http://your_api:3000/api/zero/query
-      ZERO_MUTATE_URL: http://your_api:3000/api/zero/mutate
+      ZERO_QUERY_URL: http://your-api:3000/api/zero/query
+      ZERO_MUTATE_URL: http://your-api:3000/api/zero/mutate
 
       # URL for connecting to the replication-manager
       ZERO_CHANGE_STREAMER_URI: http://replication-manager:4849

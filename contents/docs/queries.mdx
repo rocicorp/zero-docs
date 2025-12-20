@@ -76,26 +76,27 @@ const allPostsQueryDef = defineQuery(() => zql.post)
 
 ### Arguments
 
-The `QueryFn` can take a single `args` parameter of any type, and can use arbitrary logic to compute the ZQL expression from those parameters.
+The `QueryFn` can take a single `args` parameter. To enable this, pass a _validator_ to `defineQuery`:
 
 ```ts
 import {zql} from 'schema.ts'
 
-const postsByAuthor = defineQuery<{
-  authorID: string | undefined
-}>(({args: {authorID}}) => {
-  let q = zql.post
-  if (args.authorID !== undefined) {
-    q = q.where('authorID', args.authorID)
+const postsByAuthor = defineQuery(
+  z.object({authorID: z.string().optional()}),
+  ({args: {authorID}}) => {
+    let q = zql.post
+    if (authorID !== undefined) {
+      q = q.where('authorID', authorID)
+    }
+    return q
   }
-  return q
-})
+)
 ```
 
-<Note emoji="😈" heading="Queries don't have to be pure" slug="purity">
-It's most common to compute the ZQL expression using only the arguments. But it's not *required*.
+We use [Zod](https://zod.dev/) in these examples, but you can use any validation library that implements [Standard Schema](https://standardschema.dev/).
 
-Impure queries can be useful, e.g., to consult some external system on the server for authorization or validation.
+<Note heading="Why validators are required" slug="validators-required">
+Zero queries run on both the client and [on your server](#server-setup). In the server case, the parameters come from the client and are untrusted. The validator ensures the data passed to your query is of the expected type.
 
 </Note>
 
@@ -138,34 +139,6 @@ Each `Query` has a `queryName` which is computed by `defineQueries`. This name i
 console.log(queries.posts.all.queryName)
 // "posts.all"
 ```
-
-### Validators
-
-You can optionally pass a _validator_ to `defineQuery` as the first argument:
-
-```ts
-import {zql} from 'schema.ts'
-
-const postsByAuthor = defineQuery(
-  z.object({authorID: z.string().optional()}),
-  ({args: {authorID}}) => {
-    let q = zql.post
-    if (authorID !== undefined) {
-      q = q.where('authorID', authorID)
-    }
-    return q
-  }
-)
-```
-
-We use [Zod](https://zod.dev/) in these examples, but you can use any validation library that implements [Standard Schema](https://standardschema.dev/).
-
-<Note type="warning" emoji="⚠️" heading="Always use validation in production">
-Although validators are *technically* optional, you should consider them required.
-
-This is because Zero queries run on both the client and [on your server](#server-setup). In the server case, the parameters come from the client and are untrusted. These inputs are validated using the validator you provide.
-
-</Note>
 
 ### Context
 

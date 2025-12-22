@@ -68,6 +68,12 @@ export function CodeGroupProvider({
     () => initialSync ?? {},
   );
 
+  useEffect(() => {
+    if (initialSync && Object.keys(initialSync).length > 0) {
+      setSelection(prev => ({...prev, ...initialSync}));
+    }
+  }, [initialSync]);
+
   const updateSelection = useCallback((partial: CodeGroupSyncMap) => {
     const normalized = normalizeSyncMap(partial);
     if (!Object.keys(normalized).length) return;

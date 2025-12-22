@@ -1,13 +1,11 @@
 import ClientBoundary from '@/components/ClientBoundary';
-import {CodeGroupProvider} from '@/components/code-group-provider';
 import {ThemeProvider} from '@/components/theme-provider';
-import {CODE_GROUP_COOKIE, parseCodeGroupCookie} from '@/lib/code-group-sync';
 import type {Metadata} from 'next';
 import localFont from 'next/font/local';
-import {cookies} from 'next/headers';
 import Script from 'next/script';
 import './globals.css';
 import '@shikijs/twoslash/style-rich.css';
+import {CodeGroupClientWrapper} from '@/components/code-group-provider';
 
 const muoto = localFont({
   src: './fonts/muoto-var.ttf',
@@ -38,17 +36,11 @@ export const metadata: Metadata = {
   description: 'The official documentation for Zero by Rocicorp.',
 };
 
-export const dynamic = 'force-dynamic';
-
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const cookieStore = await cookies();
-  const cookieValue = cookieStore.get(CODE_GROUP_COOKIE);
-  const codeGroupSync = parseCodeGroupCookie(cookieValue?.value ?? null);
-
   return (
     <html lang="en" className="dark" style={{colorScheme: 'dark'}}>
       <body className={`${muoto.variable} ${codeFont.variable} font-regular`}>
@@ -66,12 +58,12 @@ export default async function RootLayout({
           defaultTheme="system"
           enableSystem={true}
         >
-          <CodeGroupProvider initialSync={codeGroupSync}>
+          <CodeGroupClientWrapper>
             <ClientBoundary />
             <main className="sm:container mx-auto w-[88vw] h-auto">
               {children}
             </main>
-          </CodeGroupProvider>
+          </CodeGroupClientWrapper>
         </ThemeProvider>
         <Script
           src="/um.js"

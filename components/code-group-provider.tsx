@@ -1,10 +1,18 @@
 'use client';
 
-import {createContext, useCallback, useContext, useMemo, useState} from 'react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import {
   CODE_GROUP_COOKIE,
   CodeGroupSyncMap,
   normalizeSyncMap,
+  parseCodeGroupCookie,
   serializeCodeGroupCookie,
 } from '@/lib/code-group-sync';
 
@@ -21,6 +29,36 @@ type CodeGroupProviderProps = {
 };
 
 const COOKIE_MAX_AGE = 60 * 60 * 24 * 365; // 1 year
+
+type CodeGroupClientWrapperProps = {
+  children: React.ReactNode;
+};
+
+export function CodeGroupClientWrapper({
+  children,
+}: CodeGroupClientWrapperProps) {
+  const [initialSync, setInitialSync] = useState<CodeGroupSyncMap>({});
+
+  useEffect(() => {
+    // Read cookie on client side after mount
+    if (typeof document !== 'undefined') {
+      const cookies = document.cookie.split(';');
+      const codeGroupCookie = cookies.find(cookie =>
+        cookie.trim().startsWith(`${CODE_GROUP_COOKIE}=`),
+      );
+
+      if (codeGroupCookie) {
+        const value = codeGroupCookie.split('=')[1];
+        const parsed = parseCodeGroupCookie(value);
+        setInitialSync(parsed);
+      }
+    }
+  }, []);
+
+  return (
+    <CodeGroupProvider initialSync={initialSync}>{children}</CodeGroupProvider>
+  );
+}
 
 export function CodeGroupProvider({
   children,

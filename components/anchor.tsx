@@ -37,7 +37,6 @@ export default function Anchor({
         isMatch && activeClassName,
         'transition duration-75 ease-out',
       )}
-      prefetch={true}
       {...props}
     >
       {children}

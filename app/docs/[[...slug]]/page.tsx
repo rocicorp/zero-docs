@@ -4,6 +4,7 @@ import {notFound} from 'next/navigation';
 import {getDocsForSlug, getDocsTocs, getPreviousNext} from '@/lib/mdx';
 import {Typography} from '@/components/typography';
 import CopyContent from '@/components/ui/copy-content';
+import {getAllPageSlugs} from '@/lib/get-slugs';
 
 type PageProps = {params: Promise<{slug: string[]}>};
 
@@ -88,4 +89,8 @@ export async function generateMetadata({params}: PageProps) {
       images: ogImageUrl,
     },
   };
+}
+
+export function generateStaticParams() {
+  return getAllPageSlugs();
 }

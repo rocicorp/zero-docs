@@ -9,10 +9,11 @@ import {
   useRef,
   useState,
 } from 'react';
-import clsx from 'clsx';
 import * as Tabs from '@radix-ui/react-tabs';
 import {useCodeGroupSync} from '@/components/code-group-provider';
 import {CodeGroupSyncMap, normalizeSyncMap} from '@/lib/code-group-sync';
+import {cn} from '@/lib/utils';
+import clsx from 'clsx';
 
 type CodeGroupLabel = {
   text: string;
@@ -104,7 +105,7 @@ export default function CodeGroup({
     return codeBlocks.map((_, index) => normalizeLabel(labels[index], index));
   }, [codeBlocks, labels]);
 
-  const {selection, updateSelection} = useCodeGroupSync();
+  const {selection, updateSelection, state} = useCodeGroupSync();
 
   const initialMatchRef = useRef<number | null>(null);
   if (initialMatchRef.current === null) {
@@ -162,7 +163,7 @@ export default function CodeGroup({
 
   return (
     <Tabs.Root
-      className="code-group my-6"
+      className={cn('code-group my-6', state === 'loading' && 'blur-[3px]')}
       value={String(activeIndex)}
       onValueChange={value => handleSelect(Number(value))}
       data-active-label={activeLabel?.text ?? ''}
@@ -172,8 +173,9 @@ export default function CodeGroup({
           <Tabs.Trigger
             key={`${text}-${index}`}
             value={String(index)}
+            disabled={state === 'loading'}
             className={clsx(
-              'rounded-md px-3 py-1 transition-colors',
+              'rounded-md px-3 py-1 transition',
               'data-[state=active]:bg-accent data-[state=active]:text-accent-foreground data-[state=active]:shadow-sm',
               'data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:bg-accent/50 data-[state=inactive]:hover:text-foreground',
             )}

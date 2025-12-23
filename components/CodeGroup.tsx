@@ -4,17 +4,16 @@ import {
   Children,
   ReactElement,
   ReactNode,
-  useCallback,
   useEffect,
   useMemo,
   useRef,
   useState,
 } from 'react';
-import clsx from 'clsx';
 import * as Tabs from '@radix-ui/react-tabs';
 import {useCodeGroupSync} from '@/components/code-group-provider';
 import {CodeGroupSyncMap, normalizeSyncMap} from '@/lib/code-group-sync';
-import {CodeSkeleton} from '@/components/ui/skeleton';
+import {cn} from '@/lib/utils';
+import clsx from 'clsx';
 
 type CodeGroupLabel = {
   text: string;
@@ -87,8 +86,6 @@ export default function CodeGroup({
   children,
   defaultLabel,
 }: CodeGroupProps) {
-  const [isClient, setIsClient] = useState(false);
-
   const codeBlocks = useMemo(() => {
     return Children.toArray(children).filter(child => {
       if (typeof child === 'string') {
@@ -108,21 +105,18 @@ export default function CodeGroup({
     return codeBlocks.map((_, index) => normalizeLabel(labels[index], index));
   }, [codeBlocks, labels]);
 
-  const {selection, updateSelection} = useCodeGroupSync();
+  const {selection, updateSelection, state} = useCodeGroupSync();
 
-  // Initialize as -1 as it gets set on client
-  const [activeIndex, setActiveIndex] = useState(-1);
+  const initialMatchRef = useRef<number | null>(null);
+  if (initialMatchRef.current === null) {
+    initialMatchRef.current = findBestMatch(normalizedLabels, selection);
+  }
 
-  const manualSelectionRef = useRef(false);
+  const [activeIndex, setActiveIndex] = useState(() => {
+    const initialMatch = initialMatchRef.current ?? -1;
 
-  const computeActiveIndex = useCallback(() => {
-    // User preference
-    const matchIndex = findBestMatch(normalizedLabels, selection);
-
-    if (matchIndex !== -1) return matchIndex;
-
-    // Default prop
-    if (defaultLabel) {
+    // If no sync match and defaultLabel is provided, find the matching label
+    if (initialMatch === -1 && defaultLabel) {
       const defaultIndex = normalizedLabels.findIndex(
         label => label.text === defaultLabel,
       );
@@ -131,27 +125,24 @@ export default function CodeGroup({
       }
     }
 
-    // Default
-    return 0;
-  }, [normalizedLabels, selection, defaultLabel, codeBlocks.length]);
+    const boundedIndex =
+      initialMatch >= 0 && initialMatch < codeBlocks.length ? initialMatch : 0;
+    return boundedIndex;
+  });
 
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
+  const manualSelectionRef = useRef(false);
 
   useEffect(() => {
     setActiveIndex(current => (current >= codeBlocks.length ? 0 : current));
   }, [codeBlocks.length]);
 
   useEffect(() => {
-    if (!isClient || !normalizedLabels.length || manualSelectionRef.current)
-      return;
-
-    const newIndex = computeActiveIndex();
-    if (newIndex !== activeIndex) {
-      setActiveIndex(newIndex);
+    if (!normalizedLabels.length || manualSelectionRef.current) return;
+    const matchIndex = findBestMatch(normalizedLabels, selection);
+    if (matchIndex !== -1 && matchIndex !== activeIndex) {
+      setActiveIndex(matchIndex);
     }
-  }, [isClient, normalizedLabels, computeActiveIndex, activeIndex]);
+  }, [normalizedLabels, selection, activeIndex]);
 
   if (!codeBlocks.length) {
     return null;
@@ -172,7 +163,7 @@ export default function CodeGroup({
 
   return (
     <Tabs.Root
-      className="code-group my-6"
+      className={cn('code-group my-6', state === 'loading' && 'blur-[3px]')}
       value={String(activeIndex)}
       onValueChange={value => handleSelect(Number(value))}
       data-active-label={activeLabel?.text ?? ''}
@@ -182,10 +173,11 @@ export default function CodeGroup({
           <Tabs.Trigger
             key={`${text}-${index}`}
             value={String(index)}
+            disabled={state === 'loading'}
             className={clsx(
-              'rounded-md px-3 py-1 transition-colors',
+              'rounded-md px-3 py-1 transition',
+              'text-muted-foreground data-[state=inactive]:hover:bg-accent/50 data-[state=inactive]:hover:text-foreground',
               'data-[state=active]:bg-accent data-[state=active]:text-accent-foreground data-[state=active]:shadow-sm',
-              'data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:bg-accent/50 data-[state=inactive]:hover:text-foreground',
             )}
           >
             {text}
@@ -193,21 +185,15 @@ export default function CodeGroup({
         ))}
       </Tabs.List>
       <div className="overflow-hidden rounded-b-lg border border-t-0 border-border/60 [&_pre]:!m-0 [&_pre]:!rounded-none [&_pre]:!border-0">
-        {isClient ? (
-          codeBlocks.map((block, index) => (
-            <Tabs.Content
-              key={index}
-              value={String(index)}
-              className="rounded-b-lg code-group-content"
-            >
-              {block}
-            </Tabs.Content>
-          ))
-        ) : (
-          <div className="rounded-b-lg code-group-content">
-            <CodeSkeleton lineCount={5} />
-          </div>
-        )}
+        {codeBlocks.map((block, index) => (
+          <Tabs.Content
+            key={index}
+            value={String(index)}
+            className="rounded-b-lg code-group-content"
+          >
+            {block}
+          </Tabs.Content>
+        ))}
       </div>
     </Tabs.Root>
   );

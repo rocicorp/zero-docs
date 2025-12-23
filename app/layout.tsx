@@ -1,11 +1,12 @@
 import ClientBoundary from '@/components/ClientBoundary';
+import {CodeGroupProvider} from '@/components/code-group-provider';
 import {ThemeProvider} from '@/components/theme-provider';
 import type {Metadata} from 'next';
 import localFont from 'next/font/local';
 import Script from 'next/script';
+
 import './globals.css';
 import '@shikijs/twoslash/style-rich.css';
-import {CodeGroupClientWrapper} from '@/components/code-group-provider';
 
 const muoto = localFont({
   src: './fonts/muoto-var.ttf',
@@ -58,12 +59,12 @@ export default function RootLayout({
           defaultTheme="system"
           enableSystem={true}
         >
-          <CodeGroupClientWrapper>
+          <CodeGroupProvider>
             <ClientBoundary />
             <main className="sm:container mx-auto w-[88vw] h-auto">
               {children}
             </main>
-          </CodeGroupClientWrapper>
+          </CodeGroupProvider>
         </ThemeProvider>
         <Script
           src="/um.js"

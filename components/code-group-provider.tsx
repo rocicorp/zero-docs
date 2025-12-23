@@ -19,60 +19,20 @@ import {
 type CodeGroupContextValue = {
   selection: CodeGroupSyncMap;
   updateSelection: (partial: CodeGroupSyncMap) => void;
+  state: 'loading' | 'ready';
 };
 
 const CodeGroupContext = createContext<CodeGroupContextValue | null>(null);
 
-type CodeGroupProviderProps = {
-  children: React.ReactNode;
-  initialSync?: CodeGroupSyncMap;
-};
-
 const COOKIE_MAX_AGE = 60 * 60 * 24 * 365; // 1 year
 
-type CodeGroupClientWrapperProps = {
+type CodeGroupProviderProps = {
   children: React.ReactNode;
 };
 
-export function CodeGroupClientWrapper({
-  children,
-}: CodeGroupClientWrapperProps) {
-  const [initialSync, setInitialSync] = useState<CodeGroupSyncMap>({});
-
-  useEffect(() => {
-    // Read cookie on client side after mount
-    if (typeof document !== 'undefined') {
-      const cookies = document.cookie.split(';');
-      const codeGroupCookie = cookies.find(cookie =>
-        cookie.trim().startsWith(`${CODE_GROUP_COOKIE}=`),
-      );
-
-      if (codeGroupCookie) {
-        const value = codeGroupCookie.split('=')[1];
-        const parsed = parseCodeGroupCookie(value);
-        setInitialSync(parsed);
-      }
-    }
-  }, []);
-
-  return (
-    <CodeGroupProvider initialSync={initialSync}>{children}</CodeGroupProvider>
-  );
-}
-
-export function CodeGroupProvider({
-  children,
-  initialSync,
-}: CodeGroupProviderProps) {
-  const [selection, setSelection] = useState<CodeGroupSyncMap>(
-    () => initialSync ?? {},
-  );
-
-  useEffect(() => {
-    if (initialSync && Object.keys(initialSync).length > 0) {
-      setSelection(prev => ({...prev, ...initialSync}));
-    }
-  }, [initialSync]);
+export function CodeGroupProvider({children}: CodeGroupProviderProps) {
+  const [state, setState] = useState<'loading' | 'ready'>('loading');
+  const [selection, setSelection] = useState<CodeGroupSyncMap>({});
 
   const updateSelection = useCallback((partial: CodeGroupSyncMap) => {
     const normalized = normalizeSyncMap(partial);
@@ -89,12 +49,31 @@ export function CodeGroupProvider({
     });
   }, []);
 
+  useEffect(() => {
+    // Read cookie on client side after mount
+    if (typeof document !== 'undefined') {
+      const cookies = document.cookie.split(';');
+      const codeGroupCookie = cookies.find(cookie =>
+        cookie.trim().startsWith(`${CODE_GROUP_COOKIE}=`),
+      );
+
+      if (codeGroupCookie) {
+        const value = codeGroupCookie.split('=')[1];
+        const parsed = parseCodeGroupCookie(value);
+        setSelection(prev => ({...prev, ...parsed}));
+      }
+    }
+
+    setState('ready');
+  }, []);
+
   const value = useMemo(
     () => ({
       selection,
       updateSelection,
+      state,
     }),
-    [selection, updateSelection],
+    [selection, updateSelection, state],
   );
 
   return (

@@ -176,8 +176,8 @@ export default function CodeGroup({
             disabled={state === 'loading'}
             className={clsx(
               'rounded-md px-3 py-1 transition',
-              'text-muted-foreground data-[state=inactive]:hover:bg-accent/50 data-[state=inactive]:hover:text-foreground',
               'data-[state=active]:bg-accent data-[state=active]:text-accent-foreground data-[state=active]:shadow-sm',
+              'data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:bg-accent/50 data-[state=inactive]:hover:text-foreground',
             )}
           >
             {text}

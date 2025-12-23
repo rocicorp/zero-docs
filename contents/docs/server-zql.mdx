@@ -128,6 +128,7 @@ Within your mutators, you can access the underlying transaction via `tx.dbTransa
 // mutators.ts
 export const mutators = defineMutators({
   createUser: defineMutator(
+    z.object({id: z.string(), name: z.string()}),
     async ({tx, args: {id, name}}) => {
       if (tx.location === 'server') {
         await tx.dbTransaction.wrappedTransaction
@@ -143,6 +144,7 @@ export const mutators = defineMutators({
 // mutators.ts
 export const mutators = defineMutators({
   createUser: defineMutator(
+    z.object({id: z.string(), name: z.string()}),
     async ({tx, args: {id, name}}) => {
       if (tx.location === 'server') {
         await tx.dbTransaction.wrappedTransaction.query(
@@ -159,6 +161,7 @@ export const mutators = defineMutators({
 // mutators.ts
 export const mutators = defineMutators({
   createUser: defineMutator(
+    z.object({id: z.string(), name: z.string()}),
     async ({tx, args: {id, name}}) => {
       if (tx.location === 'server') {
         await tx.dbTransaction.wrappedTransaction<

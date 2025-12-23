@@ -79,8 +79,8 @@ export const ROUTES = [
     href: null,
     defaultOpen: false,
     items: [
-      {title: 'Overview', href: '/deployment'},
-      {title: 'Runtime Config', href: '/zero-cache-config'},
+      {title: 'Hosting', href: '/deployment'},
+      {title: 'Configuration', href: '/zero-cache-config'},
     ],
   },
 

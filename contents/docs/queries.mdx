@@ -25,7 +25,7 @@ A copy of each query exists on both the client and on your server:
 
 <ImageLightbox
   src="/images/custom-queries/queries1.svg"
-  className="invert dark:invert-0"
+  invert="dark"
 />
 
 Often the implementations will be the same, and you can just share their code. This is easy with full-stack frameworks like TanStack Start or Next.js.
@@ -39,7 +39,7 @@ When a query is invoked, it initially runs on the client, against the client-sid
 <ImageLightbox
   src="/images/custom-queries/queries2.svg"
   caption="Client hydration"
-  className="invert dark:invert-0"
+  invert="dark"
 />
 
 In the background, the name and arguments for the query are sent to zero-cache. Zero-cache calls the `queries` endpoint on your server to get the ZQL for the query. Your server looks up its implementation of the query, invokes it, and returns the resulting ZQL expression to zero-cache.
@@ -49,7 +49,7 @@ Zero-cache then runs this ZQL against the server-side data. The initial server r
 <ImageLightbox
   src="/images/custom-queries/queries4.svg"
   caption="Server hydration"
-  className="invert dark:invert-0"
+  invert="dark"
 />
 
 zero-cache receives updates from Postgres via logical replication. It updates affected queries and sends row changes back to the client, which updates the client query, and the user sees the changes.
@@ -57,7 +57,7 @@ zero-cache receives updates from Postgres via logical replication. It updates af
 <ImageLightbox
   src="/images/custom-queries/queries6.svg"
   caption="Incremental update"
-  className="invert dark:invert-0"
+  invert="dark"
 />
 
 ## Defining Queries
@@ -782,7 +782,7 @@ Queries can be either _active_ or _cached_. An active query is one that is curre
 
 <ImageLightbox
   src="/images/reading-data/query-lifecycle.svg"
-  className="invert dark:invert-0"
+  invert="dark"
 />
 
 Queries are _deactivated_ according to how they were created:

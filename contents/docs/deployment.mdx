@@ -13,15 +13,15 @@ Zero-cache is made up of two main components:
 
 These components have the following characteristics:
 
-|                       | Replication Manager | View Syncer          |
-| --------------------- | ------------------- | -------------------- |
-| Owns replication slot | ✅                  | ❌                   |
-| Serves client queries | ❌                  | ✅                   |
-| Backs up replica      | ✅ (if URL set)     | ❌                   |
-| Restores from backup  | Optional            | Required             |
-| Subscribes to changes | N/A (produces)      | ✅                   |
-| CVR management        | ❌                  | ✅                   |
-| Number deployed       | 1                   | N (horizontal scale) |
+|                       | Replication Manager         | View Syncer          |
+| --------------------- | --------------------------- | -------------------- |
+| Owns replication slot | ✅                          | ❌                   |
+| Serves client queries | ❌                          | ✅                   |
+| Backs up replica      | ✅ (required in multi-node) | ❌                   |
+| Restores from backup  | Optional                    | Required             |
+| Subscribes to changes | N/A (produces)              | ✅                   |
+| CVR management        | ❌                          | ✅                   |
+| Number deployed       | 1                           | N (horizontal scale) |
 
 You will also need to deploy a Postgres database, your frontend, and your API server for the [query](/docs/queries#server-setup) and [mutate](/docs/mutators#server-setup) endpoints.
 
@@ -172,8 +172,11 @@ services:
       # Password used to access the inspector and /statz
       ZERO_ADMIN_PASSWORD: pickanewpassword
 
+      # Dedicated replication-manager; disable view syncing.
+      ZERO_NUM_SYNC_WORKERS: 0
       # URL for backing up the SQLite replica
       # (include a simple version number for future cleanup)
+      # Required in multi-node so view-syncers can reserve snapshots.
       ZERO_LITESTREAM_BACKUP_URL: s3://zero-backups/replica-v1
 
       # S3 creds + Mini S3 endpoint (replication-manager backs up to S3)
@@ -232,9 +235,10 @@ You can also override the number of sync workers _per view-syncer_ with `ZERO_NU
 
 ## Replica Lifecycle
 
-Zero-cache is backed by a SQLite replica of your database. The SQLite replica uses upstream Postgres as the source of truth. If the SQLite replica is somehow corrupted or the litestream backup disappears, the replication-manager can resync its source replica from it.
-
-If the litestream backup URL is changed (by, for example, appending a number to the [`ZERO_LITESTREAM_BACKUP_URL`](/docs/zero-cache-config#litestream-backup-url) value), it will force a resync from upstream.
+Zero-cache is backed by a SQLite replica of your database. The SQLite replica
+uses upstream Postgres as the source of truth. If the replica is missing or a
+litestream restore fails, the replication-manager will resync the replica from
+upstream on the next start.
 
 ## Performance
 

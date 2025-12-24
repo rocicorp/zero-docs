@@ -220,6 +220,8 @@ default: `false`
 
 The location of the litestream backup, usually an s3:// URL. This is only consulted by the replication-manager. view-syncers receive this information from the replication-manager.
 
+In multi-node deployments, this is required on the replication-manager so view-syncers can reserve snapshots; in single-node deployments it is optional.
+
 flag: `--litestream-backup-url`<br/>
 env: `ZERO_LITESTREAM_BACKUP_URL`<br/>
 
@@ -411,7 +413,7 @@ env: `ZERO_MUTATE_URL`<br/>
 
 ### Number of Sync Workers
 
-The number of processes to use for view syncing. Leave this unset to use the maximum available parallelism. If set to 0, the server runs without sync workers, which is the configuration for running the replication-manager.
+The number of processes to use for view syncing. Leave this unset to use the maximum available parallelism. If set to 0, the server runs without sync workers, which is the configuration for running the replication-manager in multi-node deployments.
 
 flag: `--num-sync-workers`<br/>
 env: `ZERO_NUM_SYNC_WORKERS`<br/>

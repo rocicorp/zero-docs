@@ -532,7 +532,6 @@ The `@rocicorp/zero` package provides the `handleMutateRequest` and `mustGetMuta
 ```ts
 // src/routes/api/zero/mutate.ts
 import {createFileRoute} from '@tanstack/react-router'
-import {json} from '@tanstack/react-start'
 import {handleMutateRequest} from '@rocicorp/zero/server'
 import {mustGetMutator} from '@rocicorp/zero'
 import {mutators} from 'mutators.ts'
@@ -556,7 +555,7 @@ export const Route = createFileRoute('/api/zero/mutate')({
           request
         )
 
-        return json(result)
+        return Response.json(result)
       }
     }
   }

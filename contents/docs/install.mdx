@@ -274,6 +274,7 @@ import type {ZeroOptions} from '@rocicorp/zero'
 import {schema} from './zero/schema.ts'
 
 const opts: ZeroOptions = {
+  userID: 'anon',
   cacheURL: 'http://localhost:4848',
   schema
 }
@@ -302,6 +303,7 @@ import type {ZeroOptions} from '@rocicorp/zero'
 import {schema} from './zero/schema.ts'
 
 const opts: ZeroOptions = {
+  userID: 'anon',
   cacheURL: 'http://localhost:4848',
   schema
 }
@@ -329,6 +331,7 @@ import {Zero} from '@rocicorp/zero'
 import {schema} from './zero/schema.ts'
 
 const opts: ZeroOptions = {
+  userID: 'anon',
   cacheURL: 'http://localhost:4848',
   schema
 }
@@ -447,7 +450,7 @@ console.log('albums', albums)
 
 </CodeGroup>
 
-If you run your app now, you should see an error like:
+When you reload your app, you should see an error like:
 
 <CodeGroup
   labels={[
@@ -461,30 +464,30 @@ If you run your app now, you should see an error like:
 ```console
 > npx zero-cache-dev
 ...
-Uncaught exception. Could not get ZQL for query `albumsByArtist` because no query endpoint is specified.
+no ZERO_QUERY_URL is configured for Zero Cache
 ```
 
 ```console
 > pnpm exec zero-cache-dev
 ...
-Uncaught exception. Could not get ZQL for query `albumsByArtist` because no query endpoint is specified.
+no ZERO_QUERY_URL is configured for Zero Cache
 ```
 
 ```console
 > bunx zero-cache-dev
 ...
-Uncaught exception. Could not get ZQL for query `albumsByArtist` because no query endpoint is specified.
+no ZERO_QUERY_URL is configured for Zero Cache
 ```
 
 ```console
 > yarn exec zero-cache-dev
 ...
-Uncaught exception. Could not get ZQL for query `albumsByArtist` because no query endpoint is specified.
+no ZERO_QUERY_URL is configured for Zero Cache
 ```
 
 </CodeGroup>
 
-Let's fix that.
+This is expected. We now need to implement a queries endpoint so that zero-cache can get the ZQL for the `albums.byArtist` query.
 
 ### Implement Query Backend
 
@@ -518,7 +521,6 @@ Zero provides utilities to make it easy to implement the queries endpoint in any
 ```ts
 // src/routes/api/query.ts
 import {createFileRoute} from '@tanstack/react-router'
-import {json} from '@tanstack/react-start'
 import {handleQueryRequest} from '@rocicorp/zero/server'
 import {mustGetQuery} from '@rocicorp/zero'
 import {queries} from '../../zero/queries.ts'
@@ -537,7 +539,7 @@ export const Route = createFileRoute('/api/query')({
           request
         )
 
-        return json(result)
+        return Response.json(result)
       }
     }
   }
@@ -707,8 +709,8 @@ export const mutators = defineMutators({
 ```
 
 You can use the [CRUD-style API](/docs/mutators#writing-data) with `tx.mutate.<table>.<method>()`
-to write data within your mutator.
-You can also use `tx.run(zql.<table>.<method>)` to run ZQL expressions.
+to write data.
+You can also use `tx.run(zql.<table>.<method>)` to run queries within your mutator.
 
 <Note
   type="warning"
@@ -728,7 +730,7 @@ Once you've defined your mutators, you must register them with Zero before you c
 import {mutators} from './zero/mutators.ts'
 
 const opts: ZeroOptions = {
-  // ... cacheURL, schema, etc.
+  // ... userID, cacheURL, etc.
   // add mutators
   mutators
 }
@@ -882,30 +884,30 @@ If you run this app now, you should be able to see the UI update optimistically,
 ```console
 > npx zero-cache-dev
 ...
-Uncaught exception. Could not execution mutation `albums.create` because no mutate endpoint is specified.
+A ZERO_MUTATE_URL must be set in order to process mutations
 ```
 
 ```console
 > pnpm exec zero-cache-dev
 ...
-Uncaught exception. Could not execution mutation `albums.create` because no mutate endpoint is specified.
+A ZERO_MUTATE_URL must be set in order to process mutations
 ```
 
 ```console
 > bunx zero-cache-dev
 ...
-Uncaught exception. Could not execution mutation `albums.create` because no mutate endpoint is specified.
+A ZERO_MUTATE_URL must be set in order to process mutations
 ```
 
 ```console
 > yarn exec zero-cache-dev
 ...
-Uncaught exception. Could not execution mutation `albums.create` because no mutate endpoint is specified.
+A ZERO_MUTATE_URL must be set in order to process mutations
 ```
 
 </CodeGroup>
 
-This is because, like queries, we need to implement an endpoint in our API. Let's fix it!
+Similar to queries, we need to wire up a mutate endpoint in our API. Let's do that now.
 
 ### Implement Mutate Endpoint
 
@@ -932,12 +934,12 @@ Use the Zero Postgres adapters to create a `dbProvider` instance:
 >
 
 ```ts
-// app/api/mutate/db-provider.ts
+// src/db-provider.ts
 import {zeroDrizzle} from '@rocicorp/zero/server/adapters/drizzle'
 import {drizzle} from 'drizzle-orm/node-postgres'
 import {Pool} from 'pg'
 import {schema} from '../../zero/schema.ts'
-import {drizzleSchema} from '../../drizzle/schema.ts'
+import * as drizzleSchema from '../../drizzle/schema.ts'
 
 // pass a drizzle client instance. for example:
 const pool = new Pool({
@@ -957,7 +959,7 @@ declare module '@rocicorp/zero' {
 ```
 
 ```ts
-// app/api/mutate/db-provider.ts
+// src/db-provider.ts
 import {zeroNodePg} from '@rocicorp/zero/server/adapters/pg'
 import {Pool} from 'pg'
 import {schema} from '../../zero/schema.ts'
@@ -976,7 +978,7 @@ declare module '@rocicorp/zero' {
 ```
 
 ```ts
-// app/api/mutate/db-provider.ts
+// src/db-provider.ts
 import {zeroPostgresJS} from '@rocicorp/zero/server/adapters/postgresjs'
 import postgres from 'postgres'
 import {schema} from '../../zero/schema.ts'
@@ -1020,7 +1022,6 @@ Then, use the `dbProvider` to handle the mutate request:
 ```ts
 // src/routes/api/mutate.ts
 import {createFileRoute} from '@tanstack/react-router'
-import {json} from '@tanstack/react-start'
 import {handleMutateRequest} from '@rocicorp/zero/server'
 import {mustGetMutator} from '@rocicorp/zero'
 import {mutators} from '../../zero/mutators.ts'
@@ -1044,7 +1045,7 @@ export const Route = createFileRoute('/api/mutate')({
           request
         )
 
-        return json(result)
+        return Response.json(result)
       }
     }
   }

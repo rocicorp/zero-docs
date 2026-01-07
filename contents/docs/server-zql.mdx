@@ -44,6 +44,7 @@ several built-in factories for popular Postgres bindings libraries.
 // app/api/mutate/db-provider.ts
 import {zeroDrizzle} from '@rocicorp/zero/server/adapters/drizzle'
 import {schema} from '../../zero/schema.ts'
+import * as drizzleSchema from '../../drizzle/schema.ts'
 
 // pass a drizzle client instance. for example:
 export const drizzleClient = drizzle(pool, {

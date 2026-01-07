@@ -6,7 +6,7 @@ import {Navbar} from '@/components/navbar';
 export default function ConditionalNavbar() {
   const pathname = usePathname();
 
-  // Conditionally render the Navbar only if not on the root page
+  // Hide navbar only on the root page, show on all docs pages including introduction
   if (pathname === '/') {
     return null;
   }

@@ -5,7 +5,6 @@ import {getDocsForSlug, getDocsTocs, getPreviousNext} from '@/lib/mdx';
 import {Typography} from '@/components/typography';
 import CopyContent from '@/components/ui/copy-content';
 import {getAllPageSlugs} from '@/lib/get-slugs';
-import {IntroductionLanding} from '@/components/IntroductionLanding';
 
 type PageProps = {params: Promise<{slug: string[]}>};
 
@@ -20,15 +19,6 @@ export default async function DocsPage({params}: PageProps) {
   ]);
 
   if (!res) notFound();
-
-  // Special handling for introduction page - use full width layout
-  if (pathName === 'introduction') {
-    return (
-      <div className="flex-[4] min-w-0 py-10 w-full max-w-full">
-        <IntroductionLanding />
-      </div>
-    );
-  }
 
   return (
     <div className="flex flex-[4] min-w-0 items-start gap-14">
@@ -65,7 +55,7 @@ export default async function DocsPage({params}: PageProps) {
           <Pagination previousNext={previousNext} />
         </Typography>
       </div>
-      <Toc tocs={tocs} path={pathName} />
+      <Toc tocs={tocs} path={pathName} className="sidebar-fade-in" />
     </div>
   );
 }

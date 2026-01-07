@@ -1669,3 +1669,348 @@ html.dark {
     padding: 1rem;
   }
 }
+
+/* Sidebar fade-in animation */
+@keyframes sidebarFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.sidebar-fade-in {
+  animation: sidebarFadeIn 0.6s ease-out;
+}
+
+/* Page slide-up and fade-in transition */
+@keyframes pageSlideUpFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-transition-enter {
+  animation: pageSlideUpFadeIn 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Landing page header (from zero-landing-v2) */
+.landing-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding: 2.5rem 0;
+  margin: 0;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 100;
+  background: hsl(var(--background));
+}
+
+.landing-header-inner {
+  max-width: clamp(320px, 90vw, 1000px);
+  width: 100%;
+  padding: 0 clamp(1.5rem, 4vw, 2rem);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.landing-logo {
+  position: relative;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.landing-logo img {
+  width: 48px;
+  height: 48px;
+  display: block;
+}
+
+.landing-logo img:hover {
+  animation: logo-spin 0.3s ease-in-out;
+}
+
+.landing-logo .landing-wordmark {
+  position: absolute;
+  left: calc(48px + 1.5rem);
+  width: 107px;
+  height: 24px;
+  clip-path: inset(0 100% 0 0);
+  opacity: 0;
+  transition: clip-path 0.3s ease-in-out, opacity 0.3s ease-in-out;
+  pointer-events: none;
+}
+
+.landing-logo:hover .landing-wordmark {
+  clip-path: inset(0 0 0 0);
+  opacity: 1;
+}
+
+@keyframes logo-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(720deg);
+  }
+}
+
+.landing-nav {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.landing-nav-link {
+  color: hsl(var(--foreground));
+  text-decoration: none;
+  font-size: 1rem;
+  font-weight: 500;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  padding: 0 1rem;
+  transition: opacity 0.2s;
+}
+
+.landing-nav-link:hover {
+  opacity: 0.7;
+}
+
+.landing-nav-button {
+  text-decoration: none;
+  font-size: 1rem;
+  font-weight: 600;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  padding: 0 1.75rem;
+  border-radius: 10px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+  background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.18) 0%,
+      rgba(255, 255, 255, 0.06) 40%,
+      rgba(0, 0, 0, 0.12) 100%
+    ),
+    #27252b;
+  color: #ebe9f0;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.32);
+  backdrop-filter: blur(10px);
+}
+
+.landing-nav-button:hover {
+  opacity: 0.95;
+  transform: translateY(-1px) scale(1.02);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+}
+
+.landing-nav-button:active {
+  transform: translateY(0) scale(0.98);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.26);
+}
+
+@media (max-width: 768px) {
+  .landing-header {
+    padding: 1.5rem 0;
+  }
+
+  .landing-logo img {
+    width: 40px;
+    height: 40px;
+  }
+
+  .landing-logo .landing-wordmark {
+    left: calc(40px + 1rem);
+    width: 89px;
+    height: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .landing-header {
+    padding: 1rem 0;
+  }
+
+  .landing-logo img {
+    width: 36px;
+    height: 36px;
+  }
+
+  .landing-nav-link,
+  .landing-nav-button {
+    font-size: 0.875rem;
+    height: 40px;
+    padding: 0 1rem;
+  }
+}
+
+/* Docs preview on scroll */
+.docs-preview-container {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 90;
+  transition: opacity 0.1s ease-out, transform 0.1s ease-out;
+}
+
+.docs-preview-content {
+  width: 100%;
+  height: 100%;
+  background: hsl(var(--background));
+  display: flex;
+  gap: 3.5rem;
+  max-width: 1250px;
+  margin: 0 auto;
+  padding: 5rem 2rem 2rem;
+}
+
+.docs-preview-sidebar {
+  min-width: 230px;
+  width: 230px;
+  background: hsl(var(--muted) / 0.3);
+  border-radius: 8px;
+  height: 400px;
+}
+
+.docs-preview-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.docs-preview-main h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  color: hsl(var(--foreground));
+}
+
+.docs-preview-main p {
+  color: hsl(var(--muted-foreground));
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.docs-preview-toc {
+  min-width: 200px;
+  width: 200px;
+  background: hsl(var(--muted) / 0.3);
+  border-radius: 8px;
+  height: 300px;
+}
+
+@media (max-width: 1024px) {
+  .docs-preview-toc {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .docs-preview-sidebar {
+    display: none;
+  }
+
+  .docs-preview-content {
+    padding: 5rem 1.5rem 2rem;
+  }
+}
+
+/* Scroll indicator */
+.scroll-indicator {
+  position: fixed;
+  bottom: 3rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 95;
+  pointer-events: none;
+  animation: scrollIndicatorFadeIn 0.5s ease-out, scrollIndicatorBounce 2s ease-in-out infinite;
+}
+
+.scroll-indicator-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1.25rem 2rem;
+  background: linear-gradient(
+      135deg,
+      rgba(252, 33, 138, 0.15) 0%,
+      rgba(255, 255, 255, 0.08) 40%,
+      rgba(0, 0, 0, 0.1) 100%
+    ),
+    hsl(var(--background));
+  border: 1px solid rgba(252, 33, 138, 0.2);
+  border-radius: 16px;
+  box-shadow:
+    0 4px 16px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
+}
+
+.scroll-indicator-content span {
+  color: hsl(var(--foreground));
+  font-size: 0.875rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.scroll-indicator-icon {
+  width: 24px;
+  height: 24px;
+  color: hsl(var(--primary-highlight));
+}
+
+@keyframes scrollIndicatorFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scrollIndicatorBounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(8px);
+  }
+}
+
+@media (max-width: 768px) {
+  .scroll-indicator {
+    bottom: 2rem;
+  }
+
+  .scroll-indicator-content {
+    padding: 1rem 1.5rem;
+  }
+
+  .scroll-indicator-content span {
+    font-size: 0.8125rem;
+  }
+
+  .scroll-indicator-icon {
+    width: 20px;
+    height: 20px;
+  }
+}

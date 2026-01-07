@@ -1,11 +1,13 @@
 'use client';
 
 import {useEffect, useRef, useState} from 'react';
+import {DocsPreview} from './DocsPreview';
 
 export function IntroductionLanding() {
   const heroTitleRef = useRef<HTMLHeadingElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [showDemoModal, setShowDemoModal] = useState(false);
+  const mainRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     // Hero intro animation with falling sparks
@@ -121,9 +123,52 @@ export function IntroductionLanding() {
     }
   };
 
+  const scrollToTop = () => {
+    const start = window.scrollY;
+    const duration = 300;
+    const startTime = performance.now();
+
+    const animateScroll = (currentTime: number) => {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const easeProgress = 1 - (1 - progress) * (1 - progress);
+
+      window.scrollTo(0, start * (1 - easeProgress));
+
+      if (progress < 1) {
+        requestAnimationFrame(animateScroll);
+      }
+    };
+
+    requestAnimationFrame(animateScroll);
+  };
+
   return (
     <div className="intro-landing-page">
-      <main className="intro-main">
+      <header className="landing-header">
+        <div className="landing-header-inner">
+          <div className="landing-logo" onClick={scrollToTop}>
+            <img src="/images/logo.svg" alt="Zero Logo" />
+            <img
+              src="/images/wordmark.svg"
+              alt="Zero Wordmark"
+              className="landing-wordmark"
+            />
+          </div>
+          <nav className="landing-nav">
+            <a
+              href="https://github.com/rocicorp/mono#zero"
+              className="landing-nav-link"
+            >
+              GitHub
+            </a>
+            <a href="/docs/quickstart" className="landing-nav-button">
+              Docs
+            </a>
+          </nav>
+        </div>
+      </header>
+      <main className="intro-main" ref={mainRef}>
         <section className="section section-hero">
           <span className="hero-byline">
             <span className="hero-byline__icon" aria-hidden="true">
@@ -619,58 +664,6 @@ export function IntroductionLanding() {
             Dive into the docs to see how Zero fits into your stack, and hop
             into our Discord to connect with the team and other builders.
           </p>
-
-          <div className="feature-grid feature-grid--two">
-            <a
-              className="feature-card feature-card--link feature-card--with-icon"
-              href="/docs/quickstart"
-            >
-              <h3>Quickstart</h3>
-              <div className="feature-card-icon">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  width="32"
-                  height="32"
-                >
-                  <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
-                  <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
-                </svg>
-              </div>
-              <p>
-                Build your first Zero app in under 5 minutes with our
-                step-by-step guide.
-              </p>
-            </a>
-            <a
-              className="feature-card feature-card--link feature-card--with-icon"
-              href="https://discord.rocicorp.dev"
-              target="_blank"
-              rel="noreferrer"
-            >
-              <h3>Join Our Discord</h3>
-              <div className="feature-card-icon">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                  width="32"
-                  height="32"
-                >
-                  <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515a.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0a12.64 12.64 0 0 0-.617-1.25a.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057a19.9 19.9 0 0 0 5.993 3.03a.078.078 0 0 0 .084-.028a14.09 14.09 0 0 0 1.226-1.994a.076.076 0 0 0-.041-.106a13.107 13.107 0 0 1-1.872-.892a.077.077 0 0 1-.008-.128a10.2 10.2 0 0 0 .372-.292a.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127a12.299 12.299 0 0 1-1.873.892a.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028a19.839 19.839 0 0 0 6.002-3.03a.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419c0-1.333.956-2.419 2.157-2.419c1.21 0 2.176 1.096 2.157 2.42c0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419c0-1.333.955-2.419 2.157-2.419c1.21 0 2.176 1.096 2.157 2.42c0 1.333-.946 2.418-2.157 2.418z" />
-                </svg>
-              </div>
-              <p>
-                Hang out with the Zero community, ask questions, and share what
-                you're building.
-              </p>
-            </a>
-          </div>
         </section>
       </main>
 
@@ -716,6 +709,8 @@ export function IntroductionLanding() {
           </div>
         </div>
       )}
+
+      <DocsPreview />
     </div>
   );
 }

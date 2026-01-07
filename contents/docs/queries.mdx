@@ -257,7 +257,6 @@ The `@rocicorp/zero` package provides the `handleQueryRequest` and `mustGetQuery
 ```ts
 // src/routes/api/zero/query.ts
 import {createFileRoute} from '@tanstack/react-router'
-import {json} from '@tanstack/react-start'
 import {handleQueryRequest} from '@rocicorp/zero/server'
 import {mustGetQuery} from '@rocicorp/zero'
 import {queries} from 'queries.ts'
@@ -276,7 +275,7 @@ export const Route = createFileRoute('/api/zero/query')({
           request
         )
 
-        return json(result)
+        return Response.json(result)
       }
     }
   }

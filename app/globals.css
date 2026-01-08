@@ -579,6 +579,7 @@ html.dark {
 .intro-landing-page {
   width: 100%;
   max-width: 100%;
+  --header-height: 128px;
 }
 
 .intro-main {
@@ -587,6 +588,7 @@ html.dark {
   align-items: center;
   justify-content: flex-start;
   width: 100%;
+  padding-top: calc(var(--header-height) + 3rem);
 }
 
 .intro-landing-page .section {
@@ -739,7 +741,7 @@ html.dark {
   position: relative;
   padding: 0.5rem 1.25rem;
   margin: 0 auto 4rem;
-  font-size: clamp(0.9375rem, 0.9119rem + 0.1136vw, 1rem);
+  font-size: clamp(1.125rem, 1.0739rem + 0.2273vw, 1.25rem);
   font-weight: 400;
   color: hsl(var(--foreground));
   text-align: center;
@@ -1731,13 +1733,13 @@ html.dark {
   cursor: pointer;
 }
 
-.landing-logo img {
+.landing-logo img:not(.landing-wordmark) {
   width: 48px;
   height: 48px;
   display: block;
 }
 
-.landing-logo img:hover {
+.landing-logo img:not(.landing-wordmark):hover {
   animation: logo-spin 0.3s ease-in-out;
 }
 
@@ -1746,6 +1748,7 @@ html.dark {
   left: calc(48px + 1.5rem);
   width: 107px;
   height: 24px;
+  min-width: 107px;
   clip-path: inset(0 100% 0 0);
   opacity: 0;
   transition: clip-path 0.3s ease-in-out, opacity 0.3s ease-in-out;
@@ -1755,6 +1758,15 @@ html.dark {
 .landing-logo:hover .landing-wordmark {
   clip-path: inset(0 0 0 0);
   opacity: 1;
+}
+
+/* Dark mode - invert logo colors */
+.dark .landing-logo img:not(.landing-wordmark) {
+  filter: invert(1);
+}
+
+.dark .landing-logo .landing-wordmark {
+  filter: invert(1);
 }
 
 @keyframes logo-spin {
@@ -1823,28 +1835,44 @@ html.dark {
 }
 
 @media (max-width: 768px) {
+  .intro-landing-page {
+    --header-height: 96px;
+  }
+
+  .intro-main {
+    padding-top: calc(var(--header-height) + 2.5rem);
+  }
+
   .landing-header {
     padding: 1.5rem 0;
   }
 
-  .landing-logo img {
+  .landing-logo img:not(.landing-wordmark) {
     width: 40px;
     height: 40px;
   }
 
   .landing-logo .landing-wordmark {
     left: calc(40px + 1rem);
-    width: 89px;
+    width: auto;
     height: 20px;
   }
 }
 
 @media (max-width: 480px) {
+  .intro-landing-page {
+    --header-height: 80px;
+  }
+
+  .intro-main {
+    padding-top: calc(var(--header-height) + 2rem);
+  }
+
   .landing-header {
     padding: 1rem 0;
   }
 
-  .landing-logo img {
+  .landing-logo img:not(.landing-wordmark) {
     width: 36px;
     height: 36px;
   }
@@ -1930,15 +1958,18 @@ html.dark {
   }
 }
 
-/* Scroll indicator */
-.scroll-indicator {
-  position: fixed;
-  bottom: 3rem;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 95;
-  pointer-events: none;
-  animation: scrollIndicatorFadeIn 0.5s ease-out, scrollIndicatorBounce 2s ease-in-out infinite;
+/* Transition spacer - creates blank space for smooth scrolling */
+.transition-spacer {
+  min-height: 60vh;
+  width: 100%;
+}
+
+/* Scroll indicator - static element in flow */
+.scroll-indicator-static {
+  display: flex;
+  justify-content: center;
+  margin-top: 4rem;
+  animation: scrollIndicatorBounce 2s ease-in-out infinite;
 }
 
 .scroll-indicator-content {
@@ -1997,10 +2028,6 @@ html.dark {
 }
 
 @media (max-width: 768px) {
-  .scroll-indicator {
-    bottom: 2rem;
-  }
-
   .scroll-indicator-content {
     padding: 1rem 1.5rem;
   }
@@ -2012,5 +2039,9 @@ html.dark {
   .scroll-indicator-icon {
     width: 20px;
     height: 20px;
+  }
+
+  .transition-spacer {
+    min-height: 50vh;
   }
 }

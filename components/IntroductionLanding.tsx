@@ -664,7 +664,29 @@ export function IntroductionLanding() {
             Dive into the docs to see how Zero fits into your stack, and hop
             into our Discord to connect with the team and other builders.
           </p>
+
+          {/* Scroll indicator positioned below text */}
+          <div className="scroll-indicator-static">
+            <div className="scroll-indicator-content">
+              <svg
+                className="scroll-indicator-icon"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M12 5v14M19 12l-7 7-7-7" />
+              </svg>
+              <span>Keep scrolling to explore the docs</span>
+            </div>
+          </div>
         </section>
+
+        {/* Large blank space for scroll transition */}
+        <div className="transition-spacer"></div>
       </main>
 
       {/* Demo Modal */}

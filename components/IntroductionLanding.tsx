@@ -1,6 +1,7 @@
 'use client';
 
 import {useEffect, useRef, useState} from 'react';
+import Link from 'next/link';
 import {DocsPreview} from './DocsPreview';
 
 export function IntroductionLanding() {
@@ -252,7 +253,7 @@ export function IntroductionLanding() {
             the server in the background.
           </p>
           <p>
-            <em>But there's a catch:</em> almost all realistic apps have way too
+            <em>But there&apos;s a catch:</em> almost all realistic apps have way too
             much data to download ahead of time. There are usually complex
             permissions too &mdash; not all users can read and write all data.
           </p>
@@ -293,7 +294,7 @@ export function IntroductionLanding() {
                   <span className="variable">createClient</span>{' '}
                   <span className="punctuation">{'}'}</span>{' '}
                   <span className="keyword">from</span>{' '}
-                  <span className="string">'@supabase/supabase-js'</span>
+                  <span className="string">&apos;@supabase/supabase-js&apos;</span>
                   <span className="punctuation">;</span>
                   {'\n\n'}
                   <span className="keyword">const</span>{' '}
@@ -340,7 +341,7 @@ export function IntroductionLanding() {
                   <span className="variable">Zero</span>{' '}
                   <span className="punctuation">{'}'}</span>{' '}
                   <span className="keyword">from</span>{' '}
-                  <span className="string">'@rocicorp/zero'</span>
+                  <span className="string">&apos;@rocicorp/zero&apos;</span>
                   <span className="punctuation">;</span>
                   {'\n\n'}
                   <span className="keyword">const</span>{' '}
@@ -352,7 +353,7 @@ export function IntroductionLanding() {
                   {'{\n  '}
                   <span className="property">server</span>
                   <span className="punctuation">:</span>{' '}
-                  <span className="string">'http://localhost:4848'</span>
+                  <span className="string">&apos;http://localhost:4848&apos;</span>
                   <span className="punctuation">,</span>
                   {'\n  '}
                   <span className="property">schema</span>
@@ -365,7 +366,7 @@ export function IntroductionLanding() {
                   {'\n      '}
                   <span className="property">tableName</span>
                   <span className="punctuation">:</span>{' '}
-                  <span className="string">'issue'</span>
+                  <span className="string">&apos;issue&apos;</span>
                   <span className="punctuation">,</span>
                   {'\n    '}
                   <span className="punctuation">{'}'}</span>
@@ -400,13 +401,13 @@ export function IntroductionLanding() {
                   <span className="variable">useQuery</span>{' '}
                   <span className="punctuation">{'}'}</span>{' '}
                   <span className="keyword">from</span>{' '}
-                  <span className="string">'@rocicorp/zero/react'</span>
+                  <span className="string">&apos;@rocicorp/zero/react&apos;</span>
                   <span className="punctuation">;</span>
                   {'\n'}
                   <span className="keyword">import</span>{' '}
                   <span className="variable">z</span>{' '}
                   <span className="keyword">from</span>{' '}
-                  <span className="string">'./zero'</span>
+                  <span className="string">&apos;./zero&apos;</span>
                   <span className="punctuation">;</span>
                   {'\n\n'}
                   <span className="keyword">export</span>{' '}
@@ -475,23 +476,23 @@ export function IntroductionLanding() {
         <section className="section">
           <h2 className="subheading">Only with Zero</h2>
           <p>
-            Zero's query-driven sync enables a really powerful set of features.
+            Zero&apos;s query-driven sync enables a really powerful set of features.
             Some tools offer some of these features, but only Zero offers all of
             them together.
           </p>
 
           <div className="feature-grid">
-            <a
+            <Link
               className="feature-card feature-card--link"
               href="/docs/permissions"
             >
               <h3>Fine-Grained Permissions</h3>
               <p>
                 Define row- and field-level access rules so each user sees
-                exactly the data they're allowed to.
+                exactly the data they&apos;re allowed to.
               </p>
-            </a>
-            <a
+            </Link>
+            <Link
               className="feature-card feature-card--link"
               href="/docs/reading-data"
             >
@@ -500,15 +501,15 @@ export function IntroductionLanding() {
                 Only data returned by active queries is synced to the client —
                 no need to ship entire tables.
               </p>
-            </a>
-            <a className="feature-card feature-card--link" href="/docs/offline">
+            </Link>
+            <Link className="feature-card feature-card--link" href="/docs/offline">
               <h3>Client-First Reads & Writes</h3>
               <p>
                 Queries resolve on the client for instant results. Writes apply
                 immediately and sync seamlessly.
               </p>
-            </a>
-            <a
+            </Link>
+            <Link
               className="feature-card feature-card--link"
               href="/docs/writing-data"
             >
@@ -517,7 +518,7 @@ export function IntroductionLanding() {
                 Group multiple writes into one transaction. All succeed — or all
                 roll back together.
               </p>
-            </a>
+            </Link>
           </div>
         </section>
 
@@ -551,7 +552,7 @@ export function IntroductionLanding() {
             <div className="testimonial-card">
               <div className="testimonial-quote">
                 <p>
-                  We tried building our own sync layer. Should've just used Zero
+                  We tried building our own sync layer. Should&apos;ve just used Zero
                   from day one. Saved us months of development time.
                 </p>
               </div>
@@ -595,7 +596,7 @@ export function IntroductionLanding() {
               <div className="testimonial-quote">
                 <p>
                   Local-first with Zero means our app works offline and syncs
-                  seamlessly. Our users don't even notice when their connection
+                  seamlessly. Our users don&apos;t even notice when their connection
                   drops.
                 </p>
               </div>
@@ -616,7 +617,7 @@ export function IntroductionLanding() {
               <div className="testimonial-quote">
                 <p>
                   The developer experience is top-notch. Write queries, get
-                  reactive updates. It's that simple.
+                  reactive updates. It&apos;s that simple.
                 </p>
               </div>
               <div className="testimonial-author">

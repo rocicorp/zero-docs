@@ -26,7 +26,17 @@ export function DocsPreview() {
         // When fully scrolled (within 20px of bottom), navigate
         if (distanceFromBottom <= 20) {
           setHasNavigated(true);
-          router.push('/docs/quickstart');
+          // Lock scroll position temporarily
+          const currentScroll = window.scrollY;
+          document.body.style.overflow = 'hidden';
+          document.body.style.position = 'fixed';
+          document.body.style.top = `-${currentScroll}px`;
+          document.body.style.width = '100%';
+
+          // Navigate after a brief moment
+          setTimeout(() => {
+            router.push('/docs/quickstart');
+          }, 100);
         }
       } else {
         setScrollProgress(0);
@@ -37,15 +47,17 @@ export function DocsPreview() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [hasNavigated, router]);
 
+  const displayProgress = hasNavigated ? 1 : scrollProgress;
+
   return (
     <>
       {/* Docs preview */}
-      {scrollProgress > 0 && (
+      {displayProgress > 0 && (
         <div
           className="docs-preview-container"
           style={{
-            opacity: Math.pow(scrollProgress, 0.7),
-            transform: `translateY(${(1 - scrollProgress) * 200}px)`,
+            opacity: Math.pow(displayProgress, 0.7),
+            transform: `translateY(${(1 - displayProgress) * 200}px)`,
           }}
         >
           <div className="docs-preview-content">

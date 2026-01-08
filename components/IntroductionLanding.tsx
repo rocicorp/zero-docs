@@ -5,86 +5,11 @@ import Link from 'next/link';
 import {DocsPreview} from './DocsPreview';
 
 export function IntroductionLanding() {
-  const heroTitleRef = useRef<HTMLHeadingElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [showDemoModal, setShowDemoModal] = useState(false);
   const mainRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
-    // Hero intro animation with falling sparks
-    const createHeroIntroAnimation = () => {
-      const heroTitle = heroTitleRef.current;
-      if (!heroTitle) return;
-
-      const heroTitleText = heroTitle.querySelector('.hero-title__text');
-      const instantWord = heroTitleText?.querySelector('em');
-
-      if (!instantWord) return;
-
-      // Add slam animation class
-      heroTitle.classList.add('hero-slam-in');
-
-      // Create falling sparks from the word "Instant"
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          const instantRect = instantWord.getBoundingClientRect();
-          const colors = [
-            '#fc218a',
-            '#ff4da6',
-            '#ff6bb8',
-            '#ffa8d5',
-            '#e91e8c',
-            '#ff9900',
-            '#c157ff',
-            '#4c6bff',
-            '#00c2ff',
-          ];
-
-          for (let i = 0; i < 40; i++) {
-            const particle = document.createElement('div');
-            particle.className = 'hero-spark-particle';
-
-            const leftPadding = 0;
-            const rightPadding = 10;
-            const randomX =
-              instantRect.left -
-              leftPadding +
-              Math.random() * (instantRect.width + leftPadding + rightPadding);
-            const yPosition = Math.pow(Math.random(), 0.5);
-            const randomY = instantRect.top + yPosition * instantRect.height;
-
-            const color = colors[Math.floor(Math.random() * colors.length)];
-            particle.style.color = color;
-
-            particle.style.left = `${randomX}px`;
-            particle.style.top = `${randomY}px`;
-
-            const horizontalDrift = (Math.random() - 0.5) * 60;
-            const fallDistance = 80 + Math.random() * 120;
-
-            particle.style.setProperty('--drift-x', `${horizontalDrift}px`);
-            particle.style.setProperty('--fall-y', `${fallDistance}px`);
-
-            const duration = 0.5 + Math.random() * 0.3;
-            const delay = Math.random() * 0.1;
-            particle.style.animation = `heroSparkFall ${duration}s ease-in forwards`;
-            particle.style.animationDelay = `${delay}s`;
-
-            document.body.appendChild(particle);
-
-            setTimeout(
-              () => {
-                particle.remove();
-              },
-              (duration + delay) * 1000,
-            );
-          }
-        });
-      });
-    };
-
-    createHeroIntroAnimation();
-
     // Handle escape key for demo modal
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -185,7 +110,7 @@ export function IntroductionLanding() {
             </span>
             Build absurdly <em>fast</em> web applications with Zero
           </span>
-          <h1 className="hero-title" ref={heroTitleRef}>
+          <h1 className="hero-title">
             <span className="hero-title__text">
               <em>Instant</em> Queries by Default
             </span>

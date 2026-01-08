@@ -88,9 +88,9 @@ export function IntroductionLanding() {
             >
               GitHub
             </a>
-            <a href="/docs/quickstart" className="landing-nav-button">
+            <Link href="/docs/quickstart" className="landing-nav-button">
               Docs
-            </a>
+            </Link>
           </nav>
         </div>
       </header>
@@ -174,7 +174,7 @@ export function IntroductionLanding() {
         <section className="section section-intro">
           <p>
             Sync engines enable instant UI by downloading data to the client
-            before it's needed. All read and writes are local and synced with
+            before it&apos;s needed. All read and writes are local and synced with
             the server in the background.
           </p>
           <p>

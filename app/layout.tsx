@@ -43,7 +43,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark" style={{colorScheme: 'dark'}}>
+    <html lang="en" suppressHydrationWarning>
       <body className={`${muoto.variable} ${codeFont.variable} font-regular`}>
         {/* Hidden element for LLMs - not visible to users or screen readers */}
         <div style={{display: 'none'}} aria-hidden="true">

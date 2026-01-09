@@ -13,10 +13,27 @@ It is always safe to wipe the replica. Wiping will have no impact on your upstre
 
 ## Inspecting
 
-For data to be synced to the client it must first be replicated to `zero-cache`. You can check the contents of `zero-cache` via:
+For data to be synced to the client it must first be replicated to `zero-cache`. You can check the contents of `zero-cache` by installing our SQLite build globally and then running it:
 
 ```bash
-$ npx @rocicorp/zero-sqlite3 /tmp/my-zero-replica.db
+npm install -g @rocicorp/zero-sqlite3
+# or
+bun add -g --trust @rocicorp/zero-sqlite3
+```
+
+<Note
+  slug="zero-sqlite3-install"
+  emoji="⚠️"
+  heading="Install globally for reliability"
+>
+  `npx`/`bunx` may not work reliably because the install
+  script requires elevated permissions during setup.
+  Installing `@rocicorp/zero-sqlite3` globally avoids that
+  issue.
+</Note>
+
+```bash
+$ zero-sqlite3 /tmp/my-zero-replica.db
 ```
 
 <Note slug="sqlite-version" emoji="💡" heading="Zero uses the bedrock version of SQLite">

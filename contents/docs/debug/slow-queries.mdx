@@ -4,14 +4,14 @@ title: Slow Queries
 
 In the `zero-cache` logs, you may see statements indicating a query is slow:
 
-```shell
+```json
 {
-    "level": "DEBUG",
-    "worker": "syncer",
-    "component": "view-syncer",
-    "hydrationTimeMs": 1339,
-    "message": "Total rows considered: 146"
-  },
+  "level": "DEBUG",
+  "worker": "syncer",
+  "component": "view-syncer",
+  "hydrationTimeMs": 1339,
+  "message": "Total rows considered: 146"
+}
 ```
 
 or:

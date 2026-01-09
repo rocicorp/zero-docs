@@ -136,14 +136,14 @@ Zero delegates the single-table queries to `SQLite`, which has a sophisticated q
 
 For the joins, Zero implements its own cost-based planner to choose the best join order and algorithm.
 
-To view the plans selected by `SQLite`, see the `plans` field returned by `analyze()` or `analyzeQuery()`. This contains the output of SQLite's [`EXPLAIN QUERY PLAN`](https://www.sqlite.org/eqp.html) command for each SQLite query used:
+To view the plans selected by `SQLite`, see the `sqlitePlans` field returned by `analyze()` or `analyzeQuery()`. This contains the output of SQLite's [`EXPLAIN QUERY PLAN`](https://www.sqlite.org/eqp.html) command for each SQLite query used:
 
 <ImageLightbox
   src="/images/debugging/inspector/table-plans.png"
   caption="SQLite EXPLAIN QUERY PLAN output"
 />
 
-To view the join plan selected by Zero, call `analyze()` or `analyzeQuery()` with the `joinPlans` option set to true and see the `plannerEvents` field in the output:
+To view the join plan selected by Zero, call `analyze()` or `analyzeQuery()` with the `joinPlans` option set to true and see the `joinPlans` field in the output:
 
 <ImageLightbox
   src="/images/debugging/inspector/join-plans.png"

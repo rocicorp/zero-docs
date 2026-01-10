@@ -159,6 +159,8 @@ If `zero-cache` itself crashes, or if the [mutate](/docs/mutators) or [query](/d
 
 This type of error is unlikely to resolve just by retrying, so Zero doesn't try. The app can retry the connection manually by calling `zero.connection.connect()`.
 
+Writes are not accepted while Zero is in the 'error' state.
+
 ### Auth Required
 
 If the [mutate](/docs/mutators) or [query](/docs/queries) endpoints return a 401 or 403 status code, Zero transitions to the `needs-auth` state.

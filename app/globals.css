@@ -1930,8 +1930,24 @@ html.dark {
 .scroll-indicator-static {
   display: flex;
   justify-content: center;
+  width: 100%;
   margin-top: 4rem;
   animation: scrollIndicatorBounce 2s ease-in-out infinite;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.scroll-indicator-static:hover .scroll-indicator-content {
+  border-color: rgba(252, 33, 138, 0.4);
+  box-shadow:
+    0 4px 20px rgba(252, 33, 138, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.scroll-indicator-static:active .scroll-indicator-content {
+  transform: scale(0.98);
 }
 
 .scroll-indicator-content {
@@ -1953,6 +1969,7 @@ html.dark {
     0 4px 16px rgba(0, 0, 0, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(12px);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.1s ease;
 }
 
 .scroll-indicator-content span {

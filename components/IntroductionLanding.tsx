@@ -2,12 +2,14 @@
 
 import {useEffect, useRef, useState} from 'react';
 import Link from 'next/link';
+import {useRouter} from 'next/navigation';
 import {DocsPreview} from './DocsPreview';
 
 export function IntroductionLanding() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [showDemoModal, setShowDemoModal] = useState(false);
   const mainRef = useRef<HTMLElement>(null);
+  const router = useRouter();
 
   useEffect(() => {
     // Handle escape key for demo modal
@@ -67,6 +69,10 @@ export function IntroductionLanding() {
     };
 
     requestAnimationFrame(animateScroll);
+  };
+
+  const scrollToDocs = () => {
+    router.push('/docs/quickstart');
   };
 
   return (
@@ -592,7 +598,7 @@ export function IntroductionLanding() {
           </p>
 
           {/* Scroll indicator positioned below text */}
-          <div className="scroll-indicator-static">
+          <button className="scroll-indicator-static" onClick={scrollToDocs}>
             <div className="scroll-indicator-content">
               <svg
                 className="scroll-indicator-icon"
@@ -608,7 +614,7 @@ export function IntroductionLanding() {
               </svg>
               <span>Keep scrolling to explore the docs</span>
             </div>
-          </div>
+          </button>
         </section>
 
         {/* Large blank space for scroll transition */}

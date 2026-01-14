@@ -2074,7 +2074,7 @@ html:not(.dark) .intro-landing-page .how-it-works-svg {
 }
 
 .landing-logo img:not(.landing-wordmark):hover {
-  animation: logo-spin 0.3s ease-in-out;
+  animation: logo-spin 1.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .landing-logo .landing-wordmark {
@@ -2109,8 +2109,14 @@ html:not(.dark) .intro-landing-page .how-it-works-svg {
   0% {
     transform: rotate(0deg);
   }
+  5% {
+    transform: rotate(0deg);
+  }
+  65% {
+    transform: rotate(1080deg);
+  }
   100% {
-    transform: rotate(720deg);
+    transform: rotate(1080deg);
   }
 }
 

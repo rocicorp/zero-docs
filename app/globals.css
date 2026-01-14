@@ -1742,6 +1742,147 @@ html.dark {
   margin-bottom: 0;
 }
 
+.intro-landing-page .cloud-zero-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.intro-landing-page .cloud-zero-list {
+  flex: 1;
+}
+
+.intro-landing-page .cloud-zero-pricing {
+  margin-top: 1.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid rgba(128, 128, 128, 0.2);
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+.intro-landing-page .cloud-zero-price {
+  font-size: clamp(1.75rem, 1.5rem + 1vw, 2.25rem);
+  font-weight: 800;
+  color: hsl(var(--foreground));
+  letter-spacing: -0.02em;
+}
+
+.intro-landing-page .cloud-zero-price-unit {
+  font-size: clamp(1rem, 0.9rem + 0.3vw, 1.125rem);
+  font-weight: 500;
+  color: hsl(var(--foreground));
+  opacity: 0.7;
+}
+
+.intro-landing-page .cloud-zero-price-secondary {
+  font-size: clamp(0.875rem, 0.8rem + 0.2vw, 1rem);
+  font-weight: 500;
+  color: hsl(var(--foreground));
+  opacity: 0.5;
+  margin-left: 0.5rem;
+}
+
+.intro-landing-page .cloud-zero-cta-container {
+  width: 100%;
+  margin-top: 2.5rem;
+  border-radius: 1rem;
+  background: hsl(var(--background));
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.05),
+    0 4px 12px rgba(0, 0, 0, 0.03),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  position: relative;
+  isolation: isolate;
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.1) 0%,
+      rgba(255, 255, 255, 0) 50%,
+      rgba(0, 0, 0, 0.03) 100%
+    ),
+    hsl(var(--background));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.intro-landing-page .cloud-zero-cta-container::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: conic-gradient(
+    from var(--hero-byline-angle),
+    #ff9900 0deg,
+    #ff5e5e 60deg,
+    #c157ff 120deg,
+    #4c6bff 180deg,
+    #00c2ff 240deg,
+    #00d98b 300deg,
+    #ff9900 360deg
+  );
+  z-index: -1;
+  animation: heroBylineOrbit 3.8s linear infinite;
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+.intro-landing-page .cloud-zero-cta-prompt {
+  padding: 4rem;
+  max-width: 36rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  text-align: center;
+}
+
+.intro-landing-page .cloud-zero-cta-buttons {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.intro-landing-page .cloud-zero-cta-buttons .load-demo-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+}
+
+.intro-landing-page .cloud-zero-cta-buttons .load-demo-btn svg {
+  width: 1.25rem;
+  height: 1.25rem;
+  flex-shrink: 0;
+}
+
+.dark .intro-landing-page .cloud-zero-cta-container {
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.3),
+    0 4px 12px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.05) 0%,
+      rgba(255, 255, 255, 0) 50%,
+      rgba(0, 0, 0, 0.1) 100%
+    ),
+    hsl(var(--background));
+}
+
 .dark .intro-landing-page .cloud-zero-card {
   border-color: rgba(255, 255, 255, 0.1);
   box-shadow:

@@ -181,13 +181,14 @@ export function IntroductionLanding() {
         <section className="section section-intro">
           <p>
             Sync engines enable instant UI by downloading data to the client
-            before it&apos;s needed. All read and writes are local and synced with
-            the server in the background.
+            before it&apos;s needed. All read and writes are local and synced
+            with the server in the background.
           </p>
           <p>
-            <em>But there&apos;s a catch:</em> almost all realistic apps have way too
-            much data to download ahead of time. There are usually complex
-            permissions too &mdash; not all users can read and write all data.
+            <em>But there&apos;s a catch:</em> almost all realistic apps have
+            way too much data to download ahead of time. There are usually
+            complex permissions too &mdash; not all users can read and write all
+            data.
           </p>
           <p>
             We started the Zero project two years ago to solve these problems
@@ -204,8 +205,8 @@ export function IntroductionLanding() {
               <div className="demo-prompt">
                 <h3 className="demo-prompt-title">Try it out right now.</h3>
                 <p className="demo-intro-text">
-                  We have not auto-loaded this demo because we really want you
-                  to see how fast it loads.
+                  Our Gigabugs demo has 1.2 million rows, and loads in less than
+                  2 seconds.
                 </p>
                 <button className="load-demo-btn">Sync 1TB of Data</button>
               </div>
@@ -226,7 +227,9 @@ export function IntroductionLanding() {
                   <span className="variable">createClient</span>{' '}
                   <span className="punctuation">{'}'}</span>{' '}
                   <span className="keyword">from</span>{' '}
-                  <span className="string">&apos;@supabase/supabase-js&apos;</span>
+                  <span className="string">
+                    &apos;@supabase/supabase-js&apos;
+                  </span>
                   <span className="punctuation">;</span>
                   {'\n\n'}
                   <span className="keyword">const</span>{' '}
@@ -285,7 +288,9 @@ export function IntroductionLanding() {
                   {'{\n  '}
                   <span className="property">server</span>
                   <span className="punctuation">:</span>{' '}
-                  <span className="string">&apos;http://localhost:4848&apos;</span>
+                  <span className="string">
+                    &apos;http://localhost:4848&apos;
+                  </span>
                   <span className="punctuation">,</span>
                   {'\n  '}
                   <span className="property">schema</span>
@@ -333,7 +338,9 @@ export function IntroductionLanding() {
                   <span className="variable">useQuery</span>{' '}
                   <span className="punctuation">{'}'}</span>{' '}
                   <span className="keyword">from</span>{' '}
-                  <span className="string">&apos;@rocicorp/zero/react&apos;</span>
+                  <span className="string">
+                    &apos;@rocicorp/zero/react&apos;
+                  </span>
                   <span className="punctuation">;</span>
                   {'\n'}
                   <span className="keyword">import</span>{' '}
@@ -408,9 +415,9 @@ export function IntroductionLanding() {
         <section className="section">
           <h2 className="subheading">Only with Zero</h2>
           <p>
-            Zero&apos;s query-driven sync enables a really powerful set of features.
-            Some tools offer some of these features, but only Zero offers all of
-            them together.
+            Zero&apos;s query-driven sync enables a really powerful set of
+            features. Some tools offer some of these features, but only Zero
+            offers all of them together.
           </p>
 
           <div className="feature-grid">
@@ -434,7 +441,10 @@ export function IntroductionLanding() {
                 no need to ship entire tables.
               </p>
             </Link>
-            <Link className="feature-card feature-card--link" href="/docs/offline">
+            <Link
+              className="feature-card feature-card--link"
+              href="/docs/offline"
+            >
               <h3>Client-First Reads & Writes</h3>
               <p>
                 Queries resolve on the client for instant results. Writes apply
@@ -484,8 +494,8 @@ export function IntroductionLanding() {
             <div className="testimonial-card">
               <div className="testimonial-quote">
                 <p>
-                  We tried building our own sync layer. Should&apos;ve just used Zero
-                  from day one. Saved us months of development time.
+                  We tried building our own sync layer. Should&apos;ve just used
+                  Zero from day one. Saved us months of development time.
                 </p>
               </div>
               <div className="testimonial-author">
@@ -528,8 +538,8 @@ export function IntroductionLanding() {
               <div className="testimonial-quote">
                 <p>
                   Local-first with Zero means our app works offline and syncs
-                  seamlessly. Our users don&apos;t even notice when their connection
-                  drops.
+                  seamlessly. Our users don&apos;t even notice when their
+                  connection drops.
                 </p>
               </div>
               <div className="testimonial-author">
@@ -587,6 +597,53 @@ export function IntroductionLanding() {
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="section section-cloud-zero">
+          <div className="cloud-zero-header">
+            <h2 className="subheading">Cloud Zero</h2>
+            <span className="coming-soon-badge">Coming very soon</span>
+          </div>
+
+          <div className="cloud-zero-preview">
+            <img
+              src="/images/cloud-zero-dashboard.png"
+              alt="Cloud Zero Dashboard"
+              className="cloud-zero-image"
+            />
+          </div>
+
+          <div className="cloud-zero-grid">
+            <div className="cloud-zero-card">
+              <h3>Traditional SaaS</h3>
+              <ul className="cloud-zero-list">
+                <li>
+                  Professionally managed, monitored, and upgraded by Rocicorp
+                </li>
+                <li>
+                  Runs in our cluster as a traditional cloud infra product
+                </li>
+                <li>$30/vcpu/mo</li>
+                <li>$0.05/GB/mo</li>
+              </ul>
+            </div>
+            <div className="cloud-zero-card">
+              <h3>BYOC</h3>
+              <ul className="cloud-zero-list">
+                <li>
+                  Professionally managed, monitored, and upgraded by Rocicorp
+                </li>
+                <li>Runs in your own AWS vpc</li>
+                <li>
+                  We have only limited access required to run the service, which
+                  can be revoked
+                </li>
+                <li>Data remains within your org</li>
+                <li>Utilize your own AWS pricing and commitments</li>
+                <li>$100/mo/vcpu</li>
+              </ul>
             </div>
           </div>
         </section>

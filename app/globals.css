@@ -26,6 +26,7 @@
     --radius: 0.5rem;
     --primary-highlight: 331.2 97.3% 55.9%;
     --primary-highlight-foreground: 0 0% 100%;
+    --docs-logo-accent: 186 100% 35%;
 
     /* Root page */
     --paragraph-color: hsl(0, 0%, 15%);
@@ -58,6 +59,7 @@
     --ring: 240 4.9% 83.9%;
     --primary-highlight: 331.2 97.3% 55.9%;
     --primary-highlight-foreground: 0 0% 100%;
+    --docs-logo-accent: 180 100% 50%;
 
     /* Root page */
     --paragraph-color: #d4d4d8;
@@ -66,6 +68,14 @@
     --inline-code-foreground: rgb(39, 252, 174);
     --inline-code-background: rgb(26, 27, 38);
   }
+}
+
+.inner-docs-nav .zero-alpha-logo {
+  color: hsl(var(--foreground));
+}
+
+.inner-docs-nav .zero-alpha-logo .logo-accent {
+  color: hsl(var(--docs-logo-accent));
 }
 
 .theme-toggle-group {

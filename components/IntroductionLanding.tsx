@@ -4,6 +4,29 @@ import {useEffect, useRef, useState} from 'react';
 import Link from 'next/link';
 import {useRouter} from 'next/navigation';
 import {DocsPreview} from './DocsPreview';
+import hljs from 'highlight.js/lib/core';
+import typescript from 'highlight.js/lib/languages/typescript';
+
+// Register TypeScript/TSX for syntax highlighting
+hljs.registerLanguage('typescript', typescript);
+
+const codeExample = `function Playlist({id}: {id: string}) {
+  const [playlist] = useQuery(
+    zero.query.playlist
+      .related('tracks', track => track
+        .related('album')
+        .related('artist')
+        .orderBy('playcount', 'asc'))
+      .where('id', id)
+      .one()
+  );
+
+  const onStar = (id: string, starred: boolean) => {
+    zero.mutate.track.update({id, starred});
+  };
+
+  // render playlist...
+}`;
 
 export function IntroductionLanding() {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -214,201 +237,130 @@ export function IntroductionLanding() {
           </div>
         </section>
 
-        <section className="section">
+        <section className="section section-how-it-works">
           <h2 className="subheading">How it Works</h2>
 
-          <div className="step-section">
-            <h3>Step 1: Install &amp; start a Postgres database</h3>
-            <div className="code-block glass-panel">
-              <pre>
-                <code>
-                  <span className="keyword">import</span>{' '}
-                  <span className="punctuation">{'{'}</span>{' '}
-                  <span className="variable">createClient</span>{' '}
-                  <span className="punctuation">{'}'}</span>{' '}
-                  <span className="keyword">from</span>{' '}
-                  <span className="string">
-                    &apos;@supabase/supabase-js&apos;
-                  </span>
-                  <span className="punctuation">;</span>
-                  {'\n\n'}
-                  <span className="keyword">const</span>{' '}
-                  <span className="variable">supabase</span>{' '}
-                  <span className="operator">=</span>{' '}
-                  <span className="function">createClient</span>
-                  <span className="punctuation">(</span>
-                  {'\n  '}
-                  <span className="object">process</span>
-                  <span className="punctuation">.</span>
-                  <span className="object">env</span>
-                  <span className="punctuation">.</span>
-                  <span className="property">SUPABASE_URL</span>
-                  <span className="punctuation">,</span>
-                  {'\n  '}
-                  <span className="object">process</span>
-                  <span className="punctuation">.</span>
-                  <span className="object">env</span>
-                  <span className="punctuation">.</span>
-                  <span className="property">SUPABASE_KEY</span>
-                  {'\n'}
-                  <span className="punctuation">);</span>
-                  {'\n\n'}
-                  <span className="keyword">export</span>{' '}
-                  <span className="keyword">default</span>{' '}
-                  <span className="variable">supabase</span>
-                  <span className="punctuation">;</span>
-                </code>
-              </pre>
-            </div>
+          <div className="how-it-works-illustration">
+            <img
+              src="/images/how-it-works.svg"
+              alt="Zero Architecture Diagram"
+              className="how-it-works-svg"
+            />
+          </div>
+
+          <div className="how-it-works-description">
             <p>
-              Start your local Postgres instance and get the database ready for
-              development.
+              You get a client-side API that looks like an embedded database,
+              but to which you can issue arbitrary hybrid queries that span the
+              entire database, including the server.
+            </p>
+            <p>
+              Behind the scenes, Zero synchronizes query results continuously to
+              a client-side persistent cache. This cache is used automatically
+              for future queries whenever possible.
             </p>
           </div>
 
-          <div className="step-section">
-            <h3>Step 2: Run zero-cache</h3>
-            <div className="code-block glass-panel">
-              <pre>
-                <code>
-                  <span className="keyword">import</span>{' '}
-                  <span className="punctuation">{'{'}</span>{' '}
-                  <span className="variable">Zero</span>{' '}
-                  <span className="punctuation">{'}'}</span>{' '}
-                  <span className="keyword">from</span>{' '}
-                  <span className="string">&apos;@rocicorp/zero&apos;</span>
-                  <span className="punctuation">;</span>
-                  {'\n\n'}
-                  <span className="keyword">const</span>{' '}
-                  <span className="variable">z</span>{' '}
-                  <span className="operator">=</span>{' '}
-                  <span className="keyword">new</span>{' '}
-                  <span className="function">Zero</span>
-                  <span className="punctuation">(</span>
-                  {'{\n  '}
-                  <span className="property">server</span>
-                  <span className="punctuation">:</span>{' '}
-                  <span className="string">
-                    &apos;http://localhost:4848&apos;
-                  </span>
-                  <span className="punctuation">,</span>
-                  {'\n  '}
-                  <span className="property">schema</span>
-                  <span className="punctuation">:</span>{' '}
-                  <span className="punctuation">{'{'}</span>
-                  {'\n    '}
-                  <span className="property">issues</span>
-                  <span className="punctuation">:</span>{' '}
-                  <span className="punctuation">{'{'}</span>
-                  {'\n      '}
-                  <span className="property">tableName</span>
-                  <span className="punctuation">:</span>{' '}
-                  <span className="string">&apos;issue&apos;</span>
-                  <span className="punctuation">,</span>
-                  {'\n    '}
-                  <span className="punctuation">{'}'}</span>
-                  <span className="punctuation">,</span>
-                  {'\n  '}
-                  <span className="punctuation">{'}'}</span>
-                  <span className="punctuation">,</span>
-                  {'\n'}
-                  <span className="punctuation">{'}'}</span>
-                  <span className="punctuation">);</span>
-                  {'\n\n'}
-                  <span className="keyword">export</span>{' '}
-                  <span className="keyword">default</span>{' '}
-                  <span className="variable">z</span>
-                  <span className="punctuation">;</span>
-                </code>
-              </pre>
-            </div>
-            <p>
-              In another terminal tab, start the local zero-cache service to
-              enable query syncing and reactivity.
-            </p>
+          <div className="code-block glass-panel">
+            <pre>
+              <code
+                className="language-typescript"
+                dangerouslySetInnerHTML={{
+                  __html: hljs.highlight(codeExample, {language: 'typescript'})
+                    .value,
+                }}
+              />
+            </pre>
           </div>
 
-          <div className="step-section">
-            <h3>Step 3: Start your application</h3>
-            <div className="code-block glass-panel">
-              <pre>
-                <code>
-                  <span className="keyword">import</span>{' '}
-                  <span className="punctuation">{'{'}</span>{' '}
-                  <span className="variable">useQuery</span>{' '}
-                  <span className="punctuation">{'}'}</span>{' '}
-                  <span className="keyword">from</span>{' '}
-                  <span className="string">
-                    &apos;@rocicorp/zero/react&apos;
-                  </span>
-                  <span className="punctuation">;</span>
-                  {'\n'}
-                  <span className="keyword">import</span>{' '}
-                  <span className="variable">z</span>{' '}
-                  <span className="keyword">from</span>{' '}
-                  <span className="string">&apos;./zero&apos;</span>
-                  <span className="punctuation">;</span>
-                  {'\n\n'}
-                  <span className="keyword">export</span>{' '}
-                  <span className="keyword">function</span>{' '}
-                  <span className="function">IssuesList</span>
-                  <span className="punctuation">()</span>{' '}
-                  <span className="punctuation">{'{'}</span>
-                  {'\n  '}
-                  <span className="keyword">const</span>{' '}
-                  <span className="variable">issues</span>{' '}
-                  <span className="operator">=</span>{' '}
-                  <span className="function">useQuery</span>
-                  <span className="punctuation">(</span>
-                  <span className="variable">z</span>
-                  <span className="punctuation">.</span>
-                  <span className="property">query</span>
-                  <span className="punctuation">.</span>
-                  <span className="property">issues</span>
-                  <span className="punctuation">);</span>
-                  {'\n\n  '}
-                  <span className="keyword">return</span>{' '}
-                  <span className="punctuation">(</span>
-                  {'\n    '}
-                  <span className="tag">&lt;div&gt;</span>
-                  {'\n      '}
-                  <span className="punctuation">{'{'}</span>
-                  <span className="variable">issues</span>
-                  <span className="punctuation">.</span>
-                  <span className="function">map</span>
-                  <span className="punctuation">(</span>
-                  <span className="parameter">issue</span>{' '}
-                  <span className="operator">=&gt;</span>{' '}
-                  <span className="punctuation">(</span>
-                  {'\n        '}
-                  <span className="tag">&lt;div</span>{' '}
-                  <span className="attribute">key</span>
-                  <span className="operator">=</span>
-                  <span className="punctuation">{'{'}</span>
-                  <span className="parameter">issue</span>
-                  <span className="punctuation">.</span>
-                  <span className="property">id</span>
-                  <span className="punctuation">{'}'}</span>
-                  <span className="tag">&gt;</span>
-                  <span className="punctuation">{'{'}</span>
-                  <span className="parameter">issue</span>
-                  <span className="punctuation">.</span>
-                  <span className="property">title</span>
-                  <span className="punctuation">{'}'}</span>
-                  <span className="tag">&lt;/div&gt;</span>
-                  {'\n      '}
-                  <span className="punctuation">))</span>
-                  <span className="punctuation">{'}'}</span>
-                  {'\n    '}
-                  <span className="tag">&lt;/div&gt;</span>
-                  {'\n  '}
-                  <span className="punctuation">);</span>
-                  {'\n'}
-                  <span className="punctuation">{'}'}</span>
-                </code>
-              </pre>
+          <p>This architecture provides:</p>
+          <div className="feature-grid">
+            <div className="feature-card feature-card--icon-left">
+              <div className="feature-card-icon-left">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z" />
+                </svg>
+              </div>
+              <div className="feature-card-content">
+                <h3>Instant Response</h3>
+                <p>User interactions update the UI within the next frame.</p>
+              </div>
             </div>
-            <p>In a final terminal tab, start your application.</p>
+            <div className="feature-card feature-card--icon-left">
+              <div className="feature-card-icon-left">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M2 8.82a15 15 0 0 1 20 0" />
+                  <path d="M21.378 16.626a1 1 0 0 0-3.004-3.004l-4.01 4.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z" />
+                  <path d="M5 12.859a10 10 0 0 1 10.5-2.222" />
+                  <path d="M8.5 16.429a5 5 0 0 1 3-1.406" />
+                </svg>
+              </div>
+              <div className="feature-card-content">
+                <h3>Automatic Reactivity</h3>
+                <p>Changes propagate live to all connected users.</p>
+              </div>
+            </div>
+            <div className="feature-card feature-card--icon-left">
+              <div className="feature-card-icon-left">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="m18 16 4-4-4-4" />
+                  <path d="m6 8-4 4 4 4" />
+                  <path d="m14.5 4-5 16" />
+                </svg>
+              </div>
+              <div className="feature-card-content">
+                <h3>Faster Development</h3>
+                <p>
+                  Build most features entirely client-side without new server
+                  APIs.
+                </p>
+              </div>
+            </div>
+            <div className="feature-card feature-card--icon-left">
+              <div className="feature-card-icon-left">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                  <path d="M14 15H9v-5" />
+                  <path d="M16 3h5v5" />
+                  <path d="M21 3 9 15" />
+                </svg>
+              </div>
+              <div className="feature-card-content">
+                <h3>Scalability</h3>
+                <p>
+                  Handles arbitrary backend data amounts with on-demand
+                  synchronization.
+                </p>
+              </div>
+            </div>
           </div>
         </section>
 
@@ -422,44 +374,115 @@ export function IntroductionLanding() {
 
           <div className="feature-grid">
             <Link
-              className="feature-card feature-card--link"
+              className="feature-card feature-card--icon-left feature-card--link"
               href="/docs/permissions"
             >
-              <h3>Fine-Grained Permissions</h3>
-              <p>
-                Define row- and field-level access rules so each user sees
-                exactly the data they&apos;re allowed to.
-              </p>
+              <div className="feature-card-icon-left">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M12.4 2.7a2.5 2.5 0 0 1 3.4 0l5.5 5.5a2.5 2.5 0 0 1 0 3.4l-3.7 3.7a2.5 2.5 0 0 1-3.4 0L8.7 9.8a2.5 2.5 0 0 1 0-3.4z" />
+                  <path d="m14 7 3 3" />
+                  <path d="m9.4 10.6-6.814 6.814A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814" />
+                </svg>
+              </div>
+              <div className="feature-card-content">
+                <h3>Fine-Grained Permissions</h3>
+                <p>
+                  Define row- and field-level access rules so each user sees
+                  exactly the data they&apos;re allowed to.
+                </p>
+              </div>
             </Link>
             <Link
-              className="feature-card feature-card--link"
+              className="feature-card feature-card--icon-left feature-card--link"
               href="/docs/reading-data"
             >
-              <h3>Partial Sync</h3>
-              <p>
-                Only data returned by active queries is synced to the client —
-                no need to ship entire tables.
-              </p>
+              <div className="feature-card-icon-left">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                  <path d="M3 3v5h5" />
+                  <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" />
+                  <path d="M16 16h5v5" />
+                  <circle cx="12" cy="12" r="1" />
+                </svg>
+              </div>
+              <div className="feature-card-content">
+                <h3>Partial Sync</h3>
+                <p>
+                  Only data returned by active queries is synced to the client —
+                  no need to ship entire tables.
+                </p>
+              </div>
             </Link>
             <Link
-              className="feature-card feature-card--link"
+              className="feature-card feature-card--icon-left feature-card--link"
               href="/docs/offline"
             >
-              <h3>Client-First Reads & Writes</h3>
-              <p>
-                Queries resolve on the client for instant results. Writes apply
-                immediately and sync seamlessly.
-              </p>
+              <div className="feature-card-icon-left">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="m3 16 4 4 4-4" />
+                  <path d="M7 20V4" />
+                  <path d="m21 8-4-4-4 4" />
+                  <path d="M17 4v16" />
+                </svg>
+              </div>
+              <div className="feature-card-content">
+                <h3>Client-First Reads & Writes</h3>
+                <p>
+                  Queries resolve on the client for instant results. Writes
+                  apply immediately and sync seamlessly.
+                </p>
+              </div>
             </Link>
             <Link
-              className="feature-card feature-card--link"
+              className="feature-card feature-card--icon-left feature-card--link"
               href="/docs/writing-data"
             >
-              <h3>Atomic Transactions</h3>
-              <p>
-                Group multiple writes into one transaction. All succeed — or all
-                roll back together.
-              </p>
+              <div className="feature-card-icon-left">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <circle cx="12" cy="12" r="1" />
+                  <path d="M20.2 20.2c2.04-2.03.02-7.36-4.5-11.9-4.54-4.52-9.87-6.54-11.9-4.5-2.04 2.03-.02 7.36 4.5 11.9 4.54 4.52 9.87 6.54 11.9 4.5Z" />
+                  <path d="M15.7 15.7c4.52-4.54 6.54-9.87 4.5-11.9-2.03-2.04-7.36-.02-11.9 4.5-4.52 4.54-6.54 9.87-4.5 11.9 2.03 2.04 7.36.02 11.9-4.5Z" />
+                </svg>
+              </div>
+              <div className="feature-card-content">
+                <h3>Atomic Transactions</h3>
+                <p>
+                  Group multiple writes into one transaction. Every change
+                  succeeds together — or the entire batch rolls back.
+                </p>
+              </div>
             </Link>
           </div>
         </section>

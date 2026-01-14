@@ -622,7 +622,6 @@ html.dark {
   cursor: default;
 }
 
-
 .intro-landing-page .hero-title__text {
   display: inline;
   font-weight: 900;
@@ -814,7 +813,6 @@ html.dark {
   }
 }
 
-
 .intro-landing-page .section-intro p,
 .intro-landing-page .section p {
   font-size: clamp(1.125rem, 1.0739rem + 0.2273vw, 1.25rem);
@@ -922,6 +920,39 @@ html.dark {
 .intro-landing-page .feature-card--with-icon p {
   flex-basis: 100%;
   margin-top: 0.75rem;
+}
+
+.intro-landing-page .feature-card--icon-left {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.25rem;
+}
+
+.intro-landing-page .feature-card-icon-left {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: hsl(var(--foreground));
+}
+
+.intro-landing-page .feature-card-icon-left svg {
+  width: 28px;
+  height: 28px;
+  display: block;
+}
+
+.intro-landing-page .feature-card-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.intro-landing-page .feature-card-content h3 {
+  margin-bottom: 0.5rem;
+}
+
+.intro-landing-page .feature-card-content p {
+  margin-bottom: 0;
 }
 
 .intro-landing-page .feature-card h3 {
@@ -1468,6 +1499,43 @@ html.dark {
     hsl(var(--background));
 }
 
+/* How it Works section */
+.intro-landing-page .section-how-it-works {
+  margin-top: clamp(3rem, 6vw, 6rem);
+}
+
+.intro-landing-page .how-it-works-illustration {
+  width: 100%;
+  margin: 3rem 0;
+  aspect-ratio: 731 / 176;
+}
+
+.intro-landing-page .how-it-works-svg {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.light .intro-landing-page .how-it-works-svg,
+html:not(.dark) .intro-landing-page .how-it-works-svg {
+  filter: invert(1) hue-rotate(180deg);
+}
+
+.intro-landing-page .how-it-works-description {
+  margin-bottom: 2rem;
+}
+
+.intro-landing-page .how-it-works-description p {
+  font-size: clamp(1.125rem, 1.0739rem + 0.2273vw, 1.25rem);
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+}
+
+.intro-landing-page .how-it-works-description p:last-child {
+  margin-bottom: 0;
+}
+
 /* Testimonials */
 .intro-landing-page .section-testimonials {
   margin-top: clamp(3rem, 6vw, 6rem);
@@ -2007,7 +2075,9 @@ html.dark {
   min-width: 107px;
   clip-path: inset(0 100% 0 0);
   opacity: 0;
-  transition: clip-path 0.3s ease-in-out, opacity 0.3s ease-in-out;
+  transition:
+    clip-path 0.3s ease-in-out,
+    opacity 0.3s ease-in-out;
   pointer-events: none;
 }
 
@@ -2065,8 +2135,12 @@ html.dark {
   align-items: center;
   padding: 0 1.75rem;
   border-radius: 10px;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
-  background: linear-gradient(
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    opacity 0.2s ease;
+  background:
+    linear-gradient(
       135deg,
       rgba(255, 255, 255, 0.18) 0%,
       rgba(255, 255, 255, 0.06) 40%,
@@ -2150,7 +2224,9 @@ html.dark {
   height: 100vh;
   pointer-events: none;
   z-index: 90;
-  transition: opacity 0.1s ease-out, transform 0.1s ease-out;
+  transition:
+    opacity 0.1s ease-out,
+    transform 0.1s ease-out;
 }
 
 .docs-preview-content {
@@ -2250,7 +2326,8 @@ html.dark {
   align-items: center;
   gap: 0.75rem;
   padding: 1.25rem 2rem;
-  background: linear-gradient(
+  background:
+    linear-gradient(
       135deg,
       rgba(252, 33, 138, 0.15) 0%,
       rgba(255, 255, 255, 0.08) 40%,
@@ -2263,7 +2340,10 @@ html.dark {
     0 4px 16px rgba(0, 0, 0, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(12px);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.1s ease;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.1s ease;
 }
 
 .scroll-indicator-content span {

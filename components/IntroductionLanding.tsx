@@ -692,7 +692,7 @@ export function IntroductionLanding() {
         </section>
 
         <section className="section section-get-started">
-          <h2 className="subheading">Ready to Get Started?</h2>
+          <h2 className="subheading">Run Zero Yourself</h2>
           <p>
             Dive into the docs to see how Zero fits into your stack, and hop
             into our Discord to connect with the team and other builders.

@@ -33,6 +33,9 @@ export function DocsPreview() {
           document.body.style.top = `-${currentScroll}px`;
           document.body.style.width = '100%';
 
+          // Set flag to indicate we're coming from landing page
+          sessionStorage.setItem('fromLanding', 'true');
+
           // Navigate after a brief moment
           setTimeout(() => {
             router.push('/docs/quickstart');

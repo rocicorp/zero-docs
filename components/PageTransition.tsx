@@ -1,18 +1,25 @@
 'use client';
 
 import {useEffect, useState} from 'react';
-import {usePathname} from 'next/navigation';
 
-export function PageTransition({children}: {children: React.ReactNode}) {
-  const pathname = usePathname();
+export function PageTransition({
+  children,
+  fromLanding,
+}: {
+  children: React.ReactNode;
+  fromLanding: boolean;
+}) {
   const [animate, setAnimate] = useState(false);
 
   useEffect(() => {
-    // Trigger animation on route change
-    setAnimate(true);
-    const timer = setTimeout(() => setAnimate(false), 700);
-    return () => clearTimeout(timer);
-  }, [pathname]);
+    // Only animate if coming from the landing page
+    if (fromLanding) {
+      sessionStorage.removeItem('fromLanding');
+      setAnimate(true);
+      const timer = setTimeout(() => setAnimate(false), 700);
+      return () => clearTimeout(timer);
+    }
+  }, [fromLanding]);
 
   return (
     <div className={animate ? 'page-transition-enter' : ''}>

@@ -72,6 +72,7 @@ export function IntroductionLanding() {
   };
 
   const scrollToDocs = () => {
+    sessionStorage.setItem('fromLanding', 'true');
     router.push('/docs/quickstart');
   };
 

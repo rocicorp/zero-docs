@@ -1648,6 +1648,11 @@ html.dark {
   animation: sidebarFadeIn 0.6s ease-out;
 }
 
+/* TOC sidebar - only animate when coming from landing page */
+.from-landing .toc-sidebar {
+  animation: sidebarFadeIn 0.6s ease-out;
+}
+
 /* Page slide-up and fade-in transition */
 @keyframes pageSlideUpFadeIn {
   from {

@@ -371,7 +371,7 @@ default: `2`
 
 ### Mutate API Key
 
-An optional secret used to authorize zero-cache to call the API server handling writes.
+An optional secret used to authorize zero-cache to call the API server handling writes. This is sent from zero-cache to your mutate endpoint in an `X-Api-Key` header.
 
 flag: `--mutate-api-key`<br/>
 env: `ZERO_MUTATE_API_KEY`<br/>
@@ -443,7 +443,7 @@ default: `4848`
 
 ### Query API Key
 
-An optional secret used to authorize zero-cache to call the API server handling queries.
+An optional secret used to authorize zero-cache to call the API server handling queries. This is sent from zero-cache to your query endpoint in an `X-Api-Key` header.
 
 flag: `--query-api-key`<br/>
 env: `ZERO_QUERY_API_KEY`<br/>

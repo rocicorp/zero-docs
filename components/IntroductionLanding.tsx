@@ -4,6 +4,7 @@ import {useEffect, useRef, useState} from 'react';
 import Link from 'next/link';
 import {useRouter} from 'next/navigation';
 import {DocsPreview} from './DocsPreview';
+import CopyButtonListener from './ui/copy-button-listener';
 import hljs from 'highlight.js/lib/core';
 import typescript from 'highlight.js/lib/languages/typescript';
 
@@ -101,6 +102,7 @@ export function IntroductionLanding() {
 
   return (
     <div className="intro-landing-page">
+      <CopyButtonListener />
       <header className="landing-header">
         <div className="landing-header-inner">
           <div className="landing-logo" onClick={scrollToTop}>
@@ -262,7 +264,10 @@ export function IntroductionLanding() {
           </div>
 
           <div className="code-block glass-panel">
-            <pre>
+            <pre className="has-copy-button">
+              <button className="font-regular copy-button" type="button">
+                Copy
+              </button>
               <code
                 className="language-typescript"
                 dangerouslySetInnerHTML={{

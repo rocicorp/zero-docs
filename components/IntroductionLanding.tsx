@@ -784,10 +784,9 @@ export function IntroductionLanding() {
             onClick={() => setShowDemoModal(false)}
           ></div>
           <div className="demo-modal-content">
-            <div className="demo-modal-pill pop-in">Tada! Loaded in 1.5s.</div>
             <div className="demo-iframe-wrapper">
               <iframe
-                src="https://zbugs-qtpvqu9px.preview.rocicorp.dev/p/roci?demo"
+                src="https://zbugs-5u190hv7h.preview.rocicorp.dev/p/roci?demo"
                 className="demo-iframe"
                 title="Zero Demo"
               ></iframe>

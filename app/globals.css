@@ -1418,7 +1418,7 @@ html.dark {
 .intro-landing-page .demo-iframe {
   width: 100%;
   height: 100%;
-  border: none;
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 1rem;
   background: hsl(var(--background));
   box-shadow:

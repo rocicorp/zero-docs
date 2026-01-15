@@ -212,8 +212,8 @@ export function IntroductionLanding() {
             data.
           </p>
           <p>
-            We started the Zero project two years ago to solve these problems
-            and bring the performance of sync to the entire web.
+            We created Zero to solve these problems and bring the performance of
+            sync to the entire web.
           </p>
         </section>
 
@@ -229,7 +229,7 @@ export function IntroductionLanding() {
                   Our Gigabugs demo has 1.2 million rows, and loads in less than
                   2 seconds.
                 </p>
-                <button className="load-demo-btn">Sync 1TB of Data</button>
+                <button className="load-demo-btn">Sync 1GB of Data</button>
               </div>
             </div>
           </div>
@@ -247,10 +247,15 @@ export function IntroductionLanding() {
           </div>
 
           <div className="how-it-works-description">
+            <p>Zero has two parts: a client and a server.</p>
             <p>
-              You get a client-side API that looks like an embedded database,
-              but to which you can issue arbitrary hybrid queries that span the
-              entire database, including the server.
+              The server runs in the cloud and maintains a sync-optimized
+              replica of your Postgres database.
+            </p>
+            <p>
+              On the client, you get an API that looks like an embedded
+              database, but to which you can issue arbitrary “hybrid queries”
+              that span the entire database, including the server.
             </p>
             <p>
               Behind the scenes, Zero synchronizes query results continuously to
@@ -273,105 +278,10 @@ export function IntroductionLanding() {
               />
             </pre>
           </div>
-
-          <p>This architecture provides:</p>
-          <div className="feature-grid">
-            <div className="feature-card feature-card--icon-left">
-              <div className="feature-card-icon-left">
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z" />
-                </svg>
-              </div>
-              <div className="feature-card-content">
-                <h3>Instant Response</h3>
-                <p>User interactions update the UI within the next frame.</p>
-              </div>
-            </div>
-            <div className="feature-card feature-card--icon-left">
-              <div className="feature-card-icon-left">
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M2 8.82a15 15 0 0 1 20 0" />
-                  <path d="M21.378 16.626a1 1 0 0 0-3.004-3.004l-4.01 4.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z" />
-                  <path d="M5 12.859a10 10 0 0 1 10.5-2.222" />
-                  <path d="M8.5 16.429a5 5 0 0 1 3-1.406" />
-                </svg>
-              </div>
-              <div className="feature-card-content">
-                <h3>Automatic Reactivity</h3>
-                <p>Changes propagate live to all connected users.</p>
-              </div>
-            </div>
-            <div className="feature-card feature-card--icon-left">
-              <div className="feature-card-icon-left">
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="m18 16 4-4-4-4" />
-                  <path d="m6 8-4 4 4 4" />
-                  <path d="m14.5 4-5 16" />
-                </svg>
-              </div>
-              <div className="feature-card-content">
-                <h3>Faster Development</h3>
-                <p>
-                  Build most features entirely client-side without new server
-                  APIs.
-                </p>
-              </div>
-            </div>
-            <div className="feature-card feature-card--icon-left">
-              <div className="feature-card-icon-left">
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                  <path d="M14 15H9v-5" />
-                  <path d="M16 3h5v5" />
-                  <path d="M21 3 9 15" />
-                </svg>
-              </div>
-              <div className="feature-card-content">
-                <h3>Scalability</h3>
-                <p>
-                  Handles arbitrary backend data amounts with on-demand
-                  synchronization.
-                </p>
-              </div>
-            </div>
-          </div>
         </section>
 
         <section className="section">
-          <h2 className="subheading">Only with Zero</h2>
-          <p>
-            Zero&apos;s query-driven sync enables a really powerful set of
-            features. Some tools offer some of these features, but only Zero
-            offers all of them together.
-          </p>
+          <h2 className="subheading">Features</h2>
 
           <div className="feature-grid">
             <Link
@@ -388,22 +298,24 @@ export function IntroductionLanding() {
                   strokeLinecap="round"
                   strokeLinejoin="round"
                 >
-                  <path d="M12.4 2.7a2.5 2.5 0 0 1 3.4 0l5.5 5.5a2.5 2.5 0 0 1 0 3.4l-3.7 3.7a2.5 2.5 0 0 1-3.4 0L8.7 9.8a2.5 2.5 0 0 1 0-3.4z" />
-                  <path d="m14 7 3 3" />
-                  <path d="m9.4 10.6-6.814 6.814A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814" />
+                  <path d="M12 2v8" />
+                  <path d="m16 6-4 4-4-4" />
+                  <rect width="20" height="8" x="2" y="14" rx="2" />
+                  <path d="M6 18h.01" />
+                  <path d="M10 18h.01" />
                 </svg>
               </div>
               <div className="feature-card-content">
-                <h3>Fine-Grained Permissions</h3>
+                <h3>Instant Reads</h3>
                 <p>
-                  Define row- and field-level access rules so each user sees
-                  exactly the data they&apos;re allowed to.
+                  This is a placeholder description for a feature block that
+                  should be replaced. Keep it to two to three lines if possible.
                 </p>
               </div>
             </Link>
             <Link
               className="feature-card feature-card--icon-left feature-card--link"
-              href="/docs/reading-data"
+              href="#"
             >
               <div className="feature-card-icon-left">
                 <svg
@@ -415,18 +327,18 @@ export function IntroductionLanding() {
                   strokeLinecap="round"
                   strokeLinejoin="round"
                 >
-                  <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
-                  <path d="M3 3v5h5" />
-                  <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" />
-                  <path d="M16 16h5v5" />
-                  <circle cx="12" cy="12" r="1" />
+                  <path d="m16 6-4-4-4 4" />
+                  <path d="M12 2v8" />
+                  <rect width="20" height="8" x="2" y="14" rx="2" />
+                  <path d="M6 18h.01" />
+                  <path d="M10 18h.01" />
                 </svg>
               </div>
               <div className="feature-card-content">
-                <h3>Partial Sync</h3>
+                <h3>Instant Writes</h3>
                 <p>
-                  Only data returned by active queries is synced to the client —
-                  no need to ship entire tables.
+                  This is a placeholder description for a feature block that
+                  should be replaced. Keep it to two to three lines if possible.
                 </p>
               </div>
             </Link>
@@ -451,10 +363,10 @@ export function IntroductionLanding() {
                 </svg>
               </div>
               <div className="feature-card-content">
-                <h3>Client-First Reads & Writes</h3>
+                <h3>Automatic Reactivity</h3>
                 <p>
-                  Queries resolve on the client for instant results. Writes
-                  apply immediately and sync seamlessly.
+                  This is a placeholder description for a feature block that
+                  should be replaced. Keep it to two to three lines if possible.
                 </p>
               </div>
             </Link>
@@ -472,16 +384,68 @@ export function IntroductionLanding() {
                   strokeLinecap="round"
                   strokeLinejoin="round"
                 >
-                  <circle cx="12" cy="12" r="1" />
-                  <path d="M20.2 20.2c2.04-2.03.02-7.36-4.5-11.9-4.54-4.52-9.87-6.54-11.9-4.5-2.04 2.03-.02 7.36 4.5 11.9 4.54 4.52 9.87 6.54 11.9 4.5Z" />
-                  <path d="M15.7 15.7c4.52-4.54 6.54-9.87 4.5-11.9-2.03-2.04-7.36-.02-11.9 4.5-4.52 4.54-6.54 9.87-4.5 11.9 2.03 2.04 7.36.02 11.9-4.5Z" />
+                  <path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z" />
                 </svg>
               </div>
               <div className="feature-card-content">
-                <h3>Atomic Transactions</h3>
+                <h3>Fast Startup</h3>
                 <p>
-                  Group multiple writes into one transaction. Every change
-                  succeeds together — or the entire batch rolls back.
+                  This is a placeholder description for a feature block that
+                  should be replaced. Keep it to two to three lines if possible.
+                </p>
+              </div>
+            </Link>
+            <Link
+              className="feature-card feature-card--icon-left feature-card--link"
+              href="/docs/writing-data"
+            >
+              <div className="feature-card-icon-left">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <rect width="20" height="8" x="2" y="2" rx="2" ry="2" />
+                  <rect width="20" height="8" x="2" y="14" rx="2" ry="2" />
+                  <line x1="6" x2="6.01" y1="6" y2="6" />
+                  <line x1="6" x2="6.01" y1="18" y2="18" />
+                </svg>
+              </div>
+              <div className="feature-card-content">
+                <h3>Server Authority</h3>
+                <p>
+                  This is a placeholder description for a feature block that
+                  should be replaced. Keep it to two to three lines if possible.
+                </p>
+              </div>
+            </Link>
+            <Link
+              className="feature-card feature-card--icon-left feature-card--link"
+              href="/docs/writing-data"
+            >
+              <div className="feature-card-icon-left">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M10 22V7a1 1 0 0 0-1-1H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5a1 1 0 0 0-1-1H2" />
+                  <rect x="14" y="2" width="8" height="8" rx="1" />
+                </svg>
+              </div>
+              <div className="feature-card-content">
+                <h3>Easy Integration</h3>
+                <p>
+                  This is a placeholder description for a feature block that
+                  should be replaced. Keep it to two to three lines if possible.
                 </p>
               </div>
             </Link>
@@ -627,8 +591,7 @@ export function IntroductionLanding() {
 
         <section className="section section-cloud-zero">
           <div className="cloud-zero-header">
-            <h2 className="subheading">Cloud Zero</h2>
-            <span className="coming-soon-badge">Coming very soon</span>
+            <h2 className="subheading">Pricing</h2>
           </div>
 
           <div className="cloud-zero-preview">
@@ -674,10 +637,10 @@ export function IntroductionLanding() {
 
           <div className="cloud-zero-cta-container">
             <div className="cloud-zero-cta-prompt">
-              <h3 className="demo-prompt-title">Interested?</h3>
+              <h3 className="demo-prompt-title">Get in Touch</h3>
               <p className="demo-intro-text">
-                We&apos;ve started slowly rolling out to a limited group of
-                users. Get in touch:
+                Hosting is in private beta. Message us and we&apos;ll get you
+                onboarded.
               </p>
               <div className="cloud-zero-cta-buttons">
                 <a href="mailto:hello@rocicorp.com" className="load-demo-btn">
@@ -774,8 +737,10 @@ export function IntroductionLanding() {
           href="https://rocicorp.dev"
           target="_blank"
           rel="noopener noreferrer"
+          className="landing-footer-link"
         >
           <RocicorpLogo className="landing-footer-logo" />
+          <span className="landing-footer-text">Made by Rocicorp</span>
         </Link>
       </footer>
 

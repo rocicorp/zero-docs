@@ -2018,41 +2018,6 @@ html:not(.dark) .intro-landing-page .how-it-works-svg {
   }
 }
 
-/* Sidebar fade-in animation */
-@keyframes sidebarFadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-.sidebar-fade-in {
-  animation: sidebarFadeIn 0.6s ease-out;
-}
-
-/* TOC sidebar - only animate when coming from landing page */
-.from-landing .toc-sidebar {
-  animation: sidebarFadeIn 0.6s ease-out;
-}
-
-/* Page slide-up and fade-in transition */
-@keyframes pageSlideUpFadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(40px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.page-transition-enter {
-  animation: pageSlideUpFadeIn 0.7s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
 /* Landing page header (from zero-landing-v2) */
 .landing-header {
   display: flex;
@@ -2120,6 +2085,22 @@ html:not(.dark) .intro-landing-page .how-it-works-svg {
 
 .dark .landing-logo .landing-wordmark {
   filter: invert(1);
+}
+
+/* Landing page footer */
+.landing-footer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 4rem 0;
+  width: 100%;
+}
+
+.landing-footer-logo {
+  width: 80px;
+  height: auto;
+  color: hsl(var(--foreground));
+  opacity: 0.5;
 }
 
 @keyframes logo-spin {
@@ -2248,186 +2229,3 @@ html:not(.dark) .intro-landing-page .how-it-works-svg {
   }
 }
 
-/* Docs preview on scroll */
-.docs-preview-container {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 100vh;
-  pointer-events: none;
-  z-index: 90;
-  transition:
-    opacity 0.1s ease-out,
-    transform 0.1s ease-out;
-}
-
-.docs-preview-content {
-  width: 100%;
-  height: 100%;
-  background: hsl(var(--background));
-  display: flex;
-  gap: 3.5rem;
-  max-width: 1250px;
-  margin: 0 auto;
-  padding: 5rem 2rem 2rem;
-}
-
-.docs-preview-sidebar {
-  min-width: 230px;
-  width: 230px;
-  background: hsl(var(--muted) / 0.3);
-  border-radius: 8px;
-  height: 400px;
-}
-
-.docs-preview-main {
-  flex: 1;
-  min-width: 0;
-}
-
-.docs-preview-main h1 {
-  font-size: 2rem;
-  font-weight: 700;
-  margin-bottom: 1.5rem;
-  color: hsl(var(--foreground));
-}
-
-.docs-preview-main p {
-  color: hsl(var(--muted-foreground));
-  font-size: 1rem;
-  line-height: 1.6;
-}
-
-.docs-preview-toc {
-  min-width: 200px;
-  width: 200px;
-  background: hsl(var(--muted) / 0.3);
-  border-radius: 8px;
-  height: 300px;
-}
-
-@media (max-width: 1024px) {
-  .docs-preview-toc {
-    display: none;
-  }
-}
-
-@media (max-width: 768px) {
-  .docs-preview-sidebar {
-    display: none;
-  }
-
-  .docs-preview-content {
-    padding: 5rem 1.5rem 2rem;
-  }
-}
-
-/* Transition spacer - creates blank space for smooth scrolling */
-.transition-spacer {
-  min-height: 60vh;
-  width: 100%;
-}
-
-/* Scroll indicator - static element in flow */
-.scroll-indicator-static {
-  display: flex;
-  justify-content: center;
-  width: 100%;
-  margin-top: 4rem;
-  animation: scrollIndicatorBounce 2s ease-in-out infinite;
-  background: none;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-}
-
-.scroll-indicator-static:hover .scroll-indicator-content {
-  border-color: rgba(252, 33, 138, 0.4);
-  box-shadow:
-    0 4px 20px rgba(252, 33, 138, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
-}
-
-.scroll-indicator-static:active .scroll-indicator-content {
-  transform: scale(0.98);
-}
-
-.scroll-indicator-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 1.25rem 2rem;
-  background:
-    linear-gradient(
-      135deg,
-      rgba(252, 33, 138, 0.15) 0%,
-      rgba(255, 255, 255, 0.08) 40%,
-      rgba(0, 0, 0, 0.1) 100%
-    ),
-    hsl(var(--background));
-  border: 1px solid rgba(252, 33, 138, 0.2);
-  border-radius: 16px;
-  box-shadow:
-    0 4px 16px rgba(0, 0, 0, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(12px);
-  transition:
-    border-color 0.2s ease,
-    box-shadow 0.2s ease,
-    transform 0.1s ease;
-}
-
-.scroll-indicator-content span {
-  color: hsl(var(--foreground));
-  font-size: 0.875rem;
-  font-weight: 500;
-  white-space: nowrap;
-}
-
-.scroll-indicator-icon {
-  width: 24px;
-  height: 24px;
-  color: hsl(var(--primary-highlight));
-}
-
-@keyframes scrollIndicatorFadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes scrollIndicatorBounce {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(8px);
-  }
-}
-
-@media (max-width: 768px) {
-  .scroll-indicator-content {
-    padding: 1rem 1.5rem;
-  }
-
-  .scroll-indicator-content span {
-    font-size: 0.8125rem;
-  }
-
-  .scroll-indicator-icon {
-    width: 20px;
-    height: 20px;
-  }
-
-  .transition-spacer {
-    min-height: 50vh;
-  }
-}

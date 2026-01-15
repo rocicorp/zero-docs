@@ -2096,11 +2096,20 @@ html:not(.dark) .intro-landing-page .how-it-works-svg {
   width: 100%;
 }
 
+.landing-footer a {
+  cursor: pointer;
+}
+
 .landing-footer-logo {
   width: 80px;
   height: auto;
   color: hsl(var(--foreground));
   opacity: 0.5;
+  transition: opacity 0.15s ease-out;
+}
+
+.landing-footer a:hover .landing-footer-logo {
+  opacity: 1;
 }
 
 @keyframes logo-spin {

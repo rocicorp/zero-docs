@@ -767,7 +767,13 @@ export function IntroductionLanding() {
       </main>
 
       <footer className="landing-footer">
-        <RocicorpLogo className="landing-footer-logo" />
+        <Link
+          href="https://rocicorp.dev"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <RocicorpLogo className="landing-footer-logo" />
+        </Link>
       </footer>
 
       {/* Demo Modal */}

@@ -1154,6 +1154,14 @@ html.dark {
   margin-left: auto;
 }
 
+.intro-landing-page .video-caption {
+  text-align: center;
+  font-style: italic;
+  font-size: clamp(1.125rem, 1.0739rem + 0.2273vw, 1.25rem);
+  margin-top: 1rem;
+  opacity: 0.7;
+}
+
 .dark .intro-landing-page .video-container {
   border-color: rgba(255, 255, 255, 0.1);
   box-shadow:
@@ -2237,4 +2245,3 @@ html:not(.dark) .intro-landing-page .how-it-works-svg {
     padding: 0 1rem;
   }
 }
-

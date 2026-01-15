@@ -152,7 +152,7 @@ export function IntroductionLanding() {
               muted
               playsInline
             >
-              <source src="/video/test-video-2.mp4" type="video/mp4" />
+              <source src="/video/zbugs-demo.mp4" type="video/mp4" />
               Your browser does not support the video tag.
             </video>
             <div className="video-controls">
@@ -194,6 +194,9 @@ export function IntroductionLanding() {
               </button>
             </div>
           </div>
+          <p className="video-caption">
+            Try Gigabugs, our 1.2 million row bug tracker.
+          </p>
         </section>
 
         <section className="section section-intro">

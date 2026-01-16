@@ -1817,6 +1817,109 @@ html:not(.dark) .intro-landing-page .how-it-works-svg {
     0 8px 32px rgba(0, 0, 0, 0.15);
 }
 
+.intro-landing-page .cloud-zero-pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+
+.intro-landing-page .cloud-zero-tier-card {
+  --tier-color-text: #fc218a;
+  background: hsl(var(--background));
+  border-radius: 1rem;
+  padding: 1.75rem;
+  position: relative;
+  overflow: hidden;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.05),
+    0 4px 12px rgba(0, 0, 0, 0.03),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.1) 0%,
+      rgba(255, 255, 255, 0) 50%,
+      rgba(0, 0, 0, 0.03) 100%
+    ),
+    hsl(var(--background));
+  display: flex;
+  flex-direction: column;
+  transition: box-shadow 0.2s ease;
+}
+
+.intro-landing-page .cloud-zero-tier-card:hover {
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.12),
+    0 16px 40px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+.intro-landing-page .cloud-zero-tier-card--saas {
+  --tier-color-text: var(--docs-logo-accent-color);
+}
+
+.intro-landing-page .cloud-zero-tier-card--byoc {
+  --tier-color-text: #fc218a;
+}
+
+.intro-landing-page .cloud-zero-tier-header {
+  margin-bottom: 0.25rem;
+}
+
+.intro-landing-page .cloud-zero-tier-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--tier-color-text);
+  margin-bottom: 0.25rem;
+}
+
+.intro-landing-page .cloud-zero-tier-name {
+  font-size: clamp(1.125rem, 1rem + 0.4vw, 1.25rem);
+  font-weight: 700;
+  margin: 0;
+  color: hsl(var(--foreground));
+  white-space: nowrap;
+}
+
+.intro-landing-page p.cloud-zero-tier-subtitle {
+  font-size: 1rem;
+  color: inerhit;
+  opacity: 0.5;
+  line-height: 1.3;
+  margin: 0 0 2rem 0;
+}
+
+.intro-landing-page .cloud-zero-tier-card .cloud-zero-list {
+  flex: 1;
+}
+
+.intro-landing-page .cloud-zero-tier-price {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-top: 1.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid rgba(128, 128, 128, 0.2);
+}
+
+.intro-landing-page .cloud-zero-tier-price-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.25rem;
+  margin-top: auto;
+  line-height: 1;
+}
+
+.intro-landing-page .cloud-zero-tier-price .cloud-zero-price-secondary {
+  font-size: 0.875rem;
+  opacity: 0.5;
+  margin-left: 0.25rem;
+}
+
 .intro-landing-page .cloud-zero-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -2023,6 +2126,35 @@ html:not(.dark) .intro-landing-page .how-it-works-svg {
       rgba(0, 0, 0, 0.1) 100%
     ),
     hsl(var(--background));
+}
+
+.dark .intro-landing-page .cloud-zero-tier-card {
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.3),
+    0 4px 12px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.05) 0%,
+      rgba(255, 255, 255, 0) 50%,
+      rgba(0, 0, 0, 0.1) 100%
+    ),
+    hsl(var(--background));
+}
+
+.dark .intro-landing-page .cloud-zero-tier-card:hover {
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.4),
+    0 8px 20px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+@media (max-width: 992px) {
+  .intro-landing-page .cloud-zero-pricing-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 768px) {

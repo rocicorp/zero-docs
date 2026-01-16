@@ -4,13 +4,15 @@ import {useEffect, useRef, useState} from 'react';
 import Link from 'next/link';
 import CopyButtonListener from './ui/copy-button-listener';
 import RocicorpLogo from './logos/Rocicorp';
+import CodeGroup from './CodeGroup';
 import hljs from 'highlight.js/lib/core';
 import typescript from 'highlight.js/lib/languages/typescript';
 
 // Register TypeScript/TSX for syntax highlighting
 hljs.registerLanguage('typescript', typescript);
 
-const codeExample = `function Playlist({id}: {id: string}) {
+const codeExamples = {
+  app: `function Playlist({id}: {id: string}) {
   const [playlist] = useQuery(
     zero.query.playlist
       .related('tracks', track => track
@@ -26,7 +28,45 @@ const codeExample = `function Playlist({id}: {id: string}) {
   };
 
   // render playlist...
-}`;
+}`,
+  queries: `import {defineQueries, defineQuery} from '@rocicorp/zero'
+import {z} from 'zod'
+import {zql} from './schema.ts'
+ 
+export const queries = defineQueries({
+  albums: {
+    byArtist: defineQuery(
+      z.object({artistID: z.string()}),
+      ({args: {artistID}}) =>
+        zql.albums
+          .where('artistId', artistID)
+          .orderBy('createdAt', 'asc')
+          .limit(10)
+          .related('artist', q => q.one())
+    )
+  }
+})`,
+  mutators: `import {defineMutators, defineMutator} from '@rocicorp/zero'
+import {z} from 'zod'
+ 
+export const mutators = defineMutators({
+  updateIssue: defineMutator(
+    z.object({
+      id: z.string(),
+      title: z.string()
+    }),
+    async ({tx, args: {id, title}}) => {
+      if (title.length > 100) {
+        throw new Error(\`Title is too long\`)
+      }
+      await tx.mutate.issue.update({
+        id,
+        title
+      })
+    }
+  )
+})`,
+};
 
 export function IntroductionLanding() {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -272,19 +312,54 @@ export function IntroductionLanding() {
             </p>
           </div>
 
-          <div className="code-block glass-panel">
-            <pre className="has-copy-button">
-              <button className="font-regular copy-button" type="button">
-                Copy
-              </button>
-              <code
-                className="language-typescript"
-                dangerouslySetInnerHTML={{
-                  __html: hljs.highlight(codeExample, {language: 'typescript'})
-                    .value,
-                }}
-              />
-            </pre>
+          <div className="code-block-tabbed">
+            <CodeGroup
+              labels={[
+                {text: 'app.tsx'},
+                {text: 'queries.ts'},
+                {text: 'mutators.ts'},
+              ]}
+            >
+              <pre className="has-copy-button">
+                <button className="font-regular copy-button" type="button">
+                  Copy
+                </button>
+                <code
+                  className="language-typescript"
+                  dangerouslySetInnerHTML={{
+                    __html: hljs.highlight(codeExamples.app, {
+                      language: 'typescript',
+                    }).value,
+                  }}
+                />
+              </pre>
+              <pre className="has-copy-button">
+                <button className="font-regular copy-button" type="button">
+                  Copy
+                </button>
+                <code
+                  className="language-typescript"
+                  dangerouslySetInnerHTML={{
+                    __html: hljs.highlight(codeExamples.queries, {
+                      language: 'typescript',
+                    }).value,
+                  }}
+                />
+              </pre>
+              <pre className="has-copy-button">
+                <button className="font-regular copy-button" type="button">
+                  Copy
+                </button>
+                <code
+                  className="language-typescript"
+                  dangerouslySetInnerHTML={{
+                    __html: hljs.highlight(codeExamples.mutators, {
+                      language: 'typescript',
+                    }).value,
+                  }}
+                />
+              </pre>
+            </CodeGroup>
           </div>
         </section>
 

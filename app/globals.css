@@ -1518,6 +1518,29 @@ html.dark {
   white-space: pre;
 }
 
+.intro-landing-page .code-block-tabbed {
+  margin: 2rem 0;
+}
+
+.intro-landing-page .code-block-tabbed .code-group {
+  margin: 0;
+}
+
+.intro-landing-page .code-block-tabbed pre {
+  margin: 0;
+  padding: 1.5rem;
+  overflow-x: auto;
+}
+
+.intro-landing-page .code-block-tabbed code {
+  display: block;
+  font-family: 'Menlo', 'Consolas', 'SFMono-Regular', 'Courier New', monospace;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: hsl(var(--foreground));
+  white-space: pre;
+}
+
 .dark .intro-landing-page .glass-panel {
   border-color: rgba(255, 255, 255, 0.1);
   box-shadow:

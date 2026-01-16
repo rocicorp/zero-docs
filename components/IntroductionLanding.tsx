@@ -31,6 +31,7 @@ const codeExample = `function Playlist({id}: {id: string}) {
 export function IntroductionLanding() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [showDemoModal, setShowDemoModal] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(true);
   const mainRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -56,8 +57,10 @@ export function IntroductionLanding() {
     if (videoRef.current) {
       if (videoRef.current.paused) {
         videoRef.current.play();
+        setIsPlaying(true);
       } else {
         videoRef.current.pause();
+        setIsPlaying(false);
       }
     }
   };
@@ -151,6 +154,8 @@ export function IntroductionLanding() {
               loop
               muted
               playsInline
+              onClick={toggleVideoPlayPause}
+              style={{cursor: 'pointer'}}
             >
               <source src="/video/zbugs-demo.mp4" type="video/mp4" />
               Your browser does not support the video tag.
@@ -158,25 +163,28 @@ export function IntroductionLanding() {
             <div className="video-controls">
               <button
                 className="video-control-btn video-play-pause"
-                aria-label="Play/Pause"
+                aria-label={isPlaying ? 'Pause' : 'Play'}
                 onClick={toggleVideoPlayPause}
               >
-                <svg
-                  className="video-icon video-icon-play"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                >
-                  <path d="M8 5v14l11-7z" />
-                </svg>
-                <svg
-                  className="video-icon video-icon-pause"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                >
-                  <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
-                </svg>
+                {isPlaying ? (
+                  <svg
+                    className="video-icon"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
+                    <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
+                  </svg>
+                ) : (
+                  <svg
+                    className="video-icon"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
+                    <path d="M8 5v14l11-7z" />
+                  </svg>
+                )}
               </button>
               <button
                 className="video-control-btn video-fullscreen"

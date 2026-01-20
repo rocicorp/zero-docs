@@ -708,7 +708,7 @@ export function IntroductionLanding() {
               <div className="cloud-zero-group-header">
                 <span className="cloud-zero-group-label">Traditional SaaS</span>
                 <p className="cloud-zero-group-subtitle">
-                  Runs in Rocicorp&apos;s AWS account.
+                  Runs in Rocicorp&apos;s AWS account
                 </p>
               </div>
               <div className="cloud-zero-group-tiers">
@@ -751,7 +751,7 @@ export function IntroductionLanding() {
               <div className="cloud-zero-group-header">
                 <span className="cloud-zero-group-label">BYOC</span>
                 <p className="cloud-zero-group-subtitle">
-                  Runs in your AWS account.
+                  Runs in your AWS account
                 </p>
               </div>
               <div className="cloud-zero-tier">

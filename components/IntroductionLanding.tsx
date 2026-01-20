@@ -21,11 +21,11 @@ function Playlist({id}: {id: string}) {
   // no HTTP APIs, no state management no realtime goop.
   const [playlist] = useQuery(
     queries.playlist.byID({id})
-  );
+  )
 
   const onStar = (id: string, starred: boolean) => {
-    mutators.playlist.star({id, starred});
-  };
+    mutators.playlist.star({id, starred})
+  }
 
   // render playlist...
 }`,

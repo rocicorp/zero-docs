@@ -884,7 +884,7 @@ export function IntroductionLanding() {
           className="landing-footer-link"
         >
           <RocicorpLogo className="landing-footer-logo" />
-          <span className="landing-footer-text">Made by Rocicorp</span>
+          <span className="landing-footer-text">Made by <span className="landing-footer-underline">Rocicorp</span></span>
         </Link>
       </footer>
 

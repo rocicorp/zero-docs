@@ -304,10 +304,10 @@ export function IntroductionLanding() {
             </p>
             <p>
               Zero-cache runs in the cloud and maintains a read-only replica of
-              your Postgres DB in SQLite on fast attached NVMe storage.
+              your Postgres DB in SQLite, on fast attached NVMe storage.
             </p>
             <p>
-              On the client, you get an API that <em>looks</em> like an embedded
+              Client-side, you get an API that <em>looks</em> like an embedded
               database, but to which you can issue arbitrary &quot;hybrid
               queries&quot; that span the entire database, including the server:
             </p>
@@ -370,12 +370,12 @@ export function IntroductionLanding() {
                 streaming query engine
               </Link>{' '}
               to efficiently sync query results to a persistent cache on the
-              client. This cache is used automatically for client-side reads and
-              writes when possible.
+              client. This cache is used automatically for the next read or
+              write.
             </p>
             <p>
-              With thoughtful query preloading, this architecture means that
-              almost all interactions feel instant.
+              With thoughtful preloading, this architecture means almost all
+              interactions feel instant.
             </p>
           </div>
         </section>
@@ -436,7 +436,7 @@ export function IntroductionLanding() {
                 <h3>Instant Writes</h3>
                 <p>
                   Writes are always client-first, updating all open queries
-                  instantly. Edge cases like reverts are handled automatically.
+                  instantly. Edge-cases like reverts are handled automatically.
                 </p>
               </div>
             </div>
@@ -884,7 +884,9 @@ export function IntroductionLanding() {
           className="landing-footer-link"
         >
           <RocicorpLogo className="landing-footer-logo" />
-          <span className="landing-footer-text">Made by <span className="landing-footer-underline">Rocicorp</span></span>
+          <span className="landing-footer-text">
+            Made by <span className="landing-footer-underline">Rocicorp</span>
+          </span>
         </Link>
       </footer>
 

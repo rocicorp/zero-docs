@@ -857,6 +857,18 @@ html.dark {
   margin-bottom: 2rem;
 }
 
+.intro-landing-page .subheading .heading-link::after {
+  top: 0.375em;
+  left: -0.8em;
+  height: 0.5em;
+  width: 0.5em;
+  background-size: contain;
+}
+
+.intro-landing-page section[id] {
+  scroll-margin-top: 6rem;
+}
+
 .intro-landing-page h3 {
   font-size: clamp(1.125rem, 1.0739rem + 0.2273vw, 1.25rem);
   font-weight: 700;

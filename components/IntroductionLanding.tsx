@@ -282,8 +282,12 @@ export function IntroductionLanding() {
           </div>
         </section>
 
-        <section className="section section-how-it-works">
-          <h2 className="subheading">How it Works</h2>
+        <section className="section section-how-it-works" id="how-it-works">
+          <h2 className="subheading">
+            <a href="#how-it-works" className="heading-link">
+              How it Works
+            </a>
+          </h2>
 
           <div className="how-it-works-illustration">
             <img
@@ -376,8 +380,12 @@ export function IntroductionLanding() {
           </div>
         </section>
 
-        <section className="section">
-          <h2 className="subheading">Features</h2>
+        <section className="section" id="features">
+          <h2 className="subheading">
+            <a href="#features" className="heading-link">
+              Features
+            </a>
+          </h2>
 
           <div className="feature-grid">
             <Link
@@ -551,8 +559,12 @@ export function IntroductionLanding() {
           </div>
         </section>
 
-        <section className="section section-testimonials">
-          <h2 className="subheading">Our Users Say</h2>
+        <section className="section section-testimonials" id="testimonials">
+          <h2 className="subheading">
+            <a href="#testimonials" className="heading-link">
+              Our Users Say
+            </a>
+          </h2>
           <p>Check out what our users have to say about Zero.</p>
 
           <div className="testimonials-grid">
@@ -688,9 +700,13 @@ export function IntroductionLanding() {
           </div>
         </section>
 
-        <section className="section section-cloud-zero">
+        <section className="section section-cloud-zero" id="pricing">
           <div className="cloud-zero-header">
-            <h2 className="subheading">Pricing</h2>
+            <h2 className="subheading">
+              <a href="#pricing" className="heading-link">
+                Pricing
+              </a>
+            </h2>
           </div>
 
           <div className="how-it-works-description">
@@ -820,8 +836,12 @@ export function IntroductionLanding() {
           </div>
         </section>
 
-        <section className="section section-get-started">
-          <h2 className="subheading">Get Started</h2>
+        <section className="section section-get-started" id="get-started">
+          <h2 className="subheading">
+            <a href="#get-started" className="heading-link">
+              Get Started
+            </a>
+          </h2>
 
           <div className="feature-grid">
             <Link

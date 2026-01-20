@@ -1166,6 +1166,10 @@ html.dark {
   text-decoration: underline;
 }
 
+.intro-landing-page p a {
+  text-decoration: underline;
+}
+
 .dark .intro-landing-page .video-container {
   border-color: rgba(255, 255, 255, 0.1);
   box-shadow:

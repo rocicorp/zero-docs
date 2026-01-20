@@ -694,6 +694,10 @@ export function IntroductionLanding() {
             <h2 className="subheading">Pricing</h2>
           </div>
 
+          <div className="how-it-works-description">
+            <p>Fully-managed zero-cache, on either your servers or ours.</p>
+          </div>
+
           <div className="cloud-zero-preview">
             <img
               src="/images/cloud-zero-dashboard.png"

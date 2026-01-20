@@ -149,6 +149,17 @@ For production you'll need to do two things:
 1. Run `zero-cache` on a subdomain of your main site (e.g., `zero.example.com` if your main site is `example.com`). Consult your hosting provider's docs, or your favorite LLM for how to configure this.
 2. Set cookies from your main site with the `Domain` attribute set to your root domain (e.g., `.example.com`). If you use a third-party auth provider, consult their docs on how to do this. For example, for Better Auth, this is done with the [`crossSubDomainCookies`](https://www.better-auth.com/docs/concepts/cookies#cross-subdomain-cookies) feature.
 
+<Note
+  emoji="⚠️"
+  type="warning"
+  heading="Never use SameSite=None for auth cookies"
+  slug="samesite-none-warning"
+>
+  Do not set `SameSite=None` on cookies used for authentication with Zero. Because Zero uses WebSockets, setting `SameSite=None` can expose your application to [Cross-Site WebSocket Hijacking (CSWSH)](https://christian-schneider.net/CrossSiteWebSocketHijacking.html) attacks.
+
+  Use `SameSite=Lax` (the browser default) or `SameSite=Strict` instead.
+</Note>
+
 ### Tokens
 
 Zero also supports token-based authentication.

@@ -243,8 +243,10 @@ export function IntroductionLanding() {
             </div>
           </div>
           <p className="video-caption">
-            <a href="https://gigabugs.rocicorp.dev/">Gigabugs</a> – Our 1.2
-            million row bug tracker demo.
+            <a href="https://gigabugs.rocicorp.dev/" target="_blank">
+              Gigabugs
+            </a>{' '}
+            – Our 1.2 million row bug tracker demo.
           </p>
         </section>
 
@@ -802,7 +804,7 @@ export function IntroductionLanding() {
                   <span>Email us</span>
                 </a>
                 <a
-                  href="https://discord.gg/rocicorp"
+                  href="https://discord.rocicorp.dev"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="load-demo-btn"
@@ -851,7 +853,7 @@ export function IntroductionLanding() {
             </Link>
             <a
               className="feature-card feature-card--icon-left feature-card--link"
-              href="https://discord.gg/rocicorp"
+              href="https://discord.rocicorp.dev"
               target="_blank"
               rel="noopener noreferrer"
             >

@@ -702,74 +702,73 @@ export function IntroductionLanding() {
             />
           </div>
 
-          <div className="cloud-zero-pricing-grid">
-            <div className="cloud-zero-tier-card cloud-zero-tier-card--saas">
-              <div className="cloud-zero-tier-header">
-                <span className="cloud-zero-tier-label">Traditional SaaS</span>
-                <h4 className="cloud-zero-tier-name">Hobby</h4>
+          <div className="cloud-zero-pricing-stack">
+            <div className="cloud-zero-group-card cloud-zero-group-card--saas">
+              <div className="cloud-zero-group-header">
+                <span className="cloud-zero-group-label">Traditional SaaS</span>
+                <p className="cloud-zero-group-subtitle">
+                  Runs in Rocicorp&apos;s AWS account.
+                </p>
               </div>
-              <p className="cloud-zero-tier-subtitle">
-                zero-cache runs in Rocicorp&apos;s AWS account.
-              </p>
-              <ul className="cloud-zero-list">
-                <li>10 GB storage</li>
-                <li>3 shared vCPU</li>
-                <li>Support via public Discord</li>
-                <li>Additional storage: $0.20 / GB</li>
-                <li>Dedicated vCPU: $50 each</li>
-              </ul>
-              <div className="cloud-zero-tier-price">
-                <div className="cloud-zero-tier-price-row">
-                  <span className="cloud-zero-price">$30</span>
-                  <span className="cloud-zero-price-unit">/mo</span>
+              <div className="cloud-zero-group-tiers">
+                <div className="cloud-zero-tier">
+                  <h4 className="cloud-zero-tier-name">Hobby</h4>
+                  <ul className="cloud-zero-list">
+                    <li>10 GB storage</li>
+                    <li>3 shared vCPU</li>
+                    <li>Support via public Discord</li>
+                    <li>Additional storage: $0.20/GB</li>
+                    <li>Dedicated vCPU: $50 each</li>
+                  </ul>
+                  <div className="cloud-zero-tier-price">
+                    <div className="cloud-zero-tier-price-row">
+                      <span className="cloud-zero-price">$30</span>
+                      <span className="cloud-zero-price-unit">/mo</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="cloud-zero-tier">
+                  <h4 className="cloud-zero-tier-name">Professional</h4>
+                  <ul className="cloud-zero-list">
+                    <li>100 GB storage</li>
+                    <li>6 dedicated vCPU</li>
+                    <li>Shared Slack channel</li>
+                    <li>Additional storage: $0.20/GB</li>
+                    <li>Additional vCPU: $50</li>
+                  </ul>
+                  <div className="cloud-zero-tier-price">
+                    <div className="cloud-zero-tier-price-row">
+                      <span className="cloud-zero-price">$300</span>
+                      <span className="cloud-zero-price-unit">/mo</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
 
-            <div className="cloud-zero-tier-card cloud-zero-tier-card--saas">
-              <div className="cloud-zero-tier-header">
-                <span className="cloud-zero-tier-label">Traditional SaaS</span>
-                <h4 className="cloud-zero-tier-name">Professional</h4>
+            <div className="cloud-zero-group-card cloud-zero-group-card--byoc">
+              <div className="cloud-zero-group-header">
+                <span className="cloud-zero-group-label">BYOC</span>
+                <p className="cloud-zero-group-subtitle">
+                  Runs in your AWS account.
+                </p>
               </div>
-              <p className="cloud-zero-tier-subtitle">
-                zero-cache runs in Rocicorp&apos;s AWS account.
-              </p>
-              <ul className="cloud-zero-list">
-                <li>100 GB storage</li>
-                <li>6 dedicated vCPU</li>
-                <li>Shared Slack channel</li>
-                <li>Additional storage: $0.20 / GB</li>
-                <li>Additional vCPU: $50</li>
-              </ul>
-              <div className="cloud-zero-tier-price">
-                <div className="cloud-zero-tier-price-row">
-                  <span className="cloud-zero-price">$300</span>
-                  <span className="cloud-zero-price-unit">/mo</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="cloud-zero-tier-card cloud-zero-tier-card--byoc">
-              <div className="cloud-zero-tier-header">
-                <span className="cloud-zero-tier-label">BYOC</span>
+              <div className="cloud-zero-tier">
                 <h4 className="cloud-zero-tier-name">Bring Your Own Cloud</h4>
-              </div>
-              <p className="cloud-zero-tier-subtitle">
-                zero-cache runs in your own AWS account.
-              </p>
-              <ul className="cloud-zero-list">
-                <li>Data stays in your AWS account</li>
-                <li>Rocicorp has limited privileges</li>
-                <li>AWS infra billed to your account</li>
-                <li>Shared Slack channel</li>
-                <li>Includes 10 vCPU</li>
-                <li>Additional vCPU: $20</li>
-              </ul>
-              <div className="cloud-zero-tier-price">
-                <div className="cloud-zero-tier-price-row">
-                  <span className="cloud-zero-price">$1000</span>
-                  <span className="cloud-zero-price-unit">/mo</span>
-                  <span className="cloud-zero-price-secondary">+ AWS</span>
+                <ul className="cloud-zero-list">
+                  <li>Data stays in your AWS account</li>
+                  <li>Rocicorp has limited privileges</li>
+                  <li>AWS infra billed to your account</li>
+                  <li>Shared Slack channel</li>
+                  <li>Includes 10 vCPU</li>
+                  <li>Additional vCPU: $20</li>
+                </ul>
+                <div className="cloud-zero-tier-price">
+                  <div className="cloud-zero-tier-price-row">
+                    <span className="cloud-zero-price">$1000</span>
+                    <span className="cloud-zero-price-unit">/mo</span>
+                    <span className="cloud-zero-price-secondary">+ AWS</span>
+                  </div>
                 </div>
               </div>
             </div>

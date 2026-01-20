@@ -12,19 +12,19 @@ import typescript from 'highlight.js/lib/languages/typescript';
 hljs.registerLanguage('typescript', typescript);
 
 const codeExamples = {
-  app: `function Playlist({id}: {id: string}) {
+  app: `import {queries} from 'queries.ts'
+import {mutators} from 'mutators.ts'
+
+function Playlist({id}: {id: string}) {
+  // This usually resolves *instantly*, and updates reactively
+  // as server data changes. Just wire it directly to your UI –
+  // no HTTP APIs, no state management no realtime goop.
   const [playlist] = useQuery(
-    zero.query.playlist
-      .related('tracks', track => track
-        .related('album')
-        .related('artist')
-        .orderBy('playcount', 'asc'))
-      .where('id', id)
-      .one()
+    queries.playlist.byID({id})
   );
 
   const onStar = (id: string, starred: boolean) => {
-    zero.mutate.track.update({id, starred});
+    mutators.playlist.star({id, starred});
   };
 
   // render playlist...
@@ -34,15 +34,17 @@ import {z} from 'zod'
 import {zql} from './schema.ts'
  
 export const queries = defineQueries({
-  albums: {
-    byArtist: defineQuery(
-      z.object({artistID: z.string()}),
-      ({args: {artistID}}) =>
-        zql.albums
-          .where('artistId', artistID)
-          .orderBy('createdAt', 'asc')
-          .limit(10)
-          .related('artist', q => q.one())
+  playlist: {
+    byID: defineQuery(
+      z.object({id: z.string()}),
+      ({args: {id}}) =>
+        zql.playlist
+          .related('tracks', track => track
+            .related('album')
+            .related('artist')
+            .orderBy('playcount', 'asc'))
+          .where('id', id)
+          .one()
     )
   }
 })`,
@@ -50,21 +52,16 @@ export const queries = defineQueries({
 import {z} from 'zod'
  
 export const mutators = defineMutators({
-  updateIssue: defineMutator(
+  playlist: {
+    star: defineMutator(
     z.object({
       id: z.string(),
-      title: z.string()
+      starred: z.boolean()
     }),
-    async ({tx, args: {id, title}}) => {
-      if (title.length > 100) {
-        throw new Error(\`Title is too long\`)
-      }
-      await tx.mutate.issue.update({
-        id,
-        title
-      })
+    async ({tx, args: {id, starred}}) => {
+      await tx.mutate.track.update({id, starred});
     }
-  )
+  }
 })`,
 };
 

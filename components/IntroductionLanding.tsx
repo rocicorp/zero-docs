@@ -308,8 +308,8 @@ export function IntroductionLanding() {
             </p>
             <p>
               On the client, you get an API that <em>looks</em> like an embedded
-              database, but to which you can issue arbitrary "hybrid queries"
-              that span the entire database, including the server:
+              database, but to which you can issue arbitrary &quot;hybrid
+              queries&quot; that span the entire database, including the server:
             </p>
           </div>
 

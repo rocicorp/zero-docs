@@ -388,10 +388,7 @@ export function IntroductionLanding() {
           </h2>
 
           <div className="feature-grid">
-            <Link
-              className="feature-card feature-card--icon-left feature-card--link"
-              href="/docs/permissions"
-            >
+            <div className="feature-card feature-card--icon-left">
               <div className="feature-card-icon-left">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -416,11 +413,8 @@ export function IntroductionLanding() {
                   immediately – literally in the next frame.
                 </p>
               </div>
-            </Link>
-            <Link
-              className="feature-card feature-card--icon-left feature-card--link"
-              href="#"
-            >
+            </div>
+            <div className="feature-card feature-card--icon-left">
               <div className="feature-card-icon-left">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -445,11 +439,8 @@ export function IntroductionLanding() {
                   instantly. Edge cases like reverts are handled automatically.
                 </p>
               </div>
-            </Link>
-            <Link
-              className="feature-card feature-card--icon-left feature-card--link"
-              href="/docs/offline"
-            >
+            </div>
+            <div className="feature-card feature-card--icon-left">
               <div className="feature-card-icon-left">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -474,11 +465,8 @@ export function IntroductionLanding() {
                   automatically updated.
                 </p>
               </div>
-            </Link>
-            <Link
-              className="feature-card feature-card--icon-left feature-card--link"
-              href="/docs/writing-data"
-            >
+            </div>
+            <div className="feature-card feature-card--icon-left">
               <div className="feature-card-icon-left">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -500,11 +488,8 @@ export function IntroductionLanding() {
                   performance.
                 </p>
               </div>
-            </Link>
-            <Link
-              className="feature-card feature-card--icon-left feature-card--link"
-              href="/docs/writing-data"
-            >
+            </div>
+            <div className="feature-card feature-card--icon-left">
               <div className="feature-card-icon-left">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -529,11 +514,8 @@ export function IntroductionLanding() {
                   logic.
                 </p>
               </div>
-            </Link>
-            <Link
-              className="feature-card feature-card--icon-left feature-card--link"
-              href="/docs/writing-data"
-            >
+            </div>
+            <div className="feature-card feature-card--icon-left">
               <div className="feature-card-icon-left">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -555,7 +537,7 @@ export function IntroductionLanding() {
                   Postgres schemas, with normal APIs and libraries.
                 </p>
               </div>
-            </Link>
+            </div>
           </div>
         </section>
 

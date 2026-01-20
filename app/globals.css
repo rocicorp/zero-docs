@@ -1614,6 +1614,11 @@ html:not(.dark) .intro-landing-page .how-it-works-svg {
   margin-bottom: 0;
 }
 
+.intro-landing-page .how-it-works-description code {
+  color: var(--docs-logo-accent-color);
+  font-weight: 600;
+}
+
 /* Testimonials */
 .intro-landing-page .section-testimonials {
   margin-top: clamp(3rem, 6vw, 6rem);

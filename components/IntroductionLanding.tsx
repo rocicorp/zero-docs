@@ -243,21 +243,21 @@ export function IntroductionLanding() {
             </div>
           </div>
           <p className="video-caption">
-            Try Gigabugs, our 1.2 million row bug tracker.
+            <a href="https://gigabugs.rocicorp.dev/">Gigabugs</a> – Our 1.2
+            million row bug tracker demo.
           </p>
         </section>
 
         <section className="section section-intro">
           <p>
             Sync engines enable instant UI by downloading data to the client
-            before it&apos;s needed. All read and writes are local and synced
-            with the server in the background.
+            ahead of time. All read and writes happen locally, and changes are
+            synced in the background.
           </p>
           <p>
-            <em>But there&apos;s a catch:</em> almost all realistic apps have
-            way too much data to download ahead of time. There are usually
-            complex permissions too &mdash; not all users can read and write all
-            data.
+            <em>But there&apos;s a catch</em>. Apps usually have far too much
+            data to download up-front. They also often have permissions – not
+            all users can read and write all data.
           </p>
           <p>
             We created Zero to solve these problems and bring the performance of
@@ -295,20 +295,18 @@ export function IntroductionLanding() {
           </div>
 
           <div className="how-it-works-description">
-            <p>Zero has two parts: a client and a server.</p>
             <p>
-              The server runs in the cloud and maintains a sync-optimized
-              replica of your Postgres database.
+              Zero has two parts: <code>zero-client</code> and{' '}
+              <code>zero-cache</code>.
             </p>
             <p>
-              On the client, you get an API that looks like an embedded
-              database, but to which you can issue arbitrary “hybrid queries”
-              that span the entire database, including the server.
+              Zero-cache runs in the cloud and maintains a read-only replica of
+              your Postgres DB in SQLite on fast attached NVMe storage.
             </p>
             <p>
-              Behind the scenes, Zero synchronizes query results continuously to
-              a client-side persistent cache. This cache is used automatically
-              for future queries whenever possible.
+              On the client, you get an API that <em>looks</em> like an embedded
+              database, but to which you can issue arbitrary "hybrid queries"
+              that span the entire database, including the server:
             </p>
           </div>
 
@@ -361,6 +359,22 @@ export function IntroductionLanding() {
               </pre>
             </CodeGroup>
           </div>
+
+          <div className="how-it-works-description">
+            <p>
+              Zero uses a custom-built{' '}
+              <Link href="/docs/zql" style={{textDecoration: 'underline'}}>
+                streaming query engine
+              </Link>{' '}
+              to efficiently sync query results to a persistent cache on the
+              client. This cache is used automatically for client-side reads and
+              writes when possible.
+            </p>
+            <p>
+              With thoughtful query preloading, this architecture means that
+              almost all interactions feel instant.
+            </p>
+          </div>
         </section>
 
         <section className="section">
@@ -391,8 +405,8 @@ export function IntroductionLanding() {
               <div className="feature-card-content">
                 <h3>Instant Reads</h3>
                 <p>
-                  This is a placeholder description for a feature block that
-                  should be replaced. Keep it to two to three lines if possible.
+                  Queries are always client-first, returning matching local data
+                  immediately – literally in the next frame.
                 </p>
               </div>
             </Link>
@@ -420,8 +434,8 @@ export function IntroductionLanding() {
               <div className="feature-card-content">
                 <h3>Instant Writes</h3>
                 <p>
-                  This is a placeholder description for a feature block that
-                  should be replaced. Keep it to two to three lines if possible.
+                  Writes are always client-first, updating all open queries
+                  instantly. Edge cases like reverts are handled automatically.
                 </p>
               </div>
             </Link>
@@ -448,8 +462,9 @@ export function IntroductionLanding() {
               <div className="feature-card-content">
                 <h3>Automatic Reactivity</h3>
                 <p>
-                  This is a placeholder description for a feature block that
-                  should be replaced. Keep it to two to three lines if possible.
+                  All queries are reactive. When data changes on the server –
+                  even from non-Zero clients – affected queries are
+                  automatically updated.
                 </p>
               </div>
             </Link>
@@ -473,8 +488,9 @@ export function IntroductionLanding() {
               <div className="feature-card-content">
                 <h3>Fast Startup</h3>
                 <p>
-                  This is a placeholder description for a feature block that
-                  should be replaced. Keep it to two to three lines if possible.
+                  Query-driven sync provides precise control over when data is
+                  synced, enabling you to balance startup and interaction
+                  performance.
                 </p>
               </div>
             </Link>
@@ -501,8 +517,9 @@ export function IntroductionLanding() {
               <div className="feature-card-content">
                 <h3>Server Authority</h3>
                 <p>
-                  This is a placeholder description for a feature block that
-                  should be replaced. Keep it to two to three lines if possible.
+                  All reads and writes flow through your code on your server,
+                  giving you complete control over permissions and business
+                  logic.
                 </p>
               </div>
             </Link>
@@ -527,8 +544,8 @@ export function IntroductionLanding() {
               <div className="feature-card-content">
                 <h3>Easy Integration</h3>
                 <p>
-                  This is a placeholder description for a feature block that
-                  should be replaced. Keep it to two to three lines if possible.
+                  Zero works with normal Postgres databases, using normal
+                  Postgres schemas, with normal APIs and libraries.
                 </p>
               </div>
             </Link>
@@ -802,7 +819,7 @@ export function IntroductionLanding() {
         </section>
 
         <section className="section section-get-started">
-          <h2 className="subheading">Run Zero Yourself</h2>
+          <h2 className="subheading">Get Started</h2>
 
           <div className="feature-grid">
             <Link

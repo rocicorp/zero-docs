@@ -276,7 +276,6 @@ mark {
 }
 
 .prose {
-  margin: 0 !important;
 }
 
 .prose
@@ -1160,6 +1159,11 @@ html.dark {
   font-size: clamp(1.125rem, 1.0739rem + 0.2273vw, 1.25rem);
   margin-top: 1rem;
   opacity: 0.7;
+}
+
+.intro-landing-page .video-caption a {
+  color: hsl(var(--foreground));
+  text-decoration: underline;
 }
 
 .dark .intro-landing-page .video-container {

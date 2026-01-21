@@ -17,7 +17,8 @@ export async function GET(_: NextRequest, {params}: RouteProps) {
   return new NextResponse(res.raw, {
     headers: {
       'Content-Type': 'text/markdown; charset=utf-8',
-      'Cache-Control': 'public, max-age=0, must-revalidate',
+      'Cache-Control':
+        'public, max-age=86400, s-maxage=86400, stale-while-revalidate=43200',
     },
   });
 }

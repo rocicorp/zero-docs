@@ -2,28 +2,37 @@ import path from 'path';
 import {promises as fs} from 'fs';
 import matter from 'gray-matter';
 import {getMarkdownForSlug} from './mdx-to-markdown';
-import {page_routes as pageRoutes} from './routes-config';
+import {llm_sections as llmSections} from './routes-config';
 import {getBaseUrl, getDocsContentPath} from './docs-utils';
 
+async function getOutputBase() {
+  const basePath = path.join(process.cwd(), 'lib', 'llms-base.md');
+  return fs.readFile(basePath, 'utf-8');
+}
+
 async function generateLlmsTxt(baseUrl: string): Promise<string> {
-  let output = OUTPUT_BASE;
+  let output = await getOutputBase();
 
-  for (const route of pageRoutes) {
-    if (!route.href) continue;
+  for (const section of llmSections) {
+    output += `\n## ${section.title}\n\n`;
 
-    const slug = route.href.replace(/^\//, '').replace(/^docs\//, '');
-    const url = `${baseUrl}/docs/raw/${slug}`;
+    for (const route of section.pages) {
+      if (!route.href) continue;
 
-    try {
-      const contentPath = await getDocsContentPath(slug);
-      const rawMdx = await fs.readFile(contentPath, 'utf-8');
-      const {data} = matter(rawMdx);
-      const description = data.description ?? '';
-      const descSuffix = description ? `: ${description}` : '';
+      const slug = route.href.replace(/^\//, '').replace(/^docs\//, '');
+      const url = `${baseUrl}/docs/raw/${slug}`;
 
-      output += `- [${route.title}](${url})${descSuffix}\n`;
-    } catch (err) {
-      console.warn(`Warning: Could not process route ${route.href}:`, err);
+      try {
+        const contentPath = await getDocsContentPath(slug);
+        const rawMdx = await fs.readFile(contentPath, 'utf-8');
+        const {data} = matter(rawMdx);
+        const description = data.description ?? '';
+        const descSuffix = description ? `: ${description}` : '';
+
+        output += `- [${route.title}](${url})${descSuffix}\n`;
+      } catch (err) {
+        console.warn(`Warning: Could not process route ${route.href}:`, err);
+      }
     }
   }
 
@@ -31,48 +40,48 @@ async function generateLlmsTxt(baseUrl: string): Promise<string> {
 }
 
 async function generateLlmsFullTxt(baseUrl: string): Promise<string> {
-  let output = OUTPUT_BASE;
+  let output = await getOutputBase();
 
-  for (const route of pageRoutes) {
-    if (!route.href) continue;
+  for (const section of llmSections) {
+    output += `\n## ${section.title}\n\n`;
 
-    const slug = route.href.replace(/^\//, '').replace(/^docs\//, '');
+    for (const route of section.pages) {
+      if (!route.href) continue;
 
-    try {
-      const markdown = await getMarkdownForSlug(slug);
+      const slug = route.href.replace(/^\//, '').replace(/^docs\//, '');
 
-      if (!markdown) {
-        console.warn(`Warning: No markdown generated for ${slug}`);
-        continue;
+      try {
+        const markdown = await getMarkdownForSlug(slug);
+
+        if (!markdown) {
+          console.warn(`Warning: No markdown generated for ${slug}`);
+          continue;
+        }
+
+        const url = `${baseUrl}/docs/raw/${slug}`;
+
+        output += '---\n\n';
+
+        if (markdown.startsWith('# ')) {
+          const firstNewline = markdown.indexOf('\n');
+          const title = markdown.slice(0, firstNewline);
+          const rest = markdown.slice(firstNewline).trimStart();
+
+          output += `${title}\n\n`;
+          output += `Source: ${url}\n\n`;
+          output += `${rest}\n\n`;
+        } else {
+          output += `Source: ${url}\n\n`;
+          output += `${markdown}\n\n`;
+        }
+      } catch (err) {
+        console.warn(`Warning: Error processing ${slug}:`, err);
       }
-
-      const url = `${baseUrl}/docs/raw/${slug}`;
-
-      output += '---\n\n';
-
-      if (markdown.startsWith('# ')) {
-        const firstNewline = markdown.indexOf('\n');
-        const title = markdown.slice(0, firstNewline);
-        const rest = markdown.slice(firstNewline).trimStart();
-
-        output += `${title}\n\n`;
-        output += `Source: ${url}\n\n`;
-        output += `${rest}\n\n`;
-      } else {
-        output += `Source: ${url}\n\n`;
-        output += `${markdown}\n\n`;
-      }
-    } catch (err) {
-      console.warn(`Warning: Error processing ${slug}:`, err);
     }
   }
 
   return output;
 }
-
-const OUTPUT_BASE = `# Zero\n\n
-> Zero is a new kind of sync engine powered by queries.\n\n
-## Documentation\n\n`;
 
 async function main() {
   console.log('Generating llms.txt files...');

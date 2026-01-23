@@ -190,7 +190,8 @@ The `MutatorFn` can take a single `args` parameter. To enable this, pass a _vali
 import {defineMutator} from '@rocicorp/zero'
 
 const initStats = defineMutator(
-  async (z.object({issueCount: z.number()}), {
+  z.object({issueCount: z.number()}), 
+  async ({
     tx,
     args: {issueCount}
   }) => {

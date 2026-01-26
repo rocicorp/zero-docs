@@ -4,31 +4,33 @@ import {useEffect} from 'react';
 
 export default function CopyButtonListener() {
   useEffect(() => {
-    const copyButtons = document.querySelectorAll<HTMLButtonElement>(
-      '.copy-button',
-    );
+    const handleClick = (event: MouseEvent) => {
+      const target = event.target as HTMLElement | null;
+      if (!target) return;
 
-    const cleanups: Array<() => void> = [];
+      const button = target.closest<HTMLButtonElement>('button.copy-button');
+      if (!button) return;
 
-    copyButtons.forEach(button => {
-      const handleClick = () => {
-        const codeBlock = button.nextElementSibling?.textContent;
-        if (!codeBlock) return;
+      const pre = button.closest('pre');
+      const codeElement = pre?.querySelector('code');
+      const codeBlock =
+        codeElement?.textContent ?? button.nextElementSibling?.textContent;
 
-        navigator.clipboard.writeText(codeBlock).then(() => {
-          button.textContent = 'Copied!';
-          setTimeout(() => {
-            button.textContent = 'Copy';
-          }, 2000);
-        });
-      };
+      if (!codeBlock) return;
 
-      button.addEventListener('click', handleClick);
-      cleanups.push(() => button.removeEventListener('click', handleClick));
-    });
+      navigator.clipboard.writeText(codeBlock).then(() => {
+        const originalText = button.textContent;
+        button.textContent = 'Copied!';
+        window.setTimeout(() => {
+          button.textContent = originalText || 'Copy';
+        }, 2000);
+      });
+    };
+
+    document.addEventListener('click', handleClick);
 
     return () => {
-      cleanups.forEach(cleanup => cleanup());
+      document.removeEventListener('click', handleClick);
     };
   }, []);
 

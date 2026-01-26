@@ -161,6 +161,31 @@ This type of error is unlikely to resolve just by retrying, so Zero doesn't try.
 
 Writes are not accepted while Zero is in the `error` state.
 
+#### Reporting errors
+
+Zero doesn't have a built-in Sentry integration, but you can forward fatal connection
+errors to Sentry (or any error-monitoring tool) by subscribing to
+`zero.connection.state`.
+
+In `@rocicorp/zero`, the `error` connection state is
+`{name: 'error'; reason: string}`. You can wrap `reason` in an `Error` and report it:
+
+```ts
+import * as Sentry from '@sentry/browser'
+
+zero.connection.state.subscribe(state => {
+  if (state.name !== 'error') return
+
+  Sentry.withScope(scope => {
+    scope.setTag('zero.connection.state', state.name)
+    scope.setExtra('zero.connection.reason', state.reason)
+    Sentry.captureException(
+      new Error(`Zero connection error: ${state.reason}`)
+    )
+  })
+})
+```
+
 ### Auth Required
 
 If the [mutate](/docs/mutators) or [query](/docs/queries) endpoints return a 401 or 403 status code, Zero transitions to the `needs-auth` state.

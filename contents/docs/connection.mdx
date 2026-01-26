@@ -161,14 +161,8 @@ This type of error is unlikely to resolve just by retrying, so Zero doesn't try.
 
 Writes are not accepted while Zero is in the `error` state.
 
-#### Reporting errors
-
-Zero doesn't have a built-in Sentry integration, but you can forward fatal connection
-errors to Sentry (or any error-monitoring tool) by subscribing to
-`zero.connection.state`.
-
-In `@rocicorp/zero`, the `error` connection state is
-`{name: 'error'; reason: string}`. You can wrap `reason` in an `Error` and report it:
+You can forward connection errors to Sentry (or any error-monitoring tool) by subscribing to `zero.connection.state`.
+You can wrap `reason` in an `Error` and report it:
 
 ```ts
 import * as Sentry from '@sentry/browser'

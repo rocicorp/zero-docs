@@ -13,6 +13,7 @@
     "check-types": "tsc",
     "lint": "oxlint --type-aware --quiet",
     "lint:next": "next lint",
+    "test": "vitest run",
     "links": "blc http://localhost:3000/ -ro --exclude 'https://discord.rocicorp.dev/' --exclude 'https://bsky.app/profile/zero.rocicorp.dev' --exclude 'https://x.com/rocicorp_zero'  --exclude 'https://x.com/zero__ms'"
   },
   "dependencies": {
@@ -31,6 +32,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
+    "github-slugger": "^2.0.0",
     "gray-matter": "^4.0.3",
     "lucide-react": "^0.537.0",
     "lunr": "^2.3.9",
@@ -55,6 +57,7 @@
     "tailwind-merge": "^3.3.1",
     "tailwindcss-animate": "^1.0.7",
     "unist-util-visit": "^5.0.0",
+    "use-debounce": "^10.1.0",
     "zod": "^4.2.1"
   },
   "devDependencies": {
@@ -78,6 +81,7 @@
     "tailwindcss": "^3.4.10",
     "ts-node": "^10.9.2",
     "tsx": "^4.20.3",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.0.18"
   }
 }

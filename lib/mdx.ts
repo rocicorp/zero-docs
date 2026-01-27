@@ -15,7 +15,7 @@ import Note from '@/components/note';
 import ImageLightbox from '@/components/ui/ImageLightbox';
 import Video from '@/components/ui/Video';
 import {Button} from '@/components/ui/button';
-import {sluggify} from './utils';
+import GithubSlugger from 'github-slugger';
 import {convertMdxToMarkdown} from './mdx-to-markdown';
 import rehypePrettyCode from 'rehype-pretty-code';
 import highlighter from './themes/highlighter';
@@ -118,10 +118,12 @@ const extractHeadings = async (slug: string) => {
     href: string;
   }> = [];
 
+  const slugger = new GithubSlugger();
+
   while ((match = headingsRegex.exec(rawMdx)) !== null) {
     const headingLevel = match[1].length;
     const headingText = match[2].trim();
-    const headingSlug = sluggify(headingText);
+    const headingSlug = slugger.slug(headingText);
     extractedHeadings.push({
       level: headingLevel,
       text: headingText,

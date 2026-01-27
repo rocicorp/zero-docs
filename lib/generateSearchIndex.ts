@@ -1,114 +1,191 @@
 import fs from 'fs';
 import matter from 'gray-matter';
 import path from 'path';
+import {pathToFileURL} from 'node:url';
 import remarkParse from 'remark-parse';
-import remarkStringify from 'remark-stringify';
+import remarkMdx from 'remark-mdx';
+import remarkGfm from 'remark-gfm';
 import {unified} from 'unified';
 import {visit} from 'unist-util-visit';
-import {Nodes, Root} from 'mdast';
+import {toString} from 'mdast-util-to-string';
+import GithubSlugger from 'github-slugger';
 import strip from 'strip-markdown';
+import type {Content, Heading, Root} from 'mdast';
+import type {Node, Parent} from 'unist';
 import {getAllMDXFiles} from './get-slugs';
+import type {SearchDocument} from './search-types';
 
-// Define the root directory where docs are stored
 const DOCS_ROOT = path.join(process.cwd(), 'contents/docs');
 const OUTPUT_FILE = path.join(process.cwd(), 'assets', 'search-index.json');
+const HEADING_MIN_DEPTH = 2;
+const HEADING_MAX_DEPTH = 4;
 
-// Define the structure of a document for indexing
-interface SearchDocument {
+type HeadingEntry = {
+  text: string;
   id: string;
-  title: string;
-  content: string;
-  url: string;
-  headings: {text: string; id: string}[];
+  depth: number;
+  index: number;
+};
+
+const cloneTree = <T>(value: T) => JSON.parse(JSON.stringify(value)) as T;
+
+const normalizeWhitespace = (value: string) =>
+  value.replace(/\s+/g, ' ').trim();
+
+function unwrapMdxNodes() {
+  return (tree: Node) => {
+    visit(
+      tree,
+      ['mdxJsxFlowElement', 'mdxJsxTextElement'],
+      (node, index, parent) => {
+        if (!parent || index === undefined) return;
+        const parentNode = parent as Parent;
+        const mdxNode = node as Node & {children?: Node[]};
+        const children = mdxNode.children ?? [];
+        parentNode.children.splice(index, 1, ...children);
+        return index;
+      },
+    );
+
+    visit(
+      tree,
+      ['mdxFlowExpression', 'mdxTextExpression', 'mdxjsEsm'],
+      (node, index, parent) => {
+        if (!parent || index === undefined) return;
+        const parentNode = parent as Parent;
+        parentNode.children.splice(index, 1);
+        return index;
+      },
+    );
+  };
 }
 
-/**
- * Extract headings with IDs from MDX content
- */
-function extractHeadings(tree: Root): {text: string; id: string}[] {
-  const headings: {text: string; id: string}[] = [];
+const parseMdx = (content: string) =>
+  unified()
+    .use(remarkParse)
+    .use(remarkMdx)
+    .use(remarkGfm)
+    .parse(content) as Root;
 
-  visit(tree, 'heading', (node: Nodes) => {
-    const text =
-      'children' in node
-        ? node.children
-            .filter((child: Nodes) => child.type === 'text')
-            .map((child: Nodes) => ('value' in child ? child.value : ''))
-            .join('')
-        : '';
+function extractHeadingEntries(tree: Root): HeadingEntry[] {
+  const slugger = new GithubSlugger();
+  const headings: HeadingEntry[] = [];
 
-    // Extract the slug ID from the heading node
-    const id = text
-      .toLowerCase()
-      .replace(/[^\w]+/g, '-')
-      .replace(/^-+|-+$/g, '');
-
-    if (text && id) {
-      headings.push({text, id});
+  tree.children.forEach((node, index) => {
+    if (node.type !== 'heading') return;
+    const heading = node as Heading;
+    if (
+      heading.depth < HEADING_MIN_DEPTH ||
+      heading.depth > HEADING_MAX_DEPTH
+    ) {
+      return;
     }
+
+    const text = normalizeWhitespace(toString(heading));
+    if (!text) return;
+    const id = slugger.slug(text);
+    headings.push({text, id, depth: heading.depth, index});
   });
 
   return headings;
 }
 
-async function markdownToText(tree: Root) {
+const findSectionEndIndex = (
+  heading: HeadingEntry,
+  headings: HeadingEntry[],
+  totalNodes: number,
+) => {
+  for (const candidate of headings) {
+    if (candidate.index <= heading.index) continue;
+    if (candidate.depth <= heading.depth) return candidate.index;
+  }
+
+  return totalNodes;
+};
+
+async function mdastNodesToText(nodes: Content[]) {
+  const tree: Root = {type: 'root', children: cloneTree(nodes)};
   const stripped = await unified()
+    .use(unwrapMdxNodes)
     .use(strip, {keep: ['code', 'table']})
     .run(tree);
-  return String(await unified().use(remarkStringify).stringify(stripped));
+  const strippedRoot = stripped as Root;
+  const text = strippedRoot.children.map(node => toString(node)).join(' ');
+  return normalizeWhitespace(text);
 }
 
 let index = 0;
 
-/**
- * Extracts content from an MDX file and processes it into plain text
- */
-async function extractTextFromMDX(filePath: string): Promise<SearchDocument> {
+export async function extractDocumentsFromMDX(
+  filePath: string,
+): Promise<SearchDocument[]> {
   const fileContent = fs.readFileSync(filePath, 'utf-8');
-  const {content, data} = matter(fileContent); // Extract frontmatter
+  const {content, data} = matter(fileContent);
 
-  // Convert MDX content to mdast
-  const mdast = unified().use(remarkParse).parse(content);
+  const mdast = parseMdx(content);
+  const headingEntries = extractHeadingEntries(mdast);
+  const plainText = await mdastNodesToText(mdast.children as Content[]);
 
-  // Convert mdast to plain text
-  const plainText = await markdownToText(mdast);
-
-  // Extract headings with IDs
-  const headings = extractHeadings(mdast);
-
-  // Derive a URL from the file name
   const pathWithoutExtension = path
     .relative(DOCS_ROOT, filePath)
     .replace(/\/index\.mdx$/, '')
     .replace(/\.mdx$/, '');
-  const url = `/docs/${pathWithoutExtension}`;
+  const cleanPath = pathWithoutExtension.trim();
+  const url = cleanPath ? `/docs/${cleanPath}` : '/docs';
+  const title = (data.title || cleanPath || 'Docs') as string;
 
-  const cleanedContent = plainText
-    .replace(/```.*$/gm, '')
-    .replace(/\n+/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
-
-  return {
-    id: `${index++}-${pathWithoutExtension}`, // Use file name as ID
-    title: data.title || pathWithoutExtension, // Use frontmatter title or fallback to path
+  const pageDocument: SearchDocument = {
+    id: `${index++}-${cleanPath}`,
+    title,
+    searchTitle: title,
     url,
-    content: cleanedContent,
-    headings, // Include extracted headings with IDs
+    content: plainText,
+    headings: headingEntries.map(({text, id}) => ({text, id})),
+    kind: 'page',
   };
+
+  const sectionDocuments = await Promise.all(
+    headingEntries.map(async heading => {
+      const endIndex = findSectionEndIndex(
+        heading,
+        headingEntries,
+        mdast.children.length,
+      );
+      const sectionNodes = mdast.children.slice(
+        heading.index + 1,
+        endIndex,
+      ) as Content[];
+      const sectionContent = await mdastNodesToText(sectionNodes);
+
+      return {
+        id: `${index++}-${cleanPath}#${heading.id}`,
+        title,
+        searchTitle: heading.text,
+        sectionTitle: heading.text,
+        sectionId: heading.id,
+        url,
+        content: sectionContent,
+        kind: 'section',
+      } satisfies SearchDocument;
+    }),
+  );
+
+  return [pageDocument, ...sectionDocuments];
 }
 
-/**
- * Generates a search index from all found MDX files
- */
 async function generateSearchIndex() {
   const files = getAllMDXFiles(DOCS_ROOT);
-  const index: SearchDocument[] = await Promise.all(
-    files.map(file => extractTextFromMDX(file)),
-  );
+  const index = (
+    await Promise.all(files.map(file => extractDocumentsFromMDX(file)))
+  ).flat();
 
   fs.writeFileSync(OUTPUT_FILE, JSON.stringify(index, null, 2));
   console.log(`✅ Search index generated: ${OUTPUT_FILE}`);
 }
 
-generateSearchIndex().catch(console.error);
+const isDirectRun =
+  process.argv[1] && pathToFileURL(process.argv[1]).href === import.meta.url;
+
+if (isDirectRun) {
+  generateSearchIndex().catch(console.error);
+}

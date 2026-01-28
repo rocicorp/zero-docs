@@ -1043,6 +1043,7 @@ html.dark {
 
 .intro-landing-page .video-container {
   width: 100%;
+  aspect-ratio: 16 / 9;
   border-radius: 1rem;
   overflow: hidden;
   background: hsl(var(--background));

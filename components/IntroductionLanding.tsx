@@ -5,6 +5,7 @@ import Link from 'next/link';
 import CopyButtonListener from './ui/copy-button-listener';
 import RocicorpLogo from './logos/Rocicorp';
 import CodeGroup from './CodeGroup';
+import {Tooltip, TooltipTrigger, TooltipContent} from './ui/tooltip';
 import hljs from 'highlight.js/lib/core';
 import typescript from 'highlight.js/lib/languages/typescript';
 
@@ -700,6 +701,8 @@ export function IntroductionLanding() {
               src="/images/cloud-zero-dashboard.png"
               alt="Cloud Zero Dashboard"
               className="cloud-zero-image"
+              width={2812}
+              height={1456}
             />
           </div>
 
@@ -716,7 +719,23 @@ export function IntroductionLanding() {
                   <h4 className="cloud-zero-tier-name">Hobby</h4>
                   <ul className="cloud-zero-list">
                     <li>10 GB storage</li>
-                    <li>3 shared vCPU</li>
+                    <li>
+                      3 shared vCPU
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <button
+                            type="button"
+                            className="cloud-zero-info-btn"
+                            aria-label="More info about shared vCPU"
+                          >
+                            ?
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent side="top" sideOffset={4}>
+                          Shared with up to four other Hobby accounts.
+                        </TooltipContent>
+                      </Tooltip>
+                    </li>
                     <li>Support via public Discord</li>
                     <li>Additional storage: $0.20/GB</li>
                     <li>Dedicated vCPU: $50 each</li>

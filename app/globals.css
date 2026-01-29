@@ -1635,7 +1635,7 @@ html:not(.dark) .intro-landing-page .how-it-works-svg {
 
 .intro-landing-page .testimonial-card {
   background: hsl(var(--background));
-  border-radius: 1.25rem;
+  border-radius: 1rem;
   padding: 2rem;
   position: relative;
   overflow: hidden;
@@ -1643,34 +1643,31 @@ html:not(.dark) .intro-landing-page .how-it-works-svg {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.05),
+    0 4px 12px rgba(0, 0, 0, 0.03),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   background:
     linear-gradient(
-      225deg,
-      rgba(252, 33, 138, 0.03) 0%,
-      rgba(255, 255, 255, 0.08) 30%,
-      rgba(255, 255, 255, 0) 70%,
-      rgba(0, 0, 0, 0.02) 100%
+      135deg,
+      rgba(255, 255, 255, 0.1) 0%,
+      rgba(255, 255, 255, 0) 50%,
+      rgba(0, 0, 0, 0.03) 100%
     ),
     hsl(var(--background));
-  box-shadow:
-    0 2px 8px rgba(0, 0, 0, 0.04),
-    0 8px 16px rgba(0, 0, 0, 0.02),
-    inset 0 1px 0 rgba(255, 255, 255, 0.4);
-  border: 1.5px solid rgba(252, 33, 138, 0.08);
   transform: perspective(1000px) rotateX(0) rotateY(0) translateZ(0);
   transform-style: preserve-3d;
   transition:
     transform 0.1s ease-out,
-    box-shadow 0.3s,
-    border-color 0.3s;
+    box-shadow 0.2s;
 }
 
 .intro-landing-page .testimonial-card:hover {
   box-shadow:
-    0 12px 32px rgba(0, 0, 0, 0.1),
-    0 20px 48px rgba(0, 0, 0, 0.06),
-    inset 0 1px 0 rgba(255, 255, 255, 0.5);
-  border-color: rgba(252, 33, 138, 0.15);
+    0 8px 24px rgba(0, 0, 0, 0.12),
+    0 16px 40px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
 }
 
 .intro-landing-page .testimonial-quote {
@@ -1739,27 +1736,25 @@ html:not(.dark) .intro-landing-page .how-it-works-svg {
 }
 
 .dark .intro-landing-page .testimonial-card {
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.3),
+    0 4px 12px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
   background:
     linear-gradient(
-      225deg,
-      rgba(252, 33, 138, 0.06) 0%,
-      rgba(255, 255, 255, 0.03) 30%,
-      rgba(255, 255, 255, 0) 70%,
+      135deg,
+      rgba(255, 255, 255, 0.05) 0%,
+      rgba(255, 255, 255, 0) 50%,
       rgba(0, 0, 0, 0.1) 100%
     ),
     hsl(var(--background));
-  border-color: rgba(252, 33, 138, 0.12);
-  box-shadow:
-    0 2px 8px rgba(0, 0, 0, 0.2),
-    0 8px 16px rgba(0, 0, 0, 0.15),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 .dark .intro-landing-page .testimonial-card:hover {
-  border-color: rgba(252, 33, 138, 0.25);
   box-shadow:
-    0 12px 32px rgba(0, 0, 0, 0.4),
-    0 20px 48px rgba(0, 0, 0, 0.3),
+    0 2px 6px rgba(0, 0, 0, 0.4),
+    0 8px 20px rgba(0, 0, 0, 0.3),
     inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 

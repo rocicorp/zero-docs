@@ -269,7 +269,13 @@ export function IntroductionLanding() {
           <div className="section-try-it-content">
             <div
               className="demo-container"
-              onClick={() => setShowDemoModal(true)}
+              onClick={() => {
+                if (window.innerWidth <= 768) {
+                  window.open('https://bugs.rocicorp.dev/p/roci?demo', '_blank');
+                } else {
+                  setShowDemoModal(true);
+                }
+              }}
             >
               <div className="demo-prompt">
                 <h3 className="demo-prompt-title">Try it out right now.</h3>
@@ -919,7 +925,7 @@ export function IntroductionLanding() {
           <div className="demo-modal-content">
             <div className="demo-iframe-wrapper">
               <iframe
-                src="https://zbugs-5u190hv7h.preview.rocicorp.dev/p/roci?demo"
+                src="https://bugs.rocicorp.dev/p/roci?demo"
                 className="demo-iframe"
                 title="Zero Demo"
               ></iframe>

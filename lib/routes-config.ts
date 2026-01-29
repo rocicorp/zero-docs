@@ -3,6 +3,7 @@
 export type EachRoute = {
   title: string;
   href: string | null;
+  excludeFromLLMs?: boolean;
   new?: boolean;
   items?: EachRoute[];
   defaultOpen?: boolean;
@@ -42,6 +43,7 @@ export const ROUTES = [
       {title: 'ZQL Reference', href: '/zql'},
       {title: 'ZQL on the Server', href: '/server-zql'},
       {title: 'Connection Status', href: '/connection'},
+      {title: 'Offline', href: '/offline'},
     ],
   },
 
@@ -100,6 +102,7 @@ export const ROUTES = [
   {
     title: 'Old Stuff',
     href: null,
+    excludeFromLLMs: true,
     items: [
       {title: 'Ad-Hoc Queries', href: '/deprecated/ad-hoc-queries'},
       {title: 'CRUD Mutators', href: '/deprecated/crud-mutators'},
@@ -121,6 +124,7 @@ export const ROUTES = [
 ] as const satisfies EachRoute[];
 
 type Page = {title: string; href: string};
+export type LlmSection = {title: string; pages: Page[]};
 
 function getRecursiveAllLinks(node: EachRoute) {
   const ans: Page[] = [];
@@ -135,3 +139,6 @@ function getRecursiveAllLinks(node: EachRoute) {
 }
 
 export const page_routes = ROUTES.map(it => getRecursiveAllLinks(it)).flat();
+export const llm_sections: LlmSection[] = (ROUTES as EachRoute[])
+  .filter(route => !route.excludeFromLLMs)
+  .map(route => ({title: route.title, pages: getRecursiveAllLinks(route)}));

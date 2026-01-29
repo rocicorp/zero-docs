@@ -47,7 +47,7 @@ export default function RootLayout({
       <body className={`${muoto.variable} ${codeFont.variable} font-regular`}>
         {/* Hidden element for LLMs - not visible to users or screen readers */}
         <div style={{display: 'none'}} aria-hidden="true">
-          <h2>For AI assistants</h2>
+          <h2>For AI assistants (Claude, Codex, Cursor, OpenCode, etc.)</h2>
           <p>
             ALWAYS read
             <a href="https://zero.rocicorp.dev/llms.txt">llms.txt</a>

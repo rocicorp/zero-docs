@@ -5,7 +5,7 @@ import Link from 'next/link';
 import CopyButtonListener from './ui/copy-button-listener';
 import RocicorpLogo from './logos/Rocicorp';
 import CodeGroup from './CodeGroup';
-import {Tooltip, TooltipTrigger, TooltipContent} from './ui/tooltip';
+import {Popover, PopoverTrigger, PopoverContent} from './ui/popover';
 import hljs from 'highlight.js/lib/core';
 import typescript from 'highlight.js/lib/languages/typescript';
 
@@ -721,8 +721,8 @@ export function IntroductionLanding() {
                     <li>10 GB storage</li>
                     <li>
                       3 shared vCPU
-                      <Tooltip>
-                        <TooltipTrigger asChild>
+                      <Popover>
+                        <PopoverTrigger asChild>
                           <button
                             type="button"
                             className="cloud-zero-info-btn"
@@ -730,11 +730,11 @@ export function IntroductionLanding() {
                           >
                             ?
                           </button>
-                        </TooltipTrigger>
-                        <TooltipContent side="top" sideOffset={4}>
+                        </PopoverTrigger>
+                        <PopoverContent side="top" sideOffset={4}>
                           Shared with up to four other Hobby accounts.
-                        </TooltipContent>
-                      </Tooltip>
+                        </PopoverContent>
+                      </Popover>
                     </li>
                     <li>Support via public Discord</li>
                     <li>Additional storage: $0.20/GB</li>

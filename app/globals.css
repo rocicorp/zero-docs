@@ -858,9 +858,14 @@ html.dark {
   margin-bottom: 2rem;
 }
 
+.intro-landing-page .subheading .heading-link {
+  padding-left: 1.2em;
+  margin-left: -1.2em;
+}
+
 .intro-landing-page .subheading .heading-link::after {
   top: 0.375em;
-  left: -0.8em;
+  left: 0.2em;
   height: 0.5em;
   width: 0.5em;
   background-size: contain;
@@ -1682,20 +1687,6 @@ html:not(.dark) .intro-landing-page .how-it-works-svg {
   font-weight: 400;
   color: hsl(var(--foreground));
   margin: 0;
-  position: relative;
-  padding-left: 1.25rem;
-}
-
-.intro-landing-page .testimonial-quote p::before {
-  content: '"';
-  position: absolute;
-  left: -1rem;
-  top: -1rem;
-  font-size: 2.5rem;
-  line-height: 1;
-  font-weight: 700;
-  color: hsl(var(--foreground));
-  opacity: 0.3;
 }
 
 .intro-landing-page .testimonial-author {
@@ -1710,7 +1701,7 @@ html:not(.dark) .intro-landing-page .how-it-works-svg {
   height: 48px;
   border-radius: 50%;
   object-fit: cover;
-  border: 2px solid rgba(252, 33, 138, 0.15);
+  border: 2px solid rgba(0, 0, 0, 0.1);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   flex-shrink: 0;
 }
@@ -1760,7 +1751,7 @@ html:not(.dark) .intro-landing-page .how-it-works-svg {
 }
 
 .dark .intro-landing-page .testimonial-avatar {
-  border-color: rgba(252, 33, 138, 0.25);
+  border-color: rgba(255, 255, 255, 0.15);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
 }
 

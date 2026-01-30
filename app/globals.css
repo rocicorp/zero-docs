@@ -672,7 +672,8 @@ html.dark {
   -webkit-background-clip: initial;
   -webkit-text-fill-color: currentColor;
   background-clip: initial;
-  padding-right: 0.05em;
+  padding-right: 0.15em;
+  margin-right: -0.15em;
   animation: heroBylineEmColor 14s linear infinite;
 }
 

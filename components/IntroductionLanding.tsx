@@ -167,7 +167,7 @@ export function IntroductionLanding({
               loop
               muted
               playsInline
-              poster="/images/zbugs-poster-dkzx.jpg"
+              poster="/video/zbugs-poster-dkzx.jpg"
               onClick={toggleVideoPlayPause}
               style={{cursor: 'pointer'}}
             >

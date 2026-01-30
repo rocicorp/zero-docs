@@ -230,7 +230,7 @@ export function IntroductionLanding({
           </div>
           <p className="video-caption">
             <a href="https://gigabugs.rocicorp.dev/">Gigabugs</a> – Our 1.2
-            million row bug tracker demo.
+            million row bug tracker.
           </p>
         </section>
 
@@ -241,13 +241,23 @@ export function IntroductionLanding({
             synced in the background.
           </p>
           <p>
-            <em>But there&apos;s a catch</em>. Apps usually have far too much
-            data to download up-front. They also often have permissions – not
-            all users can read and write all data.
+            It's a beautiful idea, with a long history of use by the world's
+            best software: Linear, Figma, Superhuman, and Dropbox were all built
+            this way.
           </p>
           <p>
-            We created Zero to solve these problems and bring the performance of
-            sync to the entire web.
+            But there's a catch. And this catch is the reason why sync-based
+            apps are still so rare.
+          </p>
+          <p>
+            Apps usually have far too much data to download up-front. And they
+            also often have complex permissions. Incrementally syncing a static
+            block of data is easy; syncing just the slice the user needs and has
+            access to right now is much more difficult.
+          </p>
+          <p>
+            We created Zero to solve these problems in a general way, and to
+            bring the performance of sync to the entire web.
           </p>
         </section>
 
@@ -272,7 +282,7 @@ export function IntroductionLanding({
                   Our Gigabugs demo has 1.2 million rows, and loads in less than
                   2 seconds.
                 </p>
-                <button className="load-demo-btn">Sync 1GB of Data</button>
+                <button className="load-demo-btn">Open Demo</button>
               </div>
             </div>
           </div>
@@ -299,13 +309,18 @@ export function IntroductionLanding({
               <code>zero-cache</code>.
             </p>
             <p>
-              Zero-cache runs in the cloud and maintains a read-only replica of
-              your Postgres DB in SQLite, on fast attached NVMe storage.
+              Zero-cache runs in the cloud and maintains a read-only SQLite
+              replica of your Postgres database. Zero-client runs in the client
+              and maintains a persistent local store of recently used rows.
             </p>
             <p>
-              Client-side, you get an API that <em>looks</em> like an embedded
-              database, but to which you can issue arbitrary &quot;hybrid
-              queries&quot; that span the entire database, including the server:
+              Queries run against the client first, returning matching results
+              instantly. In parallel, queries are sent to the server, which
+              returns authoritative results asynchronously.
+            </p>
+            <p>
+              Server results are automatically stored on the client, so that
+              future queries can be answered instantly.
             </p>
           </div>
 
@@ -337,16 +352,13 @@ export function IntroductionLanding({
 
           <div className="how-it-works-description">
             <p>
-              Zero uses a custom-built{' '}
-              <Link href="/docs/zql" style={{textDecoration: 'underline'}}>
-                streaming query engine
-              </Link>{' '}
-              to efficiently sync query results to a persistent cache on the
-              client. This cache is used automatically for future queries.
+              Efficient incremental sync of complex queries is made possible by{' '}
+              <a href="/docs/zql">ZQL</a>, a new streaming query engine we built
+              specifically for Zero.
             </p>
             <p>
-              With thoughtful preloading, this architecture enables UI where
-              almost all interactions feel instant.
+              This architecture lets you sync exactly the data you need, when
+              you need it — enabling instant UI without preloading the universe.
             </p>
           </div>
         </section>
@@ -406,7 +418,7 @@ export function IntroductionLanding({
               <div className="feature-card-content">
                 <h3>Instant Writes</h3>
                 <p>
-                  Writes are always client-first, updating all open queries
+                  Mutations are always client-first, updating all open queries
                   instantly. Edge-cases like reverts are handled automatically.
                 </p>
               </div>
@@ -455,8 +467,8 @@ export function IntroductionLanding({
                 <h3>Fast Startup</h3>
                 <p>
                   Query-driven sync provides precise control over when data is
-                  synced, enabling you to balance startup and interaction
-                  performance.
+                  synced, enabling fast startup without sacrificing instant
+                  interactions.
                 </p>
               </div>
             </div>
@@ -515,10 +527,9 @@ export function IntroductionLanding({
         <section className="section section-testimonials" id="testimonials">
           <h2 className="subheading">
             <a href="#testimonials" className="heading-link">
-              Our Users Say
+              From Our Users
             </a>
           </h2>
-          <p>Check out what our users have to say about Zero.</p>
 
           <div className="testimonials-grid">
             <a
@@ -538,9 +549,7 @@ export function IntroductionLanding({
                 />
                 <div className="testimonial-info">
                   <div className="testimonial-name">Scott Tolinski</div>
-                  <div className="testimonial-title">
-                    Co-host of http://Syntax.fm
-                  </div>
+                  <div className="testimonial-title">Co-host of Syntax.fm</div>
                 </div>
               </div>
             </a>
@@ -552,7 +561,7 @@ export function IntroductionLanding({
               <div className="testimonial-quote">
                 <p>
                   Have been building with Zero for months. It&apos;s making me
-                  hate all my older codebases.
+                  hate my older codebases.
                 </p>
               </div>
               <div className="testimonial-author">
@@ -574,9 +583,9 @@ export function IntroductionLanding({
             >
               <div className="testimonial-quote">
                 <p>
-                  We rebuilt our sync engine from the ground up to make
-                  Productlane the fastest customer support tool out there. Huge
-                  shoutout to Zero for making this possible!
+                  We rebuilt Productlane from the ground up to make the fastest
+                  customer support tool out there. Huge shoutout to Zero for
+                  making this possible!
                 </p>
               </div>
               <div className="testimonial-author">
@@ -730,7 +739,7 @@ export function IntroductionLanding({
                 />
                 <div className="testimonial-info">
                   <div className="testimonial-name">Christoph Schmatzler</div>
-                  <div className="testimonial-title">señor developer</div>
+                  <div className="testimonial-title">Developer</div>
                 </div>
               </div>
             </a>
@@ -770,7 +779,14 @@ export function IntroductionLanding({
           </div>
 
           <div className="how-it-works-description">
-            <p>Fully-managed zero-cache, on either your servers or ours.</p>
+            <p>
+              Zero is <a href="/docs/open-source">open-source</a> and fully
+              self-hostable.
+            </p>
+            <p>
+              We also offer a fully-managed service, which can run on either
+              your servers or ours.
+            </p>
           </div>
 
           <div className="cloud-zero-preview">

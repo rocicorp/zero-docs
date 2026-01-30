@@ -117,24 +117,6 @@ import {z} from 'zod'
 export const mutators = defineMutators({
   playlist: {
     star: defineMutator(
-    z.object({
-      id: z.string(),
-      starred: z.boolean()
-    }),
-    async ({tx, args: {id, starred}}) => {
-      await tx.mutate.track.update({id, starred});
-    }
-  }
-})
-~~~`);
-
-  const mutatorsMobileFriendly = await parseMdx(`~~~ts
-import {defineMutators, defineMutator} from '@rocicorp/zero'
-import {z} from 'zod'
- 
-export const mutators = defineMutators({
-  playlist: {
-    star: defineMutator(
       z.object({
         id: z.string(),
         starred: z.boolean()
@@ -155,7 +137,7 @@ export const mutators = defineMutators({
         queries,
         queriesMobileFriendly,
         mutators,
-        mutatorsMobileFriendly,
+        mutatorsMobileFriendly: mutators,
       }}
     />
   );

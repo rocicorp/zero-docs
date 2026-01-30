@@ -43,6 +43,8 @@ export async function GET(req: NextRequest) {
             fontSize: 86,
             letterSpacing: '-2.58px' /* 86 * -3% */,
             fontFamily: 'muoto-bold',
+            whiteSpace: 'pre-wrap',
+            textAlign: 'center',
           }}
         >
           {title}

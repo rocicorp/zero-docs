@@ -3,7 +3,7 @@ import {Metadata} from 'next';
 import {parseMdx} from '@/lib/mdx';
 
 const title = 'Zero';
-const description = 'General Purpose Sync for the Web';
+const description = 'Instant Queries By Default';
 
 export const metadata: Metadata = {
   title,
@@ -11,13 +11,13 @@ export const metadata: Metadata = {
   openGraph: {
     title,
     description,
-    images: `/api/og?logo=zero`,
+    images: `/api/og?title=${encodeURIComponent('Instant Queries\nBy Default')}&logo=zero`,
   },
   twitter: {
     card: 'summary_large_image',
     title,
     description,
-    images: `/api/og?logo=zero`,
+    images: `/api/og?title=${encodeURIComponent('Instant Queries\nBy Default')}&logo=zero`,
   },
 };
 

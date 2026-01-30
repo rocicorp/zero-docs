@@ -68,7 +68,10 @@ export function IntroductionLanding({
     const videoElement = videoRef.current;
     if (!videoElement) return;
 
-    const onPlay = () => setIsPlaying(true);
+    const onPlay = () => {
+      setIsPlaying(true);
+      setIsVideoReady(true);
+    };
     const onPause = () => setIsPlaying(false);
     const onCanPlay = () => setIsVideoReady(true);
 

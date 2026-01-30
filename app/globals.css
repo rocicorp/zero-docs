@@ -2452,7 +2452,7 @@ html:not(.dark) .intro-landing-page .how-it-works-svg {
   }
 
   .landing-logo .landing-wordmark {
-    left: calc(40px + 1rem);
+    left: calc(40px + 0.5rem);
     width: auto;
     height: 20px;
   }
@@ -2474,6 +2474,10 @@ html:not(.dark) .intro-landing-page .how-it-works-svg {
   .landing-logo img:not(.landing-wordmark) {
     width: 36px;
     height: 36px;
+  }
+
+  .landing-logo .landing-wordmark {
+    left: calc(36px + 0.5rem);
   }
 
   .landing-nav-link,

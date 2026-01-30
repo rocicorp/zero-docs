@@ -672,6 +672,8 @@ html.dark {
   -webkit-background-clip: initial;
   -webkit-text-fill-color: currentColor;
   background-clip: initial;
+  padding-right: 0.15em;
+  margin-right: -0.15em;
   animation: heroBylineEmColor 14s linear infinite;
 }
 
@@ -813,9 +815,8 @@ html.dark {
 }
 
 .intro-landing-page .hero-byline em {
-  display: inline-block;
-  position: relative;
-  left: -2px;
+  display: inline;
+  margin-left: -0.1em;
   animation: heroBylineEmColor 14s linear infinite;
 }
 
@@ -2451,7 +2452,7 @@ html:not(.dark) .intro-landing-page .how-it-works-svg {
   }
 
   .landing-logo .landing-wordmark {
-    left: calc(40px + 1rem);
+    left: calc(40px + 0.5rem);
     width: auto;
     height: 20px;
   }
@@ -2473,6 +2474,10 @@ html:not(.dark) .intro-landing-page .how-it-works-svg {
   .landing-logo img:not(.landing-wordmark) {
     width: 36px;
     height: 36px;
+  }
+
+  .landing-logo .landing-wordmark {
+    left: calc(36px + 0.5rem);
   }
 
   .landing-nav-link,

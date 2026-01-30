@@ -6,70 +6,31 @@ import CopyButtonListener from './ui/copy-button-listener';
 import RocicorpLogo from './logos/Rocicorp';
 import CodeGroup from './CodeGroup';
 import {Popover, PopoverTrigger, PopoverContent} from './ui/popover';
-import hljs from 'highlight.js/lib/core';
-import typescript from 'highlight.js/lib/languages/typescript';
+import {
+  enterFullscreen,
+  exitFullscreen,
+  isCurrentlyFullscreen,
+} from '@/lib/fullscreen';
+import {parseMdx} from '@/lib/mdx';
+import {useIsMobile} from './hooks/use-mobile';
 
-// Register TypeScript/TSX for syntax highlighting
-hljs.registerLanguage('typescript', typescript);
-
-const codeExamples = {
-  app: `import {queries} from 'queries.ts'
-import {mutators} from 'mutators.ts'
-
-function Playlist({id}: {id: string}) {
-  // This usually resolves *instantly*, and updates reactively
-  // as server data changes. Just wire it directly to your UI –
-  // no HTTP APIs, no state management, no realtime goop.
-  const [playlist] = useQuery(
-    queries.playlist.byID({id})
-  )
-
-  const onStar = (id: string, starred: boolean) => {
-    mutators.playlist.star({id, starred})
-  }
-
-  // render playlist...
-}`,
-  queries: `import {defineQueries, defineQuery} from '@rocicorp/zero'
-import {z} from 'zod'
-import {zql} from './schema.ts'
- 
-export const queries = defineQueries({
-  playlist: {
-    byID: defineQuery(
-      z.object({id: z.string()}),
-      ({args: {id}}) =>
-        zql.playlist
-          .related('tracks', track => track
-            .related('album')
-            .related('artist')
-            .orderBy('playcount', 'asc'))
-          .where('id', id)
-          .one()
-    )
-  }
-})`,
-  mutators: `import {defineMutators, defineMutator} from '@rocicorp/zero'
-import {z} from 'zod'
- 
-export const mutators = defineMutators({
-  playlist: {
-    star: defineMutator(
-    z.object({
-      id: z.string(),
-      starred: z.boolean()
-    }),
-    async ({tx, args: {id, starred}}) => {
-      await tx.mutate.track.update({id, starred});
-    }
-  }
-})`,
-};
-
-export function IntroductionLanding() {
+export function IntroductionLanding({
+  codeExamples,
+}: {
+  codeExamples: {
+    app: Awaited<ReturnType<typeof parseMdx>>;
+    appMobileFriendly: Awaited<ReturnType<typeof parseMdx>>;
+    queries: Awaited<ReturnType<typeof parseMdx>>;
+    queriesMobileFriendly: Awaited<ReturnType<typeof parseMdx>>;
+    mutators: Awaited<ReturnType<typeof parseMdx>>;
+    mutatorsMobileFriendly: Awaited<ReturnType<typeof parseMdx>>;
+  };
+}) {
+  const isMobile = useIsMobile();
   const videoRef = useRef<HTMLVideoElement>(null);
   const [showDemoModal, setShowDemoModal] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(true);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isVideoReady, setIsVideoReady] = useState(false);
   const mainRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -103,14 +64,35 @@ export function IntroductionLanding() {
     }
   };
 
-  const toggleFullscreen = () => {
-    const videoContainer = videoRef.current?.parentElement;
-    if (!videoContainer) return;
+  useEffect(() => {
+    const videoElement = videoRef.current;
+    if (!videoElement) return;
 
-    if (!document.fullscreenElement) {
-      videoContainer.requestFullscreen();
+    const onPlay = () => {
+      setIsPlaying(true);
+      setIsVideoReady(true);
+    };
+    const onPause = () => setIsPlaying(false);
+    const onCanPlay = () => setIsVideoReady(true);
+
+    videoElement.addEventListener('play', onPlay);
+    videoElement.addEventListener('pause', onPause);
+    videoElement.addEventListener('canplay', onCanPlay);
+
+    return () => {
+      videoElement.removeEventListener('play', onPlay);
+      videoElement.removeEventListener('pause', onPause);
+      videoElement.removeEventListener('canplay', onCanPlay);
+    };
+  }, []);
+
+  const toggleFullscreen = () => {
+    const videoContainer = videoRef.current;
+
+    if (!isCurrentlyFullscreen(videoContainer)) {
+      enterFullscreen(videoContainer);
     } else {
-      document.exitFullscreen();
+      exitFullscreen(videoContainer);
     }
   };
 
@@ -192,53 +174,59 @@ export function IntroductionLanding() {
               loop
               muted
               playsInline
+              preload="auto"
+              poster="/images/zbugs-demo-dkzx.webp"
               onClick={toggleVideoPlayPause}
               style={{cursor: 'pointer'}}
             >
-              <source src="/video/zbugs-demo.mp4" type="video/mp4" />
+              <source src="/video/zbugs-demo-8a3f2c.mp4" type="video/mp4" />
               Your browser does not support the video tag.
             </video>
-            <div className="video-controls">
-              <button
-                className="video-control-btn video-play-pause"
-                aria-label={isPlaying ? 'Pause' : 'Play'}
-                onClick={toggleVideoPlayPause}
-              >
-                {isPlaying ? (
-                  <svg
-                    className="video-icon"
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                  >
-                    <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
-                  </svg>
-                ) : (
-                  <svg
-                    className="video-icon"
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                  >
-                    <path d="M8 5v14l11-7z" />
-                  </svg>
-                )}
-              </button>
-              <button
-                className="video-control-btn video-fullscreen"
-                aria-label="Fullscreen"
-                onClick={toggleFullscreen}
-              >
-                <svg
-                  className="video-icon"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
+            {isVideoReady ? (
+              <div className="video-controls">
+                <button
+                  className="video-control-btn video-play-pause"
+                  aria-label={isPlaying ? 'Pause' : 'Play'}
+                  onClick={toggleVideoPlayPause}
                 >
-                  <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z" />
-                </svg>
-              </button>
-            </div>
+                  {isPlaying ? (
+                    <svg
+                      className="video-icon"
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                    >
+                      <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
+                    </svg>
+                  ) : (
+                    <svg
+                      className="video-icon"
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                    >
+                      <path d="M8 5v14l11-7z" />
+                    </svg>
+                  )}
+                </button>
+                <button
+                  className="video-control-btn video-fullscreen"
+                  aria-label="Fullscreen"
+                  onClick={toggleFullscreen}
+                >
+                  <svg
+                    className="video-icon"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
+                    <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z" />
+                  </svg>
+                </button>
+              </div>
+            ) : (
+              <></>
+            )}
           </div>
           <p className="video-caption">
             <a href="https://gigabugs.rocicorp.dev/">Gigabugs</a> – Our 1.2
@@ -329,45 +317,21 @@ export function IntroductionLanding() {
                 {text: 'mutators.ts'},
               ]}
             >
-              <pre className="has-copy-button">
-                <button className="font-regular copy-button" type="button">
-                  Copy
-                </button>
-                <code
-                  className="language-typescript"
-                  dangerouslySetInnerHTML={{
-                    __html: hljs.highlight(codeExamples.app, {
-                      language: 'typescript',
-                    }).value,
-                  }}
-                />
-              </pre>
-              <pre className="has-copy-button">
-                <button className="font-regular copy-button" type="button">
-                  Copy
-                </button>
-                <code
-                  className="language-typescript"
-                  dangerouslySetInnerHTML={{
-                    __html: hljs.highlight(codeExamples.queries, {
-                      language: 'typescript',
-                    }).value,
-                  }}
-                />
-              </pre>
-              <pre className="has-copy-button">
-                <button className="font-regular copy-button" type="button">
-                  Copy
-                </button>
-                <code
-                  className="language-typescript"
-                  dangerouslySetInnerHTML={{
-                    __html: hljs.highlight(codeExamples.mutators, {
-                      language: 'typescript',
-                    }).value,
-                  }}
-                />
-              </pre>
+              <div className="prose max-w-full w-full">
+                {isMobile
+                  ? codeExamples.appMobileFriendly.content
+                  : codeExamples.app.content}
+              </div>
+              <div className="prose max-w-full w-full">
+                {isMobile
+                  ? codeExamples.queriesMobileFriendly.content
+                  : codeExamples.queries.content}
+              </div>
+              <div className="prose max-w-full w-full">
+                {isMobile
+                  ? codeExamples.mutatorsMobileFriendly.content
+                  : codeExamples.mutators.content}
+              </div>
             </CodeGroup>
           </div>
 

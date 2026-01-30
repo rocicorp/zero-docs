@@ -1048,6 +1048,9 @@ html.dark {
 }
 
 .intro-landing-page .video-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 100%;
   aspect-ratio: 16 / 9;
   border-radius: 1rem;
@@ -1524,48 +1527,8 @@ html.dark {
     inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
-.intro-landing-page .code-block {
-  position: relative;
-  overflow-x: auto;
-  margin: 2rem 0;
-}
-
-.intro-landing-page .code-block pre {
-  margin: 0;
-  padding: 0;
-  overflow: visible;
-}
-
-.intro-landing-page .code-block code {
-  display: block;
-  font-family: 'Menlo', 'Consolas', 'SFMono-Regular', 'Courier New', monospace;
-  font-size: 0.9rem;
-  line-height: 1.6;
-  color: hsl(var(--foreground));
-  white-space: pre;
-}
-
 .intro-landing-page .code-block-tabbed {
   margin: 2rem 0;
-}
-
-.intro-landing-page .code-block-tabbed .code-group {
-  margin: 0;
-}
-
-.intro-landing-page .code-block-tabbed pre {
-  margin: 0;
-  padding: 1.5rem;
-  overflow-x: auto;
-}
-
-.intro-landing-page .code-block-tabbed code {
-  display: block;
-  font-family: 'Menlo', 'Consolas', 'SFMono-Regular', 'Courier New', monospace;
-  font-size: 0.9rem;
-  line-height: 1.6;
-  color: hsl(var(--foreground));
-  white-space: pre;
 }
 
 .dark .intro-landing-page .glass-panel {

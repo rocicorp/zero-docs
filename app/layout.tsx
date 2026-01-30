@@ -25,13 +25,13 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Zero Docs',
     description: 'The official documentation for Zero by Rocicorp.',
-    images: '/opengraph-image.jpg',
+    images: '/opengraph-image.png',
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Zero Docs',
     description: 'The official documentation for Zero by Rocicorp.',
-    images: '/opengraph-image.jpg',
+    images: '/opengraph-image.png',
   },
   title: 'Zero Docs',
   description: 'The official documentation for Zero by Rocicorp.',

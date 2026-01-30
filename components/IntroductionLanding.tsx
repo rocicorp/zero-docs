@@ -271,7 +271,10 @@ export function IntroductionLanding() {
               className="demo-container"
               onClick={() => {
                 if (window.innerWidth <= 768) {
-                  window.open('https://bugs.rocicorp.dev/p/roci?demo', '_blank');
+                  window.open(
+                    'https://bugs.rocicorp.dev/p/roci?demo',
+                    '_blank',
+                  );
                 } else {
                   setShowDemoModal(true);
                 }
@@ -560,20 +563,19 @@ export function IntroductionLanding() {
             <div className="testimonial-card">
               <div className="testimonial-quote">
                 <p>
-                  Zero completely changed how we think about real-time. The
-                  query-driven sync is genius — our app feels instant now.
+                  Zero is a game changer. You will be shocked at how fast it is.
                 </p>
               </div>
               <div className="testimonial-author">
                 <img
-                  src="https://i.pravatar.cc/150?img=12"
-                  alt="Matt Wonlaw"
+                  src="https://pbs.twimg.com/profile_images/1404817306031562756/5cHmpCuL_400x400.jpg"
+                  alt="Scott Tolinski"
                   className="testimonial-avatar"
                 />
                 <div className="testimonial-info">
-                  <div className="testimonial-name">Matt Wonlaw</div>
+                  <div className="testimonial-name">Scott Tolinski</div>
                   <div className="testimonial-title">
-                    Engineering Lead, Streamline
+                    Co-host of http://Syntax.fm
                   </div>
                 </div>
               </div>
@@ -582,19 +584,19 @@ export function IntroductionLanding() {
             <div className="testimonial-card">
               <div className="testimonial-quote">
                 <p>
-                  We tried building our own sync layer. Should&apos;ve just used
-                  Zero from day one. Saved us months of development time.
+                  Have been building with Zero for months. It's making me hate
+                  all my older codebases.
                 </p>
               </div>
               <div className="testimonial-author">
                 <img
-                  src="https://i.pravatar.cc/150?img=33"
-                  alt="Marcus Rodriguez"
+                  src="https://pbs.twimg.com/profile_images/1602333093485891584/mmVqjFNI_400x400.jpg"
+                  alt="Dax Raad"
                   className="testimonial-avatar"
                 />
                 <div className="testimonial-info">
-                  <div className="testimonial-name">Marcus Rodriguez</div>
-                  <div className="testimonial-title">CTO, Catalyst Labs</div>
+                  <div className="testimonial-name">Dax Raad</div>
+                  <div className="testimonial-title">OpenCode, SST.dev</div>
                 </div>
               </div>
             </div>
@@ -602,21 +604,43 @@ export function IntroductionLanding() {
             <div className="testimonial-card">
               <div className="testimonial-quote">
                 <p>
-                  The permission system is incredibly powerful. We can finally
-                  give users real-time collaboration without worrying about data
-                  leaks.
+                  We rebuilt our sync engine from the ground up to make
+                  Productlane the fastest customer support tool out there. Huge
+                  shoutout to Zero for making this possible!
                 </p>
               </div>
               <div className="testimonial-author">
                 <img
-                  src="https://i.pravatar.cc/150?img=47"
-                  alt="Priya Patel"
+                  src="https://pbs.twimg.com/profile_images/1865821729005674496/VC6IpG6f_400x400.jpg"
+                  alt="Raphael Fleckenstein"
                   className="testimonial-avatar"
                 />
                 <div className="testimonial-info">
-                  <div className="testimonial-name">Priya Patel</div>
+                  <div className="testimonial-name">Raphael Fleckenstein</div>
+                  <div className="testimonial-title">CEO, Productlane.com</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="testimonial-card">
+              <div className="testimonial-quote">
+                <p>
+                  One of my favorite features is custom mutators. I can run
+                  validation logic instantly on the client for fast UX, and
+                  optionally do additional validation on the server for security
+                  or performance.
+                </p>
+              </div>
+              <div className="testimonial-author">
+                <img
+                  src="https://pbs.twimg.com/profile_images/1963593369306750976/7gPWqEa8_400x400.jpg"
+                  alt="Cory House"
+                  className="testimonial-avatar"
+                />
+                <div className="testimonial-info">
+                  <div className="testimonial-name">Cory House</div>
                   <div className="testimonial-title">
-                    Senior Developer, Nexus
+                    Founder, ReactJS Consulting
                   </div>
                 </div>
               </div>
@@ -625,20 +649,20 @@ export function IntroductionLanding() {
             <div className="testimonial-card">
               <div className="testimonial-quote">
                 <p>
-                  Local-first with Zero means our app works offline and syncs
-                  seamlessly. Our users don&apos;t even notice when their
-                  connection drops.
+                  Rocicorp is making something that used to require an insane
+                  amount of engineering in-house. Hard to go back once you've
+                  used it.
                 </p>
               </div>
               <div className="testimonial-author">
                 <img
-                  src="https://i.pravatar.cc/150?img=68"
-                  alt="Alex Kumar"
+                  src="https://pbs.twimg.com/profile_images/1241922871720652803/bOf1XH2y_400x400.jpg"
+                  alt="Kurt Schrader"
                   className="testimonial-avatar"
                 />
                 <div className="testimonial-info">
-                  <div className="testimonial-name">Alex Kumar</div>
-                  <div className="testimonial-title">Founder, TaskFlow</div>
+                  <div className="testimonial-name">Kurt Schrader</div>
+                  <div className="testimonial-title">CEO, Shortcut</div>
                 </div>
               </div>
             </div>
@@ -646,21 +670,19 @@ export function IntroductionLanding() {
             <div className="testimonial-card">
               <div className="testimonial-quote">
                 <p>
-                  The developer experience is top-notch. Write queries, get
-                  reactive updates. It&apos;s that simple.
+                  If there's anything that has changed how we built software,
+                  it's this.
                 </p>
               </div>
               <div className="testimonial-author">
                 <img
-                  src="https://i.pravatar.cc/150?img=27"
-                  alt="Jamie Taylor"
+                  src="https://pbs.twimg.com/profile_images/721330013547663361/LWxIUO2u_400x400.jpg"
+                  alt="Felipe Torres"
                   className="testimonial-avatar"
                 />
                 <div className="testimonial-info">
-                  <div className="testimonial-name">Jamie Taylor</div>
-                  <div className="testimonial-title">
-                    Full-Stack Developer, Velocity
-                  </div>
+                  <div className="testimonial-name">Felipe Torres</div>
+                  <div className="testimonial-title">Founder</div>
                 </div>
               </div>
             </div>
@@ -668,21 +690,78 @@ export function IntroductionLanding() {
             <div className="testimonial-card">
               <div className="testimonial-quote">
                 <p>
-                  Zero handles the hard parts of sync so we can focus on
-                  building features. The performance gains are unreal.
+                  Ranger now runs faster than <b>any</b> of our competitors
+                  thanks to Zero.
                 </p>
               </div>
               <div className="testimonial-author">
                 <img
-                  src="https://i.pravatar.cc/150?img=59"
-                  alt="Taylor Morgan"
+                  src="https://pbs.twimg.com/profile_images/1635321690757668864/PsA8fpgz_400x400.jpg"
+                  alt="Joe Greve"
                   className="testimonial-avatar"
                 />
                 <div className="testimonial-info">
-                  <div className="testimonial-name">Taylor Morgan</div>
-                  <div className="testimonial-title">
-                    Product Engineer, Orbit
-                  </div>
+                  <div className="testimonial-name">Joe Greve</div>
+                  <div className="testimonial-title">CEO, Ranger Budget</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="testimonial-card">
+              <div className="testimonial-quote">
+                <p>
+                  Zero is making Plot feel instantaneous. Like blink and you
+                  miss it.
+                </p>
+              </div>
+              <div className="testimonial-author">
+                <img
+                  src="https://pbs.twimg.com/profile_images/2012194448239681536/Qr7Z55wS_400x400.jpg"
+                  alt="Abraham Aguilera"
+                  className="testimonial-avatar"
+                />
+                <div className="testimonial-info">
+                  <div className="testimonial-name">Abraham Aguilera</div>
+                  <div className="testimonial-title">Founder, Plot</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="testimonial-card">
+              <div className="testimonial-quote">
+                <p>
+                  Deployed it halfway across the world and literally can't tell.
+                </p>
+              </div>
+              <div className="testimonial-author">
+                <img
+                  src="https://pbs.twimg.com/profile_images/1971935406355550208/TgteTLXb_400x400.jpg"
+                  alt="Christoph Schmatzler"
+                  className="testimonial-avatar"
+                />
+                <div className="testimonial-info">
+                  <div className="testimonial-name">Christoph Schmatzler</div>
+                  <div className="testimonial-title">señor developer</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="testimonial-card">
+              <div className="testimonial-quote">
+                <p>
+                  Built a notes app yesterday and Zero blew my mind. Excited to
+                  see SaaS verticals finally get some good web apps.
+                </p>
+              </div>
+              <div className="testimonial-author">
+                <img
+                  src="https://pbs.twimg.com/profile_images/1907688428398850048/zAuYRr83_400x400.jpg"
+                  alt="Colm Tuite"
+                  className="testimonial-avatar"
+                />
+                <div className="testimonial-info">
+                  <div className="testimonial-name">Colm Tuite</div>
+                  <div className="testimonial-title">Founder, Base UI</div>
                 </div>
               </div>
             </div>

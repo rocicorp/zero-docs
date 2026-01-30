@@ -167,11 +167,11 @@ export function IntroductionLanding({
               loop
               muted
               playsInline
-              poster="/images/zbugs-poster-qv4o.jpg"
+              poster="/images/zbugs-poster-dkzx.jpg"
               onClick={toggleVideoPlayPause}
               style={{cursor: 'pointer'}}
             >
-              <source src="/video/zbugs-demo-qv4o.mp4" type="video/mp4" />
+              <source src="/video/zbugs-demo-dkzx.mp4" type="video/mp4" />
               Your browser does not support the video tag.
             </video>
             <div className="video-controls">

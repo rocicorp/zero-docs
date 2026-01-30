@@ -98,6 +98,16 @@ const nextConfig = {
           },
         ],
       },
+      {
+        source: '/video/:path*.jpg',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value:
+              'public, max-age=86400, s-maxage=86400, stale-while-revalidate=43200',
+          },
+        ],
+      },
     ];
   },
 };

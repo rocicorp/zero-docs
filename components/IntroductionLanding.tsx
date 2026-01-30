@@ -29,7 +29,7 @@ export function IntroductionLanding({
   const isMobile = useIsMobile();
   const videoRef = useRef<HTMLVideoElement>(null);
   const [showDemoModal, setShowDemoModal] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(true);
+  const [isPlaying, setIsPlaying] = useState(false);
   const [isVideoReady, setIsVideoReady] = useState(false);
   const mainRef = useRef<HTMLElement>(null);
 

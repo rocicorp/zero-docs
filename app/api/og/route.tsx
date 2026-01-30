@@ -17,7 +17,7 @@ const zeroLogo = new URL(
 
 export async function GET(req: NextRequest) {
   const {searchParams} = new URL(req.url);
-  const title = searchParams.get('title') ?? 'General Purpose Sync for the Web';
+  const title = searchParams.get('title') ?? 'Instant Queries by Default';
   const subtitle = searchParams.get('subtitle');
   const logo = searchParams.get('logo') === 'zero' ? zeroLogo : zeroDocsLogo;
   const logoWidth = logo === zeroLogo ? 292 : 424;

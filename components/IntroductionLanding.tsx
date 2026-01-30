@@ -249,7 +249,7 @@ export function IntroductionLanding() {
         <section className="section section-intro">
           <p>
             Sync engines enable instant UI by downloading data to the client
-            ahead of time. All read and writes happen locally, and changes are
+            ahead of time. Read and writes happen locally, and changes are
             synced in the background.
           </p>
           <p>
@@ -378,12 +378,11 @@ export function IntroductionLanding() {
                 streaming query engine
               </Link>{' '}
               to efficiently sync query results to a persistent cache on the
-              client. This cache is used automatically for the next read or
-              write.
+              client. This cache is used automatically for future queries.
             </p>
             <p>
-              With thoughtful preloading, this architecture means almost all
-              interactions feel instant.
+              With thoughtful preloading, this architecture enables UI where
+              almost all interactions feel instant.
             </p>
           </div>
         </section>
@@ -588,8 +587,8 @@ export function IntroductionLanding() {
             >
               <div className="testimonial-quote">
                 <p>
-                  Have been building with Zero for months. It&apos;s making me hate
-                  all my older codebases.
+                  Have been building with Zero for months. It&apos;s making me
+                  hate all my older codebases.
                 </p>
               </div>
               <div className="testimonial-author">
@@ -663,8 +662,8 @@ export function IntroductionLanding() {
               <div className="testimonial-quote">
                 <p>
                   Rocicorp is making something that used to require an insane
-                  amount of engineering in-house. Hard to go back once you&apos;ve
-                  used it.
+                  amount of engineering in-house. Hard to go back once
+                  you&apos;ve used it.
                 </p>
               </div>
               <div className="testimonial-author">
@@ -686,8 +685,8 @@ export function IntroductionLanding() {
             >
               <div className="testimonial-quote">
                 <p>
-                  If there&apos;s anything that has changed how we built software,
-                  it&apos;s this.
+                  If there&apos;s anything that has changed how we built
+                  software, it&apos;s this.
                 </p>
               </div>
               <div className="testimonial-author">
@@ -755,7 +754,8 @@ export function IntroductionLanding() {
             >
               <div className="testimonial-quote">
                 <p>
-                  Deployed it halfway across the world and literally can&apos;t tell.
+                  Deployed it halfway across the world and literally can&apos;t
+                  tell.
                 </p>
               </div>
               <div className="testimonial-author">

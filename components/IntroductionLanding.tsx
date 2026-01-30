@@ -588,7 +588,7 @@ export function IntroductionLanding() {
             >
               <div className="testimonial-quote">
                 <p>
-                  Have been building with Zero for months. It's making me hate
+                  Have been building with Zero for months. It&apos;s making me hate
                   all my older codebases.
                 </p>
               </div>
@@ -663,7 +663,7 @@ export function IntroductionLanding() {
               <div className="testimonial-quote">
                 <p>
                   Rocicorp is making something that used to require an insane
-                  amount of engineering in-house. Hard to go back once you've
+                  amount of engineering in-house. Hard to go back once you&apos;ve
                   used it.
                 </p>
               </div>
@@ -686,8 +686,8 @@ export function IntroductionLanding() {
             >
               <div className="testimonial-quote">
                 <p>
-                  If there's anything that has changed how we built software,
-                  it's this.
+                  If there&apos;s anything that has changed how we built software,
+                  it&apos;s this.
                 </p>
               </div>
               <div className="testimonial-author">
@@ -755,7 +755,7 @@ export function IntroductionLanding() {
             >
               <div className="testimonial-quote">
                 <p>
-                  Deployed it halfway across the world and literally can't tell.
+                  Deployed it halfway across the world and literally can&apos;t tell.
                 </p>
               </div>
               <div className="testimonial-author">

@@ -55,7 +55,7 @@ export default async function DocsPage({params}: PageProps) {
           <Pagination previousNext={previousNext} />
         </Typography>
       </div>
-      <Toc tocs={tocs} path={pathName} />
+      <Toc tocs={tocs} path={pathName} className="toc-sidebar" />
     </div>
   );
 }

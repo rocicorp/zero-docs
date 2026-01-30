@@ -19,7 +19,7 @@ import {mutators} from 'mutators.ts'
 function Playlist({id}: {id: string}) {
   // This usually resolves *instantly*, and updates reactively
   // as server data changes. Just wire it directly to your UI –
-  // no HTTP APIs, no state management no realtime goop.
+  // no HTTP APIs, no state management, no realtime goop.
   const [playlist] = useQuery(
     queries.playlist.byID({id})
   )
@@ -249,7 +249,7 @@ export function IntroductionLanding() {
         <section className="section section-intro">
           <p>
             Sync engines enable instant UI by downloading data to the client
-            ahead of time. Read and writes happen locally, and changes are
+            ahead of time. Reads and writes happen locally, and changes are
             synced in the background.
           </p>
           <p>

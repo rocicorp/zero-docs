@@ -99,7 +99,7 @@ const nextConfig = {
         ],
       },
       {
-        source: 'images/:path*.jpg',
+        source: '/images/:path*.jpg',
         headers: [
           {
             key: 'Cache-Control',

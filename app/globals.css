@@ -672,6 +672,7 @@ html.dark {
   -webkit-background-clip: initial;
   -webkit-text-fill-color: currentColor;
   background-clip: initial;
+  padding-right: 0.05em;
   animation: heroBylineEmColor 14s linear infinite;
 }
 
@@ -813,9 +814,8 @@ html.dark {
 }
 
 .intro-landing-page .hero-byline em {
-  display: inline-block;
-  position: relative;
-  left: -2px;
+  display: inline;
+  margin-left: -0.1em;
   animation: heroBylineEmColor 14s linear infinite;
 }
 

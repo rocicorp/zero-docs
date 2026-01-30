@@ -241,10 +241,8 @@ export function IntroductionLanding() {
             </div>
           </div>
           <p className="video-caption">
-            <a href="https://gigabugs.rocicorp.dev/" target="_blank">
-              Gigabugs
-            </a>{' '}
-            – Our 1.2 million row bug tracker demo.
+            <a href="https://gigabugs.rocicorp.dev/">Gigabugs</a> – Our 1.2
+            million row bug tracker demo.
           </p>
         </section>
 
@@ -560,7 +558,10 @@ export function IntroductionLanding() {
           <p>Check out what our users have to say about Zero.</p>
 
           <div className="testimonials-grid">
-            <div className="testimonial-card">
+            <a
+              href="https://x.com/stolinski/status/1870127005510861202"
+              className="testimonial-card"
+            >
               <div className="testimonial-quote">
                 <p>
                   Zero is a game changer. You will be shocked at how fast it is.
@@ -579,9 +580,12 @@ export function IntroductionLanding() {
                   </div>
                 </div>
               </div>
-            </div>
+            </a>
 
-            <div className="testimonial-card">
+            <a
+              href="https://x.com/thdxr/status/1869449253904679133"
+              className="testimonial-card"
+            >
               <div className="testimonial-quote">
                 <p>
                   Have been building with Zero for months. It's making me hate
@@ -599,9 +603,12 @@ export function IntroductionLanding() {
                   <div className="testimonial-title">OpenCode, SST.dev</div>
                 </div>
               </div>
-            </div>
+            </a>
 
-            <div className="testimonial-card">
+            <a
+              href="https://x.com/fleckensteyn/status/1998440074640314730"
+              className="testimonial-card"
+            >
               <div className="testimonial-quote">
                 <p>
                   We rebuilt our sync engine from the ground up to make
@@ -620,9 +627,12 @@ export function IntroductionLanding() {
                   <div className="testimonial-title">CEO, Productlane.com</div>
                 </div>
               </div>
-            </div>
+            </a>
 
-            <div className="testimonial-card">
+            <a
+              href="https://x.com/housecor/status/1945886895470157863"
+              className="testimonial-card"
+            >
               <div className="testimonial-quote">
                 <p>
                   One of my favorite features is custom mutators. I can run
@@ -644,9 +654,12 @@ export function IntroductionLanding() {
                   </div>
                 </div>
               </div>
-            </div>
+            </a>
 
-            <div className="testimonial-card">
+            <a
+              href="https://x.com/kurt/status/2002441903812509939"
+              className="testimonial-card"
+            >
               <div className="testimonial-quote">
                 <p>
                   Rocicorp is making something that used to require an insane
@@ -665,9 +678,12 @@ export function IntroductionLanding() {
                   <div className="testimonial-title">CEO, Shortcut</div>
                 </div>
               </div>
-            </div>
+            </a>
 
-            <div className="testimonial-card">
+            <a
+              href="https://x.com/fforres/status/1968017796786425928"
+              className="testimonial-card"
+            >
               <div className="testimonial-quote">
                 <p>
                   If there's anything that has changed how we built software,
@@ -685,9 +701,12 @@ export function IntroductionLanding() {
                   <div className="testimonial-title">Founder</div>
                 </div>
               </div>
-            </div>
+            </a>
 
-            <div className="testimonial-card">
+            <a
+              href="https://x.com/GreveJoe/status/1984810258561450162"
+              className="testimonial-card"
+            >
               <div className="testimonial-quote">
                 <p>
                   Ranger now runs faster than <b>any</b> of our competitors
@@ -705,9 +724,12 @@ export function IntroductionLanding() {
                   <div className="testimonial-title">CEO, Ranger Budget</div>
                 </div>
               </div>
-            </div>
+            </a>
 
-            <div className="testimonial-card">
+            <a
+              href="https://x.com/abraguilera/status/2008808256702194030"
+              className="testimonial-card"
+            >
               <div className="testimonial-quote">
                 <p>
                   Zero is making Plot feel instantaneous. Like blink and you
@@ -725,9 +747,12 @@ export function IntroductionLanding() {
                   <div className="testimonial-title">Founder, Plot</div>
                 </div>
               </div>
-            </div>
+            </a>
 
-            <div className="testimonial-card">
+            <a
+              href="https://x.com/cschmatzler/status/2004310059548135936"
+              className="testimonial-card"
+            >
               <div className="testimonial-quote">
                 <p>
                   Deployed it halfway across the world and literally can't tell.
@@ -744,9 +769,12 @@ export function IntroductionLanding() {
                   <div className="testimonial-title">señor developer</div>
                 </div>
               </div>
-            </div>
+            </a>
 
-            <div className="testimonial-card">
+            <a
+              href="https://x.com/colmtuite/status/1941718639968649349"
+              className="testimonial-card"
+            >
               <div className="testimonial-quote">
                 <p>
                   Built a notes app yesterday and Zero blew my mind. Excited to
@@ -764,7 +792,7 @@ export function IntroductionLanding() {
                   <div className="testimonial-title">Founder, Base UI</div>
                 </div>
               </div>
-            </div>
+            </a>
           </div>
         </section>
 
@@ -887,7 +915,7 @@ export function IntroductionLanding() {
                 onboarded.
               </p>
               <div className="cloud-zero-cta-buttons">
-                <a href="mailto:hello@rocicorp.com" className="load-demo-btn">
+                <a href="mailto:hello@rocicorp.dev" className="load-demo-btn">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"
@@ -904,7 +932,6 @@ export function IntroductionLanding() {
                 </a>
                 <a
                   href="https://discord.rocicorp.dev"
-                  target="_blank"
                   rel="noopener noreferrer"
                   className="load-demo-btn"
                 >
@@ -957,7 +984,6 @@ export function IntroductionLanding() {
             <a
               className="feature-card feature-card--icon-left feature-card--link"
               href="https://discord.rocicorp.dev"
-              target="_blank"
               rel="noopener noreferrer"
             >
               <div className="feature-card-icon-left">
@@ -983,7 +1009,6 @@ export function IntroductionLanding() {
       <footer className="landing-footer">
         <Link
           href="https://rocicorp.dev"
-          target="_blank"
           rel="noopener noreferrer"
           className="landing-footer-link"
         >

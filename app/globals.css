@@ -1640,7 +1640,7 @@ html:not(.dark) .intro-landing-page .how-it-works-svg {
   padding: 2rem;
   position: relative;
   overflow: hidden;
-  cursor: default;
+  cursor: pointer;
   display: flex;
   flex-direction: column;
   gap: 1.5rem;

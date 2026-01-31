@@ -241,18 +241,19 @@ export function IntroductionLanding({
             synced in the background.
           </p>
           <p>
-            It's a beautiful idea, with a long history of use: Linear, Figma,
-            Superhuman, and Dropbox were all built this way.
+            It's a beautiful idea, and one that has been used by some of the
+            world's best software: Linear, Figma, Superhuman, and Dropbox were
+            all built this way.
           </p>
           <p>
             But there's a catch. And this catch is the reason why sync-based
-            apps are still so rare.
+            apps are still rare.
           </p>
           <p>
-            Apps usually have far too much data to download up-front. And they
-            also usually have complex permissions. Incrementally syncing a
-            static block of data is easy; syncing just the slice the user wants
-            and has access to is much more difficult.
+            Apps usually have far too much data to download up-front. They also
+            have complex permissions. Incrementally syncing a static block of
+            data is easy; syncing just the slice the user wants and has access
+            to is much more difficult.
           </p>
           <p>
             We created Zero to solve these problems in a general way, and to
@@ -278,8 +279,8 @@ export function IntroductionLanding({
               <div className="demo-prompt">
                 <h3 className="demo-prompt-title">Try it out right now.</h3>
                 <p className="demo-intro-text">
-                  Our Gigabugs demo has 1.2 million rows, and loads in less than
-                  2 seconds.
+                  Our Gigabugs demo has 1.2 million rows, instant interactions,
+                  and loads in less than 2 seconds.
                 </p>
                 <button className="load-demo-btn">Open Demo</button>
               </div>
@@ -309,8 +310,8 @@ export function IntroductionLanding({
             </p>
             <p>
               Zero-cache runs in the cloud and maintains a read-only replica of
-              your Postgres database. Zero-client runs in the client and
-              maintains a persistent copy of recently used rows.
+              your Postgres database. Zero-client gets linked into your app and
+              maintains a client-side store of recently used rows.
             </p>
             <p>
               Queries run against the client first, returning matching results
@@ -318,7 +319,7 @@ export function IntroductionLanding({
               returns authoritative results asynchronously.
             </p>
             <p>
-              Server results are automatically stored on the client, so that
+              Server results are automatically stored client-side, so that
               future queries can be answered instantly.
             </p>
           </div>
@@ -351,9 +352,9 @@ export function IntroductionLanding({
 
           <div className="how-it-works-description">
             <p>
-              Efficient incremental sync of complex queries is made possible by{' '}
-              <a href="/docs/zql">ZQL</a>, a new streaming query engine we built
-              specifically for Zero.
+              Efficient incremental execution of complex queries is made
+              possible by <a href="/docs/zql">ZQL</a>, a new streaming query
+              engine we built specifically for Zero.
             </p>
             <p>
               This architecture lets you sync exactly the data you need, when
@@ -525,7 +526,7 @@ export function IntroductionLanding({
 
         <section className="section section-testimonials" id="testimonials">
           <h2 className="subheading">
-            <a href="#testimonials" className="heading-link">
+            <a href="#users" className="heading-link">
               From Our Users
             </a>
           </h2>

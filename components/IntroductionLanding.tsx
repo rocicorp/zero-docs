@@ -241,9 +241,8 @@ export function IntroductionLanding({
             synced in the background.
           </p>
           <p>
-            It's a beautiful idea, with a long history of use by the world's
-            best software: Linear, Figma, Superhuman, and Dropbox were all built
-            this way.
+            It's a beautiful idea, with a long history of use: Linear, Figma,
+            Superhuman, and Dropbox were all built this way.
           </p>
           <p>
             But there's a catch. And this catch is the reason why sync-based
@@ -251,9 +250,9 @@ export function IntroductionLanding({
           </p>
           <p>
             Apps usually have far too much data to download up-front. And they
-            also often have complex permissions. Incrementally syncing a static
-            block of data is easy; syncing just the slice the user needs and has
-            access to right now is much more difficult.
+            also usually have complex permissions. Incrementally syncing a
+            static block of data is easy; syncing just the slice the user wants
+            and has access to is much more difficult.
           </p>
           <p>
             We created Zero to solve these problems in a general way, and to
@@ -309,9 +308,9 @@ export function IntroductionLanding({
               <code>zero-cache</code>.
             </p>
             <p>
-              Zero-cache runs in the cloud and maintains a read-only SQLite
-              replica of your Postgres database. Zero-client runs in the client
-              and maintains a persistent local store of recently used rows.
+              Zero-cache runs in the cloud and maintains a read-only replica of
+              your Postgres database. Zero-client runs in the client and
+              maintains a persistent copy of recently used rows.
             </p>
             <p>
               Queries run against the client first, returning matching results

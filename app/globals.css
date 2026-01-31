@@ -2198,6 +2198,21 @@ html:not(.dark) .intro-landing-page .how-it-works-svg {
 @media (max-width: 768px) {
   .intro-landing-page .cloud-zero-group-tiers {
     grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .intro-landing-page .cloud-zero-tier-price {
+    border-top: none;
+    padding-top: 0;
+  }
+
+  .intro-landing-page .cloud-zero-group-tiers .cloud-zero-tier-price {
+    padding-bottom: 2.5rem;
+  }
+
+  .intro-landing-page .cloud-zero-group-tiers .cloud-zero-tier:not(:first-child) {
+    border-top: 1px solid rgba(128, 128, 128, 0.2);
+    padding-top: 2.5rem;
   }
 }
 

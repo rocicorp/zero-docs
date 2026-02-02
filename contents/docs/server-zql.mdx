@@ -30,6 +30,10 @@ several built-in factories for popular Postgres bindings libraries.
       sync: {pgClient: 'drizzle'},
     },
     {
+      text: 'Prisma',
+      sync: {pgClient: 'prisma'},
+    },
+    {
       text: 'node-postgres',
       sync: {pgClient: 'node-postgres'},
     },
@@ -51,6 +55,28 @@ export const drizzleClient = drizzle(pool, {
   schema: drizzleSchema
 })
 export const dbProvider = zeroDrizzle(schema, drizzleClient)
+
+// Register the database provider for type safety
+declare module '@rocicorp/zero' {
+  interface DefaultTypes {
+    dbProvider: typeof dbProvider
+  }
+}
+```
+
+```ts
+// app/api/mutate/db-provider.ts
+import {PrismaPg} from '@prisma/adapter-pg'
+import {PrismaClient} from '@prisma/client'
+import {zeroPrisma} from '@rocicorp/zero/server/adapters/prisma'
+import {schema} from '../../zero/schema.ts'
+
+const prisma = new PrismaClient({
+  adapter: new PrismaPg({
+    connectionString: process.env.ZERO_UPSTREAM_DB!
+  })
+})
+export const dbProvider = zeroPrisma(schema, prisma)
 
 // Register the database provider for type safety
 declare module '@rocicorp/zero' {
@@ -115,6 +141,10 @@ Within your mutators, you can access the underlying transaction via `tx.dbTransa
       sync: {pgClient: 'drizzle'},
     },
     {
+      text: 'Prisma',
+      sync: {pgClient: 'prisma'},
+    },
+    {
       text: 'node-postgres',
       sync: {pgClient: 'node-postgres'},
     },
@@ -135,6 +165,28 @@ export const mutators = defineMutators({
         await tx.dbTransaction.wrappedTransaction
           .insert(drizzleSchema.user)
           .values({id, name})
+      }
+    }
+  )
+})
+```
+
+```ts
+// mutators.ts
+export const mutators = defineMutators({
+  createUser: defineMutator(
+    z.object({id: z.string(), name: z.string()}),
+    async ({tx, args: {id, name}}) => {
+      if (tx.location === 'server') {
+        await tx.dbTransaction.wrappedTransaction.user.create(
+          {
+            data: {
+              id,
+              name,
+              status: 'active'
+            }
+          }
+        )
       }
     }
   )

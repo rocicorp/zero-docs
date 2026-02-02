@@ -68,11 +68,14 @@ export function IntroductionLanding({
     const videoElement = videoRef.current;
     if (!videoElement) return;
 
+    const updatePlaying = () => {
+      setIsPlaying(!videoElement.paused);
+    }
     const onPlay = () => {
-      setIsPlaying(true);
+      updatePlaying()
       setIsVideoReady(true);
     };
-    const onPause = () => setIsPlaying(false);
+    const onPause = () => updatePlaying();
     const onCanPlay = () => setIsVideoReady(true);
 
     videoElement.addEventListener('play', onPlay);

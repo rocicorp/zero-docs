@@ -286,14 +286,13 @@ If you are seeing a lot of Rehome errors, you may need to enable sticky sessions
 
 You can roll out updates in the following order:
 
-1. Run the database migrations (using the [expand/migrate/contract pattern](/docs/schema#schema-change-process)) and wait for replication to catch up.
+1. Run additive database migrations (the expand/migrate part of the [expand/migrate/contract pattern](/docs/schema#schema-change-process)) and wait for replication to catch up.
 2. Upgrade replication-manager.
 3. Upgrade view-syncers (if they come up before the replication-manager, they'll sit in retry loops until the manager is updated).
-4. Update the API servers (your mutate and query endpoints).
-5. Update client(s).
 
 <Note
-  type="warning"
+  emoji="🤝"
+  type="note"
   heading="The replication-manager has a different upgrade pattern"
   slug="replication-manager-upgrade"
 >
@@ -301,6 +300,22 @@ You can roll out updates in the following order:
   is the single owner of the changelog DB state. The
   view-syncers are simply drained and reconnected, since
   they are designed to be disposable.
+</Note>
+
+4. Update the API servers (your mutate and query endpoints).
+5. Update client(s).
+6. After most clients have refreshed, run contract migrations to drop or rename obsolete columns/tables.
+
+<Note
+  type="warning"
+  heading="Contract changes need updated clients"
+  slug="contract-migrations"
+>
+  Contract migrations are destructive (dropping or renaming
+  columns/tables). Make sure the API and clients are already
+  updated and have had time to refresh before you remove
+  columns. For renames, add the new column, backfill, deploy
+  the app to use it, then drop the old column later.
 </Note>
 
 ### Client/Server Version Compatibility

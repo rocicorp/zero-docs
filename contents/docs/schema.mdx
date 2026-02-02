@@ -389,11 +389,12 @@ If the schema changes in an incompatible way while a client is running, `zero-ca
 
 Like other database-backed applications, Zero schema migrations generally follow an "expand/migrate/contract" pattern:
 
-1. Implement and run an “expand” migration on the backend that is backwards compatible with existing schemas. Add new rows, tables, as well as any defaults and triggers needed for backwards compatibility.
-2. Update and deploy the client app to use the new schema.
-3. Optionally, after some grace period, implement and run a “contract” migration on the backend, deleting any obsolete rows/tables.
+1. Implement and run an "expand" migration on the backend that is backwards compatible with existing schemas. Add new columns or tables, plus any defaults and triggers needed for compatibility with existing clients.
+2. Update and deploy the API and client app to use the new schema.
+3. After a grace period, implement and run a "contract" migration on the backend to drop or rename obsolete columns/tables.
 
-Steps 1 and 2 can generally be done as part of a single deploy in your CI pipeline, but step 4 should be weeks later, when most open clients have refreshed the application.
+Steps 1 and 2 can generally be done as part of a single deploy in your CI pipeline, but step 3 should be weeks later, when most open clients have refreshed the application.
+See [Rolling Updates](/docs/deployment#rolling-updates) for more details.
 
 <Note type="warning" slug="postgres-special-cases">
   Certain schema changes require special handling in

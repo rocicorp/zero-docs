@@ -393,7 +393,8 @@ Like other database-backed applications, Zero schema migrations generally follow
 2. Update and deploy the API and client app to use the new schema.
 3. After a grace period, implement and run a "contract" migration on the backend to drop or rename obsolete columns/tables.
 
-Steps 1 and 2 can generally be done as part of a single deploy in your CI pipeline, but step 3 should be weeks later, when most open clients have refreshed the application. Contract changes are destructive, so for renames you should add the new column, backfill, deploy the app to use it, then drop the old column later.
+Steps 1 and 2 can generally be done as part of a single deploy in your CI pipeline, but step 3 should be weeks later, when most open clients have refreshed the application.
+See the [Rolling Updates](/docs/deployment#rolling-updates) docs for more details.
 
 <Note type="warning" slug="postgres-special-cases">
   Certain schema changes require special handling in

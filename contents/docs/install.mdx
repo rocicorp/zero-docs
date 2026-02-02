@@ -923,6 +923,10 @@ Use the Zero Postgres adapters to create a `dbProvider` instance:
       sync: {pgClient: 'drizzle'},
     },
     {
+      text: 'Prisma',
+      sync: {pgClient: 'prisma'},
+    },
+    {
       text: 'node-postgres',
       sync: {pgClient: 'node-postgres'},
     },
@@ -949,6 +953,29 @@ export const drizzleClient = drizzle(pool, {
   schema: drizzleSchema
 })
 export const dbProvider = zeroDrizzle(schema, drizzleClient)
+
+// Register the database provider for type safety
+declare module '@rocicorp/zero' {
+  interface DefaultTypes {
+    dbProvider: typeof dbProvider
+  }
+}
+```
+
+```ts
+// src/db-provider.ts
+import {PrismaPg} from '@prisma/adapter-pg'
+import {PrismaClient} from '@prisma/client'
+import {zeroPrisma} from '@rocicorp/zero/server/adapters/prisma'
+import {schema} from '../../zero/schema.ts'
+
+// pass a prisma client instance. for example:
+const prisma = new PrismaClient({
+  adapter: new PrismaPg({
+    connectionString: process.env.ZERO_UPSTREAM_DB!
+  })
+})
+export const dbProvider = zeroPrisma(schema, prisma)
 
 // Register the database provider for type safety
 declare module '@rocicorp/zero' {

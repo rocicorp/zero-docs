@@ -147,11 +147,11 @@ This is intended to paper over short connectivity glitches, such as server resta
 
 ### Disconnecting
 
-After the `disconnectTimeoutMs` elapses, Zero transitions to `disconnected`.
+After the `disconnectTimeoutMs` elapses, Zero transitions to `disconnected`. Zero also transitions to `disconnected` when the tab is hidden for `hiddenTabDisconnectDelay` (default 5 minutes).
 
 While `disconnected`, Zero continues to try to reconnect to `zero-cache` every 5 seconds.
 
-Reads are allowed while `disconnected`, but writes are not.
+Reads are allowed while `disconnected`, but writes are rejected and return an offline error.
 
 ### Errors
 
@@ -159,7 +159,7 @@ If `zero-cache` itself crashes, or if the [mutate](/docs/mutators) or [query](/d
 
 This type of error is unlikely to resolve just by retrying, so Zero doesn't try. The app can retry the connection manually by calling `zero.connection.connect()`.
 
-Writes are not accepted while Zero is in the `error` state.
+Writes are rejected while Zero is in the `error` state.
 
 You can forward connection errors to Sentry (or any error-monitoring tool) by subscribing to `zero.connection.state`.
 You can wrap `reason` in an `Error` and report it:
@@ -185,6 +185,8 @@ zero.connection.state.subscribe(state => {
 If the [mutate](/docs/mutators) or [query](/docs/queries) endpoints return a 401 or 403 status code, Zero transitions to the `needs-auth` state.
 
 The app should refresh the cookie or auth token and retry the connection manually by calling `zero.connection.connect()`.
+
+Writes are rejected while Zero is in the `needs-auth` state.
 
 See [Authentication](/docs/auth#auth-failure-and-refresh) for more information.
 

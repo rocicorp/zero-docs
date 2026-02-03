@@ -2,13 +2,7 @@
 title: Offline
 ---
 
-Zero currently supports offline reads, but not writes. We plan to support offline writes in the future, but we don't have a timeline for that yet.
-
-<Note emoji="🤓" type="warning" heading="Well actually…">
-  Offline writes *are* currently accepted by Zero, and sent
-  when you come back online. But we plan to disable this
-  soon.
-</Note>
+Zero currently supports offline reads, but not writes. When the client is disconnected, error, or closed, mutations are short-circuited and return an error.
 
 The lack of offline writes is often surprising to people familiar with sync engines, because offline is usually touted as something that comes for free with these tools.
 
@@ -16,7 +10,7 @@ This page explains why Zero doesn't currently support offline writes, how we rec
 
 ## Offline Writes are a UX Problem
 
-While Zero can technically queue offline writes and replay them when reconnected (this happens by default in any sync engine, and is what Zero does today), that fact doesn't make supporting offline writes much easier. That's because a really hard part of offline writes is in handling conflicts, and no software tool can make that problem go away.
+While sync engines can technically queue offline writes and replay them when reconnected, that fact doesn't make supporting offline writes much easier. That's because a really hard part of offline writes is in handling conflicts, and no software tool can make that problem go away.
 
 For example, imagine two users are editing an article about cats. One goes offline and does a bunch of work on the article, while the other decides that the article should actually be about dogs and rewrites it. When the offline user reconnects, there is no way that any software algorithm can automatically resolve their conflict. One or the other of them is going to be upset.
 
@@ -52,9 +46,9 @@ These problems are surmountable, but significant effort. Their solutions might a
 
 ## Zero's Position
 
-For all of the above reasons, we plan to disable offline writes in Zero for beta.
+For all of the above reasons, offline writes are disabled in Zero for beta.
 
-When the Zero client loses connection to `zero-cache` for several minutes (or when `zero-cache` cannot reach the customer API server), it will enter a special _offline mode_. In this mode, all writes to Zero will throw.
+If `zero-cache` cannot reach your API server, the client transitions the [connection](/docs/connection) to `needs-auth` or `error` rather than a special offline mode. Mutations are rejected in `disconnected`, `needs-auth`, `error`, and `closed`.
 
 While we recognize that offline writes would be useful for some applications, the reality is that for most of the apps we want to support, the user is online the vast majority of the time and the cost to support offline is extremely high. There is simply more value in making the online experience great first.
 
@@ -62,20 +56,16 @@ We would like to revisit this in the future and really think through how to desi
 
 ## Dealing with Offline Today
 
-Until Zero disables offline writes automatically, use `useZeroOnline` to detect connection loss and manually disable writes in your UI:
+Use the [Connection Status API](/docs/connection) to detect connection loss and visually disable writes in your UI:
 
 ```tsx
-const {online} = useZeroOnline()
+const state = useConnectionState()
 
-return <button disabled={!online}>Add to cart</button>
-```
-
-... or use the underlying `zero.onOnline` event:
-
-```tsx
-const unsubscribe = zero.onOnline(online => {
-  console.log('Online:', online)
-})
+return (
+  <button disabled={state.name !== 'connected'}>
+    Add to cart
+  </button>
+)
 ```
 
 ## Even More Information

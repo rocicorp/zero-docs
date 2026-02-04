@@ -58,9 +58,19 @@ CREATE PUBLICATION _{app-id}_public_0 FOR TABLES IN SCHEMA public;
 
 Note that changing the set of publications will result in resyncing the replica, which may involve downtime (replication lag) while the new replica is initializing. To change the set of publications without disrupting an existing app, a new app should be created.
 
+To use a custom publication, you can create one with:
+
+```sql
+CREATE PUBLICATION zero_data FOR TABLES IN SCHEMA public;
+-- or, more selectively:
+CREATE PUBLICATION zero_data FOR TABLE users, orders;
+```
+
+Then set the flag to that publication name, e.g.: ` ZERO_APP_PUBLICATIONS=zero_data`. To specify multiple publications, separate them with commas, e.g.: `ZERO_APP_PUBLICATIONS=zero_data1,zero_data2`.
+
 flag: `--app-publications`<br/>
 env: `ZERO_APP_PUBLICATIONS`<br/>
-default: `[]`
+default: `_{app-id}_public_0`
 
 ### Auto Reset
 

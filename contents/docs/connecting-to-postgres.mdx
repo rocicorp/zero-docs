@@ -122,7 +122,9 @@ IPv4 addresses are only supported on the Pro plan and are an extra $4/month.
 
 ### PlanetScale for Postgres
 
-PlanetScale doesn't support creating publications with the [`FOR ALL TABLES` clause](https://www.postgresql.org/docs/current/sql-createpublication.html). Zero typically uses this to create an initial default publication during setup. You can workaround this by [creating a publication](postgres-support#limiting-replication) explicitly listing the tables you want to replicate.
+It is easiest to connect zero-cache to PlanetScale with a role that has sufficient privileges to allow it to create its own publication.
+
+If your Postgres role does not have permission to create publications, you can [create a publication manually](/docs/postgres-support#limiting-replication) and then specify that publication name in [App Publications](/docs/zero-cache-config#app-publications).
 
 ### Neon
 

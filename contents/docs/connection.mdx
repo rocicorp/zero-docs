@@ -114,13 +114,34 @@ zero.connection.state.subscribe(state => {
 
 </CodeGroup>
 
+## Offline
+
+Zero [does not support offline writes](#why-zero-doesnt-support-offline-writes). When the client is in the `disconnected`, `error`, or `needs-auth` states, reads from synced data continue to work, but writes are rejected.
+
+| State | Reads | Writes |
+| --- | --- | --- |
+| `connecting` | ✅ | ✅ (queued) |
+| `connected` | ✅ | ✅ |
+| `disconnected` | ✅ | ❌ |
+| `error` | ✅ | ❌ |
+| `needs-auth` | ✅ | ❌ |
+| `closed` | ❌ | ❌ |
+
+## Offline UI
+
+While Zero is in the `disconnected`, `error`, or `needs-auth` states, you should prevent the user from inputting data to your application to avoid data loss.
+
+Zero automates this as best it can by rejecting writes in these states. But there can still be cases where the user can lose work – for example by typing into a textarea that is only written to Zero when the user presses a button.
+
+The easiest way to implement this is with a modal overlay that covers the entire screen and tells the user to reconnect. However, you could also continue to let the user use the app read-only, and only disable inputs.
+
 ## Details
 
 ### Connecting
 
-Zero starts in the `connecting` state. Once the connection is established, it transitions to `connected`.
+Zero starts in the `connecting` state.
 
-While `connecting`, Zero repeatedly tries to connect to `zero-cache` for 1 minute by default. This timeout can be configured with the `disconnectTimeoutMs` constructor parameter:
+While `connecting`, Zero repeatedly tries to connect to `zero-cache`. After 1 minute of failed attempts, it transitions to `disconnected`. This timeout can be configured with the `disconnectTimeoutMs` constructor parameter:
 
 ```tsx
 const opts: ZeroOptions = {
@@ -129,7 +150,9 @@ const opts: ZeroOptions = {
 }
 ```
 
-Reads and writes are allowed to Zero mutators while `connecting`. The writes are queued and will be sent when the connection succeeds.
+Reads and writes are allowed to Zero mutators while `connecting`. The writes are queued and are sent when the connection succeeds.
+
+If the connection fails, the writes remain queued and are sent the next time Zero connects.
 
 This is intended to paper over short connectivity glitches, such as server restarts, walking into an elevator, etc.
 
@@ -141,25 +164,29 @@ This is intended to paper over short connectivity glitches, such as server resta
 >
   While you can increase the `disconnectTimeoutMs` to allow
   for longer periods of offline operation, this has caveats
-  that you should understand carefully. Please see
-  [offline](#offline-support) for more information.
+  and is not recommended. Please see
+  [offline](#why-zero-doesnt-support-offline-writes) for more information.
 </Note>
 
-### Disconnecting
+### Connected
 
-After the `disconnectTimeoutMs` elapses, Zero transitions to `disconnected`. Zero also transitions to `disconnected` when the tab is hidden for `hiddenTabDisconnectDelay` (default 5 minutes).
+Once Zero connects to `zero-cache` and syncs the first time, it transitions to the `connected` state.
+
+### Disconnected
+
+After the `disconnectTimeoutMs` elapses while in the `connecting` state, Zero transitions to `disconnected`. Zero also transitions to `disconnected` when the tab is hidden for `hiddenTabDisconnectDelay` (default 5 minutes).
 
 While `disconnected`, Zero continues to try to reconnect to `zero-cache` every 5 seconds.
 
-Reads are allowed while `disconnected`, but writes are rejected and return an offline error.
+Reads are allowed while `disconnected`, but writes are rejected and return an offline error. See [Offline](#offline-support) for more information.
 
-### Errors
+### Error
 
 If `zero-cache` itself crashes, or if the [mutate](/docs/mutators) or [query](/docs/queries) endpoints return a network or HTTP error, Zero transitions to the `error` state.
 
 This type of error is unlikely to resolve just by retrying, so Zero doesn't try. The app can retry the connection manually by calling `zero.connection.connect()`.
 
-Writes are rejected while Zero is in the `error` state.
+Reads are allowed while in the `error` state, but writes are rejected.
 
 You can forward connection errors to Sentry (or any error-monitoring tool) by subscribing to `zero.connection.state`.
 You can wrap `reason` in an `Error` and report it:
@@ -180,58 +207,51 @@ zero.connection.state.subscribe(state => {
 })
 ```
 
-### Auth Required
+### Needs-Auth
 
 If the [mutate](/docs/mutators) or [query](/docs/queries) endpoints return a 401 or 403 status code, Zero transitions to the `needs-auth` state.
 
 The app should refresh the cookie or auth token and retry the connection manually by calling `zero.connection.connect()`.
 
-Writes are rejected while Zero is in the `needs-auth` state.
+Reads are allowed while in the `needs-auth` state, but writes are rejected.
 
 See [Authentication](/docs/auth#auth-failure-and-refresh) for more information.
 
-## Offline Support
+### Closed
 
-While in the `connecting` state, Zero queues writes and replays them when the connection succeeds.
+Zero transitions to the `closed` state when you call `zero.close()`.
 
-This works well for short periods offline, but not long periods for several reasons.
+Most applications will never call `close()`, and even if they do, they should not still be using Zero at that time. So in practice, you should never see this state in a running application.
 
-### Conflicts
+Reads and writes are both rejected while Zero is in the `closed` state.
+
+## Why Zero Doesn't Support Offline Writes
+
+Supporting offline writes in collaborative applications is inherently difficult, and no sync engine or CRDT algorithm can automatically solve it for you. Despite what their marketing says 😉.
+
+### Example
 
 Imagine two users are editing an article about cats. One goes offline and does a bunch of work on the article, while the other decides that the article should actually be about dogs and rewrites it. When the offline user reconnects, there is no way that any software algorithm can automatically resolve their conflict. One or the other of them is going to be upset.
 
-While this example may sound extreme, you can construct similar situations with the majority of common applications.
+This is a trivial data model with a single field, and is already unsolvable. Real-world applications are much worse:
 
-Just take your own application and ask yourself what should really happen if one user takes their device offline for a week and makes arbitrarily complex changes while other users are working online.
+* Foreign keys and other constraints can pass while offline, but break when the user reconnects.
+* Custom business logic and authorization rules can pass while offline, but break when the user reconnects.
+* The application's schema can change while offline, and the user's data may not be processable by the new schema.
 
-If you want to build an application that supports offline writes, you have three options:
+Just take your own schema and ask yourself what should really happen if one user takes their device offline for a week and makes arbitrarily complex changes while other users are working online.
 
-1. Make the logical datamodel append-only (i.e., users can create and mark tasks done, but cannot edit or delete them).
-2. Support custom UX to allow users to fork and merge conflicts when they occur.
-3. Only support editing from a single device. Even a single-user application can experience conflicts as soon as there are multiple _devices_.
+### Tradeoffs
 
-### Writes Can be Lost Across Schema Changes
+It is of course *possible* to create applications that support offline writes well (Git exists!). But it requires significant tradeoffs. For example, you could:
 
-Typically when a write happens while offline, it is written to local storage and replayed on next connection – even across app restarts.
+* Disallow destructive operations (i.e., users can create tasks done while offline, but cannot edit or delete them).
+* Support custom UX to allow users to fork and merge conflicts when they occur.
+* Restrict offline writes to a single device.
+* Accept potential user data loss.
 
-However, if that app restart gets a new version of Zero, or a new schema version, Zero creates a new local storage area and the offline write is effectively lost.
+### Zero's Position
 
-In [Replicache](https://replicache.dev/), our prior sync engine on which Zero is based, this was solved with a system called "mutation recovery" that rescued these mutations from prior schema/Zero versions. This system has not yet been ported to Zero.
+While we recognize that offline writes would be useful for some applications, the reality is that for most of the apps we want to support, the user is online the vast majority of the time and the cost to support offline is extremely high. There is simply more value in making the online experience great first, and that's where we're focused right now.
 
-### Startup Can be Slow When Replaying Writes
-
-When Zero starts, it sends all queued mutations to the server and simultaneously pulls updates from the server. When the server updates are applied, any queued mutations are "rebased" (re-run locally) to resolve conflicts.
-
-If there are many locally queued changes, this process can be slow.
-
-To effectively support long periods offline, Zero should probably have a mode where it first sends all queued mutations, then replays them after the server updates are applied. But this would conflict with the goal to startup and get server updates fast when there _aren't_ many queued mutations, so some work would be needed to balance these two goals.
-
-### Offline Mutations Must Never Be Rejected
-
-When a mutator throws an error on the server, the `handleMutateRequest` function in `@rocicorp/zero/server` returns the error to the client but marks the mutation processed.
-
-This is a good UX and DX when online because it mirrors the behavior of normal web apps.
-
-When offline, mutations should never be rejected. Otherwise the user could lose arbitrarily large amounts of work. Mutations should be replayed until they can be accepted.
-
-This would require a different implementation of the `handleMutateRequest`. Also the developer would have to be very careful to respond to any erroring mutations quickly, as those clients will be unable to save work until the error is resolved.
+We would like to [revisit this in the future](https://bugs.rocicorp.dev/p/zero/issue/246605), but it's not a priority right now.

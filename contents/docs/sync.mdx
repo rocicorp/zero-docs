@@ -51,7 +51,7 @@ This architecture can enable:
 
 - **Instant UI.** Reads and writes are to local storage, effectively instant.
 - **Realtime updates.** By running the sync engine continuously, users can see updates from other devices and users in realtime. The data is always fresh.
-- **Offline support.** Because data is stored locally, it is possible to support at least limited offline access. For example, Zero supports [read-only access while offline](./offline), and other sync engines support some limited offline writes.
+- **Offline support.** Because data is stored locally, it is possible to support at least limited offline access. For example, Zero supports [read-only access while offline](./connection#offline), and other sync engines support some limited offline writes.
 
 Sync engines also simplify the development of complex apps. Big parts of modern app development are just data plumbing: fetching data, updating data, caching data, invalidating caches, keeping different copies of data consistent, and so-on. A sync engine abstracts all this away and lets you focus on what your app actually does.
 

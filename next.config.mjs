@@ -54,6 +54,11 @@ const nextConfig = {
         destination: '/docs/server-zql',
         permanent: false,
       },
+      {
+        source: '/docs/offline',
+        destination: '/docs/connection#offline',
+        permanent: false,
+      },
     ];
   },
   async headers() {

@@ -28,7 +28,7 @@ A copy of each query exists on both the client and on your server:
   invert="dark"
 />
 
-Often the implementations will be the same, and you can just share their code. This is easy with full-stack frameworks like TanStack Start or Next.js.
+Often the implementations will be the same, and you can just share their code. This is easy with full-stack frameworks like TanStack Start, Next.js, or One.
 
 But the implementations don't have to be the same, or even compute the same result. For example, the server can add extra filters to enforce permissions that the client query does not.
 
@@ -251,6 +251,7 @@ You can use the `handleQueryRequest` and `mustGetQuery` functions to implement t
     {text: 'Next.js', sync: {api: 'nextjs'}},
     {text: 'Solid Start', sync: {api: 'solid'}},
     {text: 'Hono', sync: {api: 'hono'}},
+    {text: 'One', sync: {api: 'one'}},
   ]}
 >
 
@@ -344,6 +345,28 @@ app.post('/api/zero/query', async c => {
 
   return c.json(result)
 })
+```
+
+```ts
+// app/api/zero/query+api.ts
+import {handleQueryRequest} from '@rocicorp/zero/server'
+import {mustGetQuery} from '@rocicorp/zero'
+import {queries} from 'queries.ts'
+import {schema} from 'schema.ts'
+import type {Endpoint} from 'one'
+
+export const POST: Endpoint = async request => {
+  const result = await handleQueryRequest(
+    (name, args) => {
+      const query = mustGetQuery(queries, name)
+      return query.fn({args, ctx: {userId: 'anon'}})
+    },
+    schema,
+    request
+  )
+
+  return Response.json(result)
+}
 ```
 
 </CodeGroup>

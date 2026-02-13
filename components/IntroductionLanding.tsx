@@ -45,10 +45,12 @@ export function IntroductionLanding({
 
     if (showDemoModal) {
       document.addEventListener('keydown', handleEscape);
+      document.body.style.overflow = 'hidden';
     }
 
     return () => {
       document.removeEventListener('keydown', handleEscape);
+      document.body.style.overflow = '';
     };
   }, [showDemoModal]);
 
@@ -1018,6 +1020,7 @@ export function IntroductionLanding({
                     onClick={() => setShowDemoModal(false)}
                   >
                     <svg
+                      aria-hidden="true"
                       viewBox="0 0 24 24"
                       fill="none"
                       stroke="currentColor"
@@ -1032,7 +1035,8 @@ export function IntroductionLanding({
                   </button>
                   <button
                     className="demo-toolbar-title"
-                    onMouseDown={() => setIframeKey(k => k + 1)}
+                    aria-label="Refresh Demo"
+                    onClick={() => setIframeKey(k => k + 1)}
                   >
                     <span className="demo-toolbar-title__default">Gigabugs Demo</span>
                     <span className="demo-toolbar-title__hover">Refresh Demo</span>
@@ -1045,6 +1049,7 @@ export function IntroductionLanding({
                   >
                     Visit Gigabugs
                     <svg
+                      aria-hidden="true"
                       viewBox="0 0 24 24"
                       fill="none"
                       stroke="currentColor"

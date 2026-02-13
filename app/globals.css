@@ -1574,6 +1574,39 @@ html.dark {
   pointer-events: none;
 }
 
+/* Demo Modal — Light mode */
+html:not(.dark) .intro-landing-page .demo-modal-backdrop {
+  background: rgba(255, 255, 255, 0.9);
+}
+
+html:not(.dark) .intro-landing-page .demo-iframe {
+  border-color: rgba(0, 0, 0, 0.1);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.1),
+    0 16px 64px rgba(0, 0, 0, 0.08);
+}
+
+html:not(.dark) .intro-landing-page .demo-toolbar-btn {
+  background: rgba(255, 255, 255, 0.6);
+  color: rgba(0, 0, 0, 0.6);
+  border-color: rgba(0, 0, 0, 0.12);
+}
+
+html:not(.dark) .intro-landing-page .demo-toolbar-btn:hover {
+  background: rgba(255, 255, 255, 0.9);
+  color: #000;
+  border-color: rgba(0, 0, 0, 0.25);
+}
+
+html:not(.dark) .intro-landing-page .demo-toolbar-title {
+  background: rgba(255, 255, 255, 0.6);
+  color: rgba(0, 0, 0, 0.7);
+}
+
+html:not(.dark) .intro-landing-page .demo-toolbar-title:hover .demo-toolbar-title__hover {
+  color: #000;
+}
+
 /* Code blocks */
 .intro-landing-page .step-section {
   margin-bottom: 6rem;

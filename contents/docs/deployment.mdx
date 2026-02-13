@@ -56,7 +56,7 @@ services:
       - 3000:3000
     environment:
       # Your API handles mutations and writes to the PG db
-      # This should be a pooled connection (e.g. pgbouncer)
+      # Use a transaction pooler (e.g. pgbouncer) in production
       ZERO_UPSTREAM_DB: postgres://postgres:pass@upstream-db:5432/zero
     depends_on:
       upstream-db:
@@ -68,8 +68,14 @@ services:
       - 4848:4848
     environment:
       # Used for replication from postgres
-      # This must be a direct connection (not via pgbouncer)
+      # This *must* be a direct connection (not via pgbouncer)
       ZERO_UPSTREAM_DB: postgres://postgres:pass@upstream-db:5432/zero
+      # Used for storing client view records
+      # Use a transaction pooler (pgbouncer) in production
+      ZERO_CVR_DB: postgres://postgres:pass@upstream-db:5432/zero
+      # Used for storing recent replication log entries
+      # Use a transaction pooler in production
+      ZERO_CHANGE_DB: postgres://postgres:pass@upstream-db:5432/zero
       # Path to the SQLite replica
       ZERO_REPLICA_FILE: /data/zero.db
       # Password used to access the inspector and /statz
@@ -119,7 +125,7 @@ services:
       - 3000:3000
     environment:
       # Your API handles mutations and writes to the PG db
-      # This should be a pooled connection (e.g. pgbouncer)
+      # Use a transaction pooler (e.g. pgbouncer) in production
       ZERO_UPSTREAM_DB: postgres://postgres:pass@upstream-db:5432/zero
     depends_on:
       upstream-db:
@@ -160,11 +166,13 @@ services:
         condition: service_started
     environment:
       # Used for replication from postgres
-      # this must be a direct connection (not via pgbouncer)
+      # This *must* be a direct connection (not via pgbouncer)
       ZERO_UPSTREAM_DB: postgres://postgres:pass@upstream-db:5432/zero
       # Used for storing client view records
+      # Use a transaction pooler (e.g. pgbouncer) in production
       ZERO_CVR_DB: postgres://postgres:pass@upstream-db:5432/zero
       # Used for storing recent replication log entries
+      # Use a transaction pooler in production
       ZERO_CHANGE_DB: postgres://postgres:pass@upstream-db:5432/zero
 
       # Path to the SQLite replica
@@ -200,10 +208,13 @@ services:
         condition: service_healthy
     environment:
       # Used for writing to the upstream database
+      # Use a transaction pooler in production
       ZERO_UPSTREAM_DB: postgres://postgres:pass@upstream-db:5432/zero
       # Used for storing client view records
+      # Use a transaction pooler in production
       ZERO_CVR_DB: postgres://postgres:pass@upstream-db:5432/zero
       # Used for storing recent replication log entries
+      # Use a transaction pooler in production
       ZERO_CHANGE_DB: postgres://postgres:pass@upstream-db:5432/zero
 
       # Path to the SQLite replica

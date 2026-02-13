@@ -471,4 +471,6 @@ import {dropAllDatabases} from '@rocicorp/zero'
 // - The names of the successfully dropped databases
 // - Any errors encountered while dropping
 const {dropped, errors} = await dropAllDatabases()
+// or, if you are using a custom kvStore
+const {dropped, errors} = await dropAllDatabases({ kvStore: customKvStore })
 ```

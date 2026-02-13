@@ -1303,39 +1303,24 @@ html.dark {
 }
 
 .intro-landing-page .load-demo-btn {
-  background:
-    linear-gradient(
-      135deg,
-      rgba(255, 255, 255, 0.18) 0%,
-      rgba(255, 255, 255, 0.06) 40%,
-      rgba(0, 0, 0, 0.12) 100%
-    ),
-    #27252b;
-  color: hsl(var(--background));
-  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: #27252b;
+  color: #fff;
+  border: none;
   font-family: inherit;
   font-size: clamp(0.875rem, 1.5vw, 1.25rem);
   font-weight: 600;
   padding: clamp(0.75rem, 1.5vw, 1rem) clamp(1.25rem, 4vw, 2.5rem);
   border-radius: 1rem;
   cursor: pointer;
-  transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease,
-    opacity 0.2s ease;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.32);
-  backdrop-filter: blur(10px);
+  transition: transform 0.2s ease;
 }
 
 .intro-landing-page .load-demo-btn:hover {
   transform: translateY(-1px) scale(1.02);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.38);
-  opacity: 0.95;
 }
 
 .intro-landing-page .load-demo-btn:active {
   transform: translateY(0) scale(0.98);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.26);
 }
 
 .dark .intro-landing-page .demo-container {
@@ -2503,55 +2488,23 @@ html:not(.dark) .intro-landing-page .how-it-works-svg {
   align-items: center;
   padding: 0 1.75rem;
   border-radius: 10px;
-  transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease,
-    opacity 0.2s ease;
-  background:
-    linear-gradient(
-      135deg,
-      rgba(255, 255, 255, 0.18) 0%,
-      rgba(255, 255, 255, 0.06) 40%,
-      rgba(0, 0, 0, 0.12) 100%
-    ),
-    #27252b;
-  color: #ebe9f0;
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.32);
-  backdrop-filter: blur(10px);
+  transition: transform 0.2s ease;
+  background: #27252b;
+  color: #fff;
+  border: none;
 }
 
 .landing-nav-button:hover {
-  opacity: 0.95;
   transform: translateY(-1px) scale(1.02);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.4);
 }
 
 .landing-nav-button:active {
   transform: translateY(0) scale(0.98);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.26);
 }
 
 .dark .landing-nav-button {
-  background:
-    linear-gradient(
-      135deg,
-      rgba(255, 255, 255, 0.25) 0%,
-      rgba(255, 255, 255, 0.12) 40%,
-      rgba(255, 255, 255, 0.05) 100%
-    ),
-    #e8e6f0;
+  background: #e8e6f0;
   color: #1e1e1e;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.4),
-    0 2px 8px rgba(0, 0, 0, 0.3);
-}
-
-.dark .landing-nav-button:hover {
-  box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.5),
-    0 4px 12px rgba(0, 0, 0, 0.4);
 }
 
 @media (max-width: 768px) {

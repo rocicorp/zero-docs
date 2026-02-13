@@ -1,6 +1,7 @@
 'use client';
 
 import {useEffect, useRef, useState} from 'react';
+import {createPortal} from 'react-dom';
 import Link from 'next/link';
 import CopyButtonListener from './ui/copy-button-listener';
 import RocicorpLogo from './logos/Rocicorp';
@@ -29,6 +30,7 @@ export function IntroductionLanding({
   const isMobile = useIsMobile();
   const videoRef = useRef<HTMLVideoElement>(null);
   const [showDemoModal, setShowDemoModal] = useState(false);
+  const [iframeKey, setIframeKey] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isVideoReady, setIsVideoReady] = useState(false);
   const mainRef = useRef<HTMLElement>(null);
@@ -43,12 +45,10 @@ export function IntroductionLanding({
 
     if (showDemoModal) {
       document.addEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'hidden';
     }
 
     return () => {
       document.removeEventListener('keydown', handleEscape);
-      document.body.style.overflow = '';
     };
   }, [showDemoModal]);
 
@@ -1002,47 +1002,74 @@ export function IntroductionLanding({
         </Link>
       </footer>
 
-      {/* Demo Modal */}
-      {showDemoModal && (
-        <div className="demo-modal active">
-          <div
-            className="demo-modal-backdrop"
-            onClick={() => setShowDemoModal(false)}
-          ></div>
-          <div className="demo-modal-content">
-            <div className="demo-iframe-wrapper">
-              <iframe
-                src="https://bugs.rocicorp.dev/p/roci?demo"
-                className="demo-iframe"
-                title="Zero Demo"
-              ></iframe>
-            </div>
-            <button
-              className="feature-card feature-card--link demo-exit-card"
-              onClick={() => setShowDemoModal(false)}
-            >
-              <span className="demo-exit-card__icon" aria-hidden="true">
-                <svg
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M9 3h9a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H9" />
-                  <path d="M13 12H4" />
-                  <path d="M6.5 8.5 3 12l3.5 3.5" />
-                </svg>
-              </span>
-              <div className="demo-exit-card__content">
-                <h3>Exit Demo</h3>
+      {/* Demo Modal — portaled to body so backdrop-filter works */}
+      {showDemoModal &&
+        createPortal(
+          <div className="intro-landing-page">
+            <div className="demo-modal active">
+              <div
+                className="demo-modal-backdrop"
+                onClick={() => setShowDemoModal(false)}
+              ></div>
+              <div className="demo-modal-content">
+                <div className="demo-modal-toolbar">
+                  <button
+                    className="demo-toolbar-btn"
+                    onClick={() => setShowDemoModal(false)}
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M19 12H5" />
+                      <path d="M12 19l-7-7 7-7" />
+                    </svg>
+                    Exit Demo
+                  </button>
+                  <button
+                    className="demo-toolbar-title"
+                    onMouseDown={() => setIframeKey(k => k + 1)}
+                  >
+                    <span className="demo-toolbar-title__default">Gigabugs Demo</span>
+                    <span className="demo-toolbar-title__hover">Refresh Demo</span>
+                  </button>
+                  <a
+                    className="demo-toolbar-btn"
+                    href="https://bugs.rocicorp.dev/p/roci"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Visit Gigabugs
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M7 17L17 7" />
+                      <path d="M7 7h10v10" />
+                    </svg>
+                  </a>
+                </div>
+                <div className="demo-iframe-wrapper">
+                  <iframe
+                    key={iframeKey}
+                    src="https://bugs.rocicorp.dev/p/roci?demo"
+                    className="demo-iframe"
+                    title="Zero Demo"
+                  ></iframe>
+                </div>
               </div>
-            </button>
-          </div>
-        </div>
-      )}
+            </div>
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }

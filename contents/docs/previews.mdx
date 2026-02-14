@@ -50,3 +50,17 @@ const zero = new Zero({
 ```
 
 For full URL pattern syntax details, see [Queries URL Patterns](/docs/queries#url-patterns).
+
+## Schema Changes in Previews
+
+If a preview includes a schema change, you should implement the schema change **first** and do it in the same backwards-compatible way documented in [Schema Change Process](/docs/schema#schema-change-process) (`expand → migrate → contract`). After that, implement the rest of the preview behavior.
+
+In practice, this means:
+
+1. Apply the compatible schema expansion first.
+2. Ship the preview app/API behavior as a preview, using the new schema.
+3. Run contract cleanup later, after old clients are gone.
+
+If desired, previews can share a single staging database.
+
+Neon-style per-preview database branching is not well supported with Zero today, because each upstream database typically needs its own `zero-cache`.

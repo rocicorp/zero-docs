@@ -1,0 +1,52 @@
+---
+title: Previews
+description: Per-Branch Preview URLs
+---
+
+Most teams deploying to platforms like Vercel use unique hostnames per preview build. Zero supports this directly, and you do not need one `zero-cache` instance per preview deployment.
+
+## Overview
+
+Preview support has two parts:
+
+1. Configure `zero-cache` with allowed URL patterns for both query and mutate endpoints.
+2. In the browser, pick the concrete `queryURL` and `mutateURL` based on the current hostname when constructing `Zero`.
+
+You must do this for both endpoints.
+
+## Configure Allowed Endpoint Patterns
+
+Set `ZERO_QUERY_URL` and `ZERO_MUTATE_URL` to include your production URL and your preview URL pattern:
+
+```bash
+ZERO_QUERY_URL="https://myapp.com/api/zero/query,https://my-app-*.preview.myapp.com/api/zero/query"
+ZERO_MUTATE_URL="https://myapp.com/api/zero/mutate,https://my-app-*.preview.myapp.com/api/zero/mutate"
+```
+
+`zero-cache` will only allow client-selected URLs that match one of the configured values/patterns.
+
+## Choose Endpoint URLs in the Client
+
+When you construct `Zero` on the client, derive URLs from `location.origin` and pass both `queryURL` and `mutateURL`:
+
+```ts
+function getZeroEndpoints() {
+  const origin = location.origin
+  return {
+    queryURL: `${origin}/api/zero/query`,
+    mutateURL: `${origin}/api/zero/mutate`
+  }
+}
+
+const {queryURL, mutateURL} = getZeroEndpoints()
+
+const zero = new Zero({
+  schema,
+  userID,
+  auth,
+  queryURL,
+  mutateURL
+})
+```
+
+For full URL pattern syntax details, see [Queries URL Patterns](/docs/queries#url-patterns).

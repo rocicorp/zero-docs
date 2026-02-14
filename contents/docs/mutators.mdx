@@ -190,11 +190,8 @@ The `MutatorFn` can take a single `args` parameter. To enable this, pass a _vali
 import {defineMutator} from '@rocicorp/zero'
 
 const initStats = defineMutator(
-  z.object({issueCount: z.number()}), 
-  async ({
-    tx,
-    args: {issueCount}
-  }) => {
+  z.object({issueCount: z.number()}),
+  async ({tx, args: {issueCount}}) => {
     if (issueCount < 0) {
       throw new Error(`issueCount cannot be negative`)
     }
@@ -748,6 +745,8 @@ export ZERO_MUTATE_URL="https://mybranch-*.preview.myapp.com/mutate"
 ```
 
 For more information, see the [URLPattern section of the Queries docs](/docs/queries#url-patterns). It works the same way for mutations.
+
+If you're configuring per-branch preview URLs (for example on Vercel), see [Preview Deployments](/docs/preview-deployments) for the complete setup across both query and mutate endpoints.
 
 ### Server-Specific Code
 

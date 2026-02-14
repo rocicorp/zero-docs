@@ -80,6 +80,7 @@ export const ROUTES = [
     defaultOpen: false,
     items: [
       {title: 'Hosting', href: '/deployment'},
+      {title: 'Previews', href: '/previews'},
       {title: 'Configuration', href: '/zero-cache-config'},
     ],
   },

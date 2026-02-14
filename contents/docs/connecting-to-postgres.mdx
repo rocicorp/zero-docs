@@ -134,6 +134,6 @@ Because Zero keeps an open connection to Postgres to replicate changes, as long 
 
 For production databases that have enough usage to always be running anyway, this is fine. But for smaller applications that would otherwise not always be running, this can create a surprisingly high bill. You may want to choose a provider that charge a flat monthly rate instead.
 
-Also some users choose Neon because they hope to use branching for previews. Note that Zero doesn't support this usage model well yet, and if not done with care, Zero can end up keeping each Neon _preview_ branch running too 😳.
+Also some users choose Neon because they hope to use branching for previews. This can work, but if not done with care, Zero can end up keeping each Neon _preview_ branch running too 😳.
 
-We are actively working on better preview support.
+For the recommended approach to preview URLs, see [Preview Deployments](/docs/preview-deployments).

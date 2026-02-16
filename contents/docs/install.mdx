@@ -515,6 +515,10 @@ Zero provides utilities to make it easy to implement the queries endpoint in any
       text: 'Hono',
       sync: {api: 'hono'},
     },
+    {
+      text: 'One',
+      sync: {api: 'one'},
+    },
   ]}
 >
 
@@ -611,6 +615,28 @@ app.post('/api/query', async c => {
 
   return c.json(result)
 })
+```
+
+```ts
+// app/api/query+api.ts
+import {handleQueryRequest} from '@rocicorp/zero/server'
+import {mustGetQuery} from '@rocicorp/zero'
+import {queries} from '../zero/queries.ts'
+import {schema} from '../zero/schema.ts'
+import type {Endpoint} from 'one'
+
+export const POST: Endpoint = async request => {
+  const result = await handleQueryRequest(
+    (name, args) => {
+      const query = mustGetQuery(queries, name)
+      return query.fn({args, ctx: {userId: 'anon'}})
+    },
+    schema,
+    request
+  )
+
+  return Response.json(result)
+}
 ```
 
 </CodeGroup>
@@ -1043,6 +1069,10 @@ Then, use the `dbProvider` to handle the mutate request:
       text: 'Hono',
       sync: {api: 'hono'},
     },
+    {
+      text: 'One',
+      sync: {api: 'one'},
+    },
   ]}
 >
 
@@ -1144,6 +1174,29 @@ app.post('/api/mutate', async c => {
 
   return c.json(result)
 })
+```
+
+```ts
+// app/api/mutate+api.ts
+import {handleMutateRequest} from '@rocicorp/zero/server'
+import {mustGetMutator} from '@rocicorp/zero'
+import {mutators} from '../zero/mutators.ts'
+import {dbProvider} from '../db-provider.ts'
+import type {Endpoint} from 'one'
+
+export const POST: Endpoint = async request => {
+  const result = await handleMutateRequest(
+    dbProvider,
+    transact =>
+      transact((tx, name, args) => {
+        const mutator = mustGetMutator(mutators, name)
+        return mutator.fn({args, tx, ctx: {userId: 'anon'}})
+      }),
+    request
+  )
+
+  return Response.json(result)
+}
 ```
 
 </CodeGroup>

@@ -37,7 +37,7 @@ A copy of each mutator exists on both the client and on your server:
   invert="light"
 />
 
-Often the implementations will be the same, and you can just share their code. This is easy with full-stack frameworks like TanStack Start or Next.js.
+Often the implementations will be the same, and you can just share their code. This is easy with full-stack frameworks like TanStack Start, Next.js, or One.
 
 But the implementations don't have to be the same, or even compute the same result. For example, the server can add extra checks to enforce permissions, or send notifications or interact with other systems.
 
@@ -524,6 +524,7 @@ You can use the `handleMutateRequest` and `mustGetMutator` functions to implemen
     {text: 'Next.js', sync: {api: 'nextjs'}},
     {text: 'Solid Start', sync: {api: 'solid'}},
     {text: 'Hono', sync: {api: 'hono'}},
+    {text: 'One', sync: {api: 'one'}},
   ]}
 >
 
@@ -634,6 +635,29 @@ app.post('/api/zero/mutate', async c => {
 })
 ```
 
+```ts
+// app/api/zero/mutate+api.ts
+import {handleMutateRequest} from '@rocicorp/zero/server'
+import {mustGetMutator} from '@rocicorp/zero'
+import {mutators} from 'mutators.ts'
+import {dbProvider} from 'db-provider.ts'
+import type {Endpoint} from 'one'
+
+export const POST: Endpoint = async request => {
+  const result = await handleMutateRequest(
+    dbProvider,
+    transact =>
+      transact((tx, name, args) => {
+        const mutator = mustGetMutator(mutators, name)
+        return mutator.fn({args, tx, ctx: {userId: 'anon'}})
+      }),
+    request
+  )
+
+  return Response.json(result)
+}
+```
+
 </CodeGroup>
 
 <Note heading="Using a different bindings library">
@@ -675,6 +699,7 @@ It is also of course possible for the entire push endpoint to return an HTTP err
     {text: 'Next.js', sync: {api: 'nextjs'}},
     {text: 'Solid Start', sync: {api: 'solid'}},
     {text: 'Hono', sync: {api: 'hono'}},
+    {text: 'One', sync: {api: 'one'}},
   ]}
 >
 
@@ -707,6 +732,12 @@ app.post('/api/zero/mutate', async c => {
   // This will cause the client to resend all queued mutations.
   throw new Error('zonk')
 })
+```
+
+```ts
+export const POST: Endpoint = async () => {
+  throw new Error('zonk') // will trigger resend
+}
 ```
 
 </CodeGroup>
@@ -1010,6 +1041,7 @@ Then in your mutate handler:
     {text: 'Next.js', sync: {api: 'nextjs'}},
     {text: 'Solid Start', sync: {api: 'solid'}},
     {text: 'Hono', sync: {api: 'hono'}},
+    {text: 'One', sync: {api: 'one'}},
   ]}
 >
 
@@ -1119,6 +1151,29 @@ app.post('/api/zero/mutate', async c => {
   await Promise.allSettled(asyncTasks.map(task => task()))
   return c.json(result)
 })
+```
+
+```ts
+export const POST: Endpoint = async request => {
+  const asyncTasks: Array<() => Promise<void>> = []
+  const mutators = createMutators(asyncTasks)
+
+  const result = await handleMutateRequest(
+    dbProvider,
+    transact =>
+      transact((tx, name, args) => {
+        const mutator = mustGetMutator(mutators, name)
+        return mutator.fn({tx, ctx: {userId: 'anon'}, args})
+      }),
+    request
+  )
+
+  // Run all async tasks
+  // If any fail, do not block the response, since the
+  // mutation result has already been written to the database.
+  await Promise.allSettled(asyncTasks.map(task => task()))
+  return Response.json(result)
+}
 ```
 
 </CodeGroup>

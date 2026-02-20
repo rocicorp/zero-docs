@@ -122,9 +122,8 @@ IPv4 addresses are only supported on the Pro plan and are an extra $4/month.
 
 ### PlanetScale for Postgres
 
-It is easiest to connect zero-cache to PlanetScale with a role that has sufficient privileges to allow it to create its own publication.
-
-If your Postgres role does not have permission to create publications, you can [create a publication manually](/docs/postgres-support#limiting-replication) and then specify that publication name in [App Publications](/docs/zero-cache-config#app-publications).
+* You need to connect using the "default" role that PlanetScale provides, because PlanetScale's "User-Defiend Roles" cannot create replication slots.
+* Be sure to use a direct connection for "Upstream DB" and a pg bouncer connnection string for "CVR DB" and "Change DB". Otherwise you will likely exhaust connection limits to PlanetScale.
 
 ### Neon
 

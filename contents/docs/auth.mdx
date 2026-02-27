@@ -462,15 +462,10 @@ When a user logs out, you should consider what should happen to the synced data.
 
 If you do nothing, the synced data will be left on the device. The next login will be a little faster because Zero doesn't have to resync that data from scratch. But also, the data will be left on the device indefinitely which could be undesirable for privacy and security.
 
-If you instead want to clear data on logout, Zero provides the `dropAllDatabases` function:
+If you instead want to clear data on logout, use `zero.delete()`:
 
 ```ts
-import {dropAllDatabases} from '@rocicorp/zero'
-
-// Returns an object with:
-// - The names of the successfully dropped databases
-// - Any errors encountered while dropping
-const {dropped, errors} = await dropAllDatabases()
-// or, if you are using a custom kvStore
-const {dropped, errors} = await dropAllDatabases({ kvStore: customKvStore })
+await zero.delete()
 ```
+
+This immediately closes the `Zero` instance and deletes all data from the browser's IndexedDB database.

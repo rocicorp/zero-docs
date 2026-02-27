@@ -23,6 +23,8 @@ TODO
 - [**Scalar Subqueries:**](/docs/zql#scalar-subqueries) Added a new optional optimization for `exists` queries that filter by related data with a one-to-one relationship. This can improve query performance significantly for cases where the subquery result changes rarely.
 - [**Virtual Scroll:**](/docs/status#query-language) Added [zero-virtual](https://github.com/rocicorp/zero-virtual) library for efficient infinite scrolling in React.
 - [**Change Streamer Back Limit Heap Proportion:**](/docs/zero-cache-config#change-streamer-back-limit-heap-proportion) Added a new configuration option to control the back pressure limit for the change streamer. This is useful for absorbing periodic spikes in replication throughput.
+- [**Comparing to `undefined`:**](/docs/zql#comparing-to-undefined) Added a new convenience for comparing to `undefined`. This is useful for filtering by nullable fields.
+- [**Support for `time` and `timetz` columns:**](/docs/postgres-support#column-types) Added support for `time` and `timetz` columns (thanks [GRBurst](https://github.com/rocicorp/mono/pull/5417)).
 
 ## Performance
 

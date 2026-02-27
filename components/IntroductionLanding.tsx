@@ -184,7 +184,7 @@ export function IntroductionLanding({
               onClick={toggleVideoPlayPause}
               style={{cursor: 'pointer'}}
             >
-              <source src="/video/zbugs-demo-8a3f2c.mp4" type="video/mp4" />
+              <source src="/video/zbugs-demo.mp4" type="video/mp4" />
               Your browser does not support the video tag.
             </video>
             {isVideoReady ? (

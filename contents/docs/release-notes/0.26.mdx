@@ -20,6 +20,7 @@ TODO
 ## Features
 
 - [**Schema Backfill:**](/docs/schema#backfill) Zero now natively supports adding columns with non-constant defaults, or adding existing columns to a custom publication. There is no longer a need to touch every row in the database to backfill data manually.
+- [**Scalar Subqueries:**](/docs/zql#scalar-subqueries) Added a new optional optimization for `exists` queries that filter by related data with a one-to-one relationship. This can improve query performance significantly for cases where the subquery result changes rarely.
 - [**Virtual Scroll:**](/docs/status#query-language) Added [zero-virtual](https://github.com/rocicorp/zero-virtual) library for efficient infinite scrolling in React.
 - [**Change Streamer Back Limit Heap Proportion:**](/docs/zero-cache-config#change-streamer-back-limit-heap-proportion) Added a new configuration option to control the back pressure limit for the change streamer. This is useful for absorbing periodic spikes in replication throughput.
 

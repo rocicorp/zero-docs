@@ -431,3 +431,48 @@ zql.issue.where({cmp, or, exists} =>
 ```
 
 You can manually flip just one or a few of the `whereExists` clauses in a query, leaving the rest to be planned automatically.
+
+## Scalar Subqueries
+
+Scalar subqueries are an optimization for `exists` queries. Instead of doing a join at query time, Zero pre-resolves the subquery and rewrites it as a simple equality check.
+
+To use scalar subqueries, add `{scalar: true}` to your `whereExists` call:
+
+```tsx
+// Instead of joining to find issues where project.name = 'zero'
+// Zero resolves this server-side to: where('projectId', '123')
+zql.issue.whereExists(
+  'project',
+  q => q.where('name', 'zero'),
+  {scalar: true},
+)
+```
+
+Or with `exists`:
+
+```tsx
+zql.issue.where({cmp, exists} =>
+  exists('project',
+    q => q.where('name', 'zero'),
+    {scalar: true},
+  ),
+)
+```
+
+### Why It Matters
+
+Joins are expensive. Sometimes they are needed, but for something like "give me all issues where the owner's name is Alice", you don't need a full join — you just need Alice's ID. The scalar optimization pre-fetches that ID and rewrites your query as `where('ownerId', aliceId)`. This can improve query performance significantly.
+
+It also allows planning to work better. Since the ID is known at planning time, Zero/SQLite can choose better indexes.
+
+### Trade-offs
+
+The query needs to be "rehydrated" (re-run) whenever the scalar subquery result changes.
+
+This is fine for relatively stable lookup data like user IDs or project IDs, but you probably wouldn't want it for rapidly-changing data.
+
+Also, scalar subqueries only work when the subquery is guaranteed to return at most one row (hence "scalar"). Zero checks that your subquery constrains a unique index and will throw an error if it doesn't.
+
+### Future Work
+
+Scalar subqueries are not currently integrated with Zero's planner. You need to manually choose when to use them.

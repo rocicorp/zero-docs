@@ -13,6 +13,8 @@ npm install @rocicorp/zero@0.26
 
 This release focuses on stability and polish. We've fixed a ton of bugs, improved error handling, and added a few quality-of-life features like [Schema Backfill](/docs/schema#backfill) and [Scalar Subqueries](/docs/zql#scalar-subqueries). No major breaking changes this time.
 
+Special thanks to [@alpkaravil](https://github.com/alpkaravil), [@GRBurst](https://github.com/GRBurst), [@jbingen](https://github.com/jbingen), [@kvnkusch](https://github.com/kvnkusch), and [@utkarsh-611](https://github.com/utkarsh-611) for their contributions to this release.
+
 ## Features
 
 - [**Schema Backfill:**](/docs/schema#backfill) Zero now natively supports adding columns with non-constant defaults, or adding existing columns to a custom publication. There is no longer a need to touch every row in the database to backfill data manually.
@@ -69,6 +71,7 @@ This release focuses on stability and polish. We've fixed a ton of bugs, improve
 - [Retry on change-db connection errors](https://github.com/rocicorp/mono/pull/5625)
 - [Detect publication differences during initial sync](https://github.com/rocicorp/mono/pull/5629)
 - [Prevent concurrent schema migrations from racing](https://github.com/rocicorp/mono/pull/5626)
+- [Fix stale destroy timers on query resubscribe](https://github.com/rocicorp/mono/pull/5623) (thanks [@alpkaravil](https://github.com/alpkaravil)!)
 
 
 ## Breaking Changes

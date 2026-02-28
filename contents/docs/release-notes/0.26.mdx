@@ -1,6 +1,6 @@
 ---
 title: Zero 0.26
-description: Schema Backfill, Auth Updates
+description: Schema Backfill and Scalar Subqueries
 ---
 
 ## Installation
@@ -11,25 +11,21 @@ npm install @rocicorp/zero@0.26
 
 ## Overview
 
-TODO
-
-## Upgrading
-
-TODO
+This release focuses on stability and polish. We've fixed a ton of bugs, improved error handling, and added a few quality-of-life features like [Schema Backfill](/docs/schema#backfill) and [Scalar Subqueries](/docs/zql#scalar-subqueries). No major breaking changes this time.
 
 ## Features
 
 - [**Schema Backfill:**](/docs/schema#backfill) Zero now natively supports adding columns with non-constant defaults, or adding existing columns to a custom publication. There is no longer a need to touch every row in the database to backfill data manually.
 - [**Scalar Subqueries:**](/docs/zql#scalar-subqueries) Added a new optional optimization for `exists` queries that filter by related data with a one-to-one relationship. This can improve query performance significantly for cases where the subquery result changes rarely.
 - [**Virtual Scroll:**](/docs/status#query-language) Added [zero-virtual](https://github.com/rocicorp/zero-virtual) library for efficient infinite scrolling in React.
-- [**Change Streamer Back Limit Heap Proportion:**](/docs/zero-cache-config#change-streamer-back-limit-heap-proportion) Added a new configuration option to control the back pressure limit for the change streamer. This is useful for absorbing periodic spikes in replication throughput.
-- [**Comparing to `undefined`:**](/docs/zql#comparing-to-undefined) Added a new convenience for comparing to `undefined`. This is useful for filtering by nullable fields.
 - [**Support for `time` and `timetz` columns:**](/docs/postgres-support#column-types) Added support for `time` and `timetz` columns (thanks [GRBurst](https://github.com/rocicorp/mono/pull/5417)).
+- [**Comparing to `undefined`:**](/docs/zql#comparing-to-undefined) Added a new convenience for comparing to `undefined`. This is useful for filtering by nullable fields.
 - [**zero.delete():**](/docs/auth#logging-out) Added a more convenient way to delete all data from the browser's IndexedDB database.
 
 ## Fixes
 
 - [Updating auth tokens no cycles connection](https://github.com/rocicorp/mono/pull/5530)
+- [Add configurable back-pressure limit for change streamer](https://github.com/rocicorp/mono/pull/5552)
 - [Surface replication LSN at /statz?replication](https://github.com/rocicorp/mono/pull/5507)
 - [Generalize all statz output to be machine-readable](https://github.com/rocicorp/mono/pull/5508)
 - [Fix unique constraint violations during sync](https://github.com/rocicorp/mono/pull/5372)

@@ -72,10 +72,7 @@ TODO
 
 ## Breaking Changes
 
-Despite the large DX update, we tried to make the upgrade as smooth as possible. However, there are a few breaking changes we could not easily avoid.
+Just two very minor breaking changes this time, that are unlikely to affect most users:
 
-1. If you do not want to immediately opt-in to the new query and mutator APIs, set [`enableLegacyQueries`](/docs/deprecated/ad-hoc-queries) and [`enableLegacyMutators`](/docs/deprecated/crud-mutators) to `true` in your schema.ts.
-1. If you are using the `.client` or `.server` promises with custom mutators, these no longer ever reject. [They now always resolve with a result type that has success/error cases](/docs/mutators#waiting-for-results)
-1. [Mutators now reject while Zero is offline](/docs/connection#disconnecting). You may want to use the new [Connection Status API](/docs/connection) to detect this and display custom UI to users.
-1. The pattern for reauthentication has changed. The `auth` parameter is now always a `string` – the `function` form is no longer supported. Instead, [call `zero.connection.connect({auth: token})` to reconnect](/docs/auth#auth-failure-and-refresh). This was done to simplify the API and support reauth via cookies consistently.
-1. The `onError` feature of `Zero` has been removed. It was undocumented and only half-working. Please use the new [Connection Status API](/docs/connection) to detect errors and display custom UI to users.
+1. If you send custom headers to query or mutate endpoints, you must now allowlist them via [`ZERO_MUTATE_ALLOWED_CLIENT_HEADERS`](/docs/zero-cache-config#mutate-allowed-client-headers) or [`ZERO_QUERY_ALLOWED_CLIENT_HEADERS`](/docs/zero-cache-config#query-allowed-client-headers). By default, no client-provided headers are forwarded.
+1. If you have very large mutations, note that WebSocket messages are now limited to 10MB by default. Increase `ZERO_WEBSOCKET_MAX_PAYLOAD_BYTES` if needed.

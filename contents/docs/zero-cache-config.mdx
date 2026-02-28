@@ -584,6 +584,13 @@ JSON string containing WebSocket compression options. Only used if websocket-com
 flag: `--websocket-compression-options`<br/>
 env: `ZERO_WEBSOCKET_COMPRESSION_OPTIONS`<br/>
 
+### Websocket Max Payload Bytes
+
+Maximum size of incoming WebSocket messages in bytes. Messages exceeding this limit are rejected before parsing. Default: 10MB (10485760).
+
+flag: `--websocket-max-payload-bytes`<br/>
+env: `ZERO_WEBSOCKET_MAX_PAYLOAD_BYTES`<br/>
+
 ### Yield Threshold (ms)
 
 The maximum amount of time in milliseconds that a sync worker will spend in IVM (processing query hydration and advancement) before yielding to the event loop. Lower values increase responsiveness and fairness at the cost of reduced throughput.

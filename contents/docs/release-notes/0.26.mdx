@@ -64,6 +64,11 @@ This release focuses on stability and polish. We've fixed a ton of bugs, improve
 - [Fix watermark errors when restoring from litestream backups](https://github.com/rocicorp/mono/pull/5589)
 - [Fix replica metadata being deleted during non-disruptive resync](https://github.com/rocicorp/mono/pull/5590)
 - [Fix occasional server crash when Postgres goes down](https://github.com/rocicorp/mono/pull/5618)
+- [Set idle transaction timeout to prevent hung transactions](https://github.com/rocicorp/mono/pull/5620)
+- [Fix lock errors under high CDC load](https://github.com/rocicorp/mono/pull/5622)
+- [Retry on change-db connection errors](https://github.com/rocicorp/mono/pull/5625)
+- [Detect publication differences during initial sync](https://github.com/rocicorp/mono/pull/5629)
+- [Prevent concurrent schema migrations from racing](https://github.com/rocicorp/mono/pull/5626)
 
 
 ## Breaking Changes

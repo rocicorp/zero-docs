@@ -1,0 +1,85 @@
+---
+title: REST
+description: Creating REST APIs for Zero Applications
+---
+
+If you need a traditional REST surface (for webhooks, third-party integrations, CLI tools, etc), you can easily generate one from your Zero mutator registry without having to duplicate any code.
+
+This is optional. Zero clients do not use this API. They still use `zero.mutate(...)` and your `ZERO_MUTATE_URL` endpoint.
+
+## Pattern
+
+1. Keep mutators as the source of truth.
+2. Add a server route that maps REST paths to mutator names.
+3. Look up the mutator with `mustGetMutator` and execute `mutator.fn(...)`.
+4. Reuse the same validator schemas for docs generation (OpenAPI).
+
+For example:
+
+- `POST /api/mutators/cart/add` maps to mutator name `cart.add`
+- `POST /api/mutators/cart/remove` maps to mutator name `cart.remove`
+
+This pattern works nicely because Zero mutators have more requirements than regular APIs. Namely they require an open transaction to be passed in. So it's easier to generate REST APIs from mutators than the reverse.
+
+## TanStack Start Example
+
+```ts
+// app/routes/api/mutators/$.ts
+import {createServerFileRoute} from '@tanstack/react-start/server'
+import {mustGetMutator} from '@rocicorp/zero'
+import {mutators} from 'zero/mutators'
+
+export const ServerRoute = createServerFileRoute(
+  '/api/mutators/$'
+).methods({
+  POST: async ({params, request}) => {
+    const name = params._splat?.split('/').join('.')
+    if (!name) {
+      return Response.json(
+        {error: 'Mutator name required'},
+        {status: 400}
+      )
+    }
+
+    const args = await request.json()
+    const mutator = mustGetMutator(mutators, name)
+
+    await dbProvider.transaction(async tx => {
+      await mutator.fn({
+        tx,
+        ctx: {userId: '...'},
+        args
+      })
+    })
+
+    return Response.json({ok: true})
+  }
+})
+```
+
+## OpenAPI Generation
+
+For API discovery, expose an OpenAPI document (for example `/api/openapi.json`) generated from your mutator registry.
+
+Typical setup:
+
+- discover mutator names at runtime
+- generate one `POST` operation per mutator path
+- include request/response schemas
+- serve Swagger UI from `/api/docs`
+
+<Note emoji="💡" heading="Keep validators separately exportable">
+  `defineMutators()` returns callable mutators, but does not
+  expose validator schemas on the resulting registry object.
+
+  If you want schema-driven docs, export your validator map
+  separately and reuse those schema objects in
+  `defineMutator(...)`.
+</Note>
+
+## Full Working Example
+
+See the `ztunes` sample for a full implementation:
+
+- Source: https://github.com/rocicorp/ztunes
+- Swagger docs: https://ztunes.rocicorp.dev/api/docs

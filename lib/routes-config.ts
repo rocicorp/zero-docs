@@ -43,6 +43,7 @@ export const ROUTES = [
       {title: 'ZQL Reference', href: '/zql'},
       {title: 'ZQL on the Server', href: '/server-zql'},
       {title: 'Connection Status', href: '/connection'},
+      {title: 'REST APIs', href: '/rest'},
     ],
   },
 

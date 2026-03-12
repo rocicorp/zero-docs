@@ -13,7 +13,7 @@ npm install @rocicorp/zero@0.26
 
 This release focuses on stability and polish. We've fixed a ton of bugs, improved error handling, and added a few quality-of-life features like [Schema Backfill](/docs/schema#backfill) and [Scalar Subqueries](/docs/zql#scalar-subqueries). No major breaking changes this time.
 
-Special thanks to [@alpkaravil](https://github.com/alpkaravil), [@GRBurst](https://github.com/GRBurst), [@jbingen](https://github.com/jbingen), [@kvnkusch](https://github.com/kvnkusch), and [@utkarsh-611](https://github.com/utkarsh-611) for their contributions to this release.
+Special thanks to [@alpkaravil](https://github.com/alpkaravil), [@GRBurst](https://github.com/GRBurst), [@jbingen](https://github.com/jbingen), [@kvnkusch](https://github.com/kvnkusch), [@utkarsh-611](https://github.com/utkarsh-611), and [@YevheniiKotyrlo](https://github.com/YevheniiKotyrlo) for their contributions to this release.
 
 ## Features
 
@@ -72,6 +72,11 @@ Special thanks to [@alpkaravil](https://github.com/alpkaravil), [@GRBurst](https
 - [Detect publication differences during initial sync](https://github.com/rocicorp/mono/pull/5629)
 - [Prevent concurrent schema migrations from racing](https://github.com/rocicorp/mono/pull/5626)
 - [Fix stale destroy timers on query resubscribe](https://github.com/rocicorp/mono/pull/5623) (thanks [@alpkaravil](https://github.com/alpkaravil)!)
+- [Add missing @types/ws dependency](https://github.com/rocicorp/mono/pull/5639) (thanks [@YevheniiKotyrlo](https://github.com/YevheniiKotyrlo)!)
+- [Fix constraints not detected when definition changes but name stays same](https://github.com/rocicorp/mono/pull/5647)
+- [Fix duplicate mutations when retry transaction succeeds](https://github.com/rocicorp/mono/pull/5634)
+- [Fix analyze-query crash with scalar subqueries](https://github.com/rocicorp/mono/pull/5614)
+- [Detect tables moved out of published schema](https://github.com/rocicorp/mono/pull/5635)
 
 
 ## Breaking Changes

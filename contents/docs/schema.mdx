@@ -396,9 +396,23 @@ Like other database-backed applications, Zero schema migrations generally follow
 Steps 1 and 2 can generally be done as part of a single deploy in your CI pipeline, but step 3 should be weeks later, when most open clients have refreshed the application.
 See [Rolling Updates](/docs/deployment#rolling-updates) for more details.
 
-<Note type="warning" slug="postgres-special-cases">
-  Certain schema changes require special handling in
-  Postgres. See [Schema
-  Changes](/docs/postgres-support#schema-changes) for
-  details.
-</Note>
+### Backfill
+
+When you add a new column or table to your schema, initial data (from e.g., `GENERATED`, `DEFAULT`, `CURRENT_TIMESTAMP`, etc.) needs to be replicated to `zero-cache` and synced to clients.
+
+Similarly, when adding an existing column to a [custom publication](/docs/postgres-support#zero-cache-replication), that column's existing data needs to be replicated.
+
+Zero handles both these cases through a process called _backfilling_.
+
+Zero backfills existing data to the replica in the background after detecting a new column. The new column is not exposed to the client until all data has been backfilled, which may take some time depending on the amount of data.
+
+### Monitoring Backfill Progress
+
+To track backfill progress, check your `zero-cache` logs for messages about backfilling status.
+
+If you're using [Cloud Zero](https://zerosync.dev/#pricing), backfill progress is displayed directly in the dashboard:
+
+<ImageLightbox
+  src="/images/schema/backfill-dashboard.png"
+  caption="Backfill progress in the CloudZero dashboard"
+/>

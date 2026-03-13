@@ -1,0 +1,81 @@
+---
+title: Zero 0.26
+description: Schema Backfill and Scalar Subqueries
+---
+
+## Installation
+
+```bash
+npm install @rocicorp/zero@0.26
+```
+
+## Features
+
+- [**Schema Backfill:**](/docs/schema#backfill) Zero now natively supports adding columns with non-constant defaults, or adding existing columns to a custom publication. There is no longer a need to touch every row in the database to backfill data manually.
+- [**Scalar Subqueries:**](/docs/zql#scalar-subqueries) Added a new optional optimization for `exists` queries that filter by related data with a one-to-one relationship. This can improve query performance significantly for cases where the subquery result changes rarely.
+- [**Virtual Scroll:**](/docs/status#query-language) Added [zero-virtual](https://github.com/rocicorp/zero-virtual) library for efficient infinite scrolling in React.
+- [**Support for `time` and `timetz` columns:**](/docs/postgres-support#column-types) Added support for `time` and `timetz` columns (thanks [GRBurst](https://github.com/rocicorp/mono/pull/5417)).
+- [**Comparing to `undefined`:**](/docs/zql#comparing-to-undefined) Added a new convenience for comparing to `undefined`. This is useful for filtering by nullable fields.
+- [**zero.delete():**](/docs/auth#logging-out) Added a more convenient way to delete all data from the browser's IndexedDB database.
+
+## Fixes
+
+- [Updating auth tokens no cycles connection](https://github.com/rocicorp/mono/pull/5530)
+- [Add configurable back-pressure limit for change streamer](https://github.com/rocicorp/mono/pull/5552)
+- [Surface replication LSN at /statz?replication](https://github.com/rocicorp/mono/pull/5507)
+- [Generalize all statz output to be machine-readable](https://github.com/rocicorp/mono/pull/5508)
+- [Fix unique constraint violations during sync](https://github.com/rocicorp/mono/pull/5372)
+- [Fix zero-sqlite3 install script to work with bun](https://github.com/rocicorp/zero-sqlite3/pull/20)
+- [Warn when mutations are rejected due to offline/error/closed state](https://github.com/rocicorp/mono/pull/5405)
+- [Fix queries being dropped when other queries with same hash expire](https://github.com/rocicorp/mono/pull/5423)
+- [Fix incorrect query results when filtering by undefined values](https://github.com/rocicorp/mono/pull/5426)
+- [Fix connection.connect() being ignored when in error/auth state](https://github.com/rocicorp/mono/pull/5400)
+- [Extra table name validation](https://github.com/rocicorp/mono/pull/5430)
+- [Redact sensitive info from logs](https://github.com/rocicorp/mono/pull/5432)
+- [Do not log mutation args](https://github.com/rocicorp/mono/pull/5435)
+- [Allow validation of JWT issuer and audience claims](https://github.com/rocicorp/mono/pull/5436)
+- [Protect against admin password timing attacks](https://github.com/rocicorp/mono/pull/5450)
+- [Forward origin header to API server](https://github.com/rocicorp/mono/pull/5443)
+- [Escape publication names](https://github.com/rocicorp/mono/pull/5446)
+- [Prevent denial of service attacks](https://github.com/rocicorp/mono/pull/5447)
+- [Fix race condition in notification handling](https://github.com/rocicorp/mono/pull/5458)
+- [Fix custom kvStoreProvider being ignored in React Native](https://github.com/rocicorp/mono/pull/5448) (thanks [@kvnkusch](https://github.com/kvnkusch)!)
+- [Allow hybrid permissions with new queries in zero-cache-dev](https://github.com/rocicorp/mono/pull/5477)
+- [Fix unnecessary reconnection attempts after auth errors](https://github.com/rocicorp/mono/pull/5504)
+- [Fix "database connection is not open" error during shutdown](https://github.com/rocicorp/mono/pull/5506)
+- [Fix view-syncer crash from stale WebSocket messages](https://github.com/rocicorp/mono/pull/5509)
+- [Forward fresh auth token with each push message](https://github.com/rocicorp/mono/pull/5503) (thanks [@jbingen](https://github.com/jbingen)!)
+- [Prevent IDB collection from deleting active databases](https://github.com/rocicorp/mono/pull/5499)
+- [Fix statz double close and ensure sqlite db handles are closed](https://github.com/rocicorp/mono/pull/5527)
+- [Fix OOM crashes when replicating databases with large rows](https://github.com/rocicorp/mono/pull/5528)
+- [Fix parsing of json[] and jsonb[] types](https://github.com/rocicorp/mono/pull/5532)
+- [Remove unsupported devtools option from replicache-perf](https://github.com/rocicorp/mono/pull/5540)
+- [Fix slow queries on tables with nullable unique columns](https://github.com/rocicorp/mono/pull/5542)
+- [Fix replication crash from closed WebSocket](https://github.com/rocicorp/mono/pull/5541) (thanks [@utkarsh-611](https://github.com/utkarsh-611)!)
+- [Fix notifications not working in background browser tabs](https://github.com/rocicorp/mono/pull/5548)
+- [Log WebSocket close code 1006 as info, not error](https://github.com/rocicorp/mono/pull/5563) (thanks [@jbingen](https://github.com/jbingen)!)
+- [Fix replication deadlock on Storer crash](https://github.com/rocicorp/mono/pull/5569) (thanks [@utkarsh-611](https://github.com/utkarsh-611)!)
+- [Downgrade IDBNotFoundError to info log level](https://github.com/rocicorp/mono/pull/5562) (thanks [@jbingen](https://github.com/jbingen)!)
+- [Fix type safety for default context/schema types](https://github.com/rocicorp/mono/pull/5375)
+- [Fix watermark errors when restoring from litestream backups](https://github.com/rocicorp/mono/pull/5589)
+- [Fix replica metadata being deleted during non-disruptive resync](https://github.com/rocicorp/mono/pull/5590)
+- [Fix occasional server crash when Postgres goes down](https://github.com/rocicorp/mono/pull/5618)
+- [Set idle transaction timeout to prevent hung transactions](https://github.com/rocicorp/mono/pull/5620)
+- [Fix lock errors under high CDC load](https://github.com/rocicorp/mono/pull/5622)
+- [Retry on change-db connection errors](https://github.com/rocicorp/mono/pull/5625)
+- [Detect publication differences during initial sync](https://github.com/rocicorp/mono/pull/5629)
+- [Prevent concurrent schema migrations from racing](https://github.com/rocicorp/mono/pull/5626)
+- [Fix stale destroy timers on query resubscribe](https://github.com/rocicorp/mono/pull/5623) (thanks [@alpkaravil](https://github.com/alpkaravil)!)
+- [Add missing @types/ws dependency](https://github.com/rocicorp/mono/pull/5639) (thanks [@YevheniiKotyrlo](https://github.com/YevheniiKotyrlo)!)
+- [Fix constraints not detected when definition changes but name stays same](https://github.com/rocicorp/mono/pull/5647)
+- [Fix duplicate mutations when retry transaction succeeds](https://github.com/rocicorp/mono/pull/5634)
+- [Fix analyze-query crash with scalar subqueries](https://github.com/rocicorp/mono/pull/5614)
+- [Detect tables moved out of published schema](https://github.com/rocicorp/mono/pull/5635)
+
+
+## Breaking Changes
+
+Just two very minor breaking changes this time, that are unlikely to affect most users:
+
+1. If you send custom headers to query or mutate endpoints, you must now allowlist them via [`ZERO_MUTATE_ALLOWED_CLIENT_HEADERS`](/docs/zero-cache-config#mutate-allowed-client-headers) or [`ZERO_QUERY_ALLOWED_CLIENT_HEADERS`](/docs/zero-cache-config#query-allowed-client-headers). By default, no client-provided headers are forwarded.
+1. If you have very large mutations, note that WebSocket messages are now limited to 10MB by default. Increase `ZERO_WEBSOCKET_MAX_PAYLOAD_BYTES` if needed.

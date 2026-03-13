@@ -67,7 +67,7 @@ Postgres has a massive feature set, and Zero supports a growing subset of it.
     <tr>
       <td>
         <code>date</code>, <code>timestamp</code>,{' '}
-        <code>timestampz</code>
+        <code>timestampz</code>, <code>time</code>, <code>timetz</code>
       </td>
       <td>
         <code>number</code>
@@ -189,51 +189,4 @@ Currently, Permissions can limit which tables and rows can be replicated to the 
 
 ## Schema changes
 
-Most Postgres schema changes are supported as is.
-
-Two cases require special handling:
-
-### Adding columns
-
-Adding a column with a non-constant `DEFAULT` value is not supported.
-
-This includes any expression with parentheses, as well as the special functions `CURRENT_TIME`, `CURRENT_DATE`, and `CURRENT_TIMESTAMP`
-(due to a [constraint of SQLite](https://www.sqlite.org/lang_altertable.html#altertabaddcol)).
-
-However, the `DEFAULT` value of an _existing_ column can be changed to any value, including non-constant expressions. To achieve the desired column default:
-
-- Add the column with no `DEFAULT` value
-- Backfill the column with desired values
-- Set the column's `DEFAULT` value
-
-```sql
-BEGIN;
-
-ALTER TABLE foo ADD bar ...;  -- without a DEFAULT value
-UPDATE foo SET bar = ...;
-ALTER TABLE foo ALTER bar SET DEFAULT ...;
-
-COMMIT;
-```
-
-### Changing publications
-
-Postgres allows you to change published tables/columns with an `ALTER PUBLICATION` statement. Zero automatically adjusts the table schemas on the replica, but it does not receive the pre-existing data.
-
-To stream the pre-existing data to Zero, make an innocuous `UPDATE` after adding the tables/columns to the publication:
-
-```sql
-BEGIN;
-
-ALTER PUBLICATION zero_data ADD TABLE foo;
-
-ALTER TABLE foo REPLICA IDENTITY FULL;
-UPDATE foo SET id = id;  -- For some column "id" in "foo"
-ALTER TABLE foo REPLICA IDENTITY DEFAULT;
-
-COMMIT;
-```
-
-## Self-Referential Relationships
-
-See [schema](/docs/schema#self-referential-relationships)
+All Postgres schema changes are supported. See [Schema Migrations](/docs/schema#migrations).

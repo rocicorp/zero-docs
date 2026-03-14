@@ -849,7 +849,7 @@ export function IntroductionLanding({
                   <h4 className="cloud-zero-tier-name">Professional</h4>
                   <ul className="cloud-zero-list">
                     <li>100 GB storage</li>
-                    <li>6 dedicated vCPU</li>
+                    <li>7 dedicated vCPU</li>
                     <li>Shared Slack channel</li>
                     <li>Additional storage: $0.20/GB</li>
                     <li>Additional vCPU: $50</li>

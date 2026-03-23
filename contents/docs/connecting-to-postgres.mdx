@@ -6,25 +6,27 @@ In the future, Zero will work with many different backend databases. Today only 
 
 Here are some common Postgres options and what we know about their support level:
 
-| Postgres                          | Support Status                                             |
-| --------------------------------- | ---------------------------------------------------------- |
-| AWS RDS                           | ✅                                                         |
-| AWS Aurora                        | ✅&nbsp;&nbsp;v15.6+                                       |
-| Google Cloud SQL                  | ✅&nbsp;&nbsp;See [notes below](#google-cloud-sql)         |
-| [Fly.io](https://fly.io) Postgres | ✅&nbsp;&nbsp;See [notes below](#flyio)                    |
-| Neon                              | ✅&nbsp;&nbsp;See [notes below](#neon)                     |
-| PlanetScale for Postgres          | ✅&nbsp;&nbsp;See [notes below](#planetscale-for-postgres) |
-| Postgres.app                      | ✅                                                         |
-| postgres:16.2-alpine docker image | ✅                                                         |
-| Supabase                          | ✅&nbsp;&nbsp;See [notes below](#supabase)                 |
-| Render                            | 🤷‍♂️&nbsp;&nbsp;No [event triggers](#event-triggers)         |
-| Heroku                            | 🤷‍♂️&nbsp;&nbsp;No [event triggers](#event-triggers)         |
+| Postgres                 | Support Status                                             |
+| ------------------------ | ---------------------------------------------------------- |
+| AWS RDS                  | ✅                                                         |
+| AWS Aurora               | ✅&nbsp;&nbsp;v15.6+                                       |
+| PlanetScale for Postgres | ✅&nbsp;&nbsp;See [notes below](#planetscale-for-postgres) |
+| Neon                     | ✅&nbsp;&nbsp;See [notes below](#neon)                     |
+| Google Cloud SQL         | ✅&nbsp;&nbsp;See [notes below](#google-cloud-sql)         |
+| Postgres.app             | ✅                                                         |
+| Postgres 15+ Docker      | ✅                                                         |
+| Supabase                 | ⚠️&nbsp;&nbsp;See [notes below](#supabase)                 |
+| Fly.io Managed Postgres  | ⚠️&nbsp;&nbsp;See [notes below](#flyio)                    |
+| Render                   | ⚠️&nbsp;&nbsp;See [notes below](#render)                   |
+| Heroku                   | 🤷‍♂️&nbsp;&nbsp;No [event triggers](#event-triggers)         |
 
 ## Event Triggers
 
 Zero uses Postgres “[Event Triggers](https://www.postgresql.org/docs/current/sql-createeventtrigger.html)” when possible to implement high-quality, efficient [schema migration](schema/#migrations).
 
-Some hosted Postgres providers don’t provide access to Event Triggers.
+Some hosted Postgres providers don't provide access to Event Triggers.
+
+Some managed providers also have incomplete Event Trigger behavior for certain DDL (for example, `ALTER PUBLICATION`). We call out known provider-specific issues below.
 
 Zero still works out of the box with these providers, but for correctness, any schema change triggers a full reset of all server-side and client-side state. For small databases (< 10GB) this can be OK, but for bigger databases we recommend choosing a provider that grants access to Event Triggers.
 
@@ -63,45 +65,99 @@ For development databases, you can set a `max_slot_wal_keep_size` value in Postg
 
 This is a configuration parameter that bounds the amount of WAL kept around for replication slots, and [invalidates the slots that are too far behind](https://www.postgresql.org/docs/current/runtime-config-replication.html#GUC-MAX-SLOT-WAL-KEEP-SIZE).
 
-`zero-cache` will automatically detect if the replication slot has been invalidated and re-sync replicas from scratch.
+Zero-cache will automatically detect if the replication slot has been invalidated and re-sync replicas from scratch.
 
 This configuration can cause problems like `slot has been invalidated because it exceeded the maximum reserved size` and is not recommended for production databases.
 
 ## Provider-Specific Notes
 
-### Google Cloud SQL
+### PlanetScale for Postgres
 
-Zero works with Google Cloud SQL out of the box. In many configurations, when you connect with a user that has sufficient privileges, `zero-cache` will create its default publication automatically.
+You should use the `default` role that PlanetScale provides, because PlanetScale user-defined roles cannot create replication slots.
 
-If your Cloud SQL user does not have permission to create publications, you can still use Zero by [creating a publication manually](/docs/postgres-support#limiting-replication) and then specifying that publication name in [App Publications](/docs/zero-cache-config#app-publications) when running `zero-cache`.
+Planetscale Postgres defaults `max_connections` to 25, which can easily be exhausted by Zero's connection pools. This will result in an error like `remaining connection slots are reserved for roles with the SUPERUSER attribute`.
+You should increase this value in the Parameters section of the PlanetScale dashboard to 100 or more.
 
-On Google Cloud SQL for PostgreSQL, enable logical decoding by turning on the instance flag `cloudsql.logical_decoding`.
-You do not set `wal_level` directly on Cloud SQL.
-See Google's documentation for details: [Configure logical replication](https://cloud.google.com/sql/docs/postgres/replication/configure-logical-replication).
+Make sure to only use a direct connection for the `ZERO_UPSTREAM_DB`, and use pooled URLs for `ZERO_CVR_DB`, `ZERO_CHANGE_DB`, and your API (see [Deployment](/docs/deployment)).
+
+### Neon
+
+#### Logical Replication
+
+Neon supports logical replication, but you need to enable it in the Neon console for your branch/endpoint.
+
+![Enable logical replication](/images/connecting-to-postgres/neon-enable.png)
+
+#### Branching
+
+Neon fully supports Zero, but you should be aware of how Neon's pricing model and Zero interact: because Zero keeps an open connection to Postgres to replicate changes, as long as zero-cache is running, Postgres will be running and you will be charged by Neon.
+
+For production databases that have enough usage to always be running anyway, this is fine. But for smaller applications that would otherwise not always be running, this can create a surprisingly high bill. You may want to choose a provider that charge a flat monthly rate instead.
+
+Also some users choose Neon because they hope to use branching for previews. This can work, but if not done with care, Zero can end up keeping each Neon _preview_ branch running too 😳.
+
+For the recommended approach to preview URLs, see [Previews](/docs/previews).
 
 ### Fly.io
 
-Fly does not support TLS on their internal networks. If you run both `zero-cache` and Postgres on Fly, you need
-to stop `zero-cache` from trying to use TLS to talk to Postgres. You can do this by adding the `sslmode=disable`
-query parameter to your connection strings from `zero-cache`.
+#### Networking
+
+Fly Managed Postgres is the latest offering from Fly.io, and it is private-network-only by default. If zero-cache runs outside Fly, connect via Fly WireGuard or run a proxy like [fly-mpg-proxy](https://github.com/fly-apps/fly-mpg-proxy).
+
+Fly does not support TLS on its private network. If `zero-cache` connects to Postgres over the Fly private network (including WireGuard), add `sslmode=disable` to your connection strings.
+
+#### Permissions
+
+Fly Managed Postgres does not provide superuser access, so `zero-cache` cannot create [event triggers](#event-triggers).
+
+Also, some publication operations (like `FOR TABLES IN SCHEMA ...` / `FOR ALL TABLES`) can be permission-restricted. If `zero-cache` can't create its default publication, create one listing tables explicitly and set the [app publication](/docs/zero-cache-config#app-publications).
+
+#### Pooling
+
+You should use Fly's pgBouncer endpoint for `ZERO_CVR_DB` and `ZERO_CHANGE_DB`.
 
 ### Supabase
 
-#### Postgres Version
-
 Supabase requires at least 15.8.1.083 for event trigger support. If you have a lower 15.x, Zero will still work but [schema updates will be slower](#event-triggers). See Supabase's docs for upgrading your Postgres version.
 
-#### Connection Type
-
-In order to connect to Supabase you must use the "Direct Connection" style connection string, not the pooler:
+Zero must use the "Direct Connection" string:
 
 <ImageLightbox
   src="/images/connecting-to-postgres/direct.png"
-  caption='Use the "Direct Connection" option to connect zero-cache to your Supabase database.'
+  caption='Use the "Direct Connection" option for ZERO_UPSTREAM_DB.'
   invert="dark"
 />
 
 This is because Zero sets up a logical replication slot, which is only supported with a direct connection.
+
+For `ZERO_CVR_DB` and `ZERO_CHANGE_DB`, prefer Supabase's **session** pooler. The transaction pooler can break prepared statements and cause errors like `26000 prepared statement ... does not exist`.
+
+#### Publication Changes
+
+Supabase [does not fire DDL event triggers](https://github.com/supabase/supautils/issues/123) for `ALTER PUBLICATION`.
+
+You must use a `FOR ALL TABLES` publication, so that these missing DDL event triggers do not cause errors with zero-cache.
+
+{/* In Zero `>=v0.26.3`, you can work around this by bookending each `ALTER PUBLICATION` statement with `COMMENT ON PUBLICATION` statements in the same transaction:
+
+```sql
+BEGIN;
+
+COMMENT ON PUBLICATION zero_pub IS 'anything';
+
+ALTER PUBLICATION zero_pub ADD TABLE ...;
+
+COMMENT ON PUBLICATION zero_pub IS 'anything';
+
+-- ... other statements ...
+
+COMMIT;
+```
+
+Both `COMMENT ON PUBLICATION` statements must target the publication being modified. All three statements must be in the same transaction, and the comment value can be anything.
+
+On non-Supabase Postgres, these `COMMENT ON PUBLICATION` statements are harmless when publication event triggers already work.
+Also, the event trigger messages emitted for this workaround are backwards compatible with the previous minor version of the processing code, so rolling back one minor version is safe. */}
 
 #### IPv4
 
@@ -120,19 +176,22 @@ difficult. [Hetzner](https://www.hetzner.com/) offers cheap hosted VPS that supp
 
 IPv4 addresses are only supported on the Pro plan and are an extra $4/month.
 
-### PlanetScale for Postgres
+### Render
 
-* You need to connect using the "default" role that PlanetScale provides, because PlanetScale's "User-Defiend Roles" cannot create replication slots.
-* Be sure to use a direct connection for "Upstream DB" and a pg bouncer connnection string for "CVR DB" and "Change DB". Otherwise you will likely exhaust connection limits to PlanetScale.
+Render _can_ work with Zero, but requires admin/support-side setup, and does not support a few core Zero features.
 
-### Neon
+App roles can't create [event triggers](#event-triggers), so schema changes will fall back to full resets.
 
-Neon fully supports Zero, but you should be aware of how Neon's pricing model and Zero interact.
+You also must ensure `wal_level=logical` by creating a Render support ticket.
 
-Because Zero keeps an open connection to Postgres to replicate changes, as long as zero-cache is running, Postgres will be running and you will be charged by Neon.
+Render does not provide superuser access, but you can submit another support ticket to ask Render to create a publication with `FOR ALL TABLES` for you, and then set that publication in [App Publications](/docs/zero-cache-config#app-publications).
 
-For production databases that have enough usage to always be running anyway, this is fine. But for smaller applications that would otherwise not always be running, this can create a surprisingly high bill. You may want to choose a provider that charge a flat monthly rate instead.
+### Google Cloud SQL
 
-Also some users choose Neon because they hope to use branching for previews. This can work, but if not done with care, Zero can end up keeping each Neon _preview_ branch running too 😳.
+Zero works with Google Cloud SQL out of the box. In many configurations, when you connect with a user that has sufficient privileges, `zero-cache` will create its default publication automatically.
 
-For the recommended approach to preview URLs, see [Preview Deployments](/docs/preview-deployments).
+If your Cloud SQL user does not have permission to create publications, you can still use Zero by [creating a publication manually](/docs/postgres-support#limiting-replication) and then specifying that publication name in [App Publications](/docs/zero-cache-config#app-publications) when running `zero-cache`.
+
+On Google Cloud SQL for PostgreSQL, enable logical decoding by turning on the instance flag `cloudsql.logical_decoding`.
+You do not set `wal_level` directly on Cloud SQL.
+See Google's documentation for details: [Configure logical replication](https://cloud.google.com/sql/docs/postgres/replication/configure-logical-replication).

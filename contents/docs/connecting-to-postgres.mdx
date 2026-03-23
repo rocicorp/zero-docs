@@ -134,7 +134,9 @@ For `ZERO_CVR_DB` and `ZERO_CHANGE_DB`, prefer Supabase's **session** pooler. Th
 
 #### Publication Changes
 
-Supabase [does not fire DDL event triggers](https://github.com/supabase/supautils/issues/123) for `ALTER PUBLICATION` directly.
+Supabase [does not fire DDL event triggers](https://github.com/supabase/supautils/issues/123) for `ALTER PUBLICATION`.
+
+You must use a `FOR ALL TABLES` publication, so that these missing DDL event triggers do not cause errors with zero-cache.
 
 {/* In Zero `>=v0.26.3`, you can work around this by bookending each `ALTER PUBLICATION` statement with `COMMENT ON PUBLICATION` statements in the same transaction:
 

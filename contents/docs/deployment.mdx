@@ -25,6 +25,8 @@ These components have the following characteristics:
 
 You will also need to deploy a Postgres database, your frontend, and your API server for the [query](/docs/queries#server-setup) and [mutate](/docs/mutators#server-setup) endpoints.
 
+Before setting up Postgres, read [Connecting to Postgres](/docs/connecting-to-postgres) for provider-specific notes.
+
 ## Minimum Viable Strategy
 
 The simplest way to deploy Zero is to run everything on a single node. This is the least expensive way to run Zero, and it can take you surprisingly far.
@@ -56,7 +58,7 @@ services:
       - 3000:3000
     environment:
       # Your API handles mutations and writes to the PG db
-      # Use a transaction pooler (e.g. pgbouncer) in production
+      # Use a pooler (e.g. pgbouncer) in production
       ZERO_UPSTREAM_DB: postgres://postgres:pass@upstream-db:5432/zero
     depends_on:
       upstream-db:
@@ -71,10 +73,10 @@ services:
       # This *must* be a direct connection (not via pgbouncer)
       ZERO_UPSTREAM_DB: postgres://postgres:pass@upstream-db:5432/zero
       # Used for storing client view records
-      # Use a transaction pooler (pgbouncer) in production
+      # Use a pooler (e.g. pgbouncer) in production
       ZERO_CVR_DB: postgres://postgres:pass@upstream-db:5432/zero
       # Used for storing recent replication log entries
-      # Use a transaction pooler in production
+      # Use a pooler in production
       ZERO_CHANGE_DB: postgres://postgres:pass@upstream-db:5432/zero
       # Path to the SQLite replica
       ZERO_REPLICA_FILE: /data/zero.db
@@ -125,7 +127,7 @@ services:
       - 3000:3000
     environment:
       # Your API handles mutations and writes to the PG db
-      # Use a transaction pooler (e.g. pgbouncer) in production
+      # Use a pooler (e.g. pgbouncer) in production
       ZERO_UPSTREAM_DB: postgres://postgres:pass@upstream-db:5432/zero
     depends_on:
       upstream-db:
@@ -169,10 +171,10 @@ services:
       # This *must* be a direct connection (not via pgbouncer)
       ZERO_UPSTREAM_DB: postgres://postgres:pass@upstream-db:5432/zero
       # Used for storing client view records
-      # Use a transaction pooler (e.g. pgbouncer) in production
+      # Use a pooler (e.g. pgbouncer) in production
       ZERO_CVR_DB: postgres://postgres:pass@upstream-db:5432/zero
       # Used for storing recent replication log entries
-      # Use a transaction pooler in production
+      # Use a pooler in production
       ZERO_CHANGE_DB: postgres://postgres:pass@upstream-db:5432/zero
 
       # Path to the SQLite replica
@@ -208,13 +210,13 @@ services:
         condition: service_healthy
     environment:
       # Used for writing to the upstream database
-      # Use a transaction pooler in production
+      # Use a pooler in production
       ZERO_UPSTREAM_DB: postgres://postgres:pass@upstream-db:5432/zero
       # Used for storing client view records
-      # Use a transaction pooler in production
+      # Use a pooler in production
       ZERO_CVR_DB: postgres://postgres:pass@upstream-db:5432/zero
       # Used for storing recent replication log entries
-      # Use a transaction pooler in production
+      # Use a pooler in production
       ZERO_CHANGE_DB: postgres://postgres:pass@upstream-db:5432/zero
 
       # Path to the SQLite replica

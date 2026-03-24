@@ -851,7 +851,15 @@ export function IntroductionLanding({
                     <li>100 GB storage</li>
                     <li>7 dedicated vCPU</li>
                     <li>Shared Slack channel</li>
-                    <li>24/7 monitoring + SLA</li>
+                    <li>
+                      24/7 monitoring +{' '}
+                      <a
+                        href="https://www.notion.so/replicache/Cloud-Zero-Professional-SLA-31f3bed8954580aca461dd511759506f"
+                        style={{textDecoration: 'underline'}}
+                      >
+                        SLA
+                      </a>
+                    </li>
                     <li>Additional storage: $0.20/GB</li>
                     <li>Additional vCPU: $50</li>
                   </ul>
@@ -878,7 +886,15 @@ export function IntroductionLanding({
                   <li>Data stays in your AWS account</li>
                   <li>Rocicorp has limited privileges</li>
                   <li>Shared Slack channel</li>
-                  <li>24/7 monitoring + SLA</li>
+                  <li>
+                    24/7 monitoring +{' '}
+                    <a
+                      href="https://www.notion.so/replicache/Cloud-Zero-Professional-SLA-31f3bed8954580aca461dd511759506f"
+                      style={{textDecoration: 'underline'}}
+                    >
+                      SLA
+                    </a>
+                  </li>
                   <li>Includes 10 vCPU</li>
                   <li>Additional vCPU: $20</li>
                 </ul>

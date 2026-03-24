@@ -1,0 +1,34 @@
+---
+title: Zero 1.0
+description: First Stable Release
+---
+
+## Installation
+
+```bash
+npm install @rocicorp/zero@1.0
+```
+
+## Overview
+
+After nearly two years of development, 26 releases, thousands of commits, and hundreds of bugfixes, we are declaring Zero stable.
+
+This means we fully support the Zero API and are committed to maintaining it for the foreseeable future.
+
+Functionally, this release is actually a very minor update to 0.26.2.
+
+## Features
+
+- **Schema Change Hooks:** Added support for detecting publication changes on Supabase via `COMMENT ON PUBLICATION` statements, working around Supabase's lack of event trigger support for publications.
+
+## Fixes
+
+- [Handle corrupted litestream restores](https://github.com/rocicorp/mono/pull/5677)
+- [Fix error handling when CDC is unhealthy](https://github.com/rocicorp/mono/pull/5679)
+- [Fix IPC_CHANNEL_CLOSED race condition during shutdown](https://github.com/rocicorp/mono/pull/5671)
+- [Fix orphaned subscriber scenarios](https://github.com/rocicorp/mono/pull/5681)
+- [Fix `time`/`timetz` SQL generation and type handling](https://github.com/rocicorp/mono/pull/5667)
+
+## Breaking Changes
+
+None.

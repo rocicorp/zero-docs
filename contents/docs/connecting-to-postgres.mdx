@@ -26,8 +26,6 @@ Zero uses Postgres “[Event Triggers](https://www.postgresql.org/docs/current/s
 
 Some hosted Postgres providers don't provide access to Event Triggers.
 
-Some managed providers also have incomplete Event Trigger behavior for certain DDL (for example, `ALTER PUBLICATION`). We call out known provider-specific issues below.
-
 Zero still works out of the box with these providers, but for correctness, any schema change triggers a full reset of all server-side and client-side state. For small databases (< 10GB) this can be OK, but for bigger databases we recommend choosing a provider that grants access to Event Triggers.
 
 ## Configuration
@@ -136,9 +134,7 @@ For `ZERO_CVR_DB` and `ZERO_CHANGE_DB`, prefer Supabase's **session** pooler. Th
 
 Supabase [does not fire DDL event triggers](https://github.com/supabase/supautils/issues/123) for `ALTER PUBLICATION`.
 
-You must use a `FOR ALL TABLES` publication, so that these missing DDL event triggers do not cause errors with zero-cache.
-
-{/* In Zero `>=v0.26.3`, you can work around this by bookending each `ALTER PUBLICATION` statement with `COMMENT ON PUBLICATION` statements in the same transaction:
+Starting in Zero `>=v1.0`, you can work around this by bookending each `ALTER PUBLICATION` statement with `COMMENT ON PUBLICATION` statements in the same transaction:
 
 ```sql
 BEGIN;
@@ -157,7 +153,7 @@ COMMIT;
 Both `COMMENT ON PUBLICATION` statements must target the publication being modified. All three statements must be in the same transaction, and the comment value can be anything.
 
 On non-Supabase Postgres, these `COMMENT ON PUBLICATION` statements are harmless when publication event triggers already work.
-Also, the event trigger messages emitted for this workaround are backwards compatible with the previous minor version of the processing code, so rolling back one minor version is safe. */}
+Also, the event trigger messages emitted for this workaround are backwards compatible with the previous minor version of the processing code, so rolling back one minor version is safe.
 
 #### IPv4
 

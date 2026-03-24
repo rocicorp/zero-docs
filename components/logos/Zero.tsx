@@ -42,20 +42,20 @@ function ZeroLogo(props: ZeroLogoProps) {
       <rect
         x="126.43"
         y="8.286"
-        width="27"
+        width="26.5"
         height="15.714"
         rx="2"
         fill="var(--docs-logo-accent-color)"
       />
       <text
-        x="140.5"
+        x="140"
         y="17"
         textAnchor="middle"
         dominantBaseline="middle"
         fill="black"
-        fontSize="10.5"
-        fontWeight="1000"
-        style={{fontFamily: 'verdana'}}
+        fontSize="9.5"
+        fontWeight="bold"
+        style={{fontFamily: 'muoto'}}
       >
         1.0
       </text>

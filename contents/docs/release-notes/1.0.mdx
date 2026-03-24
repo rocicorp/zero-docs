@@ -13,13 +13,13 @@ npm install @rocicorp/zero@1.0
 
 After nearly two years of development, 26 releases, thousands of commits, and hundreds of bugfixes, we are declaring Zero stable.
 
-This means we fully support the Zero API and are committed to maintaining it for the foreseeable future.
+This means we fully support the Zero API and are committed to maintaining it. There may still be breaking changes in the future, but they will be rare and much smaller than they have been until now.
 
-Functionally, this release is actually a very minor update to 0.26.2.
+Functionally, this release is a very minor update to [0.26.2](https://discord.com/channels/830183651022471199/1328521707564306462/1484346469430333727). The major version bump is symbolic – there are no actual breaking changes.
 
 ## Features
 
-- [**Schema Change Hooks:**](/docs/connecting-to-postgres#custom-publications) Added support for detecting publication changes on Supabase via `COMMENT ON PUBLICATION` statements, working around Supabase's lack of event trigger support for publications.
+- [**Schema Change Hooks:**](/docs/connecting-to-postgres#publication-changes) Added support for detecting publication changes on Supabase via `COMMENT ON PUBLICATION` statements, working around Supabase's lack of event trigger support for publications.
 
 ## Fixes
 

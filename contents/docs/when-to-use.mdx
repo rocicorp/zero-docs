@@ -3,9 +3,7 @@ title: When To Use Zero
 description: And When Not To – A Quick Guide
 ---
 
-We are trying to make Zero a great choice for a wide variety of applications. But every tool has tradeoffs, and Zero especially so [while in alpha](./status).
-
-This page will help you understand if Zero is a good fit for you today.
+Every tool has tradeoffs. This page will help you understand if Zero is a good fit for what you're building.
 
 ## Zero Might be a Good Fit
 
@@ -55,23 +53,11 @@ Zero's query engine is built assuming very fast local access to this replica (i.
 
 The ultimate size limit on the database that Zero can work with is the size limit of this SQLite database. So [up to 45TB on EC2](https://aws.amazon.com/ec2/instance-types/) at time of writing.
 
-However, most of our experience with Zero so far is with much smaller workloads. We currently recommend Zero for use with datasets smaller than 100GB, but are working to improve this in the beta timeframe.
+However, most of our customers today use Zero with smaller datasets. We currently recommend Zero for use with datasets less than 100GB. If you to work with larger datasets, please [reach out](https://discord.rocicorp.dev) and we can talk it through with you.
 
 ## Zero Might Not be a Good Fit **Yet**
 
-While Zero is in alpha, there are additional reasons not to choose it:
-
-### You don't want to run server-side infra
-
-Zero is a Docker container that you currently have to [self-host](./deployment). We're working on a SaaS solution but it's not ready yet.
-
-### You can't tolerate occasional downtime
-
-The easiest way to run Zero today is [single-node](./deployment#guide-single-node-on-flyio), which requires downtime for updates. Also there are occasional regressions.
-
-### You need support for SSR
-
-Zero doesn't support [SSR](./roadmap#beyond) yet, but it is planned.
+Please see [our roadmap](/docs/status#roadmap) for high-priority upcoming Zero features.
 
 ## Alternatives
 

@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import {SheetLeftbar} from './leftbar';
 import {page_routes} from '@/lib/routes-config';
-import ZeroAlphaLogo from './logos/ZeroAlpha';
+import ZeroLogo from './logos/Zero';
 import dynamic from 'next/dynamic';
 
 const Search = dynamic(() => import('./search'), {
@@ -30,7 +30,7 @@ function Logo() {
       href="/"
       className="flex items-center gap-3 relative xs:absolute md:relative left-1/2 -translate-x-1/2 justify-center "
     >
-      <ZeroAlphaLogo className="w-full h-8" />
+      <ZeroLogo className="w-full h-8" />
     </Link>
   );
 }

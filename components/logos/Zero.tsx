@@ -49,11 +49,11 @@ function ZeroLogo(props: ZeroLogoProps) {
       />
       <text
         x="140.5"
-        y="17.5"
+        y="17"
         textAnchor="middle"
         dominantBaseline="middle"
         fill="black"
-        fontSize="10"
+        fontSize="10.5"
         fontWeight="1000"
         style={{fontFamily: 'verdana'}}
       >

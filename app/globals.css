@@ -26,7 +26,7 @@
     --radius: 0.5rem;
     --primary-highlight: 331.2 97.3% 55.9%;
     --primary-highlight-foreground: 0 0% 100%;
-    --docs-logo-accent: 186 100% 35%;
+    --docs-logo-accent: 180 100% 50%;
     --docs-logo-accent-color: hsl(var(--docs-logo-accent));
 
     /* Root page */
@@ -81,14 +81,20 @@
 }
 
 @media (color-gamut: p3) {
+  :root {
+    --docs-logo-accent-color: color(display-p3 0.05 0.8 0.8);
+  }
   .dark {
-    --docs-logo-accent-color: color(display-p3 0.07 0.93 0.93);
+    --docs-logo-accent-color: color(display-p3 0.05 0.93 0.93);
   }
 }
 
 @media (color-gamut: rec2020) {
+  :root {
+    --docs-logo-accent-color: color(display-p3 0.05 0.8 0.8);
+  }
   .dark {
-    --docs-logo-accent-color: color(rec2020 0.07 0.93 0.93);
+    --docs-logo-accent-color: color(rec2020 0.05 0.93 0.93);
   }
 }
 
@@ -1585,7 +1591,10 @@ html:not(.dark) .intro-landing-page .demo-toolbar-title {
   color: rgba(0, 0, 0, 0.7);
 }
 
-html:not(.dark) .intro-landing-page .demo-toolbar-title:hover .demo-toolbar-title__hover {
+html:not(.dark)
+  .intro-landing-page
+  .demo-toolbar-title:hover
+  .demo-toolbar-title__hover {
   color: #000;
 }
 
@@ -2066,7 +2075,9 @@ html:not(.dark) .intro-landing-page .how-it-works-svg {
   font-weight: 700;
   line-height: 1;
   cursor: pointer;
-  transition: border-color 0.15s ease, color 0.15s ease;
+  transition:
+    border-color 0.15s ease,
+    color 0.15s ease;
   vertical-align: middle;
   position: relative;
   top: -2px;
@@ -2298,7 +2309,9 @@ html:not(.dark) .intro-landing-page .how-it-works-svg {
     padding-bottom: 2.5rem;
   }
 
-  .intro-landing-page .cloud-zero-group-tiers .cloud-zero-tier:not(:first-child) {
+  .intro-landing-page
+    .cloud-zero-group-tiers
+    .cloud-zero-tier:not(:first-child) {
     border-top: 1px solid rgba(128, 128, 128, 0.2);
     padding-top: 2.5rem;
   }
@@ -2557,6 +2570,4 @@ html:not(.dark) .intro-landing-page .how-it-works-svg {
     height: 40px;
     padding: 0 1rem;
   }
-
 }
-

@@ -170,7 +170,7 @@ export function IntroductionLanding({
           </h1>
         </section>
 
-        <section className="section section-video">
+        <section className="section section-video" id="demo">
           <div className="video-container">
             <video
               ref={videoRef}

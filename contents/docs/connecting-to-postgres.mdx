@@ -138,7 +138,7 @@ Supabase [does not fire DDL event triggers](https://github.com/supabase/supautil
 
 You must use a `FOR ALL TABLES` publication, so that these missing DDL event triggers do not cause errors with zero-cache.
 
-In Zero `>v0.26.2`, you can work around this by bookending each `ALTER PUBLICATION` statement with `COMMENT ON PUBLICATION` statements in the same transaction:
+In Zero `>=v1.0`, you can work around this by bookending each `ALTER PUBLICATION` statement with `COMMENT ON PUBLICATION` statements in the same transaction:
 
 ```sql
 BEGIN;

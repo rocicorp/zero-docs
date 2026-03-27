@@ -1,0 +1,26 @@
+---
+title: Zero 1.1
+description: Replication Monitoring and Performance
+---
+
+## Installation
+
+```bash
+npm install @rocicorp/zero@1.1
+```
+
+## Features
+
+- [**Replication Lag Metrics:**](/docs/zero-cache-config#replication-lag-report-interval-ms) Added new [OpenTelemetry](/docs/debug/otel) metric `zero.replication.total_lag` to monitor replication lag. For PG 17+, this accurately reflects committed write lag (single-digit ms); for PG 16 and earlier, timings may appear longer due to flush behavior.
+
+## Performance
+
+- [**EXISTS Query Optimization:**](https://github.com/rocicorp/mono/pull/5661) Removed unnecessary `TEMP B-TREE` sorting in EXISTS subquery pipelines. Performance improvement depends on the query and data. Benchmarks improve by about 10%, but in gigabugs with 100GB of data some queries went from never finishing to 2ms.
+
+## Fixes
+
+- [Fix reads disrupting replica initialization](https://github.com/rocicorp/mono/pull/5702)
+
+## Breaking Changes
+
+None.

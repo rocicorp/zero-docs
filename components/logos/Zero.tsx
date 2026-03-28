@@ -42,22 +42,22 @@ function ZeroLogo(props: ZeroLogoProps) {
       <rect
         x="126.43"
         y="8.286"
-        width="26.5"
+        width="23"
         height="15.714"
         rx="2"
         fill="var(--docs-logo-accent-color)"
       />
       <text
-        x="140"
-        y="17"
+        x="138"
+        y="16.75"
         textAnchor="middle"
         dominantBaseline="middle"
         fill="black"
-        fontSize="9.5"
+        fontSize="10"
         fontWeight="bold"
         style={{fontFamily: 'muoto'}}
       >
-        1.0
+        v1
       </text>
     </svg>
   );

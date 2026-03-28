@@ -542,10 +542,13 @@ env: `ZERO_REPLICA_PAGE_CACHE_SIZE_KIB`<br/>
 
 The minimum interval at which replication lag reports are written upstream and reported via the `zero.replication.total_lag` [OpenTelemetry metric](/docs/debug/otel). Because replication lag reports are only issued after the previous one was received, the actual interval between reports may be longer when there is a backlog in the replication stream.
 
-This feature requires write access to upstream Postgres (uses `pg_logical_emit_message()`). For PostgreSQL 17+, lag measurements accurately reflect committed write latency (single-digit milliseconds). For PostgreSQL 16 and earlier, measurements may appear 50-100ms longer due to flush behavior.
+This feature requires write access to upstream Postgres (uses `pg_logical_emit_message()`). For PostgreSQL 17+, lag measurements accurately reflect committed write latency (single-digit milliseconds). For PostgreSQL 16 and earlier, measurements may appear 50-100ms longer due to flush behavior.  A negative or 0 value disables lag reporting.
+
+Even if otel is not enabled, info and warn-level logs are emitted for large lag values.
 
 flag: `--replication-lag-report-interval-ms`<br/>
 env: `ZERO_REPLICATION_LAG_REPORT_INTERVAL_MS`<br/>
+default: `30_000`
 
 ### Server Version
 

@@ -351,50 +351,254 @@ declare module '@rocicorp/zero' {
 
 This prevents having to pass `Schema` manually to every Zero API.
 
-## Migrations
+## Schema Changes
 
-Zero uses TypeScript-style structural typing to detect schema changes and implement smooth migrations.
+Zero applications have three components that interact with the database schema: Postgres, the API server (query/mutate endpoints), and the client.
 
-### How it Works
+### Development
 
-When the Zero client connects to `zero-cache` it sends a copy of the schema it was constructed with. `zero-cache` compares this schema to the one it has, and rejects the connection with a special error code if the schema is incompatible.
+During development, you can make changes to all three components at once:
 
-By default, the Zero client handles this error code by calling `location.reload()`. The intent is to request a newer version of the app that has been updated to handle the new server schema.
+1. Change the Postgres schema
+2. Update schema.ts
+3. Update the API server to use the new schema
+4. Update your app code
+5. Deploy everything
 
-<Note type="note" heading="Update Order">
-It's important to update the database schema first, then the app. Otherwise a reload loop will occur.
+Clients will disconnect if the client schema is incompatible with the server. The [`onUpdateNeeded` event fires](#handling-old-clients), and users get the new code. For local dev or staging, this is fine and convenient.
 
-If a reload loop does occur, Zero uses exponential backoff to avoid overloading the server.
+### Production
 
+Zero also supports downtime-free schema changes for use in production. To achieve this, the order you deploy in matters:
+
+- **Expand** (adding things): Deploy providers before consumers. DB → API → Client.
+- **Contract** (removing things): Deploy consumers before providers. Client → API → DB.
+
+<Note type="warning" heading="Test on staging first">
+For production apps, we strongly recommend testing schema changes on a staging environment that has a production-like dataset before deploying to production.
 </Note>
 
-If you want to change or delay this reload, you can do so by providing the `onUpdateNeeded` constructor parameter:
+### Expand Changes
+
+When you're adding a column, table, or new mutator/query:
+
+1. Deploy the database change and wait for it to replicate through `zero-cache`.
+   - In Cloud Zero, you can see replication status in the dashboard.
+   - In self-hosted `zero-cache`, check the logs.
+   - If there's [backfill](#backfill), wait for that to complete.
+2. Deploy the API server.
+3. Deploy the client.
+
+For full-stack frameworks where the API and client deploy together, steps 2 and 3 are combined.
+
+If your change doesn't affect the Postgres schema (for example, just adding a mutator that uses existing columns), skip step 1. If your change doesn't affect the API server, skip step 2.
+
+<Note type="warning" heading="Incorrect deployment order will cause downtime">
+If you deploy the API server before the schema change has replicated, mutators and/or queries will fail because they will refer to non-existent columns.
+
+If you deploy the client before the API change, the client will call mutators/queries that don't exist yet.
+
+Both these issues will cause Zero to go into an [error](/docs/connection#error) state. The user can manually reload to recover from this as soon as the depended-upon component has been deployed.
+</Note>
+
+### Contract Changes
+
+When you're removing a column, table, or mutator/query:
+
+1. Deploy the client (stop using the thing being removed).
+2. Deploy the API server (stop providing the thing being removed).
+3. Deploy the database change.
+
+<Note heading="Handling old clients">
+When a client connects to `zero-cache`, it sends the schema it was built against. If that schema is incompatible with what `zero-cache` has (for example if server has just contracted), the client receives an error and calls `onUpdateNeeded`:
 
 ```ts
 new Zero({
-  onUpdateNeeded: updateReason => {
+  // Optional. By default calls location.reload()
+  onUpdateNeeded: reason => {
     if (reason.type === 'SchemaVersionNotSupported') {
-      // Do something custom here, like show a banner.
-      // When you're ready, call `location.reload()`.
+      // Show a banner prompting the user to update
     }
   }
 })
 ```
 
-If the schema changes in a compatible way while a client is running, `zero-cache` syncs the schema change to the client so that it's ready when the app reloads.
+By default `onUpdateNeeded` calls `location.reload()` if available. On the web, this will reload the page and the user will get the new code.
 
-If the schema changes in an incompatible way while a client is running, `zero-cache` will close the client connection with the same error code as above.
+For native apps or web apps that want a smoother experience, provide a custom `onUpdateNeeded` callback.
+</Note>
 
-### Schema Change Process
+### Compound Changes
 
-Like other database-backed applications, Zero schema migrations generally follow an "expand/migrate/contract" pattern:
+Some changes are both expand and contract—like renaming a column or changing a mutator's interface.
 
-1. Implement and run an "expand" migration on the backend that is backwards compatible with existing schemas. Add new columns or tables, plus any defaults and triggers needed for compatibility with existing clients.
-2. Update and deploy the API and client app to use the new schema.
-3. After a grace period, implement and run a "contract" migration on the backend to drop or rename obsolete columns/tables.
+For these, you run both patterns in sequence:
 
-Steps 1 and 2 can generally be done as part of a single deploy in your CI pipeline, but step 3 should be weeks later, when most open clients have refreshed the application.
-See [Rolling Updates](/docs/deployment#rolling-updates) for more details.
+1. **Expand**: Add the new column/mutator. Optionally backfill data and add a trigger to keep the old column in sync.
+2. **Contract**: Remove the old column/mutator.
+
+### Examples
+
+#### Adding a Column
+
+Add a `bio` column to the `users` table:
+
+1. **Add column to database**
+   ```sql
+   ALTER TABLE users ADD COLUMN bio TEXT;
+   ```
+   Wait for replication.
+
+2. **Deploy API server**
+   - Add `bio` to schema.ts
+   - Add any new queries that read `bio`
+   - Add any new mutators that write to `bio`
+   - Deploy
+
+3. **Deploy client**
+   - Update app code to display/edit `bio`
+   - Deploy
+
+For full-stack frameworks, steps 2 and 3 are a single deploy.
+
+Even when the API server and client are separate, they can be deployed in sequence by CI using a single PR. The client just can't be deployed until the API server is complete.
+
+#### Removing a Column
+
+Remove the `bio` column from the `users` table:
+
+1. **Deploy client**
+   - Remove `bio` from app code
+   - Deploy
+
+2. **Deploy API server**
+   - Remove mutators that write to `bio`
+   - Remove queries that read `bio`
+   - Remove `bio` from schema.ts
+   - Deploy
+
+3. **Remove column from database**
+   ```sql
+   ALTER TABLE users DROP COLUMN bio;
+   ```
+
+#### Renaming a Column
+
+Rename `nickname` to `displayName`:
+
+1. **Add new column with trigger**
+   ```sql
+   ALTER TABLE users ADD COLUMN display_name TEXT;
+   UPDATE users SET display_name = nickname;
+
+   CREATE FUNCTION sync_display_name() RETURNS TRIGGER AS $$
+   BEGIN
+     IF TG_OP = 'INSERT' THEN
+       -- On insert, sync whichever column was provided
+       IF NEW.display_name IS NULL AND NEW.nickname IS NOT NULL THEN
+         NEW.display_name := NEW.nickname;
+       ELSIF NEW.nickname IS NULL AND NEW.display_name IS NOT NULL THEN
+         NEW.nickname := NEW.display_name;
+       END IF;
+     ELSE -- UPDATE
+       -- Sync whichever column changed
+       IF NEW.display_name IS DISTINCT FROM OLD.display_name AND
+          NEW.nickname IS NOT DISTINCT FROM OLD.nickname THEN
+         NEW.nickname := NEW.display_name;
+       ELSIF NEW.nickname IS DISTINCT FROM OLD.nickname AND
+             NEW.display_name IS NOT DISTINCT FROM OLD.display_name THEN
+         NEW.display_name := NEW.nickname;
+       END IF;
+     END IF;
+     RETURN NEW;
+   END;
+   $$ LANGUAGE plpgsql;
+
+   CREATE TRIGGER sync_display_name_trigger
+     BEFORE INSERT OR UPDATE ON users
+     FOR EACH ROW EXECUTE FUNCTION sync_display_name();
+   ```
+   Wait for replication.
+
+2. **Deploy app using new column**
+   - Add `displayName` to schema.ts
+   - Update app code to read/write `displayName`
+   - Update queries to read/write `displayName`
+   - Update mutators to use `displayName`
+   - Deploy API → Client
+
+3. **Remove old column**
+   - Remove `nickname` from schema.ts
+   - Deploy Client → API
+   - Drop trigger and old column:
+   ```sql
+   DROP TRIGGER sync_display_name_trigger ON users;
+   DROP FUNCTION sync_display_name();
+   ALTER TABLE users DROP COLUMN nickname;
+   ```
+
+#### Making a Column Optional
+
+Change `nickname` from required to optional:
+
+The safest approach is to treat this like a rename—create a new nullable column:
+
+1. **Add new nullable column with trigger**
+   ```sql
+   ALTER TABLE users ADD COLUMN nickname_v2 TEXT;  -- nullable
+   UPDATE users SET nickname_v2 = nickname;
+
+   CREATE FUNCTION sync_nickname() RETURNS TRIGGER AS $$
+   BEGIN
+     IF TG_OP = 'INSERT' THEN
+       -- On insert, sync whichever column was provided
+       IF NEW.nickname_v2 IS NULL AND NEW.nickname IS NOT NULL THEN
+         NEW.nickname_v2 := NEW.nickname;
+       ELSIF NEW.nickname IS NULL AND NEW.nickname_v2 IS NOT NULL THEN
+         NEW.nickname := COALESCE(NEW.nickname_v2, '');  -- default for old clients
+       END IF;
+     ELSE -- UPDATE
+       -- Sync whichever column changed
+       IF NEW.nickname_v2 IS DISTINCT FROM OLD.nickname_v2 AND
+          NEW.nickname IS NOT DISTINCT FROM OLD.nickname THEN
+         NEW.nickname := COALESCE(NEW.nickname_v2, '');  -- default for old clients
+       ELSIF NEW.nickname IS DISTINCT FROM OLD.nickname AND
+             NEW.nickname_v2 IS NOT DISTINCT FROM OLD.nickname_v2 THEN
+         NEW.nickname_v2 := NEW.nickname;
+       END IF;
+     END IF;
+     RETURN NEW;
+   END;
+   $$ LANGUAGE plpgsql;
+
+   CREATE TRIGGER sync_nickname_trigger
+     BEFORE INSERT OR UPDATE ON users
+     FOR EACH ROW EXECUTE FUNCTION sync_nickname();
+   ```
+   Wait for replication.
+
+2. **Deploy app using new column**
+   - Add `nicknameV2` to schema.ts as `optional()`
+   - Update app code to handle nulls
+   - Deploy API → Client
+
+3. **Remove old column**
+   - Remove `nickname` from schema.ts
+   - Rename `nickname_v2` to `nickname` if desired (another rename cycle), or keep the new name
+   - Deploy Client → API
+   - Drop trigger and old column
+
+### Quick Reference
+
+| Change | Deploy Order |
+|--------|--------------|
+| Add column/table | DB → (wait) → API → Client |
+| Remove column/table | Client (maybe wait for app update) → API → DB |
+| Add mutator/query | API → Client |
+| Remove mutator/query | Client → API |
+| Change mutator implementation | API only |
+| Change mutator interface | Add mutator → Client → Remove mutator |
+| Rename column/table | Add new + Migrate → Remove old |
 
 ### Backfill
 

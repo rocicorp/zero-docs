@@ -570,6 +570,7 @@ export async function POST(req: Request) {
 ```ts
 // src/routes/api/query.ts
 import type {APIEvent} from '@solidjs/start/server'
+import {json} from '@solidjs/router'
 import {handleQueryRequest} from '@rocicorp/zero/server'
 import {mustGetQuery} from '@rocicorp/zero'
 import {queries} from '../../zero/queries.ts'
@@ -585,7 +586,7 @@ export async function POST(event: APIEvent) {
     event.request
   )
 
-  return new Response.json(result)
+  return json(result)
 }
 ```
 
@@ -1104,6 +1105,7 @@ export async function POST(req: Request) {
 ```ts
 // src/routes/api/mutate.ts
 import type {APIEvent} from '@solidjs/start/server'
+import {json} from '@solidjs/router'
 import {handleMutateRequest} from '@rocicorp/zero/server'
 import {mustGetMutator} from '@rocicorp/zero'
 import {mutators} from '../../zero/mutators.ts'
@@ -1120,7 +1122,7 @@ export async function POST(event: APIEvent) {
     event.request
   )
 
-  return new Response.json(result)
+  return json(result)
 }
 ```
 

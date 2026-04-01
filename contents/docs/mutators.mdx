@@ -601,7 +601,7 @@ export async function POST(event: APIEvent) {
     event.request
   )
 
-  return new Response.json(result)
+  return Response.json(result)
 }
 ```
 
@@ -1041,7 +1041,7 @@ export const Route = createFileRoute('/api/zero/mutate')({
         await Promise.allSettled(
           asyncTasks.map(task => task())
         )
-        return json(result)
+        return Response.json(result)
       }
     }
   }
@@ -1090,7 +1090,7 @@ export async function POST(event: APIEvent) {
   // If any fail, do not block the response, since the
   // mutation result has already been written to the database.
   await Promise.allSettled(asyncTasks.map(task => task()))
-  return new Response.json(result)
+  return Response.json(result)
 }
 ```
 

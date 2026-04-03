@@ -9,6 +9,10 @@ description: IVM Performance and Bug Fixes
 npm install @rocicorp/zero@1.2
 ```
 
+## Features
+
+- [**Replica metrics:**](/docs/debug/otel#zeroreplica) Added new `replica` metrics group to otel, with `db_size`, `wal_size`, and `backup_lag` metrics.
+
 ## Performance
 
 Optimizations which improve query performance 10–30% in benchmarks:
@@ -20,7 +24,6 @@ Optimizations which improve query performance 10–30% in benchmarks:
 
 ## Fixes
 
-- [Added `db_size`, `wal_size`, and `backup_lag` metrics](https://github.com/rocicorp/mono/pull/5746)
 - [Fix bundle size regression under Vite 8/Rolldown](https://github.com/rocicorp/mono/pull/5744)
 - [Fix timestamp handling for BC dates and years outside 0-9999](https://github.com/rocicorp/mono/pull/5720)
 - [Fix crash with fractional timestamp values in queries](https://github.com/rocicorp/mono/pull/5703)

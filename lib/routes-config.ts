@@ -119,7 +119,7 @@ export const ROUTES = [
       {title: 'Release Notes', href: '/release-notes'},
       {title: 'Reporting Bugs', href: '/reporting-bugs'},
       {title: 'Open Source', href: '/open-source'},
-      {title: 'LLMs', href: '/llms'},
+      {title: 'Agents', href: '/agents'},
     ],
   },
 ] as const satisfies EachRoute[];

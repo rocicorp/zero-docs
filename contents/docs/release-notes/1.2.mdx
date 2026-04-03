@@ -1,0 +1,37 @@
+---
+title: Zero 1.2
+description: IVM Performance and Bug Fixes
+---
+
+## Installation
+
+```bash
+npm install @rocicorp/zero@1.2
+```
+
+## Features
+
+- [**Replica metrics:**](/docs/debug/otel#zeroreplica) Added new `replica` metrics group to otel, with `db_size`, `wal_size`, and `backup_lag` metrics.
+
+## Performance
+
+Optimizations which improve query performance 10–30% in benchmarks:
+
+- [Added fast-path to compare-utf8 for BMP-only strings](https://github.com/rocicorp/compare-utf8) (thanks [@Karavil](https://github.com/Karavil)!)
+- [Replaced closure-based BTree iterators with class instances](https://github.com/rocicorp/mono/pull/5731) (thanks [@Karavil](https://github.com/Karavil)!)
+- [Eliminated per-call object allocations in binary search](https://github.com/rocicorp/mono/pull/5735)
+- [Reuse comparators instead of allocating closures](https://github.com/rocicorp/mono/pull/5736)
+
+## Fixes
+
+- [Fix timestamp handling for BC dates and years outside 0-9999](https://github.com/rocicorp/mono/pull/5720)
+- [Fix crash with fractional timestamp values in queries](https://github.com/rocicorp/mono/pull/5703)
+- [Fix "Constraint should match partition key" error`](https://github.com/rocicorp/mono/pull/5715)
+- [Fix custom push URL not being used for `_zero_cleanupResults`](https://github.com/rocicorp/mono/pull/5716)
+- [Fix "unknown table" error when adding `related()` to existing query](https://github.com/rocicorp/mono/pull/5714)
+- [Downgrade TTL clock update failure to warning](https://github.com/rocicorp/mono/pull/5733)
+- [Bump litestream to v0.0.9 with S3 retry fixes](https://github.com/rocicorp/mono/pull/5738)
+
+## Breaking Changes
+
+None.

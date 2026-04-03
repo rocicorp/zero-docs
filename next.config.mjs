@@ -59,6 +59,16 @@ const nextConfig = {
         destination: '/docs/connection#offline',
         permanent: false,
       },
+      {
+        source: '/docs/llms',
+        destination: '/docs/agents',
+        permanent: false,
+      },
+      {
+        source: '/docs/raw/:slug*',
+        destination: '/docs/:slug*.md',
+        permanent: false,
+      },
     ];
   },
   async headers() {

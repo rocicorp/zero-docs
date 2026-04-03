@@ -14,6 +14,10 @@ function getDocsSlug(pathname: string) {
   return slug.length > 0 ? slug : DEFAULT_SLUG;
 }
 
+function endsWithMd(pathname: string) {
+  return pathname.endsWith('.md');
+}
+
 export function middleware(request: NextRequest) {
   const {pathname} = request.nextUrl;
 
@@ -21,13 +25,17 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  if (!acceptsMarkdown(request)) {
+  const wantsMd = endsWithMd(pathname);
+  const wantsMarkdown = wantsMd || acceptsMarkdown(request);
+
+  if (!wantsMarkdown) {
     const response = NextResponse.next();
     response.headers.set('Vary', 'Accept');
     return response;
   }
 
-  const slug = getDocsSlug(pathname);
+  const rawPathname = wantsMd ? pathname.slice(0, -3) : pathname;
+  const slug = getDocsSlug(rawPathname);
   const url = request.nextUrl.clone();
   url.pathname = `${RAW_PREFIX}/${slug}`;
 

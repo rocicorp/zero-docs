@@ -333,10 +333,13 @@ You can roll out updates in the following order:
 
 ### Client/Server Version Compatibility
 
-Servers are compatible with any client of same major version, and with clients one major version back. So for example:
+Servers are compatible with any client of same major version, and with clients one major version back. So for example, server `2.2.0` is compatible with:
 
-- Server `2.*.*` is compatible with client `2.*.*`
-- Server `2.*.*` is compatible with client `1.*.*`
+- client `2.3.0`
+- client `2.1.0`
+- client `3.0.0`
+
+But **not** compatible with client 0.26.0.
 
 To upgrade Zero to a new major version, first deploy the new zero-cache, then the new frontend.
 

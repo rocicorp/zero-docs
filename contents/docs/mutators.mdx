@@ -665,7 +665,7 @@ const result = await handleMutateRequest(
 )
 ```
 
-`handleMutateRequest` catches such errors and turns them into a structured response that gets sent back to the client. You can [recover the errors](#waiting-for-mutator-result) and show UI if you want.
+`handleMutateRequest` catches such errors and turns them into a structured response that gets sent back to the client. You can [recover the errors](#waiting-for-results) and show UI if you want.
 
 It is also of course possible for the entire push endpoint to return an HTTP error, or to not reply at all:
 

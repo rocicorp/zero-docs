@@ -365,12 +365,9 @@ ZERO_APP_ID=zero_dev
 ```
 
 Without this, the local instance will call `pg_terminate_backend` to steal the
-shared replication slot, crashing the deployed instance. This includes monorepo
-dev scripts (e.g. `turbo dev`) that start zero-cache as a workspace package —
-if `ZERO_UPSTREAM_DB` points at a shared database, local zero-cache will evict
-the deployed one. When the deployed instance is then restarted or redeployed, it
-must perform a full re-sync of all replicated tables from Postgres, incurring
-unnecessary egress costs.
+shared replication slot, crashing the deployed instance. When the deployed
+instance is then restarted or redeployed, it must perform a full re-sync of all
+replicated tables from Postgres, incurring unnecessary egress costs.
 
 Leave `ZERO_APP_ID` unset in production (defaults to `zero`). The two
 environments then hold independent replication slots and can run simultaneously —

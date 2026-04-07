@@ -55,10 +55,7 @@ default: `zero`
   deployed instance, you **must** set a different `ZERO_APP_ID` locally (e.g.
   `ZERO_APP_ID=zero_dev`). Two instances sharing the same App ID fight over the
   exclusive Postgres replication slot — the newer instance calls
-  `pg_terminate_backend` to steal the slot, crashing the other. This applies to
-  any monorepo dev script (e.g. `turbo dev`) that starts zero-cache as part of
-  the workspace: if `ZERO_UPSTREAM_DB` points at a shared database, local
-  zero-cache will evict the deployed instance.
+  `pg_terminate_backend` to steal the slot, crashing the other.
 
   With distinct App IDs, local and production use separate replication slots
   (`zero_dev_0_...` vs `zero_0_...`) and can run simultaneously against the

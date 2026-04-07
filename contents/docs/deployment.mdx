@@ -351,3 +351,26 @@ To upgrade Zero to a new major version, first deploy the new zero-cache, then th
 ### Configuration
 
 The zero-cache image is configured via environment variables. See [zero-cache Config](/docs/zero-cache-config) for available options.
+
+## Local Development Against a Shared Database
+
+If you run `zero-cache` locally pointing at the same upstream Postgres as a
+deployed instance (e.g. to test against a staging or production database), you
+**must** set a distinct [`ZERO_APP_ID`](/docs/zero-cache-config#app-id) in
+your local environment:
+
+```bash
+# local .env only
+ZERO_APP_ID=zero_dev
+```
+
+Without this, the local instance will call `pg_terminate_backend` to steal the
+shared replication slot, crashing the deployed instance. This includes monorepo
+dev scripts (e.g. `turbo dev`) that start zero-cache as a workspace package —
+if `ZERO_UPSTREAM_DB` points at a shared database, local zero-cache will evict
+the deployed one. Every eviction also triggers a full re-sync of all replicated
+tables from Postgres.
+
+Leave `ZERO_APP_ID` unset in production (defaults to `zero`). The two
+environments then hold independent replication slots and can run simultaneously —
+no separate dev database needed.

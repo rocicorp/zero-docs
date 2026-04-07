@@ -46,6 +46,25 @@ flag: `--app-id`<br/>
 env: `ZERO_APP_ID`<br/>
 default: `zero`
 
+<Note
+  type="warning"
+  heading="Avoid replication slot conflicts when running zero-cache locally"
+  slug="app-id-local-dev"
+>
+  If you run `zero-cache` locally against the same Postgres database as a
+  deployed instance, you **must** set a different `ZERO_APP_ID` locally (e.g.
+  `ZERO_APP_ID=zero_dev`). Two instances sharing the same App ID fight over the
+  exclusive Postgres replication slot — the newer instance calls
+  `pg_terminate_backend` to steal the slot, crashing the other. This applies to
+  any monorepo dev script (e.g. `turbo dev`) that starts zero-cache as part of
+  the workspace: if `ZERO_UPSTREAM_DB` points at a shared database, local
+  zero-cache will evict the deployed instance.
+
+  With distinct App IDs, local and production use separate replication slots
+  (`zero_dev_0_...` vs `zero_0_...`) and can run simultaneously against the
+  same Postgres without conflict. You do not need a separate dev database.
+</Note>
+
 ### App Publications
 
 Postgres PUBLICATIONs that define the tables and columns to replicate. Publication names may not begin with an underscore, as zero reserves that prefix for internal use.

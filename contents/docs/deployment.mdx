@@ -297,38 +297,23 @@ If you are seeing a lot of Rehome errors, you may need to enable sticky sessions
 
 ## Rolling Updates
 
-You can roll out updates in the following order:
+Zero supports zero-downtime updates by rolling out changes in the following order:
 
-1. Run additive database migrations (the expand/migrate part of the [expand/migrate/contract pattern](/docs/schema#schema-change-process)) and wait for replication to catch up.
-2. Upgrade replication-manager.
-3. Upgrade view-syncers (if they come up before the replication-manager, they'll sit in retry loops until the manager is updated).
+1. Upgrade replication-manager and wait for it to start up.
+2. Upgrade view-syncers (if they come up before the replication-manager, they'll sit in retry loops until the manager is updated).
+3. Update the API servers (your mutate and query endpoints).
+4. Update client(s).
+5. After most clients have refreshed, run contract migrations to drop or rename obsolete columns/tables.
 
 <Note
-  emoji="🤝"
   type="note"
-  heading="The replication-manager has a different upgrade pattern"
-  slug="replication-manager-upgrade"
+  emoji="💡"
+  heading="Separate Zero changes from schema changes"
+  slug="separate-zero-and-schema-changes"
 >
-  The replication-manager requires a full handoff, since it
-  is the single owner of the changelog DB state. The
-  view-syncers are simply drained and reconnected, since
-  they are designed to be disposable.
-</Note>
+Rolling out Zero version changes and [schema changes](/docs/schema#schema-changes) together is complicated because both require specific ordering, and the ordering depends on the type of schema change.
 
-4. Update the API servers (your mutate and query endpoints).
-5. Update client(s).
-6. After most clients have refreshed, run contract migrations to drop or rename obsolete columns/tables.
-
-<Note
-  type="warning"
-  heading="Contract changes need updated clients"
-  slug="contract-migrations"
->
-  Contract migrations are destructive (dropping or renaming
-  columns/tables). Make sure the API and clients are already
-  updated and have had time to refresh before you remove
-  columns. For renames, add the new column, backfill, deploy
-  the app to use it, then drop the old column later.
+For this reason, we recommend separating the two types of changes into different PRs and deployments.
 </Note>
 
 ### Client/Server Version Compatibility

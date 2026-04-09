@@ -360,10 +360,14 @@ Zero applications have three components that interact with the database schema: 
 During development, you can make changes to all three components in any order:
 
 * Change the Postgres schema
-* Update the API server to use the new schema (including schema.ts)
-* Update client code (including schema.ts)
+* Update the API server to use the new schema
+* Update client code to use the new schema
 
-Clients will disconnect if the client schema is incompatible with the server. The [`onUpdateNeeded` event fires](#handling-old-clients), and users get the new code. For local dev or staging, this is fine and convenient.
+If the Zero client ever detects that its schema is incompatible with the server, it disconnecst and fires the [`onUpdateNeeded` event fires](#handling-old-clients) event. By default this reloads the app. This repeats (with backoff) until eventually the client gets a compatible schema.
+
+If the API server ever detects that it has an incompatible schema, it will similarly fail with an error. The app will go into an [`error`](connection#error) state. You can reload the app when you're ready.
+
+For local dev or staging, this is all fine and convenient.
 
 ### Production
 

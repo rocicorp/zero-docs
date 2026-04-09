@@ -357,13 +357,11 @@ Zero applications have three components that interact with the database schema: 
 
 ### Development
 
-During development, you can make changes to all three components at once:
+During development, you can make changes to all three components in any order:
 
-1. Change the Postgres schema
-2. Update schema.ts
-3. Update the API server to use the new schema
-4. Update your app code
-5. Deploy everything
+* Change the Postgres schema
+* Update the API server to use the new schema (including schema.ts)
+* Update client code (including schema.ts)
 
 Clients will disconnect if the client schema is incompatible with the server. The [`onUpdateNeeded` event fires](#handling-old-clients), and users get the new code. For local dev or staging, this is fine and convenient.
 

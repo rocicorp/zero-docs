@@ -363,11 +363,7 @@ During development, you can make changes to all three components in any order:
 * Update the API server to use the new schema
 * Update client code to use the new schema
 
-If the Zero client ever detects that its schema is incompatible with the server, it disconnecst and fires the [`onUpdateNeeded` event fires](#handling-old-clients) event. By default this reloads the app. This repeats (with backoff) until eventually the client gets a compatible schema.
-
-If the API server ever detects that it has an incompatible schema, it will similarly fail with an error. The app will go into an [`error`](connection#error) state. You can reload the app when you're ready.
-
-For local dev or staging, this is all fine and convenient.
+If the Zero client ever detects that its schema is incompatible with the server, it disconnects and fires the [`onUpdateNeeded` event](#handling-old-clients). If the API server ever detects that it has an incompatible schema, it will fail with an error. Simply reloading the app fixes both issues.
 
 ### Production
 
@@ -376,7 +372,7 @@ Zero also supports downtime-free schema changes for use in production. To achiev
 - **Expand** (adding things): Deploy providers before consumers. DB → API → Client.
 - **Contract** (removing things): Deploy consumers before providers. Client → API → DB.
 
-<Note type="warning" heading="Test on staging first">
+<Note type="note" heading="Test on staging first" slug="test-on-staging">
 For production apps, we strongly recommend testing schema changes on a staging environment that has a production-like dataset before deploying to production.
 </Note>
 
@@ -391,11 +387,15 @@ When you're adding a column, table, or new mutator/query:
 2. Deploy the API server.
 3. Deploy the client.
 
+<Note type="warning" heading="Custom publications + Supabase" slug="supabase-warning">
+If you use a [custom publication](postgres-support#limiting-replication) with Supabase, you need to [manually notify `zero-cache`](connecting-to-postgres#publication-changes) of changes to your publication.
+</Note>
+
 For full-stack frameworks where the API and client deploy together, steps 2 and 3 are combined.
 
 If your change doesn't affect the Postgres schema (for example, just adding a mutator that uses existing columns), skip step 1. If your change doesn't affect the API server, skip step 2.
 
-<Note type="warning" heading="Incorrect deployment order will cause downtime">
+<Note type="warning" emoji="👨‍🏫" slug="incorrect-deployment-order" heading="Incorrect deployment order will cause downtime">
 If you deploy the API server before the schema change has replicated, mutators and/or queries will fail because they will refer to non-existent columns.
 
 If you deploy the client before the API change, the client will call mutators/queries that don't exist yet.

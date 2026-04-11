@@ -31,6 +31,78 @@ Here are instructions to setup [Grafana Cloud](https://grafana.com/oss/grafana/)
 8. Start `zero-cache`
 9. Look for logs under "Drilldown" > "Logs" in left sidebar
 
+## Distributed Tracing
+
+You can enable end-to-end trace correlation from your frontend through zero-cache to your API server. This allows you to see the full request flow in your tracing UI.
+
+To enable this, provide a `getTraceparent` callback when creating your Zero client:
+
+<CodeGroup
+  labels={[
+    {text: 'React', sync: {client: 'react'}},
+    {text: 'SolidJS', sync: {client: 'solidjs'}},
+    {text: 'TypeScript', sync: {client: 'typescript'}},
+  ]}
+>
+
+```tsx
+import {ZeroProvider} from '@rocicorp/zero/react'
+import {propagation, context} from '@opentelemetry/api'
+
+function getTraceparent() {
+  const carrier: Record<string, string> = {}
+  propagation.inject(context.active(), carrier)
+  return carrier.traceparent
+}
+
+return (
+  <ZeroProvider
+    /* ... other options ... */
+    getTraceparent={getTraceparent}
+  >
+    <App />
+  </ZeroProvider>
+)
+```
+
+```tsx
+import {ZeroProvider} from '@rocicorp/zero/solid'
+import {propagation, context} from '@opentelemetry/api'
+
+function getTraceparent() {
+  const carrier: Record<string, string> = {}
+  propagation.inject(context.active(), carrier)
+  return carrier.traceparent
+}
+
+return (
+  <ZeroProvider
+    /* ... other options ... */
+    getTraceparent={getTraceparent}
+  >
+    <App />
+  </ZeroProvider>
+)
+```
+
+```ts
+import {Zero} from '@rocicorp/zero'
+import {propagation, context} from '@opentelemetry/api'
+
+const zero = new Zero({
+  // ... other options
+  getTraceparent: () => {
+    const carrier: Record<string, string> = {}
+    propagation.inject(context.active(), carrier)
+    return carrier.traceparent
+  },
+})
+```
+
+</CodeGroup>
+
+This callback is called before sending WebSocket messages that trigger API server calls (`push`, `changeDesiredQueries`, `initConnection`). The returned [W3C `traceparent`](https://www.w3.org/TR/trace-context/#traceparent-header) header is forwarded through zero-cache to your API server, where it can be used to continue the trace.
+
 ## Metrics Reference
 
 <style>{`
@@ -82,6 +154,11 @@ Here are instructions to setup [Grafana Cloud](https://grafana.com/oss/grafana/)
 |--------|------|------|-------------|
 | `max-protocol-version` | Gauge | | Highest sync protocol version seen from connecting clients |
 | `active-clients` | UpDownCounter | | Number of currently connected sync clients |
+| `active-client-groups` | Gauge | | Number of active ViewSyncerService instances in a syncer worker |
+| `queries` | Gauge | | Active IVM pipelines across all client groups in a syncer worker |
+| `rows` | Gauge | | CVR-tracked rows across all client groups in a syncer worker |
+| `lock-wait-time` | Histogram | s | Time spent waiting to acquire the ViewSyncerService lock per operation |
+| `pipeline-resets` | Counter | | Count of pipeline resets. Has a `reason` attribute: `advancement-timeout`, `scalar-subquery`, `schema-change`, `truncation`, `permissions-change` |
 | `hydration` | Counter | | Number of query hydrations |
 | `hydration-time` | Histogram | s | Time to hydrate a query |
 | `advance-time` | Histogram | s | Time to advance all queries for a client group after applying a transaction |

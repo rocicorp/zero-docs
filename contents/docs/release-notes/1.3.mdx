@@ -1,0 +1,31 @@
+---
+title: Zero 1.3
+description: Faster Initial Sync and Other Perf Improvements
+---
+
+## Installation
+
+```bash
+npm install @rocicorp/zero@1.3
+```
+
+## Features
+
+- [**Distributed Tracing:**](/docs/debug/otel#distributed-tracing) Clients can now pass OpenTelemetry trace context to zero-cache via a `getTraceparent` callback, enabling end-to-end trace correlation from your frontend through zero-cache to your API server.
+- [**Sync Metrics:**](/docs/debug/otel#zerosync) Added five new OTel metrics for sync worker visibility: `zero.sync.active-client-groups`, `zero.sync.queries`, `zero.sync.rows`, `zero.sync.lock-wait-time`, and `zero.sync.pipeline-resets`.
+
+## Performance
+
+- [2x faster initial sync by switching to binary COPY protocol](https://github.com/rocicorp/mono/pull/5704)
+- [20-30% faster updates by optimizing `compareValues`](https://github.com/rocicorp/mono/pull/5754) and [`makeBoundComparator`](https://github.com/rocicorp/mono/pull/5791)
+
+## Fixes
+
+- [Auth token and cookie not sent for cleanup pushes](https://github.com/rocicorp/mono/pull/5795)
+- [Hang during initial sync when no upstream changes occurred after backfill](https://github.com/rocicorp/mono/pull/5796)
+- [Publication validation not detecting `UPDATE` privilege changes](https://github.com/rocicorp/mono/pull/5788)
+- [Spurious error logs from background Postgres connection warmup](https://github.com/rocicorp/mono/pull/5756)
+
+## Breaking Changes
+
+None.

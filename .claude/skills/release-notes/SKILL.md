@@ -64,6 +64,12 @@ Produce a release note draft that is intentionally over-inclusive so a human can
 - Fix bullets must be one line each and link to PRs.
 - If several PRs comprise one logical fix, include one bullet with artful multi-link phrasing.
 - If no breaking changes, write `None.`
+- **Fix descriptions must be user-facing**, not implementation details:
+  - Describe the problem, not "Fix [problem]" - the section heading already says "Fixes"
+  - Good: "Hang during initial sync when no upstream changes occurred after backfill"
+  - Bad: "Ensure backfill-completed tx version is >= the backfill watermark"
+  - If there's an error message, include it: "Error 'could not frob confabulator' when..."
+  - Omit purely internal fixes that users would never notice
 - Thank external contributors (non-Rocicorp) at the end of their bullet:
   - Format: `(thanks [@username](https://github.com/username)!)`
   - Check commit author emails - rocicorp employees use `@roci.dev` emails

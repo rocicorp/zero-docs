@@ -400,6 +400,16 @@ An optional secret used to authorize zero-cache to call the API server handling 
 flag: `--mutate-api-key`<br/>
 env: `ZERO_MUTATE_API_KEY`<br/>
 
+### Mutate Allowed Client Headers
+
+Comma-separated list of custom request headers that zero-cache is allowed to forward to your mutate endpoint. Header names are matched case-insensitively.
+
+By default, no client-provided custom headers are forwarded.
+
+flag: `--mutate-allowed-client-headers`<br/>
+env: `ZERO_MUTATE_ALLOWED_CLIENT_HEADERS`<br/>
+default: `none`
+
 ### Mutate Forward Cookies
 
 If true, zero-cache will forward cookies from the request to zero-cache to your mutate endpoint. This is useful for passing authentication cookies to the API server. If false, cookies are not forwarded.
@@ -471,6 +481,16 @@ An optional secret used to authorize zero-cache to call the API server handling 
 
 flag: `--query-api-key`<br/>
 env: `ZERO_QUERY_API_KEY`<br/>
+
+### Query Allowed Client Headers
+
+Comma-separated list of custom request headers that zero-cache is allowed to forward to your query endpoint. Header names are matched case-insensitively.
+
+By default, no client-provided custom headers are forwarded.
+
+flag: `--query-allowed-client-headers`<br/>
+env: `ZERO_QUERY_ALLOWED_CLIENT_HEADERS`<br/>
+default: `none`
 
 ### Query Forward Cookies
 

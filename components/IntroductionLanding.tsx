@@ -125,7 +125,9 @@ export function IntroductionLanding({
   return (
     <div className="intro-landing-page">
       <CopyButtonListener />
-      <header className={`landing-header ${mobileMenuOpen ? 'mobile-menu-open' : ''}`}>
+      <header
+        className={`landing-header ${mobileMenuOpen ? 'mobile-menu-open' : ''}`}
+      >
         <div className="landing-header-inner">
           <div className="landing-logo" onClick={scrollToTop}>
             <img src="/images/logo.svg" alt="Zero Logo" />
@@ -157,9 +159,15 @@ export function IntroductionLanding({
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label="Toggle menu"
           >
-            <span className={`hamburger-line ${mobileMenuOpen ? 'open' : ''}`} />
-            <span className={`hamburger-line ${mobileMenuOpen ? 'open' : ''}`} />
-            <span className={`hamburger-line ${mobileMenuOpen ? 'open' : ''}`} />
+            <span
+              className={`hamburger-line ${mobileMenuOpen ? 'open' : ''}`}
+            />
+            <span
+              className={`hamburger-line ${mobileMenuOpen ? 'open' : ''}`}
+            />
+            <span
+              className={`hamburger-line ${mobileMenuOpen ? 'open' : ''}`}
+            />
           </button>
         </div>
         {mobileMenuOpen && (
@@ -210,25 +218,11 @@ export function IntroductionLanding({
       )}
       <main className="intro-main" ref={mainRef}>
         <section className="section section-hero">
-          <span className="hero-byline">
-            <span className="hero-byline__icon" aria-hidden="true">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-                width="20"
-                height="20"
-              >
-                <path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z" />
-              </svg>
-            </span>
-            Build absurdly <em>fast</em> web applications with Zero
-          </span>
           <h1 className="hero-title">
             <span className="hero-title__text">
-              <em>Instant UX</em>
+              <em>Absurdly Fast</em>
               <br />
-              by Default
+              Web Apps
             </span>
           </h1>
         </section>
@@ -298,7 +292,7 @@ export function IntroductionLanding({
           </div>
           <p className="video-caption">
             <a href="https://gigabugs.rocicorp.dev/">Gigabugs</a> – Our 1.2
-            million row bug tracker.
+            million row issue tracker.
           </p>
         </section>
 

@@ -617,7 +617,7 @@ html.dark {
   align-items: center;
   justify-content: flex-start;
   width: 100%;
-  padding-top: calc(var(--header-height) + 3rem);
+  padding-top: calc(var(--header-height) + 2.5rem);
 }
 
 .intro-landing-page .section {
@@ -632,7 +632,7 @@ html.dark {
   position: relative;
   overflow: visible;
   text-align: center;
-  padding-top: 1.5rem;
+  padding-top: 0;
 }
 
 .intro-landing-page .section:first-child {
@@ -658,7 +658,7 @@ html.dark {
   display: inline;
   font-weight: 900;
   line-height: 1.1;
-  font-size: clamp(3.25rem, 8vw + 0.5rem, 6rem);
+  font-size: clamp(2.5rem, 8vw + 0.5rem, 6rem);
   background: linear-gradient(
     175deg,
     hsl(var(--foreground)) 0%,

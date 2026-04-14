@@ -35,6 +35,16 @@ export function IntroductionLanding({
   const [isVideoReady, setIsVideoReady] = useState(false);
   const mainRef = useRef<HTMLElement>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 50);
+    };
+    handleScroll();
+    window.addEventListener('scroll', handleScroll, {passive: true});
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   useEffect(() => {
     // Handle escape key for demo modal
@@ -129,7 +139,7 @@ export function IntroductionLanding({
         className={`landing-header ${mobileMenuOpen ? 'mobile-menu-open' : ''}`}
       >
         <div className="landing-header-inner">
-          <div className="landing-logo" onClick={scrollToTop}>
+          <div className={`landing-logo ${isScrolled ? 'scrolled' : ''}`} onClick={scrollToTop}>
             <img src="/images/logo.svg" alt="Zero Logo" />
             <img
               src="/images/wordmark.svg"

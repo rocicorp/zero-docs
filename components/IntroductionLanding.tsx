@@ -34,6 +34,7 @@ export function IntroductionLanding({
   const [isPlaying, setIsPlaying] = useState(false);
   const [isVideoReady, setIsVideoReady] = useState(false);
   const mainRef = useRef<HTMLElement>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     // Handle escape key for demo modal
@@ -124,7 +125,7 @@ export function IntroductionLanding({
   return (
     <div className="intro-landing-page">
       <CopyButtonListener />
-      <header className="landing-header">
+      <header className={`landing-header ${mobileMenuOpen ? 'mobile-menu-open' : ''}`}>
         <div className="landing-header-inner">
           <div className="landing-logo" onClick={scrollToTop}>
             <img src="/images/logo.svg" alt="Zero Logo" />
@@ -151,8 +152,62 @@ export function IntroductionLanding({
               Start
             </a>
           </nav>
+          <button
+            className="landing-hamburger"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label="Toggle menu"
+          >
+            <span className={`hamburger-line ${mobileMenuOpen ? 'open' : ''}`} />
+            <span className={`hamburger-line ${mobileMenuOpen ? 'open' : ''}`} />
+            <span className={`hamburger-line ${mobileMenuOpen ? 'open' : ''}`} />
+          </button>
         </div>
+        {mobileMenuOpen && (
+          <nav className="landing-mobile-menu">
+            <a
+              href="#how-it-works"
+              className="landing-mobile-link"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              How It Works
+            </a>
+            <a
+              href="#features"
+              className="landing-mobile-link"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Features
+            </a>
+            <a
+              href="#testimonials"
+              className="landing-mobile-link"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              From Our Users
+            </a>
+            <a
+              href="#pricing"
+              className="landing-mobile-link"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Pricing
+            </a>
+            <a
+              href="#get-started"
+              className="landing-mobile-link"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Get Started
+            </a>
+          </nav>
+        )}
       </header>
+      {mobileMenuOpen && (
+        <div
+          className="landing-mobile-backdrop"
+          onClick={() => setMobileMenuOpen(false)}
+        />
+      )}
       <main className="intro-main" ref={mainRef}>
         <section className="section section-hero">
           <span className="hero-byline">
@@ -304,7 +359,7 @@ export function IntroductionLanding({
         <section className="section section-how-it-works" id="how-it-works">
           <h2 className="subheading">
             <a href="#how-it-works" className="heading-link">
-              How it Works
+              How It Works
             </a>
           </h2>
 

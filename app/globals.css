@@ -2518,6 +2518,63 @@ html:not(.dark) .intro-landing-page .how-it-works-svg {
   color: #1e1e1e;
 }
 
+/* Hamburger menu - hidden on desktop */
+.landing-hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 40px;
+  height: 40px;
+  padding: 8px;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.hamburger-line {
+  display: block;
+  width: 100%;
+  height: 2px;
+  background: hsl(var(--foreground));
+  border-radius: 1px;
+}
+
+.hamburger-line.open:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+
+.hamburger-line.open:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger-line.open:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
+/* Mobile menu - hidden on desktop */
+.landing-mobile-menu {
+  display: none;
+}
+
+.landing-mobile-link {
+  display: block;
+  padding: 1rem 1.5rem;
+  color: hsl(var(--foreground));
+  text-decoration: none;
+  font-size: 1.125rem;
+  font-weight: 500;
+  transition: opacity 0.2s;
+}
+
+.landing-mobile-link:hover {
+  opacity: 0.7;
+}
+
+.landing-mobile-backdrop {
+  display: none;
+}
+
 @media (max-width: 768px) {
   .intro-landing-page {
     --header-height: 96px;
@@ -2529,6 +2586,7 @@ html:not(.dark) .intro-landing-page .how-it-works-svg {
 
   .landing-header {
     padding: 1.5rem 0;
+    flex-direction: column;
   }
 
   .landing-logo img:not(.landing-wordmark) {
@@ -2540,6 +2598,50 @@ html:not(.dark) .intro-landing-page .how-it-works-svg {
     left: calc(40px + 0.5rem);
     width: auto;
     height: 20px;
+  }
+
+  /* Hide desktop nav, show hamburger */
+  .landing-nav {
+    display: none;
+  }
+
+  .landing-hamburger {
+    display: flex;
+  }
+
+  /* Mobile menu dropdown */
+  .landing-mobile-menu {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    padding: 0.5rem clamp(1.5rem, 4vw, 2rem);
+  }
+
+  .landing-mobile-link {
+    padding: 1rem 0;
+  }
+
+  .landing-header-inner {
+    padding: 0;
+  }
+
+  .landing-mobile-backdrop {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: hsl(var(--background));
+    z-index: 99;
+  }
+
+  .landing-header.mobile-menu-open .landing-logo {
+    display: none;
+  }
+
+  .landing-header.mobile-menu-open .landing-hamburger {
+    margin-left: auto;
   }
 }
 

@@ -2443,13 +2443,9 @@ html:not(.dark) .intro-landing-page .how-it-works-svg {
 
 .landing-footer-underline {
   text-decoration: underline;
-  text-decoration-color: transparent;
+  text-decoration-color: hsl(var(--foreground));
   text-underline-offset: 2px;
   transition: text-decoration-color 0.2s ease;
-}
-
-.landing-footer-link:hover .landing-footer-underline {
-  text-decoration-color: hsl(var(--foreground));
 }
 
 @keyframes logo-spin {

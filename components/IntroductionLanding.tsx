@@ -171,7 +171,9 @@ export function IntroductionLanding({
           </span>
           <h1 className="hero-title">
             <span className="hero-title__text">
-              <em>Instant</em> Queries by Default
+              <em>Instant UX</em>
+              <br />
+              by Default
             </span>
           </h1>
         </section>
@@ -247,7 +249,7 @@ export function IntroductionLanding({
 
         <section className="section section-intro">
           <p>
-            Sync engines enable instant UI by downloading data to the client
+            Sync engines enable instant UX by downloading data to the client
             ahead of time. Reads and writes happen locally, and changes are
             synced in the background.
           </p>

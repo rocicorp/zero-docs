@@ -11,13 +11,13 @@ export const metadata: Metadata = {
   openGraph: {
     title,
     description,
-    images: `/api/og?title=${encodeURIComponent('Instant Queries\nBy Default')}&logo=zero`,
+    images: `/api/og?title=${encodeURIComponent('Instant UX\nBy Default')}&logo=zero`,
   },
   twitter: {
     card: 'summary_large_image',
     title,
     description,
-    images: `/api/og?title=${encodeURIComponent('Instant Queries\nBy Default')}&logo=zero`,
+    images: `/api/og?title=${encodeURIComponent('Instant UX\nBy Default')}&logo=zero`,
   },
 };
 

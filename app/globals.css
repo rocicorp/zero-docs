@@ -673,7 +673,7 @@ html.dark {
   display: inline;
   font-weight: 900;
   font-style: italic;
-  font-size: inherit;
+  font-size: 105%;
   background: none;
   -webkit-background-clip: initial;
   -webkit-text-fill-color: currentColor;

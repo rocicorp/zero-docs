@@ -135,15 +135,21 @@ export function IntroductionLanding({
             />
           </div>
           <nav className="landing-nav">
-            <a
-              href="https://github.com/rocicorp/mono#zero"
-              className="landing-nav-link"
-            >
-              GitHub
+            <a href="#how-it-works" className="landing-nav-link">
+              How
             </a>
-            <Link href="/docs/quickstart" className="landing-nav-button">
-              Docs
-            </Link>
+            <a href="#features" className="landing-nav-link">
+              Features
+            </a>
+            <a href="#testimonials" className="landing-nav-link">
+              Users
+            </a>
+            <a href="#pricing" className="landing-nav-link">
+              Pricing
+            </a>
+            <a href="#get-started" className="landing-nav-button">
+              Start
+            </a>
           </nav>
         </div>
       </header>

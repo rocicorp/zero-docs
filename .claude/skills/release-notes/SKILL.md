@@ -62,6 +62,8 @@ Produce a release note draft that is intentionally over-inclusive so a human can
 - Do not list chores unless they appear miscategorized and user-relevant.
 - Feature bullets must link to docs; if unknown, use `TODO` links as placeholders.
 - Fix bullets must be one line each and link to PRs.
+- Performance bullets should include quantified impact when available (e.g. `2x faster`, `20-30% faster`, `~6-8% faster`) based on PR benchmark tables/comments.
+- If a perf PR has mixed results, emphasize meaningful wins and avoid dismissive phrasing.
 - If several PRs comprise one logical fix, include one bullet with artful multi-link phrasing.
 - If no breaking changes, write `None.`
 - **Fix descriptions must be user-facing**, not implementation details:

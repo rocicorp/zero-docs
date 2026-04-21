@@ -259,6 +259,7 @@ For now, we don't recommend using Zero with SSR. Use your framework's recommende
     {text: 'TanStack Start', sync: {api: 'tanstack'}},
     {text: 'Next.js', sync: {api: 'nextjs'}},
     {text: 'SolidStart', sync: {api: 'solid'}},
+    {text: 'One', sync: {api: 'one'}},
   ]}
 >
 
@@ -305,6 +306,20 @@ const ZeroProvider = clientOnly(async () => {
     default: mod.ZeroProvider
   }))
 })
+
+export default function Root() {
+  return (
+    <ZeroProvider>
+      <App />
+    </ZeroProvider>
+  )
+}
+```
+
+```tsx
+// One uses Vite's client rendering by default,
+// so ZeroProvider works without special wrappers
+import {ZeroProvider} from '@rocicorp/zero/react'
 
 export default function Root() {
   return (

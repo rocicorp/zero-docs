@@ -139,7 +139,10 @@ export function IntroductionLanding({
         className={`landing-header ${mobileMenuOpen ? 'mobile-menu-open' : ''}`}
       >
         <div className="landing-header-inner">
-          <div className={`landing-logo ${isScrolled ? 'scrolled' : ''}`} onClick={scrollToTop}>
+          <div
+            className={`landing-logo ${isScrolled ? 'scrolled' : ''}`}
+            onClick={scrollToTop}
+          >
             <img src="/images/logo.svg" alt="Zero Logo" />
             <img
               src="/images/wordmark.svg"

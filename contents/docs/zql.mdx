@@ -219,8 +219,13 @@ Where supports the following comparison operators:
 
 TypeScript will restrict you from using operators with types that don’t make sense – you can’t use `>` with `boolean` for example.
 
-<Note type="note" slug="adding-operators" heading="Don't see the operator you need?">
-  [Let us know](https://discord.rocicorp.dev/)! Many are easy to add.
+<Note
+  type="note"
+  slug="adding-operators"
+  heading="Don't see the operator you need?"
+>
+  [Let us know](https://discord.rocicorp.dev/)! Many are
+  easy to add.
 </Note>
 
 ### Equals is the Default Comparison Operator
@@ -453,7 +458,7 @@ To use scalar subqueries, add `{scalar: true}` to your `whereExists` call:
 zql.issue.whereExists(
   'project',
   q => q.where('name', 'zero'),
-  {scalar: true},
+  {scalar: true}
 )
 ```
 

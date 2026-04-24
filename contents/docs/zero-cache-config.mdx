@@ -103,7 +103,7 @@ The threshold was determined empirically with load testing. Higher thresholds ha
 
 This parameter is exported as an emergency knob to reduce the size of the buffer in the event that the server OOMs from back pressure. Resist the urge to increase this proportion, as it is mainly useful for absorbing periodic spikes and does not meaningfully affect steady-state replication throughput; the latter is determined by other factors such as object serialization and PG throughput.
 
-In other words, the back pressure limit does not constrain replication throughput; rather, it protects the system when the upstream throughput exceeds the downstream throughput.  
+In other words, the back pressure limit does not constrain replication throughput; rather, it protects the system when the upstream throughput exceeds the downstream throughput.
 
 flag: `--change-streamer-back-limit-heap-proportion`<br/>
 env: `ZERO_CHANGE_STREAMER_BACK_LIMIT_HEAP_PROPORTION`<br/>
@@ -562,7 +562,7 @@ env: `ZERO_REPLICA_PAGE_CACHE_SIZE_KIB`<br/>
 
 The minimum interval at which replication lag reports are written upstream and reported via the `zero.replication.total_lag` [OpenTelemetry metric](/docs/debug/otel). Because replication lag reports are only issued after the previous one was received, the actual interval between reports may be longer when there is a backlog in the replication stream.
 
-This feature requires write access to upstream Postgres (uses `pg_logical_emit_message()`). For PostgreSQL 17+, lag measurements accurately reflect committed write latency (single-digit milliseconds). For PostgreSQL 16 and earlier, measurements may appear 50-100ms longer due to flush behavior.  A negative or 0 value disables lag reporting.
+This feature requires write access to upstream Postgres (uses `pg_logical_emit_message()`). For PostgreSQL 17+, lag measurements accurately reflect committed write latency (single-digit milliseconds). For PostgreSQL 16 and earlier, measurements may appear 50-100ms longer due to flush behavior. A negative or 0 value disables lag reporting.
 
 Even if otel is not enabled, info and warn-level logs are emitted for large lag values.
 

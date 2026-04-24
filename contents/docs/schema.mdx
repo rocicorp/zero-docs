@@ -359,9 +359,9 @@ Zero applications have three components that interact with the database schema: 
 
 During development, you can make changes to all three components in any order:
 
-* Change the Postgres schema
-* Update the API server to use the new schema
-* Update client code to use the new schema
+- Change the Postgres schema
+- Update the API server to use the new schema
+- Update client code to use the new schema
 
 If the Zero client ever detects that its schema is incompatible with the server, it disconnects and fires the [`onUpdateNeeded` event](#handling-old-clients). If the API server ever detects that it has an incompatible schema, it will fail with an error. Simply reloading the app fixes both issues.
 
@@ -372,8 +372,14 @@ Zero also supports downtime-free schema changes for use in production. To achiev
 - **Expand** (adding things): Deploy providers before consumers. DB → API → Client.
 - **Contract** (removing things): Deploy consumers before providers. Client → API → DB.
 
-<Note type="note" heading="Test on staging first" slug="test-on-staging">
-For production apps, we strongly recommend testing schema changes on a staging environment that has a production-like dataset before deploying to production.
+<Note
+  type="note"
+  heading="Test on staging first"
+  slug="test-on-staging"
+>
+  For production apps, we strongly recommend testing schema
+  changes on a staging environment that has a
+  production-like dataset before deploying to production.
 </Note>
 
 ### Expand Changes
@@ -387,8 +393,16 @@ When you're adding a column, table, or new mutator/query:
 2. Deploy the API server.
 3. Deploy the client.
 
-<Note type="warning" heading="Custom publications + Supabase" slug="supabase-warning">
-If you use a [custom publication](postgres-support#limiting-replication) with Supabase, you need to [manually notify `zero-cache`](connecting-to-postgres#publication-changes) of changes to your publication.
+<Note
+  type="warning"
+  heading="Custom publications + Supabase"
+  slug="supabase-warning"
+>
+  If you use a [custom
+  publication](postgres-support#limiting-replication) with
+  Supabase, you need to [manually notify
+  `zero-cache`](connecting-to-postgres#publication-changes)
+  of changes to your publication.
 </Note>
 
 For full-stack frameworks where the API and client deploy together, steps 2 and 3 are combined.
@@ -401,6 +415,7 @@ If you deploy the API server before the schema change has replicated, mutators a
 If you deploy the client before the API change, the client will call mutators/queries that don't exist yet.
 
 Both these issues will cause Zero to go into an [error](/docs/connection#error) state. The user can manually reload to recover from this as soon as the depended-upon component has been deployed.
+
 </Note>
 
 ### Contract Changes
@@ -428,6 +443,7 @@ new Zero({
 By default `onUpdateNeeded` calls `location.reload()` if available. On the web, this will reload the page and the user will get the new code.
 
 For native apps or web apps that want a smoother experience, provide a custom `onUpdateNeeded` callback.
+
 </Note>
 
 ### Compound Changes
@@ -446,9 +462,11 @@ For these, you run both patterns in sequence:
 Add a `bio` column to the `users` table:
 
 1. **Add column to database**
+
    ```sql
    ALTER TABLE users ADD COLUMN bio TEXT;
    ```
+
    Wait for replication.
 
 2. **Deploy API server**
@@ -489,6 +507,7 @@ Remove the `bio` column from the `users` table:
 Rename `nickname` to `displayName`:
 
 1. **Add new column with trigger**
+
    ```sql
    ALTER TABLE users ADD COLUMN display_name TEXT;
    UPDATE users SET display_name = nickname;
@@ -520,6 +539,7 @@ Rename `nickname` to `displayName`:
      BEFORE INSERT OR UPDATE ON users
      FOR EACH ROW EXECUTE FUNCTION sync_display_name();
    ```
+
    Wait for replication.
 
 2. **Deploy app using new column**
@@ -546,6 +566,7 @@ Change `nickname` from required to optional:
 The safest approach is to treat this like a rename—create a new nullable column:
 
 1. **Add new nullable column with trigger**
+
    ```sql
    ALTER TABLE users ADD COLUMN nickname_v2 TEXT;  -- nullable
    UPDATE users SET nickname_v2 = nickname;
@@ -577,6 +598,7 @@ The safest approach is to treat this like a rename—create a new nullable colum
      BEFORE INSERT OR UPDATE ON users
      FOR EACH ROW EXECUTE FUNCTION sync_nickname();
    ```
+
    Wait for replication.
 
 2. **Deploy app using new column**
@@ -592,15 +614,15 @@ The safest approach is to treat this like a rename—create a new nullable colum
 
 ### Quick Reference
 
-| Change | Deploy Order |
-|--------|--------------|
-| Add column/table | DB → (wait) → API → Client |
-| Remove column/table | Client (maybe wait for app update) → API → DB |
-| Add mutator/query | API → Client |
-| Remove mutator/query | Client → API |
-| Change mutator implementation | API only |
-| Change mutator interface | Add mutator → Client → Remove mutator |
-| Rename column/table | Add new + Migrate → Remove old |
+| Change                        | Deploy Order                                  |
+| ----------------------------- | --------------------------------------------- |
+| Add column/table              | DB → (wait) → API → Client                    |
+| Remove column/table           | Client (maybe wait for app update) → API → DB |
+| Add mutator/query             | API → Client                                  |
+| Remove mutator/query          | Client → API                                  |
+| Change mutator implementation | API only                                      |
+| Change mutator interface      | Add mutator → Client → Remove mutator         |
+| Rename column/table           | Add new + Migrate → Remove old                |
 
 ### Backfill
 

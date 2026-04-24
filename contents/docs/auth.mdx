@@ -157,7 +157,8 @@ For production you'll need to do two things:
 >
   Do not set `SameSite=None` on cookies used for authentication with Zero. Because Zero uses WebSockets, setting `SameSite=None` can expose your application to [Cross-Site WebSocket Hijacking (CSWSH)](https://christian-schneider.net/CrossSiteWebSocketHijacking.html) attacks.
 
-  Use `SameSite=Lax` (the browser default) or `SameSite=Strict` instead.
+Use `SameSite=Lax` (the browser default) or `SameSite=Strict` instead.
+
 </Note>
 
 ### Tokens
@@ -197,7 +198,10 @@ export async function handleMutate(request: Request) {
 
   if (!session) {
     // can be 401 or 403
-    return Response.json({error: 'Unauthorized'}, {status: 401})
+    return Response.json(
+      {error: 'Unauthorized'},
+      {status: 401}
+    )
   }
 
   // handle mutate request ...

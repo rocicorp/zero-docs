@@ -118,14 +118,14 @@ zero.connection.state.subscribe(state => {
 
 Zero [does not support offline writes](#why-zero-doesnt-support-offline-writes). When the client is in the `disconnected`, `error`, or `needs-auth` states, reads from synced data continue to work, but writes are rejected.
 
-| State | Reads | Writes |
-| --- | --- | --- |
-| `connecting` | ✅ | ✅ (queued) |
-| `connected` | ✅ | ✅ |
-| `disconnected` | ✅ | ❌ |
-| `error` | ✅ | ❌ |
-| `needs-auth` | ✅ | ❌ |
-| `closed` | ❌ | ❌ |
+| State          | Reads | Writes      |
+| -------------- | ----- | ----------- |
+| `connecting`   | ✅    | ✅ (queued) |
+| `connected`    | ✅    | ✅          |
+| `disconnected` | ✅    | ❌          |
+| `error`        | ✅    | ❌          |
+| `needs-auth`   | ✅    | ❌          |
+| `closed`       | ❌    | ❌          |
 
 ## Offline UI
 
@@ -165,7 +165,8 @@ This is intended to paper over short connectivity glitches, such as server resta
   While you can increase the `disconnectTimeoutMs` to allow
   for longer periods of offline operation, this has caveats
   and is not recommended. Please see
-  [offline](#why-zero-doesnt-support-offline-writes) for more information.
+  [offline](#why-zero-doesnt-support-offline-writes) for
+  more information.
 </Note>
 
 ### Connected
@@ -235,20 +236,20 @@ Imagine two users are editing an article about cats. One goes offline and does a
 
 This is a trivial data model with a single field, and is already unsolvable. Real-world applications are much worse:
 
-* Foreign keys and other constraints can pass while offline, but break when the user reconnects.
-* Custom business logic and authorization rules can pass while offline, but break when the user reconnects.
-* The application's schema can change while offline, and the user's data may not be processable by the new schema.
+- Foreign keys and other constraints can pass while offline, but break when the user reconnects.
+- Custom business logic and authorization rules can pass while offline, but break when the user reconnects.
+- The application's schema can change while offline, and the user's data may not be processable by the new schema.
 
 Just take your own schema and ask yourself what should really happen if one user takes their device offline for a week and makes arbitrarily complex changes while other users are working online.
 
 ### Tradeoffs
 
-It is of course *possible* to create applications that support offline writes well (Git exists!). But it requires significant tradeoffs. For example, you could:
+It is of course _possible_ to create applications that support offline writes well (Git exists!). But it requires significant tradeoffs. For example, you could:
 
-* Disallow destructive operations (i.e., users can create tasks while offline, but cannot edit or delete them).
-* Support custom UX to allow users to fork and merge conflicts when they occur.
-* Restrict offline writes to a single device.
-* Accept potential user data loss.
+- Disallow destructive operations (i.e., users can create tasks while offline, but cannot edit or delete them).
+- Support custom UX to allow users to fork and merge conflicts when they occur.
+- Restrict offline writes to a single device.
+- Accept potential user data loss.
 
 ### Zero's Position
 

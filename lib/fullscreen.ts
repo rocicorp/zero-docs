@@ -1,5 +1,3 @@
-
-
 const methodsList = [
   // modern browsers
   {
@@ -204,7 +202,10 @@ const getFullscreenMethods = (element: HTMLMediaElement | null) => {
     }
 
     if (element && iosMethods.requestFullscreen in element) {
-      return {methods: iosMethods, element: element as HTMLVideoElement} as const;
+      return {
+        methods: iosMethods,
+        element: element as HTMLVideoElement,
+      } as const;
     }
   }
 

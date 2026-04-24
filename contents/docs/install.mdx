@@ -920,6 +920,10 @@ Use the Zero Postgres adapters to create a `dbProvider` instance:
       sync: {pgClient: 'drizzle'},
     },
     {
+      text: 'Kysely',
+      sync: {pgClient: 'kysely'},
+    },
+    {
       text: 'Prisma',
       sync: {pgClient: 'prisma'},
     },
@@ -950,6 +954,38 @@ export const drizzleClient = drizzle(pool, {
   schema: drizzleSchema
 })
 export const dbProvider = zeroDrizzle(schema, drizzleClient)
+
+// Register the database provider for type safety
+declare module '@rocicorp/zero' {
+  interface DefaultTypes {
+    dbProvider: typeof dbProvider
+  }
+}
+```
+
+```ts
+// src/db-provider.ts
+import {Kysely, PostgresDialect} from 'kysely'
+import {zeroKysely} from '@rocicorp/zero/server/adapters/kysely'
+import {Pool} from 'pg'
+import {schema} from '../../zero/schema.ts'
+
+interface Database {
+  user: {
+    id: string
+    name: string | null
+    status: 'active' | 'inactive'
+  }
+}
+
+const kysely = new Kysely<Database>({
+  dialect: new PostgresDialect({
+    pool: new Pool({
+      connectionString: process.env.ZERO_UPSTREAM_DB!
+    })
+  })
+})
+export const dbProvider = zeroKysely(schema, kysely)
 
 // Register the database provider for type safety
 declare module '@rocicorp/zero' {

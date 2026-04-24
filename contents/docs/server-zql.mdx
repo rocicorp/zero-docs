@@ -21,13 +21,17 @@ This is useful for many reasons:
 ## Creating a Database
 
 To run ZQL on the database, you will create a `ZQLDatabase` instance. Zero ships with
-several built-in factories for popular Postgres bindings libraries.
+several built-in factories for popular Postgres libraries and ORMs.
 
 <CodeGroup
   labels={[
     {
       text: 'Drizzle',
       sync: {pgClient: 'drizzle'},
+    },
+    {
+      text: 'Kysely',
+      sync: {pgClient: 'kysely'},
     },
     {
       text: 'Prisma',
@@ -55,6 +59,38 @@ export const drizzleClient = drizzle(pool, {
   schema: drizzleSchema
 })
 export const dbProvider = zeroDrizzle(schema, drizzleClient)
+
+// Register the database provider for type safety
+declare module '@rocicorp/zero' {
+  interface DefaultTypes {
+    dbProvider: typeof dbProvider
+  }
+}
+```
+
+```ts
+// app/api/mutate/db-provider.ts
+import {Kysely, PostgresDialect} from 'kysely'
+import {zeroKysely} from '@rocicorp/zero/server/adapters/kysely'
+import {Pool} from 'pg'
+import {schema} from '../../zero/schema.ts'
+
+interface Database {
+  user: {
+    id: string
+    name: string | null
+    status: 'active' | 'inactive'
+  }
+}
+
+const kysely = new Kysely<Database>({
+  dialect: new PostgresDialect({
+    pool: new Pool({
+      connectionString: process.env.ZERO_UPSTREAM_DB!
+    })
+  })
+})
+export const dbProvider = zeroKysely(schema, kysely)
 
 // Register the database provider for type safety
 declare module '@rocicorp/zero' {
@@ -141,6 +177,10 @@ Within your mutators, you can access the underlying transaction via `tx.dbTransa
       sync: {pgClient: 'drizzle'},
     },
     {
+      text: 'Kysely',
+      sync: {pgClient: 'kysely'},
+    },
+    {
       text: 'Prisma',
       sync: {pgClient: 'prisma'},
     },
@@ -165,6 +205,23 @@ export const mutators = defineMutators({
         await tx.dbTransaction.wrappedTransaction
           .insert(drizzleSchema.user)
           .values({id, name})
+      }
+    }
+  )
+})
+```
+
+```ts
+// mutators.ts
+export const mutators = defineMutators({
+  createUser: defineMutator(
+    z.object({id: z.string(), name: z.string()}),
+    async ({tx, args: {id, name}}) => {
+      if (tx.location === 'server') {
+        await tx.dbTransaction.wrappedTransaction
+          .insertInto('user')
+          .values({id, name, status: 'active'})
+          .execute()
       }
     }
   )

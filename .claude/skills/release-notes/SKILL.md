@@ -68,8 +68,17 @@ Produce a release note draft that is intentionally over-inclusive so a human can
 - If no breaking changes, write `None.`
 - **Fix descriptions must be user-facing**, not implementation details:
   - Describe the problem, not "Fix [problem]" - the section heading already says "Fixes"
+  - Phrase fixes as the old broken behavior or user-visible problem, not as a new capability
+  - Prefer wording like "X could...", "X were not...", "X failed to...", or "X incorrectly..."
+  - Avoid feature-style wording in fixes such as "X can now...", "Added support for...", or "Expose..."
+  - When a fix has a user-visible error message and the exact text is available in commit messages, PR discussion, tests, issues, or code comments, prefer quoting that error text because users are more likely to recognize it
+  - If you cannot verify the exact error text from source material, do not invent or paraphrase it as a fake quote
   - Good: "Hang during initial sync when no upstream changes occurred after backfill"
+  - Good: "Query and mutator validation errors were not exposing raw schema issues in error `details`"
+  - Good: "Error 'cannot extract elements from a scalar' when nullable array values were passed to custom mutators"
   - Bad: "Ensure backfill-completed tx version is >= the backfill watermark"
+  - Bad: "Query and mutator validation errors can expose raw schema issues in error `details`"
+  - Bad: "Error 'some guessed message' when..." if that string was not verified from source
   - If there's an error message, include it: "Error 'could not frob confabulator' when..."
   - Omit purely internal fixes that users would never notice
 - Thank external contributors (non-Rocicorp) at the end of their bullet:

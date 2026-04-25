@@ -1,24 +1,24 @@
 import rehypeAddCopyButton from '@/lib/rehype-add-copy-button';
-import { rendererRich, transformerTwoslash } from '@shikijs/twoslash';
-import { promises as fs } from 'fs';
-import { compileMDX } from 'next-mdx-remote/rsc';
+import {rendererRich, transformerTwoslash} from '@shikijs/twoslash';
+import {promises as fs} from 'fs';
+import {compileMDX} from 'next-mdx-remote/rsc';
 import path from 'node:path';
 import rehypeAutolinkHeadings from 'rehype-autolink-headings';
 import rehypeCodeTitles from 'rehype-code-titles';
 import rehypeSlug from 'rehype-slug';
 import remarkGfm from 'remark-gfm';
-import { page_routes } from './routes-config';
+import {page_routes} from './routes-config';
 // Custom components for MDX
 import CodeGroup from '@/components/CodeGroup';
 import SyncedCode from '@/components/SyncedCode';
 import Note from '@/components/note';
 import ImageLightbox from '@/components/ui/ImageLightbox';
 import Video from '@/components/ui/Video';
-import { Button } from '@/components/ui/button';
+import {Button} from '@/components/ui/button';
 import GithubSlugger from 'github-slugger';
 import rehypePrettyCode from 'rehype-pretty-code';
-import { getLatestNpmVersions } from './get-latest-npm-versions';
-import { convertMdxToMarkdown } from './mdx-to-markdown';
+import {getLatestNpmVersions} from './get-latest-npm-versions';
+import {convertMdxToMarkdown} from './mdx-to-markdown';
 import highlighter from './themes/highlighter';
 
 const components = {
@@ -39,7 +39,8 @@ export async function parseMdx<Frontmatter>(rawMdx: string) {
     source: rawMdx,
     options: {
       parseFrontmatter: true,
-      blockJS: true,
+      blockJS: false,
+      blockDangerousJS: true,
       mdxOptions: {
         rehypePlugins: [
           rehypeCodeTitles, // Adds titles to code blocks

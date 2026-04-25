@@ -269,7 +269,7 @@ export const Route = createFileRoute('/api/zero/query')({
         const result = await handleQueryRequest(
           (name, args) => {
             const query = mustGetQuery(queries, name)
-            return query.fn({args, ctx: {userId: 'anon'}})
+            return query.fn({args})
           },
           schema,
           request
@@ -293,7 +293,7 @@ export async function POST(req: Request) {
   const result = await handleQueryRequest(
     (name, args) => {
       const query = mustGetQuery(queries, name)
-      return query.fn({args, ctx: {userId: 'anon'}})
+      return query.fn({args})
     },
     schema,
     req
@@ -315,7 +315,7 @@ export async function POST(event: APIEvent) {
   const result = await handleQueryRequest(
     (name, args) => {
       const query = mustGetQuery(queries, name)
-      return query.fn({args, ctx: {userId: 'anon'}})
+      return query.fn({args})
     },
     schema,
     event.request
@@ -336,7 +336,7 @@ app.post('/api/zero/query', async c => {
   const result = await handleQueryRequest(
     (name, args) => {
       const query = mustGetQuery(queries, name)
-      return query.fn({args, ctx: {userId: 'anon'}})
+      return query.fn({args})
     },
     schema,
     c.req.raw
@@ -353,6 +353,13 @@ app.post('/api/zero/query', async c => {
 `mustGetQuery` looks up the query in the registry and throws an error if not found.
 
 The `query.fn` function is your query implementation wrapped in the validator you provided.
+
+<Note emoji="🔐" heading="Add auth if you need it">
+  These examples have only public queries, so they do not
+  pass a context. In authenticated apps, validate auth in
+  the request, derive context from the session, and pass it
+  to the query handler. See [Authentication](/docs/auth).
+</Note>
 
 ### Custom Query URL
 

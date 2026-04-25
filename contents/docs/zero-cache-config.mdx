@@ -66,11 +66,25 @@ CREATE PUBLICATION zero_data FOR TABLES IN SCHEMA public;
 CREATE PUBLICATION zero_data FOR TABLE users, orders;
 ```
 
-Then set the flag to that publication name, e.g.: ` ZERO_APP_PUBLICATIONS=zero_data`. To specify multiple publications, separate them with commas, e.g.: `ZERO_APP_PUBLICATIONS=zero_data1,zero_data2`.
+Then set the flag to that publication name, e.g.: `ZERO_APP_PUBLICATIONS=zero_data`. To specify multiple publications, separate them with commas, e.g.: `ZERO_APP_PUBLICATIONS=zero_data1,zero_data2`.
 
 flag: `--app-publications`<br/>
 env: `ZERO_APP_PUBLICATIONS`<br/>
 default: `_{app-id}_public_0`
+
+### Auth Revalidate Interval Seconds
+
+The interval in seconds between periodic `/query` auth revalidation for validated connections. If unset, periodic auth revalidation is disabled.
+
+flag: `--auth-revalidate-interval-seconds`<br/>
+env: `ZERO_AUTH_REVALIDATE_INTERVAL_SECONDS`<br/>
+
+### Auth Retransform Interval Seconds
+
+The interval in seconds between periodic shared `/query` retransform work for a client group. If unset, periodic shared retransform is disabled.
+
+flag: `--auth-retransform-interval-seconds`<br/>
+env: `ZERO_AUTH_RETRANSFORM_INTERVAL_SECONDS`<br/>
 
 ### Auto Reset
 
@@ -95,7 +109,7 @@ flag: `--change-max-conns`<br/>
 env: `ZERO_CHANGE_MAX_CONNS`<br/>
 default: `5`
 
-### Change Streamer Back Limit Heap Proportion
+### Change Streamer Back Pressure Limit Heap Proportion
 
 The percentage of `--max-old-space-size` to use as a buffer for absorbing replication stream spikes. When the estimated amount of queued data exceeds this threshold, back pressure is applied to the replication stream, delaying downstream sync as a result.
 
@@ -105,9 +119,21 @@ This parameter is exported as an emergency knob to reduce the size of the buffer
 
 In other words, the back pressure limit does not constrain replication throughput; rather, it protects the system when the upstream throughput exceeds the downstream throughput.
 
-flag: `--change-streamer-back-limit-heap-proportion`<br/>
-env: `ZERO_CHANGE_STREAMER_BACK_LIMIT_HEAP_PROPORTION`<br/>
+flag: `--change-streamer-back-pressure-limit-heap-proportion`<br/>
+env: `ZERO_CHANGE_STREAMER_BACK_PRESSURE_LIMIT_HEAP_PROPORTION`<br/>
 default: `0.04`
+
+### Change Streamer Flow Control Consensus Padding Seconds
+
+During periodic flow control checks (every 64kb), this is the amount of time to wait after the majority of subscribers have acked, after which replication continues even if some subscribers have yet to ack. This is not a timeout for the entire send; it starts only after the majority of receivers have acked.
+
+This allows a bounded amount of time for backlogged subscribers to catch up on each flush without forcing all subscribers to wait for the entire backlog to be processed. It is also useful for mitigating the effect of unresponsive subscribers due to severed WebSocket connections until liveness checks disconnect them.
+
+Set this to a negative number to disable early flow control releases.
+
+flag: `--change-streamer-flow-control-consensus-padding-seconds`<br/>
+env: `ZERO_CHANGE_STREAMER_FLOW_CONTROL_CONSENSUS_PADDING_SECONDS`<br/>
+default: `1`
 
 ### Change Streamer Mode
 
@@ -205,6 +231,14 @@ flag: `--enable-query-planner`<br/>
 env: `ZERO_ENABLE_QUERY_PLANNER`<br/>
 default: `true`
 
+### Enable CRUD Mutations
+
+Enables support for legacy CRUD mutations. When this is `false`, view-syncers do not connect to the upstream database for CRUD writes, and push messages with CRUD mutations return an error response.
+
+flag: `--enable-crud-mutations`<br/>
+env: `ZERO_ENABLE_CRUD_MUTATIONS`<br/>
+default: `true`
+
 ### Enable Telemetry
 
 Zero collects anonymous telemetry data to help us understand usage. We collect:
@@ -249,6 +283,13 @@ In multi-node deployments, this is required on the replication-manager so view-s
 flag: `--litestream-backup-url`<br/>
 env: `ZERO_LITESTREAM_BACKUP_URL`<br/>
 
+### Litestream Endpoint
+
+The S3-compatible endpoint URL to use for the litestream backup. This is only required for non-AWS services. The replication-manager and view-syncers must have the same endpoint.
+
+flag: `--litestream-endpoint`<br/>
+env: `ZERO_LITESTREAM_ENDPOINT`<br/>
+
 ### Litestream Checkpoint Threshold MB
 
 The size of the WAL file at which to perform an SQlite checkpoint to apply the writes in the WAL to the main database file. Each checkpoint creates a new WAL segment file that will be backed up by litestream. Smaller thresholds may improve read performance, at the expense of creating more files to download when restoring the replica from the backup.
@@ -272,7 +313,7 @@ default: `./src/services/litestream/config.yml`
 
 ### Litestream Executable
 
-Path to the litestream executable. This option has no effect if litestream-backup-url is unspecified.
+Path to the litestream executable. This must be built from the `rocicorp/litestream` fork. This option has no effect if litestream-backup-url is unspecified.
 
 flag: `--litestream-executable`<br/>
 env: `ZERO_LITESTREAM_EXECUTABLE`<br/>
@@ -447,7 +488,7 @@ env: `ZERO_MUTATE_URL`<br/>
 
 ### Number of Sync Workers
 
-The number of processes to use for view syncing. Leave this unset to use the maximum available parallelism. If set to 0, the server runs without sync workers, which is the configuration for running the replication-manager in multi-node deployments.
+The number of processes to use for view syncing. Leave this unset to use `max(1, availableParallelism() - 1)`, reserving one core for the replicator. If set to `0`, the server runs without sync workers, which is the configuration for running the replication-manager in multi-node deployments.
 
 flag: `--num-sync-workers`<br/>
 env: `ZERO_NUM_SYNC_WORKERS`<br/>
@@ -551,13 +592,6 @@ Performs a VACUUM at server startup if the specified number of hours has elapsed
 flag: `--replica-vacuum-interval-hours`<br/>
 env: `ZERO_REPLICA_VACUUM_INTERVAL_HOURS`<br/>
 
-### Replica Page Cache Size KiB
-
-The SQLite page cache size in kibibytes (KiB) for view-syncer connections. The page cache stores recently accessed database pages in memory to reduce disk I/O. Larger cache sizes improve performance for workloads that fit in cache. If unspecified, SQLite's default (~2 MB) is used. Note that the effective memory use of this setting will be: `2 * cache_size * num_cores`, as each connection to the replica gets its own cache and each core maintains 2 connections.
-
-flag: `--replica-page-cache-size-kib`<br/>
-env: `ZERO_REPLICA_PAGE_CACHE_SIZE_KIB`<br/>
-
 ### Replication Lag Report Interval (ms)
 
 The minimum interval at which replication lag reports are written upstream and reported via the `zero.replication.total_lag` [OpenTelemetry metric](/docs/debug/otel). Because replication lag reports are only issued after the previous one was received, the actual interval between reports may be longer when there is a backlog in the replication stream.
@@ -601,6 +635,16 @@ flag: `--upstream-max-conns`<br/>
 env: `ZERO_UPSTREAM_MAX_CONNS`<br/>
 default: `20`
 
+### Upstream PG Replication Slot Failover
+
+For upstream PostgreSQL 17 and later, create replication slots with the `failover` parameter set to `true` to enable slot synchronization and failover. Additional Postgres-level configuration is required when enabling this option. This option has no effect for PostgreSQL versions before 17.
+
+See the PostgreSQL docs for details: https://www.postgresql.org/docs/current/logicaldecoding-explanation.html#LOGICALDECODING-REPLICATION-SLOTS-SYNCHRONIZATION
+
+flag: `--upstream-pg-replication-slot-failover`<br/>
+env: `ZERO_UPSTREAM_PG_REPLICATION_SLOT_FAILOVER`<br/>
+default: `false`
+
 ### Websocket Compression
 
 Enable WebSocket per-message deflate compression. Compression can reduce bandwidth usage for sync traffic but increases CPU usage on both client and server. Disabled by default. See: https://github.com/websockets/ws#websocket-compression
@@ -618,10 +662,11 @@ env: `ZERO_WEBSOCKET_COMPRESSION_OPTIONS`<br/>
 
 ### Websocket Max Payload Bytes
 
-Maximum size of incoming WebSocket messages in bytes. Messages exceeding this limit are rejected before parsing. Default: 10MB (10485760).
+Maximum size of incoming WebSocket messages in bytes. Messages exceeding this limit are rejected before parsing.
 
 flag: `--websocket-max-payload-bytes`<br/>
 env: `ZERO_WEBSOCKET_MAX_PAYLOAD_BYTES`<br/>
+default: `10485760` (10 MiB)
 
 ### Yield Threshold (ms)
 

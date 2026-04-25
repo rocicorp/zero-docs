@@ -47,7 +47,6 @@ export const ServerRoute = createServerFileRoute(
     await dbProvider.transaction(async tx => {
       await mutator.fn({
         tx,
-        ctx: {userId: '...'},
         args
       })
     })

@@ -5,13 +5,13 @@ title: Authentication
 Setting up auth in Zero apps has a few steps:
 
 1. Setting the `userID` on the client
-2. Sending credentials to the [mutate](/docs/mutators) and [queries](/docs/queries) endpoints
-3. Setting the `Context` type to implement permissions
-4. Logging out if desired
+2. Defining the `Context` type for permissions
+3. Wiring credentials to the [mutate](/docs/mutators) and [queries](/docs/queries) endpoints
+4. Logging out
 
 ## Setting userID
 
-Because multiple users can share the same browser, Zero requires that you provide a `userID` parameter on construction:
+Authenticated Zero clients should provide a `userID` on construction:
 
 <CodeGroup
   labels={[
@@ -67,16 +67,16 @@ const zero = new Zero(opts)
 
 </CodeGroup>
 
-If the user is not logged in, just pass empty string or some other constant value:
+If the user is logged out, omit `userID`, or set to `undefined` / `null`:
 
 ```ts
 const opts: ZeroOptions = {
   // ...
-  userID: 'anon'
+  userID: undefined
 }
 ```
 
-Zero segregates the client-side storage for each user. This allows users to quickly switch between multiple users and accounts without resyncing.
+Zero uses this to segregate the client-side storage for each user. This allows users to quickly switch between multiple users and accounts without resyncing.
 
 <Note
   emoji="🧑‍🏫"
@@ -89,6 +89,8 @@ Zero segregates the client-side storage for each user. This allows users to quic
   that Zero can do about this – users can just open the
   folder where the data is stored and look inside it.
 </Note>
+
+If you do not want Zero to store synced data in IndexedDB on the client, set `kvStore: 'mem'` in your `ZeroOptions`. This uses in-memory storage instead, so data is not persisted on the device and is cleared on full reloads and browser restarts.
 
 If you have more than one set of Zero data per-user (i.e., for different apps in the same domain), you can additionally use the `storageKey` parameter:
 
@@ -107,6 +109,52 @@ If specified, `storageKey` is concatenated along with `userID` and other interna
   caption="Zero's IndexedDB databases are prefixed with 'rep' or 'replicache' because reasons."
 />
 
+## Context
+
+When a user is authenticated, you will want to know who they are in your [queries](/docs/queries) and [mutators](/docs/mutators) to enforce permissions.
+
+To do this, first define a `Context` type that includes the user's ID and any other relevant information, then register that type globally with Zero:
+
+```ts
+export type ZeroContext = {
+  id: string
+}
+
+declare module '@rocicorp/zero' {
+  interface DefaultTypes {
+    context: ZeroContext
+  }
+}
+```
+
+Then pass an instance of this context when instantiating Zero on the client:
+
+```tsx
+const opts: ZeroOptions = {
+  // ...
+  userID: 'user-123',
+  context: {
+    id: 'user-123'
+  }
+}
+```
+
+If your app also supports guest access, allow `Context` to be `undefined` (or `null`) when the request is unauthenticated, and pass `undefined` or `null` for the `userID`.
+
+```ts
+declare module '@rocicorp/zero' {
+  interface DefaultTypes {
+    context: ZeroContext | undefined
+  }
+}
+
+const opts: ZeroOptions = {
+  // ...
+  userID: undefined,
+  context: undefined
+}
+```
+
 ## Sending Credentials
 
 You can send credentials using either cookies or tokens.
@@ -118,12 +166,13 @@ The most common way to authenticate Zero is with cookies.
 To enable it, set the [`ZERO_QUERY_FORWARD_COOKIES`](/docs/zero-cache-config#query-forward-cookies) and [`ZERO_MUTATE_FORWARD_COOKIES`](/docs/zero-cache-config#mutate-forward-cookies) options to `true`:
 
 ```bash
+# ... other env vars
 export ZERO_QUERY_FORWARD_COOKIES="true"
 export ZERO_MUTATE_FORWARD_COOKIES="true"
 # run zero-cache, e.g. `npx zero-cache-dev`
 ```
 
-Zero-cache will then forward all cookies sent to `cacheURL` to your [mutate](/docs/mutators) and [queries](/docs/queries) endpoints:
+Zero-cache will then forward all cookies sent to `cacheURL` to your [mutators](/docs/mutators) and [queries](/docs/queries) endpoints:
 
 ```tsx
 const opts: ZeroOptions = {
@@ -137,6 +186,292 @@ const opts: ZeroOptions = {
 ```
 
 Cookies will show up in the normal HTTP `Cookie` header and you can authenticate these endpoints just like you would any API request.
+
+#### Query Handler
+
+You can now build `ctx` from the validated cookie and pass it to your queries to enforce permissions.
+
+<CodeGroup
+  labels={[
+    {text: 'Tanstack Start', sync: {api: 'tanstack'}},
+    {text: 'Next.js', sync: {api: 'nextjs'}},
+    {text: 'Solid Start', sync: {api: 'solid'}},
+    {text: 'Hono', sync: {api: 'hono'}},
+  ]}
+>
+
+```ts
+// src/routes/api/zero/query.ts
+import {createFileRoute} from '@tanstack/react-router'
+import {handleQueryRequest} from '@rocicorp/zero/server'
+import {mustGetQuery} from '@rocicorp/zero'
+import {queries} from 'queries.ts'
+import {schema} from 'schema.ts'
+
+export const Route = createFileRoute('/api/zero/query')({
+  server: {
+    handlers: {
+      POST: async ({request}) => {
+        const session = await authenticate(
+          request.headers.get('Cookie')
+        )
+
+        const result = await handleQueryRequest(
+          (name, args) => {
+            const query = mustGetQuery(queries, name)
+            return query.fn({
+              args,
+              ctx: session?.user
+            })
+          },
+          schema,
+          request
+        )
+
+        return Response.json(result)
+      }
+    }
+  }
+})
+```
+
+```ts
+// app/api/zero/query/route.ts
+import {handleQueryRequest} from '@rocicorp/zero/server'
+import {mustGetQuery} from '@rocicorp/zero'
+import {queries} from 'queries.ts'
+import {schema} from 'schema.ts'
+
+export async function POST(req: Request) {
+  const session = await authenticate(
+    req.headers.get('Cookie')
+  )
+
+  const result = await handleQueryRequest(
+    (name, args) => {
+      const query = mustGetQuery(queries, name)
+      return query.fn({
+        args,
+        ctx: session?.user
+      })
+    },
+    schema,
+    req
+  )
+
+  return Response.json(result)
+}
+```
+
+```ts
+// src/routes/api/zero/query.ts
+import type {APIEvent} from '@solidjs/start/server'
+import {handleQueryRequest} from '@rocicorp/zero/server'
+import {mustGetQuery} from '@rocicorp/zero'
+import {queries} from 'queries.ts'
+import {schema} from 'schema.ts'
+
+export async function POST(event: APIEvent) {
+  const session = await authenticate(
+    event.request.headers.get('Cookie')
+  )
+
+  const result = await handleQueryRequest(
+    (name, args) => {
+      const query = mustGetQuery(queries, name)
+      return query.fn({
+        args,
+        ctx: session?.user
+      })
+    },
+    schema,
+    event.request
+  )
+
+  return Response.json(result)
+}
+```
+
+```ts
+// api/app.ts
+import {Hono} from 'hono'
+import {handleQueryRequest} from '@rocicorp/zero/server'
+import {mustGetQuery} from '@rocicorp/zero'
+import {queries} from 'queries.ts'
+import {schema} from 'schema.ts'
+
+const app = new Hono()
+
+app.post('/api/zero/query', async c => {
+  const request = c.req.raw
+  const session = await authenticate(
+    request.headers.get('Cookie')
+  )
+
+  const result = await handleQueryRequest(
+    (name, args) => {
+      const query = mustGetQuery(queries, name)
+      return query.fn({
+        args,
+        ctx: session?.user
+      })
+    },
+    schema,
+    request
+  )
+
+  return c.json(result)
+})
+```
+
+</CodeGroup>
+
+#### Mutate Handler
+
+You can now also build `ctx` from the validated cookie and pass it to your mutators to enforce permissions.
+
+<CodeGroup
+  labels={[
+    {text: 'Tanstack Start', sync: {api: 'tanstack'}},
+    {text: 'Next.js', sync: {api: 'nextjs'}},
+    {text: 'Solid Start', sync: {api: 'solid'}},
+    {text: 'Hono', sync: {api: 'hono'}},
+  ]}
+>
+
+```ts
+// src/routes/api/zero/mutate.ts
+import {createFileRoute} from '@tanstack/react-router'
+import {handleMutateRequest} from '@rocicorp/zero/server'
+import {mustGetMutator} from '@rocicorp/zero'
+import {mutators} from 'mutators.ts'
+import {dbProvider} from 'db-provider.ts'
+
+export const Route = createFileRoute('/api/zero/mutate')({
+  server: {
+    handlers: {
+      POST: async ({request}) => {
+        const session = await authenticate(
+          request.headers.get('Cookie')
+        )
+
+        const result = await handleMutateRequest(
+          dbProvider,
+          transact =>
+            transact((tx, name, args) => {
+              const mutator = mustGetMutator(mutators, name)
+              return mutator.fn({
+                args,
+                tx,
+                ctx: session?.user
+              })
+            }),
+          request
+        )
+
+        return Response.json(result)
+      }
+    }
+  }
+})
+```
+
+```ts
+// app/api/zero/mutate/route.ts
+import {handleMutateRequest} from '@rocicorp/zero/server'
+import {mustGetMutator} from '@rocicorp/zero'
+import {mutators} from 'mutators.ts'
+import {dbProvider} from 'db-provider.ts'
+
+export async function POST(req: Request) {
+  const session = await authenticate(
+    req.headers.get('Cookie')
+  )
+
+  const result = await handleMutateRequest(
+    dbProvider,
+    transact =>
+      transact((tx, name, args) => {
+        const mutator = mustGetMutator(mutators, name)
+        return mutator.fn({
+          args,
+          tx,
+          ctx: session?.user
+        })
+      }),
+    req
+  )
+
+  return Response.json(result)
+}
+```
+
+```ts
+// src/routes/api/zero/mutate.ts
+import type {APIEvent} from '@solidjs/start/server'
+import {handleMutateRequest} from '@rocicorp/zero/server'
+import {mustGetMutator} from '@rocicorp/zero'
+import {mutators} from 'mutators.ts'
+import {dbProvider} from 'db-provider.ts'
+
+export async function POST(event: APIEvent) {
+  const session = await authenticate(
+    event.request.headers.get('Cookie')
+  )
+
+  const result = await handleMutateRequest(
+    dbProvider,
+    transact =>
+      transact((tx, name, args) => {
+        const mutator = mustGetMutator(mutators, name)
+        return mutator.fn({
+          args,
+          tx,
+          ctx: session?.user
+        })
+      }),
+    event.request
+  )
+
+  return Response.json(result)
+}
+```
+
+```ts
+// api/app.ts
+import {Hono} from 'hono'
+import {handleMutateRequest} from '@rocicorp/zero/server'
+import {mustGetMutator} from '@rocicorp/zero'
+import {mutators} from 'mutators.ts'
+import {dbProvider} from './db-provider.ts'
+
+const app = new Hono()
+
+app.post('/api/zero/mutate', async c => {
+  const request = c.req.raw
+  const session = await authenticate(
+    request.headers.get('Cookie')
+  )
+
+  const result = await handleMutateRequest(
+    dbProvider,
+    transact =>
+      transact((tx, name, args) => {
+        const mutator = mustGetMutator(mutators, name)
+        return mutator.fn({
+          args,
+          tx,
+          ctx: session?.user
+        })
+      }),
+    request
+  )
+
+  return c.json(result)
+})
+```
+
+</CodeGroup>
 
 #### Deployment
 
@@ -170,45 +505,336 @@ If you have an opaque auth token, such as a JWT or a token from your auth provid
 ```ts
 const opts: ZeroOptions = {
   // ...
+  userID: 'user-123',
   auth: token
 }
 ```
 
-Zero will forward this token to your [mutate](/docs/mutators) and [queries](/docs/queries) endpoints in an `Authorization: Bearer <token>` header, which you can use to authenticate the request as normal:
+If you set `auth`, you must also set `userID` to the authenticated user's ID.
+
+Zero will forward this token to your [mutators](/docs/mutators) and [queries](/docs/queries) endpoints in an `Authorization: Bearer <token>` header.
+Authenticate the request first and derive your context from it when invoking your query and mutator implementations.
+
+#### Query Handler
+
+You can now build `ctx` from the validated token header and pass it to your queries to enforce permissions.
+
+<CodeGroup
+  labels={[
+    {text: 'Tanstack Start', sync: {api: 'tanstack'}},
+    {text: 'Next.js', sync: {api: 'nextjs'}},
+    {text: 'Solid Start', sync: {api: 'solid'}},
+    {text: 'Hono', sync: {api: 'hono'}},
+  ]}
+>
 
 ```ts
-export async function handleMutate(request: Request) {
+// src/routes/api/zero/query.ts
+import {createFileRoute} from '@tanstack/react-router'
+import {handleQueryRequest} from '@rocicorp/zero/server'
+import {mustGetQuery} from '@rocicorp/zero'
+import {queries} from 'queries.ts'
+import {schema} from 'schema.ts'
+
+export const Route = createFileRoute('/api/zero/query')({
+  server: {
+    handlers: {
+      POST: async ({request}) => {
+        const session = await authenticate(
+          request.headers.get('Authorization')
+        )
+
+        const result = await handleQueryRequest(
+          (name, args) => {
+            const query = mustGetQuery(queries, name)
+            return query.fn({
+              args,
+              ctx: session?.user
+            })
+          },
+          schema,
+          request
+        )
+
+        return Response.json(result)
+      }
+    }
+  }
+})
+```
+
+```ts
+// app/api/zero/query/route.ts
+import {handleQueryRequest} from '@rocicorp/zero/server'
+import {mustGetQuery} from '@rocicorp/zero'
+import {queries} from 'queries.ts'
+import {schema} from 'schema.ts'
+
+export async function POST(req: Request) {
+  const session = await authenticate(
+    req.headers.get('Authorization')
+  )
+
+  const result = await handleQueryRequest(
+    (name, args) => {
+      const query = mustGetQuery(queries, name)
+      return query.fn({
+        args,
+        ctx: session?.user
+      })
+    },
+    schema,
+    req
+  )
+
+  return Response.json(result)
+}
+```
+
+```ts
+// src/routes/api/zero/query.ts
+import type {APIEvent} from '@solidjs/start/server'
+import {handleQueryRequest} from '@rocicorp/zero/server'
+import {mustGetQuery} from '@rocicorp/zero'
+import {queries} from 'queries.ts'
+import {schema} from 'schema.ts'
+
+export async function POST(event: APIEvent) {
+  const session = await authenticate(
+    event.request.headers.get('Authorization')
+  )
+
+  const result = await handleQueryRequest(
+    (name, args) => {
+      const query = mustGetQuery(queries, name)
+      return query.fn({
+        args,
+        ctx: session?.user
+      })
+    },
+    schema,
+    event.request
+  )
+
+  return Response.json(result)
+}
+```
+
+```ts
+// api/app.ts
+import {Hono} from 'hono'
+import {handleQueryRequest} from '@rocicorp/zero/server'
+import {mustGetQuery} from '@rocicorp/zero'
+import {queries} from 'queries.ts'
+import {schema} from 'schema.ts'
+
+const app = new Hono()
+
+app.post('/api/zero/query', async c => {
+  const request = c.req.raw
   const session = await authenticate(
     request.headers.get('Authorization')
   )
 
-  // handle mutate request ...
+  const result = await handleQueryRequest(
+    (name, args) => {
+      const query = mustGetQuery(queries, name)
+      return query.fn({
+        args,
+        ctx: session?.user
+      })
+    },
+    schema,
+    request
+  )
+
+  return c.json(result)
+})
+```
+
+</CodeGroup>
+
+#### Mutate Handler
+
+You can now also build `ctx` from the validated token header and pass it to your mutators to enforce permissions.
+
+<CodeGroup
+  labels={[
+    {text: 'Tanstack Start', sync: {api: 'tanstack'}},
+    {text: 'Next.js', sync: {api: 'nextjs'}},
+    {text: 'Solid Start', sync: {api: 'solid'}},
+    {text: 'Hono', sync: {api: 'hono'}},
+  ]}
+>
+
+```ts
+// src/routes/api/zero/mutate.ts
+import {createFileRoute} from '@tanstack/react-router'
+import {handleMutateRequest} from '@rocicorp/zero/server'
+import {mustGetMutator} from '@rocicorp/zero'
+import {mutators} from 'mutators.ts'
+import {dbProvider} from 'db-provider.ts'
+
+export const Route = createFileRoute('/api/zero/mutate')({
+  server: {
+    handlers: {
+      POST: async ({request}) => {
+        const session = await authenticate(
+          request.headers.get('Authorization')
+        )
+
+        const result = await handleMutateRequest(
+          dbProvider,
+          transact =>
+            transact((tx, name, args) => {
+              const mutator = mustGetMutator(mutators, name)
+              return mutator.fn({
+                args,
+                tx,
+                ctx: session?.user
+              })
+            }),
+          request
+        )
+
+        return Response.json(result)
+      }
+    }
+  }
+})
+```
+
+```ts
+// app/api/zero/mutate/route.ts
+import {handleMutateRequest} from '@rocicorp/zero/server'
+import {mustGetMutator} from '@rocicorp/zero'
+import {mutators} from 'mutators.ts'
+import {dbProvider} from 'db-provider.ts'
+
+export async function POST(req: Request) {
+  const session = await authenticate(
+    req.headers.get('Authorization')
+  )
+
+  const result = await handleMutateRequest(
+    dbProvider,
+    transact =>
+      transact((tx, name, args) => {
+        const mutator = mustGetMutator(mutators, name)
+        return mutator.fn({
+          args,
+          tx,
+          ctx: session?.user
+        })
+      }),
+    req
+  )
+
+  return Response.json(result)
 }
 ```
+
+```ts
+// src/routes/api/zero/mutate.ts
+import type {APIEvent} from '@solidjs/start/server'
+import {handleMutateRequest} from '@rocicorp/zero/server'
+import {mustGetMutator} from '@rocicorp/zero'
+import {mutators} from 'mutators.ts'
+import {dbProvider} from 'db-provider.ts'
+
+export async function POST(event: APIEvent) {
+  const session = await authenticate(
+    event.request.headers.get('Authorization')
+  )
+
+  const result = await handleMutateRequest(
+    dbProvider,
+    transact =>
+      transact((tx, name, args) => {
+        const mutator = mustGetMutator(mutators, name)
+        return mutator.fn({
+          args,
+          tx,
+          ctx: session?.user
+        })
+      }),
+    event.request
+  )
+
+  return Response.json(result)
+}
+```
+
+```ts
+// api/app.ts
+import {Hono} from 'hono'
+import {handleMutateRequest} from '@rocicorp/zero/server'
+import {mustGetMutator} from '@rocicorp/zero'
+import {mutators} from 'mutators.ts'
+import {dbProvider} from './db-provider.ts'
+
+const app = new Hono()
+
+app.post('/api/zero/mutate', async c => {
+  const request = c.req.raw
+  const session = await authenticate(
+    request.headers.get('Authorization')
+  )
+
+  const result = await handleMutateRequest(
+    dbProvider,
+    transact =>
+      transact((tx, name, args) => {
+        const mutator = mustGetMutator(mutators, name)
+        return mutator.fn({
+          args,
+          tx,
+          ctx: session?.user
+        })
+      }),
+    request
+  )
+
+  return c.json(result)
+})
+```
+
+</CodeGroup>
+
+## Updating Tokens
+
+If you are using token auth and the user stays signed in as the same user, you can update the token without recreating Zero:
+
+```ts
+const nextToken = await fetchNewToken()
+await zero.connection.connect({auth: nextToken})
+```
+
+When called while connected, Zero refreshes server-side auth context and re-transforms queries without reconnecting. The new token is also reused for later reconnects.
+
+Use this only to refresh credentials for the current user. For logging out or logging in as a different user, recreate `Zero` with the new `userID` and `auth` values instead.
 
 ## Auth Failure and Refresh
 
-To mark a request as unauthorized, return a `401` or `403` status code from your [queries](/docs/queries) or [mutate](/docs/mutators) endpoint.
+To mark a request as unauthorized, return a `401` or `403` status code from your [queries](/docs/queries) or [mutators](/docs/mutators) endpoint.
 
 ```ts
-export async function handleMutate(request: Request) {
-  const session = await authenticate(
-    request.headers.get('Authorization')
+const session = await authenticate(
+  request.headers.get('Authorization')
+)
+
+if (!session) {
+  // can be 401 or 403
+  return Response.json(
+    {error: 'Unauthorized'},
+    {status: 401}
   )
-
-  if (!session) {
-    // can be 401 or 403
-    return Response.json(
-      {error: 'Unauthorized'},
-      {status: 401}
-    )
-  }
-
-  // handle mutate request ...
 }
+
+// handle mutate/query request ...
 ```
 
-This will cause Zero to disconnect from `zero-cache` and the [connection status](/docs/connection) will change to `needs-auth`. You can then re-authenticate the user and call `zero.connection.connect()` to reconnect to `zero-cache`:
+This will cause Zero to disconnect from `zero-cache` and the [connection status](/docs/connection) will change to `needs-auth`. For cookie auth, refresh the cookie and call `zero.connection.connect()`. For token auth, fetch a new token and call `zero.connection.connect({auth: newToken})`.
 
 ```tsx
 function NeedsAuthDialog() {
@@ -233,7 +859,7 @@ function NeedsAuthDialog() {
 }
 ```
 
-Or, if you aren't using cookie auth:
+Or, if you are using token auth:
 
 ```tsx
 function NeedsAuthDialog() {
@@ -241,7 +867,7 @@ function NeedsAuthDialog() {
 
   const refreshAuthToken = async () => {
     const token = await fetchNewToken()
-    // pass a new token to reconnect to zero-cache
+    // pass a new token to use when reconnecting to zero-cache
     zero.connection.connect({auth: token})
   }
 
@@ -258,51 +884,6 @@ function NeedsAuthDialog() {
 }
 ```
 
-## Context
-
-When a user is authenticated, you will want to know who they are in your [queries](/docs/queries) and [mutators](/docs/mutators) to enforce permissions.
-
-To do this, define a `Context` type that includes the user's ID and any other relevant information, then register that type with Zero:
-
-```ts
-export type ZeroContext = {
-  userID: string
-  role: 'admin' | 'user'
-}
-
-declare module '@rocicorp/zero' {
-  interface DefaultTypes {
-    context: ZeroContext
-  }
-}
-```
-
-Then pass an instance of this context when instantiating Zero:
-
-```tsx
-const opts: ZeroOptions = {
-  // ...
-  context: {
-    userID: 'user-123',
-    role: 'admin'
-  }
-}
-```
-
-On the server-side, you will also pass an instance of this context when invoking your [queries](/docs/queries#implementing-the-endpoint) and [mutators](/docs/mutators#implementing-the-endpoint):
-
-```ts
-const query = mustGetQuery(queries, name)
-query.fn({args, ctx})
-
-// or
-
-const mutator = mustGetMutator(mutators, name)
-mutator.fn({tx, args, ctx})
-```
-
-You can then access the context within your [queries](/docs/queries#context) and [mutators](/docs/mutators#context) to implement permissions.
-
 ## Permission Patterns
 
 Zero does not have (or need) a first-class permission system like [RLS](https://supabase.com/docs/guides/database/postgres/row-level-security).
@@ -316,23 +897,23 @@ Here are a collection of common permissions patterns and how to implement them i
 #### Only Owned Rows
 
 ```ts
-// Use the context's `userID` to filter the rows to only the
+// Use the context's user ID to filter the rows to only the
 // ones owned by the user.
-const myPosts = defineQuery(({ctx: {userID}}) => {
-  return zql.post.where('authorID', userID)
+const myPosts = defineQuery(({ctx}) => {
+  return zql.post.where('authorID', ctx.id)
 })
 ```
 
 #### Owned or Shared Rows
 
 ```ts
-// Use the context's `userID` to filter the rows to only the
+// Use the context's user ID to filter the rows to only the
 // ones owned by the user or shared with the user.
-const allowedPosts = defineQuery(({ctx: {userID}}) => {
+const allowedPosts = defineQuery(({ctx}) => {
   return zql.post.where(({cmp, exists, or}) =>
     or(
-      cmp('authorID', userID),
-      exists('sharedWith', q => q.where('userID', userID))
+      cmp('authorID', ctx.id),
+      exists('sharedWith', q => q.where('userID', ctx.id))
     )
   )
 })
@@ -341,14 +922,30 @@ const allowedPosts = defineQuery(({ctx: {userID}}) => {
 #### Owned Rows or All if Admin
 
 ```ts
-const allowedPosts = defineQuery(
-  ({ctx: {userID, role}}) => {
-    if (role === 'admin') {
-      return zql.post
-    }
-    return zql.post.where('authorID', userID)
+const allowedPosts = defineQuery(({ctx}) => {
+  if (ctx.role === 'admin') {
+    return zql.post
   }
-)
+  return zql.post.where('authorID', ctx.id)
+})
+```
+
+#### Deny by Returning No Rows
+
+Read permissions in Zero are filter-based. If a user should not be able to see
+any rows for a query, return a query that matches no rows instead of throwing an
+error.
+
+```ts
+// The empty `or()` expression is always false,
+// so this returns no rows.
+const myPosts = defineQuery(({ctx}) => {
+  if (!ctx?.id) {
+    return zql.post.where(({or}) => or())
+  }
+
+  return zql.post.where('authorID', ctx.id)
+})
 ```
 
 ### Write Permissions
@@ -363,7 +960,7 @@ const createPost = defineMutator(
     title: z.string(),
     content: z.string()
   }),
-  (tx, {ctx: {userID}, args: {id, title, content}}) => {
+  (tx, {ctx, args: {id, title, content}}) => {
     return zql.post.insert({
       id,
       title,
@@ -382,14 +979,14 @@ const updatePost = defineMutator(
     id: z.string(),
     content: z.string().optional()
   }),
-  (tx, {ctx: {userID}, args: {id, content}}) => {
+  (tx, {ctx, args: {id, content}}) => {
     const prev = await tx.run(
       zql.post.where('id', id).one()
     )
     if (!prev) {
       return
     }
-    if (prev.authorID !== userID) {
+    if (prev.authorID !== ctx.id) {
       throw new Error('Access denied')
     }
     return zql.post.update({
@@ -408,12 +1005,12 @@ const updatePost = defineMutator(
     id: z.string(),
     content: z.string().optional()
   }),
-  (tx, {ctx: {userID}, args: {id, content}}) => {
+  (tx, {ctx, args: {id, content}}) => {
     const prev = await tx.run(
       zql.post
         .where('id', id)
         .related('sharedWith', q =>
-          q.where('userID', userID)
+          q.where('userID', ctx.id)
         )
         .one()
     )
@@ -421,7 +1018,7 @@ const updatePost = defineMutator(
       return
     }
     if (
-      prev.authorID !== userID &&
+      prev.authorID !== ctx.id &&
       prev.sharedWith.length === 0
     ) {
       throw new Error('Access denied')
@@ -442,14 +1039,14 @@ const updatePost = defineMutator(
     id: z.string(),
     content: z.string().optional()
   }),
-  (tx, {ctx: {role, userID}, args: {id, content}}) => {
+  (tx, {ctx, args: {id, content}}) => {
     const prev = await tx.run(
       zql.post.where('id', id).one()
     )
     if (!prev) {
       return
     }
-    if (role !== 'admin' && prev.authorID !== userID) {
+    if (ctx.role !== 'admin' && prev.authorID !== ctx.id) {
       throw new Error('Access denied')
     }
     return zql.post.update({
@@ -462,7 +1059,7 @@ const updatePost = defineMutator(
 
 ## Logging Out
 
-When a user logs out, you should consider what should happen to the synced data.
+When a user logs out, you should recreate `Zero` without `userID`, and consider what should happen to the synced data.
 
 If you do nothing, the synced data will be left on the device. The next login will be a little faster because Zero doesn't have to resync that data from scratch. But also, the data will be left on the device indefinitely which could be undesirable for privacy and security.
 

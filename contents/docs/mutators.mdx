@@ -546,8 +546,7 @@ export const Route = createFileRoute('/api/zero/mutate')({
               const mutator = mustGetMutator(mutators, name)
               return mutator.fn({
                 args,
-                tx,
-                ctx: {userId: 'anon'}
+                tx
               })
             }),
           request
@@ -573,7 +572,7 @@ export async function POST(req: Request) {
     transact =>
       transact((tx, name, args) => {
         const mutator = mustGetMutator(mutators, name)
-        return mutator.fn({args, tx, ctx: {userId: 'anon'}})
+        return mutator.fn({args, tx})
       }),
     req
   )
@@ -596,7 +595,7 @@ export async function POST(event: APIEvent) {
     transact =>
       transact((tx, name, args) => {
         const mutator = mustGetMutator(mutators, name)
-        return mutator.fn({args, tx, ctx: {userId: 'anon'}})
+        return mutator.fn({args, tx})
       }),
     event.request
   )
@@ -623,8 +622,7 @@ app.post('/api/zero/mutate', async c => {
         const mutator = mustGetMutator(mutators, name)
         return mutator.fn({
           args,
-          tx,
-          ctx: {userId: 'anon'}
+          tx
         })
       }),
     c.req.raw
@@ -647,6 +645,13 @@ app.post('/api/zero/mutate', async c => {
 `mustGetMutator` looks up the mutator in the registry and throws an error if not found.
 
 The `mutator.fn` function is your mutator implementation wrapped in the validator you provided.
+
+<Note emoji="🔐" heading="Add auth if you need it">
+  These examples have only public mutators, so they do not
+  pass a context. In authenticated apps, validate auth in
+  the request, derive context from the session, and pass it
+  to the mutate handler. See [Authentication](/docs/auth).
+</Note>
 
 ### Handling Errors
 
@@ -713,7 +718,7 @@ app.post('/api/zero/mutate', async c => {
 
 If Zero receives any response from the mutate endpoint other than HTTP 200, 401, or 403, it will disconnect and enter the [error state](/docs/connection#errors).
 
-If Zero receives HTTP 401 or 403, the client will enter the needs auth state and require a manual reconnect with `zero.connection.connect()`, then it will retry all queued mutations.
+If Zero receives HTTP 401 or 403, the client will enter the needs auth state and require a manual reconnect. Use `zero.connection.connect()` for cookie auth or `zero.connection.connect({auth: newToken})` for token auth, then Zero will retry all queued mutations.
 
 If you want a different behavior, it is possible to [implement the mutate endpoint](#custom-push-implementation) yourself and handle errors differently.
 
@@ -1028,7 +1033,6 @@ export const Route = createFileRoute('/api/zero/mutate')({
               const mutator = mustGetMutator(mutators, name)
               return mutator.fn({
                 tx,
-                ctx: {userId: 'anon'},
                 args
               })
             }),
@@ -1058,7 +1062,7 @@ export async function POST(req: Request) {
     transact =>
       transact((tx, name, args) => {
         const mutator = mustGetMutator(mutators, name)
-        return mutator.fn({tx, ctx: {userId: 'anon'}, args})
+        return mutator.fn({tx, args})
       }),
     req
   )
@@ -1081,7 +1085,7 @@ export async function POST(event: APIEvent) {
     transact =>
       transact((tx, name, args) => {
         const mutator = mustGetMutator(mutators, name)
-        return mutator.fn({tx, ctx: {userId: 'anon'}, args})
+        return mutator.fn({tx, args})
       }),
     event.request
   )
@@ -1106,7 +1110,6 @@ app.post('/api/zero/mutate', async c => {
         const mutator = mustGetMutator(mutators, name)
         return mutator.fn({
           tx,
-          ctx: {userId: 'anon'},
           args
         })
       }),

@@ -212,7 +212,10 @@ zero.connection.state.subscribe(state => {
 
 If the [mutate](/docs/mutators) or [query](/docs/queries) endpoints return a 401 or 403 status code, Zero transitions to the `needs-auth` state.
 
-The app should refresh the cookie or auth token and retry the connection manually by calling `zero.connection.connect()`.
+For cookie auth, refresh the cookie and call `zero.connection.connect()`.
+
+For token auth, fetch a new token and call `zero.connection.connect({auth: newToken})` to refresh the token in place without recreating the client.
+If you are using `ZeroProvider`, it will do this for you when the `auth` value changes from one token to another.
 
 Reads are allowed while in the `needs-auth` state, but writes are rejected.
 

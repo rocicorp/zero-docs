@@ -74,17 +74,29 @@ default: `_{app-id}_public_0`
 
 ### Auth Revalidate Interval Seconds
 
-The interval in seconds between periodic `/query` auth revalidation for validated connections. If unset, periodic auth revalidation is disabled.
+How often `zero-cache` re-checks that each live connection is still authorized to use your `/query` endpoint.
+
+On each interval, `zero-cache` sends a lightweight validation request using that connection's current auth context, such as forwarded cookies or an opaque auth token. If your query endpoint rejects that auth with a 401/403, the connection is disconnected.
+
+Use this to bound how long already-open connections can continue after logout, session expiry, token revocation, or other server-side auth changes that happen without a reconnect. Lower values enforce auth changes faster, but send more validation requests to `/query`.
 
 flag: `--auth-revalidate-interval-seconds`<br/>
 env: `ZERO_AUTH_REVALIDATE_INTERVAL_SECONDS`<br/>
+default: `300`
 
 ### Auth Retransform Interval Seconds
 
-The interval in seconds between periodic shared `/query` retransform work for a client group. If unset, periodic shared retransform is disabled.
+How often `zero-cache` refreshes a client group's synced or named query transformations using one validated connection from that group.
+
+This re-runs auth-sensitive query expansion even when the query set itself has not changed. It is useful when your query endpoint generates different ZQL based on current auth or server-side session state, such as roles, organization membership, feature flags, or other permissions-derived context.
+
+Use this to bound how long a client group can keep using stale auth-derived query shapes after backend auth state changes. Lower values pick up those changes faster, but do more `/query` transform work.
+
+If clients already call `updateAuth` whenever auth changes, this mainly serves as a background safety net for out-of-band auth changes.
 
 flag: `--auth-retransform-interval-seconds`<br/>
 env: `ZERO_AUTH_RETRANSFORM_INTERVAL_SECONDS`<br/>
+default: `300`
 
 ### Auto Reset
 

@@ -1146,9 +1146,9 @@ app.post('/api/mutate', async c => {
 
 <Note emoji="🔐" heading="Add auth if you need it">
   These examples have only public queries and mutators, so
-  they does not pass a context or user ID. In authenticated
-  apps, validate auth in the request, derive `userID` from
-  the session, and pass the context to the mutate and query
+  they do not pass a context. In authenticated apps,
+  validate auth in the request, derive context from the
+  session, and pass the context to the mutate and query
   handlers. See [Authentication](/docs/auth).
 </Note>
 

@@ -274,7 +274,6 @@ import type {ZeroOptions} from '@rocicorp/zero'
 import {schema} from './zero/schema.ts'
 
 const opts: ZeroOptions = {
-  userID: 'anon',
   cacheURL: 'http://localhost:4848',
   schema
 }
@@ -303,7 +302,6 @@ import type {ZeroOptions} from '@rocicorp/zero'
 import {schema} from './zero/schema.ts'
 
 const opts: ZeroOptions = {
-  userID: 'anon',
   cacheURL: 'http://localhost:4848',
   schema
 }
@@ -331,7 +329,6 @@ import {Zero} from '@rocicorp/zero'
 import {schema} from './zero/schema.ts'
 
 const opts: ZeroOptions = {
-  userID: 'anon',
   cacheURL: 'http://localhost:4848',
   schema
 }
@@ -533,7 +530,7 @@ export const Route = createFileRoute('/api/query')({
         const result = await handleQueryRequest(
           (name, args) => {
             const query = mustGetQuery(queries, name)
-            return query.fn({args, ctx: {userId: 'anon'}})
+            return query.fn({args})
           },
           schema,
           request
@@ -557,7 +554,7 @@ export async function POST(req: Request) {
   const result = await handleQueryRequest(
     (name, args) => {
       const query = mustGetQuery(queries, name)
-      return query.fn({args, ctx: {userId: 'anon'}})
+      return query.fn({args})
     },
     schema,
     req
@@ -579,7 +576,7 @@ export async function POST(event: APIEvent) {
   const result = await handleQueryRequest(
     (name, args) => {
       const query = mustGetQuery(queries, name)
-      return query.fn({args, ctx: {userId: 'anon'}})
+      return query.fn({args})
     },
     schema,
     event.request
@@ -603,7 +600,7 @@ app.post('/api/query', async c => {
   const result = await handleQueryRequest(
     (name, args) => {
       const query = mustGetQuery(queries, name)
-      return query.fn({args, ctx: {userId: 'anon'}})
+      return query.fn({args})
     },
     schema,
     c.req.raw
@@ -1065,8 +1062,7 @@ export const Route = createFileRoute('/api/mutate')({
               const mutator = mustGetMutator(mutators, name)
               return mutator.fn({
                 args,
-                tx,
-                ctx: {userId: 'anon'}
+                tx
               })
             }),
           request
@@ -1092,7 +1088,7 @@ export async function POST(req: Request) {
     transact =>
       transact((tx, name, args) => {
         const mutator = mustGetMutator(mutators, name)
-        return mutator.fn({args, tx, ctx: {userId: 'anon'}})
+        return mutator.fn({args, tx})
       }),
     req
   )
@@ -1115,7 +1111,7 @@ export async function POST(event: APIEvent) {
     transact =>
       transact((tx, name, args) => {
         const mutator = mustGetMutator(mutators, name)
-        return mutator.fn({args, tx, ctx: {userId: 'anon'}})
+        return mutator.fn({args, tx})
       }),
     event.request
   )
@@ -1137,7 +1133,7 @@ app.post('/api/mutate', async c => {
     transact =>
       transact((tx, name, args) => {
         const mutator = mustGetMutator(mutators, name)
-        return mutator.fn({args, tx, ctx: {userId: 'anon'}})
+        return mutator.fn({args, tx})
       }),
     c.req.raw
   )
@@ -1147,6 +1143,14 @@ app.post('/api/mutate', async c => {
 ```
 
 </CodeGroup>
+
+<Note emoji="🔐" heading="Add auth if you need it">
+  These examples have only public queries and mutators, so
+  they does not pass a context or user ID. In authenticated
+  apps, validate auth in the request, derive `userID` from
+  the session, and pass the context to the mutate and query
+  handlers. See [Authentication](/docs/auth).
+</Note>
 
 Restart zero-cache to tell it about this new endpoint:
 

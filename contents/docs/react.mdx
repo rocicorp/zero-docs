@@ -20,18 +20,32 @@ const cacheURL = import.meta.env.VITE_PUBLIC_ZERO_CACHE_URL!
 
 export default function Root() {
   const session = useSession()
-  const {userID} = session
-  const context = {userID}
+  const userID = session?.userID
+  const auth = session?.accessToken
+  const context = userID ? {userID} : undefined
 
   return (
     <ZeroProvider
-      {...{userID, context, cacheURL, schema, mutators}}
+      {...{
+        userID,
+        auth,
+        context,
+        cacheURL,
+        schema,
+        mutators
+      }}
     >
       <App />
     </ZeroProvider>
   )
 }
 ```
+
+If you use token auth, pass it with `auth={session?.jwt}`. If you use cookie auth, omit the parameter entirely.
+
+When `auth` changes from one string to another, `ZeroProvider` refreshes auth in place with `zero.connection.connect({auth})`. When `auth` is added or removed, or `userID` changes, it recreates the `Zero` instance.
+
+When the user is logged out, omit the `userID` entirely.
 
 You can also pass a `Zero` instance to the `ZeroProvider` if you want to control the lifecycle of the `Zero` instance yourself:
 
@@ -42,6 +56,8 @@ You can also pass a `Zero` instance to the `ZeroProvider` if you want to control
   <App />
 </ZeroProvider>
 ```
+
+When you pass `zero={zero}`, `ZeroProvider` only provides React Context. It does not manage auth updates for that instance, so if you are using token auth, call `zero.connection.connect({auth: newToken})` yourself or recreate the instance when the user changes.
 
 ## Usage
 

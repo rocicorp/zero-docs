@@ -998,10 +998,10 @@ export function IntroductionLanding({
 
           <div className="cloud-zero-cta-container">
             <div className="cloud-zero-cta-prompt">
-              <h3 className="demo-prompt-title">Sign Up</h3>
+              <h3 className="demo-prompt-title">Now Onboarding</h3>
               <p className="demo-intro-text">
-                Hosting is in private beta. Join the waitlist and we'll get you
-                onboarded as soon as possible.
+                Answer a few questions about your project and we'll get you
+                running on Cloud Zero today.
               </p>
               <div className="cloud-zero-cta-buttons">
                 <a
@@ -1009,7 +1009,7 @@ export function IntroductionLanding({
                   rel="noopener noreferrer"
                   className="load-demo-btn"
                 >
-                  <span>Join Waitlist</span>
+                  <span>Get Started</span>
                 </a>
               </div>
             </div>

@@ -12,6 +12,7 @@ import type {
   Link,
   Paragraph,
   PhrasingContent,
+  Strong,
   Text,
 } from 'mdast';
 import {page_routes as pageRoutes} from '@/lib/routes-config';
@@ -114,53 +115,67 @@ function resolveResourcesPlugin(options?: {slug: string}) {
 
 function mdxToMarkdownPlugin() {
   return (tree: Node) => {
-    visit(tree, (node, index, parent) => {
-      if (!parent || index === undefined) return;
-
-      if (
-        node.type !== 'mdxJsxFlowElement' &&
-        node.type !== 'mdxJsxTextElement'
-      ) {
-        return;
-      }
-
-      const outcome = transformMdxJsx(node as MdxJsxNode);
-      if (!outcome) return;
-
-      const parentNode = parent as Parent;
-      const siblings = parentNode.children as Node[];
-
-      switch (outcome.action) {
-        case 'replace':
-          siblings[index] = outcome.node;
-          return index;
-
-        case 'remove':
-          siblings.splice(index, 1);
-          return index;
-
-        case 'unwrap':
-          siblings.splice(index, 1, ...outcome.children);
-          return index;
-
-        default:
-          return;
-      }
-    });
+    const root = tree as Parent;
+    root.children = normalizeNodes(root.children as Node[]);
   };
+}
+
+function normalizeNodes(nodes: Node[]) {
+  return nodes.flatMap(node => normalizeNode(node));
+}
+
+function normalizeNode(node: Node): Node[] {
+  if (node.type === 'mdxJsxFlowElement' || node.type === 'mdxJsxTextElement') {
+    const outcome = transformMdxJsx(node as MdxJsxNode);
+    if (!outcome) return [];
+
+    switch (outcome.action) {
+      case 'replace':
+        return [outcome.node];
+
+      case 'remove':
+        return [];
+
+      case 'unwrap':
+        return outcome.children;
+
+      default:
+        return [];
+    }
+  }
+
+  if (hasChildren(node)) {
+    return [cloneWithChildren(node, normalizeNodes(node.children as Node[]))];
+  }
+
+  return [node];
+}
+
+function hasChildren(node: Node): node is Parent {
+  return 'children' in node && Array.isArray((node as Parent).children);
+}
+
+function cloneWithChildren<T extends Node>(node: T, children: Node[]): T {
+  return {...node, children} as T;
 }
 
 function transformMdxJsx(node: MdxJsxNode): TransformOutcome | null {
   if (!node.name) {
     return {
       action: 'unwrap',
-      children: [...(node.children ?? [])],
+      children: normalizeNodes([...(node.children ?? [])]),
     };
   }
 
   switch (node.name) {
     case 'Note':
       return {action: 'replace', node: transformNote(node)};
+
+    case 'CodeGroup':
+      return {action: 'unwrap', children: transformCodeGroup(node)};
+
+    case 'SyncedCode':
+      return {action: 'unwrap', children: transformSyncedCode(node)};
 
     case 'ImageLightbox':
     case 'img': {
@@ -181,7 +196,9 @@ function transformMdxJsx(node: MdxJsxNode): TransformOutcome | null {
 function transformNote(node: MdxJsxNode): Blockquote {
   const emoji = getAttribute(node.attributes, 'emoji');
   const heading = getAttribute(node.attributes, 'heading');
-  const blockChildren = [...(node.children ?? [])] as Blockquote['children'];
+  const blockChildren = normalizeNodes([
+    ...(node.children ?? []),
+  ]) as Blockquote['children'];
 
   const prefix: PhrasingContent[] = [];
   if (emoji) prefix.push({type: 'text', value: `${emoji} `});
@@ -201,6 +218,38 @@ function transformNote(node: MdxJsxNode): Blockquote {
   }
 
   return {type: 'blockquote', children: blockChildren};
+}
+
+function transformCodeGroup(node: MdxJsxNode): Node[] {
+  const labels = getCodeGroupLabels(node.attributes);
+  const variants = node.children ?? [];
+
+  return variants.flatMap((variant, index) => {
+    const label = labels[index] ?? `Option ${index + 1}`;
+    return [createLabelParagraph(label), ...normalizeNode(variant)];
+  });
+}
+
+function transformSyncedCode(node: MdxJsxNode): Node[] {
+  const syncValues = getStringArrayAttribute(node.attributes, 'syncValues');
+  const variants = node.children ?? [];
+
+  return variants.flatMap((variant, index) => {
+    const label = syncValues[index] ?? `Variant ${index + 1}`;
+    return [createLabelParagraph(label), ...normalizeNode(variant)];
+  });
+}
+
+function createLabelParagraph(label: string): Paragraph {
+  const strong: Strong = {
+    type: 'strong',
+    children: [{type: 'text', value: label}],
+  };
+
+  return {
+    type: 'paragraph',
+    children: [strong],
+  };
 }
 
 function transformImage(node: MdxJsxNode): Paragraph | null {
@@ -247,6 +296,113 @@ function getAttribute(attributes: MdxJsxNode['attributes'], name: string) {
   if (typeof attr.value === 'string') return attr.value;
   if (attr.value && typeof attr.value === 'object' && 'value' in attr.value) {
     return String(attr.value.value).trim();
+  }
+}
+
+function getStringArrayAttribute(
+  attributes: MdxJsxNode['attributes'],
+  name: string,
+) {
+  const value = getExpressionAttributeValue(attributes, name);
+  if (!Array.isArray(value)) return [];
+
+  return value.flatMap(item =>
+    typeof item === 'string' && item.trim() ? [item.trim()] : [],
+  );
+}
+
+function getCodeGroupLabels(attributes: MdxJsxNode['attributes']) {
+  const value = getExpressionAttributeValue(attributes, 'labels');
+  if (!Array.isArray(value)) return [];
+
+  return value.map((item, index) => {
+    if (typeof item === 'string' && item.trim()) {
+      return item.trim();
+    }
+
+    if (item && typeof item === 'object' && 'text' in item) {
+      const text = item.text;
+      if (typeof text === 'string' && text.trim()) {
+        return text.trim();
+      }
+    }
+
+    return `Option ${index + 1}`;
+  });
+}
+
+function getExpressionAttributeValue(
+  attributes: MdxJsxNode['attributes'],
+  name: string,
+) {
+  const attr = attributes?.find(
+    attribute =>
+      attribute.type === 'mdxJsxAttribute' && attribute.name === name,
+  );
+  if (!attr || attr.type !== 'mdxJsxAttribute') return undefined;
+
+  return evaluateExpressionAttributeValue(attr.value);
+}
+
+function evaluateExpressionAttributeValue(value: MdxJsxAttributeValue) {
+  if (!value || typeof value === 'string') return undefined;
+
+  const statement = value.data?.estree?.body?.[0];
+  if (!statement || statement.type !== 'ExpressionStatement') {
+    return undefined;
+  }
+
+  return evaluateEstreeExpression(statement.expression);
+}
+
+function evaluateEstreeExpression(
+  node: EstreeNode | null | undefined,
+): unknown {
+  if (!node) return undefined;
+
+  switch (node.type) {
+    case 'Literal':
+      return node.value;
+
+    case 'ArrayExpression':
+      return node.elements.map(element => evaluateEstreeExpression(element));
+
+    case 'ObjectExpression':
+      return node.properties.reduce<Record<string, unknown>>(
+        (result, property) => {
+          if (property.type !== 'Property' || property.computed) {
+            return result;
+          }
+
+          const key = getEstreeObjectKey(property.key);
+          if (!key) return result;
+
+          result[key] = evaluateEstreeExpression(property.value);
+          return result;
+        },
+        {},
+      );
+
+    case 'UnaryExpression': {
+      const evaluated = evaluateEstreeExpression(node.argument);
+      if (typeof evaluated !== 'number') return undefined;
+      return node.operator === '-' ? -evaluated : evaluated;
+    }
+
+    default:
+      return undefined;
+  }
+}
+
+function getEstreeObjectKey(node: EstreeNode | null | undefined) {
+  if (!node) return undefined;
+
+  if (node.type === 'Identifier') {
+    return node.name;
+  }
+
+  if (node.type === 'Literal' && typeof node.value === 'string') {
+    return node.value;
   }
 }
 
@@ -351,7 +507,11 @@ type MdxJsxAttributeValue =
   | string
   | null
   | undefined
-  | {type: 'mdxJsxAttributeValueExpression'; value: string};
+  | {
+      type: 'mdxJsxAttributeValueExpression';
+      value: string;
+      data?: {estree?: EstreeProgram};
+    };
 
 type MdxJsxAttribute =
   | {
@@ -370,3 +530,41 @@ type MdxJsxNode = Node & {
   attributes?: MdxJsxAttribute[];
   children?: Node[];
 };
+
+type EstreeProgram = {
+  type: 'Program';
+  body?: EstreeNode[];
+};
+
+type EstreeNode =
+  | {
+      type: 'ExpressionStatement';
+      expression: EstreeNode;
+    }
+  | {
+      type: 'Literal';
+      value: unknown;
+    }
+  | {
+      type: 'ArrayExpression';
+      elements: Array<EstreeNode | null>;
+    }
+  | {
+      type: 'ObjectExpression';
+      properties: EstreeNode[];
+    }
+  | {
+      type: 'Property';
+      computed?: boolean;
+      key: EstreeNode;
+      value: EstreeNode;
+    }
+  | {
+      type: 'Identifier';
+      name: string;
+    }
+  | {
+      type: 'UnaryExpression';
+      operator: string;
+      argument: EstreeNode;
+    };

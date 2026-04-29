@@ -2,30 +2,22 @@ import fs from 'fs';
 import matter from 'gray-matter';
 import path from 'path';
 import {pathToFileURL} from 'node:url';
-import remarkParse from 'remark-parse';
-import remarkMdx from 'remark-mdx';
-import remarkGfm from 'remark-gfm';
 import {unified} from 'unified';
 import {visit} from 'unist-util-visit';
 import {toString} from 'mdast-util-to-string';
-import GithubSlugger from 'github-slugger';
 import strip from 'strip-markdown';
-import type {Content, Heading, Root} from 'mdast';
+import type {Content, Root} from 'mdast';
 import type {Node, Parent} from 'unist';
+import {
+  extractDocsHeadingEntries,
+  parseDocsMdx,
+  type DocsHeadingEntry,
+} from './docs-headings';
 import {getAllMDXFiles} from './get-slugs';
 import type {SearchDocument} from './search-types';
 
 const DOCS_ROOT = path.join(process.cwd(), 'contents/docs');
 const OUTPUT_FILE = path.join(process.cwd(), 'assets', 'search-index.json');
-const HEADING_MIN_DEPTH = 2;
-const HEADING_MAX_DEPTH = 4;
-
-type HeadingEntry = {
-  text: string;
-  id: string;
-  depth: number;
-  index: number;
-};
 
 const cloneTree = <T>(value: T) => JSON.parse(JSON.stringify(value)) as T;
 
@@ -60,39 +52,9 @@ function unwrapMdxNodes() {
   };
 }
 
-const parseMdx = (content: string) =>
-  unified()
-    .use(remarkParse)
-    .use(remarkMdx)
-    .use(remarkGfm)
-    .parse(content) as Root;
-
-function extractHeadingEntries(tree: Root): HeadingEntry[] {
-  const slugger = new GithubSlugger();
-  const headings: HeadingEntry[] = [];
-
-  tree.children.forEach((node, index) => {
-    if (node.type !== 'heading') return;
-    const heading = node as Heading;
-    if (
-      heading.depth < HEADING_MIN_DEPTH ||
-      heading.depth > HEADING_MAX_DEPTH
-    ) {
-      return;
-    }
-
-    const text = normalizeWhitespace(toString(heading));
-    if (!text) return;
-    const id = slugger.slug(text);
-    headings.push({text, id, depth: heading.depth, index});
-  });
-
-  return headings;
-}
-
 const findSectionEndIndex = (
-  heading: HeadingEntry,
-  headings: HeadingEntry[],
+  heading: DocsHeadingEntry,
+  headings: DocsHeadingEntry[],
   totalNodes: number,
 ) => {
   for (const candidate of headings) {
@@ -120,10 +82,10 @@ export async function extractDocumentsFromMDX(
   filePath: string,
 ): Promise<SearchDocument[]> {
   const fileContent = fs.readFileSync(filePath, 'utf-8');
-  const {content, data} = matter(fileContent);
+  const {data} = matter(fileContent);
 
-  const mdast = parseMdx(content);
-  const headingEntries = extractHeadingEntries(mdast);
+  const mdast = parseDocsMdx(fileContent);
+  const headingEntries = extractDocsHeadingEntries(mdast);
   const plainText = await mdastNodesToText(mdast.children as Content[]);
 
   const pathWithoutExtension = path

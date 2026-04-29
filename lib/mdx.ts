@@ -15,7 +15,7 @@ import Note from '@/components/note';
 import ImageLightbox from '@/components/ui/ImageLightbox';
 import Video from '@/components/ui/Video';
 import {Button} from '@/components/ui/button';
-import GithubSlugger from 'github-slugger';
+import {getDocsTocEntries} from './docs-headings';
 import rehypePrettyCode from 'rehype-pretty-code';
 import {getLatestNpmVersions} from './get-latest-npm-versions';
 import {convertMdxToMarkdown} from './mdx-to-markdown';
@@ -112,28 +112,7 @@ const compileDoc = async (slug: string) => {
 
 const extractHeadings = async (slug: string) => {
   const rawMdx = await readRawDoc(slug);
-  const headingsRegex = /^(#{2,4})\s(.+)$/gm;
-  let match;
-  const extractedHeadings: Array<{
-    level: number;
-    text: string;
-    href: string;
-  }> = [];
-
-  const slugger = new GithubSlugger();
-
-  while ((match = headingsRegex.exec(rawMdx)) !== null) {
-    const headingLevel = match[1].length;
-    const headingText = match[2].trim();
-    const headingSlug = slugger.slug(headingText);
-    extractedHeadings.push({
-      level: headingLevel,
-      text: headingText,
-      href: `#${headingSlug}`,
-    });
-  }
-
-  return extractedHeadings;
+  return getDocsTocEntries(rawMdx);
 };
 
 export async function getDocsForSlug(slug: string) {

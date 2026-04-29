@@ -1,7 +1,6 @@
 'use client';
 
 import {useEffect, useRef, useState} from 'react';
-import {createPortal} from 'react-dom';
 import Link from 'next/link';
 import CopyButtonListener from './ui/copy-button-listener';
 import RocicorpLogo from './logos/Rocicorp';
@@ -29,8 +28,6 @@ export function IntroductionLanding({
 }) {
   const isMobile = useIsMobile();
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [showDemoModal, setShowDemoModal] = useState(false);
-  const [iframeKey, setIframeKey] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isVideoReady, setIsVideoReady] = useState(false);
   const mainRef = useRef<HTMLElement>(null);
@@ -45,25 +42,6 @@ export function IntroductionLanding({
     window.addEventListener('scroll', handleScroll, {passive: true});
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
-  useEffect(() => {
-    // Handle escape key for demo modal
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        setShowDemoModal(false);
-      }
-    };
-
-    if (showDemoModal) {
-      document.addEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'hidden';
-    }
-
-    return () => {
-      document.removeEventListener('keydown', handleEscape);
-      document.body.style.overflow = '';
-    };
-  }, [showDemoModal]);
 
   const toggleVideoPlayPause = () => {
     if (videoRef.current) {
@@ -338,18 +316,11 @@ export function IntroductionLanding({
 
         <section className="section section-try-it">
           <div className="section-try-it-content">
-            <div
+            <a
               className="demo-container"
-              onClick={() => {
-                if (window.innerWidth <= 768) {
-                  window.open(
-                    'https://bugs.rocicorp.dev/p/roci?demo',
-                    '_blank',
-                  );
-                } else {
-                  setShowDemoModal(true);
-                }
-              }}
+              href="https://bugs.rocicorp.dev/p/roci?demo"
+              target="_blank"
+              rel="noopener noreferrer"
             >
               <div className="demo-prompt">
                 <h3 className="demo-prompt-title">Try it out right now.</h3>
@@ -357,9 +328,9 @@ export function IntroductionLanding({
                   Our Gigabugs demo has 1.2 million rows, instant interactions,
                   and loads in less than 2 seconds.
                 </p>
-                <button className="load-demo-btn">Open Demo</button>
+                <span className="load-demo-btn">Open Demo</span>
               </div>
-            </div>
+            </a>
           </div>
         </section>
 
@@ -1085,82 +1056,6 @@ export function IntroductionLanding({
           </span>
         </Link>
       </footer>
-
-      {/* Demo Modal — portaled to body so backdrop-filter works */}
-      {showDemoModal &&
-        createPortal(
-          <div className="intro-landing-page">
-            <div className="demo-modal active">
-              <div
-                className="demo-modal-backdrop"
-                onClick={() => setShowDemoModal(false)}
-              ></div>
-              <div className="demo-modal-content">
-                <div className="demo-modal-toolbar">
-                  <button
-                    className="demo-toolbar-btn"
-                    onClick={() => setShowDemoModal(false)}
-                  >
-                    <svg
-                      aria-hidden="true"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M19 12H5" />
-                      <path d="M12 19l-7-7 7-7" />
-                    </svg>
-                    Exit Demo
-                  </button>
-                  <button
-                    className="demo-toolbar-title"
-                    aria-label="Refresh Demo"
-                    onClick={() => setIframeKey(k => k + 1)}
-                  >
-                    <span className="demo-toolbar-title__default">
-                      Gigabugs Demo
-                    </span>
-                    <span className="demo-toolbar-title__hover">
-                      Refresh Demo
-                    </span>
-                  </button>
-                  <a
-                    className="demo-toolbar-btn"
-                    href="https://bugs.rocicorp.dev/p/roci"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Visit Gigabugs
-                    <svg
-                      aria-hidden="true"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M7 17L17 7" />
-                      <path d="M7 7h10v10" />
-                    </svg>
-                  </a>
-                </div>
-                <div className="demo-iframe-wrapper">
-                  <iframe
-                    key={iframeKey}
-                    src="https://bugs.rocicorp.dev/p/roci?demo"
-                    className="demo-iframe"
-                    title="Zero Demo"
-                  ></iframe>
-                </div>
-              </div>
-            </div>
-          </div>,
-          document.body,
-        )}
     </div>
   );
 }

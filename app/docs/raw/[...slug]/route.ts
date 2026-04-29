@@ -1,12 +1,11 @@
 import {getAllPageSlugs} from '@/lib/get-slugs';
+import {formatDocsMarkdown} from '@/lib/docs-markdown';
 import {getDocsForSlug} from '@/lib/mdx';
 import {NextRequest, NextResponse} from 'next/server';
 
 export const dynamic = 'force-static';
 
 type RouteProps = {params: Promise<{slug: string[]}>};
-
-const MD_FOOTER = `**For AI agents**: to view all the available documentation, visit https://zero.rocicorp.dev/llms.txt`;
 
 export async function GET(_: NextRequest, {params}: RouteProps) {
   const {slug: slugParams} = await params;
@@ -18,7 +17,7 @@ export async function GET(_: NextRequest, {params}: RouteProps) {
     return new NextResponse('MD not found', {status: 404});
   }
 
-  return new NextResponse(`${res.raw}\n\n${MD_FOOTER}`, {
+  return new NextResponse(formatDocsMarkdown(res.raw), {
     headers: {
       'Content-Type': 'text/markdown; charset=utf-8',
       'Cache-Control':

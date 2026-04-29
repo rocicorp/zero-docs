@@ -305,8 +305,9 @@ Here are equivalent multi-node configurations for the same topology on a few com
 services:
   replication-manager:
     image: rocicorp/zero:{version}
-    ports:
-      - 4849:4849
+    # Do not expose the RM to the public internet - only view-syncers
+    expose:
+      - 4849
     stop_grace_period: 10m
     depends_on:
       upstream-db:

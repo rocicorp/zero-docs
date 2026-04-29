@@ -771,11 +771,20 @@ Different bottlenecks dominate each phase.
 - **Network to clients**: even if IVM is fast, it can take time to send data over websocket. This can be improved by using CDNs (like CloudFront) that improve routing.
 - **Network between services**: for a single-region deployment, all services should be colocated.
 
-## Load Balancing
+## Networking
 
-View syncers must be publicly reachable by port 4848 by clients, and the replication-manager can have internal networking with the view-syncers on port 4849.
+View syncers must be publicly reachable by clients on port 4848. The replication-manager must only be reachable by view-syncers over your private network on port 4849.
 
-The external load balancer must support websockets, and can use the health check at `/keepalive` to verify view-syncers and replication-managers are healthy.
+<Note
+  type="danger"
+  heading="Do not expose replication-manager to the internet"
+  slug="private-replication-manager"
+>
+The replication-manager serves Zero's internal replication protocol. Keep it behind private networking such as a private service address, internal load balancer, or Kubernetes `ClusterIP` service.
+
+</Note>
+
+The external load balancer for view-syncers must support websockets, and can use the health check at `/keepalive` to verify view-syncers are healthy. The replication-manager should also have a `/keepalive` health check, but that check should run through private infrastructure rather than a public load balancer.
 
 ### Sticky Sessions
 

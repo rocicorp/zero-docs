@@ -659,7 +659,7 @@ html.dark {
   display: inline;
   font-weight: 900;
   line-height: 1.1;
-  font-size: clamp(2.6rem, 8vw + 0.5rem, 5.25rem);
+  font-size: clamp(2rem, calc(6vw + 0.5rem), 5.25rem);
   background: linear-gradient(
     175deg,
     hsl(var(--foreground)) 0%,

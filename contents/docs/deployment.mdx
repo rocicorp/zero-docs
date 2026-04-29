@@ -374,11 +374,18 @@ kill_timeout = 300
 [build]
   image = "rocicorp/zero:{version}"
 
+# Do not add [http_service] or [[services]] to this app. The
+# replication-manager serves Zero's internal replication protocol and should
+# only be reachable over Fly private networking at:
+#   ws://zero-replication-manager.internal:4849/
+#
+# Since this app does not have [http_service], use a top-level Machine check.
+
 [checks]
   [checks.replication_manager]
     type = "http"
     port = 4849
-    path = "/keepalive"
+    path = "/"
     interval = "5s"
     timeout = "5s"
     grace_period = "10m"
@@ -413,9 +420,10 @@ kill_timeout = 300
   auto_stop_machines = "off"
   min_machines_running = 1
 
+# View-syncers are public, so their health checks attach to [http_service].
 [[http_service.checks]]
   protocol = "https"
-  path = "/keepalive"
+  path = "/"
   interval = "5s"
   timeout = "5s"
   grace_period = "10m"

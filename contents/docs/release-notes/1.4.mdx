@@ -13,7 +13,7 @@ npm install @rocicorp/zero@1.4
 
 - [**Kysely Adapter:**](/docs/server-zql?codeGroup=pgclient%3Akysely#creating-a-database) Added `zeroKysely`, so Zero server mutators can run against a Kysely transaction.
 - [**Analyze Query Library:**](/docs/debug/slow-queries) Added `@rocicorp/zero/analyze`, for easier CLI-based query analysis.
-- [**Shadow Sync:**](/docs/zero-cache-config) `zero-cache` can now periodically test initial sync in the background, to catch schema drift and full-resync failures earlier.
+- [**Shadow Sync:**](/docs/zero-cache-config#shadow-sync-enabled) `zero-cache` can now periodically test initial sync in the background, to catch schema drift and full-resync failures earlier.
 - [**Client Log Sink:**](https://github.com/rocicorp/mono/pull/5835) Added a `logSink` param to `Zero` constructor for redirecting Zero client logs.
 - [**Cloud Zero Ad 🙃:**](https://zero.rocicorp.dev/cloud) Added a small notice about Cloud Zero in the `zero-cache-dev` startup output. Disable with `ZERO_ENABLE_STARTUP_MESSAGE=0`.
 

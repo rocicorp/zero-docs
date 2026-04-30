@@ -65,6 +65,11 @@ const nextConfig = {
         permanent: false,
       },
       {
+        source: '/docs/debug/otel',
+        destination: '/docs/otel',
+        permanent: false,
+      },
+      {
         source: '/docs/raw/:slug*',
         destination: '/docs/:slug*.md',
         permanent: false,

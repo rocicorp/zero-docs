@@ -11,69 +11,9 @@ Slow query materialization 325.46865100000286
 
 Or, you may just notice queries taking longer than expected in the UI. Here are some tips to help debug such slow queries.
 
-## Query Plan
+## Analyze Queries
 
-The `@rocicorp/zero` package ships with a CLI to help debug query plans. You can run it with:
-
-```bash
-# see all parameters
-npx analyze-query --help
-# analyze a specific query
-npx analyze-query \
-  --schema-path="./schema.ts" \
-  --replica-file="./zero.db" \
-  --query='albums.where("artistId", "artist_1").orderBy("createdAt", "asc").limit(10)'
-```
-
-This command will output the query plan and time to execute each phase of that plan:
-
-```bash
-$ npx analyze-query \
-  --schema-path="./schema.ts" \
-  --replica-file="./zero.db" \
-  --query='albums.where("artistId", "artist_1").orderBy("createdAt", "asc").limit(10)'
-
-Loading schema from ./schema.ts
-=== Query Stats: ===
-total synced rows: 10
-albums vended: {
-  'SELECT "id","title","artist_id","release_year","cover_art_url","created_at","_0_version" FROM "albums" WHERE "artist_id" = ? ORDER BY "created_at" asc, "id" asc': 10
-}
-Rows Read (into JS): 10
-time: 3.12ms ms
-=== Rows Scanned (by SQLite): ===
-albums: {
-  'SELECT "id","title","artist_id","release_year","cover_art_url","created_at","_0_version" FROM "albums" WHERE "artist_id" = ? ORDER BY "created_at" asc, "id" asc': 25
-}
-total rows scanned: 25
-=== Query Plans: ===
-query SELECT "id","title","artist_id","release_year","cover_art_url","created_at","_0_version" FROM "albums" WHERE "artist_id" = ? ORDER BY "created_at" asc, "id" asc
-SCAN albums
-USE TEMP B-TREE FOR ORDER BY
-```
-
-Ideally, run this command on the server where your `zero.db` replica file is located, so it uses the same disk as `zero-cache`. Adjust the `--schema-path` to point to your [schema](/docs/schema) file (you may need to copy this onto the server). The `--query` arg is the ZQL query you want to analyze.
-
-Running locally, the analyzer will use any local `.env` file to find your environment configuration (so you don't need to manually provide the replica file).
-
-### Optimizing the Plan
-
-You should look for any `TEMP B-TREE` entries in the query plan. These indicate that the query is not properly indexed in SQLite, and that `zero-cache` had to create a temporary index to satisfy the query. You should add appropriate indexes upstream to fix this.
-
-<Note
-  emoji="⚠️"
-  type="warning"
-  heading="Primary key ordering"
-  slug="primary-key-ordering"
->
-  ZQL adds all primary key columns to the `orderBy` clause
-  for a predictable total order, but only appends those PK
-  columns which are not already present in the order of the
-  query. This means that upstream indexes must also include
-  the PK columns.
-</Note>
-
-Feel free to share your query plans with us in [Discord](https://discord.rocicorp.dev) if you need help optimizing them.
+Use the [inspector](/docs/debug/inspector#analyzing-queries) or [analyze query CLI](/docs/debug/analyze-query-cli) to analyze queries and get detailed information about the query plan and performance.
 
 ## Check `ttl`
 

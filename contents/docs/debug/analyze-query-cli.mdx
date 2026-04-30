@@ -1,0 +1,145 @@
+---
+title: Analyze Query CLI
+---
+
+Besides the query analyzer built into the [inspector](/docs/debug/inspector#analyzing-queries), you can also analyze queries from a terminal. This is useful for repeatable debugging, sharing command output, and running analysis from agent workflows.
+
+<Note
+  emoji="💡"
+  type="note"
+  heading="Looking for the old analyze-query command?"
+  slug="old-analyze-query-command"
+>
+  The standalone `npx analyze-query` CLI has been
+  deprecated and replaced by the `runAnalyzeCLI` function.
+  This new approach makes it easier to wire the analyzer into
+  your app's schema, and also enables analyzing a remote
+  zero-cache.
+</Note>
+
+## Set Up
+
+Create a small script in your app that imports your schema and calls `runAnalyzeCLI`:
+
+```ts
+// scripts/analyze.ts
+import {runAnalyzeCLI} from '@rocicorp/zero/analyze'
+import {schema} from '../src/zero/schema.ts'
+
+await runAnalyzeCLI({schema})
+```
+
+The schema lets the CLI evaluate query strings using your client-side table names, column names, and relationships.
+
+If you use a TypeScript runner such as `tsx`, add a package script:
+
+```json
+{
+  "scripts": {
+    "analyze-query": "tsx scripts/analyze.ts"
+  }
+}
+```
+
+## Run ZQL Queries
+
+Pass `--zero-cache-url` plus a query in chain form:
+
+```bash
+npm run analyze-query -- \
+  --zero-cache-url='http://localhost:4848' \
+  --auth-token="$ZERO_AUTH_JWT" \
+  --query='albums.where("artistId", "artist_1").orderBy("createdAt", "asc").limit(10)'
+```
+
+If your app authenticates with cookies, pass the cookie header instead:
+
+```bash
+npm run analyze-query -- \
+  --zero-cache-url='http://localhost:4848' \
+  --cookie="$COOKIE" \
+  --query='albums.where("artistId", "artist_1").orderBy("createdAt", "asc").limit(10)'
+```
+
+## Production Use
+
+Production Zero servers require a [`ZERO_ADMIN_PASSWORD`](/docs/zero-cache-config#admin-password). To analyze queries on a production server, pass `--admin-password`:
+
+```bash
+npm run analyze-query -- \
+  --zero-cache-url='https://zero.example.com' \
+  --admin-password="$ZERO_ADMIN_PASSWORD" \
+  --query='albums.where("artistId", "artist_1").orderBy("createdAt", "asc").limit(10)'
+```
+
+If your deployment resolves auth from custom headers, use `--headers-json`:
+
+```bash
+npm run analyze-query -- \
+  --zero-cache-url='https://zero.example.com' \
+  --admin-password="$ZERO_ADMIN_PASSWORD" \
+  --headers-json="{\"My-Custom-Header\":\"$CUSTOM_HEADER_VALUE\"}" \
+  --query='albums.where("artistId", "artist_1").orderBy("createdAt", "asc").limit(10)'
+```
+
+## Env Var Shorthand
+
+Options fall back to `ZERO_*` environment variables, so if you are running against your dev server, many flags can be dropped:
+
+```bash
+# ZERO_CACHE_URL, ZERO_ADMIN_PASSWORD picked up from .env
+npm run analyze-query -- --cookie="$COOKIE" --query='issue.limit(10)'
+```
+
+## Other Input Modes
+
+Use `--query-name` and `--query-args` to analyze a server-registered named query:
+
+```bash
+npm run analyze-query -- \
+  --zero-cache-url=http://localhost:4848 \
+  --query-name=issueList \
+  --query-args='[]'
+```
+
+Use `--ast` when you already have a query AST:
+
+```bash
+npm run analyze-query -- \
+  --zero-cache-url=http://localhost:4848 \
+  --ast='{"table":"issue","limit":5}'
+```
+
+## Output
+
+```txt
+=== Query Stats: ===
+total synced rows: 10
+albums vended: {
+  'SELECT "id","title","artist_id","release_year","cover_art_url","created_at","_0_version" FROM "albums" WHERE "artist_id" = ? ORDER BY "created_at" asc, "id" asc': 10
+}
+Rows Read (into JS): 10
+time: 3.12ms
+
+=== Rows Scanned (by SQLite): ===
+albums: {
+  'SELECT "id","title","artist_id","release_year","cover_art_url","created_at","_0_version" FROM "albums" WHERE "artist_id" = ? ORDER BY "created_at" asc, "id" asc': 25
+}
+total rows scanned: 25
+
+=== Query Plans: ===
+query SELECT "id","title","artist_id","release_year","cover_art_url","created_at","_0_version" FROM "albums" WHERE "artist_id" = ? ORDER BY "created_at" asc, "id" asc
+SCAN albums
+USE TEMP B-TREE FOR ORDER BY
+```
+
+This is the same analysis data returned by the [inspector](/docs/debug/inspector#analyzing-queries). See the inspector docs for how to interpret row counts, SQLite plans, and join plans.
+
+## Optional Output
+
+Two flags make the output more verbose:
+
+- `--output-synced-rows` includes the rows that would be synced to the client.
+- `--output-vended-rows` includes the rows read from the replica while executing the query.
+
+These are useful when you want to confirm exactly which rows are being read and returned.

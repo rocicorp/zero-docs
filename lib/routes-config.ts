@@ -83,6 +83,7 @@ export const ROUTES = [
       {title: 'Hosting', href: '/deployment'},
       {title: 'Previews', href: '/previews'},
       {title: 'Configuration', href: '/zero-cache-config'},
+      {title: 'OpenTelemetry', href: '/otel'},
     ],
   },
 
@@ -92,10 +93,10 @@ export const ROUTES = [
     defaultOpen: false,
     items: [
       {title: 'Inspector', href: '/debug/inspector'},
+      {title: 'Analyze Query CLI', href: '/debug/analyze-query-cli'},
       {title: 'Slow Queries', href: '/debug/slow-queries'},
       {title: 'Replication', href: '/debug/replication'},
       {title: 'Query ASTs', href: '/debug/query-asts'},
-      {title: 'OpenTelemetry', href: '/debug/otel'},
       {title: 'zero-out', href: '/debug/zero-out'},
     ],
   },

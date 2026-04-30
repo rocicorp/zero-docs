@@ -1,0 +1,55 @@
+---
+title: Zero 1.4
+description: Performance and Reliability Improvements
+---
+
+## Installation
+
+```bash
+npm install @rocicorp/zero@1.4
+```
+
+## Features
+
+- [**Kysely Adapter:**](/docs/server-zql?codeGroup=pgclient%3Akysely#creating-a-database) Added `zeroKysely`, so Zero server mutators can run against a Kysely transaction.
+- [**Analyze Query Library:**](/docs/debug/slow-queries) Added `@rocicorp/zero/analyze`, for easier CLI-based query analysis.
+- [**Shadow Sync:**](/docs/zero-cache-config) `zero-cache` can now periodically test initial sync in the background, to catch schema drift and full-resync failures earlier.
+- [**Client Log Sink:**](https://github.com/rocicorp/mono/pull/5835) Added a `logSink` param to `Zero` constructor for redirecting Zero client logs.
+- [**Cloud Zero Ad 🙃:**](https://zero.rocicorp.dev/cloud) Added a small notice about Cloud Zero in the `zero-cache-dev` startup output. Disable with `ZERO_ENABLE_STARTUP_MESSAGE=0`.
+
+## Performance
+
+- [7x faster client-side index construction](https://github.com/rocicorp/mono/pull/5844)
+- [2x faster backfills by switching zero-cache to binary COPY](https://github.com/rocicorp/mono/pull/5789)
+- Up to ~50% faster query hydration and ~30% faster updates:
+  - [+9-16% hydration and +3-18% updates by reducing polymorphism](https://github.com/rocicorp/mono/pull/5801)
+  - [+8-14% updates by reducing allocations](https://github.com/rocicorp/mono/pull/5843)
+  - [+5-16% hydration by reducing allocations](https://github.com/rocicorp/mono/pull/5834)
+  - [+7%  hydration for queries with joins](https://github.com/rocicorp/mono/pull/5799)
+- [Avoid full table scans from reordered compound primary keys](https://github.com/rocicorp/mono/pull/5807)
+
+## Fixes
+
+- [Pagination on non-null columns could trigger full scans](https://github.com/rocicorp/mono/pull/5673) (thanks [@utkarsh-611](https://github.com/utkarsh-611)!)
+- [Include details in query/mutator validation errors](https://github.com/rocicorp/mono/pull/5822) (thanks [@tjenkinson](https://github.com/tjenkinson)!)
+- [Inspector query analysis wasn't using Zero's planner](https://github.com/rocicorp/mono/pull/5875)
+- [Add query name to hydration spans in otel](https://github.com/rocicorp/mono/pull/5872)
+- [PgBouncer causing `cached plan must not change result type` error](https://github.com/rocicorp/mono/pull/5887)
+- [Transient `litestream restore` failures were incorrectly alerting](https://github.com/rocicorp/mono/pull/5824)
+- [Nullable array columns silently converted to `[]`](https://github.com/rocicorp/mono/pull/5802) (thanks [@kvnkusch](https://github.com/kvnkusch)!)
+- [Change-log entries could be incorrectly purged during handoff](https://github.com/rocicorp/mono/pull/5805)
+- [Concurrent, nested, and `CREATE/DROP INDEX CONCURRENTLY` DDL were breaking schema replication](https://github.com/rocicorp/mono/pull/5828)
+- [Event-trigger upgrade permission errors sometimes swallowed](https://github.com/rocicorp/mono/pull/5891)
+- [Replication slot creation hanging during startup](https://github.com/rocicorp/mono/pull/5852)
+- [Autoreset during startup could deadlock while recreating a replication slot](https://github.com/rocicorp/mono/pull/5876)
+- [Original SQLite transaction failures hidden behind rollback errors](https://github.com/rocicorp/mono/pull/5862)
+- [Columns with complex Postgres backfilled incorrectly](https://github.com/rocicorp/mono/pull/5868)
+- [Latency histograms buckets are too broad](https://github.com/rocicorp/mono/pull/5866)
+- [Inspector parse and analyze errors incorrectly emitting ERROR logs](https://github.com/rocicorp/mono/pull/5841)
+- [Stalled change-streamer transactions could hang progress indefinitely](https://github.com/rocicorp/mono/pull/5819)
+- [OTel metrics from multiple worker processes clobbering each other](https://github.com/rocicorp/mono/pull/5814)
+- [Drain-mode `SIGTERM` exited uncleanly during startup](https://github.com/rocicorp/mono/pull/5803)
+
+## Breaking Changes
+
+None.

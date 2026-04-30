@@ -82,7 +82,7 @@ Use this to bound how long already-open connections can continue after logout, s
 
 flag: `--auth-revalidate-interval-seconds`<br/>
 env: `ZERO_AUTH_REVALIDATE_INTERVAL_SECONDS`<br/>
-default: `300`
+default: `unset`
 
 ### Auth Retransform Interval Seconds
 
@@ -96,7 +96,7 @@ If clients already call `updateAuth` whenever auth changes, this mainly serves a
 
 flag: `--auth-retransform-interval-seconds`<br/>
 env: `ZERO_AUTH_RETRANSFORM_INTERVAL_SECONDS`<br/>
-default: `300`
+default: `unset`
 
 ### Auto Reset
 
@@ -608,7 +608,7 @@ env: `ZERO_REPLICA_VACUUM_INTERVAL_HOURS`<br/>
 
 ### Replication Lag Report Interval (ms)
 
-The minimum interval at which replication lag reports are written upstream and reported via the `zero.replication.total_lag` [OpenTelemetry metric](/docs/debug/otel). Because replication lag reports are only issued after the previous one was received, the actual interval between reports may be longer when there is a backlog in the replication stream.
+The minimum interval at which replication lag reports are written upstream and reported via the `zero.replication.total_lag` [OpenTelemetry metric](/docs/otel). Because replication lag reports are only issued after the previous one was received, the actual interval between reports may be longer when there is a backlog in the replication stream.
 
 This feature requires write access to upstream Postgres (uses `pg_logical_emit_message()`). For PostgreSQL 17+, lag measurements accurately reflect committed write latency (single-digit milliseconds). For PostgreSQL 16 and earlier, measurements may appear 50-100ms longer due to flush behavior. A negative or 0 value disables lag reporting.
 
@@ -624,6 +624,38 @@ The version string outputted to logs when the server starts up.
 
 flag: `--server-version`<br/>
 env: `ZERO_SERVER_VERSION`<br/>
+
+### Shadow Sync Enabled
+
+Periodically exercises the initial-sync code path against a sample of rows from every published table, writing to a throwaway SQLite database. This acts as a canary: if the real initial-sync path breaks because of schema drift, Postgres version quirks, or another full-resync issue, the shadow run fails before a customer actually needs a full reset.
+
+flag: `--shadow-sync-enabled`<br/>
+env: `ZERO_SHADOW_SYNC_ENABLED`<br/>
+default: `false`
+
+### Shadow Sync Interval Hours
+
+The interval between shadow initial-sync runs, in hours. The first run fires within `[2/3, 1)` of this interval after startup, so the canary completes at least once per task lifetime while still jittering fleet restarts.
+
+flag: `--shadow-sync-interval-hours`<br/>
+env: `ZERO_SHADOW_SYNC_INTERVAL_HOURS`<br/>
+default: `12`
+
+### Shadow Sync Sample Rate
+
+The Bernoulli sampling rate for each table, where `0 < rate <= 1`. A value of `1` disables sampling and copies all rows, still subject to `--shadow-sync-max-rows-per-table`.
+
+flag: `--shadow-sync-sample-rate`<br/>
+env: `ZERO_SHADOW_SYNC_SAMPLE_RATE`<br/>
+default: `0.1`
+
+### Shadow Sync Max Rows Per Table
+
+The hard upper bound on rows copied per table per shadow run. This guards against unexpectedly large tables consuming too much disk or upstream bandwidth.
+
+flag: `--shadow-sync-max-rows-per-table`<br/>
+env: `ZERO_SHADOW_SYNC_MAX_ROWS_PER_TABLE`<br/>
+default: `10000`
 
 ### Storage DB Temp Dir
 

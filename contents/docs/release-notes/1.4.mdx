@@ -21,11 +21,11 @@ npm install @rocicorp/zero@1.4
 
 - [7x faster client-side index construction](https://github.com/rocicorp/mono/pull/5844)
 - [2x faster backfills by switching zero-cache to binary COPY](https://github.com/rocicorp/mono/pull/5789)
-- Up to ~50% faster query hydration and ~30% faster updates:
+- Various optimizations to query hydration and updates:
   - [+9-16% hydration and +3-18% updates by reducing polymorphism](https://github.com/rocicorp/mono/pull/5801)
   - [+8-14% updates by reducing allocations](https://github.com/rocicorp/mono/pull/5843)
   - [+5-16% hydration by reducing allocations](https://github.com/rocicorp/mono/pull/5834)
-  - [+7%  hydration for queries with joins](https://github.com/rocicorp/mono/pull/5799)
+  - [+7% hydration for queries with joins](https://github.com/rocicorp/mono/pull/5799)
 - [Avoid full table scans from reordered compound primary keys](https://github.com/rocicorp/mono/pull/5807)
 
 ## Fixes

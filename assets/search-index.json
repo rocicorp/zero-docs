@@ -14,7 +14,7 @@
     "kind": "page"
   },
   {
-    "id": "69-agents#options",
+    "id": "68-agents#options",
     "title": "Agent Support",
     "searchTitle": "Options",
     "sectionTitle": "Options",
@@ -130,7 +130,7 @@
     "kind": "page"
   },
   {
-    "id": "70-auth#setting-userid",
+    "id": "69-auth#setting-userid",
     "title": "Authentication",
     "searchTitle": "Setting userID",
     "sectionTitle": "Setting userID",
@@ -140,7 +140,7 @@
     "kind": "section"
   },
   {
-    "id": "71-auth#context",
+    "id": "70-auth#context",
     "title": "Authentication",
     "searchTitle": "Context",
     "sectionTitle": "Context",
@@ -150,7 +150,7 @@
     "kind": "section"
   },
   {
-    "id": "72-auth#sending-credentials",
+    "id": "71-auth#sending-credentials",
     "title": "Authentication",
     "searchTitle": "Sending Credentials",
     "sectionTitle": "Sending Credentials",
@@ -160,7 +160,7 @@
     "kind": "section"
   },
   {
-    "id": "73-auth#cookies",
+    "id": "72-auth#cookies",
     "title": "Authentication",
     "searchTitle": "Cookies",
     "sectionTitle": "Cookies",
@@ -170,7 +170,7 @@
     "kind": "section"
   },
   {
-    "id": "74-auth#query-handler",
+    "id": "73-auth#query-handler",
     "title": "Authentication",
     "searchTitle": "Query Handler",
     "sectionTitle": "Query Handler",
@@ -180,7 +180,7 @@
     "kind": "section"
   },
   {
-    "id": "75-auth#mutate-handler",
+    "id": "74-auth#mutate-handler",
     "title": "Authentication",
     "searchTitle": "Mutate Handler",
     "sectionTitle": "Mutate Handler",
@@ -190,7 +190,7 @@
     "kind": "section"
   },
   {
-    "id": "76-auth#deployment",
+    "id": "75-auth#deployment",
     "title": "Authentication",
     "searchTitle": "Deployment",
     "sectionTitle": "Deployment",
@@ -200,7 +200,7 @@
     "kind": "section"
   },
   {
-    "id": "77-auth#tokens",
+    "id": "76-auth#tokens",
     "title": "Authentication",
     "searchTitle": "Tokens",
     "sectionTitle": "Tokens",
@@ -210,7 +210,7 @@
     "kind": "section"
   },
   {
-    "id": "78-auth#query-handler-1",
+    "id": "77-auth#query-handler-1",
     "title": "Authentication",
     "searchTitle": "Query Handler",
     "sectionTitle": "Query Handler",
@@ -220,7 +220,7 @@
     "kind": "section"
   },
   {
-    "id": "79-auth#mutate-handler-1",
+    "id": "78-auth#mutate-handler-1",
     "title": "Authentication",
     "searchTitle": "Mutate Handler",
     "sectionTitle": "Mutate Handler",
@@ -230,7 +230,7 @@
     "kind": "section"
   },
   {
-    "id": "80-auth#updating-tokens",
+    "id": "79-auth#updating-tokens",
     "title": "Authentication",
     "searchTitle": "Updating Tokens",
     "sectionTitle": "Updating Tokens",
@@ -240,7 +240,7 @@
     "kind": "section"
   },
   {
-    "id": "81-auth#auth-failure-and-refresh",
+    "id": "80-auth#auth-failure-and-refresh",
     "title": "Authentication",
     "searchTitle": "Auth Failure and Refresh",
     "sectionTitle": "Auth Failure and Refresh",
@@ -250,7 +250,7 @@
     "kind": "section"
   },
   {
-    "id": "82-auth#permission-patterns",
+    "id": "81-auth#permission-patterns",
     "title": "Authentication",
     "searchTitle": "Permission Patterns",
     "sectionTitle": "Permission Patterns",
@@ -260,7 +260,7 @@
     "kind": "section"
   },
   {
-    "id": "83-auth#read-permissions",
+    "id": "82-auth#read-permissions",
     "title": "Authentication",
     "searchTitle": "Read Permissions",
     "sectionTitle": "Read Permissions",
@@ -270,7 +270,7 @@
     "kind": "section"
   },
   {
-    "id": "84-auth#only-owned-rows",
+    "id": "83-auth#only-owned-rows",
     "title": "Authentication",
     "searchTitle": "Only Owned Rows",
     "sectionTitle": "Only Owned Rows",
@@ -280,7 +280,7 @@
     "kind": "section"
   },
   {
-    "id": "85-auth#owned-or-shared-rows",
+    "id": "84-auth#owned-or-shared-rows",
     "title": "Authentication",
     "searchTitle": "Owned or Shared Rows",
     "sectionTitle": "Owned or Shared Rows",
@@ -290,7 +290,7 @@
     "kind": "section"
   },
   {
-    "id": "86-auth#owned-rows-or-all-if-admin",
+    "id": "85-auth#owned-rows-or-all-if-admin",
     "title": "Authentication",
     "searchTitle": "Owned Rows or All if Admin",
     "sectionTitle": "Owned Rows or All if Admin",
@@ -300,7 +300,7 @@
     "kind": "section"
   },
   {
-    "id": "87-auth#deny-by-returning-no-rows",
+    "id": "86-auth#deny-by-returning-no-rows",
     "title": "Authentication",
     "searchTitle": "Deny by Returning No Rows",
     "sectionTitle": "Deny by Returning No Rows",
@@ -310,7 +310,7 @@
     "kind": "section"
   },
   {
-    "id": "88-auth#write-permissions",
+    "id": "87-auth#write-permissions",
     "title": "Authentication",
     "searchTitle": "Write Permissions",
     "sectionTitle": "Write Permissions",
@@ -320,7 +320,7 @@
     "kind": "section"
   },
   {
-    "id": "89-auth#enforce-ownership",
+    "id": "88-auth#enforce-ownership",
     "title": "Authentication",
     "searchTitle": "Enforce Ownership",
     "sectionTitle": "Enforce Ownership",
@@ -330,7 +330,7 @@
     "kind": "section"
   },
   {
-    "id": "90-auth#edit-owned-rows",
+    "id": "89-auth#edit-owned-rows",
     "title": "Authentication",
     "searchTitle": "Edit Owned Rows",
     "sectionTitle": "Edit Owned Rows",
@@ -340,7 +340,7 @@
     "kind": "section"
   },
   {
-    "id": "91-auth#edit-owned-or-shared-rows",
+    "id": "90-auth#edit-owned-or-shared-rows",
     "title": "Authentication",
     "searchTitle": "Edit Owned or Shared Rows",
     "sectionTitle": "Edit Owned or Shared Rows",
@@ -350,7 +350,7 @@
     "kind": "section"
   },
   {
-    "id": "92-auth#edit-owned-or-all-if-admin",
+    "id": "91-auth#edit-owned-or-all-if-admin",
     "title": "Authentication",
     "searchTitle": "Edit Owned or All if Admin",
     "sectionTitle": "Edit Owned or All if Admin",
@@ -360,7 +360,7 @@
     "kind": "section"
   },
   {
-    "id": "93-auth#logging-out",
+    "id": "92-auth#logging-out",
     "title": "Authentication",
     "searchTitle": "Logging Out",
     "sectionTitle": "Logging Out",
@@ -388,7 +388,7 @@
     "kind": "page"
   },
   {
-    "id": "94-community#ui-frameworks",
+    "id": "93-community#ui-frameworks",
     "title": "From the Community",
     "searchTitle": "UI Frameworks",
     "sectionTitle": "UI Frameworks",
@@ -398,7 +398,7 @@
     "kind": "section"
   },
   {
-    "id": "95-community#miscellaneous",
+    "id": "94-community#miscellaneous",
     "title": "From the Community",
     "searchTitle": "Miscellaneous",
     "sectionTitle": "Miscellaneous",
@@ -490,7 +490,7 @@
     "kind": "page"
   },
   {
-    "id": "96-connecting-to-postgres#event-triggers",
+    "id": "95-connecting-to-postgres#event-triggers",
     "title": "Connecting to Postgres",
     "searchTitle": "Event Triggers",
     "sectionTitle": "Event Triggers",
@@ -500,7 +500,7 @@
     "kind": "section"
   },
   {
-    "id": "97-connecting-to-postgres#configuration",
+    "id": "96-connecting-to-postgres#configuration",
     "title": "Connecting to Postgres",
     "searchTitle": "Configuration",
     "sectionTitle": "Configuration",
@@ -510,7 +510,7 @@
     "kind": "section"
   },
   {
-    "id": "98-connecting-to-postgres#wal-level",
+    "id": "97-connecting-to-postgres#wal-level",
     "title": "Connecting to Postgres",
     "searchTitle": "WAL Level",
     "sectionTitle": "WAL Level",
@@ -520,7 +520,7 @@
     "kind": "section"
   },
   {
-    "id": "99-connecting-to-postgres#bounding-wal-size",
+    "id": "98-connecting-to-postgres#bounding-wal-size",
     "title": "Connecting to Postgres",
     "searchTitle": "Bounding WAL Size",
     "sectionTitle": "Bounding WAL Size",
@@ -530,7 +530,7 @@
     "kind": "section"
   },
   {
-    "id": "100-connecting-to-postgres#provider-specific-notes",
+    "id": "99-connecting-to-postgres#provider-specific-notes",
     "title": "Connecting to Postgres",
     "searchTitle": "Provider-Specific Notes",
     "sectionTitle": "Provider-Specific Notes",
@@ -540,7 +540,7 @@
     "kind": "section"
   },
   {
-    "id": "101-connecting-to-postgres#planetscale-for-postgres",
+    "id": "100-connecting-to-postgres#planetscale-for-postgres",
     "title": "Connecting to Postgres",
     "searchTitle": "PlanetScale for Postgres",
     "sectionTitle": "PlanetScale for Postgres",
@@ -550,7 +550,7 @@
     "kind": "section"
   },
   {
-    "id": "102-connecting-to-postgres#neon",
+    "id": "101-connecting-to-postgres#neon",
     "title": "Connecting to Postgres",
     "searchTitle": "Neon",
     "sectionTitle": "Neon",
@@ -560,7 +560,7 @@
     "kind": "section"
   },
   {
-    "id": "103-connecting-to-postgres#logical-replication",
+    "id": "102-connecting-to-postgres#logical-replication",
     "title": "Connecting to Postgres",
     "searchTitle": "Logical Replication",
     "sectionTitle": "Logical Replication",
@@ -570,7 +570,7 @@
     "kind": "section"
   },
   {
-    "id": "104-connecting-to-postgres#branching",
+    "id": "103-connecting-to-postgres#branching",
     "title": "Connecting to Postgres",
     "searchTitle": "Branching",
     "sectionTitle": "Branching",
@@ -580,7 +580,7 @@
     "kind": "section"
   },
   {
-    "id": "105-connecting-to-postgres#flyio",
+    "id": "104-connecting-to-postgres#flyio",
     "title": "Connecting to Postgres",
     "searchTitle": "Fly.io",
     "sectionTitle": "Fly.io",
@@ -590,7 +590,7 @@
     "kind": "section"
   },
   {
-    "id": "106-connecting-to-postgres#networking",
+    "id": "105-connecting-to-postgres#networking",
     "title": "Connecting to Postgres",
     "searchTitle": "Networking",
     "sectionTitle": "Networking",
@@ -600,7 +600,7 @@
     "kind": "section"
   },
   {
-    "id": "107-connecting-to-postgres#permissions",
+    "id": "106-connecting-to-postgres#permissions",
     "title": "Connecting to Postgres",
     "searchTitle": "Permissions",
     "sectionTitle": "Permissions",
@@ -610,7 +610,7 @@
     "kind": "section"
   },
   {
-    "id": "108-connecting-to-postgres#pooling",
+    "id": "107-connecting-to-postgres#pooling",
     "title": "Connecting to Postgres",
     "searchTitle": "Pooling",
     "sectionTitle": "Pooling",
@@ -620,7 +620,7 @@
     "kind": "section"
   },
   {
-    "id": "109-connecting-to-postgres#supabase",
+    "id": "108-connecting-to-postgres#supabase",
     "title": "Connecting to Postgres",
     "searchTitle": "Supabase",
     "sectionTitle": "Supabase",
@@ -630,7 +630,7 @@
     "kind": "section"
   },
   {
-    "id": "110-connecting-to-postgres#publication-changes",
+    "id": "109-connecting-to-postgres#publication-changes",
     "title": "Connecting to Postgres",
     "searchTitle": "Publication Changes",
     "sectionTitle": "Publication Changes",
@@ -640,7 +640,7 @@
     "kind": "section"
   },
   {
-    "id": "111-connecting-to-postgres#ipv4",
+    "id": "110-connecting-to-postgres#ipv4",
     "title": "Connecting to Postgres",
     "searchTitle": "IPv4",
     "sectionTitle": "IPv4",
@@ -650,7 +650,7 @@
     "kind": "section"
   },
   {
-    "id": "112-connecting-to-postgres#render",
+    "id": "111-connecting-to-postgres#render",
     "title": "Connecting to Postgres",
     "searchTitle": "Render",
     "sectionTitle": "Render",
@@ -660,7 +660,7 @@
     "kind": "section"
   },
   {
-    "id": "113-connecting-to-postgres#google-cloud-sql",
+    "id": "112-connecting-to-postgres#google-cloud-sql",
     "title": "Connecting to Postgres",
     "searchTitle": "Google Cloud SQL",
     "sectionTitle": "Google Cloud SQL",
@@ -740,7 +740,7 @@
     "kind": "page"
   },
   {
-    "id": "114-connection#overview",
+    "id": "113-connection#overview",
     "title": "Connection Status",
     "searchTitle": "Overview",
     "sectionTitle": "Overview",
@@ -750,7 +750,7 @@
     "kind": "section"
   },
   {
-    "id": "115-connection#usage",
+    "id": "114-connection#usage",
     "title": "Connection Status",
     "searchTitle": "Usage",
     "sectionTitle": "Usage",
@@ -760,7 +760,7 @@
     "kind": "section"
   },
   {
-    "id": "116-connection#offline",
+    "id": "115-connection#offline",
     "title": "Connection Status",
     "searchTitle": "Offline",
     "sectionTitle": "Offline",
@@ -770,7 +770,7 @@
     "kind": "section"
   },
   {
-    "id": "117-connection#offline-ui",
+    "id": "116-connection#offline-ui",
     "title": "Connection Status",
     "searchTitle": "Offline UI",
     "sectionTitle": "Offline UI",
@@ -780,7 +780,7 @@
     "kind": "section"
   },
   {
-    "id": "118-connection#details",
+    "id": "117-connection#details",
     "title": "Connection Status",
     "searchTitle": "Details",
     "sectionTitle": "Details",
@@ -790,7 +790,7 @@
     "kind": "section"
   },
   {
-    "id": "119-connection#connecting",
+    "id": "118-connection#connecting",
     "title": "Connection Status",
     "searchTitle": "Connecting",
     "sectionTitle": "Connecting",
@@ -800,7 +800,7 @@
     "kind": "section"
   },
   {
-    "id": "120-connection#connected",
+    "id": "119-connection#connected",
     "title": "Connection Status",
     "searchTitle": "Connected",
     "sectionTitle": "Connected",
@@ -810,7 +810,7 @@
     "kind": "section"
   },
   {
-    "id": "121-connection#disconnected",
+    "id": "120-connection#disconnected",
     "title": "Connection Status",
     "searchTitle": "Disconnected",
     "sectionTitle": "Disconnected",
@@ -820,7 +820,7 @@
     "kind": "section"
   },
   {
-    "id": "122-connection#error",
+    "id": "121-connection#error",
     "title": "Connection Status",
     "searchTitle": "Error",
     "sectionTitle": "Error",
@@ -830,7 +830,7 @@
     "kind": "section"
   },
   {
-    "id": "123-connection#needs-auth",
+    "id": "122-connection#needs-auth",
     "title": "Connection Status",
     "searchTitle": "Needs-Auth",
     "sectionTitle": "Needs-Auth",
@@ -840,7 +840,7 @@
     "kind": "section"
   },
   {
-    "id": "124-connection#closed",
+    "id": "123-connection#closed",
     "title": "Connection Status",
     "searchTitle": "Closed",
     "sectionTitle": "Closed",
@@ -850,7 +850,7 @@
     "kind": "section"
   },
   {
-    "id": "125-connection#why-zero-doesnt-support-offline-writes",
+    "id": "124-connection#why-zero-doesnt-support-offline-writes",
     "title": "Connection Status",
     "searchTitle": "Why Zero Doesn't Support Offline Writes",
     "sectionTitle": "Why Zero Doesn't Support Offline Writes",
@@ -860,7 +860,7 @@
     "kind": "section"
   },
   {
-    "id": "126-connection#example",
+    "id": "125-connection#example",
     "title": "Connection Status",
     "searchTitle": "Example",
     "sectionTitle": "Example",
@@ -870,7 +870,7 @@
     "kind": "section"
   },
   {
-    "id": "127-connection#tradeoffs",
+    "id": "126-connection#tradeoffs",
     "title": "Connection Status",
     "searchTitle": "Tradeoffs",
     "sectionTitle": "Tradeoffs",
@@ -880,7 +880,7 @@
     "kind": "section"
   },
   {
-    "id": "128-connection#zeros-position",
+    "id": "127-connection#zeros-position",
     "title": "Connection Status",
     "searchTitle": "Zero's Position",
     "sectionTitle": "Zero's Position",
@@ -932,7 +932,7 @@
     "kind": "page"
   },
   {
-    "id": "129-debug/inspector#accessing-the-inspector",
+    "id": "128-debug/inspector#accessing-the-inspector",
     "title": "Inspector",
     "searchTitle": "Accessing the Inspector",
     "sectionTitle": "Accessing the Inspector",
@@ -942,7 +942,7 @@
     "kind": "section"
   },
   {
-    "id": "130-debug/inspector#clients-and-groups",
+    "id": "129-debug/inspector#clients-and-groups",
     "title": "Inspector",
     "searchTitle": "Clients and Groups",
     "sectionTitle": "Clients and Groups",
@@ -952,7 +952,7 @@
     "kind": "section"
   },
   {
-    "id": "131-debug/inspector#queries",
+    "id": "130-debug/inspector#queries",
     "title": "Inspector",
     "searchTitle": "Queries",
     "sectionTitle": "Queries",
@@ -962,7 +962,7 @@
     "kind": "section"
   },
   {
-    "id": "132-debug/inspector#analyzing-queries",
+    "id": "131-debug/inspector#analyzing-queries",
     "title": "Inspector",
     "searchTitle": "Analyzing Queries",
     "sectionTitle": "Analyzing Queries",
@@ -972,7 +972,7 @@
     "kind": "section"
   },
   {
-    "id": "133-debug/inspector#analyzing-arbitrary-zql",
+    "id": "132-debug/inspector#analyzing-arbitrary-zql",
     "title": "Inspector",
     "searchTitle": "Analyzing Arbitrary ZQL",
     "sectionTitle": "Analyzing Arbitrary ZQL",
@@ -982,7 +982,7 @@
     "kind": "section"
   },
   {
-    "id": "134-debug/inspector#analyzing-query-plans",
+    "id": "133-debug/inspector#analyzing-query-plans",
     "title": "Inspector",
     "searchTitle": "Analyzing Query Plans",
     "sectionTitle": "Analyzing Query Plans",
@@ -992,7 +992,7 @@
     "kind": "section"
   },
   {
-    "id": "135-debug/inspector#table-data",
+    "id": "134-debug/inspector#table-data",
     "title": "Inspector",
     "searchTitle": "Table Data",
     "sectionTitle": "Table Data",
@@ -1002,7 +1002,7 @@
     "kind": "section"
   },
   {
-    "id": "136-debug/inspector#server-version",
+    "id": "135-debug/inspector#server-version",
     "title": "Inspector",
     "searchTitle": "Server Version",
     "sectionTitle": "Server Version",
@@ -1054,7 +1054,7 @@
     "kind": "page"
   },
   {
-    "id": "137-debug/otel#grafana-cloud-walkthrough",
+    "id": "136-debug/otel#grafana-cloud-walkthrough",
     "title": "OpenTelemetry",
     "searchTitle": "Grafana Cloud Walkthrough",
     "sectionTitle": "Grafana Cloud Walkthrough",
@@ -1064,7 +1064,7 @@
     "kind": "section"
   },
   {
-    "id": "138-debug/otel#distributed-tracing",
+    "id": "137-debug/otel#distributed-tracing",
     "title": "OpenTelemetry",
     "searchTitle": "Distributed Tracing",
     "sectionTitle": "Distributed Tracing",
@@ -1074,7 +1074,7 @@
     "kind": "section"
   },
   {
-    "id": "139-debug/otel#metrics-reference",
+    "id": "138-debug/otel#metrics-reference",
     "title": "OpenTelemetry",
     "searchTitle": "Metrics Reference",
     "sectionTitle": "Metrics Reference",
@@ -1084,7 +1084,7 @@
     "kind": "section"
   },
   {
-    "id": "140-debug/otel#zeroserver",
+    "id": "139-debug/otel#zeroserver",
     "title": "OpenTelemetry",
     "searchTitle": "zero.server",
     "sectionTitle": "zero.server",
@@ -1094,7 +1094,7 @@
     "kind": "section"
   },
   {
-    "id": "141-debug/otel#zeroreplica",
+    "id": "140-debug/otel#zeroreplica",
     "title": "OpenTelemetry",
     "searchTitle": "zero.replica",
     "sectionTitle": "zero.replica",
@@ -1104,7 +1104,7 @@
     "kind": "section"
   },
   {
-    "id": "142-debug/otel#zeroreplication",
+    "id": "141-debug/otel#zeroreplication",
     "title": "OpenTelemetry",
     "searchTitle": "zero.replication",
     "sectionTitle": "zero.replication",
@@ -1114,7 +1114,7 @@
     "kind": "section"
   },
   {
-    "id": "143-debug/otel#zerosync",
+    "id": "142-debug/otel#zerosync",
     "title": "OpenTelemetry",
     "searchTitle": "zero.sync",
     "sectionTitle": "zero.sync",
@@ -1124,7 +1124,7 @@
     "kind": "section"
   },
   {
-    "id": "144-debug/otel#zeromutation",
+    "id": "143-debug/otel#zeromutation",
     "title": "OpenTelemetry",
     "searchTitle": "zero.mutation",
     "sectionTitle": "zero.mutation",
@@ -1165,7 +1165,7 @@
     "kind": "page"
   },
   {
-    "id": "145-debug/replication#resetting",
+    "id": "144-debug/replication#resetting",
     "title": "Replication",
     "searchTitle": "Resetting",
     "sectionTitle": "Resetting",
@@ -1175,7 +1175,7 @@
     "kind": "section"
   },
   {
-    "id": "146-debug/replication#inspecting",
+    "id": "145-debug/replication#inspecting",
     "title": "Replication",
     "searchTitle": "Inspecting",
     "sectionTitle": "Inspecting",
@@ -1185,7 +1185,7 @@
     "kind": "section"
   },
   {
-    "id": "147-debug/replication#miscellaneous",
+    "id": "146-debug/replication#miscellaneous",
     "title": "Replication",
     "searchTitle": "Miscellaneous",
     "sectionTitle": "Miscellaneous",
@@ -1229,7 +1229,7 @@
     "kind": "page"
   },
   {
-    "id": "148-debug/slow-queries#query-plan",
+    "id": "147-debug/slow-queries#query-plan",
     "title": "Slow Queries",
     "searchTitle": "Query Plan",
     "sectionTitle": "Query Plan",
@@ -1239,7 +1239,7 @@
     "kind": "section"
   },
   {
-    "id": "149-debug/slow-queries#optimizing-the-plan",
+    "id": "148-debug/slow-queries#optimizing-the-plan",
     "title": "Slow Queries",
     "searchTitle": "Optimizing the Plan",
     "sectionTitle": "Optimizing the Plan",
@@ -1249,7 +1249,7 @@
     "kind": "section"
   },
   {
-    "id": "150-debug/slow-queries#check-ttl",
+    "id": "149-debug/slow-queries#check-ttl",
     "title": "Slow Queries",
     "searchTitle": "Check ttl",
     "sectionTitle": "Check ttl",
@@ -1259,7 +1259,7 @@
     "kind": "section"
   },
   {
-    "id": "151-debug/slow-queries#locality",
+    "id": "150-debug/slow-queries#locality",
     "title": "Slow Queries",
     "searchTitle": "Locality",
     "sectionTitle": "Locality",
@@ -1269,7 +1269,7 @@
     "kind": "section"
   },
   {
-    "id": "152-debug/slow-queries#check-storage",
+    "id": "151-debug/slow-queries#check-storage",
     "title": "Slow Queries",
     "searchTitle": "Check Storage",
     "sectionTitle": "Check Storage",
@@ -1279,7 +1279,7 @@
     "kind": "section"
   },
   {
-    "id": "153-debug/slow-queries#statz",
+    "id": "152-debug/slow-queries#statz",
     "title": "Slow Queries",
     "searchTitle": "/statz",
     "sectionTitle": "/statz",
@@ -1356,7 +1356,7 @@
     "kind": "page"
   },
   {
-    "id": "154-deployment#minimum-viable-strategy",
+    "id": "153-deployment#minimum-viable-strategy",
     "title": "Deploying Zero",
     "searchTitle": "Minimum Viable Strategy",
     "sectionTitle": "Minimum Viable Strategy",
@@ -1366,7 +1366,7 @@
     "kind": "section"
   },
   {
-    "id": "155-deployment#maximal-strategy",
+    "id": "154-deployment#maximal-strategy",
     "title": "Deploying Zero",
     "searchTitle": "Maximal Strategy",
     "sectionTitle": "Maximal Strategy",
@@ -1376,7 +1376,7 @@
     "kind": "section"
   },
   {
-    "id": "156-deployment#replica-lifecycle",
+    "id": "155-deployment#replica-lifecycle",
     "title": "Deploying Zero",
     "searchTitle": "Replica Lifecycle",
     "sectionTitle": "Replica Lifecycle",
@@ -1386,7 +1386,7 @@
     "kind": "section"
   },
   {
-    "id": "157-deployment#performance",
+    "id": "156-deployment#performance",
     "title": "Deploying Zero",
     "searchTitle": "Performance",
     "sectionTitle": "Performance",
@@ -1396,7 +1396,7 @@
     "kind": "section"
   },
   {
-    "id": "158-deployment#hydration",
+    "id": "157-deployment#hydration",
     "title": "Deploying Zero",
     "searchTitle": "Hydration",
     "sectionTitle": "Hydration",
@@ -1406,7 +1406,7 @@
     "kind": "section"
   },
   {
-    "id": "159-deployment#ivm-advancement",
+    "id": "158-deployment#ivm-advancement",
     "title": "Deploying Zero",
     "searchTitle": "IVM advancement",
     "sectionTitle": "IVM advancement",
@@ -1416,7 +1416,7 @@
     "kind": "section"
   },
   {
-    "id": "160-deployment#system-level",
+    "id": "159-deployment#system-level",
     "title": "Deploying Zero",
     "searchTitle": "System-level",
     "sectionTitle": "System-level",
@@ -1426,7 +1426,7 @@
     "kind": "section"
   },
   {
-    "id": "161-deployment#networking",
+    "id": "160-deployment#networking",
     "title": "Deploying Zero",
     "searchTitle": "Networking",
     "sectionTitle": "Networking",
@@ -1436,7 +1436,7 @@
     "kind": "section"
   },
   {
-    "id": "162-deployment#sticky-sessions",
+    "id": "161-deployment#sticky-sessions",
     "title": "Deploying Zero",
     "searchTitle": "Sticky Sessions",
     "sectionTitle": "Sticky Sessions",
@@ -1446,7 +1446,7 @@
     "kind": "section"
   },
   {
-    "id": "163-deployment#rolling-updates",
+    "id": "162-deployment#rolling-updates",
     "title": "Deploying Zero",
     "searchTitle": "Rolling Updates",
     "sectionTitle": "Rolling Updates",
@@ -1456,7 +1456,7 @@
     "kind": "section"
   },
   {
-    "id": "164-deployment#clientserver-version-compatibility",
+    "id": "163-deployment#clientserver-version-compatibility",
     "title": "Deploying Zero",
     "searchTitle": "Client/Server Version Compatibility",
     "sectionTitle": "Client/Server Version Compatibility",
@@ -1466,7 +1466,7 @@
     "kind": "section"
   },
   {
-    "id": "165-deployment#configuration",
+    "id": "164-deployment#configuration",
     "title": "Deploying Zero",
     "searchTitle": "Configuration",
     "sectionTitle": "Configuration",
@@ -1490,7 +1490,7 @@
     "kind": "page"
   },
   {
-    "id": "166-deprecated/ad-hoc-queries#overview",
+    "id": "165-deprecated/ad-hoc-queries#overview",
     "title": "Ad-Hoc Queries (Deprecated)",
     "searchTitle": "Overview",
     "sectionTitle": "Overview",
@@ -1514,7 +1514,7 @@
     "kind": "page"
   },
   {
-    "id": "167-deprecated/crud-mutators#overview",
+    "id": "166-deprecated/crud-mutators#overview",
     "title": "CRUD Mutators (Deprecated)",
     "searchTitle": "Overview",
     "sectionTitle": "Overview",
@@ -1586,7 +1586,7 @@
     "kind": "page"
   },
   {
-    "id": "168-deprecated/rls-permissions#define-permissions",
+    "id": "167-deprecated/rls-permissions#define-permissions",
     "title": "RLS Permissions (Deprecated)",
     "searchTitle": "Define Permissions",
     "sectionTitle": "Define Permissions",
@@ -1596,7 +1596,7 @@
     "kind": "section"
   },
   {
-    "id": "169-deprecated/rls-permissions#access-is-denied-by-default",
+    "id": "168-deprecated/rls-permissions#access-is-denied-by-default",
     "title": "RLS Permissions (Deprecated)",
     "searchTitle": "Access is Denied by Default",
     "sectionTitle": "Access is Denied by Default",
@@ -1606,7 +1606,7 @@
     "kind": "section"
   },
   {
-    "id": "170-deprecated/rls-permissions#permission-evaluation",
+    "id": "169-deprecated/rls-permissions#permission-evaluation",
     "title": "RLS Permissions (Deprecated)",
     "searchTitle": "Permission Evaluation",
     "sectionTitle": "Permission Evaluation",
@@ -1616,7 +1616,7 @@
     "kind": "section"
   },
   {
-    "id": "171-deprecated/rls-permissions#permission-deployment",
+    "id": "170-deprecated/rls-permissions#permission-deployment",
     "title": "RLS Permissions (Deprecated)",
     "searchTitle": "Permission Deployment",
     "sectionTitle": "Permission Deployment",
@@ -1626,7 +1626,7 @@
     "kind": "section"
   },
   {
-    "id": "172-deprecated/rls-permissions#rules",
+    "id": "171-deprecated/rls-permissions#rules",
     "title": "RLS Permissions (Deprecated)",
     "searchTitle": "Rules",
     "sectionTitle": "Rules",
@@ -1636,7 +1636,7 @@
     "kind": "section"
   },
   {
-    "id": "173-deprecated/rls-permissions#select-permissions",
+    "id": "172-deprecated/rls-permissions#select-permissions",
     "title": "RLS Permissions (Deprecated)",
     "searchTitle": "Select Permissions",
     "sectionTitle": "Select Permissions",
@@ -1646,7 +1646,7 @@
     "kind": "section"
   },
   {
-    "id": "174-deprecated/rls-permissions#insert-permissions",
+    "id": "173-deprecated/rls-permissions#insert-permissions",
     "title": "RLS Permissions (Deprecated)",
     "searchTitle": "Insert Permissions",
     "sectionTitle": "Insert Permissions",
@@ -1656,7 +1656,7 @@
     "kind": "section"
   },
   {
-    "id": "175-deprecated/rls-permissions#update-permissions",
+    "id": "174-deprecated/rls-permissions#update-permissions",
     "title": "RLS Permissions (Deprecated)",
     "searchTitle": "Update Permissions",
     "sectionTitle": "Update Permissions",
@@ -1666,7 +1666,7 @@
     "kind": "section"
   },
   {
-    "id": "176-deprecated/rls-permissions#delete-permissions",
+    "id": "175-deprecated/rls-permissions#delete-permissions",
     "title": "RLS Permissions (Deprecated)",
     "searchTitle": "Delete Permissions",
     "sectionTitle": "Delete Permissions",
@@ -1676,7 +1676,7 @@
     "kind": "section"
   },
   {
-    "id": "177-deprecated/rls-permissions#permissions-based-on-auth-data",
+    "id": "176-deprecated/rls-permissions#permissions-based-on-auth-data",
     "title": "RLS Permissions (Deprecated)",
     "searchTitle": "Permissions Based on Auth Data",
     "sectionTitle": "Permissions Based on Auth Data",
@@ -1686,7 +1686,7 @@
     "kind": "section"
   },
   {
-    "id": "178-deprecated/rls-permissions#debugging",
+    "id": "177-deprecated/rls-permissions#debugging",
     "title": "RLS Permissions (Deprecated)",
     "searchTitle": "Debugging",
     "sectionTitle": "Debugging",
@@ -1696,7 +1696,7 @@
     "kind": "section"
   },
   {
-    "id": "179-deprecated/rls-permissions#read-permissions",
+    "id": "178-deprecated/rls-permissions#read-permissions",
     "title": "RLS Permissions (Deprecated)",
     "searchTitle": "Read Permissions",
     "sectionTitle": "Read Permissions",
@@ -1706,7 +1706,7 @@
     "kind": "section"
   },
   {
-    "id": "180-deprecated/rls-permissions#write-permissions",
+    "id": "179-deprecated/rls-permissions#write-permissions",
     "title": "RLS Permissions (Deprecated)",
     "searchTitle": "Write Permissions",
     "sectionTitle": "Write Permissions",
@@ -1790,7 +1790,7 @@
     "kind": "page"
   },
   {
-    "id": "181-install#integrate-zero",
+    "id": "180-install#integrate-zero",
     "title": "Install Zero",
     "searchTitle": "Integrate Zero",
     "sectionTitle": "Integrate Zero",
@@ -1800,7 +1800,7 @@
     "kind": "section"
   },
   {
-    "id": "182-install#set-up-your-database",
+    "id": "181-install#set-up-your-database",
     "title": "Install Zero",
     "searchTitle": "Set Up Your Database",
     "sectionTitle": "Set Up Your Database",
@@ -1810,7 +1810,7 @@
     "kind": "section"
   },
   {
-    "id": "183-install#install-and-run-zero-cache",
+    "id": "182-install#install-and-run-zero-cache",
     "title": "Install Zero",
     "searchTitle": "Install and Run Zero-Cache",
     "sectionTitle": "Install and Run Zero-Cache",
@@ -1820,7 +1820,7 @@
     "kind": "section"
   },
   {
-    "id": "184-install#set-up-your-zero-schema",
+    "id": "183-install#set-up-your-zero-schema",
     "title": "Install Zero",
     "searchTitle": "Set Up Your Zero Schema",
     "sectionTitle": "Set Up Your Zero Schema",
@@ -1830,7 +1830,7 @@
     "kind": "section"
   },
   {
-    "id": "185-install#set-up-the-zero-client",
+    "id": "184-install#set-up-the-zero-client",
     "title": "Install Zero",
     "searchTitle": "Set Up the Zero Client",
     "sectionTitle": "Set Up the Zero Client",
@@ -1840,7 +1840,7 @@
     "kind": "section"
   },
   {
-    "id": "186-install#sync-data",
+    "id": "185-install#sync-data",
     "title": "Install Zero",
     "searchTitle": "Sync Data",
     "sectionTitle": "Sync Data",
@@ -1850,7 +1850,7 @@
     "kind": "section"
   },
   {
-    "id": "187-install#define-query",
+    "id": "186-install#define-query",
     "title": "Install Zero",
     "searchTitle": "Define Query",
     "sectionTitle": "Define Query",
@@ -1860,7 +1860,7 @@
     "kind": "section"
   },
   {
-    "id": "188-install#invoke-query",
+    "id": "187-install#invoke-query",
     "title": "Install Zero",
     "searchTitle": "Invoke Query",
     "sectionTitle": "Invoke Query",
@@ -1870,7 +1870,7 @@
     "kind": "section"
   },
   {
-    "id": "189-install#implement-query-backend",
+    "id": "188-install#implement-query-backend",
     "title": "Install Zero",
     "searchTitle": "Implement Query Backend",
     "sectionTitle": "Implement Query Backend",
@@ -1880,7 +1880,7 @@
     "kind": "section"
   },
   {
-    "id": "190-install#more-about-queries",
+    "id": "189-install#more-about-queries",
     "title": "Install Zero",
     "searchTitle": "More about Queries",
     "sectionTitle": "More about Queries",
@@ -1890,7 +1890,7 @@
     "kind": "section"
   },
   {
-    "id": "191-install#mutate-data",
+    "id": "190-install#mutate-data",
     "title": "Install Zero",
     "searchTitle": "Mutate Data",
     "sectionTitle": "Mutate Data",
@@ -1900,7 +1900,7 @@
     "kind": "section"
   },
   {
-    "id": "192-install#define-mutators",
+    "id": "191-install#define-mutators",
     "title": "Install Zero",
     "searchTitle": "Define Mutators",
     "sectionTitle": "Define Mutators",
@@ -1910,7 +1910,7 @@
     "kind": "section"
   },
   {
-    "id": "193-install#invoke-mutators",
+    "id": "192-install#invoke-mutators",
     "title": "Install Zero",
     "searchTitle": "Invoke Mutators",
     "sectionTitle": "Invoke Mutators",
@@ -1920,7 +1920,7 @@
     "kind": "section"
   },
   {
-    "id": "194-install#implement-mutate-endpoint",
+    "id": "193-install#implement-mutate-endpoint",
     "title": "Install Zero",
     "searchTitle": "Implement Mutate Endpoint",
     "sectionTitle": "Implement Mutate Endpoint",
@@ -1930,7 +1930,7 @@
     "kind": "section"
   },
   {
-    "id": "195-install#more-about-mutators",
+    "id": "194-install#more-about-mutators",
     "title": "Install Zero",
     "searchTitle": "More about Mutators",
     "sectionTitle": "More about Mutators",
@@ -1940,7 +1940,7 @@
     "kind": "section"
   },
   {
-    "id": "196-install#thats-it",
+    "id": "195-install#thats-it",
     "title": "Install Zero",
     "searchTitle": "That's It!",
     "sectionTitle": "That's It!",
@@ -1964,7 +1964,7 @@
     "kind": "page"
   },
   {
-    "id": "197-introduction#ready-to-get-started",
+    "id": "196-introduction#ready-to-get-started",
     "title": "Welcome to Zero",
     "searchTitle": "Ready to get started?",
     "sectionTitle": "Ready to get started?",
@@ -2100,7 +2100,7 @@
     "kind": "page"
   },
   {
-    "id": "198-mutators#architecture",
+    "id": "197-mutators#architecture",
     "title": "Mutators",
     "searchTitle": "Architecture",
     "sectionTitle": "Architecture",
@@ -2110,7 +2110,7 @@
     "kind": "section"
   },
   {
-    "id": "199-mutators#life-of-a-mutation",
+    "id": "198-mutators#life-of-a-mutation",
     "title": "Mutators",
     "searchTitle": "Life of a Mutation",
     "sectionTitle": "Life of a Mutation",
@@ -2120,7 +2120,7 @@
     "kind": "section"
   },
   {
-    "id": "200-mutators#defining-mutators",
+    "id": "199-mutators#defining-mutators",
     "title": "Mutators",
     "searchTitle": "Defining Mutators",
     "sectionTitle": "Defining Mutators",
@@ -2130,7 +2130,7 @@
     "kind": "section"
   },
   {
-    "id": "201-mutators#basics",
+    "id": "200-mutators#basics",
     "title": "Mutators",
     "searchTitle": "Basics",
     "sectionTitle": "Basics",
@@ -2140,7 +2140,7 @@
     "kind": "section"
   },
   {
-    "id": "202-mutators#writing-data",
+    "id": "201-mutators#writing-data",
     "title": "Mutators",
     "searchTitle": "Writing Data",
     "sectionTitle": "Writing Data",
@@ -2150,7 +2150,7 @@
     "kind": "section"
   },
   {
-    "id": "203-mutators#insert",
+    "id": "202-mutators#insert",
     "title": "Mutators",
     "searchTitle": "Insert",
     "sectionTitle": "Insert",
@@ -2160,7 +2160,7 @@
     "kind": "section"
   },
   {
-    "id": "204-mutators#upsert",
+    "id": "203-mutators#upsert",
     "title": "Mutators",
     "searchTitle": "Upsert",
     "sectionTitle": "Upsert",
@@ -2170,7 +2170,7 @@
     "kind": "section"
   },
   {
-    "id": "205-mutators#update",
+    "id": "204-mutators#update",
     "title": "Mutators",
     "searchTitle": "Update",
     "sectionTitle": "Update",
@@ -2180,7 +2180,7 @@
     "kind": "section"
   },
   {
-    "id": "206-mutators#delete",
+    "id": "205-mutators#delete",
     "title": "Mutators",
     "searchTitle": "Delete",
     "sectionTitle": "Delete",
@@ -2190,7 +2190,7 @@
     "kind": "section"
   },
   {
-    "id": "207-mutators#arguments",
+    "id": "206-mutators#arguments",
     "title": "Mutators",
     "searchTitle": "Arguments",
     "sectionTitle": "Arguments",
@@ -2200,7 +2200,7 @@
     "kind": "section"
   },
   {
-    "id": "208-mutators#reading-data",
+    "id": "207-mutators#reading-data",
     "title": "Mutators",
     "searchTitle": "Reading Data",
     "sectionTitle": "Reading Data",
@@ -2210,7 +2210,7 @@
     "kind": "section"
   },
   {
-    "id": "209-mutators#context",
+    "id": "208-mutators#context",
     "title": "Mutators",
     "searchTitle": "Context",
     "sectionTitle": "Context",
@@ -2220,7 +2220,7 @@
     "kind": "section"
   },
   {
-    "id": "210-mutators#mutator-registries",
+    "id": "209-mutators#mutator-registries",
     "title": "Mutators",
     "searchTitle": "Mutator Registries",
     "sectionTitle": "Mutator Registries",
@@ -2230,7 +2230,7 @@
     "kind": "section"
   },
   {
-    "id": "211-mutators#mutator-names",
+    "id": "210-mutators#mutator-names",
     "title": "Mutators",
     "searchTitle": "Mutator Names",
     "sectionTitle": "Mutator Names",
@@ -2240,7 +2240,7 @@
     "kind": "section"
   },
   {
-    "id": "212-mutators#mutatorsts",
+    "id": "211-mutators#mutatorsts",
     "title": "Mutators",
     "searchTitle": "mutators.ts",
     "sectionTitle": "mutators.ts",
@@ -2250,7 +2250,7 @@
     "kind": "section"
   },
   {
-    "id": "213-mutators#registration",
+    "id": "212-mutators#registration",
     "title": "Mutators",
     "searchTitle": "Registration",
     "sectionTitle": "Registration",
@@ -2260,7 +2260,7 @@
     "kind": "section"
   },
   {
-    "id": "214-mutators#server-setup",
+    "id": "213-mutators#server-setup",
     "title": "Mutators",
     "searchTitle": "Server Setup",
     "sectionTitle": "Server Setup",
@@ -2270,7 +2270,7 @@
     "kind": "section"
   },
   {
-    "id": "215-mutators#registering-the-endpoint",
+    "id": "214-mutators#registering-the-endpoint",
     "title": "Mutators",
     "searchTitle": "Registering the Endpoint",
     "sectionTitle": "Registering the Endpoint",
@@ -2280,7 +2280,7 @@
     "kind": "section"
   },
   {
-    "id": "216-mutators#implementing-the-endpoint",
+    "id": "215-mutators#implementing-the-endpoint",
     "title": "Mutators",
     "searchTitle": "Implementing the Endpoint",
     "sectionTitle": "Implementing the Endpoint",
@@ -2290,7 +2290,7 @@
     "kind": "section"
   },
   {
-    "id": "217-mutators#handling-errors",
+    "id": "216-mutators#handling-errors",
     "title": "Mutators",
     "searchTitle": "Handling Errors",
     "sectionTitle": "Handling Errors",
@@ -2300,7 +2300,7 @@
     "kind": "section"
   },
   {
-    "id": "218-mutators#custom-mutate-url",
+    "id": "217-mutators#custom-mutate-url",
     "title": "Mutators",
     "searchTitle": "Custom Mutate URL",
     "sectionTitle": "Custom Mutate URL",
@@ -2310,7 +2310,7 @@
     "kind": "section"
   },
   {
-    "id": "219-mutators#url-patterns",
+    "id": "218-mutators#url-patterns",
     "title": "Mutators",
     "searchTitle": "URL Patterns",
     "sectionTitle": "URL Patterns",
@@ -2320,7 +2320,7 @@
     "kind": "section"
   },
   {
-    "id": "220-mutators#server-specific-code",
+    "id": "219-mutators#server-specific-code",
     "title": "Mutators",
     "searchTitle": "Server-Specific Code",
     "sectionTitle": "Server-Specific Code",
@@ -2330,7 +2330,7 @@
     "kind": "section"
   },
   {
-    "id": "221-mutators#running-mutators",
+    "id": "220-mutators#running-mutators",
     "title": "Mutators",
     "searchTitle": "Running Mutators",
     "sectionTitle": "Running Mutators",
@@ -2340,7 +2340,7 @@
     "kind": "section"
   },
   {
-    "id": "222-mutators#waiting-for-results",
+    "id": "221-mutators#waiting-for-results",
     "title": "Mutators",
     "searchTitle": "Waiting for Results",
     "sectionTitle": "Waiting for Results",
@@ -2350,7 +2350,7 @@
     "kind": "section"
   },
   {
-    "id": "223-mutators#permissions",
+    "id": "222-mutators#permissions",
     "title": "Mutators",
     "searchTitle": "Permissions",
     "sectionTitle": "Permissions",
@@ -2360,7 +2360,7 @@
     "kind": "section"
   },
   {
-    "id": "224-mutators#dropping-down-to-raw-sql",
+    "id": "223-mutators#dropping-down-to-raw-sql",
     "title": "Mutators",
     "searchTitle": "Dropping Down to Raw SQL",
     "sectionTitle": "Dropping Down to Raw SQL",
@@ -2370,7 +2370,7 @@
     "kind": "section"
   },
   {
-    "id": "225-mutators#notifications-and-async-work",
+    "id": "224-mutators#notifications-and-async-work",
     "title": "Mutators",
     "searchTitle": "Notifications and Async Work",
     "sectionTitle": "Notifications and Async Work",
@@ -2380,7 +2380,7 @@
     "kind": "section"
   },
   {
-    "id": "226-mutators#custom-mutate-implementation",
+    "id": "225-mutators#custom-mutate-implementation",
     "title": "Mutators",
     "searchTitle": "Custom Mutate Implementation",
     "sectionTitle": "Custom Mutate Implementation",
@@ -2404,7 +2404,7 @@
     "kind": "page"
   },
   {
-    "id": "227-open-source#business-model",
+    "id": "226-open-source#business-model",
     "title": "Zero is Open Source Software",
     "searchTitle": "Business Model",
     "sectionTitle": "Business Model",
@@ -2464,7 +2464,7 @@
     "kind": "page"
   },
   {
-    "id": "228-postgres-support#object-names",
+    "id": "227-postgres-support#object-names",
     "title": "Supported Postgres Features",
     "searchTitle": "Object Names",
     "sectionTitle": "Object Names",
@@ -2474,7 +2474,7 @@
     "kind": "section"
   },
   {
-    "id": "229-postgres-support#object-types",
+    "id": "228-postgres-support#object-types",
     "title": "Supported Postgres Features",
     "searchTitle": "Object Types",
     "sectionTitle": "Object Types",
@@ -2484,7 +2484,7 @@
     "kind": "section"
   },
   {
-    "id": "230-postgres-support#column-types",
+    "id": "229-postgres-support#column-types",
     "title": "Supported Postgres Features",
     "searchTitle": "Column Types",
     "sectionTitle": "Column Types",
@@ -2494,7 +2494,7 @@
     "kind": "section"
   },
   {
-    "id": "231-postgres-support#column-defaults",
+    "id": "230-postgres-support#column-defaults",
     "title": "Supported Postgres Features",
     "searchTitle": "Column Defaults",
     "sectionTitle": "Column Defaults",
@@ -2504,7 +2504,7 @@
     "kind": "section"
   },
   {
-    "id": "232-postgres-support#ids",
+    "id": "231-postgres-support#ids",
     "title": "Supported Postgres Features",
     "searchTitle": "IDs",
     "sectionTitle": "IDs",
@@ -2514,7 +2514,7 @@
     "kind": "section"
   },
   {
-    "id": "233-postgres-support#primary-keys",
+    "id": "232-postgres-support#primary-keys",
     "title": "Supported Postgres Features",
     "searchTitle": "Primary Keys",
     "sectionTitle": "Primary Keys",
@@ -2524,7 +2524,7 @@
     "kind": "section"
   },
   {
-    "id": "234-postgres-support#limiting-replication",
+    "id": "233-postgres-support#limiting-replication",
     "title": "Supported Postgres Features",
     "searchTitle": "Limiting Replication",
     "sectionTitle": "Limiting Replication",
@@ -2534,7 +2534,7 @@
     "kind": "section"
   },
   {
-    "id": "235-postgres-support#zero-cache-replication",
+    "id": "234-postgres-support#zero-cache-replication",
     "title": "Supported Postgres Features",
     "searchTitle": "zero-cache replication",
     "sectionTitle": "zero-cache replication",
@@ -2544,7 +2544,7 @@
     "kind": "section"
   },
   {
-    "id": "236-postgres-support#browser-client-replication",
+    "id": "235-postgres-support#browser-client-replication",
     "title": "Supported Postgres Features",
     "searchTitle": "Browser client replication",
     "sectionTitle": "Browser client replication",
@@ -2554,7 +2554,7 @@
     "kind": "section"
   },
   {
-    "id": "237-postgres-support#schema-changes",
+    "id": "236-postgres-support#schema-changes",
     "title": "Supported Postgres Features",
     "searchTitle": "Schema changes",
     "sectionTitle": "Schema changes",
@@ -2590,7 +2590,7 @@
     "kind": "page"
   },
   {
-    "id": "238-previews#overview",
+    "id": "237-previews#overview",
     "title": "Previews",
     "searchTitle": "Overview",
     "sectionTitle": "Overview",
@@ -2600,7 +2600,7 @@
     "kind": "section"
   },
   {
-    "id": "239-previews#configure-allowed-endpoint-patterns",
+    "id": "238-previews#configure-allowed-endpoint-patterns",
     "title": "Previews",
     "searchTitle": "Configure Allowed Endpoint Patterns",
     "sectionTitle": "Configure Allowed Endpoint Patterns",
@@ -2610,7 +2610,7 @@
     "kind": "section"
   },
   {
-    "id": "240-previews#choose-endpoint-urls-in-the-client",
+    "id": "239-previews#choose-endpoint-urls-in-the-client",
     "title": "Previews",
     "searchTitle": "Choose Endpoint URLs in the Client",
     "sectionTitle": "Choose Endpoint URLs in the Client",
@@ -2620,7 +2620,7 @@
     "kind": "section"
   },
   {
-    "id": "241-previews#schema-changes-in-previews",
+    "id": "240-previews#schema-changes-in-previews",
     "title": "Previews",
     "searchTitle": "Schema Changes in Previews",
     "sectionTitle": "Schema Changes in Previews",
@@ -2760,7 +2760,7 @@
     "kind": "page"
   },
   {
-    "id": "242-queries#architecture",
+    "id": "241-queries#architecture",
     "title": "Queries",
     "searchTitle": "Architecture",
     "sectionTitle": "Architecture",
@@ -2770,7 +2770,7 @@
     "kind": "section"
   },
   {
-    "id": "243-queries#life-of-a-query",
+    "id": "242-queries#life-of-a-query",
     "title": "Queries",
     "searchTitle": "Life of a Query",
     "sectionTitle": "Life of a Query",
@@ -2780,7 +2780,7 @@
     "kind": "section"
   },
   {
-    "id": "244-queries#defining-queries",
+    "id": "243-queries#defining-queries",
     "title": "Queries",
     "searchTitle": "Defining Queries",
     "sectionTitle": "Defining Queries",
@@ -2790,7 +2790,7 @@
     "kind": "section"
   },
   {
-    "id": "245-queries#basics",
+    "id": "244-queries#basics",
     "title": "Queries",
     "searchTitle": "Basics",
     "sectionTitle": "Basics",
@@ -2800,7 +2800,7 @@
     "kind": "section"
   },
   {
-    "id": "246-queries#arguments",
+    "id": "245-queries#arguments",
     "title": "Queries",
     "searchTitle": "Arguments",
     "sectionTitle": "Arguments",
@@ -2810,7 +2810,7 @@
     "kind": "section"
   },
   {
-    "id": "247-queries#query-registries",
+    "id": "246-queries#query-registries",
     "title": "Queries",
     "searchTitle": "Query Registries",
     "sectionTitle": "Query Registries",
@@ -2820,7 +2820,7 @@
     "kind": "section"
   },
   {
-    "id": "248-queries#query-names",
+    "id": "247-queries#query-names",
     "title": "Queries",
     "searchTitle": "Query Names",
     "sectionTitle": "Query Names",
@@ -2830,7 +2830,7 @@
     "kind": "section"
   },
   {
-    "id": "249-queries#context",
+    "id": "248-queries#context",
     "title": "Queries",
     "searchTitle": "Context",
     "sectionTitle": "Context",
@@ -2840,7 +2840,7 @@
     "kind": "section"
   },
   {
-    "id": "250-queries#queriests",
+    "id": "249-queries#queriests",
     "title": "Queries",
     "searchTitle": "queries.ts",
     "sectionTitle": "queries.ts",
@@ -2850,7 +2850,7 @@
     "kind": "section"
   },
   {
-    "id": "251-queries#server-setup",
+    "id": "250-queries#server-setup",
     "title": "Queries",
     "searchTitle": "Server Setup",
     "sectionTitle": "Server Setup",
@@ -2860,7 +2860,7 @@
     "kind": "section"
   },
   {
-    "id": "252-queries#registering-the-endpoint",
+    "id": "251-queries#registering-the-endpoint",
     "title": "Queries",
     "searchTitle": "Registering the Endpoint",
     "sectionTitle": "Registering the Endpoint",
@@ -2870,7 +2870,7 @@
     "kind": "section"
   },
   {
-    "id": "253-queries#implementing-the-endpoint",
+    "id": "252-queries#implementing-the-endpoint",
     "title": "Queries",
     "searchTitle": "Implementing the Endpoint",
     "sectionTitle": "Implementing the Endpoint",
@@ -2880,7 +2880,7 @@
     "kind": "section"
   },
   {
-    "id": "254-queries#custom-query-url",
+    "id": "253-queries#custom-query-url",
     "title": "Queries",
     "searchTitle": "Custom Query URL",
     "sectionTitle": "Custom Query URL",
@@ -2890,7 +2890,7 @@
     "kind": "section"
   },
   {
-    "id": "255-queries#url-patterns",
+    "id": "254-queries#url-patterns",
     "title": "Queries",
     "searchTitle": "URL Patterns",
     "sectionTitle": "URL Patterns",
@@ -2900,7 +2900,7 @@
     "kind": "section"
   },
   {
-    "id": "256-queries#running-queries",
+    "id": "255-queries#running-queries",
     "title": "Queries",
     "searchTitle": "Running Queries",
     "sectionTitle": "Running Queries",
@@ -2910,7 +2910,7 @@
     "kind": "section"
   },
   {
-    "id": "257-queries#reactively",
+    "id": "256-queries#reactively",
     "title": "Queries",
     "searchTitle": "Reactively",
     "sectionTitle": "Reactively",
@@ -2920,7 +2920,7 @@
     "kind": "section"
   },
   {
-    "id": "258-queries#once",
+    "id": "257-queries#once",
     "title": "Queries",
     "searchTitle": "Once",
     "sectionTitle": "Once",
@@ -2930,7 +2930,7 @@
     "kind": "section"
   },
   {
-    "id": "259-queries#for-preloading",
+    "id": "258-queries#for-preloading",
     "title": "Queries",
     "searchTitle": "For Preloading",
     "sectionTitle": "For Preloading",
@@ -2940,7 +2940,7 @@
     "kind": "section"
   },
   {
-    "id": "260-queries#missing-data",
+    "id": "259-queries#missing-data",
     "title": "Queries",
     "searchTitle": "Missing Data",
     "sectionTitle": "Missing Data",
@@ -2950,7 +2950,7 @@
     "kind": "section"
   },
   {
-    "id": "261-queries#partial-data",
+    "id": "260-queries#partial-data",
     "title": "Queries",
     "searchTitle": "Partial Data",
     "sectionTitle": "Partial Data",
@@ -2960,7 +2960,7 @@
     "kind": "section"
   },
   {
-    "id": "262-queries#handling-errors",
+    "id": "261-queries#handling-errors",
     "title": "Queries",
     "searchTitle": "Handling Errors",
     "sectionTitle": "Handling Errors",
@@ -2970,7 +2970,7 @@
     "kind": "section"
   },
   {
-    "id": "263-queries#granular-updates",
+    "id": "262-queries#granular-updates",
     "title": "Queries",
     "searchTitle": "Granular Updates",
     "sectionTitle": "Granular Updates",
@@ -2980,7 +2980,7 @@
     "kind": "section"
   },
   {
-    "id": "264-queries#query-caching",
+    "id": "263-queries#query-caching",
     "title": "Queries",
     "searchTitle": "Query Caching",
     "sectionTitle": "Query Caching",
@@ -2990,7 +2990,7 @@
     "kind": "section"
   },
   {
-    "id": "265-queries#ttls",
+    "id": "264-queries#ttls",
     "title": "Queries",
     "searchTitle": "TTLs",
     "sectionTitle": "TTLs",
@@ -3000,7 +3000,7 @@
     "kind": "section"
   },
   {
-    "id": "266-queries#ttl-defaults",
+    "id": "265-queries#ttl-defaults",
     "title": "Queries",
     "searchTitle": "TTL Defaults",
     "sectionTitle": "TTL Defaults",
@@ -3010,7 +3010,7 @@
     "kind": "section"
   },
   {
-    "id": "267-queries#setting-different-ttls",
+    "id": "266-queries#setting-different-ttls",
     "title": "Queries",
     "searchTitle": "Setting Different TTLs",
     "sectionTitle": "Setting Different TTLs",
@@ -3020,7 +3020,7 @@
     "kind": "section"
   },
   {
-    "id": "268-queries#why-zero-ttls-are-short",
+    "id": "267-queries#why-zero-ttls-are-short",
     "title": "Queries",
     "searchTitle": "Why Zero TTLs are Short",
     "sectionTitle": "Why Zero TTLs are Short",
@@ -3030,7 +3030,7 @@
     "kind": "section"
   },
   {
-    "id": "269-queries#local-only-queries",
+    "id": "268-queries#local-only-queries",
     "title": "Queries",
     "searchTitle": "Local-Only Queries",
     "sectionTitle": "Local-Only Queries",
@@ -3040,7 +3040,7 @@
     "kind": "section"
   },
   {
-    "id": "270-queries#custom-server-implementation",
+    "id": "269-queries#custom-server-implementation",
     "title": "Queries",
     "searchTitle": "Custom Server Implementation",
     "sectionTitle": "Custom Server Implementation",
@@ -3050,7 +3050,7 @@
     "kind": "section"
   },
   {
-    "id": "271-queries#consistency",
+    "id": "270-queries#consistency",
     "title": "Queries",
     "searchTitle": "Consistency",
     "sectionTitle": "Consistency",
@@ -3082,7 +3082,7 @@
     "kind": "page"
   },
   {
-    "id": "272-quickstart#hello-zero-solid",
+    "id": "271-quickstart#hello-zero-solid",
     "title": "Quickstarts",
     "searchTitle": "hello-zero-solid",
     "sectionTitle": "hello-zero-solid",
@@ -3092,7 +3092,7 @@
     "kind": "section"
   },
   {
-    "id": "273-quickstart#hello-zero-cf",
+    "id": "272-quickstart#hello-zero-cf",
     "title": "Quickstarts",
     "searchTitle": "hello-zero-cf",
     "sectionTitle": "hello-zero-cf",
@@ -3102,7 +3102,7 @@
     "kind": "section"
   },
   {
-    "id": "274-quickstart#hello-zero",
+    "id": "273-quickstart#hello-zero",
     "title": "Quickstarts",
     "searchTitle": "hello-zero",
     "sectionTitle": "hello-zero",
@@ -3147,7 +3147,7 @@
     "kind": "page"
   },
   {
-    "id": "275-react#setup",
+    "id": "274-react#setup",
     "title": "React",
     "searchTitle": "Setup",
     "sectionTitle": "Setup",
@@ -3157,7 +3157,7 @@
     "kind": "section"
   },
   {
-    "id": "276-react#usage",
+    "id": "275-react#usage",
     "title": "React",
     "searchTitle": "Usage",
     "sectionTitle": "Usage",
@@ -3167,7 +3167,7 @@
     "kind": "section"
   },
   {
-    "id": "277-react#suspense",
+    "id": "276-react#suspense",
     "title": "React",
     "searchTitle": "Suspense",
     "sectionTitle": "Suspense",
@@ -3177,7 +3177,7 @@
     "kind": "section"
   },
   {
-    "id": "278-react#examples",
+    "id": "277-react#examples",
     "title": "React",
     "searchTitle": "Examples",
     "sectionTitle": "Examples",
@@ -3209,7 +3209,7 @@
     "kind": "page"
   },
   {
-    "id": "279-release-notes/0.1#breaking-changes",
+    "id": "278-release-notes/0.1#breaking-changes",
     "title": "Zero 0.1",
     "searchTitle": "Breaking changes",
     "sectionTitle": "Breaking changes",
@@ -3219,7 +3219,7 @@
     "kind": "section"
   },
   {
-    "id": "280-release-notes/0.1#features",
+    "id": "279-release-notes/0.1#features",
     "title": "Zero 0.1",
     "searchTitle": "Features",
     "sectionTitle": "Features",
@@ -3229,7 +3229,7 @@
     "kind": "section"
   },
   {
-    "id": "281-release-notes/0.1#source-tree-fixes",
+    "id": "280-release-notes/0.1#source-tree-fixes",
     "title": "Zero 0.1",
     "searchTitle": "Source tree fixes",
     "sectionTitle": "Source tree fixes",
@@ -3265,7 +3265,7 @@
     "kind": "page"
   },
   {
-    "id": "282-release-notes/0.10#install",
+    "id": "281-release-notes/0.10#install",
     "title": "Zero 0.10",
     "searchTitle": "Install",
     "sectionTitle": "Install",
@@ -3275,7 +3275,7 @@
     "kind": "section"
   },
   {
-    "id": "283-release-notes/0.10#features",
+    "id": "282-release-notes/0.10#features",
     "title": "Zero 0.10",
     "searchTitle": "Features",
     "sectionTitle": "Features",
@@ -3285,7 +3285,7 @@
     "kind": "section"
   },
   {
-    "id": "284-release-notes/0.10#fixes",
+    "id": "283-release-notes/0.10#fixes",
     "title": "Zero 0.10",
     "searchTitle": "Fixes",
     "sectionTitle": "Fixes",
@@ -3295,7 +3295,7 @@
     "kind": "section"
   },
   {
-    "id": "285-release-notes/0.10#breaking-changes",
+    "id": "284-release-notes/0.10#breaking-changes",
     "title": "Zero 0.10",
     "searchTitle": "Breaking Changes",
     "sectionTitle": "Breaking Changes",
@@ -3331,7 +3331,7 @@
     "kind": "page"
   },
   {
-    "id": "286-release-notes/0.11#install",
+    "id": "285-release-notes/0.11#install",
     "title": "Zero 0.11",
     "searchTitle": "Install",
     "sectionTitle": "Install",
@@ -3341,7 +3341,7 @@
     "kind": "section"
   },
   {
-    "id": "287-release-notes/0.11#features",
+    "id": "286-release-notes/0.11#features",
     "title": "Zero 0.11",
     "searchTitle": "Features",
     "sectionTitle": "Features",
@@ -3351,7 +3351,7 @@
     "kind": "section"
   },
   {
-    "id": "288-release-notes/0.11#fixes",
+    "id": "287-release-notes/0.11#fixes",
     "title": "Zero 0.11",
     "searchTitle": "Fixes",
     "sectionTitle": "Fixes",
@@ -3361,7 +3361,7 @@
     "kind": "section"
   },
   {
-    "id": "289-release-notes/0.11#breaking-changes",
+    "id": "288-release-notes/0.11#breaking-changes",
     "title": "Zero 0.11",
     "searchTitle": "Breaking Changes",
     "sectionTitle": "Breaking Changes",
@@ -3397,7 +3397,7 @@
     "kind": "page"
   },
   {
-    "id": "290-release-notes/0.12#install",
+    "id": "289-release-notes/0.12#install",
     "title": "Zero 0.12",
     "searchTitle": "Install",
     "sectionTitle": "Install",
@@ -3407,7 +3407,7 @@
     "kind": "section"
   },
   {
-    "id": "291-release-notes/0.12#features",
+    "id": "290-release-notes/0.12#features",
     "title": "Zero 0.12",
     "searchTitle": "Features",
     "sectionTitle": "Features",
@@ -3417,7 +3417,7 @@
     "kind": "section"
   },
   {
-    "id": "292-release-notes/0.12#fixes",
+    "id": "291-release-notes/0.12#fixes",
     "title": "Zero 0.12",
     "searchTitle": "Fixes",
     "sectionTitle": "Fixes",
@@ -3427,7 +3427,7 @@
     "kind": "section"
   },
   {
-    "id": "293-release-notes/0.12#breaking-changes",
+    "id": "292-release-notes/0.12#breaking-changes",
     "title": "Zero 0.12",
     "searchTitle": "Breaking Changes",
     "sectionTitle": "Breaking Changes",
@@ -3463,7 +3463,7 @@
     "kind": "page"
   },
   {
-    "id": "294-release-notes/0.13#install",
+    "id": "293-release-notes/0.13#install",
     "title": "Zero 0.13",
     "searchTitle": "Install",
     "sectionTitle": "Install",
@@ -3473,7 +3473,7 @@
     "kind": "section"
   },
   {
-    "id": "295-release-notes/0.13#features",
+    "id": "294-release-notes/0.13#features",
     "title": "Zero 0.13",
     "searchTitle": "Features",
     "sectionTitle": "Features",
@@ -3483,7 +3483,7 @@
     "kind": "section"
   },
   {
-    "id": "296-release-notes/0.13#fixes",
+    "id": "295-release-notes/0.13#fixes",
     "title": "Zero 0.13",
     "searchTitle": "Fixes",
     "sectionTitle": "Fixes",
@@ -3493,7 +3493,7 @@
     "kind": "section"
   },
   {
-    "id": "297-release-notes/0.13#breaking-changes",
+    "id": "296-release-notes/0.13#breaking-changes",
     "title": "Zero 0.13",
     "searchTitle": "Breaking Changes",
     "sectionTitle": "Breaking Changes",
@@ -3529,7 +3529,7 @@
     "kind": "page"
   },
   {
-    "id": "298-release-notes/0.14#install",
+    "id": "297-release-notes/0.14#install",
     "title": "Zero 0.14",
     "searchTitle": "Install",
     "sectionTitle": "Install",
@@ -3539,7 +3539,7 @@
     "kind": "section"
   },
   {
-    "id": "299-release-notes/0.14#features",
+    "id": "298-release-notes/0.14#features",
     "title": "Zero 0.14",
     "searchTitle": "Features",
     "sectionTitle": "Features",
@@ -3549,7 +3549,7 @@
     "kind": "section"
   },
   {
-    "id": "300-release-notes/0.14#fixes",
+    "id": "299-release-notes/0.14#fixes",
     "title": "Zero 0.14",
     "searchTitle": "Fixes",
     "sectionTitle": "Fixes",
@@ -3559,7 +3559,7 @@
     "kind": "section"
   },
   {
-    "id": "301-release-notes/0.14#breaking-changes",
+    "id": "300-release-notes/0.14#breaking-changes",
     "title": "Zero 0.14",
     "searchTitle": "Breaking Changes",
     "sectionTitle": "Breaking Changes",
@@ -3599,7 +3599,7 @@
     "kind": "page"
   },
   {
-    "id": "302-release-notes/0.15#install",
+    "id": "301-release-notes/0.15#install",
     "title": "Zero 0.15",
     "searchTitle": "Install",
     "sectionTitle": "Install",
@@ -3609,7 +3609,7 @@
     "kind": "section"
   },
   {
-    "id": "303-release-notes/0.15#upgrade-guide",
+    "id": "302-release-notes/0.15#upgrade-guide",
     "title": "Zero 0.15",
     "searchTitle": "Upgrade Guide",
     "sectionTitle": "Upgrade Guide",
@@ -3619,7 +3619,7 @@
     "kind": "section"
   },
   {
-    "id": "304-release-notes/0.15#features",
+    "id": "303-release-notes/0.15#features",
     "title": "Zero 0.15",
     "searchTitle": "Features",
     "sectionTitle": "Features",
@@ -3629,7 +3629,7 @@
     "kind": "section"
   },
   {
-    "id": "305-release-notes/0.15#fixes",
+    "id": "304-release-notes/0.15#fixes",
     "title": "Zero 0.15",
     "searchTitle": "Fixes",
     "sectionTitle": "Fixes",
@@ -3639,7 +3639,7 @@
     "kind": "section"
   },
   {
-    "id": "306-release-notes/0.15#breaking-changes",
+    "id": "305-release-notes/0.15#breaking-changes",
     "title": "Zero 0.15",
     "searchTitle": "Breaking Changes",
     "sectionTitle": "Breaking Changes",
@@ -3679,7 +3679,7 @@
     "kind": "page"
   },
   {
-    "id": "307-release-notes/0.16#install",
+    "id": "306-release-notes/0.16#install",
     "title": "Zero 0.16",
     "searchTitle": "Install",
     "sectionTitle": "Install",
@@ -3689,7 +3689,7 @@
     "kind": "section"
   },
   {
-    "id": "308-release-notes/0.16#upgrading",
+    "id": "307-release-notes/0.16#upgrading",
     "title": "Zero 0.16",
     "searchTitle": "Upgrading",
     "sectionTitle": "Upgrading",
@@ -3699,7 +3699,7 @@
     "kind": "section"
   },
   {
-    "id": "309-release-notes/0.16#features",
+    "id": "308-release-notes/0.16#features",
     "title": "Zero 0.16",
     "searchTitle": "Features",
     "sectionTitle": "Features",
@@ -3709,7 +3709,7 @@
     "kind": "section"
   },
   {
-    "id": "310-release-notes/0.16#fixes",
+    "id": "309-release-notes/0.16#fixes",
     "title": "Zero 0.16",
     "searchTitle": "Fixes",
     "sectionTitle": "Fixes",
@@ -3719,7 +3719,7 @@
     "kind": "section"
   },
   {
-    "id": "311-release-notes/0.16#breaking-changes",
+    "id": "310-release-notes/0.16#breaking-changes",
     "title": "Zero 0.16",
     "searchTitle": "Breaking Changes",
     "sectionTitle": "Breaking Changes",
@@ -3759,7 +3759,7 @@
     "kind": "page"
   },
   {
-    "id": "312-release-notes/0.17#install",
+    "id": "311-release-notes/0.17#install",
     "title": "Zero 0.17",
     "searchTitle": "Install",
     "sectionTitle": "Install",
@@ -3769,7 +3769,7 @@
     "kind": "section"
   },
   {
-    "id": "313-release-notes/0.17#upgrading",
+    "id": "312-release-notes/0.17#upgrading",
     "title": "Zero 0.17",
     "searchTitle": "Upgrading",
     "sectionTitle": "Upgrading",
@@ -3779,7 +3779,7 @@
     "kind": "section"
   },
   {
-    "id": "314-release-notes/0.17#features",
+    "id": "313-release-notes/0.17#features",
     "title": "Zero 0.17",
     "searchTitle": "Features",
     "sectionTitle": "Features",
@@ -3789,7 +3789,7 @@
     "kind": "section"
   },
   {
-    "id": "315-release-notes/0.17#fixes",
+    "id": "314-release-notes/0.17#fixes",
     "title": "Zero 0.17",
     "searchTitle": "Fixes",
     "sectionTitle": "Fixes",
@@ -3799,7 +3799,7 @@
     "kind": "section"
   },
   {
-    "id": "316-release-notes/0.17#breaking-changes",
+    "id": "315-release-notes/0.17#breaking-changes",
     "title": "Zero 0.17",
     "searchTitle": "Breaking Changes",
     "sectionTitle": "Breaking Changes",
@@ -3839,7 +3839,7 @@
     "kind": "page"
   },
   {
-    "id": "317-release-notes/0.18#install",
+    "id": "316-release-notes/0.18#install",
     "title": "Zero 0.18",
     "searchTitle": "Install",
     "sectionTitle": "Install",
@@ -3849,7 +3849,7 @@
     "kind": "section"
   },
   {
-    "id": "318-release-notes/0.18#upgrading",
+    "id": "317-release-notes/0.18#upgrading",
     "title": "Zero 0.18",
     "searchTitle": "Upgrading",
     "sectionTitle": "Upgrading",
@@ -3859,7 +3859,7 @@
     "kind": "section"
   },
   {
-    "id": "319-release-notes/0.18#features",
+    "id": "318-release-notes/0.18#features",
     "title": "Zero 0.18",
     "searchTitle": "Features",
     "sectionTitle": "Features",
@@ -3869,7 +3869,7 @@
     "kind": "section"
   },
   {
-    "id": "320-release-notes/0.18#fixes",
+    "id": "319-release-notes/0.18#fixes",
     "title": "Zero 0.18",
     "searchTitle": "Fixes",
     "sectionTitle": "Fixes",
@@ -3879,7 +3879,7 @@
     "kind": "section"
   },
   {
-    "id": "321-release-notes/0.18#breaking-changes",
+    "id": "320-release-notes/0.18#breaking-changes",
     "title": "Zero 0.18",
     "searchTitle": "Breaking Changes",
     "sectionTitle": "Breaking Changes",
@@ -3919,7 +3919,7 @@
     "kind": "page"
   },
   {
-    "id": "322-release-notes/0.19#install",
+    "id": "321-release-notes/0.19#install",
     "title": "Zero 0.19",
     "searchTitle": "Install",
     "sectionTitle": "Install",
@@ -3929,7 +3929,7 @@
     "kind": "section"
   },
   {
-    "id": "323-release-notes/0.19#upgrading",
+    "id": "322-release-notes/0.19#upgrading",
     "title": "Zero 0.19",
     "searchTitle": "Upgrading",
     "sectionTitle": "Upgrading",
@@ -3939,7 +3939,7 @@
     "kind": "section"
   },
   {
-    "id": "324-release-notes/0.19#features",
+    "id": "323-release-notes/0.19#features",
     "title": "Zero 0.19",
     "searchTitle": "Features",
     "sectionTitle": "Features",
@@ -3949,7 +3949,7 @@
     "kind": "section"
   },
   {
-    "id": "325-release-notes/0.19#fixes",
+    "id": "324-release-notes/0.19#fixes",
     "title": "Zero 0.19",
     "searchTitle": "Fixes",
     "sectionTitle": "Fixes",
@@ -3959,7 +3959,7 @@
     "kind": "section"
   },
   {
-    "id": "326-release-notes/0.19#breaking-changes",
+    "id": "325-release-notes/0.19#breaking-changes",
     "title": "Zero 0.19",
     "searchTitle": "Breaking Changes",
     "sectionTitle": "Breaking Changes",
@@ -4003,7 +4003,7 @@
     "kind": "page"
   },
   {
-    "id": "327-release-notes/0.2#breaking-changes",
+    "id": "326-release-notes/0.2#breaking-changes",
     "title": "Zero 0.2",
     "searchTitle": "Breaking changes",
     "sectionTitle": "Breaking changes",
@@ -4013,7 +4013,7 @@
     "kind": "section"
   },
   {
-    "id": "328-release-notes/0.2#features",
+    "id": "327-release-notes/0.2#features",
     "title": "Zero 0.2",
     "searchTitle": "Features",
     "sectionTitle": "Features",
@@ -4023,7 +4023,7 @@
     "kind": "section"
   },
   {
-    "id": "329-release-notes/0.2#fixes",
+    "id": "328-release-notes/0.2#fixes",
     "title": "Zero 0.2",
     "searchTitle": "Fixes",
     "sectionTitle": "Fixes",
@@ -4033,7 +4033,7 @@
     "kind": "section"
   },
   {
-    "id": "330-release-notes/0.2#docs",
+    "id": "329-release-notes/0.2#docs",
     "title": "Zero 0.2",
     "searchTitle": "Docs",
     "sectionTitle": "Docs",
@@ -4043,7 +4043,7 @@
     "kind": "section"
   },
   {
-    "id": "331-release-notes/0.2#source-tree-fixes",
+    "id": "330-release-notes/0.2#source-tree-fixes",
     "title": "Zero 0.2",
     "searchTitle": "Source tree fixes",
     "sectionTitle": "Source tree fixes",
@@ -4053,7 +4053,7 @@
     "kind": "section"
   },
   {
-    "id": "332-release-notes/0.2#zbugs",
+    "id": "331-release-notes/0.2#zbugs",
     "title": "Zero 0.2",
     "searchTitle": "zbugs",
     "sectionTitle": "zbugs",
@@ -4093,7 +4093,7 @@
     "kind": "page"
   },
   {
-    "id": "333-release-notes/0.20#install",
+    "id": "332-release-notes/0.20#install",
     "title": "Zero 0.20",
     "searchTitle": "Install",
     "sectionTitle": "Install",
@@ -4103,7 +4103,7 @@
     "kind": "section"
   },
   {
-    "id": "334-release-notes/0.20#upgrading",
+    "id": "333-release-notes/0.20#upgrading",
     "title": "Zero 0.20",
     "searchTitle": "Upgrading",
     "sectionTitle": "Upgrading",
@@ -4113,7 +4113,7 @@
     "kind": "section"
   },
   {
-    "id": "335-release-notes/0.20#features",
+    "id": "334-release-notes/0.20#features",
     "title": "Zero 0.20",
     "searchTitle": "Features",
     "sectionTitle": "Features",
@@ -4123,7 +4123,7 @@
     "kind": "section"
   },
   {
-    "id": "336-release-notes/0.20#fixes",
+    "id": "335-release-notes/0.20#fixes",
     "title": "Zero 0.20",
     "searchTitle": "Fixes",
     "sectionTitle": "Fixes",
@@ -4133,7 +4133,7 @@
     "kind": "section"
   },
   {
-    "id": "337-release-notes/0.20#breaking-changes",
+    "id": "336-release-notes/0.20#breaking-changes",
     "title": "Zero 0.20",
     "searchTitle": "Breaking Changes",
     "sectionTitle": "Breaking Changes",
@@ -4173,7 +4173,7 @@
     "kind": "page"
   },
   {
-    "id": "338-release-notes/0.21#install",
+    "id": "337-release-notes/0.21#install",
     "title": "Zero 0.21",
     "searchTitle": "Install",
     "sectionTitle": "Install",
@@ -4183,7 +4183,7 @@
     "kind": "section"
   },
   {
-    "id": "339-release-notes/0.21#upgrading",
+    "id": "338-release-notes/0.21#upgrading",
     "title": "Zero 0.21",
     "searchTitle": "Upgrading",
     "sectionTitle": "Upgrading",
@@ -4193,7 +4193,7 @@
     "kind": "section"
   },
   {
-    "id": "340-release-notes/0.21#features",
+    "id": "339-release-notes/0.21#features",
     "title": "Zero 0.21",
     "searchTitle": "Features",
     "sectionTitle": "Features",
@@ -4203,7 +4203,7 @@
     "kind": "section"
   },
   {
-    "id": "341-release-notes/0.21#fixes",
+    "id": "340-release-notes/0.21#fixes",
     "title": "Zero 0.21",
     "searchTitle": "Fixes",
     "sectionTitle": "Fixes",
@@ -4213,7 +4213,7 @@
     "kind": "section"
   },
   {
-    "id": "342-release-notes/0.21#breaking-changes",
+    "id": "341-release-notes/0.21#breaking-changes",
     "title": "Zero 0.21",
     "searchTitle": "Breaking Changes",
     "sectionTitle": "Breaking Changes",
@@ -4265,7 +4265,7 @@
     "kind": "page"
   },
   {
-    "id": "343-release-notes/0.22#install",
+    "id": "342-release-notes/0.22#install",
     "title": "Zero 0.22",
     "searchTitle": "Install",
     "sectionTitle": "Install",
@@ -4275,7 +4275,7 @@
     "kind": "section"
   },
   {
-    "id": "344-release-notes/0.22#upgrading",
+    "id": "343-release-notes/0.22#upgrading",
     "title": "Zero 0.22",
     "searchTitle": "Upgrading",
     "sectionTitle": "Upgrading",
@@ -4285,7 +4285,7 @@
     "kind": "section"
   },
   {
-    "id": "345-release-notes/0.22#how-ttls-used-to-work",
+    "id": "344-release-notes/0.22#how-ttls-used-to-work",
     "title": "Zero 0.22",
     "searchTitle": "How TTLs Used to Work",
     "sectionTitle": "How TTLs Used to Work",
@@ -4295,7 +4295,7 @@
     "kind": "section"
   },
   {
-    "id": "346-release-notes/0.22#how-ttls-work-now",
+    "id": "345-release-notes/0.22#how-ttls-work-now",
     "title": "Zero 0.22",
     "searchTitle": "How TTLs Work Now",
     "sectionTitle": "How TTLs Work Now",
@@ -4305,7 +4305,7 @@
     "kind": "section"
   },
   {
-    "id": "347-release-notes/0.22#using-new-ttls",
+    "id": "346-release-notes/0.22#using-new-ttls",
     "title": "Zero 0.22",
     "searchTitle": "Using New TTLs",
     "sectionTitle": "Using New TTLs",
@@ -4315,7 +4315,7 @@
     "kind": "section"
   },
   {
-    "id": "348-release-notes/0.22#features",
+    "id": "347-release-notes/0.22#features",
     "title": "Zero 0.22",
     "searchTitle": "Features",
     "sectionTitle": "Features",
@@ -4325,7 +4325,7 @@
     "kind": "section"
   },
   {
-    "id": "349-release-notes/0.22#fixes",
+    "id": "348-release-notes/0.22#fixes",
     "title": "Zero 0.22",
     "searchTitle": "Fixes",
     "sectionTitle": "Fixes",
@@ -4335,7 +4335,7 @@
     "kind": "section"
   },
   {
-    "id": "350-release-notes/0.22#breaking-changes",
+    "id": "349-release-notes/0.22#breaking-changes",
     "title": "Zero 0.22",
     "searchTitle": "Breaking Changes",
     "sectionTitle": "Breaking Changes",
@@ -4379,7 +4379,7 @@
     "kind": "page"
   },
   {
-    "id": "351-release-notes/0.23#install",
+    "id": "350-release-notes/0.23#install",
     "title": "Zero 0.23",
     "searchTitle": "Install",
     "sectionTitle": "Install",
@@ -4389,7 +4389,7 @@
     "kind": "section"
   },
   {
-    "id": "352-release-notes/0.23#upgrading",
+    "id": "351-release-notes/0.23#upgrading",
     "title": "Zero 0.23",
     "searchTitle": "Upgrading",
     "sectionTitle": "Upgrading",
@@ -4399,7 +4399,7 @@
     "kind": "section"
   },
   {
-    "id": "353-release-notes/0.23#features",
+    "id": "352-release-notes/0.23#features",
     "title": "Zero 0.23",
     "searchTitle": "Features",
     "sectionTitle": "Features",
@@ -4409,7 +4409,7 @@
     "kind": "section"
   },
   {
-    "id": "354-release-notes/0.23#fixes",
+    "id": "353-release-notes/0.23#fixes",
     "title": "Zero 0.23",
     "searchTitle": "Fixes",
     "sectionTitle": "Fixes",
@@ -4419,7 +4419,7 @@
     "kind": "section"
   },
   {
-    "id": "355-release-notes/0.23#zbugs",
+    "id": "354-release-notes/0.23#zbugs",
     "title": "Zero 0.23",
     "searchTitle": "zbugs",
     "sectionTitle": "zbugs",
@@ -4429,7 +4429,7 @@
     "kind": "section"
   },
   {
-    "id": "356-release-notes/0.23#breaking-changes",
+    "id": "355-release-notes/0.23#breaking-changes",
     "title": "Zero 0.23",
     "searchTitle": "Breaking Changes",
     "sectionTitle": "Breaking Changes",
@@ -4469,7 +4469,7 @@
     "kind": "page"
   },
   {
-    "id": "357-release-notes/0.24#installation",
+    "id": "356-release-notes/0.24#installation",
     "title": "Zero 0.24",
     "searchTitle": "Installation",
     "sectionTitle": "Installation",
@@ -4479,7 +4479,7 @@
     "kind": "section"
   },
   {
-    "id": "358-release-notes/0.24#features",
+    "id": "357-release-notes/0.24#features",
     "title": "Zero 0.24",
     "searchTitle": "Features",
     "sectionTitle": "Features",
@@ -4489,7 +4489,7 @@
     "kind": "section"
   },
   {
-    "id": "359-release-notes/0.24#fixes",
+    "id": "358-release-notes/0.24#fixes",
     "title": "Zero 0.24",
     "searchTitle": "Fixes",
     "sectionTitle": "Fixes",
@@ -4499,7 +4499,7 @@
     "kind": "section"
   },
   {
-    "id": "360-release-notes/0.24#breaking-changes",
+    "id": "359-release-notes/0.24#breaking-changes",
     "title": "Zero 0.24",
     "searchTitle": "Breaking Changes",
     "sectionTitle": "Breaking Changes",
@@ -4509,7 +4509,7 @@
     "kind": "section"
   },
   {
-    "id": "361-release-notes/0.24#example-upgrades",
+    "id": "360-release-notes/0.24#example-upgrades",
     "title": "Zero 0.24",
     "searchTitle": "Example Upgrades",
     "sectionTitle": "Example Upgrades",
@@ -4557,7 +4557,7 @@
     "kind": "page"
   },
   {
-    "id": "362-release-notes/0.25#installation",
+    "id": "361-release-notes/0.25#installation",
     "title": "Zero 0.25",
     "searchTitle": "Installation",
     "sectionTitle": "Installation",
@@ -4567,7 +4567,7 @@
     "kind": "section"
   },
   {
-    "id": "363-release-notes/0.25#overview",
+    "id": "362-release-notes/0.25#overview",
     "title": "Zero 0.25",
     "searchTitle": "Overview",
     "sectionTitle": "Overview",
@@ -4577,7 +4577,7 @@
     "kind": "section"
   },
   {
-    "id": "364-release-notes/0.25#upgrading",
+    "id": "363-release-notes/0.25#upgrading",
     "title": "Zero 0.25",
     "searchTitle": "Upgrading",
     "sectionTitle": "Upgrading",
@@ -4587,7 +4587,7 @@
     "kind": "section"
   },
   {
-    "id": "365-release-notes/0.25#features",
+    "id": "364-release-notes/0.25#features",
     "title": "Zero 0.25",
     "searchTitle": "Features",
     "sectionTitle": "Features",
@@ -4597,7 +4597,7 @@
     "kind": "section"
   },
   {
-    "id": "366-release-notes/0.25#performance",
+    "id": "365-release-notes/0.25#performance",
     "title": "Zero 0.25",
     "searchTitle": "Performance",
     "sectionTitle": "Performance",
@@ -4607,7 +4607,7 @@
     "kind": "section"
   },
   {
-    "id": "367-release-notes/0.25#fixes",
+    "id": "366-release-notes/0.25#fixes",
     "title": "Zero 0.25",
     "searchTitle": "Fixes",
     "sectionTitle": "Fixes",
@@ -4617,7 +4617,7 @@
     "kind": "section"
   },
   {
-    "id": "368-release-notes/0.25#breaking-changes",
+    "id": "367-release-notes/0.25#breaking-changes",
     "title": "Zero 0.25",
     "searchTitle": "Breaking Changes",
     "sectionTitle": "Breaking Changes",
@@ -4653,7 +4653,7 @@
     "kind": "page"
   },
   {
-    "id": "369-release-notes/0.26#installation",
+    "id": "368-release-notes/0.26#installation",
     "title": "Zero 0.26",
     "searchTitle": "Installation",
     "sectionTitle": "Installation",
@@ -4663,7 +4663,7 @@
     "kind": "section"
   },
   {
-    "id": "370-release-notes/0.26#features",
+    "id": "369-release-notes/0.26#features",
     "title": "Zero 0.26",
     "searchTitle": "Features",
     "sectionTitle": "Features",
@@ -4673,7 +4673,7 @@
     "kind": "section"
   },
   {
-    "id": "371-release-notes/0.26#fixes",
+    "id": "370-release-notes/0.26#fixes",
     "title": "Zero 0.26",
     "searchTitle": "Fixes",
     "sectionTitle": "Fixes",
@@ -4683,7 +4683,7 @@
     "kind": "section"
   },
   {
-    "id": "372-release-notes/0.26#breaking-changes",
+    "id": "371-release-notes/0.26#breaking-changes",
     "title": "Zero 0.26",
     "searchTitle": "Breaking Changes",
     "sectionTitle": "Breaking Changes",
@@ -4727,7 +4727,7 @@
     "kind": "page"
   },
   {
-    "id": "373-release-notes/0.3#install",
+    "id": "372-release-notes/0.3#install",
     "title": "Zero 0.3",
     "searchTitle": "Install",
     "sectionTitle": "Install",
@@ -4737,7 +4737,7 @@
     "kind": "section"
   },
   {
-    "id": "374-release-notes/0.3#breaking-changes",
+    "id": "373-release-notes/0.3#breaking-changes",
     "title": "Zero 0.3",
     "searchTitle": "Breaking changes",
     "sectionTitle": "Breaking changes",
@@ -4747,7 +4747,7 @@
     "kind": "section"
   },
   {
-    "id": "375-release-notes/0.3#features",
+    "id": "374-release-notes/0.3#features",
     "title": "Zero 0.3",
     "searchTitle": "Features",
     "sectionTitle": "Features",
@@ -4757,7 +4757,7 @@
     "kind": "section"
   },
   {
-    "id": "376-release-notes/0.3#fixes",
+    "id": "375-release-notes/0.3#fixes",
     "title": "Zero 0.3",
     "searchTitle": "Fixes",
     "sectionTitle": "Fixes",
@@ -4767,7 +4767,7 @@
     "kind": "section"
   },
   {
-    "id": "377-release-notes/0.3#docs",
+    "id": "376-release-notes/0.3#docs",
     "title": "Zero 0.3",
     "searchTitle": "Docs",
     "sectionTitle": "Docs",
@@ -4777,7 +4777,7 @@
     "kind": "section"
   },
   {
-    "id": "378-release-notes/0.3#zbugs",
+    "id": "377-release-notes/0.3#zbugs",
     "title": "Zero 0.3",
     "searchTitle": "zbugs",
     "sectionTitle": "zbugs",
@@ -4821,7 +4821,7 @@
     "kind": "page"
   },
   {
-    "id": "379-release-notes/0.4#install",
+    "id": "378-release-notes/0.4#install",
     "title": "Zero 0.4",
     "searchTitle": "Install",
     "sectionTitle": "Install",
@@ -4831,7 +4831,7 @@
     "kind": "section"
   },
   {
-    "id": "380-release-notes/0.4#breaking-changes",
+    "id": "379-release-notes/0.4#breaking-changes",
     "title": "Zero 0.4",
     "searchTitle": "Breaking changes",
     "sectionTitle": "Breaking changes",
@@ -4841,7 +4841,7 @@
     "kind": "section"
   },
   {
-    "id": "381-release-notes/0.4#added-or--and--and-not-to-zql-documentation",
+    "id": "380-release-notes/0.4#added-or--and--and-not-to-zql-documentation",
     "title": "Zero 0.4",
     "searchTitle": "Added or , and , and not to ZQL (documentation).",
     "sectionTitle": "Added or , and , and not to ZQL (documentation).",
@@ -4851,7 +4851,7 @@
     "kind": "section"
   },
   {
-    "id": "382-release-notes/0.4#fixes",
+    "id": "381-release-notes/0.4#fixes",
     "title": "Zero 0.4",
     "searchTitle": "Fixes",
     "sectionTitle": "Fixes",
@@ -4861,7 +4861,7 @@
     "kind": "section"
   },
   {
-    "id": "383-release-notes/0.4#docs",
+    "id": "382-release-notes/0.4#docs",
     "title": "Zero 0.4",
     "searchTitle": "Docs",
     "sectionTitle": "Docs",
@@ -4871,7 +4871,7 @@
     "kind": "section"
   },
   {
-    "id": "384-release-notes/0.4#zbugs",
+    "id": "383-release-notes/0.4#zbugs",
     "title": "Zero 0.4",
     "searchTitle": "zbugs",
     "sectionTitle": "zbugs",
@@ -4915,7 +4915,7 @@
     "kind": "page"
   },
   {
-    "id": "385-release-notes/0.5#install",
+    "id": "384-release-notes/0.5#install",
     "title": "Zero 0.5",
     "searchTitle": "Install",
     "sectionTitle": "Install",
@@ -4925,7 +4925,7 @@
     "kind": "section"
   },
   {
-    "id": "386-release-notes/0.5#breaking-changes",
+    "id": "385-release-notes/0.5#breaking-changes",
     "title": "Zero 0.5",
     "searchTitle": "Breaking changes",
     "sectionTitle": "Breaking changes",
@@ -4935,7 +4935,7 @@
     "kind": "section"
   },
   {
-    "id": "387-release-notes/0.5#features",
+    "id": "386-release-notes/0.5#features",
     "title": "Zero 0.5",
     "searchTitle": "Features",
     "sectionTitle": "Features",
@@ -4945,7 +4945,7 @@
     "kind": "section"
   },
   {
-    "id": "388-release-notes/0.5#fixes",
+    "id": "387-release-notes/0.5#fixes",
     "title": "Zero 0.5",
     "searchTitle": "Fixes",
     "sectionTitle": "Fixes",
@@ -4955,7 +4955,7 @@
     "kind": "section"
   },
   {
-    "id": "389-release-notes/0.5#docs",
+    "id": "388-release-notes/0.5#docs",
     "title": "Zero 0.5",
     "searchTitle": "Docs",
     "sectionTitle": "Docs",
@@ -4965,7 +4965,7 @@
     "kind": "section"
   },
   {
-    "id": "390-release-notes/0.5#zbugs",
+    "id": "389-release-notes/0.5#zbugs",
     "title": "Zero 0.5",
     "searchTitle": "zbugs",
     "sectionTitle": "zbugs",
@@ -5009,7 +5009,7 @@
     "kind": "page"
   },
   {
-    "id": "391-release-notes/0.6#install",
+    "id": "390-release-notes/0.6#install",
     "title": "Zero 0.6",
     "searchTitle": "Install",
     "sectionTitle": "Install",
@@ -5019,7 +5019,7 @@
     "kind": "section"
   },
   {
-    "id": "392-release-notes/0.6#upgrade-guide",
+    "id": "391-release-notes/0.6#upgrade-guide",
     "title": "Zero 0.6",
     "searchTitle": "Upgrade Guide",
     "sectionTitle": "Upgrade Guide",
@@ -5029,7 +5029,7 @@
     "kind": "section"
   },
   {
-    "id": "393-release-notes/0.6#breaking-changes",
+    "id": "392-release-notes/0.6#breaking-changes",
     "title": "Zero 0.6",
     "searchTitle": "Breaking Changes",
     "sectionTitle": "Breaking Changes",
@@ -5039,7 +5039,7 @@
     "kind": "section"
   },
   {
-    "id": "394-release-notes/0.6#features",
+    "id": "393-release-notes/0.6#features",
     "title": "Zero 0.6",
     "searchTitle": "Features",
     "sectionTitle": "Features",
@@ -5049,7 +5049,7 @@
     "kind": "section"
   },
   {
-    "id": "395-release-notes/0.6#zbugs",
+    "id": "394-release-notes/0.6#zbugs",
     "title": "Zero 0.6",
     "searchTitle": "zbugs",
     "sectionTitle": "zbugs",
@@ -5059,7 +5059,7 @@
     "kind": "section"
   },
   {
-    "id": "396-release-notes/0.6#docs",
+    "id": "395-release-notes/0.6#docs",
     "title": "Zero 0.6",
     "searchTitle": "Docs",
     "sectionTitle": "Docs",
@@ -5099,7 +5099,7 @@
     "kind": "page"
   },
   {
-    "id": "397-release-notes/0.7#install",
+    "id": "396-release-notes/0.7#install",
     "title": "Zero 0.7",
     "searchTitle": "Install",
     "sectionTitle": "Install",
@@ -5109,7 +5109,7 @@
     "kind": "section"
   },
   {
-    "id": "398-release-notes/0.7#features",
+    "id": "397-release-notes/0.7#features",
     "title": "Zero 0.7",
     "searchTitle": "Features",
     "sectionTitle": "Features",
@@ -5119,7 +5119,7 @@
     "kind": "section"
   },
   {
-    "id": "399-release-notes/0.7#breaking-changes",
+    "id": "398-release-notes/0.7#breaking-changes",
     "title": "Zero 0.7",
     "searchTitle": "Breaking Changes",
     "sectionTitle": "Breaking Changes",
@@ -5129,7 +5129,7 @@
     "kind": "section"
   },
   {
-    "id": "400-release-notes/0.7#zbugs",
+    "id": "399-release-notes/0.7#zbugs",
     "title": "Zero 0.7",
     "searchTitle": "zbugs",
     "sectionTitle": "zbugs",
@@ -5139,7 +5139,7 @@
     "kind": "section"
   },
   {
-    "id": "401-release-notes/0.7#docs",
+    "id": "400-release-notes/0.7#docs",
     "title": "Zero 0.7",
     "searchTitle": "Docs",
     "sectionTitle": "Docs",
@@ -5175,7 +5175,7 @@
     "kind": "page"
   },
   {
-    "id": "402-release-notes/0.8#install",
+    "id": "401-release-notes/0.8#install",
     "title": "Zero 0.8",
     "searchTitle": "Install",
     "sectionTitle": "Install",
@@ -5185,7 +5185,7 @@
     "kind": "section"
   },
   {
-    "id": "403-release-notes/0.8#features",
+    "id": "402-release-notes/0.8#features",
     "title": "Zero 0.8",
     "searchTitle": "Features",
     "sectionTitle": "Features",
@@ -5195,7 +5195,7 @@
     "kind": "section"
   },
   {
-    "id": "404-release-notes/0.8#fixes",
+    "id": "403-release-notes/0.8#fixes",
     "title": "Zero 0.8",
     "searchTitle": "Fixes",
     "sectionTitle": "Fixes",
@@ -5205,7 +5205,7 @@
     "kind": "section"
   },
   {
-    "id": "405-release-notes/0.8#breaking-changes",
+    "id": "404-release-notes/0.8#breaking-changes",
     "title": "Zero 0.8",
     "searchTitle": "Breaking Changes",
     "sectionTitle": "Breaking Changes",
@@ -5241,7 +5241,7 @@
     "kind": "page"
   },
   {
-    "id": "406-release-notes/0.9#install",
+    "id": "405-release-notes/0.9#install",
     "title": "Zero 0.9",
     "searchTitle": "Install",
     "sectionTitle": "Install",
@@ -5251,7 +5251,7 @@
     "kind": "section"
   },
   {
-    "id": "407-release-notes/0.9#features",
+    "id": "406-release-notes/0.9#features",
     "title": "Zero 0.9",
     "searchTitle": "Features",
     "sectionTitle": "Features",
@@ -5261,7 +5261,7 @@
     "kind": "section"
   },
   {
-    "id": "408-release-notes/0.9#fixes",
+    "id": "407-release-notes/0.9#fixes",
     "title": "Zero 0.9",
     "searchTitle": "Fixes",
     "sectionTitle": "Fixes",
@@ -5271,7 +5271,7 @@
     "kind": "section"
   },
   {
-    "id": "409-release-notes/0.9#breaking-changes",
+    "id": "408-release-notes/0.9#breaking-changes",
     "title": "Zero 0.9",
     "searchTitle": "Breaking Changes",
     "sectionTitle": "Breaking Changes",
@@ -5311,7 +5311,7 @@
     "kind": "page"
   },
   {
-    "id": "410-release-notes/1.0#installation",
+    "id": "409-release-notes/1.0#installation",
     "title": "Zero 1.0",
     "searchTitle": "Installation",
     "sectionTitle": "Installation",
@@ -5321,7 +5321,7 @@
     "kind": "section"
   },
   {
-    "id": "411-release-notes/1.0#overview",
+    "id": "410-release-notes/1.0#overview",
     "title": "Zero 1.0",
     "searchTitle": "Overview",
     "sectionTitle": "Overview",
@@ -5331,7 +5331,7 @@
     "kind": "section"
   },
   {
-    "id": "412-release-notes/1.0#features",
+    "id": "411-release-notes/1.0#features",
     "title": "Zero 1.0",
     "searchTitle": "Features",
     "sectionTitle": "Features",
@@ -5341,7 +5341,7 @@
     "kind": "section"
   },
   {
-    "id": "413-release-notes/1.0#fixes",
+    "id": "412-release-notes/1.0#fixes",
     "title": "Zero 1.0",
     "searchTitle": "Fixes",
     "sectionTitle": "Fixes",
@@ -5351,7 +5351,7 @@
     "kind": "section"
   },
   {
-    "id": "414-release-notes/1.0#breaking-changes",
+    "id": "413-release-notes/1.0#breaking-changes",
     "title": "Zero 1.0",
     "searchTitle": "Breaking Changes",
     "sectionTitle": "Breaking Changes",
@@ -5387,7 +5387,7 @@
     "kind": "page"
   },
   {
-    "id": "415-release-notes/1.1#installation",
+    "id": "414-release-notes/1.1#installation",
     "title": "Zero 1.1",
     "searchTitle": "Installation",
     "sectionTitle": "Installation",
@@ -5397,7 +5397,7 @@
     "kind": "section"
   },
   {
-    "id": "416-release-notes/1.1#features",
+    "id": "415-release-notes/1.1#features",
     "title": "Zero 1.1",
     "searchTitle": "Features",
     "sectionTitle": "Features",
@@ -5407,7 +5407,7 @@
     "kind": "section"
   },
   {
-    "id": "417-release-notes/1.1#fixes",
+    "id": "416-release-notes/1.1#fixes",
     "title": "Zero 1.1",
     "searchTitle": "Fixes",
     "sectionTitle": "Fixes",
@@ -5417,7 +5417,7 @@
     "kind": "section"
   },
   {
-    "id": "418-release-notes/1.1#breaking-changes",
+    "id": "417-release-notes/1.1#breaking-changes",
     "title": "Zero 1.1",
     "searchTitle": "Breaking Changes",
     "sectionTitle": "Breaking Changes",
@@ -5457,7 +5457,7 @@
     "kind": "page"
   },
   {
-    "id": "419-release-notes/1.2#installation",
+    "id": "418-release-notes/1.2#installation",
     "title": "Zero 1.2",
     "searchTitle": "Installation",
     "sectionTitle": "Installation",
@@ -5467,7 +5467,7 @@
     "kind": "section"
   },
   {
-    "id": "420-release-notes/1.2#features",
+    "id": "419-release-notes/1.2#features",
     "title": "Zero 1.2",
     "searchTitle": "Features",
     "sectionTitle": "Features",
@@ -5477,7 +5477,7 @@
     "kind": "section"
   },
   {
-    "id": "421-release-notes/1.2#performance",
+    "id": "420-release-notes/1.2#performance",
     "title": "Zero 1.2",
     "searchTitle": "Performance",
     "sectionTitle": "Performance",
@@ -5487,7 +5487,7 @@
     "kind": "section"
   },
   {
-    "id": "422-release-notes/1.2#fixes",
+    "id": "421-release-notes/1.2#fixes",
     "title": "Zero 1.2",
     "searchTitle": "Fixes",
     "sectionTitle": "Fixes",
@@ -5497,7 +5497,7 @@
     "kind": "section"
   },
   {
-    "id": "423-release-notes/1.2#breaking-changes",
+    "id": "422-release-notes/1.2#breaking-changes",
     "title": "Zero 1.2",
     "searchTitle": "Breaking Changes",
     "sectionTitle": "Breaking Changes",
@@ -5537,7 +5537,7 @@
     "kind": "page"
   },
   {
-    "id": "424-release-notes/1.3#installation",
+    "id": "423-release-notes/1.3#installation",
     "title": "Zero 1.3",
     "searchTitle": "Installation",
     "sectionTitle": "Installation",
@@ -5547,7 +5547,7 @@
     "kind": "section"
   },
   {
-    "id": "425-release-notes/1.3#features",
+    "id": "424-release-notes/1.3#features",
     "title": "Zero 1.3",
     "searchTitle": "Features",
     "sectionTitle": "Features",
@@ -5557,7 +5557,7 @@
     "kind": "section"
   },
   {
-    "id": "426-release-notes/1.3#performance",
+    "id": "425-release-notes/1.3#performance",
     "title": "Zero 1.3",
     "searchTitle": "Performance",
     "sectionTitle": "Performance",
@@ -5567,7 +5567,7 @@
     "kind": "section"
   },
   {
-    "id": "427-release-notes/1.3#fixes",
+    "id": "426-release-notes/1.3#fixes",
     "title": "Zero 1.3",
     "searchTitle": "Fixes",
     "sectionTitle": "Fixes",
@@ -5577,7 +5577,7 @@
     "kind": "section"
   },
   {
-    "id": "428-release-notes/1.3#breaking-changes",
+    "id": "427-release-notes/1.3#breaking-changes",
     "title": "Zero 1.3",
     "searchTitle": "Breaking Changes",
     "sectionTitle": "Breaking Changes",
@@ -5587,96 +5587,16 @@
     "kind": "section"
   },
   {
-    "id": "55-release-notes/1.4",
-    "title": "Zero 1.4",
-    "searchTitle": "Zero 1.4",
-    "url": "/docs/release-notes/1.4",
-    "content": "Installation npm install @rocicorp/zero@1.4 Features Kysely Adapter: Added zeroKysely, so Zero server mutators can run against a Kysely transaction alongside the existing Prisma and Drizzle adapters. Analyze Query Library: Added @rocicorp/zero/analyze, making it easier to wire a project-specific analyze-query script into your app's schema with runAnalyzeCLI. Inspector Query Planner On by Default: The inspector now always enables the query planner when analyzing queries, so join-plan output is available without extra setup. Query Names in OpenTelemetry: zero-cache now attaches custom query names to query hydration spans, making it easier to spot slow queries in your traces. Shadow Initial Sync Canary: zero-cache can now run an opt-in shadow initial sync against sampled upstream data to catch schema drift and full-resync failures earlier. Performance Faster backfills by switching zero-cache to binary COPY 7.6x faster cold-start index construction for new sort orders with BTreeSet.fromSorted 5-16% faster query hydration by reducing skipYields allocations 10-15% faster query hydration and 15% faster updates ~6-8% faster query hydration for queries with joins Avoid full table scans from reordered compound primary keys Fixes Cursor pagination queries on non-nullable columns could trigger SQLite full table scans (thanks @utkarsh-611!) Query and mutator validation errors were not exposing raw schema issues in error details, making custom frontend messages harder to build (thanks @tjenkinson!) Transient litestream restore failures were incorrectly alerting Nullable array columns were silently converting to [] (thanks @kvnkusch!) Change-log entries could be incorrectly purged during handoff Concurrent, nested, and CREATE/DROP INDEX CONCURRENTLY DDL statements could break schema tracking, follow-up, and follow-up Replication slot creation could hang during startup and leave orphaned replication state behind when blocked by long-running transactions and follow-up Autoreset during startup could deadlock while recreating a replication slot Original SQLite transaction failures could be hidden behind rollback errors Columns added with complex Postgres defaults could be mis-translated instead of being backfilled safely Latency histograms for hydration, lock waits, pokes, and related OTel metrics were collapsing into unusably broad buckets Inspector parse and analyze errors were being logged like server faults instead of user-generated warnings Stalled change-streamer transactions could hang progress indefinitely OTel metrics from multiple worker processes could clobber each other Drain-mode SIGTERM exited uncleanly during startup Breaking Changes None.",
-    "headings": [
-      {
-        "text": "Installation",
-        "id": "installation"
-      },
-      {
-        "text": "Features",
-        "id": "features"
-      },
-      {
-        "text": "Performance",
-        "id": "performance"
-      },
-      {
-        "text": "Fixes",
-        "id": "fixes"
-      },
-      {
-        "text": "Breaking Changes",
-        "id": "breaking-changes"
-      }
-    ],
-    "kind": "page"
-  },
-  {
-    "id": "429-release-notes/1.4#installation",
-    "title": "Zero 1.4",
-    "searchTitle": "Installation",
-    "sectionTitle": "Installation",
-    "sectionId": "installation",
-    "url": "/docs/release-notes/1.4",
-    "content": "npm install @rocicorp/zero@1.4",
-    "kind": "section"
-  },
-  {
-    "id": "430-release-notes/1.4#features",
-    "title": "Zero 1.4",
-    "searchTitle": "Features",
-    "sectionTitle": "Features",
-    "sectionId": "features",
-    "url": "/docs/release-notes/1.4",
-    "content": "Kysely Adapter: Added zeroKysely, so Zero server mutators can run against a Kysely transaction alongside the existing Prisma and Drizzle adapters. Analyze Query Library: Added @rocicorp/zero/analyze, making it easier to wire a project-specific analyze-query script into your app's schema with runAnalyzeCLI. Inspector Query Planner On by Default: The inspector now always enables the query planner when analyzing queries, so join-plan output is available without extra setup. Query Names in OpenTelemetry: zero-cache now attaches custom query names to query hydration spans, making it easier to spot slow queries in your traces. Shadow Initial Sync Canary: zero-cache can now run an opt-in shadow initial sync against sampled upstream data to catch schema drift and full-resync failures earlier.",
-    "kind": "section"
-  },
-  {
-    "id": "431-release-notes/1.4#performance",
-    "title": "Zero 1.4",
-    "searchTitle": "Performance",
-    "sectionTitle": "Performance",
-    "sectionId": "performance",
-    "url": "/docs/release-notes/1.4",
-    "content": "Faster backfills by switching zero-cache to binary COPY 7.6x faster cold-start index construction for new sort orders with BTreeSet.fromSorted 5-16% faster query hydration by reducing skipYields allocations 10-15% faster query hydration and 15% faster updates ~6-8% faster query hydration for queries with joins Avoid full table scans from reordered compound primary keys",
-    "kind": "section"
-  },
-  {
-    "id": "432-release-notes/1.4#fixes",
-    "title": "Zero 1.4",
-    "searchTitle": "Fixes",
-    "sectionTitle": "Fixes",
-    "sectionId": "fixes",
-    "url": "/docs/release-notes/1.4",
-    "content": "Cursor pagination queries on non-nullable columns could trigger SQLite full table scans (thanks @utkarsh-611!) Query and mutator validation errors were not exposing raw schema issues in error details, making custom frontend messages harder to build (thanks @tjenkinson!) Transient litestream restore failures were incorrectly alerting Nullable array columns were silently converting to [] (thanks @kvnkusch!) Change-log entries could be incorrectly purged during handoff Concurrent, nested, and CREATE/DROP INDEX CONCURRENTLY DDL statements could break schema tracking, follow-up, and follow-up Replication slot creation could hang during startup and leave orphaned replication state behind when blocked by long-running transactions and follow-up Autoreset during startup could deadlock while recreating a replication slot Original SQLite transaction failures could be hidden behind rollback errors Columns added with complex Postgres defaults could be mis-translated instead of being backfilled safely Latency histograms for hydration, lock waits, pokes, and related OTel metrics were collapsing into unusably broad buckets Inspector parse and analyze errors were being logged like server faults instead of user-generated warnings Stalled change-streamer transactions could hang progress indefinitely OTel metrics from multiple worker processes could clobber each other Drain-mode SIGTERM exited uncleanly during startup",
-    "kind": "section"
-  },
-  {
-    "id": "433-release-notes/1.4#breaking-changes",
-    "title": "Zero 1.4",
-    "searchTitle": "Breaking Changes",
-    "sectionTitle": "Breaking Changes",
-    "sectionId": "breaking-changes",
-    "url": "/docs/release-notes/1.4",
-    "content": "None.",
-    "kind": "section"
-  },
-  {
-    "id": "56-release-notes",
+    "id": "55-release-notes",
     "title": "Release Notes",
     "searchTitle": "Release Notes",
     "url": "/docs/release-notes",
-    "content": "Zero 1.4: Performance and Reliability Improvements Zero 1.3: Faster Initial Sync and Other Perf Improvements Zero 1.2: IVM Performance and Bug Fixes Zero 1.1: Replication Monitoring Zero 1.0: First Stable Release Zero 0.26: Schema Backfill and Scalar Subqueries Zero 0.25: DX Overhaul, Query Planning Zero 0.24: Join Flipping, Cookie Auth, Inspector Updates Zero 0.23: Synced Queries and React Native Support Zero 0.22: Simplified TTLs Zero 0.21: PG arrays, TanStack starter, and more Zero 0.20: Full Supabase support, performance improvements Zero 0.19: Many, many bugfixes and cleanups Zero 0.18: Custom Mutators Zero 0.17: Background Queries Zero 0.16: Lambda-Based Permission Deployment Zero 0.15: Live Permission Updates Zero 0.14: Name Mapping and Multischema Zero 0.13: Multinode and SST Zero 0.12: Circular Relationships Zero 0.11: Windows Zero 0.10: Remove Top-Level Await Zero 0.9: JWK Support Zero 0.8: Schema Autobuild, Result Types, and Enums Zero 0.7: Read Perms and Docker Zero 0.6: Relationship Filters Zero 0.5: JSON Columns Zero 0.4: Compound Filters Zero 0.3: Schema Migrations and Write Perms Zero 0.2: Skip Mode and Computed PKs Zero 0.1: First Release",
+    "content": "Zero 1.3: Faster Initial Sync and Other Perf Improvements Zero 1.2: IVM Performance and Bug Fixes Zero 1.1: Replication Monitoring Zero 1.0: First Stable Release Zero 0.26: Schema Backfill and Scalar Subqueries Zero 0.25: DX Overhaul, Query Planning Zero 0.24: Join Flipping, Cookie Auth, Inspector Updates Zero 0.23: Synced Queries and React Native Support Zero 0.22: Simplified TTLs Zero 0.21: PG arrays, TanStack starter, and more Zero 0.20: Full Supabase support, performance improvements Zero 0.19: Many, many bugfixes and cleanups Zero 0.18: Custom Mutators Zero 0.17: Background Queries Zero 0.16: Lambda-Based Permission Deployment Zero 0.15: Live Permission Updates Zero 0.14: Name Mapping and Multischema Zero 0.13: Multinode and SST Zero 0.12: Circular Relationships Zero 0.11: Windows Zero 0.10: Remove Top-Level Await Zero 0.9: JWK Support Zero 0.8: Schema Autobuild, Result Types, and Enums Zero 0.7: Read Perms and Docker Zero 0.6: Relationship Filters Zero 0.5: JSON Columns Zero 0.4: Compound Filters Zero 0.3: Schema Migrations and Write Perms Zero 0.2: Skip Mode and Computed PKs Zero 0.1: First Release",
     "headings": [],
     "kind": "page"
   },
   {
-    "id": "57-reporting-bugs",
+    "id": "56-reporting-bugs",
     "title": "Reporting Bugs",
     "searchTitle": "Reporting Bugs",
     "url": "/docs/reporting-bugs",
@@ -5694,7 +5614,7 @@
     "kind": "page"
   },
   {
-    "id": "434-reporting-bugs#zbugs",
+    "id": "428-reporting-bugs#zbugs",
     "title": "Reporting Bugs",
     "searchTitle": "zbugs",
     "sectionTitle": "zbugs",
@@ -5704,7 +5624,7 @@
     "kind": "section"
   },
   {
-    "id": "435-reporting-bugs#discord",
+    "id": "429-reporting-bugs#discord",
     "title": "Reporting Bugs",
     "searchTitle": "Discord",
     "sectionTitle": "Discord",
@@ -5714,7 +5634,7 @@
     "kind": "section"
   },
   {
-    "id": "58-rest",
+    "id": "57-rest",
     "title": "REST",
     "searchTitle": "REST",
     "url": "/docs/rest",
@@ -5740,7 +5660,7 @@
     "kind": "page"
   },
   {
-    "id": "436-rest#pattern",
+    "id": "430-rest#pattern",
     "title": "REST",
     "searchTitle": "Pattern",
     "sectionTitle": "Pattern",
@@ -5750,7 +5670,7 @@
     "kind": "section"
   },
   {
-    "id": "437-rest#tanstack-start-example",
+    "id": "431-rest#tanstack-start-example",
     "title": "REST",
     "searchTitle": "TanStack Start Example",
     "sectionTitle": "TanStack Start Example",
@@ -5760,7 +5680,7 @@
     "kind": "section"
   },
   {
-    "id": "438-rest#openapi-generation",
+    "id": "432-rest#openapi-generation",
     "title": "REST",
     "searchTitle": "OpenAPI Generation",
     "sectionTitle": "OpenAPI Generation",
@@ -5770,7 +5690,7 @@
     "kind": "section"
   },
   {
-    "id": "439-rest#full-working-example",
+    "id": "433-rest#full-working-example",
     "title": "REST",
     "searchTitle": "Full Working Example",
     "sectionTitle": "Full Working Example",
@@ -5780,7 +5700,7 @@
     "kind": "section"
   },
   {
-    "id": "59-roadmap",
+    "id": "58-roadmap",
     "title": "Roadmap",
     "searchTitle": "Roadmap",
     "url": "/docs/roadmap",
@@ -5798,7 +5718,7 @@
     "kind": "page"
   },
   {
-    "id": "440-roadmap#q4-2025",
+    "id": "434-roadmap#q4-2025",
     "title": "Roadmap",
     "searchTitle": "Q4 2025",
     "sectionTitle": "Q4 2025",
@@ -5808,7 +5728,7 @@
     "kind": "section"
   },
   {
-    "id": "441-roadmap#beyond",
+    "id": "435-roadmap#beyond",
     "title": "Roadmap",
     "searchTitle": "Beyond",
     "sectionTitle": "Beyond",
@@ -5818,7 +5738,7 @@
     "kind": "section"
   },
   {
-    "id": "60-samples",
+    "id": "59-samples",
     "title": "Samples",
     "searchTitle": "Samples",
     "url": "/docs/samples",
@@ -5840,7 +5760,7 @@
     "kind": "page"
   },
   {
-    "id": "442-samples#gigabugs",
+    "id": "436-samples#gigabugs",
     "title": "Samples",
     "searchTitle": "Gigabugs",
     "sectionTitle": "Gigabugs",
@@ -5850,7 +5770,7 @@
     "kind": "section"
   },
   {
-    "id": "443-samples#ztunes",
+    "id": "437-samples#ztunes",
     "title": "Samples",
     "searchTitle": "ztunes",
     "sectionTitle": "ztunes",
@@ -5860,7 +5780,7 @@
     "kind": "section"
   },
   {
-    "id": "444-samples#zslack",
+    "id": "438-samples#zslack",
     "title": "Samples",
     "searchTitle": "zslack",
     "sectionTitle": "zslack",
@@ -5870,7 +5790,7 @@
     "kind": "section"
   },
   {
-    "id": "61-schema",
+    "id": "60-schema",
     "title": "Zero Schema",
     "searchTitle": "Zero Schema",
     "url": "/docs/schema",
@@ -5996,7 +5916,7 @@
     "kind": "page"
   },
   {
-    "id": "445-schema#generating-from-database",
+    "id": "439-schema#generating-from-database",
     "title": "Zero Schema",
     "searchTitle": "Generating from Database",
     "sectionTitle": "Generating from Database",
@@ -6006,7 +5926,7 @@
     "kind": "section"
   },
   {
-    "id": "446-schema#writing-by-hand",
+    "id": "440-schema#writing-by-hand",
     "title": "Zero Schema",
     "searchTitle": "Writing by Hand",
     "sectionTitle": "Writing by Hand",
@@ -6016,7 +5936,7 @@
     "kind": "section"
   },
   {
-    "id": "447-schema#table-schemas",
+    "id": "441-schema#table-schemas",
     "title": "Zero Schema",
     "searchTitle": "Table Schemas",
     "sectionTitle": "Table Schemas",
@@ -6026,7 +5946,7 @@
     "kind": "section"
   },
   {
-    "id": "448-schema#name-mapping",
+    "id": "442-schema#name-mapping",
     "title": "Zero Schema",
     "searchTitle": "Name Mapping",
     "sectionTitle": "Name Mapping",
@@ -6036,7 +5956,7 @@
     "kind": "section"
   },
   {
-    "id": "449-schema#multiple-schemas",
+    "id": "443-schema#multiple-schemas",
     "title": "Zero Schema",
     "searchTitle": "Multiple Schemas",
     "sectionTitle": "Multiple Schemas",
@@ -6046,7 +5966,7 @@
     "kind": "section"
   },
   {
-    "id": "450-schema#optional-columns",
+    "id": "444-schema#optional-columns",
     "title": "Zero Schema",
     "searchTitle": "Optional Columns",
     "sectionTitle": "Optional Columns",
@@ -6056,7 +5976,7 @@
     "kind": "section"
   },
   {
-    "id": "451-schema#enumerations",
+    "id": "445-schema#enumerations",
     "title": "Zero Schema",
     "searchTitle": "Enumerations",
     "sectionTitle": "Enumerations",
@@ -6066,7 +5986,7 @@
     "kind": "section"
   },
   {
-    "id": "452-schema#custom-json-types",
+    "id": "446-schema#custom-json-types",
     "title": "Zero Schema",
     "searchTitle": "Custom JSON Types",
     "sectionTitle": "Custom JSON Types",
@@ -6076,7 +5996,7 @@
     "kind": "section"
   },
   {
-    "id": "453-schema#compound-primary-keys",
+    "id": "447-schema#compound-primary-keys",
     "title": "Zero Schema",
     "searchTitle": "Compound Primary Keys",
     "sectionTitle": "Compound Primary Keys",
@@ -6086,7 +6006,7 @@
     "kind": "section"
   },
   {
-    "id": "454-schema#relationships",
+    "id": "448-schema#relationships",
     "title": "Zero Schema",
     "searchTitle": "Relationships",
     "sectionTitle": "Relationships",
@@ -6096,7 +6016,7 @@
     "kind": "section"
   },
   {
-    "id": "455-schema#many-to-many-relationships",
+    "id": "449-schema#many-to-many-relationships",
     "title": "Zero Schema",
     "searchTitle": "Many-to-Many Relationships",
     "sectionTitle": "Many-to-Many Relationships",
@@ -6106,7 +6026,7 @@
     "kind": "section"
   },
   {
-    "id": "456-schema#compound-keys-relationships",
+    "id": "450-schema#compound-keys-relationships",
     "title": "Zero Schema",
     "searchTitle": "Compound Keys Relationships",
     "sectionTitle": "Compound Keys Relationships",
@@ -6116,7 +6036,7 @@
     "kind": "section"
   },
   {
-    "id": "457-schema#circular-relationships",
+    "id": "451-schema#circular-relationships",
     "title": "Zero Schema",
     "searchTitle": "Circular Relationships",
     "sectionTitle": "Circular Relationships",
@@ -6126,7 +6046,7 @@
     "kind": "section"
   },
   {
-    "id": "458-schema#database-schemas",
+    "id": "452-schema#database-schemas",
     "title": "Zero Schema",
     "searchTitle": "Database Schemas",
     "sectionTitle": "Database Schemas",
@@ -6136,7 +6056,7 @@
     "kind": "section"
   },
   {
-    "id": "459-schema#default-type-parameter",
+    "id": "453-schema#default-type-parameter",
     "title": "Zero Schema",
     "searchTitle": "Default Type Parameter",
     "sectionTitle": "Default Type Parameter",
@@ -6146,7 +6066,7 @@
     "kind": "section"
   },
   {
-    "id": "460-schema#schema-changes",
+    "id": "454-schema#schema-changes",
     "title": "Zero Schema",
     "searchTitle": "Schema Changes",
     "sectionTitle": "Schema Changes",
@@ -6156,7 +6076,7 @@
     "kind": "section"
   },
   {
-    "id": "461-schema#development",
+    "id": "455-schema#development",
     "title": "Zero Schema",
     "searchTitle": "Development",
     "sectionTitle": "Development",
@@ -6166,7 +6086,7 @@
     "kind": "section"
   },
   {
-    "id": "462-schema#production",
+    "id": "456-schema#production",
     "title": "Zero Schema",
     "searchTitle": "Production",
     "sectionTitle": "Production",
@@ -6176,7 +6096,7 @@
     "kind": "section"
   },
   {
-    "id": "463-schema#expand-changes",
+    "id": "457-schema#expand-changes",
     "title": "Zero Schema",
     "searchTitle": "Expand Changes",
     "sectionTitle": "Expand Changes",
@@ -6186,7 +6106,7 @@
     "kind": "section"
   },
   {
-    "id": "464-schema#contract-changes",
+    "id": "458-schema#contract-changes",
     "title": "Zero Schema",
     "searchTitle": "Contract Changes",
     "sectionTitle": "Contract Changes",
@@ -6196,7 +6116,7 @@
     "kind": "section"
   },
   {
-    "id": "465-schema#compound-changes",
+    "id": "459-schema#compound-changes",
     "title": "Zero Schema",
     "searchTitle": "Compound Changes",
     "sectionTitle": "Compound Changes",
@@ -6206,7 +6126,7 @@
     "kind": "section"
   },
   {
-    "id": "466-schema#examples",
+    "id": "460-schema#examples",
     "title": "Zero Schema",
     "searchTitle": "Examples",
     "sectionTitle": "Examples",
@@ -6216,7 +6136,7 @@
     "kind": "section"
   },
   {
-    "id": "467-schema#adding-a-column",
+    "id": "461-schema#adding-a-column",
     "title": "Zero Schema",
     "searchTitle": "Adding a Column",
     "sectionTitle": "Adding a Column",
@@ -6226,7 +6146,7 @@
     "kind": "section"
   },
   {
-    "id": "468-schema#removing-a-column",
+    "id": "462-schema#removing-a-column",
     "title": "Zero Schema",
     "searchTitle": "Removing a Column",
     "sectionTitle": "Removing a Column",
@@ -6236,7 +6156,7 @@
     "kind": "section"
   },
   {
-    "id": "469-schema#renaming-a-column",
+    "id": "463-schema#renaming-a-column",
     "title": "Zero Schema",
     "searchTitle": "Renaming a Column",
     "sectionTitle": "Renaming a Column",
@@ -6246,7 +6166,7 @@
     "kind": "section"
   },
   {
-    "id": "470-schema#making-a-column-optional",
+    "id": "464-schema#making-a-column-optional",
     "title": "Zero Schema",
     "searchTitle": "Making a Column Optional",
     "sectionTitle": "Making a Column Optional",
@@ -6256,7 +6176,7 @@
     "kind": "section"
   },
   {
-    "id": "471-schema#quick-reference",
+    "id": "465-schema#quick-reference",
     "title": "Zero Schema",
     "searchTitle": "Quick Reference",
     "sectionTitle": "Quick Reference",
@@ -6266,7 +6186,7 @@
     "kind": "section"
   },
   {
-    "id": "472-schema#backfill",
+    "id": "466-schema#backfill",
     "title": "Zero Schema",
     "searchTitle": "Backfill",
     "sectionTitle": "Backfill",
@@ -6276,7 +6196,7 @@
     "kind": "section"
   },
   {
-    "id": "473-schema#monitoring-backfill-progress",
+    "id": "467-schema#monitoring-backfill-progress",
     "title": "Zero Schema",
     "searchTitle": "Monitoring Backfill Progress",
     "sectionTitle": "Monitoring Backfill Progress",
@@ -6286,7 +6206,7 @@
     "kind": "section"
   },
   {
-    "id": "62-server-zql",
+    "id": "61-server-zql",
     "title": "ZQL on the Server",
     "searchTitle": "ZQL on the Server",
     "url": "/docs/server-zql",
@@ -6312,7 +6232,7 @@
     "kind": "page"
   },
   {
-    "id": "474-server-zql#creating-a-database",
+    "id": "468-server-zql#creating-a-database",
     "title": "ZQL on the Server",
     "searchTitle": "Creating a Database",
     "sectionTitle": "Creating a Database",
@@ -6322,7 +6242,7 @@
     "kind": "section"
   },
   {
-    "id": "475-server-zql#custom-database",
+    "id": "469-server-zql#custom-database",
     "title": "ZQL on the Server",
     "searchTitle": "Custom Database",
     "sectionTitle": "Custom Database",
@@ -6332,7 +6252,7 @@
     "kind": "section"
   },
   {
-    "id": "476-server-zql#running-zql",
+    "id": "470-server-zql#running-zql",
     "title": "ZQL on the Server",
     "searchTitle": "Running ZQL",
     "sectionTitle": "Running ZQL",
@@ -6342,7 +6262,7 @@
     "kind": "section"
   },
   {
-    "id": "477-server-zql#ssr",
+    "id": "471-server-zql#ssr",
     "title": "ZQL on the Server",
     "searchTitle": "SSR",
     "sectionTitle": "SSR",
@@ -6352,7 +6272,7 @@
     "kind": "section"
   },
   {
-    "id": "63-solidjs",
+    "id": "62-solidjs",
     "title": "SolidJS",
     "searchTitle": "SolidJS",
     "url": "/docs/solidjs",
@@ -6374,7 +6294,7 @@
     "kind": "page"
   },
   {
-    "id": "478-solidjs#setup",
+    "id": "472-solidjs#setup",
     "title": "SolidJS",
     "searchTitle": "Setup",
     "sectionTitle": "Setup",
@@ -6384,7 +6304,7 @@
     "kind": "section"
   },
   {
-    "id": "479-solidjs#usage",
+    "id": "473-solidjs#usage",
     "title": "SolidJS",
     "searchTitle": "Usage",
     "sectionTitle": "Usage",
@@ -6394,7 +6314,7 @@
     "kind": "section"
   },
   {
-    "id": "480-solidjs#examples",
+    "id": "474-solidjs#examples",
     "title": "SolidJS",
     "searchTitle": "Examples",
     "sectionTitle": "Examples",
@@ -6404,7 +6324,7 @@
     "kind": "section"
   },
   {
-    "id": "64-status",
+    "id": "63-status",
     "title": "Project Status",
     "searchTitle": "Project Status",
     "url": "/docs/status",
@@ -6430,7 +6350,7 @@
     "kind": "page"
   },
   {
-    "id": "481-status#breaking-changes",
+    "id": "475-status#breaking-changes",
     "title": "Project Status",
     "searchTitle": "Breaking Changes",
     "sectionTitle": "Breaking Changes",
@@ -6440,7 +6360,7 @@
     "kind": "section"
   },
   {
-    "id": "482-status#roadmap",
+    "id": "476-status#roadmap",
     "title": "Project Status",
     "searchTitle": "Roadmap",
     "sectionTitle": "Roadmap",
@@ -6450,7 +6370,7 @@
     "kind": "section"
   },
   {
-    "id": "483-status#2026",
+    "id": "477-status#2026",
     "title": "Project Status",
     "searchTitle": "2026",
     "sectionTitle": "2026",
@@ -6460,7 +6380,7 @@
     "kind": "section"
   },
   {
-    "id": "484-status#soon",
+    "id": "478-status#soon",
     "title": "Project Status",
     "searchTitle": "Soon",
     "sectionTitle": "Soon",
@@ -6470,7 +6390,7 @@
     "kind": "section"
   },
   {
-    "id": "65-sync",
+    "id": "64-sync",
     "title": "What is Sync?",
     "searchTitle": "What is Sync?",
     "url": "/docs/sync",
@@ -6492,7 +6412,7 @@
     "kind": "page"
   },
   {
-    "id": "485-sync#problem",
+    "id": "479-sync#problem",
     "title": "What is Sync?",
     "searchTitle": "Problem",
     "sectionTitle": "Problem",
@@ -6502,7 +6422,7 @@
     "kind": "section"
   },
   {
-    "id": "486-sync#solution",
+    "id": "480-sync#solution",
     "title": "What is Sync?",
     "searchTitle": "Solution",
     "sectionTitle": "Solution",
@@ -6512,7 +6432,7 @@
     "kind": "section"
   },
   {
-    "id": "487-sync#history-of-sync",
+    "id": "481-sync#history-of-sync",
     "title": "What is Sync?",
     "searchTitle": "History of Sync",
     "sectionTitle": "History of Sync",
@@ -6522,7 +6442,7 @@
     "kind": "section"
   },
   {
-    "id": "66-when-to-use",
+    "id": "65-when-to-use",
     "title": "When To Use Zero",
     "searchTitle": "When To Use Zero",
     "url": "/docs/when-to-use",
@@ -6588,7 +6508,7 @@
     "kind": "page"
   },
   {
-    "id": "488-when-to-use#zero-might-be-a-good-fit",
+    "id": "482-when-to-use#zero-might-be-a-good-fit",
     "title": "When To Use Zero",
     "searchTitle": "Zero Might be a Good Fit",
     "sectionTitle": "Zero Might be a Good Fit",
@@ -6598,7 +6518,7 @@
     "kind": "section"
   },
   {
-    "id": "489-when-to-use#you-want-to-sync-only-a-small-subset-of-data-to-client",
+    "id": "483-when-to-use#you-want-to-sync-only-a-small-subset-of-data-to-client",
     "title": "When To Use Zero",
     "searchTitle": "You want to sync only a small subset of data to client",
     "sectionTitle": "You want to sync only a small subset of data to client",
@@ -6608,7 +6528,7 @@
     "kind": "section"
   },
   {
-    "id": "490-when-to-use#you-need-fine-grained-read-or-write-permissions",
+    "id": "484-when-to-use#you-need-fine-grained-read-or-write-permissions",
     "title": "When To Use Zero",
     "searchTitle": "You need fine-grained read or write permissions",
     "sectionTitle": "You need fine-grained read or write permissions",
@@ -6618,7 +6538,7 @@
     "kind": "section"
   },
   {
-    "id": "491-when-to-use#you-are-building-a-traditional-client-server-web-app",
+    "id": "485-when-to-use#you-are-building-a-traditional-client-server-web-app",
     "title": "When To Use Zero",
     "searchTitle": "You are building a traditional client-server web app",
     "sectionTitle": "You are building a traditional client-server web app",
@@ -6628,7 +6548,7 @@
     "kind": "section"
   },
   {
-    "id": "492-when-to-use#you-use-postgresql",
+    "id": "486-when-to-use#you-use-postgresql",
     "title": "When To Use Zero",
     "searchTitle": "You use PostgreSQL",
     "sectionTitle": "You use PostgreSQL",
@@ -6638,7 +6558,7 @@
     "kind": "section"
   },
   {
-    "id": "493-when-to-use#your-app-is-broadly-like-linear",
+    "id": "487-when-to-use#your-app-is-broadly-like-linear",
     "title": "When To Use Zero",
     "searchTitle": "Your app is broadly \"like Linear\"",
     "sectionTitle": "Your app is broadly \"like Linear\"",
@@ -6648,7 +6568,7 @@
     "kind": "section"
   },
   {
-    "id": "494-when-to-use#interaction-performance-is-very-important-to-you",
+    "id": "488-when-to-use#interaction-performance-is-very-important-to-you",
     "title": "When To Use Zero",
     "searchTitle": "Interaction performance is very important to you",
     "sectionTitle": "Interaction performance is very important to you",
@@ -6658,7 +6578,7 @@
     "kind": "section"
   },
   {
-    "id": "495-when-to-use#zero-might-not-be-a-good-fit",
+    "id": "489-when-to-use#zero-might-not-be-a-good-fit",
     "title": "When To Use Zero",
     "searchTitle": "Zero Might Not be a Good Fit",
     "sectionTitle": "Zero Might Not be a Good Fit",
@@ -6668,7 +6588,7 @@
     "kind": "section"
   },
   {
-    "id": "496-when-to-use#you-need-the-privacy-or-data-ownership-benefits-of-local-first",
+    "id": "490-when-to-use#you-need-the-privacy-or-data-ownership-benefits-of-local-first",
     "title": "When To Use Zero",
     "searchTitle": "You need the privacy or data ownership benefits of local-first",
     "sectionTitle": "You need the privacy or data ownership benefits of local-first",
@@ -6678,7 +6598,7 @@
     "kind": "section"
   },
   {
-    "id": "497-when-to-use#you-need-to-support-offline-writes-or-long-periods-offline",
+    "id": "491-when-to-use#you-need-to-support-offline-writes-or-long-periods-offline",
     "title": "When To Use Zero",
     "searchTitle": "You need to support offline writes or long periods offline",
     "sectionTitle": "You need to support offline writes or long periods offline",
@@ -6688,7 +6608,7 @@
     "kind": "section"
   },
   {
-    "id": "498-when-to-use#you-are-building-a-native-mobile-app",
+    "id": "492-when-to-use#you-are-building-a-native-mobile-app",
     "title": "When To Use Zero",
     "searchTitle": "You are building a native mobile app",
     "sectionTitle": "You are building a native mobile app",
@@ -6698,7 +6618,7 @@
     "kind": "section"
   },
   {
-    "id": "499-when-to-use#the-total-backend-dataset-is--100gb",
+    "id": "493-when-to-use#the-total-backend-dataset-is--100gb",
     "title": "When To Use Zero",
     "searchTitle": "The total backend dataset is > ~100GB",
     "sectionTitle": "The total backend dataset is > ~100GB",
@@ -6708,7 +6628,7 @@
     "kind": "section"
   },
   {
-    "id": "500-when-to-use#zero-might-not-be-a-good-fit-yet",
+    "id": "494-when-to-use#zero-might-not-be-a-good-fit-yet",
     "title": "When To Use Zero",
     "searchTitle": "Zero Might Not be a Good Fit Yet",
     "sectionTitle": "Zero Might Not be a Good Fit Yet",
@@ -6718,7 +6638,7 @@
     "kind": "section"
   },
   {
-    "id": "501-when-to-use#alternatives",
+    "id": "495-when-to-use#alternatives",
     "title": "When To Use Zero",
     "searchTitle": "Alternatives",
     "sectionTitle": "Alternatives",
@@ -6728,7 +6648,7 @@
     "kind": "section"
   },
   {
-    "id": "67-zero-cache-config",
+    "id": "66-zero-cache-config",
     "title": "zero-cache Config",
     "searchTitle": "zero-cache Config",
     "url": "/docs/zero-cache-config",
@@ -7038,7 +6958,7 @@
     "kind": "page"
   },
   {
-    "id": "502-zero-cache-config#required-flags",
+    "id": "496-zero-cache-config#required-flags",
     "title": "zero-cache Config",
     "searchTitle": "Required Flags",
     "sectionTitle": "Required Flags",
@@ -7048,7 +6968,7 @@
     "kind": "section"
   },
   {
-    "id": "503-zero-cache-config#upstream-db",
+    "id": "497-zero-cache-config#upstream-db",
     "title": "zero-cache Config",
     "searchTitle": "Upstream DB",
     "sectionTitle": "Upstream DB",
@@ -7058,7 +6978,7 @@
     "kind": "section"
   },
   {
-    "id": "504-zero-cache-config#admin-password",
+    "id": "498-zero-cache-config#admin-password",
     "title": "zero-cache Config",
     "searchTitle": "Admin Password",
     "sectionTitle": "Admin Password",
@@ -7068,7 +6988,7 @@
     "kind": "section"
   },
   {
-    "id": "505-zero-cache-config#optional-flags",
+    "id": "499-zero-cache-config#optional-flags",
     "title": "zero-cache Config",
     "searchTitle": "Optional Flags",
     "sectionTitle": "Optional Flags",
@@ -7078,7 +6998,7 @@
     "kind": "section"
   },
   {
-    "id": "506-zero-cache-config#app-id",
+    "id": "500-zero-cache-config#app-id",
     "title": "zero-cache Config",
     "searchTitle": "App ID",
     "sectionTitle": "App ID",
@@ -7088,7 +7008,7 @@
     "kind": "section"
   },
   {
-    "id": "507-zero-cache-config#app-publications",
+    "id": "501-zero-cache-config#app-publications",
     "title": "zero-cache Config",
     "searchTitle": "App Publications",
     "sectionTitle": "App Publications",
@@ -7098,7 +7018,7 @@
     "kind": "section"
   },
   {
-    "id": "508-zero-cache-config#auth-revalidate-interval-seconds",
+    "id": "502-zero-cache-config#auth-revalidate-interval-seconds",
     "title": "zero-cache Config",
     "searchTitle": "Auth Revalidate Interval Seconds",
     "sectionTitle": "Auth Revalidate Interval Seconds",
@@ -7108,7 +7028,7 @@
     "kind": "section"
   },
   {
-    "id": "509-zero-cache-config#auth-retransform-interval-seconds",
+    "id": "503-zero-cache-config#auth-retransform-interval-seconds",
     "title": "zero-cache Config",
     "searchTitle": "Auth Retransform Interval Seconds",
     "sectionTitle": "Auth Retransform Interval Seconds",
@@ -7118,7 +7038,7 @@
     "kind": "section"
   },
   {
-    "id": "510-zero-cache-config#auto-reset",
+    "id": "504-zero-cache-config#auto-reset",
     "title": "zero-cache Config",
     "searchTitle": "Auto Reset",
     "sectionTitle": "Auto Reset",
@@ -7128,7 +7048,7 @@
     "kind": "section"
   },
   {
-    "id": "511-zero-cache-config#change-db",
+    "id": "505-zero-cache-config#change-db",
     "title": "zero-cache Config",
     "searchTitle": "Change DB",
     "sectionTitle": "Change DB",
@@ -7138,7 +7058,7 @@
     "kind": "section"
   },
   {
-    "id": "512-zero-cache-config#change-max-connections",
+    "id": "506-zero-cache-config#change-max-connections",
     "title": "zero-cache Config",
     "searchTitle": "Change Max Connections",
     "sectionTitle": "Change Max Connections",
@@ -7148,7 +7068,7 @@
     "kind": "section"
   },
   {
-    "id": "513-zero-cache-config#change-streamer-back-pressure-limit-heap-proportion",
+    "id": "507-zero-cache-config#change-streamer-back-pressure-limit-heap-proportion",
     "title": "zero-cache Config",
     "searchTitle": "Change Streamer Back Pressure Limit Heap Proportion",
     "sectionTitle": "Change Streamer Back Pressure Limit Heap Proportion",
@@ -7158,7 +7078,7 @@
     "kind": "section"
   },
   {
-    "id": "514-zero-cache-config#change-streamer-flow-control-consensus-padding-seconds",
+    "id": "508-zero-cache-config#change-streamer-flow-control-consensus-padding-seconds",
     "title": "zero-cache Config",
     "searchTitle": "Change Streamer Flow Control Consensus Padding Seconds",
     "sectionTitle": "Change Streamer Flow Control Consensus Padding Seconds",
@@ -7168,7 +7088,7 @@
     "kind": "section"
   },
   {
-    "id": "515-zero-cache-config#change-streamer-mode",
+    "id": "509-zero-cache-config#change-streamer-mode",
     "title": "zero-cache Config",
     "searchTitle": "Change Streamer Mode",
     "sectionTitle": "Change Streamer Mode",
@@ -7178,7 +7098,7 @@
     "kind": "section"
   },
   {
-    "id": "516-zero-cache-config#change-streamer-port",
+    "id": "510-zero-cache-config#change-streamer-port",
     "title": "zero-cache Config",
     "searchTitle": "Change Streamer Port",
     "sectionTitle": "Change Streamer Port",
@@ -7188,7 +7108,7 @@
     "kind": "section"
   },
   {
-    "id": "517-zero-cache-config#change-streamer-startup-delay-ms",
+    "id": "511-zero-cache-config#change-streamer-startup-delay-ms",
     "title": "zero-cache Config",
     "searchTitle": "Change Streamer Startup Delay (ms)",
     "sectionTitle": "Change Streamer Startup Delay (ms)",
@@ -7198,7 +7118,7 @@
     "kind": "section"
   },
   {
-    "id": "518-zero-cache-config#change-streamer-uri",
+    "id": "512-zero-cache-config#change-streamer-uri",
     "title": "zero-cache Config",
     "searchTitle": "Change Streamer URI",
     "sectionTitle": "Change Streamer URI",
@@ -7208,7 +7128,7 @@
     "kind": "section"
   },
   {
-    "id": "519-zero-cache-config#cvr-db",
+    "id": "513-zero-cache-config#cvr-db",
     "title": "zero-cache Config",
     "searchTitle": "CVR DB",
     "sectionTitle": "CVR DB",
@@ -7218,7 +7138,7 @@
     "kind": "section"
   },
   {
-    "id": "520-zero-cache-config#cvr-garbage-collection-inactivity-threshold-hours",
+    "id": "514-zero-cache-config#cvr-garbage-collection-inactivity-threshold-hours",
     "title": "zero-cache Config",
     "searchTitle": "CVR Garbage Collection Inactivity Threshold Hours",
     "sectionTitle": "CVR Garbage Collection Inactivity Threshold Hours",
@@ -7228,7 +7148,7 @@
     "kind": "section"
   },
   {
-    "id": "521-zero-cache-config#cvr-garbage-collection-initial-batch-size",
+    "id": "515-zero-cache-config#cvr-garbage-collection-initial-batch-size",
     "title": "zero-cache Config",
     "searchTitle": "CVR Garbage Collection Initial Batch Size",
     "sectionTitle": "CVR Garbage Collection Initial Batch Size",
@@ -7238,7 +7158,7 @@
     "kind": "section"
   },
   {
-    "id": "522-zero-cache-config#cvr-garbage-collection-initial-interval-seconds",
+    "id": "516-zero-cache-config#cvr-garbage-collection-initial-interval-seconds",
     "title": "zero-cache Config",
     "searchTitle": "CVR Garbage Collection Initial Interval Seconds",
     "sectionTitle": "CVR Garbage Collection Initial Interval Seconds",
@@ -7248,7 +7168,7 @@
     "kind": "section"
   },
   {
-    "id": "523-zero-cache-config#cvr-max-connections",
+    "id": "517-zero-cache-config#cvr-max-connections",
     "title": "zero-cache Config",
     "searchTitle": "CVR Max Connections",
     "sectionTitle": "CVR Max Connections",
@@ -7258,7 +7178,7 @@
     "kind": "section"
   },
   {
-    "id": "524-zero-cache-config#enable-query-planner",
+    "id": "518-zero-cache-config#enable-query-planner",
     "title": "zero-cache Config",
     "searchTitle": "Enable Query Planner",
     "sectionTitle": "Enable Query Planner",
@@ -7268,7 +7188,7 @@
     "kind": "section"
   },
   {
-    "id": "525-zero-cache-config#enable-crud-mutations",
+    "id": "519-zero-cache-config#enable-crud-mutations",
     "title": "zero-cache Config",
     "searchTitle": "Enable CRUD Mutations",
     "sectionTitle": "Enable CRUD Mutations",
@@ -7278,7 +7198,7 @@
     "kind": "section"
   },
   {
-    "id": "526-zero-cache-config#enable-telemetry",
+    "id": "520-zero-cache-config#enable-telemetry",
     "title": "zero-cache Config",
     "searchTitle": "Enable Telemetry",
     "sectionTitle": "Enable Telemetry",
@@ -7288,7 +7208,7 @@
     "kind": "section"
   },
   {
-    "id": "527-zero-cache-config#initial-sync-table-copy-workers",
+    "id": "521-zero-cache-config#initial-sync-table-copy-workers",
     "title": "zero-cache Config",
     "searchTitle": "Initial Sync Table Copy Workers",
     "sectionTitle": "Initial Sync Table Copy Workers",
@@ -7298,7 +7218,7 @@
     "kind": "section"
   },
   {
-    "id": "528-zero-cache-config#lazy-startup",
+    "id": "522-zero-cache-config#lazy-startup",
     "title": "zero-cache Config",
     "searchTitle": "Lazy Startup",
     "sectionTitle": "Lazy Startup",
@@ -7308,7 +7228,7 @@
     "kind": "section"
   },
   {
-    "id": "529-zero-cache-config#litestream-backup-url",
+    "id": "523-zero-cache-config#litestream-backup-url",
     "title": "zero-cache Config",
     "searchTitle": "Litestream Backup URL",
     "sectionTitle": "Litestream Backup URL",
@@ -7318,7 +7238,7 @@
     "kind": "section"
   },
   {
-    "id": "530-zero-cache-config#litestream-endpoint",
+    "id": "524-zero-cache-config#litestream-endpoint",
     "title": "zero-cache Config",
     "searchTitle": "Litestream Endpoint",
     "sectionTitle": "Litestream Endpoint",
@@ -7328,7 +7248,7 @@
     "kind": "section"
   },
   {
-    "id": "531-zero-cache-config#litestream-checkpoint-threshold-mb",
+    "id": "525-zero-cache-config#litestream-checkpoint-threshold-mb",
     "title": "zero-cache Config",
     "searchTitle": "Litestream Checkpoint Threshold MB",
     "sectionTitle": "Litestream Checkpoint Threshold MB",
@@ -7338,7 +7258,7 @@
     "kind": "section"
   },
   {
-    "id": "532-zero-cache-config#litestream-config-path",
+    "id": "526-zero-cache-config#litestream-config-path",
     "title": "zero-cache Config",
     "searchTitle": "Litestream Config Path",
     "sectionTitle": "Litestream Config Path",
@@ -7348,7 +7268,7 @@
     "kind": "section"
   },
   {
-    "id": "533-zero-cache-config#litestream-executable",
+    "id": "527-zero-cache-config#litestream-executable",
     "title": "zero-cache Config",
     "searchTitle": "Litestream Executable",
     "sectionTitle": "Litestream Executable",
@@ -7358,7 +7278,7 @@
     "kind": "section"
   },
   {
-    "id": "534-zero-cache-config#litestream-incremental-backup-interval-minutes",
+    "id": "528-zero-cache-config#litestream-incremental-backup-interval-minutes",
     "title": "zero-cache Config",
     "searchTitle": "Litestream Incremental Backup Interval Minutes",
     "sectionTitle": "Litestream Incremental Backup Interval Minutes",
@@ -7368,7 +7288,7 @@
     "kind": "section"
   },
   {
-    "id": "535-zero-cache-config#litestream-maximum-checkpoint-page-count",
+    "id": "529-zero-cache-config#litestream-maximum-checkpoint-page-count",
     "title": "zero-cache Config",
     "searchTitle": "Litestream Maximum Checkpoint Page Count",
     "sectionTitle": "Litestream Maximum Checkpoint Page Count",
@@ -7378,7 +7298,7 @@
     "kind": "section"
   },
   {
-    "id": "536-zero-cache-config#litestream-minimum-checkpoint-page-count",
+    "id": "530-zero-cache-config#litestream-minimum-checkpoint-page-count",
     "title": "zero-cache Config",
     "searchTitle": "Litestream Minimum Checkpoint Page Count",
     "sectionTitle": "Litestream Minimum Checkpoint Page Count",
@@ -7388,7 +7308,7 @@
     "kind": "section"
   },
   {
-    "id": "537-zero-cache-config#litestream-multipart-concurrency",
+    "id": "531-zero-cache-config#litestream-multipart-concurrency",
     "title": "zero-cache Config",
     "searchTitle": "Litestream Multipart Concurrency",
     "sectionTitle": "Litestream Multipart Concurrency",
@@ -7398,7 +7318,7 @@
     "kind": "section"
   },
   {
-    "id": "538-zero-cache-config#litestream-multipart-size",
+    "id": "532-zero-cache-config#litestream-multipart-size",
     "title": "zero-cache Config",
     "searchTitle": "Litestream Multipart Size",
     "sectionTitle": "Litestream Multipart Size",
@@ -7408,7 +7328,7 @@
     "kind": "section"
   },
   {
-    "id": "539-zero-cache-config#litestream-log-level",
+    "id": "533-zero-cache-config#litestream-log-level",
     "title": "zero-cache Config",
     "searchTitle": "Litestream Log Level",
     "sectionTitle": "Litestream Log Level",
@@ -7418,7 +7338,7 @@
     "kind": "section"
   },
   {
-    "id": "540-zero-cache-config#litestream-port",
+    "id": "534-zero-cache-config#litestream-port",
     "title": "zero-cache Config",
     "searchTitle": "Litestream Port",
     "sectionTitle": "Litestream Port",
@@ -7428,7 +7348,7 @@
     "kind": "section"
   },
   {
-    "id": "541-zero-cache-config#litestream-restore-parallelism",
+    "id": "535-zero-cache-config#litestream-restore-parallelism",
     "title": "zero-cache Config",
     "searchTitle": "Litestream Restore Parallelism",
     "sectionTitle": "Litestream Restore Parallelism",
@@ -7438,7 +7358,7 @@
     "kind": "section"
   },
   {
-    "id": "542-zero-cache-config#litestream-snapshot-backup-interval-hours",
+    "id": "536-zero-cache-config#litestream-snapshot-backup-interval-hours",
     "title": "zero-cache Config",
     "searchTitle": "Litestream Snapshot Backup Interval Hours",
     "sectionTitle": "Litestream Snapshot Backup Interval Hours",
@@ -7448,7 +7368,7 @@
     "kind": "section"
   },
   {
-    "id": "543-zero-cache-config#log-format",
+    "id": "537-zero-cache-config#log-format",
     "title": "zero-cache Config",
     "searchTitle": "Log Format",
     "sectionTitle": "Log Format",
@@ -7458,7 +7378,7 @@
     "kind": "section"
   },
   {
-    "id": "544-zero-cache-config#log-ivm-sampling",
+    "id": "538-zero-cache-config#log-ivm-sampling",
     "title": "zero-cache Config",
     "searchTitle": "Log IVM Sampling",
     "sectionTitle": "Log IVM Sampling",
@@ -7468,7 +7388,7 @@
     "kind": "section"
   },
   {
-    "id": "545-zero-cache-config#log-level",
+    "id": "539-zero-cache-config#log-level",
     "title": "zero-cache Config",
     "searchTitle": "Log Level",
     "sectionTitle": "Log Level",
@@ -7478,7 +7398,7 @@
     "kind": "section"
   },
   {
-    "id": "546-zero-cache-config#log-slow-hydrate-threshold",
+    "id": "540-zero-cache-config#log-slow-hydrate-threshold",
     "title": "zero-cache Config",
     "searchTitle": "Log Slow Hydrate Threshold",
     "sectionTitle": "Log Slow Hydrate Threshold",
@@ -7488,7 +7408,7 @@
     "kind": "section"
   },
   {
-    "id": "547-zero-cache-config#log-slow-row-threshold",
+    "id": "541-zero-cache-config#log-slow-row-threshold",
     "title": "zero-cache Config",
     "searchTitle": "Log Slow Row Threshold",
     "sectionTitle": "Log Slow Row Threshold",
@@ -7498,7 +7418,7 @@
     "kind": "section"
   },
   {
-    "id": "548-zero-cache-config#mutate-api-key",
+    "id": "542-zero-cache-config#mutate-api-key",
     "title": "zero-cache Config",
     "searchTitle": "Mutate API Key",
     "sectionTitle": "Mutate API Key",
@@ -7508,7 +7428,7 @@
     "kind": "section"
   },
   {
-    "id": "549-zero-cache-config#mutate-allowed-client-headers",
+    "id": "543-zero-cache-config#mutate-allowed-client-headers",
     "title": "zero-cache Config",
     "searchTitle": "Mutate Allowed Client Headers",
     "sectionTitle": "Mutate Allowed Client Headers",
@@ -7518,7 +7438,7 @@
     "kind": "section"
   },
   {
-    "id": "550-zero-cache-config#mutate-forward-cookies",
+    "id": "544-zero-cache-config#mutate-forward-cookies",
     "title": "zero-cache Config",
     "searchTitle": "Mutate Forward Cookies",
     "sectionTitle": "Mutate Forward Cookies",
@@ -7528,7 +7448,7 @@
     "kind": "section"
   },
   {
-    "id": "551-zero-cache-config#mutate-url",
+    "id": "545-zero-cache-config#mutate-url",
     "title": "zero-cache Config",
     "searchTitle": "Mutate URL",
     "sectionTitle": "Mutate URL",
@@ -7538,7 +7458,7 @@
     "kind": "section"
   },
   {
-    "id": "552-zero-cache-config#number-of-sync-workers",
+    "id": "546-zero-cache-config#number-of-sync-workers",
     "title": "zero-cache Config",
     "searchTitle": "Number of Sync Workers",
     "sectionTitle": "Number of Sync Workers",
@@ -7548,7 +7468,7 @@
     "kind": "section"
   },
   {
-    "id": "553-zero-cache-config#per-user-mutation-limit-max",
+    "id": "547-zero-cache-config#per-user-mutation-limit-max",
     "title": "zero-cache Config",
     "searchTitle": "Per User Mutation Limit Max",
     "sectionTitle": "Per User Mutation Limit Max",
@@ -7558,7 +7478,7 @@
     "kind": "section"
   },
   {
-    "id": "554-zero-cache-config#per-user-mutation-limit-window-ms",
+    "id": "548-zero-cache-config#per-user-mutation-limit-window-ms",
     "title": "zero-cache Config",
     "searchTitle": "Per User Mutation Limit Window (ms)",
     "sectionTitle": "Per User Mutation Limit Window (ms)",
@@ -7568,7 +7488,7 @@
     "kind": "section"
   },
   {
-    "id": "555-zero-cache-config#port",
+    "id": "549-zero-cache-config#port",
     "title": "zero-cache Config",
     "searchTitle": "Port",
     "sectionTitle": "Port",
@@ -7578,7 +7498,7 @@
     "kind": "section"
   },
   {
-    "id": "556-zero-cache-config#query-api-key",
+    "id": "550-zero-cache-config#query-api-key",
     "title": "zero-cache Config",
     "searchTitle": "Query API Key",
     "sectionTitle": "Query API Key",
@@ -7588,7 +7508,7 @@
     "kind": "section"
   },
   {
-    "id": "557-zero-cache-config#query-allowed-client-headers",
+    "id": "551-zero-cache-config#query-allowed-client-headers",
     "title": "zero-cache Config",
     "searchTitle": "Query Allowed Client Headers",
     "sectionTitle": "Query Allowed Client Headers",
@@ -7598,7 +7518,7 @@
     "kind": "section"
   },
   {
-    "id": "558-zero-cache-config#query-forward-cookies",
+    "id": "552-zero-cache-config#query-forward-cookies",
     "title": "zero-cache Config",
     "searchTitle": "Query Forward Cookies",
     "sectionTitle": "Query Forward Cookies",
@@ -7608,7 +7528,7 @@
     "kind": "section"
   },
   {
-    "id": "559-zero-cache-config#query-hydration-stats",
+    "id": "553-zero-cache-config#query-hydration-stats",
     "title": "zero-cache Config",
     "searchTitle": "Query Hydration Stats",
     "sectionTitle": "Query Hydration Stats",
@@ -7618,7 +7538,7 @@
     "kind": "section"
   },
   {
-    "id": "560-zero-cache-config#query-url",
+    "id": "554-zero-cache-config#query-url",
     "title": "zero-cache Config",
     "searchTitle": "Query URL",
     "sectionTitle": "Query URL",
@@ -7628,7 +7548,7 @@
     "kind": "section"
   },
   {
-    "id": "561-zero-cache-config#replica-file",
+    "id": "555-zero-cache-config#replica-file",
     "title": "zero-cache Config",
     "searchTitle": "Replica File",
     "sectionTitle": "Replica File",
@@ -7638,7 +7558,7 @@
     "kind": "section"
   },
   {
-    "id": "562-zero-cache-config#replica-vacuum-interval-hours",
+    "id": "556-zero-cache-config#replica-vacuum-interval-hours",
     "title": "zero-cache Config",
     "searchTitle": "Replica Vacuum Interval Hours",
     "sectionTitle": "Replica Vacuum Interval Hours",
@@ -7648,7 +7568,7 @@
     "kind": "section"
   },
   {
-    "id": "563-zero-cache-config#replication-lag-report-interval-ms",
+    "id": "557-zero-cache-config#replication-lag-report-interval-ms",
     "title": "zero-cache Config",
     "searchTitle": "Replication Lag Report Interval (ms)",
     "sectionTitle": "Replication Lag Report Interval (ms)",
@@ -7658,7 +7578,7 @@
     "kind": "section"
   },
   {
-    "id": "564-zero-cache-config#server-version",
+    "id": "558-zero-cache-config#server-version",
     "title": "zero-cache Config",
     "searchTitle": "Server Version",
     "sectionTitle": "Server Version",
@@ -7668,7 +7588,7 @@
     "kind": "section"
   },
   {
-    "id": "565-zero-cache-config#storage-db-temp-dir",
+    "id": "559-zero-cache-config#storage-db-temp-dir",
     "title": "zero-cache Config",
     "searchTitle": "Storage DB Temp Dir",
     "sectionTitle": "Storage DB Temp Dir",
@@ -7678,7 +7598,7 @@
     "kind": "section"
   },
   {
-    "id": "566-zero-cache-config#task-id",
+    "id": "560-zero-cache-config#task-id",
     "title": "zero-cache Config",
     "searchTitle": "Task ID",
     "sectionTitle": "Task ID",
@@ -7688,7 +7608,7 @@
     "kind": "section"
   },
   {
-    "id": "567-zero-cache-config#upstream-max-connections",
+    "id": "561-zero-cache-config#upstream-max-connections",
     "title": "zero-cache Config",
     "searchTitle": "Upstream Max Connections",
     "sectionTitle": "Upstream Max Connections",
@@ -7698,7 +7618,7 @@
     "kind": "section"
   },
   {
-    "id": "568-zero-cache-config#upstream-pg-replication-slot-failover",
+    "id": "562-zero-cache-config#upstream-pg-replication-slot-failover",
     "title": "zero-cache Config",
     "searchTitle": "Upstream PG Replication Slot Failover",
     "sectionTitle": "Upstream PG Replication Slot Failover",
@@ -7708,7 +7628,7 @@
     "kind": "section"
   },
   {
-    "id": "569-zero-cache-config#websocket-compression",
+    "id": "563-zero-cache-config#websocket-compression",
     "title": "zero-cache Config",
     "searchTitle": "Websocket Compression",
     "sectionTitle": "Websocket Compression",
@@ -7718,7 +7638,7 @@
     "kind": "section"
   },
   {
-    "id": "570-zero-cache-config#websocket-compression-options",
+    "id": "564-zero-cache-config#websocket-compression-options",
     "title": "zero-cache Config",
     "searchTitle": "Websocket Compression Options",
     "sectionTitle": "Websocket Compression Options",
@@ -7728,7 +7648,7 @@
     "kind": "section"
   },
   {
-    "id": "571-zero-cache-config#websocket-max-payload-bytes",
+    "id": "565-zero-cache-config#websocket-max-payload-bytes",
     "title": "zero-cache Config",
     "searchTitle": "Websocket Max Payload Bytes",
     "sectionTitle": "Websocket Max Payload Bytes",
@@ -7738,7 +7658,7 @@
     "kind": "section"
   },
   {
-    "id": "572-zero-cache-config#yield-threshold-ms",
+    "id": "566-zero-cache-config#yield-threshold-ms",
     "title": "zero-cache Config",
     "searchTitle": "Yield Threshold (ms)",
     "sectionTitle": "Yield Threshold (ms)",
@@ -7748,7 +7668,7 @@
     "kind": "section"
   },
   {
-    "id": "573-zero-cache-config#deprecated-flags",
+    "id": "567-zero-cache-config#deprecated-flags",
     "title": "zero-cache Config",
     "searchTitle": "Deprecated Flags",
     "sectionTitle": "Deprecated Flags",
@@ -7758,7 +7678,7 @@
     "kind": "section"
   },
   {
-    "id": "574-zero-cache-config#auth-jwk",
+    "id": "568-zero-cache-config#auth-jwk",
     "title": "zero-cache Config",
     "searchTitle": "Auth JWK",
     "sectionTitle": "Auth JWK",
@@ -7768,7 +7688,7 @@
     "kind": "section"
   },
   {
-    "id": "575-zero-cache-config#auth-jwks-url",
+    "id": "569-zero-cache-config#auth-jwks-url",
     "title": "zero-cache Config",
     "searchTitle": "Auth JWKS URL",
     "sectionTitle": "Auth JWKS URL",
@@ -7778,7 +7698,7 @@
     "kind": "section"
   },
   {
-    "id": "576-zero-cache-config#auth-secret",
+    "id": "570-zero-cache-config#auth-secret",
     "title": "zero-cache Config",
     "searchTitle": "Auth Secret",
     "sectionTitle": "Auth Secret",
@@ -7788,7 +7708,7 @@
     "kind": "section"
   },
   {
-    "id": "68-zql",
+    "id": "67-zql",
     "title": "ZQL",
     "searchTitle": "ZQL",
     "url": "/docs/zql",
@@ -7898,7 +7818,7 @@
     "kind": "page"
   },
   {
-    "id": "577-zql#create-a-builder",
+    "id": "571-zql#create-a-builder",
     "title": "ZQL",
     "searchTitle": "Create a Builder",
     "sectionTitle": "Create a Builder",
@@ -7908,7 +7828,7 @@
     "kind": "section"
   },
   {
-    "id": "578-zql#select",
+    "id": "572-zql#select",
     "title": "ZQL",
     "searchTitle": "Select",
     "sectionTitle": "Select",
@@ -7918,7 +7838,7 @@
     "kind": "section"
   },
   {
-    "id": "579-zql#ordering",
+    "id": "573-zql#ordering",
     "title": "ZQL",
     "searchTitle": "Ordering",
     "sectionTitle": "Ordering",
@@ -7928,7 +7848,7 @@
     "kind": "section"
   },
   {
-    "id": "580-zql#limit",
+    "id": "574-zql#limit",
     "title": "ZQL",
     "searchTitle": "Limit",
     "sectionTitle": "Limit",
@@ -7938,7 +7858,7 @@
     "kind": "section"
   },
   {
-    "id": "581-zql#paging",
+    "id": "575-zql#paging",
     "title": "ZQL",
     "searchTitle": "Paging",
     "sectionTitle": "Paging",
@@ -7948,7 +7868,7 @@
     "kind": "section"
   },
   {
-    "id": "582-zql#getting-a-single-result",
+    "id": "576-zql#getting-a-single-result",
     "title": "ZQL",
     "searchTitle": "Getting a Single Result",
     "sectionTitle": "Getting a Single Result",
@@ -7958,7 +7878,7 @@
     "kind": "section"
   },
   {
-    "id": "583-zql#relationships",
+    "id": "577-zql#relationships",
     "title": "ZQL",
     "searchTitle": "Relationships",
     "sectionTitle": "Relationships",
@@ -7968,7 +7888,7 @@
     "kind": "section"
   },
   {
-    "id": "584-zql#refining-relationships",
+    "id": "578-zql#refining-relationships",
     "title": "ZQL",
     "searchTitle": "Refining Relationships",
     "sectionTitle": "Refining Relationships",
@@ -7978,7 +7898,7 @@
     "kind": "section"
   },
   {
-    "id": "585-zql#nested-relationships",
+    "id": "579-zql#nested-relationships",
     "title": "ZQL",
     "searchTitle": "Nested Relationships",
     "sectionTitle": "Nested Relationships",
@@ -7988,7 +7908,7 @@
     "kind": "section"
   },
   {
-    "id": "586-zql#where",
+    "id": "580-zql#where",
     "title": "ZQL",
     "searchTitle": "Where",
     "sectionTitle": "Where",
@@ -7998,7 +7918,7 @@
     "kind": "section"
   },
   {
-    "id": "587-zql#comparison-operators",
+    "id": "581-zql#comparison-operators",
     "title": "ZQL",
     "searchTitle": "Comparison Operators",
     "sectionTitle": "Comparison Operators",
@@ -8008,7 +7928,7 @@
     "kind": "section"
   },
   {
-    "id": "588-zql#equals-is-the-default-comparison-operator",
+    "id": "582-zql#equals-is-the-default-comparison-operator",
     "title": "ZQL",
     "searchTitle": "Equals is the Default Comparison Operator",
     "sectionTitle": "Equals is the Default Comparison Operator",
@@ -8018,7 +7938,7 @@
     "kind": "section"
   },
   {
-    "id": "589-zql#comparing-to-null",
+    "id": "583-zql#comparing-to-null",
     "title": "ZQL",
     "searchTitle": "Comparing to null",
     "sectionTitle": "Comparing to null",
@@ -8028,7 +7948,7 @@
     "kind": "section"
   },
   {
-    "id": "590-zql#comparing-to-undefined",
+    "id": "584-zql#comparing-to-undefined",
     "title": "ZQL",
     "searchTitle": "Comparing to undefined",
     "sectionTitle": "Comparing to undefined",
@@ -8038,7 +7958,7 @@
     "kind": "section"
   },
   {
-    "id": "591-zql#compound-filters",
+    "id": "585-zql#compound-filters",
     "title": "ZQL",
     "searchTitle": "Compound Filters",
     "sectionTitle": "Compound Filters",
@@ -8048,7 +7968,7 @@
     "kind": "section"
   },
   {
-    "id": "592-zql#comparing-literal-values",
+    "id": "586-zql#comparing-literal-values",
     "title": "ZQL",
     "searchTitle": "Comparing Literal Values",
     "sectionTitle": "Comparing Literal Values",
@@ -8058,7 +7978,7 @@
     "kind": "section"
   },
   {
-    "id": "593-zql#relationship-filters",
+    "id": "587-zql#relationship-filters",
     "title": "ZQL",
     "searchTitle": "Relationship Filters",
     "sectionTitle": "Relationship Filters",
@@ -8068,7 +7988,7 @@
     "kind": "section"
   },
   {
-    "id": "594-zql#type-helpers",
+    "id": "588-zql#type-helpers",
     "title": "ZQL",
     "searchTitle": "Type Helpers",
     "sectionTitle": "Type Helpers",
@@ -8078,7 +7998,7 @@
     "kind": "section"
   },
   {
-    "id": "595-zql#planning",
+    "id": "589-zql#planning",
     "title": "ZQL",
     "searchTitle": "Planning",
     "sectionTitle": "Planning",
@@ -8088,7 +8008,7 @@
     "kind": "section"
   },
   {
-    "id": "596-zql#inspecting-query-plans",
+    "id": "590-zql#inspecting-query-plans",
     "title": "ZQL",
     "searchTitle": "Inspecting Query Plans",
     "sectionTitle": "Inspecting Query Plans",
@@ -8098,7 +8018,7 @@
     "kind": "section"
   },
   {
-    "id": "597-zql#manually-flipping-joins",
+    "id": "591-zql#manually-flipping-joins",
     "title": "ZQL",
     "searchTitle": "Manually Flipping Joins",
     "sectionTitle": "Manually Flipping Joins",
@@ -8108,7 +8028,7 @@
     "kind": "section"
   },
   {
-    "id": "598-zql#scalar-subqueries",
+    "id": "592-zql#scalar-subqueries",
     "title": "ZQL",
     "searchTitle": "Scalar Subqueries",
     "sectionTitle": "Scalar Subqueries",
@@ -8118,7 +8038,7 @@
     "kind": "section"
   },
   {
-    "id": "599-zql#why-it-matters",
+    "id": "593-zql#why-it-matters",
     "title": "ZQL",
     "searchTitle": "Why It Matters",
     "sectionTitle": "Why It Matters",
@@ -8128,7 +8048,7 @@
     "kind": "section"
   },
   {
-    "id": "600-zql#trade-offs",
+    "id": "594-zql#trade-offs",
     "title": "ZQL",
     "searchTitle": "Trade-offs",
     "sectionTitle": "Trade-offs",
@@ -8138,7 +8058,7 @@
     "kind": "section"
   },
   {
-    "id": "601-zql#future-work",
+    "id": "595-zql#future-work",
     "title": "ZQL",
     "searchTitle": "Future Work",
     "sectionTitle": "Future Work",

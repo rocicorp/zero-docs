@@ -17,6 +17,7 @@ export const ROUTES = [
     items: [
       {title: 'Quickstart', href: '/quickstart'},
       {title: 'Installation', href: '/install'},
+      {title: 'Starters', href: '/starters'},
       {title: 'Samples', href: '/samples'},
     ],
   },

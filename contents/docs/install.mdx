@@ -2,33 +2,26 @@
 title: Install Zero
 ---
 
-This guide walks you through adding Zero to any TypeScript-based web app.
-
-It should take about 20 minutes to complete. When you're done, you'll have Zero up and running and will understand its core ideas.
+This guide shows how to add Zero to an existing TypeScript-based web app. For a concrete end-to-end walkthrough, build the music app in [Quickstart](/docs/quickstart).
 
 ## Integrate Zero
 
 ### Set Up Your Database
 
-You'll need a local Postgres database for development. If you don't have a preferred method, we recommend using [Docker](https://www.docker.com/):
+You'll need a Postgres database for development. If you don't have a preferred method, we recommend using [Docker](https://www.docker.com/):
 
 ```bash
+# IMPORTANT: logical WAL level is required for Zero
+# to sync data to its SQLite replica
 docker run -d --name zero-postgres \
-  -e POSTGRES_PASSWORD="password" \
+  -e POSTGRES_DB="zero" \
+  -e POSTGRES_PASSWORD="pass" \
   -p 5432:5432 \
-  postgres:16-alpine \
-  # IMPORTANT: logical WAL level is required for Zero
-  # to sync data to its SQLite replica
+  postgres:18 \
   postgres -c wal_level=logical
 ```
 
-This will start a Postgres database running in the background.
-
-<Note heading="More Information">
-  See [Connecting to Postgres](/docs/connecting-to-postgres)
-  for more details on what Postgres features are required
-  for Zero to work.
-</Note>
+See [Provider Support](/docs/connecting-to-postgres) for developing locally with popular cloud Postgres providers.
 
 ### Install and Run Zero-Cache
 
@@ -64,61 +57,26 @@ pnpm approve-builds
 bun add @rocicorp/zero
 
 # Note: Bun disables postinstall scripts by default for security.
-# Add to package.json:
+# Either approve the build:
+bun pm trust @rocicorp/zero-sqlite3
+
+# Or add to package.json:
 # "trustedDependencies": ["@rocicorp/zero-sqlite3"]
 ```
 
 ```bash
 yarn add @rocicorp/zero
+
+# Note: Modern Yarn doesn't run postinstall scripts by default.
+# Add to package.json:
+# "dependenciesMeta": {
+#   "@rocicorp/zero-sqlite3": {
+#     "built": true
+#   }
+# }
 ```
 
 </CodeGroup>
-
-Start the development `zero-cache` by running the following command:
-
-<CodeGroup
-  labels={[
-    {text: 'npm', sync: {pm: 'npm'}},
-    {text: 'pnpm', sync: {pm: 'pnpm'}},
-    {text: 'bun', sync: {pm: 'bun'}},
-    {text: 'yarn', sync: {pm: 'yarn'}},
-  ]}
->
-
-```bash
-export ZERO_UPSTREAM_DB="postgres://postgres:password@localhost:5432/postgres"
-npx zero-cache-dev
-```
-
-```bash
-export ZERO_UPSTREAM_DB="postgres://postgres:password@localhost:5432/postgres"
-pnpm exec zero-cache-dev
-```
-
-```bash
-export ZERO_UPSTREAM_DB="postgres://postgres:password@localhost:5432/postgres"
-bunx zero-cache-dev
-```
-
-```bash
-export ZERO_UPSTREAM_DB="postgres://postgres:password@localhost:5432/postgres"
-yarn exec zero-cache-dev
-```
-
-</CodeGroup>
-
-Zero works by continuously replicating your upstream database into a SQLite _replica_.
-
-Zero-cache runs client queries against the replica. If there are tables or columns that will **not** be queried by Zero clients ever, you can exclude them.
-
-You can use the [`zero-sqlite3`](/docs/debug/replication#inspecting) tool to explore `zero.db`. Try it out by connecting to Postgres and the Zero replica in two different terminals.
-If you change something in Postgres, you'll see it immediately show up in the replica:
-
-<Video
-  src="/video/onboarding/zero-cache-sync.mp4"
-  alt="Zero-cache syncing between Postgres and SQLite"
-  animation
-/>
 
 ### Set Up Your Zero Schema
 
@@ -137,7 +95,7 @@ If you use Drizzle or Prisma, you can generate `schema.ts` automatically. Otherw
       sync: {orm: 'prisma', pgClient: 'prisma'},
     },
     {
-      text: "Manual",
+      text: 'Manual',
       sync: {orm: 'other', pgClient: 'other'},
     },
   ]}
@@ -207,26 +165,32 @@ yarn prisma generate
 
 </SyncedCode>
 
+<InstallTableNameReplace>
+
 ```ts
 // zero/schema.ts
-import {table, string, createSchema} from '@rocicorp/zero'
+import {
+  boolean,
+  createBuilder,
+  createSchema,
+  string,
+  table
+} from '@rocicorp/zero'
 
 const user = table('user')
   .columns({
     id: string(),
-    name: string()
-    // ... other columns ...
+    name: string(),
+    active: boolean()
   })
   .primaryKey('id')
-
-// ... more tables and relationships ...
-// See "Schema" page in left nav for complete schema API.
 
 export const schema = createSchema({
   tables: [user]
 })
 
-// Register the schema for type safety
+export const zql = createBuilder(schema)
+
 declare module '@rocicorp/zero' {
   interface DefaultTypes {
     schema: typeof schema
@@ -234,21 +198,13 @@ declare module '@rocicorp/zero' {
 }
 ```
 
-</CodeGroup>
+</InstallTableNameReplace>
 
-<Note heading="Having trouble using your own schema?">
-  Zero has some restrictions on the [Postgres features it
-  supports](/docs/postgres-support). You can continue this
-  tutorial with [a sample schema and seed
-  data](https://github.com/rocicorp/onboarding) to evaluate
-  it.
-</Note>
+</CodeGroup>
 
 ### Set Up the Zero Client
 
-Zero has first-class support for React and SolidJS, and community support for Svelte and Vue.
-
-There is also a low-level API you can use in any TypeScript-based project.
+Zero has first-class support for React and SolidJS, and there is also a low-level API you can use in any TypeScript-based project.
 
 <CodeGroup
   labels={[
@@ -326,6 +282,7 @@ function MyComponent() {
 ```tsx
 // zero.ts
 import {Zero} from '@rocicorp/zero'
+import type {ZeroOptions} from '@rocicorp/zero'
 import {schema} from './zero/schema.ts'
 
 const opts: ZeroOptions = {
@@ -346,163 +303,39 @@ export {zero}
 
 ### Define Query
 
-Alright, let's sync some data!
+Shared reads are conventionally stored in `queries.ts`. Use `zql` from `schema.ts` to construct and return a ZQL query:
 
-In Zero, we do this with _queries_. Queries are conventionally found in a `queries.ts` file.
-Here is an example of how queries are defined - you can adapt this to your own schema:
+<InstallTableNameReplace>
 
 ```tsx
 // zero/queries.ts
 import {defineQueries, defineQuery} from '@rocicorp/zero'
-import {z} from 'zod'
 import {zql} from './schema.ts'
 
 export const queries = defineQueries({
-  albums: {
-    byArtist: defineQuery(
-      z.object({artistID: z.string()}),
-      ({args: {artistID}}) =>
-        zql.albums
-          .where('artistId', artistID)
-          .orderBy('createdAt', 'asc')
-          .limit(10)
-          .related('artist', q => q.one())
-    )
-  }
+  allUsers: defineQuery(() => zql.user)
 })
 ```
 
-Use `zql` from `schema.ts` to construct and return a ZQL query. ZQL is quite powerful and allows you to build
-queries with filters, sorts, relationships, and more:
+</InstallTableNameReplace>
 
-<Video
-  src="/video/onboarding/onboarding-zql-autocomplete.mp4"
-  alt="Code editor with ZQL autocomplete"
-  animation
-/>
+See [Reading Data](/docs/queries) for more on filters, sorting, relationships, and permissions.
 
-See [queries](/doc/queries) for more information on defining queries.
+### Add Query Endpoint
 
-### Invoke Query
+Zero doesn't allow clients to send arbitrary ZQL to `zero-cache`.
 
-Querying for data is framework-specific. Most of the time, you will use a helper like `useQuery` that integrates into your framework's rendering model:
+Instead, Zero sends the query name and arguments to the `query` endpoint on your server, which responds to `zero-cache` with the authoritative ZQL.
 
 <CodeGroup
   labels={[
-    {
-      text: 'React',
-      sync: {client: 'react'},
-    },
-    {
-      text: 'SolidJS',
-      sync: {client: 'solidjs'},
-    },
-    {
-      text: 'TypeScript',
-      sync: {client: 'typescript'},
-    },
-  ]}
->
-
-```tsx
-// mycomponent.tsx
-import {useQuery} from '@rocicorp/zero/react'
-import {queries} from './zero/queries.ts'
-
-function MyComponent() {
-  const [albums] = useQuery(
-    queries.albums.byArtist({artistID: 'artist_1'})
-  )
-  return albums.map(a => <div key={a.id}>{a.title}</div>)
-}
-```
-
-```tsx
-// mycomponent.tsx
-import {useQuery} from '@rocicorp/zero/solid'
-import {queries} from './zero/queries.ts'
-
-function MyComponent() {
-  const [albums] = useQuery(() =>
-    queries.albums.byArtist({artistID: 'artist_1'})
-  )
-  return (
-    <For each={albums()}>
-      {album => <div key={album.id}>{album.title}</div>}
-    </For>
-  )
-}
-```
-
-```tsx
-// albums.ts
-import {zero} from './zero.ts'
-import {queries} from './zero/queries.ts'
-
-const albums = await zero.run(
-  queries.albums.byArtist({artistID: 'artist_1'})
-)
-console.log('albums', albums)
-```
-
-</CodeGroup>
-
-When you reload your app, you should see an error like:
-
-<CodeGroup
-  labels={[
-    {text: 'npm', sync: {pm: 'npm'}},
-    {text: 'pnpm', sync: {pm: 'pnpm'}},
-    {text: 'bun', sync: {pm: 'bun'}},
-    {text: 'yarn', sync: {pm: 'yarn'}},
-  ]}
->
-
-```console
-> npx zero-cache-dev
-...
-no ZERO_QUERY_URL is configured for Zero Cache
-```
-
-```console
-> pnpm exec zero-cache-dev
-...
-no ZERO_QUERY_URL is configured for Zero Cache
-```
-
-```console
-> bunx zero-cache-dev
-...
-no ZERO_QUERY_URL is configured for Zero Cache
-```
-
-```console
-> yarn exec zero-cache-dev
-...
-no ZERO_QUERY_URL is configured for Zero Cache
-```
-
-</CodeGroup>
-
-This is expected. We now need to implement a queries endpoint so that zero-cache can get the ZQL for the `albums.byArtist` query.
-
-### Implement Query Backend
-
-Zero doesn't allow clients to run any arbitrary ZQL against zero-cache, for both security and performance reasons.
-
-Instead, Zero sends the name and arguments of the query to a _queries endpoint_ on your server that is responsible for transforming the named query into ZQL.
-
-Zero provides utilities to make it easy to implement the queries endpoint in any full-stack framework:
-
-<CodeGroup
-  labels={[
-    {
-      text: 'Tanstack Start',
-      sync: {api: 'tanstack'},
-    },
     {
       text: 'Next.js',
       sync: {api: 'nextjs'},
+    },
+    {
+      text: 'Tanstack Start',
+      sync: {api: 'tanstack'},
     },
     {
       text: 'Solid Start',
@@ -514,6 +347,27 @@ Zero provides utilities to make it easy to implement the queries endpoint in any
     },
   ]}
 >
+
+```ts
+// app/api/query/route.ts
+import {handleQueryRequest} from '@rocicorp/zero/server'
+import {mustGetQuery} from '@rocicorp/zero'
+import {queries} from '../../zero/queries.ts'
+import {schema} from '../../zero/schema.ts'
+
+export async function POST(req: Request) {
+  const result = await handleQueryRequest(
+    (name, args) => {
+      const query = mustGetQuery(queries, name)
+      return query.fn({args})
+    },
+    schema,
+    req
+  )
+
+  return Response.json(result)
+}
+```
 
 ```ts
 // src/routes/api/query.ts
@@ -541,27 +395,6 @@ export const Route = createFileRoute('/api/query')({
     }
   }
 })
-```
-
-```ts
-// app/api/query/route.ts
-import {handleQueryRequest} from '@rocicorp/zero/server'
-import {mustGetQuery} from '@rocicorp/zero'
-import {queries} from '../../zero/queries.ts'
-import {schema} from '../../zero/schema.ts'
-
-export async function POST(req: Request) {
-  const result = await handleQueryRequest(
-    (name, args) => {
-      const query = mustGetQuery(queries, name)
-      return query.fn({args})
-    },
-    schema,
-    req
-  )
-
-  return Response.json(result)
-}
 ```
 
 ```ts
@@ -612,130 +445,9 @@ app.post('/api/query', async c => {
 
 </CodeGroup>
 
-Stop and re-run zero-cache with the URL of the queries endpoint:
+### Invoke Query
 
-<CodeGroup
-  labels={[
-    {text: 'npm', sync: {pm: 'npm'}},
-    {text: 'pnpm', sync: {pm: 'pnpm'}},
-    {text: 'bun', sync: {pm: 'bun'}},
-    {text: 'yarn', sync: {pm: 'yarn'}},
-  ]}
->
-
-```bash
-export ZERO_UPSTREAM_DB="postgres://postgres:password@localhost:5432/postgres"
-export ZERO_QUERY_URL="http://localhost:3000/api/query"
-npx zero-cache-dev
-```
-
-```bash
-export ZERO_UPSTREAM_DB="postgres://postgres:password@localhost:5432/postgres"
-export ZERO_QUERY_URL="http://localhost:3000/api/query"
-pnpm exec zero-cache-dev
-```
-
-```bash
-export ZERO_UPSTREAM_DB="postgres://postgres:password@localhost:5432/postgres"
-export ZERO_QUERY_URL="http://localhost:3000/api/query"
-bunx zero-cache-dev
-```
-
-```bash
-export ZERO_UPSTREAM_DB="postgres://postgres:password@localhost:5432/postgres"
-export ZERO_QUERY_URL="http://localhost:3000/api/query"
-yarn exec zero-cache-dev
-```
-
-</CodeGroup>
-
-If you reload the page, you will see data!
-Zero queries update live, so if you edit data in Postgres directly, you will see it update in the Zero replica AND the UI:
-
-<Video
-  src="/video/onboarding/zero-cache-ui-sync.mp4"
-  alt="Zero-cache syncing between Postgres and SQLite and UI"
-  animation
-/>
-
-### More about Queries
-
-You now know the basics, but there are a few more important pieces you'll need to learn for your first real app:
-
-- [How authentication and permissions work](/docs/auth).
-- [Preloading queries to create instantly responsive UI](/docs/queries#for-preloading).
-
-For these details and more, see [Reading Data](/docs/queries).
-
-But for now, let's move on to writes!
-
-## Mutate Data
-
-### Define Mutators
-
-Data is written in Zero apps using _mutators_.
-Similar to queries, we use a shared `mutators.ts` file:
-
-```tsx
-// zero/mutators.ts
-import {defineMutators, defineMutator} from '@rocicorp/zero'
-import {z} from 'zod'
-
-export const mutators = defineMutators({
-  albums: {
-    create: defineMutator(
-      z.object({
-        id: z.string(),
-        artistID: z.string(),
-        title: z.string(),
-        year: z.number(),
-        createdAt: z.number()
-      }),
-      async ({args, tx}) => {
-        await tx.mutate.albums.insert({
-          id: args.id,
-          artistId: args.artistID,
-          title: args.title,
-          releaseYear: args.year,
-          createdAt: args.createdAt
-        })
-      }
-    )
-  }
-})
-```
-
-You can use the [CRUD-style API](/docs/mutators#writing-data) with `tx.mutate.<table>.<method>()`
-to write data.
-You can also use `tx.run(zql.<table>.<method>)` to run queries within your mutator.
-
-<Note
-  type="warning"
-  heading="Always await operations in mutators"
->
-  Mutators almost always run in the same frame on the
-  client, against local data. The reason mutators are marked
-  `async` is because on the server, reading from the `tx`
-  object goes over the network to Postgres. Also, in edge
-  cases on the client, reads and writes can go to local
-  storage (IndexedDB or SQLite).
-</Note>
-
-Once you've defined your mutators, you must register them with Zero before you can use them:
-
-```tsx
-import {mutators} from './zero/mutators.ts'
-
-const opts: ZeroOptions = {
-  // ... userID, cacheURL, etc.
-  // add mutators
-  mutators
-}
-```
-
-### Invoke Mutators
-
-You can now call mutators via `zero.mutate`:
+Querying for data is framework-specific. Most of the time, you will use a helper like `useQuery` that integrates into your framework's rendering model:
 
 <CodeGroup
   labels={[
@@ -754,164 +466,90 @@ You can now call mutators via `zero.mutate`:
   ]}
 >
 
+<InstallTableNameReplace>
+
 ```tsx
-// mycomponent.tsx
-import {useZero} from '@rocicorp/zero/react'
-import {mutators} from './zero/mutators.ts'
-import {nanoid} from 'nanoid'
+import {useQuery} from '@rocicorp/zero/react'
+import {queries} from './zero/queries.ts'
 
-function MyComponent() {
-  const zero = useZero()
-
-  const onClick = async () => {
-    const result = zero.mutate(
-      mutators.albums.create({
-        id: nanoid(),
-        artistID: 'artist_1',
-        title: 'Please Please Me',
-        year: 1963,
-        createdAt: Date.now()
-      })
-    )
-
-    const clientResult = await result.client
-
-    if (clientResult.type === 'error') {
-      console.error(
-        'Failed to create album',
-        clientResult.error.message
-      )
-    } else {
-      console.log('Album created!')
-    }
-  }
-
-  return <button onClick={onClick}>Create Album</button>
-}
+const [users] = useQuery(queries.allUsers())
 ```
 
+</InstallTableNameReplace>
+
+<InstallTableNameReplace>
+
 ```tsx
-// mycomponent.tsx
-import {useZero} from '@rocicorp/zero/solid'
-import {mutators} from './zero/mutators.ts'
-import {nanoid} from 'nanoid'
+import {useQuery} from '@rocicorp/zero/solid'
+import {queries} from './zero/queries.ts'
 
-function MyComponent() {
-  const zero = useZero()
-
-  const onClick = async () => {
-    const result = zero().mutate(
-      mutators.albums.create({
-        id: nanoid(),
-        artistID: 'artist_1',
-        title: 'Please Please Me',
-        year: 1963,
-        createdAt: Date.now()
-      })
-    )
-    const clientResult = await result.client
-
-    if (clientResult.type === 'error') {
-      console.error(
-        'Failed to create album',
-        clientResult.error.message
-      )
-    } else {
-      console.log('Album created!')
-    }
-  }
-
-  return <button onClick={onClick}>Create Album</button>
-}
+const [users] = useQuery(() => queries.allUsers())
 ```
 
+</InstallTableNameReplace>
+
+<InstallTableNameReplace>
+
 ```tsx
-// albums.ts
 import {zero} from './zero.ts'
-import {mutators} from './zero/mutators.ts'
-import {nanoid} from 'nanoid'
+import {queries} from './zero/queries.ts'
 
-const result = await zero.mutate(
-  mutators.albums.create({
-    id: nanoid(),
-    artistID: 'artist_1',
-    title: 'Please Please Me',
-    year: 1963,
-    createdAt: Date.now()
-  })
-)
-const clientResult = await result.client
+const users = await zero.run(queries.allUsers())
+```
 
-if (clientResult.type === 'error') {
-  console.error(
-    'Failed to create album',
-    clientResult.error.message
+</InstallTableNameReplace>
+
+</CodeGroup>
+
+### More about Queries
+
+- [Filters, sorting, relationships, preloading, and more](/docs/queries)
+- [Server-driven authentication](/docs/auth)
+
+## Mutate Data
+
+### Define Mutators
+
+Data is written in Zero apps using mutators. Similar to queries, shared writes usually live in `mutators.ts`:
+
+<InstallTableNameReplace>
+
+```tsx
+// zero/mutators.ts
+import {defineMutators, defineMutator} from '@rocicorp/zero'
+import {z} from 'zod'
+
+export const mutators = defineMutators({
+  activateUser: defineMutator(
+    z.object({id: z.string()}),
+    async ({args: {id}, tx}) => {
+      await tx.mutate.user.update({id, active: true})
+    }
   )
-} else {
-  console.log('Album created!')
+})
+```
+
+</InstallTableNameReplace>
+
+You can use the [CRUD-style API](/docs/mutators#writing-data) with `tx.mutate.<table>.<method>()` to write data. You can also use `tx.run(zql.<table>.<method>)` to run queries within your mutator.
+
+Register the mutators where you create the Zero client:
+
+```tsx
+import type {ZeroOptions} from '@rocicorp/zero'
+import {mutators} from './zero/mutators.ts'
+
+const opts: ZeroOptions = {
+  // ... userID, cacheURL, schema, etc.
+  mutators
 }
 ```
 
-</CodeGroup>
+### Add Mutate Endpoint
 
-<Note
-  heading="Client-generated IDs are recommended"
-  type="warning"
-  emoji="⚠️"
->
-  Client-generated random IDs (from libraries like
-  [uuid](https://www.npmjs.com/package/uuid),
-  [ulid](https://www.npmjs.com/package/ulid), or
-  [nanoid](https://www.npmjs.com/package/nanoid)) work much
-  better than auto-incrementing integers in sync engines
-  like Zero. [Learn more](/docs/postgres-support#ids).
-</Note>
+Zero requires a `mutate` endpoint that runs on your server and connects directly to Postgres.
 
-If you run this app now, you should be able to see the UI update optimistically, but you'll also see an error in zero-cache:
-
-<CodeGroup
-  labels={[
-    {text: 'npm', sync: {pm: 'npm'}},
-    {text: 'pnpm', sync: {pm: 'pnpm'}},
-    {text: 'bun', sync: {pm: 'bun'}},
-    {text: 'yarn', sync: {pm: 'yarn'}},
-  ]}
->
-
-```console
-> npx zero-cache-dev
-...
-A ZERO_MUTATE_URL must be set in order to process mutations
-```
-
-```console
-> pnpm exec zero-cache-dev
-...
-A ZERO_MUTATE_URL must be set in order to process mutations
-```
-
-```console
-> bunx zero-cache-dev
-...
-A ZERO_MUTATE_URL must be set in order to process mutations
-```
-
-```console
-> yarn exec zero-cache-dev
-...
-A ZERO_MUTATE_URL must be set in order to process mutations
-```
-
-</CodeGroup>
-
-Similar to queries, we need to wire up a mutate endpoint in our API. Let's do that now.
-
-### Implement Mutate Endpoint
-
-Zero requires a _mutate endpoint_ which runs on your server and connects directly to your Postgres database.
-Zero provides helpers to implement this easily.
-
-Use the Zero Postgres adapters to create a `dbProvider` instance:
+First, create a `dbProvider` with the Postgres adapter that matches your stack:
 
 <CodeGroup
   labels={[
@@ -946,16 +584,16 @@ import {Pool} from 'pg'
 import {schema} from '../../zero/schema.ts'
 import * as drizzleSchema from '../../drizzle/schema.ts'
 
-// pass a drizzle client instance. for example:
 const pool = new Pool({
   connectionString: process.env.ZERO_UPSTREAM_DB!
 })
+
 export const drizzleClient = drizzle(pool, {
   schema: drizzleSchema
 })
+
 export const dbProvider = zeroDrizzle(schema, drizzleClient)
 
-// Register the database provider for type safety
 declare module '@rocicorp/zero' {
   interface DefaultTypes {
     dbProvider: typeof dbProvider
@@ -969,14 +607,7 @@ import {Kysely, PostgresDialect} from 'kysely'
 import {zeroKysely} from '@rocicorp/zero/server/adapters/kysely'
 import {Pool} from 'pg'
 import {schema} from '../../zero/schema.ts'
-
-interface Database {
-  user: {
-    id: string
-    name: string | null
-    status: 'active' | 'inactive'
-  }
-}
+import type {Database} from '../../kysely/database.ts'
 
 const kysely = new Kysely<Database>({
   dialect: new PostgresDialect({
@@ -985,9 +616,9 @@ const kysely = new Kysely<Database>({
     })
   })
 })
+
 export const dbProvider = zeroKysely(schema, kysely)
 
-// Register the database provider for type safety
 declare module '@rocicorp/zero' {
   interface DefaultTypes {
     dbProvider: typeof dbProvider
@@ -1002,15 +633,14 @@ import {PrismaClient} from '@prisma/client'
 import {zeroPrisma} from '@rocicorp/zero/server/adapters/prisma'
 import {schema} from '../../zero/schema.ts'
 
-// pass a prisma client instance. for example:
 const prisma = new PrismaClient({
   adapter: new PrismaPg({
     connectionString: process.env.ZERO_UPSTREAM_DB!
   })
 })
+
 export const dbProvider = zeroPrisma(schema, prisma)
 
-// Register the database provider for type safety
 declare module '@rocicorp/zero' {
   interface DefaultTypes {
     dbProvider: typeof dbProvider
@@ -1027,9 +657,9 @@ import {schema} from '../../zero/schema.ts'
 const pool = new Pool({
   connectionString: process.env.ZERO_UPSTREAM_DB!
 })
+
 export const dbProvider = zeroNodePg(schema, pool)
 
-// Register the database provider for type safety
 declare module '@rocicorp/zero' {
   interface DefaultTypes {
     dbProvider: typeof dbProvider
@@ -1044,9 +674,9 @@ import postgres from 'postgres'
 import {schema} from '../../zero/schema.ts'
 
 const sql = postgres(process.env.ZERO_UPSTREAM_DB!)
+
 export const dbProvider = zeroPostgresJS(schema, sql)
 
-// Register the database provider for type safety
 declare module '@rocicorp/zero' {
   interface DefaultTypes {
     dbProvider: typeof dbProvider
@@ -1056,17 +686,17 @@ declare module '@rocicorp/zero' {
 
 </CodeGroup>
 
-Then, use the `dbProvider` to handle the mutate request:
+Then use the `dbProvider` and helpers to define the mutate endpoint:
 
 <CodeGroup
   labels={[
     {
-      text: 'Tanstack Start',
-      sync: {api: 'tanstack'},
-    },
-    {
       text: 'Next.js',
       sync: {api: 'nextjs'},
+    },
+    {
+      text: 'Tanstack Start',
+      sync: {api: 'tanstack'},
     },
     {
       text: 'Solid Start',
@@ -1078,6 +708,28 @@ Then, use the `dbProvider` to handle the mutate request:
     },
   ]}
 >
+
+```ts
+// app/api/mutate/route.ts
+import {handleMutateRequest} from '@rocicorp/zero/server'
+import {mustGetMutator} from '@rocicorp/zero'
+import {mutators} from '../../zero/mutators.ts'
+import {dbProvider} from '../../db-provider.ts'
+
+export async function POST(req: Request) {
+  const result = await handleMutateRequest(
+    dbProvider,
+    transact =>
+      transact((tx, name, args) => {
+        const mutator = mustGetMutator(mutators, name)
+        return mutator.fn({args, tx})
+      }),
+    req
+  )
+
+  return Response.json(result)
+}
+```
 
 ```ts
 // src/routes/api/mutate.ts
@@ -1096,10 +748,7 @@ export const Route = createFileRoute('/api/mutate')({
           transact =>
             transact((tx, name, args) => {
               const mutator = mustGetMutator(mutators, name)
-              return mutator.fn({
-                args,
-                tx
-              })
+              return mutator.fn({args, tx})
             }),
           request
         )
@@ -1109,28 +758,6 @@ export const Route = createFileRoute('/api/mutate')({
     }
   }
 })
-```
-
-```ts
-// app/api/mutate/route.ts
-import {handleMutateRequest} from '@rocicorp/zero/server'
-import {mutators} from '../../zero/mutators.ts'
-import {dbProvider} from '../../db-provider.ts'
-import {mustGetMutator} from '@rocicorp/zero'
-
-export async function POST(req: Request) {
-  const result = await handleMutateRequest(
-    dbProvider,
-    transact =>
-      transact((tx, name, args) => {
-        const mutator = mustGetMutator(mutators, name)
-        return mutator.fn({args, tx})
-      }),
-    req
-  )
-
-  return Response.json(result)
-}
 ```
 
 ```ts
@@ -1180,15 +807,18 @@ app.post('/api/mutate', async c => {
 
 </CodeGroup>
 
+Mutators on the server allow for write permissions and can be different from the client implementation.
+You can also do work after a mutation runs on the server, like send notifications.
+
 <Note emoji="🔐" heading="Add auth if you need it">
   These examples have only public queries and mutators, so
-  they do not pass a context. In authenticated apps,
-  validate auth in the request, derive context from the
-  session, and pass the context to the mutate and query
+  they do not pass a context. In authenticated apps, you
+  should validate auth in the request, derive context from
+  the session, and pass the context to the mutate and query
   handlers. See [Authentication](/docs/auth).
 </Note>
 
-Restart zero-cache to tell it about this new endpoint:
+Now you can run `zero-cache` locally with `ZERO_UPSTREAM_DB`, `ZERO_QUERY_URL`, and `ZERO_MUTATE_URL` configured:
 
 <CodeGroup
   labels={[
@@ -1200,56 +830,105 @@ Restart zero-cache to tell it about this new endpoint:
 >
 
 ```bash
-export ZERO_UPSTREAM_DB="postgres://postgres:password@localhost:5432/postgres"
-export ZERO_QUERY_URL="http://localhost:3000/api/query"
-export ZERO_MUTATE_URL="http://localhost:3000/api/mutate"
-npx zero-cache-dev
+ZERO_UPSTREAM_DB="postgres://postgres:pass@localhost:5432/zero" \
+  ZERO_QUERY_URL="http://localhost:3000/api/query" \
+  ZERO_MUTATE_URL="http://localhost:3000/api/mutate" \
+  npx zero-cache-dev
 ```
 
 ```bash
-export ZERO_UPSTREAM_DB="postgres://postgres:password@localhost:5432/postgres"
-export ZERO_QUERY_URL="http://localhost:3000/api/query"
-export ZERO_MUTATE_URL="http://localhost:3000/api/mutate"
-pnpm exec zero-cache-dev
+ZERO_UPSTREAM_DB="postgres://postgres:pass@localhost:5432/zero" \
+  ZERO_QUERY_URL="http://localhost:3000/api/query" \
+  ZERO_MUTATE_URL="http://localhost:3000/api/mutate" \
+  pnpm exec zero-cache-dev
 ```
 
 ```bash
-export ZERO_UPSTREAM_DB="postgres://postgres:password@localhost:5432/postgres"
-export ZERO_QUERY_URL="http://localhost:3000/api/query"
-export ZERO_MUTATE_URL="http://localhost:3000/api/mutate"
-bunx zero-cache-dev
+ZERO_UPSTREAM_DB="postgres://postgres:pass@localhost:5432/zero" \
+  ZERO_QUERY_URL="http://localhost:3000/api/query" \
+  ZERO_MUTATE_URL="http://localhost:3000/api/mutate" \
+  bunx zero-cache-dev
 ```
 
 ```bash
-export ZERO_UPSTREAM_DB="postgres://postgres:password@localhost:5432/postgres"
-export ZERO_QUERY_URL="http://localhost:3000/api/query"
-export ZERO_MUTATE_URL="http://localhost:3000/api/mutate"
-yarn exec zero-cache-dev
+ZERO_UPSTREAM_DB="postgres://postgres:pass@localhost:5432/zero" \
+  ZERO_QUERY_URL="http://localhost:3000/api/query" \
+  ZERO_MUTATE_URL="http://localhost:3000/api/mutate" \
+  yarn exec zero-cache-dev
 ```
 
 </CodeGroup>
 
-If you refresh the page, your mutation should commit to the database and sync to other clients:
+### Invoke Mutators
 
-<Video
-  src="/video/onboarding/zero-cache-multiple-clients.mp4"
-  alt="Zero syncing data between multiple clients"
-  animation
-/>
+You can call a mutator with `zero.mutate`:
+
+<CodeGroup
+  labels={[
+    {
+      text: 'React',
+      sync: {client: 'react'},
+    },
+    {
+      text: 'SolidJS',
+      sync: {client: 'solidjs'},
+    },
+    {
+      text: 'TypeScript',
+      sync: {client: 'typescript'},
+    },
+  ]}
+>
+
+<InstallTableNameReplace>
+
+```tsx
+import {useZero} from '@rocicorp/zero/react'
+import {mutators} from './zero/mutators.ts'
+
+const zero = useZero()
+
+const onClick = () => {
+  zero.mutate(mutators.activateUser({id: '1'}))
+}
+```
+
+</InstallTableNameReplace>
+
+<InstallTableNameReplace>
+
+```tsx
+import {useZero} from '@rocicorp/zero/solid'
+import {mutators} from './zero/mutators.ts'
+
+const zero = useZero()
+
+const onClick = () => {
+  zero().mutate(mutators.activateUser({id: '1'}))
+}
+```
+
+</InstallTableNameReplace>
+
+<InstallTableNameReplace>
+
+```tsx
+import {zero} from './zero.ts'
+import {mutators} from './zero/mutators.ts'
+
+await zero.mutate(mutators.activateUser({id: '1'}))
+```
+
+</InstallTableNameReplace>
+
+</CodeGroup>
+
+When you run the mutator, Zero writes to the local database, updates queries optimistically, and then syncs in the background to your mutate endpoint.
+
+Your mutate endpoint writes to Postgres and zero-cache will instantly replicate those changes to other clients.
 
 ### More about Mutators
 
-Just as with queries, the separate server implementation of mutators extends elegantly to enable write permissions.
-Zero also has built-in helpers to do work after a mutator runs on the server, like send notifications.
-
-For these details and more, see [Writing Data](/docs/mutators).
-
-## That's It!
-
-Congratulations! You now know the basics for building with Zero 🤯.
-
-Possible next steps:
-
-- [Learn about authentication and permissions](/docs/auth)
-- [See some samples of built-out Zero apps](/docs/samples)
-- [Learn how to deploy your app to production](/docs/self-host)
+- [CRUD, server-specific code, permissions, and more](/docs/mutators)
+- [Server-driven auth and Context](/docs/auth)
+- [Learn how to deploy your app to production](/docs/deployment)

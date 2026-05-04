@@ -10,6 +10,10 @@ import remarkGfm from 'remark-gfm';
 import {page_routes} from './routes-config';
 // Custom components for MDX
 import CodeGroup from '@/components/CodeGroup';
+import {
+  InstallTableNameInput,
+  InstallTableNameReplace,
+} from '@/components/InstallTableName';
 import SyncedCode from '@/components/SyncedCode';
 import Note from '@/components/note';
 import ImageLightbox from '@/components/ui/ImageLightbox';
@@ -27,6 +31,8 @@ const components = {
   Video,
   Button,
   CodeGroup,
+  InstallTableNameInput,
+  InstallTableNameReplace,
   SyncedCode,
 };
 

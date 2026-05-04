@@ -177,6 +177,13 @@ function transformMdxJsx(node: MdxJsxNode): TransformOutcome | null {
     case 'SyncedCode':
       return {action: 'unwrap', children: transformSyncedCode(node)};
 
+    case 'InstallTableNameReplace':
+    case 'InstallTableNameInput':
+      return {
+        action: 'unwrap',
+        children: normalizeNodes([...(node.children ?? [])]),
+      };
+
     case 'ImageLightbox':
     case 'img': {
       const paragraph = transformImage(node);

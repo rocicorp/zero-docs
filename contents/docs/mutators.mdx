@@ -90,8 +90,12 @@ const myMutator = defineMutator(async ({tx}) => {
   emoji="⚠️"
   heading="Always await writes in mutators"
 >
-  Failing to do so allows the transaction to commit early,
-  causing runtime errors when writes are attempted later.
+  Mutators almost always run in the same frame on the
+  client, against local data. The reason mutators are marked
+  `async` is because on the server, reading from the `tx`
+  object goes over the network to Postgres. Also, in edge
+  cases on the client, reads and writes can go to local
+  storage (IndexedDB or SQLite).
 </Note>
 
 #### Insert

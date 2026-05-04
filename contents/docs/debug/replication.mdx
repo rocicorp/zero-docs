@@ -7,7 +7,7 @@ title: Replication
 During development we all do strange things (unsafely changing schemas, removing files, etc.). If the replica ever gets wedged (stops replicating, acts strange) you can wipe it and start over.
 
 - If you copied your setup from `hello-zero` or `hello-zero-solid`, you can also run `npm run dev:clean`
-- Otherwise you can run `rm /tmp/my-zero-replica.db*` (see your `.env` file for the replica file location) to clear the contents of the replica.
+- Otherwise you can run `rm zero.db*` to clear the contents of the replica.
 
 It is always safe to wipe the replica. Wiping will have no impact on your upstream database. Downstream zero-clients will get re-synced when they connect.
 
@@ -16,7 +16,7 @@ It is always safe to wipe the replica. Wiping will have no impact on your upstre
 For data to be synced to the client it must first be replicated to `zero-cache`. You can check the contents of `zero-cache` via:
 
 ```bash
-$ npx @rocicorp/zero-sqlite3 /tmp/my-zero-replica.db
+npx @rocicorp/zero-sqlite3 ./zero.db
 ```
 
 <Note slug="sqlite-version" emoji="💡" heading="Zero uses the bedrock version of SQLite">

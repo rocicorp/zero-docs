@@ -80,10 +80,17 @@ export const ROUTES = [
     href: null,
     defaultOpen: false,
     items: [
-      {title: 'Hosting', href: '/deployment'},
+      {title: 'Cloud Zero', href: '/cloud-zero'},
       {title: 'Previews', href: '/previews'},
-      {title: 'Configuration', href: '/zero-cache-config'},
-      {title: 'OpenTelemetry', href: '/otel'},
+      {
+        title: 'Self-Host',
+        href: null,
+        items: [
+          {title: 'Overview', href: '/self-host'},
+          {title: 'Configuration', href: '/zero-cache-config'},
+          {title: 'OpenTelemetry', href: '/otel'},
+        ],
+      },
     ],
   },
 

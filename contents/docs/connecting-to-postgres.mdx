@@ -76,7 +76,7 @@ You should use the `default` role that PlanetScale provides, because PlanetScale
 Planetscale Postgres defaults `max_connections` to 25, which can easily be exhausted by Zero's connection pools. This will result in an error like `remaining connection slots are reserved for roles with the SUPERUSER attribute`.
 You should increase this value in the Parameters section of the PlanetScale dashboard to 100 or more.
 
-Make sure to only use a direct connection for the `ZERO_UPSTREAM_DB`, and use pooled URLs for `ZERO_CVR_DB`, `ZERO_CHANGE_DB`, and your API (see [Deployment](/docs/deployment)).
+Make sure to only use a direct connection for the `ZERO_UPSTREAM_DB`, and use pooled URLs for `ZERO_CVR_DB`, `ZERO_CHANGE_DB`, and your API (see [Deployment](/docs/self-host)).
 
 ### Neon
 

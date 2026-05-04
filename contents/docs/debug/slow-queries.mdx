@@ -31,7 +31,7 @@ If you see log lines like:
 flushed cvr ... (124ms)
 ```
 
-this indicates that `zero-cache` is likely deployed too far away from your [CVR database](../deployment#architecture). If you did not configure a CVR database URL then this will be your product's Postgres DB. A slow CVR flush can slow down Zero, since it must complete the flush before sending query result(s) to clients.
+this indicates that `zero-cache` is likely deployed too far away from your [CVR database](../self-host#architecture). If you did not configure a CVR database URL then this will be your product's Postgres DB. A slow CVR flush can slow down Zero, since it must complete the flush before sending query result(s) to clients.
 
 Try moving `zero-cache` to be deployed as close as possible to the CVR database.
 

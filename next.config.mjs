@@ -70,6 +70,16 @@ const nextConfig = {
         permanent: false,
       },
       {
+        source: '/docs/deployment',
+        destination: '/docs/self-host',
+        permanent: false,
+      },
+      {
+        source: '/docs/deployment.md',
+        destination: '/docs/self-host.md',
+        permanent: false,
+      },
+      {
         source: '/docs/raw/:slug*',
         destination: '/docs/:slug*.md',
         permanent: false,

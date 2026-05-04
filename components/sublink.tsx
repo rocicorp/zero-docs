@@ -59,7 +59,14 @@ export default function SubLink({
       Comp
     )
   ) : (
-    <h4 className="font-semibold sm:text-sm text-primary">{title}</h4>
+    <h4
+      className={cn(
+        'sm:text-sm text-primary',
+        level === 0 ? 'font-semibold' : 'font-normal',
+      )}
+    >
+      {title}
+    </h4>
   );
 
   if (!items) {
@@ -102,7 +109,7 @@ export default function SubLink({
                 href: `${href ?? ''}${innerLink.href ?? ''}`,
                 level: level + 1,
                 isSheet,
-                noLink: false,
+                noLink: innerLink.href === null,
               };
               return <SubLink key={modifiedItems.href} {...modifiedItems} />;
             })}

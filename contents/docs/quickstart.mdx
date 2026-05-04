@@ -584,7 +584,9 @@ export const mutators = defineMutators({
 })
 ```
 
-Then, register the mutators where you create the Zero client:
+You can use the [CRUD-style API](/docs/mutators#writing-data) with `tx.mutate.<table>.<method>()` to write data. You can also use `tx.run(zql.<table>.<method>)` to run queries within your mutator.
+
+Register the mutators where you create the Zero client:
 
 ```tsx
 import type {ZeroOptions} from '@rocicorp/zero'

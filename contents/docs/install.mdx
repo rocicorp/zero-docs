@@ -319,7 +319,7 @@ export const queries = defineQueries({
 
 </InstallTableNameReplace>
 
-See [Reading Data](/docs/queries) for more on filters, sorting, relationships, and caching.
+See [Reading Data](/docs/queries) for more on filters, sorting, relationships, and permissions.
 
 ### Add Query Endpoint
 
@@ -531,7 +531,9 @@ export const mutators = defineMutators({
 
 </InstallTableNameReplace>
 
-Then, register the mutators where you create the Zero client:
+You can use the [CRUD-style API](/docs/mutators#writing-data) with `tx.mutate.<table>.<method>()` to write data. You can also use `tx.run(zql.<table>.<method>)` to run queries within your mutator.
+
+Register the mutators where you create the Zero client:
 
 ```tsx
 import type {ZeroOptions} from '@rocicorp/zero'
@@ -804,6 +806,9 @@ app.post('/api/mutate', async c => {
 ```
 
 </CodeGroup>
+
+Mutators on the server allow for write permissions and can be different from the client implementation.
+You can also do work after a mutation runs on the server, like send notifications.
 
 <Note emoji="🔐" heading="Add auth if you need it">
   These examples have only public queries and mutators, so

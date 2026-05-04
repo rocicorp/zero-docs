@@ -3,8 +3,9 @@
 import {ScrollArea} from '@/components/ui/scroll-area';
 import type {DocsTocEntry} from '@/lib/docs-headings';
 import {cn} from '@/lib/utils';
-import {ArrowUpRightFromSquare} from 'lucide-react';
+import {ArrowUpRightFromSquare, Database} from 'lucide-react';
 import useActiveTocSection from './hooks/use-active-toc-section';
+import {InstallTableNameInput} from './InstallTableName';
 import {ActiveHashLink} from './ui/ActiveHashLink';
 import CopyMarkdownButton from './ui/copy-markdown-button';
 
@@ -73,6 +74,12 @@ export default function Toc({
               <ArrowUpRightFromSquare className="w-4 h-4" />
               Edit this page on GitHub
             </a>
+            {path === 'install' && (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Database className="w-4 h-4" />
+                Table: <InstallTableNameInput />
+              </div>
+            )}
           </div>
         </ScrollArea>
       </div>

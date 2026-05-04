@@ -17,7 +17,7 @@ docker run -d --name zero-postgres \
   -e POSTGRES_DB="zero" \
   -e POSTGRES_PASSWORD="pass" \
   -p 5432:5432 \
-  postgres:16-alpine \
+  postgres:18 \
   postgres -c wal_level=logical
 ```
 
@@ -830,31 +830,31 @@ Now you can run `zero-cache` locally with `ZERO_UPSTREAM_DB`, `ZERO_QUERY_URL`, 
 >
 
 ```bash
-export ZERO_UPSTREAM_DB="postgres://postgres:pass@localhost:5432/zero"
-export ZERO_QUERY_URL="http://localhost:3000/api/query"
-export ZERO_MUTATE_URL="http://localhost:3000/api/mutate"
-npx zero-cache-dev
+ZERO_UPSTREAM_DB="postgres://postgres:pass@localhost:5432/zero" \
+  ZERO_QUERY_URL="http://localhost:3000/api/query" \
+  ZERO_MUTATE_URL="http://localhost:3000/api/mutate" \
+  npx zero-cache-dev
 ```
 
 ```bash
-export ZERO_UPSTREAM_DB="postgres://postgres:pass@localhost:5432/zero"
-export ZERO_QUERY_URL="http://localhost:3000/api/query"
-export ZERO_MUTATE_URL="http://localhost:3000/api/mutate"
-pnpm exec zero-cache-dev
+ZERO_UPSTREAM_DB="postgres://postgres:pass@localhost:5432/zero" \
+  ZERO_QUERY_URL="http://localhost:3000/api/query" \
+  ZERO_MUTATE_URL="http://localhost:3000/api/mutate" \
+  pnpm exec zero-cache-dev
 ```
 
 ```bash
-export ZERO_UPSTREAM_DB="postgres://postgres:pass@localhost:5432/zero"
-export ZERO_QUERY_URL="http://localhost:3000/api/query"
-export ZERO_MUTATE_URL="http://localhost:3000/api/mutate"
-bunx zero-cache-dev
+ZERO_UPSTREAM_DB="postgres://postgres:pass@localhost:5432/zero" \
+  ZERO_QUERY_URL="http://localhost:3000/api/query" \
+  ZERO_MUTATE_URL="http://localhost:3000/api/mutate" \
+  bunx zero-cache-dev
 ```
 
 ```bash
-export ZERO_UPSTREAM_DB="postgres://postgres:pass@localhost:5432/zero"
-export ZERO_QUERY_URL="http://localhost:3000/api/query"
-export ZERO_MUTATE_URL="http://localhost:3000/api/mutate"
-yarn exec zero-cache-dev
+ZERO_UPSTREAM_DB="postgres://postgres:pass@localhost:5432/zero" \
+  ZERO_QUERY_URL="http://localhost:3000/api/query" \
+  ZERO_MUTATE_URL="http://localhost:3000/api/mutate" \
+  yarn exec zero-cache-dev
 ```
 
 </CodeGroup>

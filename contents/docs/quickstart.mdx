@@ -21,15 +21,15 @@ docker run -d --name zero-postgres \
   -e POSTGRES_DB="zero" \
   -e POSTGRES_PASSWORD="pass" \
   -p 5432:5432 \
-  postgres:16-alpine \
+  postgres:18 \
   postgres -c wal_level=logical
 ```
 
 Then, create some music-themed tables and seed them with data:
 
 ```bash
-# Creates new _z_albums, _z_artists, _z_fans,
-# and _z_favorites tables with sample music data
+# Creates new albums, artists, fans,
+# and favorites tables with sample music data
 curl -L https://raw.githubusercontent.com/rocicorp/onboarding/1-install/migrations/0000_seed_music.sql \
   | psql postgresql://postgres:pass@localhost:5432/zero
 ```
@@ -101,45 +101,33 @@ Start the development `zero-cache`:
 >
 
 ```bash
-export ZERO_UPSTREAM_DB="postgres://postgres:pass@localhost:5432/zero"
-npx zero-cache-dev
-
-# ... zero-cache ready
-# ... zero-dispatcher listening at http://[::]:4848
+ZERO_UPSTREAM_DB="postgres://postgres:pass@localhost:5432/zero" \
+  npx zero-cache-dev
 ```
 
 ```bash
-export ZERO_UPSTREAM_DB="postgres://postgres:pass@localhost:5432/zero"
-pnpm exec zero-cache-dev
-
-# ... zero-cache ready
-# ... zero-dispatcher listening at http://[::]:4848
+ZERO_UPSTREAM_DB="postgres://postgres:pass@localhost:5432/zero" \
+  pnpm exec zero-cache-dev
 ```
 
 ```bash
-export ZERO_UPSTREAM_DB="postgres://postgres:pass@localhost:5432/zero"
-bunx zero-cache-dev
-
-# ... zero-cache ready
-# ... zero-dispatcher listening at http://[::]:4848
+ZERO_UPSTREAM_DB="postgres://postgres:pass@localhost:5432/zero" \
+  bunx zero-cache-dev
 ```
 
 ```bash
-export ZERO_UPSTREAM_DB="postgres://postgres:pass@localhost:5432/zero"
-yarn exec zero-cache-dev
-
-# ... zero-cache ready
-# ... zero-dispatcher listening at http://[::]:4848
+ZERO_UPSTREAM_DB="postgres://postgres:pass@localhost:5432/zero" \
+  yarn exec zero-cache-dev
 ```
 
 </CodeGroup>
 
-Zero continuously replicates your upstream database into a SQLite replica, which is created by default at `zero.db`.
+Zero will start listening on port 4848 and continuously replicate your upstream database into a SQLite replica, which is created by default at `zero.db`.
 
 Inspect the replica in another terminal:
 
 ```bash
-npx @rocicorp/zero-sqlite3 ./zero.db "SELECT title FROM _z_albums;"
+npx @rocicorp/zero-sqlite3 ./zero.db "SELECT title FROM albums;"
 # Abbey Road
 # Kind of Blue
 # Random Access Memories
@@ -448,27 +436,27 @@ Restart `zero-cache` with `ZERO_QUERY_URL` so it knows about the new query endpo
 >
 
 ```bash
-export ZERO_UPSTREAM_DB="postgres://postgres:pass@localhost:5432/zero"
-export ZERO_QUERY_URL="http://localhost:3000/api/query"
-npx zero-cache-dev
+ZERO_UPSTREAM_DB="postgres://postgres:pass@localhost:5432/zero" \
+  ZERO_QUERY_URL="http://localhost:3000/api/query" \
+  npx zero-cache-dev
 ```
 
 ```bash
-export ZERO_UPSTREAM_DB="postgres://postgres:pass@localhost:5432/zero"
-export ZERO_QUERY_URL="http://localhost:3000/api/query"
-pnpm exec zero-cache-dev
+ZERO_UPSTREAM_DB="postgres://postgres:pass@localhost:5432/zero" \
+  ZERO_QUERY_URL="http://localhost:3000/api/query" \
+  pnpm exec zero-cache-dev
 ```
 
 ```bash
-export ZERO_UPSTREAM_DB="postgres://postgres:pass@localhost:5432/zero"
-export ZERO_QUERY_URL="http://localhost:3000/api/query"
-bunx zero-cache-dev
+ZERO_UPSTREAM_DB="postgres://postgres:pass@localhost:5432/zero" \
+  ZERO_QUERY_URL="http://localhost:3000/api/query" \
+  bunx zero-cache-dev
 ```
 
 ```bash
-export ZERO_UPSTREAM_DB="postgres://postgres:pass@localhost:5432/zero"
-export ZERO_QUERY_URL="http://localhost:3000/api/query"
-yarn exec zero-cache-dev
+ZERO_UPSTREAM_DB="postgres://postgres:pass@localhost:5432/zero" \
+  ZERO_QUERY_URL="http://localhost:3000/api/query" \
+  yarn exec zero-cache-dev
 ```
 
 </CodeGroup>
@@ -880,31 +868,31 @@ Restart `zero-cache` with `ZERO_MUTATE_URL` configured:
 >
 
 ```bash
-export ZERO_UPSTREAM_DB="postgres://postgres:pass@localhost:5432/zero"
-export ZERO_QUERY_URL="http://localhost:3000/api/query"
-export ZERO_MUTATE_URL="http://localhost:3000/api/mutate"
-npx zero-cache-dev
+ZERO_UPSTREAM_DB="postgres://postgres:pass@localhost:5432/zero" \
+  ZERO_QUERY_URL="http://localhost:3000/api/query" \
+  ZERO_MUTATE_URL="http://localhost:3000/api/mutate" \
+  npx zero-cache-dev
 ```
 
 ```bash
-export ZERO_UPSTREAM_DB="postgres://postgres:pass@localhost:5432/zero"
-export ZERO_QUERY_URL="http://localhost:3000/api/query"
-export ZERO_MUTATE_URL="http://localhost:3000/api/mutate"
-pnpm exec zero-cache-dev
+ZERO_UPSTREAM_DB="postgres://postgres:pass@localhost:5432/zero" \
+  ZERO_QUERY_URL="http://localhost:3000/api/query" \
+  ZERO_MUTATE_URL="http://localhost:3000/api/mutate" \
+  pnpm exec zero-cache-dev
 ```
 
 ```bash
-export ZERO_UPSTREAM_DB="postgres://postgres:pass@localhost:5432/zero"
-export ZERO_QUERY_URL="http://localhost:3000/api/query"
-export ZERO_MUTATE_URL="http://localhost:3000/api/mutate"
-bunx zero-cache-dev
+ZERO_UPSTREAM_DB="postgres://postgres:pass@localhost:5432/zero" \
+  ZERO_QUERY_URL="http://localhost:3000/api/query" \
+  ZERO_MUTATE_URL="http://localhost:3000/api/mutate" \
+  bunx zero-cache-dev
 ```
 
 ```bash
-export ZERO_UPSTREAM_DB="postgres://postgres:pass@localhost:5432/zero"
-export ZERO_QUERY_URL="http://localhost:3000/api/query"
-export ZERO_MUTATE_URL="http://localhost:3000/api/mutate"
-yarn exec zero-cache-dev
+ZERO_UPSTREAM_DB="postgres://postgres:pass@localhost:5432/zero" \
+  ZERO_QUERY_URL="http://localhost:3000/api/query" \
+  ZERO_MUTATE_URL="http://localhost:3000/api/mutate" \
+  yarn exec zero-cache-dev
 ```
 
 </CodeGroup>
@@ -1016,19 +1004,3 @@ Your mutate endpoint writes to Postgres and zero-cache will instantly replicate 
 />
 
 That's it! You now have a simple, Zero-powered music app. Try opening multiple browser windows to see the realtime sync in action!
-
-## Clean Up
-
-If you used a Postgres database that already had data in it, you can remove the music tables and `zero-cache` metadata:
-
-```bash
-export ZERO_UPSTREAM_DB="postgres://postgres:pass@localhost:5432/zero"
-
-# Remove all traces of zero-cache metadata from Postgres
-npx zero-out
-
-# Remove the _z_albums, _z_artists, _z_fans,
-# and _z_favorites tables
-curl -L https://raw.githubusercontent.com/rocicorp/onboarding/1-install/out.sql \
-  | psql $ZERO_UPSTREAM_DB
-```

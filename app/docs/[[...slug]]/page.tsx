@@ -1,12 +1,12 @@
-import { InstallTableNameProvider } from '@/components/InstallTableName';
+import {InstallTableNameProvider} from '@/components/InstallTableName';
 import Pagination from '@/components/Pagination';
 import Toc from '@/components/toc';
-import { Typography } from '@/components/typography';
+import {Typography} from '@/components/typography';
 import CopyContent from '@/components/ui/copy-content';
-import { formatDocsMarkdown } from '@/lib/docs-markdown';
-import { getAllPageSlugs } from '@/lib/get-slugs';
-import { getDocsForSlug, getDocsTocs, getPreviousNext } from '@/lib/mdx';
-import { notFound } from 'next/navigation';
+import {formatDocsMarkdown} from '@/lib/docs-markdown';
+import {getAllPageSlugs} from '@/lib/get-slugs';
+import {getDocsForSlug, getDocsTocs, getPreviousNext} from '@/lib/mdx';
+import {notFound} from 'next/navigation';
 
 type PageProps = {params: Promise<{slug: string[]}>};
 

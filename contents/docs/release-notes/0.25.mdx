@@ -47,7 +47,7 @@ Additionally, the old `hello-zero` sample has been updated from the original CRU
 - [**drizzle-zero and prisma-zero are now first-class:**](/docs/schema#generating-from-database) They have moved into the rocicorp org and are now officially supported.
 - [**Default Schema Type:**](/docs/schema#register-schema-type) The `Schema` type can now be registered as a default with Zero. You can just say `useZero()` – `useZero<Schema>` is no longer needed. You can also delete your `createUseZero()` helper if you have one. This registration happens by default if you use the new `drizzle-zero` or `prisma-zero` packages.
 - [**New Connection Status API:**](/docs/connection) Brand new connection status API with overhauled error-handling and reconnection behavior.
-- [**Mutator promises now return structured errors:**](/docs/mutators#waiting-for-mutator-result) The `client` and `server` promises now always resolve. In the case of an error, they now return a structured error object.
+- [**Mutator promises now return structured errors:**](/docs/mutators#waiting-for-results) The `client` and `server` promises now always resolve. In the case of an error, they now return a structured error object.
 - [**New Install Guide:**](/docs/install) Rewritten guide to add Zero to an existing project.
 - [**New zero-out tool:**](/docs/debug/zero-out) Removes all trace of Zero from Postgres.
 - [**Support for Generated Columns:**](/docs/postgres-support#object-types) In Postgres 18+, `generated stored` columns are now synced. This is useful for denormalizing data from JSON columns to support filtering in Zero.
@@ -107,6 +107,6 @@ Despite the large DX update, we tried to make the upgrade as smooth as possible.
 
 1. If you do not want to immediately opt-in to the new query and mutator APIs, set [`enableLegacyQueries`](/docs/deprecated/ad-hoc-queries) and [`enableLegacyMutators`](/docs/deprecated/crud-mutators) to `true` in your schema.ts.
 1. If you are using the `.client` or `.server` promises with custom mutators, these no longer ever reject. [They now always resolve with a result type that has success/error cases](/docs/mutators#waiting-for-results)
-1. [Mutators now reject while Zero is offline](/docs/connection#disconnecting). You may want to use the new [Connection Status API](/docs/connection) to detect this and display custom UI to users.
+1. [Mutators now reject while Zero is offline](/docs/connection#offline). You may want to use the new [Connection Status API](/docs/connection) to detect this and display custom UI to users.
 1. The pattern for reauthentication has changed. The `auth` parameter is now always a `string` – the `function` form is no longer supported. Instead, [call `zero.connection.connect({auth: token})` to reconnect](/docs/auth#auth-failure-and-refresh). This was done to simplify the API and support reauth via cookies consistently.
 1. The `onError` feature of `Zero` has been removed. It was undocumented and only half-working. Please use the new [Connection Status API](/docs/connection) to detect errors and display custom UI to users.

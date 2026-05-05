@@ -20,21 +20,21 @@ This release is a bit harder to upgrade to than previous alphas. For a step-by-s
 
 - Totally new configuration system.
   - `zero.config.ts` is no more – config is now via env vars ([documentation](/docs/zero-cache-config)).
-  - Permissions rules moved into schema ([documentation](/docs/auth#permissions)).
-- Renamed CRUD mutators to be consistent with SQL naming ([bug](https://bugs.rocicorp.dev/issue/3144), [documentation](/docs/writing-data)).
+  - Permissions rules moved into schema ([documentation](/docs/deprecated/rls-permissions#define-permissions)).
+- Renamed CRUD mutators to be consistent with SQL naming ([bug](https://bugs.rocicorp.dev/issue/3144), [documentation](/docs/mutators)).
   - `z.mutate.<table>.create -> insert`
   - `z.mutate.<table>.put -> upsert`
-- Removed `select` from ZQL. It wasn’t doing anything ([documentation](/docs/reading-data))
+- Removed `select` from ZQL. It wasn’t doing anything ([documentation](/docs/zql))
 - Moved batch mutation to its own `mutateBatch` method. Before the `mutate` field also doubled as a method. This made intellisense hard to understand since `z.mutate` had all the tables as fields but also all the fields of a function.
 
 ## Features
 
-- Relationship filters. Queries can now include `whereExists` ([bug](https://bugs.rocicorp.dev/issue/3039), [documentation](/docs/reading-data#relationship-filters)).
-- Reworked syntax for compound `where` filters, including ergonomically building `or` expressions with dynamic number of clauses ([bug](https://bugs.rocicorp.dev/issue/3104), [documentation](/docs/reading-data#compound-filters)).
+- Relationship filters. Queries can now include `whereExists` ([bug](https://bugs.rocicorp.dev/issue/3039), [documentation](/docs/zql#relationship-filters)).
+- Reworked syntax for compound `where` filters, including ergonomically building `or` expressions with dynamic number of clauses ([bug](https://bugs.rocicorp.dev/issue/3104), [documentation](/docs/zql#compound-filters)).
 - Support using Postgres databases without superuser access for smaller apps ([documentation](/docs/connecting-to-postgres)).
-- Support for running `Zero` client under Cloudflare Durable Objects ([documentation](/docs/samples#hello-zero-do)).
+- Support for running `Zero` client under Cloudflare Durable Objects ([documentation](/docs/quickstart#hello-zero-cf)).
 - Reworked support for `null` / `undefined` to properly support optional fields ([bug](https://bugs.rocicorp.dev/issue/3114), [documentation](/docs/schema#optional-columns)).
-- Added `IS` / `IS NOT` to ZQL to support checking for null ([bug](https://bugs.rocicorp.dev/issue/3028), [documentation](/docs/reading-data#comparing-to-null)).
+- Added `IS` / `IS NOT` to ZQL to support checking for null ([bug](https://bugs.rocicorp.dev/issue/3028), [documentation](/docs/zql#comparing-to-null)).
 - Improved intellisense for mutators.
 - Added `--port` flag and `ZERO_PORT` environment variable ([bug](https://bugs.rocicorp.dev/issue/3031), [documentation](/docs/zero-cache-config)).
 - Default max connections of zero-cache more conservatively so that it should fit with even common small Postgres configurations.
@@ -50,6 +50,6 @@ This release is a bit harder to upgrade to than previous alphas. For a step-by-s
 
 ## Docs
 
-- Added new [ZQL reference](/docs/reading-data)
-- Added new [mutators reference](/docs/writing-data)
+- Added new [ZQL reference](/docs/zql)
+- Added new [mutators reference](/docs/mutators)
 - Added new [config reference](/docs/zero-cache-config)

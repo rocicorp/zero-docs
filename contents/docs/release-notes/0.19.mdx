@@ -18,11 +18,11 @@ npm install @rocicorp/zero@0.19
 
 ## Features
 
-- Add a `type` param to `query.run()` so it can wait for server results ([doc](/docs/reading-data#running-queries-once), [bug](https://bugs.rocicorp.dev/issue/3243))
+- Add a `type` param to `query.run()` so it can wait for server results ([doc](/docs/queries#once), [bug](https://bugs.rocicorp.dev/issue/3243))
 - `await z.mutate.foo.bar()` is now `await z.mutate.foo.bar().client` for consistency with `.server`, old API still works but deprecated ([doc](/docs/mutators#waiting-for-results))
 - Improve speed of litestream restore by about 7x
 - Increase replication speed when using JSON by about 25%
-- Add options to `analyze-query` to apply permissions and auth data ([doc](/docs/debug/permissions#read-permissions)).
+- Add options to `analyze-query` to apply permissions and auth data ([doc](/docs/deprecated/rls-permissions#read-permissions)).
 - Add option to `--lazy-startup` to `zero-cache` to delay connecting to upstram until first connection ([doc](/docs/zero-cache-config#lazy-startup))
 - Add `/statz` endpoint for getting some health statistics from a running Zero instance ([doc](/docs/debug/slow-queries#statz))
 

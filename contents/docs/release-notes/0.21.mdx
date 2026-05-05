@@ -19,8 +19,8 @@ See [hello-zero](https://github.com/rocicorp/hello-zero/pull/44) for an example 
 
 - New _"ztunes"_ sample using TanStack, Drizzle, Better Auth, and Fly.io ([docs](/docs/samples#ztunes)).
 - Add initial support for Postgres arrays ([docs](/docs/postgres-support#column-types), [bug](https://bugs.rocicorp.dev/issue/3617)).
-- Improved React lifecycle management with `ZeroProvider` ([docs](/docs/react#zero-provider), [PR](https://github.com/rocicorp/mono/pull/4527)).
-- Expose `Zero` instances automatically at `__zero` ([docs](/docs/debug/inspector#creating-an-inspector), [PR](https://github.com/rocicorp/mono/pull/4526)).
+- Improved React lifecycle management with `ZeroProvider` ([docs](/docs/react#setup), [PR](https://github.com/rocicorp/mono/pull/4527)).
+- Expose `Zero` instances automatically at `__zero` ([docs](/docs/debug/inspector#accessing-the-inspector), [PR](https://github.com/rocicorp/mono/pull/4526)).
 - Add `--output-{synced|vended}-rows` to `analyze-query` ([PR](https://github.com/rocicorp/mono/pull/4463)).
 - Technically a bug fix, but this was so annoying I'm calling it a feature: <nobr>`zero-sqlite3`</nobr> now correctly supports the up/down arrow keys ([commit](https://github.com/rocicorp/zero-sqlite3/commit/50c7a850572d9d3d4ac26ffb2e1cca2e8c5e08b0)).
 - Another super annoying fix: logs from `zero-cache` are now level-colored ([PR](https://github.com/rocicorp/mono/pull/4533)).
@@ -44,4 +44,4 @@ See [hello-zero](https://github.com/rocicorp/hello-zero/pull/44) for an example 
 
 ## Breaking Changes
 
-- Using `order by` and `limit` in many-to-many relationships now throws an error. It didn't work before but did the wrong thing silently. Now it throws a runtime error. See [docs](/docs/reading-data#order-and-limit-not-supported-in-junction-relationships), [bug](https://bugs.rocicorp.dev/issue/3527).
+- Using `order by` and `limit` in many-to-many relationships now throws an error. It didn't work before but did the wrong thing silently. Now it throws a runtime error. See [docs](/docs/zql#order-and-limit-not-supported-in-junction-relationships), [bug](https://bugs.rocicorp.dev/issue/3527).

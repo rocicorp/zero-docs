@@ -14,14 +14,14 @@ See the changes to [hello-zero](https://github.com/rocicorp/hello-zero/pull/8) o
 ## Features
 
 - **Schema Autobuild**. There's now a `zero-cache-dev` script that automatically rebuilds the schema and restarts `zero-cache` on changes to `schema.ts`. ([docs](../schema))
-- **Result Type.** You can now tell whether a query is complete or partial. ([docs](/docs/reading-data#partial-data))
+- **Result Type.** You can now tell whether a query is complete or partial. ([docs](/docs/queries#partial-data))
 - **Enums**. Enums are now supported in Postgres schemas and on client. ([docs](../postgres-support#column-types))
 - **Custom Types**. You can define custom JSON types in your schema. ([docs](../schema#custom-json-types))
-- **OTEL Tracing.** Initial tracing support. ([docs](/docs/zero-cache-config#log-trace-collector))
+- **OTEL Tracing.** Initial tracing support. ([docs](/docs/otel))
 - **timestampz.** Add support for `timestampz` Postgres column type. ([docs](../postgres-support#column-types))
-- **SSLMode**. You can disable TLS when `zero-cache` connects to DB with `sslmode=disable`. ([docs](../connecting-to-postgres#ssl-mode))
-- **Permission Helpers**. `ANYONE_CAN` and `NOBODY_CAN` helpers were added to make these cases more readable. ([docs](../permissions#permissions-denied-by-default))
-- **Multitenant Support**. A single `zero-cache` can now front separate Postgres databases. This is useful for customers that have one "dev" database in production per-developer. ([docs](../zero-cache-config#tenants-json))
+- **SSLMode**. You can disable TLS when `zero-cache` connects to DB with `sslmode=disable`. ([docs](/docs/connecting-to-postgres#flyio))
+- **Permission Helpers**. `ANYONE_CAN` and `NOBODY_CAN` helpers were added to make these cases more readable. ([docs](/docs/deprecated/rls-permissions#access-is-denied-by-default))
+- **Multitenant Support**. A single `zero-cache` can now front separate Postgres databases. This is useful for customers that have one "dev" database in production per-developer. ([docs](/docs/zero-cache-config))
 
 ## Fixes
 

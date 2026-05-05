@@ -33,16 +33,16 @@ Now, query TTLs measure _"TTL time"_ which **_only elapses while Zero is running
 
 ### Using New TTLs
 
-You don't need to do anything specific to upgrade. Zero [will clamp your TTLs at `10m`](../reading-data#longer-ttls-are-disallowed) and print a warning.
+You don't need to do anything specific to upgrade. Zero [will clamp your TTLs at `10m`](/docs/queries#setting-different-ttls) and print a warning.
 
-But for best results, please review the [new TTL documentation](../reading-data#query-lifecycle). In particular, see [how to set your TTLs](../reading-data#choosing-a-ttl) (TL;DR: You can often just remove them – [the defaults usually just work](../reading-data#ttl-defaults)).
+But for best results, please review the [new TTL documentation](/docs/queries#ttls). In particular, see [how to set your TTLs](/docs/queries#setting-different-ttls) (TL;DR: You can often just remove them – [the defaults usually just work](/docs/queries#ttl-defaults)).
 
 ## Features
 
-- Rework and simplify query TTLs ([docs](/docs/reading-data#query-lifecycle), [upgrading](#upgrading)).
+- Rework and simplify query TTLs ([docs](/docs/queries#ttls), [upgrading](#upgrading)).
 - SolidJS bindings are now fine-grained, improving performance ([PR](https://github.com/rocicorp/mono/pull/4575)).
 - Restore `ZERO_CHANGE_STREAMER_URI` option ([doc](../zero-cache-config#change-streamer-uri), [PR](https://github.com/rocicorp/mono/pull/4584)).
-- Add `useZeroOnline` to React and SolidJS bindings ([doc](/docs/offline#dealing-with-offline-today)).
+- Add `useZeroOnline` to React and SolidJS bindings ([doc](/docs/connection#offline-ui)).
 - Add `ttl` to `run()` ([PR](https://github.com/rocicorp/mono/pull/4603)).
 - Allow client to specify `push.url` in the `Zero` constructor ([doc](/docs/mutators#server-setup)).
 - Add anonymous telemetry collection to `zero-cache` ([doc](../zero-cache-config#enable-telemetry)).

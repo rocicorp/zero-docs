@@ -28,7 +28,7 @@ Once enabled, mutators are available at `z.mutate.<tablename>`:
 ```tsx
 const zero = new Zero(...);
 zero.mutate.user.insert({
-	id: nanoid(),
+	id: crypto.randomUUID(),
 	username: 'abby',
 	language: 'en-us',
 });

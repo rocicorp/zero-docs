@@ -2,6 +2,8 @@
 
 import {useEffect} from 'react';
 
+const shellLanguages = new Set(['bash', 'sh', 'shell', 'zsh']);
+
 export default function CopyButtonListener() {
   useEffect(() => {
     const handleClick = (event: MouseEvent) => {
@@ -13,12 +15,22 @@ export default function CopyButtonListener() {
 
       const pre = button.closest('pre');
       const codeElement = pre?.querySelector('code');
+      const language =
+        pre?.getAttribute('data-language') ??
+        codeElement?.getAttribute('data-language');
       const codeBlock =
         codeElement?.textContent ?? button.nextElementSibling?.textContent;
 
       if (!codeBlock) return;
 
-      navigator.clipboard.writeText(codeBlock).then(() => {
+      const textToCopy = shellLanguages.has(language ?? '')
+        ? codeBlock
+            .split('\n')
+            .filter(line => !line.trimStart().startsWith('#'))
+            .join('\n')
+        : codeBlock;
+
+      navigator.clipboard.writeText(textToCopy).then(() => {
         const originalText = button.textContent;
         button.textContent = 'Copied!';
         window.setTimeout(() => {

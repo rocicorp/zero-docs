@@ -6,6 +6,7 @@ description: Writing Data
 Mutators are how you write data with Zero. Here's a simple example:
 
 ```ts
+// src/mutators.ts
 import {defineMutators, defineMutator} from '@rocicorp/zero'
 import {z} from 'zod'
 
@@ -275,6 +276,136 @@ const createIssue = defineMutator(
   }
 )
 ```
+
+<Note
+  emoji="💡"
+  heading="Without global `DefaultTypes`"
+  slug="without-default-types"
+>
+
+If you don't want to register your [Context](/docs/auth#context) and [Schema](/docs/schema#register-schema-type) types globally, you can use `defineMutatorWithType` and `defineMutatorsWithType`:
+
+<CodeGroup
+  labels={[
+    {
+      text: 'Drizzle',
+      sync: {pgClient: 'drizzle'},
+    },
+    {
+      text: 'Kysely',
+      sync: {pgClient: 'kysely'},
+    },
+    {
+      text: 'Prisma',
+      sync: {pgClient: 'prisma'},
+    },
+    {
+      text: 'node-postgres',
+      sync: {pgClient: 'node-postgres'},
+    },
+    {
+      text: 'postgres.js',
+      sync: {pgClient: 'postgres-js'},
+    },
+  ]}
+>
+
+```ts
+import {
+  defineMutatorWithType,
+  defineMutatorsWithType
+} from '@rocicorp/zero'
+import type {ZeroContext} from 'context.ts'
+import type {Schema} from 'schema.ts'
+
+import type {DrizzleTransaction} from '@rocicorp/zero/server/adapters/drizzle'
+import type {drizzleClient} from 'db-provider.ts'
+
+const defineMutator = defineMutatorWithType<
+  Schema,
+  ZeroContext,
+  DrizzleTransaction<typeof drizzleClient>
+>()
+const defineMutators = defineMutatorsWithType<Schema>()
+```
+
+```ts
+import {
+  defineMutatorWithType,
+  defineMutatorsWithType
+} from '@rocicorp/zero'
+import type {ZeroContext} from 'context.ts'
+import type {Schema} from 'schema.ts'
+
+import type {KyselyTransaction} from '@rocicorp/zero/server/adapters/kysely'
+import type {Database} from 'db-provider.ts'
+
+const defineMutator = defineMutatorWithType<
+  Schema,
+  ZeroContext,
+  KyselyTransaction<Database>
+>()
+const defineMutators = defineMutatorsWithType<Schema>()
+```
+
+```ts
+import {
+  defineMutatorWithType,
+  defineMutatorsWithType
+} from '@rocicorp/zero'
+import type {ZeroContext} from 'context.ts'
+import type {Schema} from 'schema.ts'
+
+import type {PrismaTransaction} from '@rocicorp/zero/server/adapters/prisma'
+import type {PrismaClient} from '@prisma/client'
+
+const defineMutator = defineMutatorWithType<
+  Schema,
+  ZeroContext,
+  PrismaTransaction<PrismaClient>
+>()
+const defineMutators = defineMutatorsWithType<Schema>()
+```
+
+```ts
+import {
+  defineMutatorWithType,
+  defineMutatorsWithType
+} from '@rocicorp/zero'
+import type {ZeroContext} from 'context.ts'
+import type {Schema} from 'schema.ts'
+
+import type {NodePgTransaction} from '@rocicorp/zero/server/adapters/pg'
+
+const defineMutator = defineMutatorWithType<
+  Schema,
+  ZeroContext,
+  NodePgTransaction
+>()
+const defineMutators = defineMutatorsWithType<Schema>()
+```
+
+```ts
+import {
+  defineMutatorWithType,
+  defineMutatorsWithType
+} from '@rocicorp/zero'
+import type {ZeroContext} from 'context.ts'
+import type {Schema} from 'schema.ts'
+
+import type {PostgresJsTransaction} from '@rocicorp/zero/server/adapters/postgresjs'
+
+const defineMutator = defineMutatorWithType<
+  Schema,
+  ZeroContext,
+  PostgresJsTransaction
+>()
+const defineMutators = defineMutatorsWithType<Schema>()
+```
+
+</CodeGroup>
+
+</Note>
 
 ### Mutator Registries
 
@@ -824,11 +955,10 @@ Once you have registered your mutators, you can invoke them with `zero.mutate`:
 
 ```ts
 import {mutators} from 'mutators.ts'
-import {nanoid} from 'nanoid'
 
 zero.mutate(
   mutators.issue.update({
-    id: nanoid(),
+    id: crypto.randomUUID(),
     title: 'New title'
   })
 )
@@ -838,7 +968,8 @@ zero.mutate(
   heading="Client-generated random IDs recommended"
   emoji="🎲"
 >
-  Client-generated random IDs from libraries like
+  Client-generated random IDs from
+  [crypto.randomUUID()](https://developer.mozilla.org/en-US/docs/Web/API/Crypto/randomUUID),
   [uuid](https://www.npmjs.com/package/uuid),
   [ulid](https://www.npmjs.com/package/ulid), or
   [nanoid](https://www.npmjs.com/package/nanoid) work much
@@ -861,7 +992,7 @@ You can use the `.client` promise in this case to wait for a write to complete o
 ```ts
 const write = zero.mutate(
   mutators.issue.insert({
-    id: nanoid(),
+    id: crypto.randomUUID(),
     title: 'New title'
   })
 )
@@ -890,7 +1021,7 @@ You can also wait for the server write to succeed:
 ```ts
 const write = zero.mutate(
   mutators.issue.insert({
-    id: nanoid(),
+    id: crypto.randomUUID(),
     title: 'New title'
   })
 )

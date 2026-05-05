@@ -1,18 +1,18 @@
 'use client';
 
-import {useEffect, useRef, useState} from 'react';
-import Link from 'next/link';
-import CopyButtonListener from './ui/copy-button-listener';
-import RocicorpLogo from './logos/Rocicorp';
-import CodeGroup from './CodeGroup';
-import {Popover, PopoverTrigger, PopoverContent} from './ui/popover';
 import {
   enterFullscreen,
   exitFullscreen,
   isCurrentlyFullscreen,
 } from '@/lib/fullscreen';
 import {parseMdx} from '@/lib/mdx';
+import Link from 'next/link';
+import {useEffect, useRef, useState} from 'react';
+import CodeGroup from './CodeGroup';
 import {useIsMobile} from './hooks/use-mobile';
+import RocicorpLogo from './logos/Rocicorp';
+import CopyButtonListener from './ui/copy-button-listener';
+import {Popover, PopoverContent, PopoverTrigger} from './ui/popover';
 
 export function IntroductionLanding({
   codeExamples,
@@ -1011,7 +1011,7 @@ export function IntroductionLanding({
           <div className="feature-grid">
             <Link
               className="feature-card feature-card--icon-left feature-card--link"
-              href="/docs/quickstart"
+              href="/docs/install"
             >
               <div className="feature-card-icon-left">
                 <svg

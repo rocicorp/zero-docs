@@ -344,6 +344,11 @@ mark {
   margin-top: 0;
 }
 
+.note-aside figure {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
 /* Syntax highlighting */
 
 html.light [data-theme~='roci-light'],

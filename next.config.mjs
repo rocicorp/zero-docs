@@ -80,6 +80,11 @@ const nextConfig = {
         permanent: false,
       },
       {
+        source: '/docs/starters',
+        destination: '/docs/quickstart',
+        permanent: false,
+      },
+      {
         source: '/docs/raw/:slug*',
         destination: '/docs/:slug*.md',
         permanent: false,

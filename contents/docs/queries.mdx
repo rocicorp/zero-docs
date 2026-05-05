@@ -6,6 +6,7 @@ description: Reading and Syncing Data
 Queries are how you read and sync data with Zero. Here's a simple example:
 
 ```ts
+// src/queries.ts
 import {defineQueries, defineQuery} from '@rocicorp/zero'
 import {z} from 'zod'
 import {zql} from 'schema.ts'
@@ -155,6 +156,31 @@ const myPostsQuery = defineQuery(({ctx: {userID}}) => {
   return zql.post.where('authorID', userID)
 })
 ```
+
+<Note
+  emoji="💡"
+  heading="Without global DefaultTypes"
+  slug="without-default-types"
+>
+
+If you don't want to register your [Context](/docs/auth#context) and [Schema](/docs/schema#register-schema-type) types globally, you can use `defineQueryWithType` and `defineQueriesWithType`:
+
+```ts
+import {
+  defineQueriesWithType,
+  defineQueryWithType
+} from '@rocicorp/zero'
+import type {Schema} from 'schema.ts'
+import type {ZeroContext} from 'context.ts'
+
+const defineQuery = defineQueryWithType<
+  Schema,
+  ZeroContext
+>()
+const defineQueries = defineQueriesWithType<Schema>()
+```
+
+</Note>
 
 ### queries.ts
 
@@ -478,6 +504,60 @@ postsView.addListener(posts => {
 </CodeGroup>
 
 These functions allow you to automatically re-render UI when a query changes.
+
+### Conditionally
+
+Sometimes the inputs needed to construct a query are not available on the first render. For example, auth state or a route param might still be loading after a page refresh.
+
+Both React and Solid support conditional queries by passing `undefined` until the query can be constructed:
+
+<CodeGroup
+  labels={[
+    {text: 'React', sync: {client: 'react'}},
+    {text: 'SolidJS', sync: {client: 'solidjs'}},
+  ]}
+>
+
+```tsx
+import {useQuery} from '@rocicorp/zero/react'
+import {queries} from 'zero/queries.ts'
+
+function Username({userID}: {userID: string | undefined}) {
+  const [user] = useQuery(
+    userID
+      ? queries.users.getUser({
+          userID
+        })
+      : undefined
+  )
+
+  return user ? <div>{user.username}</div> : null
+}
+```
+
+```tsx
+import {useQuery} from '@rocicorp/zero/solid'
+import {Show} from 'solid-js'
+import {queries} from 'zero/queries.ts'
+
+function Username(props: {userID: string | undefined}) {
+  const [user] = useQuery(() =>
+    props.userID
+      ? queries.users.getUser({
+          userID: props.userID
+        })
+      : undefined
+  )
+
+  return (
+    <Show when={user()}>
+      {user => <div>{user().username}</div>}
+    </Show>
+  )
+}
+```
+
+</CodeGroup>
 
 ### Once
 

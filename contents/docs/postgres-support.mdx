@@ -145,7 +145,7 @@ An `insert()` mutation requires all columns to be specified, except when columns
 
 ## IDs
 
-It is strongly recommended to use client-generated random strings like [uuid](https://www.npmjs.com/package/uuid), [ulid](https://www.npmjs.com/package/ulid), [nanoid](https://www.npmjs.com/package/nanoid), etc for primary keys. This makes optimistic creation and updates much easier.
+It is strongly recommended to use client-generated random strings like [crypto.randomUUID()](https://developer.mozilla.org/en-US/docs/Web/API/Crypto/randomUUID), [uuid](https://www.npmjs.com/package/uuid), [ulid](https://www.npmjs.com/package/ulid), [nanoid](https://www.npmjs.com/package/nanoid), etc for primary keys. This makes optimistic creation and updates much easier.
 
 <Note type="note" slug="client-generated-ids" heading="Why are client-generated IDs better?">
   Imagine that the PK of your table is an auto-incrementing integer. If you optimistically create an entity of this type, you will have to give it some ID – the type will require it locally, but also if you want to optimistically create relationships to this row you’ll need an ID.

@@ -245,7 +245,7 @@ const messageRelationships = relationships(
 )
 ```
 
-This creates "sender" and "replies" relationships that can later be queried with the [`related` ZQL clause](/docs/reading-data#relationships):
+This creates "sender" and "replies" relationships that can later be queried with the [`related` ZQL clause](/docs/zql#relationships):
 
 ```ts
 const messagesWithSenderAndReplies = z.query.messages

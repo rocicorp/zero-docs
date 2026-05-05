@@ -173,7 +173,11 @@ zql.issue.related(
 
 This _relationship query_ can have all the same clauses that top-level queries can have.
 
-<Note type="warning" heading="Order and limit not supported in junction relationships">
+<Note
+  type="warning"
+  slug="junction-relationships"
+  heading="Order and limit not supported in junction relationships"
+>
 Using `orderBy` or `limit` in a relationship that goes through a junction table (i.e., a many-to-many relationship) is not currently supported and will throw a runtime error. See [bug 3527](https://bugs.rocicorp.dev/issue/3527).
 
 You can sometimes work around this by making the junction relationship explicit, depending on your schema and usage.
@@ -407,7 +411,7 @@ Zero automatically plans queries, selecting the best indexes and join orders in 
 
 ### Inspecting Query Plans
 
-You can inspect the plan that Zero generates for any ZQL query [using the inspector](/docs/debug/inspector#analyzing-query-plans).
+You can inspect the plan that Zero generates for any ZQL query [using the inspector](/docs/debug/inspector#analyzing-queries).
 
 ### Manually Flipping Joins
 

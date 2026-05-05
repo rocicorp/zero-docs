@@ -26,12 +26,12 @@ To upgrade your app:
 
 1. See the changes to [hello-zero](https://github.com/rocicorp/hello-zero/pull/26) or [hello-zero-solid](https://github.com/rocicorp/hello-zero-solid/pull/14) for how to update your permissions.
 2. Remove the `ZERO_SCHEMA_JSON` and `ZERO_SCHEMA_FILE` environment variables from your setup. They aren't used anymore.
-3. Use [`npx zero-deploy-permissions`](/docs/permissions#permission-deployment) to deploy permissions when necessary. You can hook this up to your CI to automate it. See the [zbugs implementation](https://github.com/rocicorp/mono/blob/86ab73122a0532e4ec516badc1d8fb82b3465b49/prod/sst/sst.config.ts#L178) as an example.
+3. Use [`npx zero-deploy-permissions`](/docs/deprecated/rls-permissions#permission-deployment) to deploy permissions when necessary. You can hook this up to your CI to automate it. See the [zbugs implementation](https://github.com/rocicorp/mono/blob/86ab73122a0532e4ec516badc1d8fb82b3465b49/prod/sst/sst.config.ts#L178) as an example.
 
 ## Features
 
-- Live-updating permissions ([docs](/docs/permissions#permission-deployment)).
-- Permissions now default to **deny** rather than **allow** ([docs](/docs/permissions#access-is-denied-by-default)).
+- Live-updating permissions ([docs](/docs/deprecated/rls-permissions#permission-deployment)).
+- Permissions now default to **deny** rather than **allow** ([docs](/docs/deprecated/rls-permissions#access-is-denied-by-default)).
 
 ## Fixes
 
@@ -48,5 +48,5 @@ To upgrade your app:
 
 ## Breaking Changes
 
-- Making permissions deny by default breaks existing apps. To fix add `ANYONE_CAN` or other appropriate permissions for your tables. See [docs](/docs/permissions#access-is-denied-by-default).
-- The `ZERO_SCHEMA_JSON` and `ZERO_SCHEMA_FILE` environment variables are no longer used. Remove them from your setup and use [`npx zero-deploy-permissions`](/docs/permissions#permission-deployment) instead.
+- Making permissions deny by default breaks existing apps. To fix add `ANYONE_CAN` or other appropriate permissions for your tables. See [docs](/docs/deprecated/rls-permissions#access-is-denied-by-default).
+- The `ZERO_SCHEMA_JSON` and `ZERO_SCHEMA_FILE` environment variables are no longer used. Remove them from your setup and use [`npx zero-deploy-permissions`](/docs/deprecated/rls-permissions#permission-deployment) instead.

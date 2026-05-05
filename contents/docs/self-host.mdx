@@ -753,7 +753,7 @@ Different bottlenecks dominate each phase.
 ### Hydration
 
 - **SQLite read cost**: hydration is essentially "run the query against the replica and stream all matching rows into the pipeline", so it's bounded by [SQLite scan/index performance](/docs/debug/inspector#analyzing-queries) + result size.
-- **Churn / TTL eviction**: if queries get [evicted](/docs/reading-data#query-caching) (inactive long enough) and then get re-requested, you pay hydration again.
+- **Churn / TTL eviction**: if queries get [evicted](/docs/queries#query-caching) (inactive long enough) and then get re-requested, you pay hydration again.
 - **Custom query transform latency**: the HTTP request from zero-cache to your API at [`ZERO_QUERY_URL`](/docs/zero-cache-config#query-url) does transform/authorization for queries, adding network + CPU before hydration starts.
 
 ### IVM advancement

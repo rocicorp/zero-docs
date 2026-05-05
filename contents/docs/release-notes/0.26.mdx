@@ -13,7 +13,7 @@ npm install @rocicorp/zero@0.26
 
 - [**Schema Backfill:**](/docs/schema#backfill) Zero now natively supports adding columns with non-constant defaults, or adding existing columns to a custom publication. There is no longer a need to touch every row in the database to backfill data manually.
 - [**Scalar Subqueries:**](/docs/zql#scalar-subqueries) Added a new optional optimization for `exists` queries that filter by related data with a one-to-one relationship. This can improve query performance significantly for cases where the subquery result changes rarely.
-- [**Virtual Scroll:**](/docs/status#query-language) Added [zero-virtual](https://github.com/rocicorp/zero-virtual) library for efficient infinite scrolling in React.
+- [**Virtual Scroll:**](/docs/status) Added [zero-virtual](https://github.com/rocicorp/zero-virtual) library for efficient infinite scrolling in React.
 - [**Support for `time` and `timetz` columns:**](/docs/postgres-support#column-types) Added support for `time` and `timetz` columns (thanks [GRBurst](https://github.com/rocicorp/mono/pull/5417)).
 - [**Comparing to `undefined`:**](/docs/zql#comparing-to-undefined) Added a new convenience for comparing to `undefined`. This is useful for filtering by nullable fields.
 - [**zero.delete():**](/docs/auth#logging-out) Added a more convenient way to delete all data from the browser's IndexedDB database.
@@ -64,7 +64,7 @@ npm install @rocicorp/zero@0.26
 - [Retry on change-db connection errors](https://github.com/rocicorp/mono/pull/5625)
 - [Detect publication differences during initial sync](https://github.com/rocicorp/mono/pull/5629)
 - [Prevent concurrent schema migrations from racing](https://github.com/rocicorp/mono/pull/5626)
-- [Fix stale destroy timers on query resubscribe](https://github.com/rocicorp/mono/pull/5623) (thanks [@alpkaravil](https://github.com/alpkaravil)!)
+- [Fix stale destroy timers on query resubscribe](https://github.com/rocicorp/mono/pull/5623) (thanks [@Karavil](https://github.com/Karavil)!)
 - [Add missing @types/ws dependency](https://github.com/rocicorp/mono/pull/5639) (thanks [@YevheniiKotyrlo](https://github.com/YevheniiKotyrlo)!)
 - [Fix constraints not detected when definition changes but name stays same](https://github.com/rocicorp/mono/pull/5647)
 - [Fix duplicate mutations when retry transaction succeeds](https://github.com/rocicorp/mono/pull/5634)

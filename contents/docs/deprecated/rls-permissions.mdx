@@ -9,11 +9,11 @@ title: RLS Permissions (Deprecated)
   heading="This API is deprecated"
 >
   It will be removed in a future release of Zero. See
-  [Permissions](/docs/auth#permissions) for more
+  [Permissions](/docs/auth#permission-patterns) for more
   information.
 </Note>
 
-Permissions are expressed using [ZQL](reading-data) and run automatically with every read and write.
+Permissions are expressed using [ZQL](/docs/queries) and run automatically with every read and write.
 
 Permissions are currently row based. Zero will eventually also have column permissions.
 
@@ -128,7 +128,7 @@ Basically only property access is allowed. This is really confusing and we're wo
 
 During development, permissions are compiled and uploaded to your database completely automatically as part of the `zero-cache-dev` script.
 
-For production, you need to call `npx zero-deploy-permissions` within your app to update the permissions in the production database whenever they change. You would typically do this as part of your normal schema migration or CI process. For example, the SST deployment script for [zbugs](/docs/samples#zbugs) looks like this:
+For production, you need to call `npx zero-deploy-permissions` within your app to update the permissions in the production database whenever they change. You would typically do this as part of your normal schema migration or CI process. For example, the SST deployment script for [Gigabugs](/docs/samples#gigabugs) looks like this:
 
 ```ts
 new command.local.Command(
@@ -148,13 +148,13 @@ new command.local.Command(
 )
 ```
 
-See the [SST Deployment Guide](/docs/self-host#guide-multi-node-on-sstaws) for more details.
+See the [deployment guide](/docs/self-host) for more details.
 
 ## Rules
 
 Each operation on a policy has a _ruleset_ containing zero or more _rules_.
 
-A rule is just a TypeScript function that receives the logged in user's `AuthData` and generates a ZQL [where expression](reading-data#compound-filters). At least one rule in a ruleset must return a row for the operation to be allowed.
+A rule is just a TypeScript function that receives the logged in user's `AuthData` and generates a ZQL [where expression](/docs/zql#compound-filters). At least one rule in a ruleset must return a row for the operation to be allowed.
 
 ## Select Permissions
 
@@ -186,7 +186,7 @@ If the issue table has two rows, one created by the user and one by someone else
 <Note type="warning" heading="Column permissions are not currently supported">
 Select permission applies to every column. The recommended approach for now is to factor out private fields into a separate table, e.g. `user_private`. Column permissions are planned but currently not a high priority.
 
-Note that although the same limitation applies to declarative insert/update permissions, [custom mutators](/docs/custom-mutators) support arbitrary server-side logic and so can easily control which columns are writable.
+Note that although the same limitation applies to declarative insert/update permissions, [custom mutators](/docs/mutators) support arbitrary server-side logic and so can easily control which columns are writable.
 
 </Note>
 
@@ -297,7 +297,7 @@ Delete permissions work in the same way as `insert` permissions except they run 
 
 ## Permissions Based on Auth Data
 
-You can use the [`cmpLit` helper](reading-data#comparing-literal-values) to define permissions based on a field of the `authData` parameter:
+You can use the [`cmpLit` helper](/docs/zql#comparing-literal-values) to define permissions based on a field of the `authData` parameter:
 
 ```ts
 definePermissions<AuthData, Schema>(schema, () => {
@@ -362,6 +362,6 @@ Zero prints the row, auth data, and permission policies that was applied to any 
 
 <Note slug="ast-format">
   The ZQL query is printed in AST format. See [Query
-  ASTs](./query-asts) to convert it to a more readable
-  format.
+  ASTs](/docs/debug/query-asts) to convert it to a more
+  readable format.
 </Note>

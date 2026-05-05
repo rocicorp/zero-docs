@@ -46,7 +46,7 @@ But the implementations don't have to be the same, or even compute the same resu
 
 When a mutator is invoked, it initially runs on the client, against the client-side datastore. Any changes are immediately applied to open queries and the user sees the changes.
 
-In the background, Zero sends a _mutation_ (a record of the mutator having run with certain arguments) to your server's push endpoint. Your push endpoint runs the [push protocol](#custom-push-implementation), executing the server-side mutator in a transaction against your database and recording the fact that the mutation ran. The `@rocicorp/zero` package contains utilities to make it easy to implement this endpoint in TypeScript.
+In the background, Zero sends a _mutation_ (a record of the mutator having run with certain arguments) to your server's push endpoint. Your push endpoint runs the [push protocol](#custom-mutate-implementation), executing the server-side mutator in a transaction against your database and recording the fact that the mutation ran. The `@rocicorp/zero` package contains utilities to make it easy to implement this endpoint in TypeScript.
 
 The changes to the database are then replicated to `zero-cache` using logical replication. `zero-cache` calculates the updates to active queries and sends rows that have changed to each client. It also sends information about the mutations that have been applied to the database.
 
@@ -851,11 +851,11 @@ app.post('/api/zero/mutate', async c => {
 
 </CodeGroup>
 
-If Zero receives any response from the mutate endpoint other than HTTP 200, 401, or 403, it will disconnect and enter the [error state](/docs/connection#errors).
+If Zero receives any response from the mutate endpoint other than HTTP 200, 401, or 403, it will disconnect and enter the [error state](/docs/connection#error).
 
 If Zero receives HTTP 401 or 403, the client will enter the needs auth state and require a manual reconnect. Use `zero.connection.connect()` for cookie auth or `zero.connection.connect({auth: newToken})` for token auth, then Zero will retry all queued mutations.
 
-If you want a different behavior, it is possible to [implement the mutate endpoint](#custom-push-implementation) yourself and handle errors differently.
+If you want a different behavior, it is possible to [implement the mutate endpoint](#custom-mutate-implementation) yourself and handle errors differently.
 
 ### Custom Mutate URL
 
@@ -886,7 +886,7 @@ export ZERO_MUTATE_URL="https://mybranch-*.preview.myapp.com/mutate"
 
 For more information, see the [URLPattern section of the Queries docs](/docs/queries#url-patterns). It works the same way for mutations.
 
-If you're configuring per-branch preview URLs (for example on Vercel), see [Preview Deployments](/docs/preview-deployments) for the complete setup across both query and mutate endpoints.
+If you're configuring per-branch preview URLs (for example on Vercel), see [Preview Deployments](/docs/previews) for the complete setup across both query and mutate endpoints.
 
 ### Server-Specific Code
 
@@ -1073,7 +1073,7 @@ If the client-side mutator fails, the `.server` promise is also rejected with th
 
 Because mutators are just normal TypeScript functions that run server-side, there is no need for a special permissions system. You can implement whatever permission checks you want using plain TypeScript code.
 
-See [Permissions](/docs/auth#permissions) for more information.
+See [Permissions](/docs/auth#permission-patterns) for more information.
 
 ## Dropping Down to Raw SQL
 

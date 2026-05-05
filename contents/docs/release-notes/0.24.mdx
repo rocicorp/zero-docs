@@ -11,19 +11,19 @@ npm install @rocicorp/zero@0.24
 
 ## Features
 
-- [**Join Flipping:**](/docs/reading-data#join-flipping) Dramatically improves the performance of `whereExists()` in many common cases. Join flipping is a form of manual query planning that tells Zero the order to evaluate joins. An automatic planner will follow in a future release.
-- [**Simplified Auth:**](/docs/auth#opaque-auth-tokens) If you are using custom mutators and synced queries, you no longer need to use JWT auth. You can use opaque tokens or even better, plain old cookies. This even means you can use HTTP-only cookies. In our demo apps this eliminated hundreds of lines of code. It's a big improvement.
-- [**Full Preview Support:**](/docs/custom-mutators#custom-mutate-url) We tried to get this out in 0.23 but it didn't quite make it. You can now dynamically configure Zero with the location of your mutator and [query](/docs/synced-queries#custom-get-queries-url) endpoints. This allows easily using preview URLs on platforms like Vercel.
+- [**Join Flipping:**](/docs/zql#manually-flipping-joins) Dramatically improves the performance of `whereExists()` in many common cases. Join flipping is a form of manual query planning that tells Zero the order to evaluate joins. An automatic planner will follow in a future release.
+- [**Simplified Auth:**](/docs/auth#tokens) If you are using custom mutators and synced queries, you no longer need to use JWT auth. You can use opaque tokens or even better, plain old cookies. This even means you can use HTTP-only cookies. In our demo apps this eliminated hundreds of lines of code. It's a big improvement.
+- [**Full Preview Support:**](/docs/mutators#custom-mutate-url) We tried to get this out in 0.23 but it didn't quite make it. You can now dynamically configure Zero with the location of your mutator and [query](/docs/queries#custom-query-url) endpoints. This allows easily using preview URLs on platforms like Vercel.
 - [**Analyze Query from Inspector:**](/docs/debug/inspector#analyzing-queries) No more `npx zero-analyze-query` or ssh'ing into production. You can analyze any query right from the dev tools of your browser. On by default in every Zero app.
 - [**Simplified Metrics Output in Inspector:**](/docs/debug/inspector#queries) No more `.metrics["long-name-i-cant-remember"].quantile(0.99)`. The most important metrics – hydration and update time – are right on the query object. Also, you don't have to `(await __zero.inspect()).client.queries` anymore. It's just `__zero.inspector.client.queries()`.
-- [**New Type helpers:**](/docs/reading-data#type-helpers) `QueryResultType` and `QueryRowType` are handy ways to get the type of a query result or one of its rows.
-- [**Faster storage for React Native via op-sqlite:**](/docs/react-native#op-sqlite) The op-sqlite bindings are faster than the expo built-in ones. We now provide this built-in to Zero.
-- [**Brand New Cloudflare Sample:**](/docs/samples#hello-zero-cf) Turned the old hello-zero-do sample into a complete Cloudflare sample using workers for everything.
+- [**New Type helpers:**](/docs/zql#type-helpers) `QueryResultType` and `QueryRowType` are handy ways to get the type of a query result or one of its rows.
+- [**Faster storage for React Native via op-sqlite:**](/docs/react-native) The op-sqlite bindings are faster than the expo built-in ones. We now provide this built-in to Zero.
+- [**Brand New Cloudflare Sample:**](/docs/quickstart#hello-zero-cf) Turned the old hello-zero-do sample into a complete Cloudflare sample using workers for everything.
 - [**Improved ZQL server-side APIs:**](/docs/server-zql) More convenient setup, and added `node-postgres` and Drizzle support.
 
 ## Fixes
 
-- [Expose server errors from `get-queries` endpoint to client](/docs/synced-queries#handling-errors)
+- [Expose server errors from `get-queries` endpoint to client](/docs/queries#handling-errors)
 - [Correctly map primary keys to server names in some edge cases](https://github.com/rocicorp/mono/pull/4857)
 - [Reduce some OTEL error logging to `warn`](https://github.com/rocicorp/mono/pull/4867)
 - [Fix a case of deadlock related to CVR cleanup](https://github.com/rocicorp/mono/pull/4877)
@@ -40,9 +40,9 @@ npm install @rocicorp/zero@0.24
 
 ## Breaking Changes
 
-1. If you are using the `push.url` param to the `Zero` constructor, rename it to `mutateURL` ([more info](/docs/custom-mutators#custom-mutate-url)).
-2. If you are using the `ZERO_PUSH_URL` config param, rename it to `ZERO_MUTATE_URL` ([more info](/docs/custom-mutators#custom-mutate-url)).
-3. If you are awaiting queries directly without calling `run()`, like `await z.query.foo.where(...)`, or `await tx.query.foo.where(...)`, add `.run()` to the end, like `await z.query.foo.where(...).run()` or `await tx.query.foo.where(...).run()`.. This is most common in custom mutator implementations ([more info](/docs/reading-data#default-run))
+1. If you are using the `push.url` param to the `Zero` constructor, rename it to `mutateURL` ([more info](/docs/mutators#custom-mutate-url)).
+2. If you are using the `ZERO_PUSH_URL` config param, rename it to `ZERO_MUTATE_URL` ([more info](/docs/mutators#custom-mutate-url)).
+3. If you are awaiting queries directly without calling `run()`, like `await z.query.foo.where(...)`, or `await tx.query.foo.where(...)`, add `.run()` to the end, like `await z.query.foo.where(...).run()` or `await tx.query.foo.where(...).run()`.. This is most common in custom mutator implementations ([more info](/docs/queries#once))
 4. If you are building for React Native, change your import path from `@rocicorp/zero/react-native` to `@rocicorp/zero/expo-sqlite` ([more&nbsp;info](/docs/react-native))
 5. Add a `ZERO_ADMIN_PASSWORD` env var to your production config. This is now required ([more info](/docs/zero-cache-config#admin-password))
 

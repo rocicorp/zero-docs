@@ -48,8 +48,7 @@ several built-in factories for popular Postgres libraries and ORMs.
   ]}
 >
 
-```ts
-// app/api/mutate/db-provider.ts
+```ts:app/api/mutate/db-provider.ts
 import {zeroDrizzle} from '@rocicorp/zero/server/adapters/drizzle'
 import {schema} from '../../zero/schema.ts'
 import * as drizzleSchema from '../../drizzle/schema.ts'
@@ -68,8 +67,7 @@ declare module '@rocicorp/zero' {
 }
 ```
 
-```ts
-// app/api/mutate/db-provider.ts
+```ts:app/api/mutate/db-provider.ts
 import {Kysely, PostgresDialect} from 'kysely'
 import {zeroKysely} from '@rocicorp/zero/server/adapters/kysely'
 import {Pool} from 'pg'
@@ -100,8 +98,7 @@ declare module '@rocicorp/zero' {
 }
 ```
 
-```ts
-// app/api/mutate/db-provider.ts
+```ts:app/api/mutate/db-provider.ts
 import {PrismaPg} from '@prisma/adapter-pg'
 import {PrismaClient} from '@prisma/client'
 import {zeroPrisma} from '@rocicorp/zero/server/adapters/prisma'
@@ -122,8 +119,7 @@ declare module '@rocicorp/zero' {
 }
 ```
 
-```ts
-// app/api/mutate/db-provider.ts
+```ts:app/api/mutate/db-provider.ts
 import {zeroNodePg} from '@rocicorp/zero/server/adapters/pg'
 import {Pool} from 'pg'
 import {schema} from '../../zero/schema.ts'
@@ -149,8 +145,7 @@ declare module '@rocicorp/zero' {
 }
 ```
 
-```ts
-// app/api/mutate/db-provider.ts
+```ts:app/api/mutate/db-provider.ts
 import {zeroPostgresJS} from '@rocicorp/zero/server/adapters/postgresjs'
 import postgres from 'postgres'
 import {schema} from '../../zero/schema.ts'
@@ -195,8 +190,7 @@ Within your mutators, you can access the underlying transaction via `tx.dbTransa
   ]}
 >
 
-```ts
-// mutators.ts
+```ts:mutators.ts
 export const mutators = defineMutators({
   createUser: defineMutator(
     z.object({id: z.string(), name: z.string()}),
@@ -211,8 +205,7 @@ export const mutators = defineMutators({
 })
 ```
 
-```ts
-// mutators.ts
+```ts:mutators.ts
 export const mutators = defineMutators({
   createUser: defineMutator(
     z.object({id: z.string(), name: z.string()}),
@@ -228,8 +221,7 @@ export const mutators = defineMutators({
 })
 ```
 
-```ts
-// mutators.ts
+```ts:mutators.ts
 export const mutators = defineMutators({
   createUser: defineMutator(
     z.object({id: z.string(), name: z.string()}),
@@ -250,8 +242,7 @@ export const mutators = defineMutators({
 })
 ```
 
-```ts
-// mutators.ts
+```ts:mutators.ts
 export const mutators = defineMutators({
   createUser: defineMutator(
     z.object({id: z.string(), name: z.string()}),
@@ -267,8 +258,7 @@ export const mutators = defineMutators({
 })
 ```
 
-```ts
-// mutators.ts
+```ts:mutators.ts
 export const mutators = defineMutators({
   createUser: defineMutator(
     z.object({id: z.string(), name: z.string()}),

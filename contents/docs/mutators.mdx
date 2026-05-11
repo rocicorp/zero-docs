@@ -5,15 +5,14 @@ description: Writing Data
 
 Mutators are how you write data with Zero. Here's a simple example:
 
-```ts
-// src/mutators.ts
+```ts:src/mutators.ts twoslash
 import {defineMutators, defineMutator} from '@rocicorp/zero'
 import {z} from 'zod'
 
 export const mutators = defineMutators({
   updateIssue: defineMutator(
     z.object({
-      id: z.string(),
+      id: z.number(),
       title: z.string()
     }),
     async ({tx, args: {id, title}}) => {
@@ -22,7 +21,9 @@ export const mutators = defineMutators({
       }
       await tx.mutate.issue.update({
         id,
-        title
+        title,
+        created: Date.now(),
+        priority: "low"
       })
     }
   )
@@ -79,10 +80,14 @@ const myMutator = defineMutator(async () => {
 
 The `MutatorFn` receives a `tx` parameter which can be used to write data with a CRUD-style API. Each table in your Zero schema has a corresponding field on `tx.mutate`:
 
-```ts
+```tsx twoslash
+import {defineMutator} from '@rocicorp/zero'
+// ---cut---
+// @noErrors
 const myMutator = defineMutator(async ({tx}) => {
   // This is here because there's a `user` table in your schema.
-  await tx.mutate.user.insert(...)
+  await tx.mutate.user.insert
+  //                   ^|
 })
 ```
 
@@ -518,8 +523,7 @@ You can use as many levels of nesting as you want to organize your mutators.
 
 As your application grows, you can move mutators to different files to keep them organized:
 
-```ts
-// posts.ts
+```ts:posts.ts
 export const postMutators = {
   create: defineMutator(
     z.object({
@@ -535,8 +539,9 @@ export const postMutators = {
     },
   ),
 }
+```
 
-// user.ts
+```ts:user.ts
 export const userMutators = {
   updateRole: defineMutator(
     z.object({
@@ -550,8 +555,9 @@ export const userMutators = {
     },
   ),
 }
+```
 
-// mutators.ts
+```ts:mutators.ts
 import {postMutators} from 'zero/mutators/posts.ts'
 import {userMutators} from 'zero/mutators/users.ts'
 
@@ -662,8 +668,7 @@ You can use the `handleMutateRequest` and `mustGetMutator` functions to implemen
   ]}
 >
 
-```ts
-// src/routes/api/zero/mutate.ts
+```ts:src/routes/api/zero/mutate.ts
 import {createFileRoute} from '@tanstack/react-router'
 import {handleMutateRequest} from '@rocicorp/zero/server'
 import {mustGetMutator} from '@rocicorp/zero'
@@ -694,8 +699,7 @@ export const Route = createFileRoute('/api/zero/mutate')({
 })
 ```
 
-```ts
-// app/api/zero/mutate/route.ts
+```ts:app/api/zero/mutate/route.ts
 import {handleMutateRequest} from '@rocicorp/zero/server'
 import {mustGetMutator} from '@rocicorp/zero'
 import {mutators} from 'mutators.ts'
@@ -716,8 +720,7 @@ export async function POST(req: Request) {
 }
 ```
 
-```ts
-// src/routes/api/zero/mutate.ts
+```ts:src/routes/api/zero/mutate.ts
 import type {APIEvent} from '@solidjs/start/server'
 import {handleMutateRequest} from '@rocicorp/zero/server'
 import {mustGetMutator} from '@rocicorp/zero'
@@ -739,8 +742,7 @@ export async function POST(event: APIEvent) {
 }
 ```
 
-```ts
-// api/app.ts
+```ts:api/app.ts
 import {Hono} from 'hono'
 import {handleMutateRequest} from '@rocicorp/zero/server'
 import {mustGetMutator} from '@rocicorp/zero'
@@ -894,8 +896,7 @@ To implement server-specific code, just run different mutators in your mutate en
 
 `defineMutators` accepts a _baseMutators_ parameter that makes this easy. The returned mutator registry will contain all the mutators from _baseMutators_, plus any new ones you define or override:
 
-```ts
-// server-mutators.ts
+```ts:server-mutators.ts
 import {defineMutators, defineMutator} from '@rocicorp/zero'
 import {z} from 'zod'
 import {zql} from 'schema.ts'
@@ -1113,8 +1114,7 @@ The best way to handle notifications and async work is a [transactional outbox](
 
 However sometimes it's still nice to do a quick and dirty async send as part of a mutation, for example early on in development, or to record metrics. For this, the `createMutators` pattern is useful:
 
-```ts
-// server-mutators.ts
+```ts:server-mutators.ts
 import {defineMutator} from '@rocicorp/zero'
 import z from 'zod'
 import {zql} from 'schema.ts'

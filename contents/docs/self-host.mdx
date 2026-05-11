@@ -363,8 +363,9 @@ services:
       interval: 10s
 ```
 
-```toml
-# replication-manager/fly.toml
+<div>
+
+```toml:replication-manager/fly.toml
 app = "zero-replication-manager"
 primary_region = "iad"
 kill_timeout = 300
@@ -400,8 +401,9 @@ kill_timeout = 300
   ZERO_REPLICA_FILE = "/data/replica.db"
   ZERO_NUM_SYNC_WORKERS = "0"
   ZERO_LITESTREAM_BACKUP_URL = "s3://acme-zero-backups/v1"
+```
 
-# view-syncer/fly.toml
+```toml:view-syncer/fly.toml
 app = "zero-view-syncer"
 primary_region = "iad"
 kill_timeout = 300
@@ -441,6 +443,8 @@ kill_timeout = 300
   ZERO_REPLICA_FILE = "/data/replica.db"
   ZERO_CHANGE_STREAMER_URI = "ws://zero-replication-manager.internal:4849/"
 ```
+
+</div>
 
 ```ts
 /// <reference path="./.sst/platform/config.d.ts" />

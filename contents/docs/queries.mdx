@@ -5,8 +5,7 @@ description: Reading and Syncing Data
 
 Queries are how you read and sync data with Zero. Here's a simple example:
 
-```ts
-// src/queries.ts
+```ts:src/queries.ts twoslash
 import {defineQueries, defineQuery} from '@rocicorp/zero'
 import {z} from 'zod'
 import {zql} from 'schema.ts'
@@ -14,8 +13,10 @@ import {zql} from 'schema.ts'
 export const queries = defineQueries({
   postsByAuthor: defineQuery(
     z.object({authorID: z.string()}),
-    ({args: {authorID}}) =>
-      zql.post.where('authorID', authorID)
+    ({args: {authorID}}) => {
+      const q = zql.post.where('authorID', authorID)
+      return q
+    }
   )
 })
 ```
@@ -69,7 +70,8 @@ Create a query using `defineQuery`.
 
 The only required argument is a `QueryFn`, which must return a [ZQL](./zql) expression:
 
-```ts
+```ts:src/queries.ts twoslash
+import {defineQuery} from '@rocicorp/zero'
 import {zql} from 'schema.ts'
 
 const allPostsQueryDef = defineQuery(() => zql.post)
@@ -125,7 +127,7 @@ export const queries = defineQueries({
 
 The result of `defineQueries` is called a `QueryRegistry`. Each field in the registry is a callable `Query` that you can use to read data:
 
-```ts
+```ts twoslash
 import {zero} from 'zero.ts'
 import {queries} from 'queries.ts'
 
@@ -136,7 +138,10 @@ const allPosts = await zero.run(queries.posts.all())
 
 Each `Query` has a `queryName` which is computed by `defineQueries`. This name is later sent to your server to identify the query to run:
 
-```ts
+```ts twoslash
+import {zero} from 'zero.ts'
+import {queries} from 'queries.ts'
+// ---cut---
 console.log(queries.posts.all.queryName)
 // "posts.all"
 ```
@@ -217,24 +222,25 @@ You can use as many levels of nesting as you want to organize your queries.
 
 As your application grows, you can move queries to different files to keep them organized:
 
-```ts
-// posts.ts
+```ts:posts.ts
 export const postQueries = {
   get: defineQuery(z.string(), id =>
     zql.post.where('id', id)
   )
   // ...
 }
+```
 
-// users.ts
+```ts:users.ts
 export const userQueries = {
   byRole: defineQuery(z.string(), role =>
     zql.user.where('role', role)
   )
   // ...
 }
+```
 
-// queries.ts
+```ts:queries.ts
 import {postQueries} from './posts.ts'
 import {userQueries} from './users.ts'
 
@@ -280,8 +286,7 @@ You can use the `handleQueryRequest` and `mustGetQuery` functions to implement t
   ]}
 >
 
-```ts
-// src/routes/api/zero/query.ts
+```ts:src/routes/api/zero/query.ts
 import {createFileRoute} from '@tanstack/react-router'
 import {handleQueryRequest} from '@rocicorp/zero/server'
 import {mustGetQuery} from '@rocicorp/zero'
@@ -308,8 +313,7 @@ export const Route = createFileRoute('/api/zero/query')({
 })
 ```
 
-```ts
-// app/api/zero/query/route.ts
+```ts:app/api/zero/query/route.ts
 import {handleQueryRequest} from '@rocicorp/zero/server'
 import {mustGetQuery} from '@rocicorp/zero'
 import {queries} from 'queries.ts'
@@ -329,8 +333,7 @@ export async function POST(req: Request) {
 }
 ```
 
-```ts
-// src/routes/api/zero/query.ts
+```ts:src/routes/api/zero/query.ts
 import type {APIEvent} from '@solidjs/start/server'
 import {handleQueryRequest} from '@rocicorp/zero/server'
 import {mustGetQuery} from '@rocicorp/zero'
@@ -351,8 +354,7 @@ export async function POST(event: APIEvent) {
 }
 ```
 
-```ts
-// api/app.ts
+```ts:api/app.ts
 import {handleQueryRequest} from '@rocicorp/zero/server'
 import {mustGetQuery} from '@rocicorp/zero'
 import {queries} from 'queries.ts'

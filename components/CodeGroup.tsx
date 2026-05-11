@@ -2,6 +2,7 @@
 
 import {
   Children,
+  Fragment,
   ReactElement,
   ReactNode,
   useEffect,
@@ -49,6 +50,49 @@ const normalizeLabel = (
   };
 };
 
+const isCodeTitle = (child: ReactNode): child is ReactElement => {
+  if (typeof child !== 'object' || child === null || !('props' in child)) {
+    return false;
+  }
+
+  const {className} = child.props as {className?: unknown};
+  if (typeof className === 'string') {
+    return className.split(' ').includes('rehype-code-title');
+  }
+  if (Array.isArray(className)) {
+    return className.includes('rehype-code-title');
+  }
+  return false;
+};
+
+const normalizeCodeGroupChildren = (children: ReactNode): ReactElement[] => {
+  const codeChildren = Children.toArray(children).filter(child => {
+    if (typeof child === 'string') {
+      return false;
+    }
+    return Boolean(child);
+  }) as ReactElement[];
+
+  const codeBlocks: ReactElement[] = [];
+  for (let i = 0; i < codeChildren.length; i++) {
+    const child = codeChildren[i];
+    const nextChild = codeChildren[i + 1];
+    if (isCodeTitle(child) && nextChild) {
+      codeBlocks.push(
+        <Fragment key={`code-title-${i}`}>
+          {child}
+          {nextChild}
+        </Fragment>,
+      );
+      i++;
+    } else {
+      codeBlocks.push(child);
+    }
+  }
+
+  return codeBlocks;
+};
+
 const findBestMatch = (
   labels: NormalizedLabel[],
   selection: CodeGroupSyncMap,
@@ -87,12 +131,7 @@ export default function CodeGroup({
   defaultLabel,
 }: CodeGroupProps) {
   const codeBlocks = useMemo(() => {
-    return Children.toArray(children).filter(child => {
-      if (typeof child === 'string') {
-        return false;
-      }
-      return Boolean(child);
-    }) as ReactElement[];
+    return normalizeCodeGroupChildren(children);
   }, [children]);
 
   if (codeBlocks.length !== labels.length) {

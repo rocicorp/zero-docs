@@ -156,8 +156,7 @@ This is useful for exploring alternative query constructions to optimize perform
 
 To use this, you will first have to expose your `builder` as a property of the global object, so that you can access it from the console. For example:
 
-```ts
-// schema.ts
+```ts:schema.ts
 // ...
 const g = globalThis as any
 g.__builder = builder

@@ -379,21 +379,231 @@ html.dark [data-theme~='roci-dark'] code span {
 
 .prose pre {
   padding: 0 !important;
-  width: inherit !important;
-  overflow-x: visible;
+  width: 100% !important;
+  max-width: 100%;
+  max-height: 630px;
+  overflow: auto;
 }
 
-.prose pre code {
-  display: grid;
-  max-height: 630px;
-  max-width: inherit !important;
-  padding: 14px !important;
+.prose pre > code {
+  display: block;
+  width: fit-content;
+  min-width: 100%;
+  max-width: none !important;
+  padding: 12px 16px !important;
   font-variant-ligatures: none;
   font-feature-settings:
     'liga' 0,
     'clig' 0,
     'calt' 0;
+}
+
+.prose pre > code .line {
+  display: block;
+  min-height: 1.5rem;
+}
+
+.twoslash-popup-container-inline {
+  display: none !important;
+}
+
+.twoslash-completion-list-inline {
+  display: none !important;
+}
+
+.twoslash-completion-cursor {
+  display: inline-block;
+  width: 2px;
+  height: 1.2em;
+  margin-bottom: -0.2em;
+  background: hsl(var(--primary-highlight));
+  vertical-align: middle;
+  user-select: none;
+}
+
+.twoslash-floating.twoslash-popup-container {
+  --twoslash-popup-bg: hsl(var(--popover));
+  --twoslash-popup-color: hsl(var(--popover-foreground));
+  --twoslash-docs-color: hsl(var(--popover-foreground));
+  --twoslash-docs-font: var(--font-regular);
+  --twoslash-code-font: var(--font-code);
+  --twoslash-code-size: 0.875rem;
+  --twoslash-border-color: hsl(var(--border));
+
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 10000;
+  display: none;
+  max-width: min(720px, calc(100vw - 1rem));
+  max-height: min(500px, calc(100vh - 1rem));
+  flex-direction: column;
   overflow: auto;
+  border: 1px solid var(--twoslash-border-color);
+  border-radius: 0.5rem;
+  background: var(--twoslash-popup-bg) !important;
+  color: var(--twoslash-popup-color);
+  box-shadow:
+    0 10px 24px hsl(240 10% 3.9% / 0.16),
+    0 2px 6px hsl(240 10% 3.9% / 0.12);
+  pointer-events: auto;
+  text-align: left;
+  user-select: none;
+}
+
+.twoslash-floating.twoslash-popup-container:hover {
+  user-select: auto;
+}
+
+.twoslash-floating.twoslash-popup-container[data-theme] {
+  background: var(--twoslash-popup-bg) !important;
+}
+
+.twoslash-floating.twoslash-popup-container code {
+  background: transparent !important;
+}
+
+.twoslash-floating.twoslash-popup-container[data-theme] code {
+  background: transparent !important;
+}
+
+.twoslash-floating .twoslash-popup-code {
+  display: block;
+  width: fit-content;
+  min-width: 100%;
+  max-width: 600px;
+  padding: 6px 12px !important;
+  font-family: var(--twoslash-code-font);
+  font-size: var(--twoslash-code-size);
+  line-height: 1.5rem;
+  white-space: pre-wrap;
+}
+
+.twoslash-floating .twoslash-popup-docs,
+.twoslash-floating .twoslash-popup-error {
+  max-width: 700px;
+  padding: 12px !important;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overflow-wrap: anywhere;
+  font-family: var(--twoslash-docs-font);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  text-wrap: balance;
+  white-space: normal;
+}
+
+.twoslash-floating .twoslash-popup-docs {
+  border-top: 1px solid var(--twoslash-border-color);
+  color: var(--twoslash-docs-color);
+}
+
+.twoslash-floating .twoslash-popup-error {
+  color: var(--twoslash-error-color);
+}
+
+.twoslash-floating .twoslash-popup-docs p,
+.twoslash-floating .twoslash-popup-error p {
+  margin: 6px 0;
+}
+
+.twoslash-floating .twoslash-popup-docs p:first-child,
+.twoslash-floating .twoslash-popup-error p:first-child {
+  margin-top: 0;
+}
+
+.twoslash-floating .twoslash-popup-docs p:last-child,
+.twoslash-floating .twoslash-popup-error p:last-child {
+  margin-bottom: 0;
+}
+
+.twoslash-floating .twoslash-popup-docs-tags {
+  display: flex;
+  flex-direction: column;
+  padding: 8px 12px !important;
+}
+
+.twoslash-floating .twoslash-popup-docs-tag-name {
+  margin-right: 0.5em;
+  color: hsl(var(--muted-foreground));
+  font-family: var(--twoslash-code-font);
+}
+
+.twoslash-floating.twoslash-completion-list {
+  --twoslash-popup-bg: hsl(var(--popover));
+  --twoslash-popup-color: hsl(var(--popover-foreground));
+  --twoslash-border-color: hsl(var(--border));
+
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 10000;
+  display: none;
+  width: 240px;
+  max-height: min(360px, calc(100vh - 1rem));
+  flex-direction: column;
+  gap: 4px;
+  overflow-y: auto;
+  padding: 6px;
+  border: 1px solid var(--twoslash-border-color);
+  border-radius: 0.5rem;
+  background: var(--twoslash-popup-bg);
+  color: var(--twoslash-popup-color);
+  box-shadow:
+    0 10px 24px hsl(240 10% 3.9% / 0.16),
+    0 2px 6px hsl(240 10% 3.9% / 0.12);
+  font-family: var(--font-code);
+  font-size: 0.8rem;
+  line-height: 1rem;
+  user-select: none;
+}
+
+.twoslash-floating.twoslash-completion-list:hover {
+  user-select: auto;
+}
+
+.twoslash-floating.twoslash-completion-list::before {
+  display: none;
+}
+
+.twoslash-floating.twoslash-completion-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.25em;
+  overflow: hidden;
+  padding: 3px 0;
+}
+
+.twoslash-floating.twoslash-completion-list .twoslash-completions-icon {
+  flex: none;
+  width: 1em;
+  color: hsl(var(--muted-foreground));
+}
+
+.twoslash-floating.twoslash-completion-list
+  .twoslash-completions-unmatched {
+  color: hsl(var(--muted-foreground));
+}
+
+.twoslash-floating.twoslash-completion-list .twoslash-completions-matched {
+  color: hsl(var(--primary-highlight));
+}
+
+.prose .twoslash .twoslash-popup-container {
+  max-width: min(720px, calc(100vw - 2rem));
+}
+
+.prose .twoslash .twoslash-popup-code {
+  display: block;
+  max-width: inherit;
+  overflow-x: auto;
+  white-space: pre;
+}
+
+.prose .twoslash .twoslash-popup-docs {
+  max-width: inherit;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
 }
 
 .code-group-content figure {
@@ -401,16 +611,29 @@ html.dark [data-theme~='roci-dark'] code span {
 }
 
 .rehype-code-title {
-  @apply px-2;
-  @apply -mb-8;
-  @apply w-full;
-  @apply text-sm;
-  @apply pt-1;
-  @apply pb-5;
-  @apply font-normal;
-  @apply tracking-wider;
-  @apply font-medium;
-  font-family: var(--font-code) !important;
+  @apply mt-6 flex w-full items-center border border-b-0 border-border bg-neutral-100 px-4 py-2 font-code text-xs font-medium text-neutral-600 dark:bg-neutral-900 dark:text-neutral-400;
+  border-radius: var(--radius) var(--radius) 0 0;
+}
+
+.rehype-code-title + figure {
+  margin-top: 0 !important;
+}
+
+.rehype-code-title + figure pre {
+  border-top-left-radius: 0 !important;
+  border-top-right-radius: 0 !important;
+}
+
+.code-group-content .rehype-code-title {
+  margin-top: 0;
+  border-top: 0;
+  border-right: 0;
+  border-left: 0;
+  border-radius: 0;
+}
+
+.code-group-content figure + .rehype-code-title {
+  border-top: 1px solid hsl(var(--border));
 }
 
 .highlight-comp > code {

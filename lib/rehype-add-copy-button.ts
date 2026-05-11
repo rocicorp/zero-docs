@@ -4,9 +4,12 @@ import {Element} from 'hast';
 
 const rehypeAddCopyButton: Plugin = () => {
   return tree => {
-    visit(tree, 'element', (node: Element) => {
+    visit(tree, 'element', (node: Element, _index, parent) => {
+      const parentElement = parent as Element | undefined;
+
       if (
         node.tagName === 'pre' &&
+        parentElement?.tagName === 'figure' &&
         node.children.some(
           child => child.type === 'element' && child.tagName === 'code',
         )

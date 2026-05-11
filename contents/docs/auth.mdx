@@ -200,8 +200,7 @@ You can now build `ctx` from the validated cookie and pass it to your queries to
   ]}
 >
 
-```ts
-// src/routes/api/zero/query.ts
+```ts:src/routes/api/zero/query.ts
 import {createFileRoute} from '@tanstack/react-router'
 import {handleQueryRequest} from '@rocicorp/zero/server'
 import {mustGetQuery} from '@rocicorp/zero'
@@ -235,8 +234,7 @@ export const Route = createFileRoute('/api/zero/query')({
 })
 ```
 
-```ts
-// app/api/zero/query/route.ts
+```ts:app/api/zero/query/route.ts
 import {handleQueryRequest} from '@rocicorp/zero/server'
 import {mustGetQuery} from '@rocicorp/zero'
 import {queries} from 'queries.ts'
@@ -263,8 +261,7 @@ export async function POST(req: Request) {
 }
 ```
 
-```ts
-// src/routes/api/zero/query.ts
+```ts:src/routes/api/zero/query.ts
 import type {APIEvent} from '@solidjs/start/server'
 import {handleQueryRequest} from '@rocicorp/zero/server'
 import {mustGetQuery} from '@rocicorp/zero'
@@ -292,8 +289,7 @@ export async function POST(event: APIEvent) {
 }
 ```
 
-```ts
-// api/app.ts
+```ts:api/app.ts
 import {Hono} from 'hono'
 import {handleQueryRequest} from '@rocicorp/zero/server'
 import {mustGetQuery} from '@rocicorp/zero'
@@ -339,8 +335,7 @@ You can now also build `ctx` from the validated cookie and pass it to your mutat
   ]}
 >
 
-```ts
-// src/routes/api/zero/mutate.ts
+```ts:src/routes/api/zero/mutate.ts
 import {createFileRoute} from '@tanstack/react-router'
 import {handleMutateRequest} from '@rocicorp/zero/server'
 import {mustGetMutator} from '@rocicorp/zero'
@@ -376,8 +371,7 @@ export const Route = createFileRoute('/api/zero/mutate')({
 })
 ```
 
-```ts
-// app/api/zero/mutate/route.ts
+```ts:app/api/zero/mutate/route.ts
 import {handleMutateRequest} from '@rocicorp/zero/server'
 import {mustGetMutator} from '@rocicorp/zero'
 import {mutators} from 'mutators.ts'
@@ -406,8 +400,7 @@ export async function POST(req: Request) {
 }
 ```
 
-```ts
-// src/routes/api/zero/mutate.ts
+```ts:src/routes/api/zero/mutate.ts
 import type {APIEvent} from '@solidjs/start/server'
 import {handleMutateRequest} from '@rocicorp/zero/server'
 import {mustGetMutator} from '@rocicorp/zero'
@@ -437,8 +430,7 @@ export async function POST(event: APIEvent) {
 }
 ```
 
-```ts
-// api/app.ts
+```ts:api/app.ts
 import {Hono} from 'hono'
 import {handleMutateRequest} from '@rocicorp/zero/server'
 import {mustGetMutator} from '@rocicorp/zero'
@@ -528,8 +520,7 @@ You can now build `ctx` from the validated token header and pass it to your quer
   ]}
 >
 
-```ts
-// src/routes/api/zero/query.ts
+```ts:src/routes/api/zero/query.ts
 import {createFileRoute} from '@tanstack/react-router'
 import {handleQueryRequest} from '@rocicorp/zero/server'
 import {mustGetQuery} from '@rocicorp/zero'
@@ -563,8 +554,7 @@ export const Route = createFileRoute('/api/zero/query')({
 })
 ```
 
-```ts
-// app/api/zero/query/route.ts
+```ts:app/api/zero/query/route.ts
 import {handleQueryRequest} from '@rocicorp/zero/server'
 import {mustGetQuery} from '@rocicorp/zero'
 import {queries} from 'queries.ts'
@@ -591,8 +581,7 @@ export async function POST(req: Request) {
 }
 ```
 
-```ts
-// src/routes/api/zero/query.ts
+```ts:src/routes/api/zero/query.ts
 import type {APIEvent} from '@solidjs/start/server'
 import {handleQueryRequest} from '@rocicorp/zero/server'
 import {mustGetQuery} from '@rocicorp/zero'
@@ -620,8 +609,7 @@ export async function POST(event: APIEvent) {
 }
 ```
 
-```ts
-// api/app.ts
+```ts:api/app.ts
 import {Hono} from 'hono'
 import {handleQueryRequest} from '@rocicorp/zero/server'
 import {mustGetQuery} from '@rocicorp/zero'
@@ -667,8 +655,7 @@ You can now also build `ctx` from the validated token header and pass it to your
   ]}
 >
 
-```ts
-// src/routes/api/zero/mutate.ts
+```ts:src/routes/api/zero/mutate.ts
 import {createFileRoute} from '@tanstack/react-router'
 import {handleMutateRequest} from '@rocicorp/zero/server'
 import {mustGetMutator} from '@rocicorp/zero'
@@ -704,8 +691,7 @@ export const Route = createFileRoute('/api/zero/mutate')({
 })
 ```
 
-```ts
-// app/api/zero/mutate/route.ts
+```ts:app/api/zero/mutate/route.ts
 import {handleMutateRequest} from '@rocicorp/zero/server'
 import {mustGetMutator} from '@rocicorp/zero'
 import {mutators} from 'mutators.ts'
@@ -734,8 +720,7 @@ export async function POST(req: Request) {
 }
 ```
 
-```ts
-// src/routes/api/zero/mutate.ts
+```ts:src/routes/api/zero/mutate.ts
 import type {APIEvent} from '@solidjs/start/server'
 import {handleMutateRequest} from '@rocicorp/zero/server'
 import {mustGetMutator} from '@rocicorp/zero'
@@ -765,8 +750,7 @@ export async function POST(event: APIEvent) {
 }
 ```
 
-```ts
-// api/app.ts
+```ts:api/app.ts
 import {Hono} from 'hono'
 import {handleMutateRequest} from '@rocicorp/zero/server'
 import {mustGetMutator} from '@rocicorp/zero'

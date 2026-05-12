@@ -2,13 +2,13 @@
 title: Tutorial
 ---
 
-This guide builds a small music app with Zero from scratch. It's a nice way to get a feel for how Zero works and takes about 15 minutes to complete.
+Let's build a small music app with Zero from scratch. It's a nice way to get a feel for how Zero works and takes about 15 minutes to complete.
 
 You will seed a Postgres database with artists and albums, run `zero-cache`, add a [query](/docs/queries) and a [mutator](/docs/mutators), and watch data sync across clients in realtime.
 
 If you want to wire Zero into your own app, see [Installation](/docs/install).
 
-## Integrate Zero
+## Setup
 
 ### Create a Project
 
@@ -205,6 +205,8 @@ bun pm trust @rocicorp/zero-sqlite3
 
 </CodeGroup>
 
+This tutorial uses Zod; any [Standard Schema](https://standardschema.dev/)-compatible validator works.
+
 Start the development `zero-cache`:
 
 <CodeGroup
@@ -256,6 +258,8 @@ watch -n 0.5 "npx @rocicorp/zero-sqlite3 ./zero.db \
   alt="Zero-cache syncing between Postgres and SQLite"
   animation
 />
+
+## Integrate Zero
 
 ### Set Up Your Zero Schema
 
@@ -462,7 +466,7 @@ export const queries = defineQueries({
 })
 ```
 
-ZQL is quite powerful and allows you to build queries with filters, sorts, relationships, and more:
+These are defined using Zero Query Language (ZQL) - it allows you to build queries with filters, sorts, relationships, and more:
 
 <Video
   src="/video/onboarding/onboarding-zql-autocomplete.mp4"
@@ -470,11 +474,13 @@ ZQL is quite powerful and allows you to build queries with filters, sorts, relat
   animation
 />
 
+See [Reading Data](/docs/queries) for more on how ZQL works.
+
 ### Add Query Endpoint
 
 Zero doesn't allow clients to send arbitrary ZQL to `zero-cache`.
 
-Instead, Zero sends the query name and arguments to the `query` endpoint on your server, which responds to `zero-cache` with the authoritative ZQL.
+Instead, Zero sends the query name and arguments to the `query` endpoint on your server, which responds to `zero-cache` with the authoritative ZQL. This prevents clients from reading arbitrary data and is the basis of permissions.
 
 <CodeGroup
   labels={[
@@ -1241,3 +1247,9 @@ Your mutate endpoint writes to Postgres and zero-cache will instantly replicate 
 />
 
 That's it! You now have a simple, Zero-powered music app. Try opening multiple browser windows to see the realtime sync in action!
+
+## Next Steps
+
+- [Learn how to add auth](/docs/auth)
+- [Try adding Zero to your existing app](/docs/install)
+- [Play with fully-fleshed out samples](/docs/samples)

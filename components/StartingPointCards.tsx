@@ -8,7 +8,7 @@ export function StartingPointCards() {
       {startingPoints.map(point => (
         <article
           key={point.href}
-          className="group relative flex min-h-52 flex-col overflow-hidden rounded-xl border bg-card p-5 shadow-sm transition duration-150 hover:-translate-y-0.5 hover:border-primary-highlight/50 hover:shadow-md focus-within:ring-2 focus-within:ring-primary-highlight focus-within:ring-offset-2 focus-within:ring-offset-background dark:hover:border-primary-highlight/70"
+          className="group relative flex min-h-52 flex-col overflow-hidden rounded-xl border bg-card p-5 shadow-sm transition duration-150 hover:-translate-y-0.5 hover:border-white/40 hover:shadow-md focus-within:ring-2 focus-within:ring-white/40 focus-within:ring-offset-2 focus-within:ring-offset-background"
         >
           <div className="pointer-events-none relative z-10 flex flex-1 flex-col">
             <div className="flex items-start justify-between gap-4">
@@ -17,7 +17,7 @@ export function StartingPointCards() {
               </h3>
               <ArrowRight
                 aria-hidden="true"
-                className="mt-1 text-sm font-medium text-muted-foreground transition group-hover:translate-x-0.5 group-hover:text-primary-highlight"
+                className="mt-1 text-sm font-medium text-muted-foreground transition group-hover:translate-x-0.5 group-hover:text-white"
                 size={18}
                 strokeWidth={2}
               />
@@ -31,7 +31,7 @@ export function StartingPointCards() {
                   <a
                     key={`${segment.href}-${index}`}
                     href={segment.href}
-                    className="pointer-events-auto relative z-20 font-medium text-primary-highlight underline underline-offset-4 hover:text-primary-highlight/80"
+                    className="pointer-events-auto relative z-20 font-medium text-foreground underline decoration-white/60 underline-offset-4 hover:text-white"
                   >
                     {segment.text}
                   </a>

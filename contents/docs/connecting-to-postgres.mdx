@@ -173,16 +173,19 @@ See Google's documentation for details: [Configure logical replication](https://
 
 ## Schema Change Hooks
 
-For providers that don't support or allow [event triggers](#event-triggers), Zero provides a manual hook you can call after a schema change to avoid a full reset:
+For providers that don't support or allow [event triggers](#event-triggers), Zero provides a manual hook you can call after a schema change to avoid a full reset. Wrap the DDL and the `update_schemas()` call in a single transaction so writes against the new schema don't slip into the WAL before `zero-cache` learns about the change:
 
 ```sql
-CREATE TABLE foo(id TEXT PRIMARY KEY);
-SELECT zero_0.update_schemas();
+BEGIN;
+  ALTER TABLE foo ADD COLUMN bar TEXT;
+  CREATE INDEX foo_bar_idx ON foo(bar);
+  SELECT zero_0.update_schemas();
+COMMIT;
 ```
 
 The function lives in the `{app-id}_{shard-num}` schema. With the default [app id](/docs/zero-cache-config#app-id) of `zero` and the default shard `0`, it's `zero_0.update_schemas()`.
 
-You can call this after any DDL statement (`CREATE`, `ALTER`, `DROP`, `ALTER PUBLICATION`, etc.) to replicate the change without resetting state.
+It works for any DDL statement (`CREATE`, `ALTER`, `DROP`, `ALTER PUBLICATION`, etc.). Because it diffs the current schema against the last snapshot, you can call it once after a batch of statements rather than after each one.
 
 <Note type="note" heading="COMMENT ON PUBLICATION workaround">
   Another way to tell Zero about a publication change is to follow the `ALTER PUBLICATION` with a `COMMENT ON PUBLICATION` statement:

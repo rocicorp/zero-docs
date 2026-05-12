@@ -1,6 +1,6 @@
 ---
 title: Zero 1.5
-description: Schema Change Improvements and Server-Authoritative Auth
+description: Schema Change Improvements and Client Group Auth
 ---
 
 ## Installation
@@ -18,29 +18,36 @@ The `handleQueryRequest` and `handleMutateRequest` helpers now take a single opt
 Change this:
 
 ```ts
-handleQueryRequest(dbProvider, transact => transact((tx, name, args) => {
-  const query = mustGetQuery(queries, name)
-  return query.fn({args, tx})
-}), request)
+handleQueryRequest(
+  (name, args) => {
+    const query = mustGetQuery(queries, name)
+    return query.fn({args})
+  },
+  schema,
+  request,
+)
 
-handleMutateRequest(dbProvider, transact => transact((tx, name, args) => {
-  const mutator = mustGetMutator(mutators, name)
-  return mutator.fn({args, tx})
-}), request)
+handleMutateRequest(
+  dbProvider,
+  transact => transact((tx, name, args) => {
+    const mutator = mustGetMutator(mutators, name)
+    return mutator.fn({args, tx})
+  }),
+  request,
+)
 ```
 
 To this:
 
 ```ts
 handleQueryRequest({
-  dbProvider,
-  handler: transact => transact((tx, name, args) => {
+  handler: (name, args) => {
     const query = mustGetQuery(queries, name)
-
-    return query.fn({args, tx, ctx: undefined})
-  }),
+    return query.fn({args})
+  },
+  schema,
   request,
-  userID
+  userID,
 })
 
 handleMutateRequest({
@@ -50,7 +57,7 @@ handleMutateRequest({
     return mutator.fn({args, tx})
   }),
   request,
-  userID
+  userID,
 })
 ```
 
@@ -58,17 +65,16 @@ This is a security enhancement and is recommended for all users. The old signatu
 
 ### Deploy Order
 
-Make sure to deploy `zero-cache` before your API server. This is [existing standard practice](/docs/self-host#rolling-updates) for Zero, but it matters in this because the updated `handleQueryRequest` and `handleMutateRequest` helpers return a new response shape that `zero-cache` 1.4 cannot parse.
+Make sure to deploy `zero-cache` before your API server. This is [existing standard practice](/docs/self-host#rolling-updates) for Zero, but it matters for this release because the 1.5 `handleQueryRequest` and `handleMutateRequest` helpers return a new response shape that `zero-cache` 1.4 cannot parse.
 
 
 ## Features
 
 - [**Schema Change Hooks:**](/docs/connecting-to-postgres#schema-change-hooks) Added `zero_<shard>.update_schemas()`, so databases that do not support or allow event triggers can manually notify Zero after schema changes. The Supabase publication-change workaround is also simpler: after `ALTER PUBLICATION`, only a trailing `COMMENT ON PUBLICATION` is needed.
-- [**Server-Verified User IDs:**](/docs/auth#server-verified-user-id) `handleQueryRequest` and `handleMutateRequest` now take a single options object that includes the server-verified `userID`. `zero-cache` uses that identity to reject connections where the client's claimed `userID` doesn't match.
 
 ## Performance
 
-- [Faster flipped-join fetches when the parent key is unique](https://github.com/rocicorp/mono/pull/5881).
+- [Faster flipped-join fetches when the parent key is unique](https://github.com/rocicorp/mono/pull/5881)
 
 ## Fixes
 

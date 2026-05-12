@@ -1,0 +1,36 @@
+---
+title: Zero 1.5
+description: Schema Change Improvements and Server-Authoritative Auth
+---
+
+## Installation
+
+```bash
+npm install @rocicorp/zero@1.5
+```
+
+## Features
+
+- [**Schema Change Hooks:**](/docs/connecting-to-postgres#schema-change-hooks) Added `zero_<shard>.update_schemas()`, so databases that do not support or allow event triggers can manually notify Zero after schema changes. The Supabase publication-change workaround is also simpler: after `ALTER PUBLICATION`, only a trailing `COMMENT ON PUBLICATION` is needed.
+- [**Server-Authoritative User IDs:**](https://github.com/rocicorp/mono/pull/5836) `handleQueryRequest` and `handleMutateRequest` now support an object-form API that can return the authenticated `userID`; `zero-cache` uses that server-confirmed identity for auth validation instead of trusting the client-provided `userID`.
+
+## Performance
+
+- [Faster flipped-join fetches when the parent key is unique](https://github.com/rocicorp/mono/pull/5881).
+
+## Fixes
+
+- [`CREATE/DROP INDEX CONCURRENTLY` and cross-transaction DDL could break schema replication](https://github.com/rocicorp/mono/pull/5895)
+- [Long-lived connections could miss periodic auth revalidation and shared query retransform when intervals were not configured](https://github.com/rocicorp/mono/pull/5838)
+- [Custom query and mutator handlers required `ctx: undefined` when no context type was defined](https://github.com/rocicorp/mono/pull/5885)
+- [`/keepalive` graceful-shutdown timeouts were enabled by default outside ECS](https://github.com/rocicorp/mono/pull/5892)
+- [`Error: pipelines must be initialized (syncQueryPipelineSet)` during shared retransform or `SIGTERM` drain](https://github.com/rocicorp/mono/pull/5904)
+- [Shadow sync could miss its first run before the replication-manager restarted](https://github.com/rocicorp/mono/pull/5883)
+- [Row-set drift across view-syncer re-hydration could leave clients with stale rows at the same CVR version](https://github.com/rocicorp/mono/pull/5857)
+- [Client-facing WebSocket compression and max-payload settings could affect internal replication WebSockets](https://github.com/rocicorp/mono/pull/5919) ([follow-up](https://github.com/rocicorp/mono/pull/5920))
+
+## Breaking Changes
+
+The sync protocol version did not change, so existing browser clients remain compatible with `zero-cache`.
+
+If you deploy custom query/mutate API servers separately from `zero-cache`, upgrade `zero-cache` first. Newer `handleQueryRequest` and `handleMutateRequest` responses can include the server-confirmed `userID`; older `zero-cache` versions cannot parse that newer API-server response shape.

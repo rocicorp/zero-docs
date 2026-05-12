@@ -187,10 +187,11 @@ You can call this after any DDL statement (`CREATE`, `ALTER`, `DROP`, `ALTER PUB
 <Note type="note" heading="COMMENT ON PUBLICATION workaround">
   Another way to tell Zero about a publication change is to follow the `ALTER PUBLICATION` with a `COMMENT ON PUBLICATION` statement:
 
-  ```sql
-  ALTER PUBLICATION zero_pub ADD TABLE ...;
-  COMMENT ON PUBLICATION zero_pub IS 'anything';
-  ```
+```sql
+ALTER PUBLICATION zero_pub ADD TABLE ...;
+COMMENT ON PUBLICATION zero_pub IS 'anything';
+```
 
-  This was the original workaround for publication changes. It is still supported, but was replaced by `update_schemas()` because the latter is explicit and applies to any DDL, not just publication changes.
+This was the original workaround for publication changes. It is still supported, but was replaced by `update_schemas()` because the latter is explicit and applies to any DDL, not just publication changes.
+
 </Note>

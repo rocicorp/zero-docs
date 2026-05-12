@@ -46,7 +46,7 @@ import {Zero} from '@rocicorp/zero'
 import type {ZeroOptions} from '@rocicorp/zero'
 
 const zero = new Zero({
-  userID,
+  userID
   // ...
 })
 ```
@@ -85,10 +85,11 @@ return (
 
 ```ts
 const zero = new Zero({
-  userID: null,
+  userID: null
   // ...
 })
 ```
+
 </CodeGroup>
 
 Zero uses the `userID` field to segregate the client-side storage for each user. This allows users to quickly switch between multiple users and accounts without resyncing.
@@ -103,7 +104,8 @@ Zero uses the `userID` field to segregate the client-side storage for each user.
   that Zero can do about this – users can just open the
   folder where the data is stored and look inside it.
 
-  If preventing this is important to you, set `kvStore: 'mem'` in your `ZeroOptions`. This uses in-memory storage instead, so data is not persisted on the device and is cleared on full reloads and browser restarts.
+If preventing this is important to you, set `kvStore: 'mem'` in your `ZeroOptions`. This uses in-memory storage instead, so data is not persisted on the device and is cleared on full reloads and browser restarts.
+
 </Note>
 
 If you have more than one set of Zero data per-user (i.e., for different apps in the same domain), you can additionally use the `storageKey` parameter:
@@ -314,7 +316,7 @@ return (
 ```ts
 const zero = new Zero({
   userID,
-  auth: token,
+  auth: token
   // ...
 })
 ```
@@ -688,11 +690,13 @@ app.post('/api/zero/mutate', async c => {
   heading="Why pass `userID` to `handleMutateRequest` and `handleQueryRequest`?"
   slug="server-verified-user-id"
 >
-  Tabs in the same browser share synced data. This group of tabs is called a "client group", keyed by `clientGroupID`. New tabs 
-  join a client group by providing the `clientGroupID` during connection.
-  
-  Passing the server-verified `userID` to `handleMutateRequest` 
-  and `handleQueryRequest` lets Zero enforce that only tabs belonging to the original user can join.
+  Tabs in the same browser share synced data. This group of
+  tabs is called a "client group", keyed by `clientGroupID`.
+  New tabs join a client group by providing the
+  `clientGroupID` during connection. Passing the
+  server-verified `userID` to `handleMutateRequest` and
+  `handleQueryRequest` lets Zero enforce that only tabs
+  belonging to the original user can join.
 </Note>
 
 ## Updating Tokens

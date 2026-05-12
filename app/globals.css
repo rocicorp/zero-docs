@@ -396,6 +396,17 @@ html.dark [data-theme~='roci-dark'] code span {
   overflow: auto;
 }
 
+.prose pre code > [data-highlighted-line] {
+  margin-inline: -14px;
+  padding-inline: 12px 14px;
+  border-left: 1px solid rgba(var(--primary-accent), 0.6);
+  background-color: rgba(var(--primary-accent), 0.04);
+}
+
+html.dark .prose pre code > [data-highlighted-line] {
+  background-color: rgba(var(--primary-accent), 0.07);
+}
+
 .code-group-content figure {
   margin: 0 !important;
 }

@@ -8,6 +8,8 @@ import type {Node, Parent} from 'unist';
 import type {
   Blockquote,
   Content,
+  List,
+  ListItem,
   Image,
   Link,
   Paragraph,
@@ -17,6 +19,10 @@ import type {
 } from 'mdast';
 import {page_routes as pageRoutes} from '@/lib/routes-config';
 import {getBaseUrl, getDocsContentPath} from '@/lib/docs-utils';
+import {
+  startingPoints,
+  type StartingPointDescriptionSegment,
+} from '@/lib/starting-points';
 
 const DOC_ROUTE_LOOKUP = (() => {
   const map = new Map<string, string>();
@@ -177,6 +183,9 @@ function transformMdxJsx(node: MdxJsxNode): TransformOutcome | null {
     case 'SyncedCode':
       return {action: 'unwrap', children: transformSyncedCode(node)};
 
+    case 'StartingPointCards':
+      return {action: 'replace', node: transformStartingPointCards()};
+
     case 'InstallTableNameReplace':
     case 'InstallTableNameInput':
       return {
@@ -244,6 +253,62 @@ function transformSyncedCode(node: MdxJsxNode): Node[] {
   return variants.flatMap((variant, index) => {
     const label = syncValues[index] ?? `Variant ${index + 1}`;
     return [createLabelParagraph(label), ...normalizeNode(variant)];
+  });
+}
+
+function transformStartingPointCards(): List {
+  const children = startingPoints.map<ListItem>(point => {
+    const paragraphChildren: PhrasingContent[] = [
+      {
+        type: 'link',
+        url: point.href,
+        title: null,
+        children: [
+          {
+            type: 'strong',
+            children: [{type: 'text', value: point.title}],
+          },
+        ],
+      },
+      {type: 'text', value: ': '},
+      ...transformStartingPointDescription(point.description),
+      {type: 'text', value: ` Time: ${point.duration}`},
+    ];
+
+    return {
+      type: 'listItem',
+      spread: false,
+      children: [
+        {
+          type: 'paragraph',
+          children: paragraphChildren,
+        },
+      ],
+    };
+  });
+
+  return {
+    type: 'list',
+    ordered: false,
+    spread: true,
+    children,
+  };
+}
+
+function transformStartingPointDescription(
+  description: readonly StartingPointDescriptionSegment[],
+): PhrasingContent[] {
+  return description.map(segment => {
+    if (typeof segment === 'string') {
+      return {type: 'text', value: segment};
+    }
+
+    return {
+      type: 'link',
+      url: segment.href,
+      title: null,
+      children: [{type: 'text', value: segment.text}],
+    };
   });
 }
 

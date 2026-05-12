@@ -241,14 +241,6 @@ function Root() {
     </ZeroProvider>
   )
 }
-
-// mycomponent.tsx
-import {useZero} from '@rocicorp/zero/react'
-
-function MyComponent() {
-  const zero = useZero()
-  console.log('clientID', zero.clientID)
-}
 ```
 
 ```tsx
@@ -268,14 +260,6 @@ function Root() {
       <App />
     </ZeroProvider>
   )
-}
-
-// mycomponent.tsx
-import {useZero} from '@rocicorp/zero/solid'
-
-function MyComponent() {
-  const zero = useZero()
-  console.log('clientID', zero().clientID)
 }
 ```
 

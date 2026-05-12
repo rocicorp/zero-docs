@@ -12,7 +12,7 @@ npm install @rocicorp/zero@1.5
 ## Features
 
 - [**Schema Change Hooks:**](/docs/connecting-to-postgres#schema-change-hooks) Added `zero_<shard>.update_schemas()`, so databases that do not support or allow event triggers can manually notify Zero after schema changes. The Supabase publication-change workaround is also simpler: after `ALTER PUBLICATION`, only a trailing `COMMENT ON PUBLICATION` is needed.
-- [**Server-Authoritative User IDs:**](https://github.com/rocicorp/mono/pull/5836) `handleQueryRequest` and `handleMutateRequest` now support an object-form API that can return the authenticated `userID`; `zero-cache` uses that server-confirmed identity for auth validation instead of trusting the client-provided `userID`.
+- [**Server-Verified User IDs:**](/docs/auth#server-verified-user-id) `handleQueryRequest` and `handleMutateRequest` now take a single options object that includes the server-verified `userID`. `zero-cache` uses that identity to reject connections where the client's claimed `userID` doesn't match.
 
 ## Performance
 

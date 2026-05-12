@@ -674,9 +674,9 @@ export const Route = createFileRoute('/api/zero/mutate')({
   server: {
     handlers: {
       POST: async ({request}) => {
-        const result = await handleMutateRequest(
+        const result = await handleMutateRequest({
           dbProvider,
-          transact =>
+          handler: transact =>
             transact((tx, name, args) => {
               const mutator = mustGetMutator(mutators, name)
               return mutator.fn({
@@ -684,8 +684,9 @@ export const Route = createFileRoute('/api/zero/mutate')({
                 tx
               })
             }),
-          request
-        )
+          request,
+          userID: null
+        })
 
         return Response.json(result)
       }
@@ -702,15 +703,16 @@ import {mutators} from 'mutators.ts'
 import {dbProvider} from 'db-provider.ts'
 
 export async function POST(req: Request) {
-  const result = await handleMutateRequest(
+  const result = await handleMutateRequest({
     dbProvider,
-    transact =>
+    handler: transact =>
       transact((tx, name, args) => {
         const mutator = mustGetMutator(mutators, name)
         return mutator.fn({args, tx})
       }),
-    req
-  )
+    request: req,
+    userID: null
+  })
 
   return Response.json(result)
 }
@@ -725,15 +727,16 @@ import {mutators} from 'mutators.ts'
 import {dbProvider} from 'db-provider.ts'
 
 export async function POST(event: APIEvent) {
-  const result = await handleMutateRequest(
+  const result = await handleMutateRequest({
     dbProvider,
-    transact =>
+    handler: transact =>
       transact((tx, name, args) => {
         const mutator = mustGetMutator(mutators, name)
         return mutator.fn({args, tx})
       }),
-    event.request
-  )
+    request: event.request,
+    userID: null
+  })
 
   return Response.json(result)
 }
@@ -750,9 +753,9 @@ import {dbProvider} from './db-provider.ts'
 const app = new Hono()
 
 app.post('/api/zero/mutate', async c => {
-  const result = await handleMutateRequest(
+  const result = await handleMutateRequest({
     dbProvider,
-    transact =>
+    handler: transact =>
       transact((tx, name, args) => {
         const mutator = mustGetMutator(mutators, name)
         return mutator.fn({
@@ -760,8 +763,9 @@ app.post('/api/zero/mutate', async c => {
           tx
         })
       }),
-    c.req.raw
-  )
+    request: c.req.raw,
+    userID: null
+  })
 
   return c.json(result)
 })
@@ -793,16 +797,17 @@ The `mutator.fn` function is your mutator implementation wrapped in the validato
 The `handleMutateRequest` function skips any mutations that throw:
 
 ```ts
-const result = await handleMutateRequest(
+const result = await handleMutateRequest({
   dbProvider,
-  transact =>
+  handler: transact =>
     transact(async (tx, name, args) => {
       // The mutation is skipped and the next mutation runs as normal.
       // The optimistic mutation on the client will be reverted.
       throw new Error('bonk')
     }),
-  c.req.raw
-)
+  request: c.req.raw,
+  userID: null
+})
 ```
 
 `handleMutateRequest` catches such errors and turns them into a structured response that gets sent back to the client. You can [recover the errors](#waiting-for-results) and show UI if you want.
@@ -1161,9 +1166,9 @@ export const Route = createFileRoute('/api/zero/mutate')({
         const asyncTasks: Array<() => Promise<void>> = []
         const mutators = createMutators(asyncTasks)
 
-        const result = await handleMutateRequest(
+        const result = await handleMutateRequest({
           dbProvider,
-          transact =>
+          handler: transact =>
             transact((tx, name, args) => {
               const mutator = mustGetMutator(mutators, name)
               return mutator.fn({
@@ -1171,8 +1176,9 @@ export const Route = createFileRoute('/api/zero/mutate')({
                 args
               })
             }),
-          request
-        )
+          request,
+          userID: null
+        })
 
         // Run all async tasks
         // If any fail, do not block the response, since the
@@ -1192,15 +1198,16 @@ export async function POST(req: Request) {
   const asyncTasks: Array<() => Promise<void>> = []
   const mutators = createMutators(asyncTasks)
 
-  const result = await handleMutateRequest(
+  const result = await handleMutateRequest({
     dbProvider,
-    transact =>
+    handler: transact =>
       transact((tx, name, args) => {
         const mutator = mustGetMutator(mutators, name)
         return mutator.fn({tx, args})
       }),
-    req
-  )
+    request: req,
+    userID: null
+  })
 
   // Run all async tasks
   // If any fail, do not block the response, since the
@@ -1215,15 +1222,16 @@ export async function POST(event: APIEvent) {
   const asyncTasks: Array<() => Promise<void>> = []
   const mutators = createMutators(asyncTasks)
 
-  const result = await handleMutateRequest(
+  const result = await handleMutateRequest({
     dbProvider,
-    transact =>
+    handler: transact =>
       transact((tx, name, args) => {
         const mutator = mustGetMutator(mutators, name)
         return mutator.fn({tx, args})
       }),
-    event.request
-  )
+    request: event.request,
+    userID: null
+  })
 
   // Run all async tasks
   // If any fail, do not block the response, since the
@@ -1238,9 +1246,9 @@ app.post('/api/zero/mutate', async c => {
   const asyncTasks: Array<() => Promise<void>> = []
   const mutators = createMutators(asyncTasks)
 
-  const result = await handleMutateRequest(
+  const result = await handleMutateRequest({
     dbProvider,
-    transact =>
+    handler: transact =>
       transact((tx, name, args) => {
         const mutator = mustGetMutator(mutators, name)
         return mutator.fn({
@@ -1248,8 +1256,9 @@ app.post('/api/zero/mutate', async c => {
           args
         })
       }),
-    c.req.raw
-  )
+    request: c.req.raw,
+    userID: null
+  })
 
   // Run all async tasks
   // If any fail, do not block the response, since the

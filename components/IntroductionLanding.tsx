@@ -1011,7 +1011,7 @@ export function IntroductionLanding({
           <div className="feature-grid">
             <Link
               className="feature-card feature-card--icon-left feature-card--link"
-              href="/docs/install"
+              href="/docs/introduction"
             >
               <div className="feature-card-icon-left">
                 <svg

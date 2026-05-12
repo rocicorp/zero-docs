@@ -14,6 +14,7 @@ import {
   InstallTableNameInput,
   InstallTableNameReplace,
 } from '@/components/InstallTableName';
+import {StartingPointCards} from '@/components/StartingPointCards';
 import SyncedCode from '@/components/SyncedCode';
 import Note from '@/components/note';
 import ImageLightbox from '@/components/ui/ImageLightbox';
@@ -31,6 +32,7 @@ const components = {
   Video,
   Button,
   CodeGroup,
+  StartingPointCards,
   InstallTableNameInput,
   InstallTableNameReplace,
   SyncedCode,

@@ -8,7 +8,14 @@ This guide shows how to add Zero to an existing TypeScript-based web app. For a 
 
 ### Set Up Your Database
 
-You'll need a Postgres database for development. If you don't have a preferred method, we recommend using [Docker](https://www.docker.com/):
+You'll need a Postgres database with logical replication enabled for development.
+
+<CodeGroup
+  labels={[
+    {text: 'Docker', sync: {db: 'docker'}},
+    {text: 'Postgres.app', sync: {db: 'postgres-app'}},
+  ]}
+>
 
 ```bash
 # IMPORTANT: logical WAL level is required for Zero
@@ -21,11 +28,41 @@ docker run -d --name zero-postgres \
   postgres -c wal_level=logical
 ```
 
-See [Provider Support](/docs/connecting-to-postgres) for developing locally with popular cloud Postgres providers.
+```bash
+# Start Postgres.app first. Requires Postgres 15 or higher.
+# If these already exist, you can skip those commands.
+createuser -s postgres
+createdb -O postgres zero
 
-### Install and Run Zero-Cache
+psql -d postgres -c "ALTER USER postgres WITH PASSWORD 'pass';"
+psql -d postgres -c "ALTER SYSTEM SET wal_level = 'logical';"
 
-Add Zero to your project:
+# Restart Postgres.app, then verify:
+psql -d postgres -c "SHOW wal_level;"
+```
+
+</CodeGroup>
+
+<Note
+  emoji="🧑‍💻"
+  type="note"
+  heading="Already using another Postgres provider?"
+  slug="another-postgres-provider"
+>
+  See [Provider Support](/docs/connecting-to-postgres) and
+  make sure `wal_level` is `logical`.
+</Note>
+
+Create a `.env` file so your app server and `zero-cache-dev` use the same Postgres connection:
+
+```bash
+# Update to your app's database connection URL
+ZERO_UPSTREAM_DB="postgres://postgres:pass@localhost:5432/zero"
+```
+
+### Install Zero
+
+Add Zero and the validator used in these examples:
 
 <CodeGroup
   labels={[
@@ -37,52 +74,58 @@ Add Zero to your project:
 >
 
 ```bash
-npm install @rocicorp/zero
+npm install @rocicorp/zero zod
 ```
 
 ```bash
-pnpm add @rocicorp/zero
+pnpm add @rocicorp/zero zod
 
 # Note: pnpm disables postinstall scripts by default for security.
-# Either approve the build:
+# Approve @rocicorp/zero-sqlite3 before continuing:
 pnpm approve-builds
 
-# Or add to package.json:
+# Or add to package.json, then reinstall and rebuild the native package:
 # "pnpm": {
-#   "onlyBuiltDependencies": ["@rocicorp/zero-sqlite3"]
+#   "onlyBuiltDependencies": [
+#     "@rocicorp/zero-sqlite3"
+#   ]
 # }
+pnpm rebuild @rocicorp/zero-sqlite3
 ```
 
 ```bash
-bun add @rocicorp/zero
+bun add @rocicorp/zero zod
 
 # Note: Bun disables postinstall scripts by default for security.
 # Either approve the build:
 bun pm trust @rocicorp/zero-sqlite3
 
-# Or add to package.json:
+# Or add to package.json, then rebuild the native packages:
 # "trustedDependencies": ["@rocicorp/zero-sqlite3"]
 ```
 
 ```bash
-yarn add @rocicorp/zero
+yarn add @rocicorp/zero zod
 
 # Note: Modern Yarn doesn't run postinstall scripts by default.
-# Add to package.json:
+# Add to package.json, then rebuild the native packages:
 # "dependenciesMeta": {
 #   "@rocicorp/zero-sqlite3": {
 #     "built": true
 #   }
 # }
+yarn rebuild @rocicorp/zero-sqlite3
 ```
 
 </CodeGroup>
+
+These examples use Zod; any [Standard Schema](https://standardschema.dev/)-compatible validator works.
 
 ### Set Up Your Zero Schema
 
 Zero uses a file called `schema.ts` to provide a type-safe query API.
 
-If you use Drizzle or Prisma, you can generate `schema.ts` automatically. Otherwise, you can create it manually.
+If you use Drizzle or Prisma, you can generate the schema automatically. Otherwise, you can create it manually.
 
 <CodeGroup
   labels={[
@@ -105,22 +148,22 @@ If you use Drizzle or Prisma, you can generate `schema.ts` automatically. Otherw
 
 ```bash
 npm install -D drizzle-zero
-npx drizzle-zero generate
+npx drizzle-zero generate --output src/zero/schema.ts
 ```
 
 ```bash
 pnpm add -D drizzle-zero
-pnpm dlx drizzle-zero generate
+pnpm exec drizzle-zero generate --output src/zero/schema.ts
 ```
 
 ```bash
 bun add -D drizzle-zero
-bunx drizzle-zero generate
+bunx drizzle-zero generate --output src/zero/schema.ts
 ```
 
 ```bash
 yarn add -D drizzle-zero
-yarn dlx drizzle-zero generate
+yarn exec drizzle-zero generate --output src/zero/schema.ts
 ```
 
 </SyncedCode>
@@ -129,36 +172,40 @@ yarn dlx drizzle-zero generate
 
 ```bash
 npm install -D prisma-zero
-# Add this to your prisma schema:
+# Add this to prisma/schema.prisma:
 # generator zero {
 #   provider = "prisma-zero"
+#   output   = "../src/zero"
 # }
 npx prisma generate
 ```
 
 ```bash
 pnpm add -D prisma-zero
-# Add this to your prisma schema:
+# Add this to prisma/schema.prisma:
 # generator zero {
 #   provider = "prisma-zero"
+#   output   = "../src/zero"
 # }
 pnpx prisma generate
 ```
 
 ```bash
 bun add -D prisma-zero
-# Add this to your prisma schema:
+# Add this to prisma/schema.prisma:
 # generator zero {
 #   provider = "prisma-zero"
+#   output   = "../src/zero"
 # }
 bunx prisma generate
 ```
 
 ```bash
 yarn add -D prisma-zero
-# Add this to your prisma schema:
+# Add this to prisma/schema.prisma:
 # generator zero {
 #   provider = "prisma-zero"
+#   output   = "../src/zero"
 # }
 yarn prisma generate
 ```
@@ -168,7 +215,7 @@ yarn prisma generate
 <InstallTableNameReplace>
 
 ```ts
-// zero/schema.ts
+// src/zero/schema.ts
 import {
   boolean,
   createBuilder,
@@ -204,17 +251,21 @@ declare module '@rocicorp/zero' {
 
 ### Set Up the Zero Client
 
-Zero has first-class support for React and SolidJS, and there is also a low-level API you can use in any TypeScript-based project.
+Zero has first-class support for React and SolidJS, and there is also a low-level API you can use in any TypeScript-based project. Choose the tab that most closely matches where your app creates its root layout or client instance.
 
 <CodeGroup
   labels={[
     {
-      text: 'React',
-      sync: {client: 'react'},
+      text: 'TanStack Start',
+      sync: {client: 'react', api: 'tanstack'},
     },
     {
-      text: 'SolidJS',
-      sync: {client: 'solidjs'},
+      text: 'Next.js',
+      sync: {client: 'react', api: 'nextjs'},
+    },
+    {
+      text: 'SolidStart',
+      sync: {client: 'solidjs', api: 'solid'},
     },
     {
       text: 'TypeScript',
@@ -224,66 +275,120 @@ Zero has first-class support for React and SolidJS, and there is also a low-leve
 >
 
 ```tsx
-// root.tsx
+// src/routes/__root.tsx
 import {ZeroProvider} from '@rocicorp/zero/react'
 import type {ZeroOptions} from '@rocicorp/zero'
-import {schema} from './zero/schema.ts'
+import {
+  HeadContent,
+  Scripts,
+  createRootRoute
+} from '@tanstack/react-router'
+import type {ReactNode} from 'react'
+import {schema} from '../zero/schema'
 
 const opts: ZeroOptions = {
   cacheURL: 'http://localhost:4848',
   schema
 }
 
-function Root() {
+export const Route = createRootRoute({
+  shellComponent: RootDocument
+})
+
+function RootDocument({children}: {children: ReactNode}) {
   return (
-    <ZeroProvider {...opts}>
-      <App />
-    </ZeroProvider>
+    <html lang="en">
+      <head>
+        <HeadContent />
+      </head>
+      <body>
+        <ZeroProvider {...opts}>{children}</ZeroProvider>
+        <Scripts />
+      </body>
+    </html>
   )
-}
-
-// mycomponent.tsx
-import {useZero} from '@rocicorp/zero/react'
-
-function MyComponent() {
-  const zero = useZero()
-  console.log('clientID', zero.clientID)
 }
 ```
 
 ```tsx
-// root.tsx
+// src/app/providers.tsx
+'use client'
+
+import {ZeroProvider} from '@rocicorp/zero/react'
+import type {ZeroOptions} from '@rocicorp/zero'
+import type {ReactNode} from 'react'
+import {schema} from '../zero/schema'
+
+const opts: ZeroOptions = {
+  cacheURL: 'http://localhost:4848',
+  schema
+}
+
+export function Providers({
+  children
+}: {
+  children: ReactNode
+}) {
+  return <ZeroProvider {...opts}>{children}</ZeroProvider>
+}
+
+// src/app/layout.tsx
+import type {ReactNode} from 'react'
+import {Providers} from './providers'
+
+export default function RootLayout({
+  children
+}: {
+  children: ReactNode
+}) {
+  return (
+    <html lang="en">
+      <body>
+        <Providers>{children}</Providers>
+      </body>
+    </html>
+  )
+}
+```
+
+```tsx
+// src/app.tsx
+import {MetaProvider, Title} from '@solidjs/meta'
+import {Router} from '@solidjs/router'
+import {FileRoutes} from '@solidjs/start/router'
 import {ZeroProvider} from '@rocicorp/zero/solid'
 import type {ZeroOptions} from '@rocicorp/zero'
-import {schema} from './zero/schema.ts'
+import {Suspense} from 'solid-js'
+import {schema} from './zero/schema'
 
 const opts: ZeroOptions = {
   cacheURL: 'http://localhost:4848',
   schema
 }
 
-function Root() {
+export default function App() {
   return (
     <ZeroProvider {...opts}>
-      <App />
+      <Router
+        root={props => (
+          <MetaProvider>
+            <Title>Zero App</Title>
+            <Suspense>{props.children}</Suspense>
+          </MetaProvider>
+        )}
+      >
+        <FileRoutes />
+      </Router>
     </ZeroProvider>
   )
-}
-
-// mycomponent.tsx
-import {useZero} from '@rocicorp/zero/solid'
-
-function MyComponent() {
-  const zero = useZero()
-  console.log('clientID', zero().clientID)
 }
 ```
 
 ```tsx
-// zero.ts
+// src/zero.ts
 import {Zero} from '@rocicorp/zero'
 import type {ZeroOptions} from '@rocicorp/zero'
-import {schema} from './zero/schema.ts'
+import {schema} from './zero/schema'
 
 const opts: ZeroOptions = {
   cacheURL: 'http://localhost:4848',
@@ -291,8 +396,6 @@ const opts: ZeroOptions = {
 }
 
 const zero = new Zero(opts)
-
-console.log('clientID', zero.clientID)
 
 export {zero}
 ```
@@ -308,9 +411,9 @@ Shared reads are conventionally stored in `queries.ts`. Use `zql` from `schema.t
 <InstallTableNameReplace>
 
 ```tsx
-// zero/queries.ts
+// src/zero/queries.ts
 import {defineQueries, defineQuery} from '@rocicorp/zero'
-import {zql} from './schema.ts'
+import {zql} from './schema'
 
 export const queries = defineQueries({
   allUsers: defineQuery(() => zql.user)
@@ -325,20 +428,20 @@ See [Reading Data](/docs/queries) for more on filters, sorting, relationships, a
 
 Zero doesn't allow clients to send arbitrary ZQL to `zero-cache`.
 
-Instead, Zero sends the query name and arguments to the `query` endpoint on your server, which responds to `zero-cache` with the authoritative ZQL.
+Instead, Zero sends the query name and arguments to the `query` endpoint on your server, which responds to `zero-cache` with the authoritative ZQL. This prevents clients from reading arbitrary data and is the basis of permissions.
 
 <CodeGroup
   labels={[
+    {
+      text: 'TanStack Start',
+      sync: {api: 'tanstack'},
+    },
     {
       text: 'Next.js',
       sync: {api: 'nextjs'},
     },
     {
-      text: 'Tanstack Start',
-      sync: {api: 'tanstack'},
-    },
-    {
-      text: 'Solid Start',
+      text: 'SolidStart',
       sync: {api: 'solid'},
     },
     {
@@ -349,33 +452,12 @@ Instead, Zero sends the query name and arguments to the `query` endpoint on your
 >
 
 ```ts
-// app/api/query/route.ts
-import {handleQueryRequest} from '@rocicorp/zero/server'
-import {mustGetQuery} from '@rocicorp/zero'
-import {queries} from '../../zero/queries.ts'
-import {schema} from '../../zero/schema.ts'
-
-export async function POST(req: Request) {
-  const result = await handleQueryRequest(
-    (name, args) => {
-      const query = mustGetQuery(queries, name)
-      return query.fn({args})
-    },
-    schema,
-    req
-  )
-
-  return Response.json(result)
-}
-```
-
-```ts
 // src/routes/api/query.ts
 import {createFileRoute} from '@tanstack/react-router'
 import {handleQueryRequest} from '@rocicorp/zero/server'
 import {mustGetQuery} from '@rocicorp/zero'
-import {queries} from '../../zero/queries.ts'
-import {schema} from '../../zero/schema.ts'
+import {queries} from '../../zero/queries'
+import {schema} from '../../zero/schema'
 
 export const Route = createFileRoute('/api/query')({
   server: {
@@ -398,12 +480,33 @@ export const Route = createFileRoute('/api/query')({
 ```
 
 ```ts
+// src/app/api/query/route.ts
+import {handleQueryRequest} from '@rocicorp/zero/server'
+import {mustGetQuery} from '@rocicorp/zero'
+import {queries} from '../../../zero/queries'
+import {schema} from '../../../zero/schema'
+
+export async function POST(req: Request) {
+  const result = await handleQueryRequest(
+    (name, args) => {
+      const query = mustGetQuery(queries, name)
+      return query.fn({args})
+    },
+    schema,
+    req
+  )
+
+  return Response.json(result)
+}
+```
+
+```ts
 // src/routes/api/query.ts
 import type {APIEvent} from '@solidjs/start/server'
 import {handleQueryRequest} from '@rocicorp/zero/server'
 import {mustGetQuery} from '@rocicorp/zero'
-import {queries} from '../../zero/queries.ts'
-import {schema} from '../../zero/schema.ts'
+import {queries} from '../../zero/queries'
+import {schema} from '../../zero/schema'
 
 export async function POST(event: APIEvent) {
   const result = await handleQueryRequest(
@@ -420,12 +523,12 @@ export async function POST(event: APIEvent) {
 ```
 
 ```ts
-// api/app.ts
+// src/api/app.ts
 import {Hono} from 'hono'
 import {handleQueryRequest} from '@rocicorp/zero/server'
 import {mustGetQuery} from '@rocicorp/zero'
-import {queries} from '../zero/queries.ts'
-import {schema} from '../zero/schema.ts'
+import {queries} from '../zero/queries'
+import {schema} from '../zero/schema'
 
 const app = new Hono()
 
@@ -470,7 +573,7 @@ Querying for data is framework-specific. Most of the time, you will use a helper
 
 ```tsx
 import {useQuery} from '@rocicorp/zero/react'
-import {queries} from './zero/queries.ts'
+import {queries} from './zero/queries'
 
 const [users] = useQuery(queries.allUsers())
 ```
@@ -481,7 +584,7 @@ const [users] = useQuery(queries.allUsers())
 
 ```tsx
 import {useQuery} from '@rocicorp/zero/solid'
-import {queries} from './zero/queries.ts'
+import {queries} from './zero/queries'
 
 const [users] = useQuery(() => queries.allUsers())
 ```
@@ -491,8 +594,8 @@ const [users] = useQuery(() => queries.allUsers())
 <InstallTableNameReplace>
 
 ```tsx
-import {zero} from './zero.ts'
-import {queries} from './zero/queries.ts'
+import {zero} from './zero'
+import {queries} from './zero/queries'
 
 const users = await zero.run(queries.allUsers())
 ```
@@ -515,7 +618,7 @@ Data is written in Zero apps using mutators. Similar to queries, shared writes u
 <InstallTableNameReplace>
 
 ```tsx
-// zero/mutators.ts
+// src/zero/mutators.ts
 import {defineMutators, defineMutator} from '@rocicorp/zero'
 import {z} from 'zod'
 
@@ -535,21 +638,86 @@ You can use the [CRUD-style API](/docs/mutators#writing-data) with `tx.mutate.<t
 
 Register the mutators where you create the Zero client:
 
-```tsx
+<CodeGroup
+  labels={[
+    {
+      text: 'TanStack Start',
+      sync: {client: 'react', api: 'tanstack'},
+    },
+    {
+      text: 'Next.js',
+      sync: {client: 'react', api: 'nextjs'},
+    },
+    {
+      text: 'SolidStart',
+      sync: {client: 'solidjs', api: 'solid'},
+    },
+    {
+      text: 'TypeScript',
+      sync: {client: 'typescript'},
+    },
+  ]}
+>
+
+```tsx {3,9}
+// src/routes/__root.tsx
 import type {ZeroOptions} from '@rocicorp/zero'
-import {mutators} from './zero/mutators.ts'
+import {mutators} from '../zero/mutators'
+import {schema} from '../zero/schema'
 
 const opts: ZeroOptions = {
-  // ... userID, cacheURL, schema, etc.
+  cacheURL: 'http://localhost:4848',
+  schema,
   mutators
 }
 ```
+
+```tsx {3,9}
+// src/app/providers.tsx
+import type {ZeroOptions} from '@rocicorp/zero'
+import {mutators} from '../zero/mutators'
+import {schema} from '../zero/schema'
+
+const opts: ZeroOptions = {
+  cacheURL: 'http://localhost:4848',
+  schema,
+  mutators
+}
+```
+
+```tsx {3,9}
+// src/app.tsx
+import type {ZeroOptions} from '@rocicorp/zero'
+import {mutators} from './zero/mutators'
+import {schema} from './zero/schema'
+
+const opts: ZeroOptions = {
+  cacheURL: 'http://localhost:4848',
+  schema,
+  mutators
+}
+```
+
+```tsx {3,9}
+// src/zero.ts
+import type {ZeroOptions} from '@rocicorp/zero'
+import {mutators} from './zero/mutators'
+import {schema} from './zero/schema'
+
+const opts: ZeroOptions = {
+  cacheURL: 'http://localhost:4848',
+  schema,
+  mutators
+}
+```
+
+</CodeGroup>
 
 ### Add Mutate Endpoint
 
 Zero requires a `mutate` endpoint that runs on your server and connects directly to Postgres.
 
-First, create a `dbProvider` with the Postgres adapter that matches your stack:
+First, create a `dbProvider` with the Postgres adapter that matches your stack. These examples assume the selected database client is already installed in your app.
 
 <CodeGroup
   labels={[
@@ -577,15 +745,21 @@ First, create a `dbProvider` with the Postgres adapter that matches your stack:
 >
 
 ```ts
-// src/db-provider.ts
+// src/zero/db-provider.ts
 import {zeroDrizzle} from '@rocicorp/zero/server/adapters/drizzle'
 import {drizzle} from 'drizzle-orm/node-postgres'
 import {Pool} from 'pg'
-import {schema} from '../../zero/schema.ts'
-import * as drizzleSchema from '../../drizzle/schema.ts'
+import {schema} from './schema'
+import * as drizzleSchema from '../drizzle/schema'
+
+// If your app uses a different Drizzle driver, reuse your existing client.
+const connectionString = process.env.ZERO_UPSTREAM_DB
+if (!connectionString) {
+  throw new Error('ZERO_UPSTREAM_DB is not set')
+}
 
 const pool = new Pool({
-  connectionString: process.env.ZERO_UPSTREAM_DB!
+  connectionString
 })
 
 export const drizzleClient = drizzle(pool, {
@@ -594,6 +768,7 @@ export const drizzleClient = drizzle(pool, {
 
 export const dbProvider = zeroDrizzle(schema, drizzleClient)
 
+// Register global types for mutators on the server
 declare module '@rocicorp/zero' {
   interface DefaultTypes {
     dbProvider: typeof dbProvider
@@ -602,23 +777,29 @@ declare module '@rocicorp/zero' {
 ```
 
 ```ts
-// src/db-provider.ts
+// src/zero/db-provider.ts
 import {Kysely, PostgresDialect} from 'kysely'
 import {zeroKysely} from '@rocicorp/zero/server/adapters/kysely'
 import {Pool} from 'pg'
-import {schema} from '../../zero/schema.ts'
-import type {Database} from '../../kysely/database.ts'
+import {schema} from './schema'
+import type {Database} from '../kysely/database'
+
+const connectionString = process.env.ZERO_UPSTREAM_DB
+if (!connectionString) {
+  throw new Error('ZERO_UPSTREAM_DB is not set')
+}
 
 const kysely = new Kysely<Database>({
   dialect: new PostgresDialect({
     pool: new Pool({
-      connectionString: process.env.ZERO_UPSTREAM_DB!
+      connectionString
     })
   })
 })
 
 export const dbProvider = zeroKysely(schema, kysely)
 
+// Register global types for mutators on the server
 declare module '@rocicorp/zero' {
   interface DefaultTypes {
     dbProvider: typeof dbProvider
@@ -627,20 +808,26 @@ declare module '@rocicorp/zero' {
 ```
 
 ```ts
-// src/db-provider.ts
+// src/zero/db-provider.ts
 import {PrismaPg} from '@prisma/adapter-pg'
 import {PrismaClient} from '@prisma/client'
 import {zeroPrisma} from '@rocicorp/zero/server/adapters/prisma'
-import {schema} from '../../zero/schema.ts'
+import {schema} from './schema'
+
+const connectionString = process.env.ZERO_UPSTREAM_DB
+if (!connectionString) {
+  throw new Error('ZERO_UPSTREAM_DB is not set')
+}
 
 const prisma = new PrismaClient({
   adapter: new PrismaPg({
-    connectionString: process.env.ZERO_UPSTREAM_DB!
+    connectionString
   })
 })
 
 export const dbProvider = zeroPrisma(schema, prisma)
 
+// Register global types for mutators on the server
 declare module '@rocicorp/zero' {
   interface DefaultTypes {
     dbProvider: typeof dbProvider
@@ -649,17 +836,23 @@ declare module '@rocicorp/zero' {
 ```
 
 ```ts
-// src/db-provider.ts
+// src/zero/db-provider.ts
 import {zeroNodePg} from '@rocicorp/zero/server/adapters/pg'
 import {Pool} from 'pg'
-import {schema} from '../../zero/schema.ts'
+import {schema} from './schema'
+
+const connectionString = process.env.ZERO_UPSTREAM_DB
+if (!connectionString) {
+  throw new Error('ZERO_UPSTREAM_DB is not set')
+}
 
 const pool = new Pool({
-  connectionString: process.env.ZERO_UPSTREAM_DB!
+  connectionString
 })
 
 export const dbProvider = zeroNodePg(schema, pool)
 
+// Register global types for mutators on the server
 declare module '@rocicorp/zero' {
   interface DefaultTypes {
     dbProvider: typeof dbProvider
@@ -668,15 +861,21 @@ declare module '@rocicorp/zero' {
 ```
 
 ```ts
-// src/db-provider.ts
+// src/zero/db-provider.ts
 import {zeroPostgresJS} from '@rocicorp/zero/server/adapters/postgresjs'
 import postgres from 'postgres'
-import {schema} from '../../zero/schema.ts'
+import {schema} from './schema'
 
-const sql = postgres(process.env.ZERO_UPSTREAM_DB!)
+const connectionString = process.env.ZERO_UPSTREAM_DB
+if (!connectionString) {
+  throw new Error('ZERO_UPSTREAM_DB is not set')
+}
+
+const sql = postgres(connectionString)
 
 export const dbProvider = zeroPostgresJS(schema, sql)
 
+// Register global types for mutators on the server
 declare module '@rocicorp/zero' {
   interface DefaultTypes {
     dbProvider: typeof dbProvider
@@ -691,15 +890,15 @@ Then use the `dbProvider` and helpers to define the mutate endpoint:
 <CodeGroup
   labels={[
     {
+      text: 'TanStack Start',
+      sync: {api: 'tanstack'},
+    },
+    {
       text: 'Next.js',
       sync: {api: 'nextjs'},
     },
     {
-      text: 'Tanstack Start',
-      sync: {api: 'tanstack'},
-    },
-    {
-      text: 'Solid Start',
+      text: 'SolidStart',
       sync: {api: 'solid'},
     },
     {
@@ -710,34 +909,12 @@ Then use the `dbProvider` and helpers to define the mutate endpoint:
 >
 
 ```ts
-// app/api/mutate/route.ts
-import {handleMutateRequest} from '@rocicorp/zero/server'
-import {mustGetMutator} from '@rocicorp/zero'
-import {mutators} from '../../zero/mutators.ts'
-import {dbProvider} from '../../db-provider.ts'
-
-export async function POST(req: Request) {
-  const result = await handleMutateRequest(
-    dbProvider,
-    transact =>
-      transact((tx, name, args) => {
-        const mutator = mustGetMutator(mutators, name)
-        return mutator.fn({args, tx})
-      }),
-    req
-  )
-
-  return Response.json(result)
-}
-```
-
-```ts
 // src/routes/api/mutate.ts
 import {createFileRoute} from '@tanstack/react-router'
 import {handleMutateRequest} from '@rocicorp/zero/server'
 import {mustGetMutator} from '@rocicorp/zero'
-import {mutators} from '../../zero/mutators.ts'
-import {dbProvider} from '../../db-provider.ts'
+import {mutators} from '../../zero/mutators'
+import {dbProvider} from '../../zero/db-provider'
 
 export const Route = createFileRoute('/api/mutate')({
   server: {
@@ -761,12 +938,34 @@ export const Route = createFileRoute('/api/mutate')({
 ```
 
 ```ts
+// src/app/api/mutate/route.ts
+import {handleMutateRequest} from '@rocicorp/zero/server'
+import {mustGetMutator} from '@rocicorp/zero'
+import {mutators} from '../../../zero/mutators'
+import {dbProvider} from '../../../zero/db-provider'
+
+export async function POST(req: Request) {
+  const result = await handleMutateRequest(
+    dbProvider,
+    transact =>
+      transact((tx, name, args) => {
+        const mutator = mustGetMutator(mutators, name)
+        return mutator.fn({args, tx})
+      }),
+    req
+  )
+
+  return Response.json(result)
+}
+```
+
+```ts
 // src/routes/api/mutate.ts
 import type {APIEvent} from '@solidjs/start/server'
 import {handleMutateRequest} from '@rocicorp/zero/server'
 import {mustGetMutator} from '@rocicorp/zero'
-import {mutators} from '../../zero/mutators.ts'
-import {dbProvider} from '../../db-provider.ts'
+import {mutators} from '../../zero/mutators'
+import {dbProvider} from '../../zero/db-provider'
 
 export async function POST(event: APIEvent) {
   const result = await handleMutateRequest(
@@ -784,11 +983,11 @@ export async function POST(event: APIEvent) {
 ```
 
 ```ts
-// api/app.ts
+// src/api/app.ts
 import {handleMutateRequest} from '@rocicorp/zero/server'
 import {mustGetMutator} from '@rocicorp/zero'
-import {mutators} from '../zero/mutators.ts'
-import {dbProvider} from './db-provider.ts'
+import {mutators} from '../zero/mutators'
+import {dbProvider} from '../zero/db-provider'
 
 app.post('/api/mutate', async c => {
   const result = await handleMutateRequest(
@@ -818,7 +1017,7 @@ You can also do work after a mutation runs on the server, like send notification
   handlers. See [Authentication](/docs/auth).
 </Note>
 
-Now you can run `zero-cache` locally with `ZERO_UPSTREAM_DB`, `ZERO_QUERY_URL`, and `ZERO_MUTATE_URL` configured:
+Start your app server in another terminal, then run `zero-cache` locally with `ZERO_QUERY_URL` and `ZERO_MUTATE_URL` configured. If your app uses a different origin, update `localhost:3000`.
 
 <CodeGroup
   labels={[
@@ -830,29 +1029,25 @@ Now you can run `zero-cache` locally with `ZERO_UPSTREAM_DB`, `ZERO_QUERY_URL`, 
 >
 
 ```bash
-ZERO_UPSTREAM_DB="postgres://postgres:pass@localhost:5432/zero" \
-  ZERO_QUERY_URL="http://localhost:3000/api/query" \
+ZERO_QUERY_URL="http://localhost:3000/api/query" \
   ZERO_MUTATE_URL="http://localhost:3000/api/mutate" \
   npx zero-cache-dev
 ```
 
 ```bash
-ZERO_UPSTREAM_DB="postgres://postgres:pass@localhost:5432/zero" \
-  ZERO_QUERY_URL="http://localhost:3000/api/query" \
+ZERO_QUERY_URL="http://localhost:3000/api/query" \
   ZERO_MUTATE_URL="http://localhost:3000/api/mutate" \
   pnpm exec zero-cache-dev
 ```
 
 ```bash
-ZERO_UPSTREAM_DB="postgres://postgres:pass@localhost:5432/zero" \
-  ZERO_QUERY_URL="http://localhost:3000/api/query" \
+ZERO_QUERY_URL="http://localhost:3000/api/query" \
   ZERO_MUTATE_URL="http://localhost:3000/api/mutate" \
   bunx zero-cache-dev
 ```
 
 ```bash
-ZERO_UPSTREAM_DB="postgres://postgres:pass@localhost:5432/zero" \
-  ZERO_QUERY_URL="http://localhost:3000/api/query" \
+ZERO_QUERY_URL="http://localhost:3000/api/query" \
   ZERO_MUTATE_URL="http://localhost:3000/api/mutate" \
   yarn exec zero-cache-dev
 ```
@@ -884,7 +1079,7 @@ You can call a mutator with `zero.mutate`:
 
 ```tsx
 import {useZero} from '@rocicorp/zero/react'
-import {mutators} from './zero/mutators.ts'
+import {mutators} from './zero/mutators'
 
 const zero = useZero()
 
@@ -899,7 +1094,7 @@ const onClick = () => {
 
 ```tsx
 import {useZero} from '@rocicorp/zero/solid'
-import {mutators} from './zero/mutators.ts'
+import {mutators} from './zero/mutators'
 
 const zero = useZero()
 
@@ -913,8 +1108,8 @@ const onClick = () => {
 <InstallTableNameReplace>
 
 ```tsx
-import {zero} from './zero.ts'
-import {mutators} from './zero/mutators.ts'
+import {zero} from './zero'
+import {mutators} from './zero/mutators'
 
 await zero.mutate(mutators.activateUser({id: '1'}))
 ```

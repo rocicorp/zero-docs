@@ -60,13 +60,17 @@ const findBestMatch = (
     const categories = Object.keys(label.sync);
     if (!categories.length) return;
     let score = 0;
+    let hasConflict = false;
     categories.forEach(category => {
       const selectedValue = selection[category];
-      if (selectedValue && label.sync[category] === selectedValue) {
-        score += 1;
+      if (!selectedValue) return;
+      if (label.sync[category] !== selectedValue) {
+        hasConflict = true;
+        return;
       }
+      score += 1;
     });
-    if (score > 0 && score > bestScore) {
+    if (!hasConflict && score > 0 && score > bestScore) {
       bestScore = score;
       bestIndex = index;
     }

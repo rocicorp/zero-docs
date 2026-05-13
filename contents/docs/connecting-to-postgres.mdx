@@ -155,7 +155,7 @@ IPv4 addresses are only supported on the Pro plan and are an extra $4/month.
 
 Render _can_ work with Zero, but requires admin/support-side setup, and does not support a few core Zero features.
 
-App roles can't create [event triggers](#event-triggers), so schema changes will fall back to full resets unless you call [`zero_0.update_schemas()`](#schema-change-hooks) after each DDL statement.
+App roles can't create [event triggers](#event-triggers), so schema changes will fall back to full resets unless you use [schema change hooks](#schema-change-hooks).
 
 You also must ensure `wal_level=logical` by creating a Render support ticket.
 
@@ -173,7 +173,21 @@ See Google's documentation for details: [Configure logical replication](https://
 
 ## Schema Change Hooks
 
-For providers that don't support or allow [event triggers](#event-triggers), Zero provides a manual hook you can call after a schema change to avoid a full reset. Wrap the DDL and the `update_schemas()` call in a single transaction so writes against the new schema don't slip into the WAL before `zero-cache` learns about the change:
+For providers that don't support or allow [event triggers](#event-triggers), Zero provides a manual hook you can call after a schema change to avoid a full reset.
+
+To enable the hook, first opt into manual DDL detection by setting `ddlDetection` to `true` in Zero's upstream shard config. With the default [app id](/docs/zero-cache-config#app-id) of `zero` and the default shard `0`, that looks like:
+
+```sql
+UPDATE zero_0."shardConfig" SET "ddlDetection" = true;
+```
+
+Then call `update_schemas()` after any DDL statements:
+
+```sql
+SELECT zero_0.update_schemas();
+```
+
+It is important to call `update_schemas()` after the DDL statements but before any dependent data changes. A good way to do this is to wrap the DDL and the `update_schemas()` call in a single transaction:
 
 ```sql
 BEGIN;
@@ -183,18 +197,13 @@ BEGIN;
 COMMIT;
 ```
 
-The function lives in the `{app-id}_{shard-num}` schema. With the default [app id](/docs/zero-cache-config#app-id) of `zero` and the default shard `0`, it's `zero_0.update_schemas()`.
-
-It works for any DDL statement (`CREATE`, `ALTER`, `DROP`, `ALTER PUBLICATION`, etc.). Because it diffs the current schema against the last snapshot, you can call it once after a batch of statements rather than after each one.
-
 <Note type="note" heading="COMMENT ON PUBLICATION workaround">
-  Another way to tell Zero about a publication change is to follow the `ALTER PUBLICATION` with a `COMMENT ON PUBLICATION` statement:
+You can also tell Zero about publication changes specifically by following the `ALTER PUBLICATION` with a `COMMENT ON PUBLICATION` statement:
 
 ```sql
 ALTER PUBLICATION zero_pub ADD TABLE ...;
 COMMENT ON PUBLICATION zero_pub IS 'anything';
 ```
 
-This was the original workaround for publication changes. It is still supported, but was replaced by `update_schemas()` because the latter is explicit and applies to any DDL, not just publication changes.
-
+It is still supported, but was replaced by `update_schemas()` because the latter is catches changes to any DDL, not just publication changes.
 </Note>

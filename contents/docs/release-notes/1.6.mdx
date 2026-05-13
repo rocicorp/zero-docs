@@ -1,0 +1,47 @@
+---
+title: Zero 1.6
+description: Postgres 17 Replication Failover and Performance
+---
+
+## Installation
+
+```bash
+npm install @rocicorp/zero@1.6
+```
+
+## Features
+
+- [**Postgres 17 Logical Replication Failover:**](https://github.com/rocicorp/mono/pull/5934) `zero-cache` now creates replication slots with an ordinal naming scheme (e.g. `zero_0_a`, `zero_0_b`) so they can be registered with [`synchronized_standby_slots`](https://www.postgresql.org/docs/current/runtime-config-replication.html#GUC-SYNCHRONIZED-STANDBY-SLOTS) for [logical replication failover](https://www.postgresql.org/docs/current/logical-replication-failover.html). _TODO: add docs link._
+- [**Litestream Region:**](https://github.com/rocicorp/mono/pull/5933) Added [`ZERO_LITESTREAM_REGION`](/docs/zero-cache-config#litestream-region) for deployments in non-standard AWS partitions like GovCloud (thanks [@ericykim](https://github.com/ericykim)!).
+- [**Optional `args` in custom queries/mutators:**](https://github.com/rocicorp/mono/pull/5945) Custom query and mutator execution functions now treat `args` as optional when the args type already allows `undefined` (thanks [@0xcadams](https://github.com/0xcadams)!).
+
+## Performance
+
+- [Faster `EXISTS` subqueries via the new `Cap` operator, which lets SQLite skip `ORDER BY` for non-flipped `EXISTS` children](https://github.com/rocicorp/mono/pull/5943)
+- [Bulk-insertion optimization in Replicache via `putMany`, speeding up large sync patches (3-5x faster for typical sync batches, up to 53x for construction)](https://github.com/rocicorp/mono/pull/5380)
+- [Batch deletes and upserts in `SQLiteStore` writes (~7-9x faster on 1000-put commits)](https://github.com/rocicorp/mono/pull/5915)
+- [Parallelize I/O during pull and rebase](https://github.com/rocicorp/mono/pull/5926)
+- [Heap-based k-way merge in `fetchMergeSort` (O(log K) per row vs O(K))](https://github.com/rocicorp/mono/pull/5921), [with a new `mergeSortedStreams` utility](https://github.com/rocicorp/mono/pull/5917)
+- [Initial sync progress reporting uses `pg_class` estimates instead of full table scans](https://github.com/rocicorp/mono/pull/5932)
+- [De-dupe SQLite requests in flip-join when children want the same parent](https://github.com/rocicorp/mono/pull/5918)
+
+## Fixes
+
+- [Returning to an app after stale-tab GC or CVR purge caused a full page reload; now the Zero instance rotates in place](https://github.com/rocicorp/mono/pull/5903)
+- [`"Row already exists"` errors after an IVM advance failure could mask the original error and continue through corrupt branch state](https://github.com/rocicorp/mono/pull/5910), [also fixed for `IVMBranch.fork()`](https://github.com/rocicorp/mono/pull/5916)
+- [`"Row already exists"` assertion failures during poke processing caused by `putMany` rebalancing duplicating entries across adjacent BTree children](https://github.com/rocicorp/mono/pull/5923)
+- [Initial sync could fail or take hours on large databases because progress reporting did full `COUNT(*)` and `SUM(pg_column_size(...))` scans](https://github.com/rocicorp/mono/pull/5932)
+- [Deadlock between post-initial-sync `changeLog` reset and a live replication-manager during non-disruptive resync](https://github.com/rocicorp/mono/pull/5953)
+- [Zombie `ViewSyncer`s could accumulate in the `active-client-groups` metric when clients disconnected before `initConnection` resolved](https://github.com/rocicorp/mono/pull/5907)
+- [`ConcurrentModificationException` is now classified as a Rehome so the client reconnects instead of erroring](https://github.com/rocicorp/mono/pull/5930)
+- [`zero-cache` startup errors during change-streamer init were not published to subscribers](https://github.com/rocicorp/mono/pull/5956)
+- [`TypeError: Expected string at context.query. Got null` when handling DDL events with `NULL current_query()`](https://github.com/rocicorp/mono/pull/5944)
+- [Repeated initial-sync failures could exhaust the replication-slot name pool; cleanup now runs preemptively under the management lock](https://github.com/rocicorp/mono/pull/5947), [and inactive slots are deleted together with their `replicas` row so a stuck slot doesn't keep claiming a name](https://github.com/rocicorp/mono/pull/5948)
+- [Replication slot creation timeouts crashed the server during backfill retries; backfill timeouts now only error after the maximum retry backoff is reached](https://github.com/rocicorp/mono/pull/5901)
+- [Shadow sync threw when a synced table could not be queried by ZQL; it now silently ignores the table to match prod behavior](https://github.com/rocicorp/mono/pull/5950)
+- [WebSocket errors are now logged as warnings instead of errors, since they reflect client or upstream issues rather than server faults](https://github.com/rocicorp/mono/pull/5842)
+- [Inspector now caches AST and metrics for deleted queries so they remain accessible after eviction](https://github.com/rocicorp/mono/pull/5924)
+
+## Breaking Changes
+
+- [**Inspector per-query hydration metrics format changed:**](https://github.com/rocicorp/mono/pull/5924) Per-query hydration metrics (`query-hydration-server-ms`) are now reported as a plain number (most-recent hydration time in ms) instead of a TDigest histogram, and the per-query metrics type was renamed from `ServerMetrics` to `QueryServerMetrics`. If you have custom tooling reading inspector metrics, you'll need to update it. The protocol version was bumped from 50 to 51 to reflect this; `MIN_SERVER_SUPPORTED_SYNC_PROTOCOL` remains at 30, so 1.6 servers remain compatible with older clients.

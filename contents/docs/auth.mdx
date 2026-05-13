@@ -693,10 +693,17 @@ app.post('/api/zero/mutate', async c => {
   Tabs in the same browser share synced data. This group of
   tabs is called a "client group", keyed by `clientGroupID`.
   New tabs join a client group by providing the
-  `clientGroupID` during connection. Passing the
-  server-verified `userID` to `handleMutateRequest` and
-  `handleQueryRequest` lets Zero enforce that only tabs
-  belonging to the original user can join.
+  `clientGroupID` during connection.
+
+  The `clientGroupID` is
+  randomly-generated client-side and non-trivial for
+  attackers to guess. However, it could be stolen with XSS
+  or leaked in logs.
+
+  Passing the server-verified `userID` to
+  `handleMutateRequest` and `handleQueryRequest` lets Zero
+  enforce that only tabs belonging to the same user can be
+  in the same client group.
 </Note>
 
 ## Updating Tokens

@@ -9,6 +9,96 @@ description: Performance and Reliability Improvements
 npm install @rocicorp/zero@1.4
 ```
 
+## Upgrading
+
+### userID: "anon"
+
+If you are using `userID: 'anon'` for logged-out users, change it to `userID: null` or `userID: undefined`. Passing `userID: 'anon'` is being deprecated in advance of upcoming security work in Zero 1.5.
+
+Change this:
+
+<CodeGroup
+  labels={[
+    {text: 'React', sync: {client: 'react'}},
+    {text: 'SolidJS', sync: {client: 'solidjs'}},
+    {text: 'TypeScript', sync: {client: 'typescript'}},
+  ]}
+>
+
+```tsx
+import {ZeroProvider} from '@rocicorp/zero/react'
+
+return (
+  <ZeroProvider userID={userID ?? 'anon'}>
+    <App />
+  </ZeroProvider>
+)
+```
+
+```tsx
+import {ZeroProvider} from '@rocicorp/zero/solid'
+
+return (
+  <ZeroProvider userID={userID ?? 'anon'}>
+    <App />
+  </ZeroProvider>
+)
+```
+
+```ts
+import {Zero} from '@rocicorp/zero'
+import type {ZeroOptions} from '@rocicorp/zero'
+
+const zero = new Zero({
+  userID: userID ?? 'anon'
+  // ...
+})
+```
+
+</CodeGroup>
+
+To this:
+
+<CodeGroup
+  labels={[
+    {text: 'React', sync: {client: 'react'}},
+    {text: 'SolidJS', sync: {client: 'solidjs'}},
+    {text: 'TypeScript', sync: {client: 'typescript'}},
+  ]}
+>
+
+```tsx
+import {ZeroProvider} from '@rocicorp/zero/react'
+
+return (
+  <ZeroProvider userID={userID}>
+    <App />
+  </ZeroProvider>
+)
+```
+
+```tsx
+import {ZeroProvider} from '@rocicorp/zero/solid'
+
+return (
+  <ZeroProvider userID={userID}>
+    <App />
+  </ZeroProvider>
+)
+```
+
+```ts
+import {Zero} from '@rocicorp/zero'
+import type {ZeroOptions} from '@rocicorp/zero'
+
+const zero = new Zero({
+  userID
+  // ...
+})
+```
+
+</CodeGroup>
+
 ## Features
 
 - [**Kysely Adapter:**](/docs/server-zql?codeGroup=pgclient%3Akysely#creating-a-database) Added `zeroKysely`, so Zero server mutators can run against a Kysely transaction.
@@ -52,4 +142,8 @@ npm install @rocicorp/zero@1.4
 
 ## Breaking Changes
 
-None.
+None. One API was deprecated:
+
+- `userID: 'anon'` for logged-out clients
+
+See [Upgrading](#upgrading) for more information.

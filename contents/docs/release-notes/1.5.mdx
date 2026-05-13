@@ -12,95 +12,11 @@ npm install @rocicorp/zero@1.5
 ## Upgrading
 
 <Note emoji="👨‍🏫" heading="Example Upgrades">
-See [ztunes](https://github.com/rocicorp/ztunes/pull/33) and [hello-zero-solid](https://github.com/rocicorp/hello-zero-solid/pull/35) for examples of how to upgrade to Zero 1.5.
+  See [ztunes](https://github.com/rocicorp/ztunes/pull/33)
+  and
+  [hello-zero-solid](https://github.com/rocicorp/hello-zero-solid/pull/35)
+  for examples of how to upgrade to Zero 1.5.
 </Note>
-
-### userID: "anon"
-
-If you are using `userID: 'anon'` for logged-out users, change it to `userID: null` or `userID: undefined`. Passing `userID: 'anon'` is deprecated because it can't work with Authenticated Client Groups (below).
-
-Change this:
-
-<CodeGroup
-  labels={[
-    {text: 'React', sync: {client: 'react'}},
-    {text: 'SolidJS', sync: {client: 'solidjs'}},
-    {text: 'TypeScript', sync: {client: 'typescript'}},
-  ]}
->
-
-```tsx
-import {ZeroProvider} from '@rocicorp/zero/react'
-
-return (
-  <ZeroProvider userID={userID ?? "anon"}>
-    <App />
-  </ZeroProvider>
-)
-```
-
-```tsx
-import {ZeroProvider} from '@rocicorp/zero/solid'
-
-return (
-  <ZeroProvider userID={userID ?? "anon"}>
-    <App />
-  </ZeroProvider>
-)
-```
-
-```ts
-import {Zero} from '@rocicorp/zero'
-import type {ZeroOptions} from '@rocicorp/zero'
-
-const zero = new Zero({
-  userID: userID ?? "anon"
-  // ...
-})
-```
-</CodeGroup>
-
-To this:
-
-<CodeGroup
-  labels={[
-    {text: 'React', sync: {client: 'react'}},
-    {text: 'SolidJS', sync: {client: 'solidjs'}},
-    {text: 'TypeScript', sync: {client: 'typescript'}},
-  ]}
->
-
-```tsx
-import {ZeroProvider} from '@rocicorp/zero/react'
-
-return (
-  <ZeroProvider userID={userID}>
-    <App />
-  </ZeroProvider>
-)
-```
-
-```tsx
-import {ZeroProvider} from '@rocicorp/zero/solid'
-
-return (
-  <ZeroProvider userID={userID}>
-    <App />
-  </ZeroProvider>
-)
-```
-
-```ts
-import {Zero} from '@rocicorp/zero'
-import type {ZeroOptions} from '@rocicorp/zero'
-
-const zero = new Zero({
-  userID,
-  // ...
-})
-```
-
-</CodeGroup>
 
 ### Authenticated Client Groups
 
@@ -116,17 +32,18 @@ handleQueryRequest(
     return query.fn({args})
   },
   schema,
-  request,
+  request
 )
 
 // mutate handler
 handleMutateRequest(
   dbProvider,
-  transact => transact((tx, name, args) => {
-    const mutator = mustGetMutator(mutators, name)
-    return mutator.fn({args, tx})
-  }),
-  request,
+  transact =>
+    transact((tx, name, args) => {
+      const mutator = mustGetMutator(mutators, name)
+      return mutator.fn({args, tx})
+    }),
+  request
 )
 ```
 
@@ -141,18 +58,19 @@ handleQueryRequest({
   },
   schema,
   request,
-  userID,
+  userID
 })
 
 // mutate handler
 handleMutateRequest({
   dbProvider,
-  handler: transact => transact((tx, name, args) => {
-    const mutator = mustGetMutator(mutators, name)
-    return mutator.fn({args, tx})
-  }),
+  handler: transact =>
+    transact((tx, name, args) => {
+      const mutator = mustGetMutator(mutators, name)
+      return mutator.fn({args, tx})
+    }),
   request,
-  userID,
+  userID
 })
 ```
 
@@ -164,7 +82,7 @@ Make sure to deploy `zero-cache` before your API server. This is [existing stand
 
 ## Features
 
-- [**Schema Change Hooks:**](/docs/connecting-to-postgres#schema-change-hooks) Added `zero_<shard>.update_schemas()`, so databases that do not support or allow event triggers can manually notify Zero after schema changes. The Supabase publication-change workaround is also simpler: after `ALTER PUBLICATION`, only a trailing `COMMENT ON PUBLICATION` is needed.
+- [**Schema Change Hooks:**](/docs/connecting-to-postgres#schema-change-hooks) Added `zero_<shard>.update_schemas()`, so databases that do not support or allow event triggers can manually notify Zero after schema changes.
 
 ## Performance
 
@@ -184,9 +102,8 @@ Make sure to deploy `zero-cache` before your API server. This is [existing stand
 
 ## Breaking Changes
 
-None. Two APIs were deprecated:
+None. One API was deprecated:
 
-- `userID: 'anon'` for logged-out clients
 - The positional signatures of `handleQueryRequest` and `handleMutateRequest`
 
- See [Upgrading](#upgrading) for more information.
+See [Upgrading](#upgrading) for more information.

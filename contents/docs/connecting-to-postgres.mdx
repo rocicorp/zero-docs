@@ -26,7 +26,7 @@ Zero uses Postgres “[Event Triggers](https://www.postgresql.org/docs/current/s
 
 Some hosted Postgres providers don't provide access to Event Triggers.
 
-Zero still works out of the box with these providers, but for correctness, any schema change triggers a full reset of all server-side and client-side state. For small databases (< 10GB) this can be OK, but for bigger databases we recommend choosing a provider that grants access to Event Triggers.
+Zero still works out of the box with these providers, but for correctness, any schema change triggers a full reset of all server-side and client-side state. For small databases (< 10GB) this can be OK, but for bigger databases you should either [manually tell Zero about the schema change](#schema-change-hooks) or choose a provider with event trigger support.
 
 ## Configuration
 
@@ -132,28 +132,7 @@ For `ZERO_CVR_DB` and `ZERO_CHANGE_DB`, prefer Supabase's **session** pooler. Th
 
 #### Publication Changes
 
-Supabase [does not fire DDL event triggers](https://github.com/supabase/supautils/issues/123) for `ALTER PUBLICATION`.
-
-Starting in Zero `>=v1.0`, you can work around this by bookending each `ALTER PUBLICATION` statement with `COMMENT ON PUBLICATION` statements in the same transaction:
-
-```sql
-BEGIN;
-
-COMMENT ON PUBLICATION zero_pub IS 'anything';
-
-ALTER PUBLICATION zero_pub ADD TABLE ...;
-
-COMMENT ON PUBLICATION zero_pub IS 'anything';
-
--- ... other statements ...
-
-COMMIT;
-```
-
-Both `COMMENT ON PUBLICATION` statements must target the publication being modified. All three statements must be in the same transaction, and the comment value can be anything.
-
-On non-Supabase Postgres, these `COMMENT ON PUBLICATION` statements are harmless when publication event triggers already work.
-Also, the event trigger messages emitted for this workaround are backwards compatible with the previous minor version of the processing code, so rolling back one minor version is safe.
+Supabase [does not fire DDL event triggers](https://github.com/supabase/supautils/issues/123) for `ALTER PUBLICATION`. Call a [schema change hook](#schema-change-hooks) after the `ALTER PUBLICATION` to replicate the change.
 
 #### IPv4
 
@@ -176,7 +155,7 @@ IPv4 addresses are only supported on the Pro plan and are an extra $4/month.
 
 Render _can_ work with Zero, but requires admin/support-side setup, and does not support a few core Zero features.
 
-App roles can't create [event triggers](#event-triggers), so schema changes will fall back to full resets.
+App roles can't create [event triggers](#event-triggers), so schema changes will fall back to full resets unless you use [schema change hooks](#schema-change-hooks).
 
 You also must ensure `wal_level=logical` by creating a Render support ticket.
 
@@ -191,3 +170,41 @@ If your Cloud SQL user does not have permission to create publications, you can 
 On Google Cloud SQL for PostgreSQL, enable logical decoding by turning on the instance flag `cloudsql.logical_decoding`.
 You do not set `wal_level` directly on Cloud SQL.
 See Google's documentation for details: [Configure logical replication](https://cloud.google.com/sql/docs/postgres/replication/configure-logical-replication).
+
+## Schema Change Hooks
+
+For providers that don't support or allow [event triggers](#event-triggers), Zero provides a manual hook you can call after a schema change to avoid a full reset.
+
+To enable the hook, first opt into manual DDL detection by setting `ddlDetection` to `true` in Zero's upstream shard config. With the default [app id](/docs/zero-cache-config#app-id) of `zero` and the default shard `0`, that looks like:
+
+```sql
+UPDATE zero_0."shardConfig" SET "ddlDetection" = true;
+```
+
+Then call `update_schemas()` after any DDL statements:
+
+```sql
+SELECT zero_0.update_schemas();
+```
+
+It is important to call `update_schemas()` after the DDL statements but before any dependent data changes. A good way to do this is to wrap the DDL and the `update_schemas()` call in a single transaction:
+
+```sql
+BEGIN;
+  ALTER TABLE foo ADD COLUMN bar TEXT;
+  CREATE INDEX foo_bar_idx ON foo(bar);
+  SELECT zero_0.update_schemas();
+COMMIT;
+```
+
+<Note type="note" heading="COMMENT ON PUBLICATION workaround">
+You can also tell Zero about publication changes specifically by following the `ALTER PUBLICATION` with a `COMMENT ON PUBLICATION` statement:
+
+```sql
+ALTER PUBLICATION zero_pub ADD TABLE ...;
+COMMENT ON PUBLICATION zero_pub IS 'anything';
+```
+
+It is still supported, but was replaced by `update_schemas()` because the latter is catches changes to any DDL, not just publication changes.
+
+</Note>

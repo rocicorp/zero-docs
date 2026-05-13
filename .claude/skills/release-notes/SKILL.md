@@ -95,6 +95,12 @@ Produce a release note draft that is intentionally over-inclusive so a human can
    - The description should match the `description` field in the release note's frontmatter
 3. Keep title style aligned with latest release notes.
 
+## Updating Non-Release-Note Docs
+
+When a new feature lands, the release-notes feature bullet should link to a real docs anchor — not a PR. That often means updating `contents/docs/**` to document the feature alongside the release.
+
+When updating those docs, do not mention version numbers. The main docs describe Zero's current state only; version numbers belong in release notes. Exception: a `<Note>` callout describing historical behavior or a legacy workaround may say "originally" or "previously" but should still avoid precise version numbers like `>=v1.5`.
+
 ## Output Checklist
 
 - Commit range used

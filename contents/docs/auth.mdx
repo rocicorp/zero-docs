@@ -2,16 +2,16 @@
 title: Authentication
 ---
 
-Setting up auth in Zero apps has a few steps:
+Setting up auth in Zero apps has the following steps:
 
-1. Setting the `userID` on the client
-2. Defining the `Context` type for permissions
-3. Wiring credentials to the [mutate](/docs/mutators) and [queries](/docs/queries) endpoints
-4. Logging out
+1. Set `userID` on the client
+2. Define the `Context` type for permissions
+3. Implement query and mutate endpoints
+4. Log out
 
-## Setting userID
+## Set userID on Client
 
-Authenticated Zero clients should provide a `userID` on construction:
+Your app will already know the logged-in user from whatever auth provider you use. Pass this `userID` to Zero on construction:
 
 <CodeGroup
   labels={[
@@ -23,15 +23,9 @@ Authenticated Zero clients should provide a `userID` on construction:
 
 ```tsx
 import {ZeroProvider} from '@rocicorp/zero/react'
-import type {ZeroOptions} from '@rocicorp/zero'
-
-const opts: ZeroOptions = {
-  // ...
-  userID: 'user-123'
-}
 
 return (
-  <ZeroProvider {...opts}>
+  <ZeroProvider userID={userID}>
     <App />
   </ZeroProvider>
 )
@@ -39,15 +33,9 @@ return (
 
 ```tsx
 import {ZeroProvider} from '@rocicorp/zero/solid'
-import type {ZeroOptions} from '@rocicorp/zero'
-
-const opts: ZeroOptions = {
-  // ...
-  userID: 'user-123'
-}
 
 return (
-  <ZeroProvider {...opts}>
+  <ZeroProvider userID={userID}>
     <App />
   </ZeroProvider>
 )
@@ -57,40 +45,68 @@ return (
 import {Zero} from '@rocicorp/zero'
 import type {ZeroOptions} from '@rocicorp/zero'
 
-const opts: ZeroOptions = {
+const zero = new Zero({
+  userID
   // ...
-  userID: 'user-123'
-}
-
-const zero = new Zero(opts)
+})
 ```
 
 </CodeGroup>
 
 If the user is logged out, omit `userID`, or set to `undefined` / `null`:
 
-```ts
-const opts: ZeroOptions = {
-  // ...
-  userID: undefined
-}
+<CodeGroup
+  labels={[
+    {text: 'React', sync: {client: 'react'}},
+    {text: 'SolidJS', sync: {client: 'solidjs'}},
+    {text: 'TypeScript', sync: {client: 'typescript'}},
+  ]}
+>
+
+```tsx
+import {ZeroProvider} from '@rocicorp/zero/react'
+
+return (
+  <ZeroProvider userID={null}>
+    <App />
+  </ZeroProvider>
+)
 ```
 
-Zero uses this to segregate the client-side storage for each user. This allows users to quickly switch between multiple users and accounts without resyncing.
+```tsx
+import {ZeroProvider} from '@rocicorp/zero/solid'
+
+return (
+  <ZeroProvider userID={null}>
+    <App />
+  </ZeroProvider>
+)
+```
+
+```ts
+const zero = new Zero({
+  userID: null
+  // ...
+})
+```
+
+</CodeGroup>
+
+Zero uses the `userID` field to segregate the client-side storage for each user. This allows users to quickly switch between multiple users and accounts without resyncing.
 
 <Note
   emoji="🧑‍🏫"
-  type="warning"
-  heading="`userID` is not a security boundary"
+  type="note"
+  heading="Users that have share computers have access to each others' data"
   slug="user-id-is-not-a-security-boundary"
 >
-  All users that have access to a browser profile have
-  access to the same IndexedDB instances. There is nothing
+  There is nothing
   that Zero can do about this – users can just open the
   folder where the data is stored and look inside it.
-</Note>
 
-If you do not want Zero to store synced data in IndexedDB on the client, set `kvStore: 'mem'` in your `ZeroOptions`. This uses in-memory storage instead, so data is not persisted on the device and is cleared on full reloads and browser restarts.
+If preventing this is important to you, set `kvStore: 'mem'` in your `ZeroOptions`. This uses in-memory storage instead, so data is not persisted on the device and is cleared on full reloads and browser restarts.
+
+</Note>
 
 If you have more than one set of Zero data per-user (i.e., for different apps in the same domain), you can additionally use the `storageKey` parameter:
 
@@ -109,7 +125,7 @@ If specified, `storageKey` is concatenated along with `userID` and other interna
   caption="Zero's IndexedDB databases are prefixed with 'rep' or 'replicache' because reasons."
 />
 
-## Context
+## Define the `Context` Type
 
 When a user is authenticated, you will want to know who they are in your [queries](/docs/queries) and [mutators](/docs/mutators) to enforce permissions.
 
@@ -155,9 +171,9 @@ const opts: ZeroOptions = {
 }
 ```
 
-## Sending Credentials
+## Send Credentials
 
-You can send credentials using either cookies or tokens.
+Both cookies and tokens are supported.
 
 ### Cookies
 
@@ -172,24 +188,7 @@ export ZERO_MUTATE_FORWARD_COOKIES="true"
 # run zero-cache, e.g. `npx zero-cache-dev`
 ```
 
-Zero-cache will then forward all cookies sent to `cacheURL` to your [mutators](/docs/mutators) and [queries](/docs/queries) endpoints:
-
-```tsx
-const opts: ZeroOptions = {
-  schema,
-  // Cookies sent to zero.example.com will be forwarded to
-  // api.example.com/mutate and api.example.com/queries.
-  cacheURL: 'https://zero.example.com',
-  mutateURL: 'https://api.example.com/mutate',
-  queryURL: 'https://api.example.com/queries'
-}
-```
-
-Cookies will show up in the normal HTTP `Cookie` header and you can authenticate these endpoints just like you would any API request.
-
-#### Query Handler
-
-You can now build `ctx` from the validated cookie and pass it to your queries to enforce permissions.
+Zero-cache will then forward all cookies sent to `cacheURL` to your [mutators](/docs/mutators) and [queries](/docs/queries) endpoints. Cookies will show up in the normal HTTP `Cookie` header and you can authenticate these endpoints just like you would any API request:
 
 <CodeGroup
   labels={[
@@ -203,10 +202,6 @@ You can now build `ctx` from the validated cookie and pass it to your queries to
 ```ts
 // src/routes/api/zero/query.ts
 import {createFileRoute} from '@tanstack/react-router'
-import {handleQueryRequest} from '@rocicorp/zero/server'
-import {mustGetQuery} from '@rocicorp/zero'
-import {queries} from 'queries.ts'
-import {schema} from 'schema.ts'
 
 export const Route = createFileRoute('/api/zero/query')({
   server: {
@@ -215,20 +210,7 @@ export const Route = createFileRoute('/api/zero/query')({
         const session = await authenticate(
           request.headers.get('Cookie')
         )
-
-        const result = await handleQueryRequest(
-          (name, args) => {
-            const query = mustGetQuery(queries, name)
-            return query.fn({
-              args,
-              ctx: session?.user
-            })
-          },
-          schema,
-          request
-        )
-
-        return Response.json(result)
+        // ... handle query ...
       }
     }
   }
@@ -237,68 +219,29 @@ export const Route = createFileRoute('/api/zero/query')({
 
 ```ts
 // app/api/zero/query/route.ts
-import {handleQueryRequest} from '@rocicorp/zero/server'
-import {mustGetQuery} from '@rocicorp/zero'
-import {queries} from 'queries.ts'
-import {schema} from 'schema.ts'
-
-export async function POST(req: Request) {
+export async function POST(request: Request) {
   const session = await authenticate(
-    req.headers.get('Cookie')
+    request.headers.get('Cookie')
   )
-
-  const result = await handleQueryRequest(
-    (name, args) => {
-      const query = mustGetQuery(queries, name)
-      return query.fn({
-        args,
-        ctx: session?.user
-      })
-    },
-    schema,
-    req
-  )
-
-  return Response.json(result)
+  // ... handle query ...
 }
 ```
 
 ```ts
 // src/routes/api/zero/query.ts
 import type {APIEvent} from '@solidjs/start/server'
-import {handleQueryRequest} from '@rocicorp/zero/server'
-import {mustGetQuery} from '@rocicorp/zero'
-import {queries} from 'queries.ts'
-import {schema} from 'schema.ts'
 
 export async function POST(event: APIEvent) {
   const session = await authenticate(
     event.request.headers.get('Cookie')
   )
-
-  const result = await handleQueryRequest(
-    (name, args) => {
-      const query = mustGetQuery(queries, name)
-      return query.fn({
-        args,
-        ctx: session?.user
-      })
-    },
-    schema,
-    event.request
-  )
-
-  return Response.json(result)
+  // ... handle query ...
 }
 ```
 
 ```ts
 // api/app.ts
 import {Hono} from 'hono'
-import {handleQueryRequest} from '@rocicorp/zero/server'
-import {mustGetQuery} from '@rocicorp/zero'
-import {queries} from 'queries.ts'
-import {schema} from 'schema.ts'
 
 const app = new Hono()
 
@@ -307,173 +250,13 @@ app.post('/api/zero/query', async c => {
   const session = await authenticate(
     request.headers.get('Cookie')
   )
-
-  const result = await handleQueryRequest(
-    (name, args) => {
-      const query = mustGetQuery(queries, name)
-      return query.fn({
-        args,
-        ctx: session?.user
-      })
-    },
-    schema,
-    request
-  )
-
-  return c.json(result)
+  // ... handle query ...
 })
 ```
 
 </CodeGroup>
 
-#### Mutate Handler
-
-You can now also build `ctx` from the validated cookie and pass it to your mutators to enforce permissions.
-
-<CodeGroup
-  labels={[
-    {text: 'Tanstack Start', sync: {api: 'tanstack'}},
-    {text: 'Next.js', sync: {api: 'nextjs'}},
-    {text: 'Solid Start', sync: {api: 'solid'}},
-    {text: 'Hono', sync: {api: 'hono'}},
-  ]}
->
-
-```ts
-// src/routes/api/zero/mutate.ts
-import {createFileRoute} from '@tanstack/react-router'
-import {handleMutateRequest} from '@rocicorp/zero/server'
-import {mustGetMutator} from '@rocicorp/zero'
-import {mutators} from 'mutators.ts'
-import {dbProvider} from 'db-provider.ts'
-
-export const Route = createFileRoute('/api/zero/mutate')({
-  server: {
-    handlers: {
-      POST: async ({request}) => {
-        const session = await authenticate(
-          request.headers.get('Cookie')
-        )
-
-        const result = await handleMutateRequest(
-          dbProvider,
-          transact =>
-            transact((tx, name, args) => {
-              const mutator = mustGetMutator(mutators, name)
-              return mutator.fn({
-                args,
-                tx,
-                ctx: session?.user
-              })
-            }),
-          request
-        )
-
-        return Response.json(result)
-      }
-    }
-  }
-})
-```
-
-```ts
-// app/api/zero/mutate/route.ts
-import {handleMutateRequest} from '@rocicorp/zero/server'
-import {mustGetMutator} from '@rocicorp/zero'
-import {mutators} from 'mutators.ts'
-import {dbProvider} from 'db-provider.ts'
-
-export async function POST(req: Request) {
-  const session = await authenticate(
-    req.headers.get('Cookie')
-  )
-
-  const result = await handleMutateRequest(
-    dbProvider,
-    transact =>
-      transact((tx, name, args) => {
-        const mutator = mustGetMutator(mutators, name)
-        return mutator.fn({
-          args,
-          tx,
-          ctx: session?.user
-        })
-      }),
-    req
-  )
-
-  return Response.json(result)
-}
-```
-
-```ts
-// src/routes/api/zero/mutate.ts
-import type {APIEvent} from '@solidjs/start/server'
-import {handleMutateRequest} from '@rocicorp/zero/server'
-import {mustGetMutator} from '@rocicorp/zero'
-import {mutators} from 'mutators.ts'
-import {dbProvider} from 'db-provider.ts'
-
-export async function POST(event: APIEvent) {
-  const session = await authenticate(
-    event.request.headers.get('Cookie')
-  )
-
-  const result = await handleMutateRequest(
-    dbProvider,
-    transact =>
-      transact((tx, name, args) => {
-        const mutator = mustGetMutator(mutators, name)
-        return mutator.fn({
-          args,
-          tx,
-          ctx: session?.user
-        })
-      }),
-    event.request
-  )
-
-  return Response.json(result)
-}
-```
-
-```ts
-// api/app.ts
-import {Hono} from 'hono'
-import {handleMutateRequest} from '@rocicorp/zero/server'
-import {mustGetMutator} from '@rocicorp/zero'
-import {mutators} from 'mutators.ts'
-import {dbProvider} from './db-provider.ts'
-
-const app = new Hono()
-
-app.post('/api/zero/mutate', async c => {
-  const request = c.req.raw
-  const session = await authenticate(
-    request.headers.get('Cookie')
-  )
-
-  const result = await handleMutateRequest(
-    dbProvider,
-    transact =>
-      transact((tx, name, args) => {
-        const mutator = mustGetMutator(mutators, name)
-        return mutator.fn({
-          args,
-          tx,
-          ctx: session?.user
-        })
-      }),
-    request
-  )
-
-  return c.json(result)
-})
-```
-
-</CodeGroup>
-
-#### Deployment
+### Cookie Deployment
 
 In order for cookie auth to work, the browser must send your frontend's cookies to `zero-cache`, so that `zero-cache` can forward them to your API.
 
@@ -502,22 +285,117 @@ Zero also supports token-based authentication.
 
 If you have an opaque auth token, such as a JWT or a token from your auth provider, you can pass it to Zero's `auth` parameter:
 
+<CodeGroup
+  labels={[
+    {text: 'React', sync: {client: 'react'}},
+    {text: 'SolidJS', sync: {client: 'solidjs'}},
+    {text: 'TypeScript', sync: {client: 'typescript'}},
+  ]}
+>
+
+```tsx
+import {ZeroProvider} from '@rocicorp/zero/react'
+
+return (
+  <ZeroProvider userID={userID} auth={token}>
+    <App />
+  </ZeroProvider>
+)
+```
+
+```tsx
+import {ZeroProvider} from '@rocicorp/zero/solid'
+
+return (
+  <ZeroProvider userID={userID} auth={token}>
+    <App />
+  </ZeroProvider>
+)
+```
+
 ```ts
-const opts: ZeroOptions = {
-  // ...
-  userID: 'user-123',
+const zero = new Zero({
+  userID,
   auth: token
+  // ...
+})
+```
+
+</CodeGroup>
+
+Zero will forward this token to your [mutators](/docs/mutators) and [queries](/docs/queries) endpoints in an `Authorization: Bearer <token>` header:
+
+<CodeGroup
+  labels={[
+    {text: 'Tanstack Start', sync: {api: 'tanstack'}},
+    {text: 'Next.js', sync: {api: 'nextjs'}},
+    {text: 'Solid Start', sync: {api: 'solid'}},
+    {text: 'Hono', sync: {api: 'hono'}},
+  ]}
+>
+
+```ts
+// src/routes/api/zero/query.ts
+import {createFileRoute} from '@tanstack/react-router'
+
+export const Route = createFileRoute('/api/zero/query')({
+  server: {
+    handlers: {
+      POST: async ({request}) => {
+        const session = await authenticate(
+          request.headers.get('Cookie')
+        )
+        // ... handle query ...
+      }
+    }
+  }
+})
+```
+
+```ts
+// app/api/zero/query/route.ts
+export async function POST(request: Request) {
+  const session = await authenticate(
+    request.headers.get('Cookie')
+  )
+  // ... handle query ...
 }
 ```
 
-If you set `auth`, you must also set `userID` to the authenticated user's ID.
+```ts
+// src/routes/api/zero/query.ts
+import type {APIEvent} from '@solidjs/start/server'
 
-Zero will forward this token to your [mutators](/docs/mutators) and [queries](/docs/queries) endpoints in an `Authorization: Bearer <token>` header.
-Authenticate the request first and derive your context from it when invoking your query and mutator implementations.
+export async function POST(event: APIEvent) {
+  const session = await authenticate(
+    event.request.headers.get('Cookie')
+  )
+  // ... handle query ...
+}
+```
 
-#### Query Handler
+```ts
+// api/app.ts
+import {Hono} from 'hono'
 
-You can now build `ctx` from the validated token header and pass it to your queries to enforce permissions.
+const app = new Hono()
+
+app.post('/api/zero/query', async c => {
+  const request = c.req.raw
+  const session = await authenticate(
+    request.headers.get('Cookie')
+  )
+  // ... handle query ...
+})
+```
+
+</CodeGroup>
+
+## Implement API Endpoints
+
+Create a Context object from the validated credentials and pass it to your [query](/docs/queries#server-setup) and [mutator](/docs/mutators#server-setup) functions.
+
+### Query
 
 <CodeGroup
   labels={[
@@ -541,11 +419,11 @@ export const Route = createFileRoute('/api/zero/query')({
     handlers: {
       POST: async ({request}) => {
         const session = await authenticate(
-          request.headers.get('Authorization')
+          request.headers.get('Cookie')
         )
 
-        const result = await handleQueryRequest(
-          (name, args) => {
+        const result = await handleQueryRequest({
+          handler: (name, args) => {
             const query = mustGetQuery(queries, name)
             return query.fn({
               args,
@@ -553,8 +431,9 @@ export const Route = createFileRoute('/api/zero/query')({
             })
           },
           schema,
-          request
-        )
+          request,
+          userID: session?.user?.id
+        })
 
         return Response.json(result)
       }
@@ -570,13 +449,13 @@ import {mustGetQuery} from '@rocicorp/zero'
 import {queries} from 'queries.ts'
 import {schema} from 'schema.ts'
 
-export async function POST(req: Request) {
+export async function POST(request: Request) {
   const session = await authenticate(
-    req.headers.get('Authorization')
+    request.headers.get('Cookie')
   )
 
-  const result = await handleQueryRequest(
-    (name, args) => {
+  const result = await handleQueryRequest({
+    handler: (name, args) => {
       const query = mustGetQuery(queries, name)
       return query.fn({
         args,
@@ -584,8 +463,9 @@ export async function POST(req: Request) {
       })
     },
     schema,
-    req
-  )
+    request,
+    userID: session?.user?.id
+  })
 
   return Response.json(result)
 }
@@ -601,11 +481,11 @@ import {schema} from 'schema.ts'
 
 export async function POST(event: APIEvent) {
   const session = await authenticate(
-    event.request.headers.get('Authorization')
+    event.request.headers.get('Cookie')
   )
 
-  const result = await handleQueryRequest(
-    (name, args) => {
+  const result = await handleQueryRequest({
+    handler: (name, args) => {
       const query = mustGetQuery(queries, name)
       return query.fn({
         args,
@@ -613,8 +493,9 @@ export async function POST(event: APIEvent) {
       })
     },
     schema,
-    event.request
-  )
+    request: event.request,
+    userID: session?.user?.id
+  })
 
   return Response.json(result)
 }
@@ -633,11 +514,11 @@ const app = new Hono()
 app.post('/api/zero/query', async c => {
   const request = c.req.raw
   const session = await authenticate(
-    request.headers.get('Authorization')
+    request.headers.get('Cookie')
   )
 
-  const result = await handleQueryRequest(
-    (name, args) => {
+  const result = await handleQueryRequest({
+    handler: (name, args) => {
       const query = mustGetQuery(queries, name)
       return query.fn({
         args,
@@ -645,8 +526,9 @@ app.post('/api/zero/query', async c => {
       })
     },
     schema,
-    request
-  )
+    request,
+    userID: session?.user?.id
+  })
 
   return c.json(result)
 })
@@ -654,9 +536,7 @@ app.post('/api/zero/query', async c => {
 
 </CodeGroup>
 
-#### Mutate Handler
-
-You can now also build `ctx` from the validated token header and pass it to your mutators to enforce permissions.
+### Mutate
 
 <CodeGroup
   labels={[
@@ -683,9 +563,9 @@ export const Route = createFileRoute('/api/zero/mutate')({
           request.headers.get('Authorization')
         )
 
-        const result = await handleMutateRequest(
+        const result = await handleMutateRequest({
           dbProvider,
-          transact =>
+          handler: transact =>
             transact((tx, name, args) => {
               const mutator = mustGetMutator(mutators, name)
               return mutator.fn({
@@ -694,8 +574,9 @@ export const Route = createFileRoute('/api/zero/mutate')({
                 ctx: session?.user
               })
             }),
-          request
-        )
+          request,
+          userID: session?.user?.id
+        })
 
         return Response.json(result)
       }
@@ -711,14 +592,14 @@ import {mustGetMutator} from '@rocicorp/zero'
 import {mutators} from 'mutators.ts'
 import {dbProvider} from 'db-provider.ts'
 
-export async function POST(req: Request) {
+export async function POST(request: Request) {
   const session = await authenticate(
-    req.headers.get('Authorization')
+    request.headers.get('Authorization')
   )
 
-  const result = await handleMutateRequest(
+  const result = await handleMutateRequest({
     dbProvider,
-    transact =>
+    handler: transact =>
       transact((tx, name, args) => {
         const mutator = mustGetMutator(mutators, name)
         return mutator.fn({
@@ -727,8 +608,9 @@ export async function POST(req: Request) {
           ctx: session?.user
         })
       }),
-    req
-  )
+    request,
+    userID: session?.user?.id
+  })
 
   return Response.json(result)
 }
@@ -747,9 +629,9 @@ export async function POST(event: APIEvent) {
     event.request.headers.get('Authorization')
   )
 
-  const result = await handleMutateRequest(
+  const result = await handleMutateRequest({
     dbProvider,
-    transact =>
+    handler: transact =>
       transact((tx, name, args) => {
         const mutator = mustGetMutator(mutators, name)
         return mutator.fn({
@@ -758,8 +640,9 @@ export async function POST(event: APIEvent) {
           ctx: session?.user
         })
       }),
-    event.request
-  )
+    request: event.request,
+    userID: session?.user?.id
+  })
 
   return Response.json(result)
 }
@@ -781,9 +664,9 @@ app.post('/api/zero/mutate', async c => {
     request.headers.get('Authorization')
   )
 
-  const result = await handleMutateRequest(
+  const result = await handleMutateRequest({
     dbProvider,
-    transact =>
+    handler: transact =>
       transact((tx, name, args) => {
         const mutator = mustGetMutator(mutators, name)
         return mutator.fn({
@@ -792,14 +675,36 @@ app.post('/api/zero/mutate', async c => {
           ctx: session?.user
         })
       }),
-    request
-  )
+    request,
+    userID: session?.user?.id
+  })
 
   return c.json(result)
 })
 ```
 
 </CodeGroup>
+
+<Note
+  type="note"
+  heading="Why pass `userID` to `handleMutateRequest` and `handleQueryRequest`?"
+  slug="server-verified-user-id"
+>
+  Tabs in the same browser share synced data. This group of
+  tabs is called a "client group", keyed by `clientGroupID`.
+  New tabs join a client group by providing the
+  `clientGroupID` during connection.
+
+  The `clientGroupID` is
+  randomly-generated client-side and non-trivial for
+  attackers to guess. However, it could be stolen with XSS
+  or leaked in logs.
+
+  Passing the server-verified `userID` to
+  `handleMutateRequest` and `handleQueryRequest` lets Zero
+  enforce that only tabs belonging to the same user can be
+  in the same client group.
+</Note>
 
 ## Updating Tokens
 

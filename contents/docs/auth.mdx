@@ -432,7 +432,7 @@ export const Route = createFileRoute('/api/zero/query')({
           },
           schema,
           request,
-          userID: session?.user?.id ?? null
+          userID: session?.user?.id
         })
 
         return Response.json(result)
@@ -464,7 +464,7 @@ export async function POST(request: Request) {
     },
     schema,
     request,
-    userID: session?.user?.id ?? null
+    userID: session?.user?.id
   })
 
   return Response.json(result)
@@ -494,7 +494,7 @@ export async function POST(event: APIEvent) {
     },
     schema,
     request: event.request,
-    userID: session?.user?.id ?? null
+    userID: session?.user?.id
   })
 
   return Response.json(result)
@@ -527,7 +527,7 @@ app.post('/api/zero/query', async c => {
     },
     schema,
     request,
-    userID: session?.user?.id ?? null
+    userID: session?.user?.id
   })
 
   return c.json(result)
@@ -575,7 +575,7 @@ export const Route = createFileRoute('/api/zero/mutate')({
               })
             }),
           request,
-          userID: session?.user?.id ?? null
+          userID: session?.user?.id
         })
 
         return Response.json(result)
@@ -609,7 +609,7 @@ export async function POST(request: Request) {
         })
       }),
     request,
-    userID: session?.user?.id ?? null
+    userID: session?.user?.id
   })
 
   return Response.json(result)
@@ -641,7 +641,7 @@ export async function POST(event: APIEvent) {
         })
       }),
     request: event.request,
-    userID: session?.user?.id ?? null
+    userID: session?.user?.id
   })
 
   return Response.json(result)
@@ -676,7 +676,7 @@ app.post('/api/zero/mutate', async c => {
         })
       }),
     request,
-    userID: session?.user?.id ?? null
+    userID: session?.user?.id
   })
 
   return c.json(result)

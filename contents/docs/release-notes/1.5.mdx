@@ -158,6 +158,10 @@ This is a security enhancement and is recommended for all users. See [Why pass `
 
 Make sure to deploy `zero-cache` before your API server. This is [existing standard practice](/docs/self-host#rolling-updates) for Zero, but it matters for this release because the 1.5 `handleQueryRequest` and `handleMutateRequest` helpers return a new response shape that `zero-cache` 1.4 cannot parse.
 
+### Examples
+
+See [ztunes](https://github.com/rocicorp/ztunes/pull/33) and [hello-zero-solid](https://github.com/rocicorp/hello-zero-solid/pull/35) for example upgrades.
+
 
 ## Features
 

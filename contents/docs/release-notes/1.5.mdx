@@ -74,7 +74,7 @@ handleMutateRequest({
 })
 ```
 
-This is a security enhancement and is recommended for all users. See [Why pass `userID` back to Zero?](/docs/auth#server-verified-user-id) and [PR 5836](https://github.com/rocicorp/mono/pull/5836) for more information. The old signature is still supported but deprecated.
+This is a security enhancement and is recommended for all users. See [Why pass `userID` back to Zero?](/docs/auth#authenticated-client-groups) and [PR 5836](https://github.com/rocicorp/mono/pull/5836) for more information. The old signature is still supported but deprecated.
 
 ### Deploy Order
 
@@ -83,6 +83,7 @@ Make sure to deploy `zero-cache` before your API server. This is [existing stand
 ## Features
 
 - [**Schema Change Hooks:**](/docs/connecting-to-postgres#schema-change-hooks) Added `zero_<shard>.update_schemas()`, so databases that do not support or allow event triggers can manually notify Zero after schema changes.
+- [**Authenticated Client Groups:**](/docs/auth#authenticated-client-groups) `handleQueryRequest` and `handleMutateRequest` now takes a `userID` parameter. This enables Zero to enforce that only tabs belonging to the same user can be in the same client group.
 
 ## Performance
 
@@ -90,7 +91,6 @@ Make sure to deploy `zero-cache` before your API server. This is [existing stand
 
 ## Fixes
 
-- [`zero-cache` enforces that authenticated `userID` matches clientGroup](https://github.com/rocicorp/mono/pull/5836)
 - [`CREATE/DROP INDEX CONCURRENTLY` could break replication](https://github.com/rocicorp/mono/pull/5895)
 - [Long-lived connections could miss periodic auth revalidation](https://github.com/rocicorp/mono/pull/5838)
 - [Allow omitting `ctx` param when no context type is defined](https://github.com/rocicorp/mono/pull/5885)

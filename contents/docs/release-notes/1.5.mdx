@@ -11,6 +11,10 @@ npm install @rocicorp/zero@1.5
 
 ## Upgrading
 
+<Note emoji="👨‍🏫" heading="Example Upgrades">
+See [ztunes](https://github.com/rocicorp/ztunes/pull/33) and [hello-zero-solid](https://github.com/rocicorp/hello-zero-solid/pull/35) for examples of how to upgrade to Zero 1.5.
+</Note>
+
 ### userID: "anon"
 
 If you are using `userID: 'anon'` for logged-out users, change it to `userID: null` or `userID: undefined`. Passing `userID: 'anon'` is deprecated because it can't work with Authenticated Client Groups (below).
@@ -157,11 +161,6 @@ This is a security enhancement and is recommended for all users. See [Why pass `
 ### Deploy Order
 
 Make sure to deploy `zero-cache` before your API server. This is [existing standard practice](/docs/self-host#rolling-updates) for Zero, but it matters for this release because the 1.5 `handleQueryRequest` and `handleMutateRequest` helpers return a new response shape that `zero-cache` 1.4 cannot parse.
-
-### Examples
-
-See [ztunes](https://github.com/rocicorp/ztunes/pull/33) and [hello-zero-solid](https://github.com/rocicorp/hello-zero-solid/pull/35) for example upgrades.
-
 
 ## Features
 

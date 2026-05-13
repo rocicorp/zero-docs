@@ -702,7 +702,7 @@ import {mustGetMutator} from '@rocicorp/zero'
 import {mutators} from 'mutators.ts'
 import {dbProvider} from 'db-provider.ts'
 
-export async function POST(req: Request) {
+export async function POST(request: Request) {
   const result = await handleMutateRequest({
     dbProvider,
     handler: transact =>
@@ -710,7 +710,7 @@ export async function POST(req: Request) {
         const mutator = mustGetMutator(mutators, name)
         return mutator.fn({args, tx})
       }),
-    request: req,
+    request,
     userID: null
   })
 
@@ -1194,7 +1194,7 @@ export const Route = createFileRoute('/api/zero/mutate')({
 ```
 
 ```ts
-export async function POST(req: Request) {
+export async function POST(request: Request) {
   const asyncTasks: Array<() => Promise<void>> = []
   const mutators = createMutators(asyncTasks)
 
@@ -1205,7 +1205,7 @@ export async function POST(req: Request) {
         const mutator = mustGetMutator(mutators, name)
         return mutator.fn({tx, args})
       }),
-    request: req,
+    request,
     userID: null
   })
 

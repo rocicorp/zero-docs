@@ -219,9 +219,9 @@ export const Route = createFileRoute('/api/zero/query')({
 
 ```ts
 // app/api/zero/query/route.ts
-export async function POST(req: Request) {
+export async function POST(request: Request) {
   const session = await authenticate(
-    req.headers.get('Cookie')
+    request.headers.get('Cookie')
   )
   // ... handle query ...
 }
@@ -354,9 +354,9 @@ export const Route = createFileRoute('/api/zero/query')({
 
 ```ts
 // app/api/zero/query/route.ts
-export async function POST(req: Request) {
+export async function POST(request: Request) {
   const session = await authenticate(
-    req.headers.get('Cookie')
+    request.headers.get('Cookie')
   )
   // ... handle query ...
 }
@@ -449,9 +449,9 @@ import {mustGetQuery} from '@rocicorp/zero'
 import {queries} from 'queries.ts'
 import {schema} from 'schema.ts'
 
-export async function POST(req: Request) {
+export async function POST(request: Request) {
   const session = await authenticate(
-    req.headers.get('Cookie')
+    request.headers.get('Cookie')
   )
 
   const result = await handleQueryRequest({
@@ -463,7 +463,7 @@ export async function POST(req: Request) {
       })
     },
     schema,
-    request: req,
+    request,
     userID: session?.user?.id ?? null
   })
 
@@ -592,9 +592,9 @@ import {mustGetMutator} from '@rocicorp/zero'
 import {mutators} from 'mutators.ts'
 import {dbProvider} from 'db-provider.ts'
 
-export async function POST(req: Request) {
+export async function POST(request: Request) {
   const session = await authenticate(
-    req.headers.get('Authorization')
+    request.headers.get('Authorization')
   )
 
   const result = await handleMutateRequest({
@@ -608,7 +608,7 @@ export async function POST(req: Request) {
           ctx: session?.user
         })
       }),
-    request: req,
+    request,
     userID: session?.user?.id ?? null
   })
 

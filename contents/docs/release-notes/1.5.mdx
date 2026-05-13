@@ -11,13 +11,101 @@ npm install @rocicorp/zero@1.5
 
 ## Upgrading
 
-### handleQueryRequest / handleMutateRequest
+### userID: "anon"
 
-The `handleQueryRequest` and `handleMutateRequest` helpers now take a single options object instead of multiple arguments. They also require a `userID` parameter.
+If you are using `userID: 'anon'` for logged-out users, change it to `userID: null` or `userID: undefined`. Passing `userID: 'anon'` is deprecated because it can't work with Authenticated Client Groups (below).
+
+Change this:
+
+<CodeGroup
+  labels={[
+    {text: 'React', sync: {client: 'react'}},
+    {text: 'SolidJS', sync: {client: 'solidjs'}},
+    {text: 'TypeScript', sync: {client: 'typescript'}},
+  ]}
+>
+
+```tsx
+import {ZeroProvider} from '@rocicorp/zero/react'
+
+return (
+  <ZeroProvider userID={userID ?? "anon"}>
+    <App />
+  </ZeroProvider>
+)
+```
+
+```tsx
+import {ZeroProvider} from '@rocicorp/zero/solid'
+
+return (
+  <ZeroProvider userID={userID ?? "anon"}>
+    <App />
+  </ZeroProvider>
+)
+```
+
+```ts
+import {Zero} from '@rocicorp/zero'
+import type {ZeroOptions} from '@rocicorp/zero'
+
+const zero = new Zero({
+  userID: userID ?? "anon"
+  // ...
+})
+```
+</CodeGroup>
+
+To this:
+
+<CodeGroup
+  labels={[
+    {text: 'React', sync: {client: 'react'}},
+    {text: 'SolidJS', sync: {client: 'solidjs'}},
+    {text: 'TypeScript', sync: {client: 'typescript'}},
+  ]}
+>
+
+```tsx
+import {ZeroProvider} from '@rocicorp/zero/react'
+
+return (
+  <ZeroProvider userID={userID}>
+    <App />
+  </ZeroProvider>
+)
+```
+
+```tsx
+import {ZeroProvider} from '@rocicorp/zero/solid'
+
+return (
+  <ZeroProvider userID={userID}>
+    <App />
+  </ZeroProvider>
+)
+```
+
+```ts
+import {Zero} from '@rocicorp/zero'
+import type {ZeroOptions} from '@rocicorp/zero'
+
+const zero = new Zero({
+  userID,
+  // ...
+})
+```
+
+</CodeGroup>
+
+### Authenticated Client Groups
+
+The `handleQueryRequest` and `handleMutateRequest` helpers now take an options object instead of multiple arguments. They also require a new `userID` parameter.
 
 Change this:
 
 ```ts
+// query handler
 handleQueryRequest(
   (name, args) => {
     const query = mustGetQuery(queries, name)
@@ -27,6 +115,7 @@ handleQueryRequest(
   request,
 )
 
+// mutate handler
 handleMutateRequest(
   dbProvider,
   transact => transact((tx, name, args) => {
@@ -39,7 +128,8 @@ handleMutateRequest(
 
 To this:
 
-```ts
+```ts {2-3,9-10,13,15,20-21}
+// query handler
 handleQueryRequest({
   handler: (name, args) => {
     const query = mustGetQuery(queries, name)
@@ -50,6 +140,7 @@ handleQueryRequest({
   userID,
 })
 
+// mutate handler
 handleMutateRequest({
   dbProvider,
   handler: transact => transact((tx, name, args) => {
@@ -61,7 +152,7 @@ handleMutateRequest({
 })
 ```
 
-This is a security enhancement and is recommended for all users. The old signature is still supported but deprecated. See [Why pass `userID` back to Zero?](/docs/auth#server-verified-user-id) and [PR 5836](https://github.com/rocicorp/mono/pull/5836) for more information.
+This is a security enhancement and is recommended for all users. See [Why pass `userID` back to Zero?](/docs/auth#server-verified-user-id) and [PR 5836](https://github.com/rocicorp/mono/pull/5836) for more information. The old signature is still supported but deprecated.
 
 ### Deploy Order
 
@@ -90,4 +181,9 @@ Make sure to deploy `zero-cache` before your API server. This is [existing stand
 
 ## Breaking Changes
 
-None. The old positional signatures of `handleQueryRequest` and `handleMutateRequest` are deprecated but still work — see [Upgrading](#upgrading).
+None. Two APIs were deprecated:
+
+- `userID: 'anon'` for logged-out clients
+- The positional signatures of `handleQueryRequest` and `handleMutateRequest`
+
+ See [Upgrading](#upgrading) for more information.

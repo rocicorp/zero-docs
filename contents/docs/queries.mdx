@@ -316,14 +316,14 @@ import {mustGetQuery} from '@rocicorp/zero'
 import {queries} from 'queries.ts'
 import {schema} from 'schema.ts'
 
-export async function POST(req: Request) {
+export async function POST(request: Request) {
   const result = await handleQueryRequest({
     handler: (name, args) => {
       const query = mustGetQuery(queries, name)
       return query.fn({args})
     },
     schema,
-    request: req,
+    request,
     userID: null
   })
 

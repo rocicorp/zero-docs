@@ -1,0 +1,813 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Package Lock Dependency Changes</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+    body {
+      margin: 0;
+      background: #f7f7fb;
+      color: #20242b;
+    }
+    .container {
+      padding: 24px;
+    }
+    h1 {
+      margin-top: 0;
+      font-size: 24px;
+    }
+    .meta {
+      margin-bottom: 16px;
+      font-size: 13px;
+      line-height: 1.6;
+      color: #4d5562;
+    }
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-top: 8px;
+      margin-bottom: 8px;
+      color: #20242b;
+    }
+    .filters label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+    }
+    .table-wrap {
+      overflow: auto;
+      border: 1px solid #d8dde8;
+      border-radius: 8px;
+      background: #fff;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 1400px;
+      font-size: 12px;
+    }
+    th,
+    td {
+      border-bottom: 1px solid #eef1f6;
+      padding: 8px;
+      text-align: left;
+      vertical-align: top;
+    }
+    th {
+      position: sticky;
+      top: 0;
+      background: #f0f4fb;
+      font-weight: 700;
+      z-index: 1;
+    }
+    tr:nth-child(even) td {
+      background: #fbfdff;
+    }
+    tr.vuln-row td {
+      background: #fff4f1;
+    }
+    tr.vuln-resolved-row td {
+      background: #eef9eb;
+    }
+    a {
+      color: #0d4aa8;
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+    .optional-col {
+      display: none;
+    }
+    #report-root.show-extra-columns .optional-col {
+      display: table-cell;
+    }
+    .date-col {
+      white-space: nowrap;
+    }
+  </style>
+</head>
+<body>
+  <div class="container" id="report-root">
+    <h1>Package Lock Dependency Changes</h1>
+    <div class="meta">
+      <div><strong>Generated:</strong> 2026-05-18T13:00:18.857Z</div>
+      <div><strong>Since:</strong> 6 months ago</div>
+      <div><strong>Commits scanned:</strong> 20</div>
+      <div><strong>Visible rows:</strong> <span id="visible-row-count">30</span> / 30</div>
+      <div class="filters">
+        <label><input id="hide-fixed" type="checkbox"> Hide fixed</label>
+        <label><input id="show-all-deps" type="checkbox" > Show all deps changes</label>
+        <label><input id="show-extra-columns" type="checkbox"> Show extra columns</label>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table class="report-table">
+        <thead>
+          <tr>
+            <th>SHA</th>
+            <th>Date</th>
+            <th class="optional-col">Lockfile</th>
+            <th class="optional-col">Workspace</th>
+            <th class="optional-col">Section</th>
+            <th>Dependency</th>
+            <th>Change</th>
+            <th class="optional-col">Spec Before</th>
+            <th class="optional-col">Spec After</th>
+            <th>Resolved Before</th>
+            <th>Resolved After</th>
+            <th>Present Date Start</th>
+            <th>Present Date End</th>
+            <th>Present Commit Start</th>
+            <th>Present Commit End</th>
+            <th>Known Vulns Before</th>
+            <th>Known Vulns After</th>
+            <th>Subject</th>
+          </tr>
+        </thead>
+        <tbody>
+
+      <tr class="" data-row-type="none" data-is-fixed="false">
+        <td><a href="https://github.com/rocicorp/zero-docs/commit/d273c57e4380fa7ccd0d59f183c1fcb5b9970a40" target="_blank" rel="noopener noreferrer">d273c57e4380</a></td>
+        <td class="date-col">2026-05-18</td>
+        <td class="optional-col">package-lock.json</td>
+        <td class="optional-col">.</td>
+        <td class="optional-col">dependencies</td>
+        <td><a href="https://npmx.dev/search?q=%40rocicorp%2Fzero" target="_blank" rel="noopener noreferrer">@rocicorp/zero</a></td>
+        <td>updated</td>
+        <td class="optional-col">^0.25.3</td>
+        <td class="optional-col">^0.25.3</td>
+        <td>0.25.3</td>
+        <td>0.25.13</td>
+        <td class="date-col">2026-05-18</td>
+        <td class="date-col"></td>
+        <td><a href="https://github.com/rocicorp/zero-docs/commit/d273c57e4380fa7ccd0d59f183c1fcb5b9970a40" target="_blank" rel="noopener noreferrer">d273c57e4380</a></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td>chore: npm audit fix (#296)</td>
+      </tr>
+
+      <tr class="vuln-resolved-row" data-row-type="resolved" data-is-fixed="true">
+        <td><a href="https://github.com/rocicorp/zero-docs/commit/d273c57e4380fa7ccd0d59f183c1fcb5b9970a40" target="_blank" rel="noopener noreferrer">d273c57e4380</a></td>
+        <td class="date-col">2026-05-18</td>
+        <td class="optional-col">package-lock.json</td>
+        <td class="optional-col">.</td>
+        <td class="optional-col">dependencies</td>
+        <td><a href="https://npmx.dev/search?q=next" target="_blank" rel="noopener noreferrer">next</a></td>
+        <td>updated</td>
+        <td class="optional-col">^16.1.6</td>
+        <td class="optional-col">^16.1.6</td>
+        <td>16.1.6</td>
+        <td>16.2.6</td>
+        <td class="date-col">2026-01-30</td>
+        <td class="date-col">2026-05-18</td>
+        <td><a href="https://github.com/rocicorp/zero-docs/commit/b9921b57d10894ad5142ada556eecdddb0e74faf" target="_blank" rel="noopener noreferrer">b9921b57d108</a></td>
+        <td><a href="https://github.com/rocicorp/zero-docs/commit/d273c57e4380fa7ccd0d59f183c1fcb5b9970a40" target="_blank" rel="noopener noreferrer">d273c57e4380</a></td>
+        <td><a href="https://github.com/advisories/GHSA-267c-6grr-h53f" target="_blank" rel="noopener noreferrer">GHSA-267c-6grr-h53f</a><br><a href="https://github.com/advisories/GHSA-26hh-7cqf-hhc6" target="_blank" rel="noopener noreferrer">GHSA-26hh-7cqf-hhc6</a><br><a href="https://github.com/advisories/GHSA-36qx-fr4f-26g5" target="_blank" rel="noopener noreferrer">GHSA-36qx-fr4f-26g5</a><br><a href="https://github.com/advisories/GHSA-3g8h-86w9-wvmq" target="_blank" rel="noopener noreferrer">GHSA-3g8h-86w9-wvmq</a><br><a href="https://github.com/advisories/GHSA-3x4c-7xq6-9pq8" target="_blank" rel="noopener noreferrer">GHSA-3x4c-7xq6-9pq8</a><br><a href="https://github.com/advisories/GHSA-492v-c6pp-mqqv" target="_blank" rel="noopener noreferrer">GHSA-492v-c6pp-mqqv</a><br><a href="https://github.com/advisories/GHSA-8h8q-6873-q5fj" target="_blank" rel="noopener noreferrer">GHSA-8h8q-6873-q5fj</a><br><a href="https://github.com/advisories/GHSA-c4j6-fc7j-m34r" target="_blank" rel="noopener noreferrer">GHSA-c4j6-fc7j-m34r</a><br><a href="https://github.com/advisories/GHSA-ffhc-5mcf-pf4q" target="_blank" rel="noopener noreferrer">GHSA-ffhc-5mcf-pf4q</a><br><a href="https://github.com/advisories/GHSA-ggv3-7p47-pfv8" target="_blank" rel="noopener noreferrer">GHSA-ggv3-7p47-pfv8</a><br><a href="https://github.com/advisories/GHSA-gx5p-jg67-6x7h" target="_blank" rel="noopener noreferrer">GHSA-gx5p-jg67-6x7h</a><br><a href="https://github.com/advisories/GHSA-h27x-g6w4-24gq" target="_blank" rel="noopener noreferrer">GHSA-h27x-g6w4-24gq</a><br><a href="https://github.com/advisories/GHSA-h64f-5h5j-jqjh" target="_blank" rel="noopener noreferrer">GHSA-h64f-5h5j-jqjh</a><br><a href="https://github.com/advisories/GHSA-jcc7-9wpm-mj36" target="_blank" rel="noopener noreferrer">GHSA-jcc7-9wpm-mj36</a><br><a href="https://github.com/advisories/GHSA-mg66-mrh9-m8jx" target="_blank" rel="noopener noreferrer">GHSA-mg66-mrh9-m8jx</a><br><a href="https://github.com/advisories/GHSA-mq59-m269-xvcx" target="_blank" rel="noopener noreferrer">GHSA-mq59-m269-xvcx</a><br><a href="https://github.com/advisories/GHSA-q4gf-8mx6-v5v3" target="_blank" rel="noopener noreferrer">GHSA-q4gf-8mx6-v5v3</a><br><a href="https://github.com/advisories/GHSA-vfv6-92ff-j949" target="_blank" rel="noopener noreferrer">GHSA-vfv6-92ff-j949</a><br><a href="https://github.com/advisories/GHSA-wfc6-r584-vfw7" target="_blank" rel="noopener noreferrer">GHSA-wfc6-r584-vfw7</a></td>
+        <td></td>
+        <td>chore: npm audit fix (#296)</td>
+      </tr>
+
+      <tr class="vuln-resolved-row" data-row-type="resolved" data-is-fixed="true">
+        <td><a href="https://github.com/rocicorp/zero-docs/commit/d273c57e4380fa7ccd0d59f183c1fcb5b9970a40" target="_blank" rel="noopener noreferrer">d273c57e4380</a></td>
+        <td class="date-col">2026-05-18</td>
+        <td class="optional-col">package-lock.json</td>
+        <td class="optional-col">.</td>
+        <td class="optional-col">devDependencies</td>
+        <td><a href="https://npmx.dev/search?q=postcss" target="_blank" rel="noopener noreferrer">postcss</a></td>
+        <td>updated</td>
+        <td class="optional-col">^8</td>
+        <td class="optional-col">^8</td>
+        <td>8.5.6</td>
+        <td>8.5.14</td>
+        <td class="date-col"></td>
+        <td class="date-col">2026-05-18</td>
+        <td></td>
+        <td><a href="https://github.com/rocicorp/zero-docs/commit/d273c57e4380fa7ccd0d59f183c1fcb5b9970a40" target="_blank" rel="noopener noreferrer">d273c57e4380</a></td>
+        <td><a href="https://github.com/advisories/GHSA-qx2v-qp2m-jg93" target="_blank" rel="noopener noreferrer">GHSA-qx2v-qp2m-jg93</a></td>
+        <td></td>
+        <td>chore: npm audit fix (#296)</td>
+      </tr>
+
+      <tr class="vuln-resolved-row" data-row-type="resolved" data-is-fixed="true">
+        <td><a href="https://github.com/rocicorp/zero-docs/commit/5aa41f57a41ba82864526a871b15238d020d13f7" target="_blank" rel="noopener noreferrer">5aa41f57a41b</a></td>
+        <td class="date-col">2026-02-13</td>
+        <td class="optional-col">package-lock.json</td>
+        <td class="optional-col">.</td>
+        <td class="optional-col">dependencies</td>
+        <td><a href="https://npmx.dev/search?q=next-mdx-remote" target="_blank" rel="noopener noreferrer">next-mdx-remote</a></td>
+        <td>updated</td>
+        <td class="optional-col">^5.0.0</td>
+        <td class="optional-col">^6.0.0</td>
+        <td>5.0.0</td>
+        <td>6.0.0</td>
+        <td class="date-col"></td>
+        <td class="date-col">2026-02-13</td>
+        <td></td>
+        <td><a href="https://github.com/rocicorp/zero-docs/commit/5aa41f57a41ba82864526a871b15238d020d13f7" target="_blank" rel="noopener noreferrer">5aa41f57a41b</a></td>
+        <td><a href="https://github.com/advisories/GHSA-g4xw-jxrg-5f6m" target="_blank" rel="noopener noreferrer">GHSA-g4xw-jxrg-5f6m</a></td>
+        <td></td>
+        <td>Bumping next-mdx-remote version and ensuring blockJS is false.</td>
+      </tr>
+
+      <tr class="" data-row-type="none" data-is-fixed="false">
+        <td><a href="https://github.com/rocicorp/zero-docs/commit/5aa41f57a41ba82864526a871b15238d020d13f7" target="_blank" rel="noopener noreferrer">5aa41f57a41b</a></td>
+        <td class="date-col">2026-02-13</td>
+        <td class="optional-col">package-lock.json</td>
+        <td class="optional-col">.</td>
+        <td class="optional-col">dependencies</td>
+        <td><a href="https://npmx.dev/search?q=unist-util-visit" target="_blank" rel="noopener noreferrer">unist-util-visit</a></td>
+        <td>updated</td>
+        <td class="optional-col">^5.0.0</td>
+        <td class="optional-col">^5.0.0</td>
+        <td>5.0.0</td>
+        <td>5.1.0</td>
+        <td class="date-col">2026-02-13</td>
+        <td class="date-col"></td>
+        <td><a href="https://github.com/rocicorp/zero-docs/commit/5aa41f57a41ba82864526a871b15238d020d13f7" target="_blank" rel="noopener noreferrer">5aa41f57a41b</a></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td>Bumping next-mdx-remote version and ensuring blockJS is false.</td>
+      </tr>
+
+      <tr class="vuln-row" data-row-type="active" data-is-fixed="true">
+        <td><a href="https://github.com/rocicorp/zero-docs/commit/b9921b57d10894ad5142ada556eecdddb0e74faf" target="_blank" rel="noopener noreferrer">b9921b57d108</a></td>
+        <td class="date-col">2026-01-30</td>
+        <td class="optional-col">package-lock.json</td>
+        <td class="optional-col">.</td>
+        <td class="optional-col">dependencies</td>
+        <td><a href="https://npmx.dev/search?q=next" target="_blank" rel="noopener noreferrer">next</a></td>
+        <td>updated</td>
+        <td class="optional-col">^15.5.7</td>
+        <td class="optional-col">^16.1.6</td>
+        <td>15.5.7</td>
+        <td>16.1.6</td>
+        <td class="date-col">2026-01-30</td>
+        <td class="date-col">2026-05-18</td>
+        <td><a href="https://github.com/rocicorp/zero-docs/commit/b9921b57d10894ad5142ada556eecdddb0e74faf" target="_blank" rel="noopener noreferrer">b9921b57d108</a></td>
+        <td><a href="https://github.com/rocicorp/zero-docs/commit/d273c57e4380fa7ccd0d59f183c1fcb5b9970a40" target="_blank" rel="noopener noreferrer">d273c57e4380</a></td>
+        <td><a href="https://github.com/advisories/GHSA-267c-6grr-h53f" target="_blank" rel="noopener noreferrer">GHSA-267c-6grr-h53f</a><br><a href="https://github.com/advisories/GHSA-26hh-7cqf-hhc6" target="_blank" rel="noopener noreferrer">GHSA-26hh-7cqf-hhc6</a><br><a href="https://github.com/advisories/GHSA-36qx-fr4f-26g5" target="_blank" rel="noopener noreferrer">GHSA-36qx-fr4f-26g5</a><br><a href="https://github.com/advisories/GHSA-3g8h-86w9-wvmq" target="_blank" rel="noopener noreferrer">GHSA-3g8h-86w9-wvmq</a><br><a href="https://github.com/advisories/GHSA-3x4c-7xq6-9pq8" target="_blank" rel="noopener noreferrer">GHSA-3x4c-7xq6-9pq8</a><br><a href="https://github.com/advisories/GHSA-492v-c6pp-mqqv" target="_blank" rel="noopener noreferrer">GHSA-492v-c6pp-mqqv</a><br><a href="https://github.com/advisories/GHSA-8h8q-6873-q5fj" target="_blank" rel="noopener noreferrer">GHSA-8h8q-6873-q5fj</a><br><a href="https://github.com/advisories/GHSA-9g9p-9gw9-jx7f" target="_blank" rel="noopener noreferrer">GHSA-9g9p-9gw9-jx7f</a><br><a href="https://github.com/advisories/GHSA-c4j6-fc7j-m34r" target="_blank" rel="noopener noreferrer">GHSA-c4j6-fc7j-m34r</a><br><a href="https://github.com/advisories/GHSA-ffhc-5mcf-pf4q" target="_blank" rel="noopener noreferrer">GHSA-ffhc-5mcf-pf4q</a><br><a href="https://github.com/advisories/GHSA-ggv3-7p47-pfv8" target="_blank" rel="noopener noreferrer">GHSA-ggv3-7p47-pfv8</a><br><a href="https://github.com/advisories/GHSA-gx5p-jg67-6x7h" target="_blank" rel="noopener noreferrer">GHSA-gx5p-jg67-6x7h</a><br><a href="https://github.com/advisories/GHSA-h25m-26qc-wcjf" target="_blank" rel="noopener noreferrer">GHSA-h25m-26qc-wcjf</a><br><a href="https://github.com/advisories/GHSA-h64f-5h5j-jqjh" target="_blank" rel="noopener noreferrer">GHSA-h64f-5h5j-jqjh</a><br><a href="https://github.com/advisories/GHSA-mg66-mrh9-m8jx" target="_blank" rel="noopener noreferrer">GHSA-mg66-mrh9-m8jx</a><br><a href="https://github.com/advisories/GHSA-mwv6-3258-q52c" target="_blank" rel="noopener noreferrer">GHSA-mwv6-3258-q52c</a><br><a href="https://github.com/advisories/GHSA-q4gf-8mx6-v5v3" target="_blank" rel="noopener noreferrer">GHSA-q4gf-8mx6-v5v3</a><br><a href="https://github.com/advisories/GHSA-vfv6-92ff-j949" target="_blank" rel="noopener noreferrer">GHSA-vfv6-92ff-j949</a><br><a href="https://github.com/advisories/GHSA-w37m-7fhw-fmv9" target="_blank" rel="noopener noreferrer">GHSA-w37m-7fhw-fmv9</a><br><a href="https://github.com/advisories/GHSA-wfc6-r584-vfw7" target="_blank" rel="noopener noreferrer">GHSA-wfc6-r584-vfw7</a></td>
+        <td><a href="https://github.com/advisories/GHSA-267c-6grr-h53f" target="_blank" rel="noopener noreferrer">GHSA-267c-6grr-h53f</a><br><a href="https://github.com/advisories/GHSA-26hh-7cqf-hhc6" target="_blank" rel="noopener noreferrer">GHSA-26hh-7cqf-hhc6</a><br><a href="https://github.com/advisories/GHSA-36qx-fr4f-26g5" target="_blank" rel="noopener noreferrer">GHSA-36qx-fr4f-26g5</a><br><a href="https://github.com/advisories/GHSA-3g8h-86w9-wvmq" target="_blank" rel="noopener noreferrer">GHSA-3g8h-86w9-wvmq</a><br><a href="https://github.com/advisories/GHSA-3x4c-7xq6-9pq8" target="_blank" rel="noopener noreferrer">GHSA-3x4c-7xq6-9pq8</a><br><a href="https://github.com/advisories/GHSA-492v-c6pp-mqqv" target="_blank" rel="noopener noreferrer">GHSA-492v-c6pp-mqqv</a><br><a href="https://github.com/advisories/GHSA-8h8q-6873-q5fj" target="_blank" rel="noopener noreferrer">GHSA-8h8q-6873-q5fj</a><br><a href="https://github.com/advisories/GHSA-c4j6-fc7j-m34r" target="_blank" rel="noopener noreferrer">GHSA-c4j6-fc7j-m34r</a><br><a href="https://github.com/advisories/GHSA-ffhc-5mcf-pf4q" target="_blank" rel="noopener noreferrer">GHSA-ffhc-5mcf-pf4q</a><br><a href="https://github.com/advisories/GHSA-ggv3-7p47-pfv8" target="_blank" rel="noopener noreferrer">GHSA-ggv3-7p47-pfv8</a><br><a href="https://github.com/advisories/GHSA-gx5p-jg67-6x7h" target="_blank" rel="noopener noreferrer">GHSA-gx5p-jg67-6x7h</a><br><a href="https://github.com/advisories/GHSA-h27x-g6w4-24gq" target="_blank" rel="noopener noreferrer">GHSA-h27x-g6w4-24gq</a><br><a href="https://github.com/advisories/GHSA-h64f-5h5j-jqjh" target="_blank" rel="noopener noreferrer">GHSA-h64f-5h5j-jqjh</a><br><a href="https://github.com/advisories/GHSA-jcc7-9wpm-mj36" target="_blank" rel="noopener noreferrer">GHSA-jcc7-9wpm-mj36</a><br><a href="https://github.com/advisories/GHSA-mg66-mrh9-m8jx" target="_blank" rel="noopener noreferrer">GHSA-mg66-mrh9-m8jx</a><br><a href="https://github.com/advisories/GHSA-mq59-m269-xvcx" target="_blank" rel="noopener noreferrer">GHSA-mq59-m269-xvcx</a><br><a href="https://github.com/advisories/GHSA-q4gf-8mx6-v5v3" target="_blank" rel="noopener noreferrer">GHSA-q4gf-8mx6-v5v3</a><br><a href="https://github.com/advisories/GHSA-vfv6-92ff-j949" target="_blank" rel="noopener noreferrer">GHSA-vfv6-92ff-j949</a><br><a href="https://github.com/advisories/GHSA-wfc6-r584-vfw7" target="_blank" rel="noopener noreferrer">GHSA-wfc6-r584-vfw7</a></td>
+        <td>fix: fullscreen on ios, copy button scroll, play sync</td>
+      </tr>
+
+      <tr class="" data-row-type="none" data-is-fixed="false">
+        <td><a href="https://github.com/rocicorp/zero-docs/commit/9b81b6b3ec838de84dbf2fee5758b6140cbfbbe1" target="_blank" rel="noopener noreferrer">9b81b6b3ec83</a></td>
+        <td class="date-col">2026-01-29</td>
+        <td class="optional-col">package-lock.json</td>
+        <td class="optional-col">.</td>
+        <td class="optional-col">dependencies</td>
+        <td><a href="https://npmx.dev/search?q=github-slugger" target="_blank" rel="noopener noreferrer">github-slugger</a></td>
+        <td>added</td>
+        <td class="optional-col"></td>
+        <td class="optional-col">^2.0.0</td>
+        <td>2.0.0</td>
+        <td>2.0.0</td>
+        <td class="date-col">2026-01-27</td>
+        <td class="date-col"></td>
+        <td><a href="https://github.com/rocicorp/zero-docs/commit/8335c99360495c57721eeede45140b7b2f90142d" target="_blank" rel="noopener noreferrer">8335c9936049</a></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td>Merge origin/main into alex/transform-landing</td>
+      </tr>
+
+      <tr class="" data-row-type="none" data-is-fixed="false">
+        <td><a href="https://github.com/rocicorp/zero-docs/commit/9b81b6b3ec838de84dbf2fee5758b6140cbfbbe1" target="_blank" rel="noopener noreferrer">9b81b6b3ec83</a></td>
+        <td class="date-col">2026-01-29</td>
+        <td class="optional-col">package-lock.json</td>
+        <td class="optional-col">.</td>
+        <td class="optional-col">dependencies</td>
+        <td><a href="https://npmx.dev/search?q=use-debounce" target="_blank" rel="noopener noreferrer">use-debounce</a></td>
+        <td>added</td>
+        <td class="optional-col"></td>
+        <td class="optional-col">^10.1.0</td>
+        <td></td>
+        <td>10.1.0</td>
+        <td class="date-col">2026-01-27</td>
+        <td class="date-col"></td>
+        <td><a href="https://github.com/rocicorp/zero-docs/commit/8335c99360495c57721eeede45140b7b2f90142d" target="_blank" rel="noopener noreferrer">8335c9936049</a></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td>Merge origin/main into alex/transform-landing</td>
+      </tr>
+
+      <tr class="" data-row-type="none" data-is-fixed="false">
+        <td><a href="https://github.com/rocicorp/zero-docs/commit/9b81b6b3ec838de84dbf2fee5758b6140cbfbbe1" target="_blank" rel="noopener noreferrer">9b81b6b3ec83</a></td>
+        <td class="date-col">2026-01-29</td>
+        <td class="optional-col">package-lock.json</td>
+        <td class="optional-col">.</td>
+        <td class="optional-col">devDependencies</td>
+        <td><a href="https://npmx.dev/search?q=vitest" target="_blank" rel="noopener noreferrer">vitest</a></td>
+        <td>added</td>
+        <td class="optional-col"></td>
+        <td class="optional-col">^4.0.18</td>
+        <td></td>
+        <td>4.0.18</td>
+        <td class="date-col">2026-01-27</td>
+        <td class="date-col"></td>
+        <td><a href="https://github.com/rocicorp/zero-docs/commit/8335c99360495c57721eeede45140b7b2f90142d" target="_blank" rel="noopener noreferrer">8335c9936049</a></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td>Merge origin/main into alex/transform-landing</td>
+      </tr>
+
+      <tr class="" data-row-type="none" data-is-fixed="false">
+        <td><a href="https://github.com/rocicorp/zero-docs/commit/3526eb6c5049f9eca347bd077c086791e5ccf717" target="_blank" rel="noopener noreferrer">3526eb6c5049</a></td>
+        <td class="date-col">2026-01-29</td>
+        <td class="optional-col">package-lock.json</td>
+        <td class="optional-col">.</td>
+        <td class="optional-col">dependencies</td>
+        <td><a href="https://npmx.dev/search?q=%40radix-ui%2Freact-popover" target="_blank" rel="noopener noreferrer">@radix-ui/react-popover</a></td>
+        <td>added</td>
+        <td class="optional-col"></td>
+        <td class="optional-col">^1.1.15</td>
+        <td></td>
+        <td>1.1.15</td>
+        <td class="date-col">2026-01-29</td>
+        <td class="date-col"></td>
+        <td><a href="https://github.com/rocicorp/zero-docs/commit/3526eb6c5049f9eca347bd077c086791e5ccf717" target="_blank" rel="noopener noreferrer">3526eb6c5049</a></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td>Replacing popover for mobile usability. Fixing clamp and scaling on hero byline for resonsive view.</td>
+      </tr>
+
+      <tr class="" data-row-type="none" data-is-fixed="false">
+        <td><a href="https://github.com/rocicorp/zero-docs/commit/8335c99360495c57721eeede45140b7b2f90142d" target="_blank" rel="noopener noreferrer">8335c9936049</a></td>
+        <td class="date-col">2026-01-27</td>
+        <td class="optional-col">package-lock.json</td>
+        <td class="optional-col">.</td>
+        <td class="optional-col">dependencies</td>
+        <td><a href="https://npmx.dev/search?q=github-slugger" target="_blank" rel="noopener noreferrer">github-slugger</a></td>
+        <td>added</td>
+        <td class="optional-col"></td>
+        <td class="optional-col">^2.0.0</td>
+        <td>2.0.0</td>
+        <td>2.0.0</td>
+        <td class="date-col">2026-01-27</td>
+        <td class="date-col"></td>
+        <td><a href="https://github.com/rocicorp/zero-docs/commit/8335c99360495c57721eeede45140b7b2f90142d" target="_blank" rel="noopener noreferrer">8335c9936049</a></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td>fix(search): made search actually work</td>
+      </tr>
+
+      <tr class="" data-row-type="none" data-is-fixed="false">
+        <td><a href="https://github.com/rocicorp/zero-docs/commit/8335c99360495c57721eeede45140b7b2f90142d" target="_blank" rel="noopener noreferrer">8335c9936049</a></td>
+        <td class="date-col">2026-01-27</td>
+        <td class="optional-col">package-lock.json</td>
+        <td class="optional-col">.</td>
+        <td class="optional-col">dependencies</td>
+        <td><a href="https://npmx.dev/search?q=use-debounce" target="_blank" rel="noopener noreferrer">use-debounce</a></td>
+        <td>added</td>
+        <td class="optional-col"></td>
+        <td class="optional-col">^10.1.0</td>
+        <td></td>
+        <td>10.1.0</td>
+        <td class="date-col">2026-01-27</td>
+        <td class="date-col"></td>
+        <td><a href="https://github.com/rocicorp/zero-docs/commit/8335c99360495c57721eeede45140b7b2f90142d" target="_blank" rel="noopener noreferrer">8335c9936049</a></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td>fix(search): made search actually work</td>
+      </tr>
+
+      <tr class="" data-row-type="none" data-is-fixed="false">
+        <td><a href="https://github.com/rocicorp/zero-docs/commit/8335c99360495c57721eeede45140b7b2f90142d" target="_blank" rel="noopener noreferrer">8335c9936049</a></td>
+        <td class="date-col">2026-01-27</td>
+        <td class="optional-col">package-lock.json</td>
+        <td class="optional-col">.</td>
+        <td class="optional-col">devDependencies</td>
+        <td><a href="https://npmx.dev/search?q=vitest" target="_blank" rel="noopener noreferrer">vitest</a></td>
+        <td>added</td>
+        <td class="optional-col"></td>
+        <td class="optional-col">^4.0.18</td>
+        <td></td>
+        <td>4.0.18</td>
+        <td class="date-col">2026-01-27</td>
+        <td class="date-col"></td>
+        <td><a href="https://github.com/rocicorp/zero-docs/commit/8335c99360495c57721eeede45140b7b2f90142d" target="_blank" rel="noopener noreferrer">8335c9936049</a></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td>fix(search): made search actually work</td>
+      </tr>
+
+      <tr class="" data-row-type="none" data-is-fixed="false">
+        <td><a href="https://github.com/rocicorp/zero-docs/commit/1c5c0d05d9c2e4e216cb10a6d3c0ce16f44386cc" target="_blank" rel="noopener noreferrer">1c5c0d05d9c2</a></td>
+        <td class="date-col">2026-01-14</td>
+        <td class="optional-col">package-lock.json</td>
+        <td class="optional-col">.</td>
+        <td class="optional-col">dependencies</td>
+        <td><a href="https://npmx.dev/search?q=highlight.js" target="_blank" rel="noopener noreferrer">highlight.js</a></td>
+        <td>added</td>
+        <td class="optional-col"></td>
+        <td class="optional-col">^11.11.1</td>
+        <td>11.11.1</td>
+        <td>11.11.1</td>
+        <td class="date-col">2026-01-14</td>
+        <td class="date-col"></td>
+        <td><a href="https://github.com/rocicorp/zero-docs/commit/1c5c0d05d9c2e4e216cb10a6d3c0ce16f44386cc" target="_blank" rel="noopener noreferrer">1c5c0d05d9c2</a></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td>Updates to elements and iconography</td>
+      </tr>
+
+      <tr class="" data-row-type="none" data-is-fixed="false">
+        <td><a href="https://github.com/rocicorp/zero-docs/commit/335a3e09784a040741d6a9dcfe280fec41b18496" target="_blank" rel="noopener noreferrer">335a3e09784a</a></td>
+        <td class="date-col">2025-12-16</td>
+        <td class="optional-col">package-lock.json</td>
+        <td class="optional-col">.</td>
+        <td class="optional-col">dependencies</td>
+        <td><a href="https://npmx.dev/search?q=%40rocicorp%2Fzero" target="_blank" rel="noopener noreferrer">@rocicorp/zero</a></td>
+        <td>added</td>
+        <td class="optional-col"></td>
+        <td class="optional-col">^0.25.3</td>
+        <td></td>
+        <td>0.25.3</td>
+        <td class="date-col">2025-12-16</td>
+        <td class="date-col">2026-05-18</td>
+        <td><a href="https://github.com/rocicorp/zero-docs/commit/335a3e09784a040741d6a9dcfe280fec41b18496" target="_blank" rel="noopener noreferrer">335a3e09784a</a></td>
+        <td><a href="https://github.com/rocicorp/zero-docs/commit/d273c57e4380fa7ccd0d59f183c1fcb5b9970a40" target="_blank" rel="noopener noreferrer">d273c57e4380</a></td>
+        <td></td>
+        <td></td>
+        <td>fix: move to use shiki for code highlighting</td>
+      </tr>
+
+      <tr class="" data-row-type="none" data-is-fixed="false">
+        <td><a href="https://github.com/rocicorp/zero-docs/commit/335a3e09784a040741d6a9dcfe280fec41b18496" target="_blank" rel="noopener noreferrer">335a3e09784a</a></td>
+        <td class="date-col">2025-12-16</td>
+        <td class="optional-col">package-lock.json</td>
+        <td class="optional-col">.</td>
+        <td class="optional-col">dependencies</td>
+        <td><a href="https://npmx.dev/search?q=%40shikijs%2Frehype" target="_blank" rel="noopener noreferrer">@shikijs/rehype</a></td>
+        <td>added</td>
+        <td class="optional-col"></td>
+        <td class="optional-col">^3.20.0</td>
+        <td></td>
+        <td>3.20.0</td>
+        <td class="date-col">2025-12-16</td>
+        <td class="date-col"></td>
+        <td><a href="https://github.com/rocicorp/zero-docs/commit/335a3e09784a040741d6a9dcfe280fec41b18496" target="_blank" rel="noopener noreferrer">335a3e09784a</a></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td>fix: move to use shiki for code highlighting</td>
+      </tr>
+
+      <tr class="" data-row-type="none" data-is-fixed="false">
+        <td><a href="https://github.com/rocicorp/zero-docs/commit/335a3e09784a040741d6a9dcfe280fec41b18496" target="_blank" rel="noopener noreferrer">335a3e09784a</a></td>
+        <td class="date-col">2025-12-16</td>
+        <td class="optional-col">package-lock.json</td>
+        <td class="optional-col">.</td>
+        <td class="optional-col">dependencies</td>
+        <td><a href="https://npmx.dev/search?q=%40shikijs%2Ftwoslash" target="_blank" rel="noopener noreferrer">@shikijs/twoslash</a></td>
+        <td>added</td>
+        <td class="optional-col"></td>
+        <td class="optional-col">^3.20.0</td>
+        <td></td>
+        <td>3.20.0</td>
+        <td class="date-col">2025-12-16</td>
+        <td class="date-col"></td>
+        <td><a href="https://github.com/rocicorp/zero-docs/commit/335a3e09784a040741d6a9dcfe280fec41b18496" target="_blank" rel="noopener noreferrer">335a3e09784a</a></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td>fix: move to use shiki for code highlighting</td>
+      </tr>
+
+      <tr class="" data-row-type="none" data-is-fixed="false">
+        <td><a href="https://github.com/rocicorp/zero-docs/commit/335a3e09784a040741d6a9dcfe280fec41b18496" target="_blank" rel="noopener noreferrer">335a3e09784a</a></td>
+        <td class="date-col">2025-12-16</td>
+        <td class="optional-col">package-lock.json</td>
+        <td class="optional-col">.</td>
+        <td class="optional-col">dependencies</td>
+        <td><a href="https://npmx.dev/search?q=rehype-pretty-code" target="_blank" rel="noopener noreferrer">rehype-pretty-code</a></td>
+        <td>added</td>
+        <td class="optional-col"></td>
+        <td class="optional-col">^0.14.1</td>
+        <td></td>
+        <td>0.14.1</td>
+        <td class="date-col">2025-12-16</td>
+        <td class="date-col"></td>
+        <td><a href="https://github.com/rocicorp/zero-docs/commit/335a3e09784a040741d6a9dcfe280fec41b18496" target="_blank" rel="noopener noreferrer">335a3e09784a</a></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td>fix: move to use shiki for code highlighting</td>
+      </tr>
+
+      <tr class="" data-row-type="none" data-is-fixed="false">
+        <td><a href="https://github.com/rocicorp/zero-docs/commit/335a3e09784a040741d6a9dcfe280fec41b18496" target="_blank" rel="noopener noreferrer">335a3e09784a</a></td>
+        <td class="date-col">2025-12-16</td>
+        <td class="optional-col">package-lock.json</td>
+        <td class="optional-col">.</td>
+        <td class="optional-col">dependencies</td>
+        <td><a href="https://npmx.dev/search?q=shiki" target="_blank" rel="noopener noreferrer">shiki</a></td>
+        <td>added</td>
+        <td class="optional-col"></td>
+        <td class="optional-col">^3.20.0</td>
+        <td></td>
+        <td>3.20.0</td>
+        <td class="date-col">2025-12-16</td>
+        <td class="date-col"></td>
+        <td><a href="https://github.com/rocicorp/zero-docs/commit/335a3e09784a040741d6a9dcfe280fec41b18496" target="_blank" rel="noopener noreferrer">335a3e09784a</a></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td>fix: move to use shiki for code highlighting</td>
+      </tr>
+
+      <tr class="" data-row-type="none" data-is-fixed="false">
+        <td><a href="https://github.com/rocicorp/zero-docs/commit/335a3e09784a040741d6a9dcfe280fec41b18496" target="_blank" rel="noopener noreferrer">335a3e09784a</a></td>
+        <td class="date-col">2025-12-16</td>
+        <td class="optional-col">package-lock.json</td>
+        <td class="optional-col">.</td>
+        <td class="optional-col">dependencies</td>
+        <td><a href="https://npmx.dev/search?q=zod" target="_blank" rel="noopener noreferrer">zod</a></td>
+        <td>added</td>
+        <td class="optional-col"></td>
+        <td class="optional-col">^4.2.1</td>
+        <td></td>
+        <td>4.2.1</td>
+        <td class="date-col">2025-12-16</td>
+        <td class="date-col"></td>
+        <td><a href="https://github.com/rocicorp/zero-docs/commit/335a3e09784a040741d6a9dcfe280fec41b18496" target="_blank" rel="noopener noreferrer">335a3e09784a</a></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td>fix: move to use shiki for code highlighting</td>
+      </tr>
+
+      <tr class="" data-row-type="none" data-is-fixed="false">
+        <td><a href="https://github.com/rocicorp/zero-docs/commit/8731b394e5d754bb3aa2e0464a3534abd2dc704b" target="_blank" rel="noopener noreferrer">8731b394e5d7</a></td>
+        <td class="date-col">2025-12-10</td>
+        <td class="optional-col">package-lock.json</td>
+        <td class="optional-col">.</td>
+        <td class="optional-col">devDependencies</td>
+        <td><a href="https://npmx.dev/search?q=oxlint" target="_blank" rel="noopener noreferrer">oxlint</a></td>
+        <td>added</td>
+        <td class="optional-col"></td>
+        <td class="optional-col">^1.32.0</td>
+        <td></td>
+        <td>1.32.0</td>
+        <td class="date-col">2025-12-10</td>
+        <td class="date-col"></td>
+        <td><a href="https://github.com/rocicorp/zero-docs/commit/0884857bba34777a84774c62263cb5f5fee4a38e" target="_blank" rel="noopener noreferrer">0884857bba34</a></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td>Merge branch &#39;main&#39; into aa/v0.25</td>
+      </tr>
+
+      <tr class="" data-row-type="none" data-is-fixed="false">
+        <td><a href="https://github.com/rocicorp/zero-docs/commit/8731b394e5d754bb3aa2e0464a3534abd2dc704b" target="_blank" rel="noopener noreferrer">8731b394e5d7</a></td>
+        <td class="date-col">2025-12-10</td>
+        <td class="optional-col">package-lock.json</td>
+        <td class="optional-col">.</td>
+        <td class="optional-col">devDependencies</td>
+        <td><a href="https://npmx.dev/search?q=oxlint-tsgolint" target="_blank" rel="noopener noreferrer">oxlint-tsgolint</a></td>
+        <td>added</td>
+        <td class="optional-col"></td>
+        <td class="optional-col">^0.8.3</td>
+        <td></td>
+        <td>0.8.5</td>
+        <td class="date-col">2025-12-10</td>
+        <td class="date-col"></td>
+        <td><a href="https://github.com/rocicorp/zero-docs/commit/0884857bba34777a84774c62263cb5f5fee4a38e" target="_blank" rel="noopener noreferrer">0884857bba34</a></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td>Merge branch &#39;main&#39; into aa/v0.25</td>
+      </tr>
+
+      <tr class="" data-row-type="none" data-is-fixed="false">
+        <td><a href="https://github.com/rocicorp/zero-docs/commit/8731b394e5d754bb3aa2e0464a3534abd2dc704b" target="_blank" rel="noopener noreferrer">8731b394e5d7</a></td>
+        <td class="date-col">2025-12-10</td>
+        <td class="optional-col">package-lock.json</td>
+        <td class="optional-col">.</td>
+        <td class="optional-col">devDependencies</td>
+        <td><a href="https://npmx.dev/search?q=prettier" target="_blank" rel="noopener noreferrer">prettier</a></td>
+        <td>added</td>
+        <td class="optional-col"></td>
+        <td class="optional-col">^3.7.4</td>
+        <td>3.6.2</td>
+        <td>3.7.4</td>
+        <td class="date-col">2025-12-10</td>
+        <td class="date-col"></td>
+        <td><a href="https://github.com/rocicorp/zero-docs/commit/0884857bba34777a84774c62263cb5f5fee4a38e" target="_blank" rel="noopener noreferrer">0884857bba34</a></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td>Merge branch &#39;main&#39; into aa/v0.25</td>
+      </tr>
+
+      <tr class="" data-row-type="none" data-is-fixed="false">
+        <td><a href="https://github.com/rocicorp/zero-docs/commit/0884857bba34777a84774c62263cb5f5fee4a38e" target="_blank" rel="noopener noreferrer">0884857bba34</a></td>
+        <td class="date-col">2025-12-10</td>
+        <td class="optional-col">package-lock.json</td>
+        <td class="optional-col">.</td>
+        <td class="optional-col">devDependencies</td>
+        <td><a href="https://npmx.dev/search?q=oxlint" target="_blank" rel="noopener noreferrer">oxlint</a></td>
+        <td>added</td>
+        <td class="optional-col"></td>
+        <td class="optional-col">^1.32.0</td>
+        <td></td>
+        <td>1.32.0</td>
+        <td class="date-col">2025-12-10</td>
+        <td class="date-col"></td>
+        <td><a href="https://github.com/rocicorp/zero-docs/commit/0884857bba34777a84774c62263cb5f5fee4a38e" target="_blank" rel="noopener noreferrer">0884857bba34</a></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td>fix: add better prettier config for docs</td>
+      </tr>
+
+      <tr class="" data-row-type="none" data-is-fixed="false">
+        <td><a href="https://github.com/rocicorp/zero-docs/commit/0884857bba34777a84774c62263cb5f5fee4a38e" target="_blank" rel="noopener noreferrer">0884857bba34</a></td>
+        <td class="date-col">2025-12-10</td>
+        <td class="optional-col">package-lock.json</td>
+        <td class="optional-col">.</td>
+        <td class="optional-col">devDependencies</td>
+        <td><a href="https://npmx.dev/search?q=oxlint-tsgolint" target="_blank" rel="noopener noreferrer">oxlint-tsgolint</a></td>
+        <td>added</td>
+        <td class="optional-col"></td>
+        <td class="optional-col">^0.8.3</td>
+        <td></td>
+        <td>0.8.5</td>
+        <td class="date-col">2025-12-10</td>
+        <td class="date-col"></td>
+        <td><a href="https://github.com/rocicorp/zero-docs/commit/0884857bba34777a84774c62263cb5f5fee4a38e" target="_blank" rel="noopener noreferrer">0884857bba34</a></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td>fix: add better prettier config for docs</td>
+      </tr>
+
+      <tr class="" data-row-type="none" data-is-fixed="false">
+        <td><a href="https://github.com/rocicorp/zero-docs/commit/0884857bba34777a84774c62263cb5f5fee4a38e" target="_blank" rel="noopener noreferrer">0884857bba34</a></td>
+        <td class="date-col">2025-12-10</td>
+        <td class="optional-col">package-lock.json</td>
+        <td class="optional-col">.</td>
+        <td class="optional-col">devDependencies</td>
+        <td><a href="https://npmx.dev/search?q=prettier" target="_blank" rel="noopener noreferrer">prettier</a></td>
+        <td>added</td>
+        <td class="optional-col"></td>
+        <td class="optional-col">^3.7.4</td>
+        <td>3.6.2</td>
+        <td>3.7.4</td>
+        <td class="date-col">2025-12-10</td>
+        <td class="date-col"></td>
+        <td><a href="https://github.com/rocicorp/zero-docs/commit/0884857bba34777a84774c62263cb5f5fee4a38e" target="_blank" rel="noopener noreferrer">0884857bba34</a></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td>fix: add better prettier config for docs</td>
+      </tr>
+
+      <tr class="vuln-row" data-row-type="active" data-is-fixed="true">
+        <td><a href="https://github.com/rocicorp/zero-docs/commit/bccb49bfa3d7d274113b8a01702274cdee01bcf5" target="_blank" rel="noopener noreferrer">bccb49bfa3d7</a></td>
+        <td class="date-col">2025-12-08</td>
+        <td class="optional-col">package-lock.json</td>
+        <td class="optional-col">.</td>
+        <td class="optional-col">dependencies</td>
+        <td><a href="https://npmx.dev/search?q=next" target="_blank" rel="noopener noreferrer">next</a></td>
+        <td>updated</td>
+        <td class="optional-col">^15.5.6</td>
+        <td class="optional-col">^15.5.7</td>
+        <td>15.5.6</td>
+        <td>15.5.7</td>
+        <td class="date-col">2025-12-08</td>
+        <td class="date-col">2026-01-30</td>
+        <td><a href="https://github.com/rocicorp/zero-docs/commit/c1eb8167c18d962d4d16c5ca7017140df6cb7c1f" target="_blank" rel="noopener noreferrer">c1eb8167c18d</a></td>
+        <td><a href="https://github.com/rocicorp/zero-docs/commit/b9921b57d10894ad5142ada556eecdddb0e74faf" target="_blank" rel="noopener noreferrer">b9921b57d108</a></td>
+        <td><a href="https://github.com/advisories/GHSA-267c-6grr-h53f" target="_blank" rel="noopener noreferrer">GHSA-267c-6grr-h53f</a><br><a href="https://github.com/advisories/GHSA-26hh-7cqf-hhc6" target="_blank" rel="noopener noreferrer">GHSA-26hh-7cqf-hhc6</a><br><a href="https://github.com/advisories/GHSA-36qx-fr4f-26g5" target="_blank" rel="noopener noreferrer">GHSA-36qx-fr4f-26g5</a><br><a href="https://github.com/advisories/GHSA-3g8h-86w9-wvmq" target="_blank" rel="noopener noreferrer">GHSA-3g8h-86w9-wvmq</a><br><a href="https://github.com/advisories/GHSA-3x4c-7xq6-9pq8" target="_blank" rel="noopener noreferrer">GHSA-3x4c-7xq6-9pq8</a><br><a href="https://github.com/advisories/GHSA-492v-c6pp-mqqv" target="_blank" rel="noopener noreferrer">GHSA-492v-c6pp-mqqv</a><br><a href="https://github.com/advisories/GHSA-8h8q-6873-q5fj" target="_blank" rel="noopener noreferrer">GHSA-8h8q-6873-q5fj</a><br><a href="https://github.com/advisories/GHSA-9g9p-9gw9-jx7f" target="_blank" rel="noopener noreferrer">GHSA-9g9p-9gw9-jx7f</a><br><a href="https://github.com/advisories/GHSA-9qr9-h5gf-34mp" target="_blank" rel="noopener noreferrer">GHSA-9qr9-h5gf-34mp</a><br><a href="https://github.com/advisories/GHSA-c4j6-fc7j-m34r" target="_blank" rel="noopener noreferrer">GHSA-c4j6-fc7j-m34r</a><br><a href="https://github.com/advisories/GHSA-ffhc-5mcf-pf4q" target="_blank" rel="noopener noreferrer">GHSA-ffhc-5mcf-pf4q</a><br><a href="https://github.com/advisories/GHSA-ggv3-7p47-pfv8" target="_blank" rel="noopener noreferrer">GHSA-ggv3-7p47-pfv8</a><br><a href="https://github.com/advisories/GHSA-gx5p-jg67-6x7h" target="_blank" rel="noopener noreferrer">GHSA-gx5p-jg67-6x7h</a><br><a href="https://github.com/advisories/GHSA-h25m-26qc-wcjf" target="_blank" rel="noopener noreferrer">GHSA-h25m-26qc-wcjf</a><br><a href="https://github.com/advisories/GHSA-h64f-5h5j-jqjh" target="_blank" rel="noopener noreferrer">GHSA-h64f-5h5j-jqjh</a><br><a href="https://github.com/advisories/GHSA-mg66-mrh9-m8jx" target="_blank" rel="noopener noreferrer">GHSA-mg66-mrh9-m8jx</a><br><a href="https://github.com/advisories/GHSA-mwv6-3258-q52c" target="_blank" rel="noopener noreferrer">GHSA-mwv6-3258-q52c</a><br><a href="https://github.com/advisories/GHSA-q4gf-8mx6-v5v3" target="_blank" rel="noopener noreferrer">GHSA-q4gf-8mx6-v5v3</a><br><a href="https://github.com/advisories/GHSA-vfv6-92ff-j949" target="_blank" rel="noopener noreferrer">GHSA-vfv6-92ff-j949</a><br><a href="https://github.com/advisories/GHSA-w37m-7fhw-fmv9" target="_blank" rel="noopener noreferrer">GHSA-w37m-7fhw-fmv9</a><br><a href="https://github.com/advisories/GHSA-wfc6-r584-vfw7" target="_blank" rel="noopener noreferrer">GHSA-wfc6-r584-vfw7</a></td>
+        <td><a href="https://github.com/advisories/GHSA-267c-6grr-h53f" target="_blank" rel="noopener noreferrer">GHSA-267c-6grr-h53f</a><br><a href="https://github.com/advisories/GHSA-26hh-7cqf-hhc6" target="_blank" rel="noopener noreferrer">GHSA-26hh-7cqf-hhc6</a><br><a href="https://github.com/advisories/GHSA-36qx-fr4f-26g5" target="_blank" rel="noopener noreferrer">GHSA-36qx-fr4f-26g5</a><br><a href="https://github.com/advisories/GHSA-3g8h-86w9-wvmq" target="_blank" rel="noopener noreferrer">GHSA-3g8h-86w9-wvmq</a><br><a href="https://github.com/advisories/GHSA-3x4c-7xq6-9pq8" target="_blank" rel="noopener noreferrer">GHSA-3x4c-7xq6-9pq8</a><br><a href="https://github.com/advisories/GHSA-492v-c6pp-mqqv" target="_blank" rel="noopener noreferrer">GHSA-492v-c6pp-mqqv</a><br><a href="https://github.com/advisories/GHSA-8h8q-6873-q5fj" target="_blank" rel="noopener noreferrer">GHSA-8h8q-6873-q5fj</a><br><a href="https://github.com/advisories/GHSA-9g9p-9gw9-jx7f" target="_blank" rel="noopener noreferrer">GHSA-9g9p-9gw9-jx7f</a><br><a href="https://github.com/advisories/GHSA-c4j6-fc7j-m34r" target="_blank" rel="noopener noreferrer">GHSA-c4j6-fc7j-m34r</a><br><a href="https://github.com/advisories/GHSA-ffhc-5mcf-pf4q" target="_blank" rel="noopener noreferrer">GHSA-ffhc-5mcf-pf4q</a><br><a href="https://github.com/advisories/GHSA-ggv3-7p47-pfv8" target="_blank" rel="noopener noreferrer">GHSA-ggv3-7p47-pfv8</a><br><a href="https://github.com/advisories/GHSA-gx5p-jg67-6x7h" target="_blank" rel="noopener noreferrer">GHSA-gx5p-jg67-6x7h</a><br><a href="https://github.com/advisories/GHSA-h25m-26qc-wcjf" target="_blank" rel="noopener noreferrer">GHSA-h25m-26qc-wcjf</a><br><a href="https://github.com/advisories/GHSA-h64f-5h5j-jqjh" target="_blank" rel="noopener noreferrer">GHSA-h64f-5h5j-jqjh</a><br><a href="https://github.com/advisories/GHSA-mg66-mrh9-m8jx" target="_blank" rel="noopener noreferrer">GHSA-mg66-mrh9-m8jx</a><br><a href="https://github.com/advisories/GHSA-mwv6-3258-q52c" target="_blank" rel="noopener noreferrer">GHSA-mwv6-3258-q52c</a><br><a href="https://github.com/advisories/GHSA-q4gf-8mx6-v5v3" target="_blank" rel="noopener noreferrer">GHSA-q4gf-8mx6-v5v3</a><br><a href="https://github.com/advisories/GHSA-vfv6-92ff-j949" target="_blank" rel="noopener noreferrer">GHSA-vfv6-92ff-j949</a><br><a href="https://github.com/advisories/GHSA-w37m-7fhw-fmv9" target="_blank" rel="noopener noreferrer">GHSA-w37m-7fhw-fmv9</a><br><a href="https://github.com/advisories/GHSA-wfc6-r584-vfw7" target="_blank" rel="noopener noreferrer">GHSA-wfc6-r584-vfw7</a></td>
+        <td>Upgrade Next version</td>
+      </tr>
+
+      <tr class="vuln-row" data-row-type="active" data-is-fixed="true">
+        <td><a href="https://github.com/rocicorp/zero-docs/commit/c1eb8167c18d962d4d16c5ca7017140df6cb7c1f" target="_blank" rel="noopener noreferrer">c1eb8167c18d</a></td>
+        <td class="date-col">2025-12-08</td>
+        <td class="optional-col">package-lock.json</td>
+        <td class="optional-col">.</td>
+        <td class="optional-col">dependencies</td>
+        <td><a href="https://npmx.dev/search?q=next" target="_blank" rel="noopener noreferrer">next</a></td>
+        <td>updated</td>
+        <td class="optional-col">^15.5.6</td>
+        <td class="optional-col">^15.5.7</td>
+        <td>15.5.6</td>
+        <td>15.5.7</td>
+        <td class="date-col">2025-12-08</td>
+        <td class="date-col">2026-01-30</td>
+        <td><a href="https://github.com/rocicorp/zero-docs/commit/c1eb8167c18d962d4d16c5ca7017140df6cb7c1f" target="_blank" rel="noopener noreferrer">c1eb8167c18d</a></td>
+        <td><a href="https://github.com/rocicorp/zero-docs/commit/b9921b57d10894ad5142ada556eecdddb0e74faf" target="_blank" rel="noopener noreferrer">b9921b57d108</a></td>
+        <td><a href="https://github.com/advisories/GHSA-267c-6grr-h53f" target="_blank" rel="noopener noreferrer">GHSA-267c-6grr-h53f</a><br><a href="https://github.com/advisories/GHSA-26hh-7cqf-hhc6" target="_blank" rel="noopener noreferrer">GHSA-26hh-7cqf-hhc6</a><br><a href="https://github.com/advisories/GHSA-36qx-fr4f-26g5" target="_blank" rel="noopener noreferrer">GHSA-36qx-fr4f-26g5</a><br><a href="https://github.com/advisories/GHSA-3g8h-86w9-wvmq" target="_blank" rel="noopener noreferrer">GHSA-3g8h-86w9-wvmq</a><br><a href="https://github.com/advisories/GHSA-3x4c-7xq6-9pq8" target="_blank" rel="noopener noreferrer">GHSA-3x4c-7xq6-9pq8</a><br><a href="https://github.com/advisories/GHSA-492v-c6pp-mqqv" target="_blank" rel="noopener noreferrer">GHSA-492v-c6pp-mqqv</a><br><a href="https://github.com/advisories/GHSA-8h8q-6873-q5fj" target="_blank" rel="noopener noreferrer">GHSA-8h8q-6873-q5fj</a><br><a href="https://github.com/advisories/GHSA-9g9p-9gw9-jx7f" target="_blank" rel="noopener noreferrer">GHSA-9g9p-9gw9-jx7f</a><br><a href="https://github.com/advisories/GHSA-9qr9-h5gf-34mp" target="_blank" rel="noopener noreferrer">GHSA-9qr9-h5gf-34mp</a><br><a href="https://github.com/advisories/GHSA-c4j6-fc7j-m34r" target="_blank" rel="noopener noreferrer">GHSA-c4j6-fc7j-m34r</a><br><a href="https://github.com/advisories/GHSA-ffhc-5mcf-pf4q" target="_blank" rel="noopener noreferrer">GHSA-ffhc-5mcf-pf4q</a><br><a href="https://github.com/advisories/GHSA-ggv3-7p47-pfv8" target="_blank" rel="noopener noreferrer">GHSA-ggv3-7p47-pfv8</a><br><a href="https://github.com/advisories/GHSA-gx5p-jg67-6x7h" target="_blank" rel="noopener noreferrer">GHSA-gx5p-jg67-6x7h</a><br><a href="https://github.com/advisories/GHSA-h25m-26qc-wcjf" target="_blank" rel="noopener noreferrer">GHSA-h25m-26qc-wcjf</a><br><a href="https://github.com/advisories/GHSA-h64f-5h5j-jqjh" target="_blank" rel="noopener noreferrer">GHSA-h64f-5h5j-jqjh</a><br><a href="https://github.com/advisories/GHSA-mg66-mrh9-m8jx" target="_blank" rel="noopener noreferrer">GHSA-mg66-mrh9-m8jx</a><br><a href="https://github.com/advisories/GHSA-mwv6-3258-q52c" target="_blank" rel="noopener noreferrer">GHSA-mwv6-3258-q52c</a><br><a href="https://github.com/advisories/GHSA-q4gf-8mx6-v5v3" target="_blank" rel="noopener noreferrer">GHSA-q4gf-8mx6-v5v3</a><br><a href="https://github.com/advisories/GHSA-vfv6-92ff-j949" target="_blank" rel="noopener noreferrer">GHSA-vfv6-92ff-j949</a><br><a href="https://github.com/advisories/GHSA-w37m-7fhw-fmv9" target="_blank" rel="noopener noreferrer">GHSA-w37m-7fhw-fmv9</a><br><a href="https://github.com/advisories/GHSA-wfc6-r584-vfw7" target="_blank" rel="noopener noreferrer">GHSA-wfc6-r584-vfw7</a></td>
+        <td><a href="https://github.com/advisories/GHSA-267c-6grr-h53f" target="_blank" rel="noopener noreferrer">GHSA-267c-6grr-h53f</a><br><a href="https://github.com/advisories/GHSA-26hh-7cqf-hhc6" target="_blank" rel="noopener noreferrer">GHSA-26hh-7cqf-hhc6</a><br><a href="https://github.com/advisories/GHSA-36qx-fr4f-26g5" target="_blank" rel="noopener noreferrer">GHSA-36qx-fr4f-26g5</a><br><a href="https://github.com/advisories/GHSA-3g8h-86w9-wvmq" target="_blank" rel="noopener noreferrer">GHSA-3g8h-86w9-wvmq</a><br><a href="https://github.com/advisories/GHSA-3x4c-7xq6-9pq8" target="_blank" rel="noopener noreferrer">GHSA-3x4c-7xq6-9pq8</a><br><a href="https://github.com/advisories/GHSA-492v-c6pp-mqqv" target="_blank" rel="noopener noreferrer">GHSA-492v-c6pp-mqqv</a><br><a href="https://github.com/advisories/GHSA-8h8q-6873-q5fj" target="_blank" rel="noopener noreferrer">GHSA-8h8q-6873-q5fj</a><br><a href="https://github.com/advisories/GHSA-9g9p-9gw9-jx7f" target="_blank" rel="noopener noreferrer">GHSA-9g9p-9gw9-jx7f</a><br><a href="https://github.com/advisories/GHSA-c4j6-fc7j-m34r" target="_blank" rel="noopener noreferrer">GHSA-c4j6-fc7j-m34r</a><br><a href="https://github.com/advisories/GHSA-ffhc-5mcf-pf4q" target="_blank" rel="noopener noreferrer">GHSA-ffhc-5mcf-pf4q</a><br><a href="https://github.com/advisories/GHSA-ggv3-7p47-pfv8" target="_blank" rel="noopener noreferrer">GHSA-ggv3-7p47-pfv8</a><br><a href="https://github.com/advisories/GHSA-gx5p-jg67-6x7h" target="_blank" rel="noopener noreferrer">GHSA-gx5p-jg67-6x7h</a><br><a href="https://github.com/advisories/GHSA-h25m-26qc-wcjf" target="_blank" rel="noopener noreferrer">GHSA-h25m-26qc-wcjf</a><br><a href="https://github.com/advisories/GHSA-h64f-5h5j-jqjh" target="_blank" rel="noopener noreferrer">GHSA-h64f-5h5j-jqjh</a><br><a href="https://github.com/advisories/GHSA-mg66-mrh9-m8jx" target="_blank" rel="noopener noreferrer">GHSA-mg66-mrh9-m8jx</a><br><a href="https://github.com/advisories/GHSA-mwv6-3258-q52c" target="_blank" rel="noopener noreferrer">GHSA-mwv6-3258-q52c</a><br><a href="https://github.com/advisories/GHSA-q4gf-8mx6-v5v3" target="_blank" rel="noopener noreferrer">GHSA-q4gf-8mx6-v5v3</a><br><a href="https://github.com/advisories/GHSA-vfv6-92ff-j949" target="_blank" rel="noopener noreferrer">GHSA-vfv6-92ff-j949</a><br><a href="https://github.com/advisories/GHSA-w37m-7fhw-fmv9" target="_blank" rel="noopener noreferrer">GHSA-w37m-7fhw-fmv9</a><br><a href="https://github.com/advisories/GHSA-wfc6-r584-vfw7" target="_blank" rel="noopener noreferrer">GHSA-wfc6-r584-vfw7</a></td>
+        <td>Upgrade Next version</td>
+      </tr>
+
+      <tr class="" data-row-type="none" data-is-fixed="false">
+        <td><a href="https://github.com/rocicorp/zero-docs/commit/44bd66347c00d618adc99cee9cb7896a1c4a4b5a" target="_blank" rel="noopener noreferrer">44bd66347c00</a></td>
+        <td class="date-col">2025-11-21</td>
+        <td class="optional-col">package-lock.json</td>
+        <td class="optional-col">.</td>
+        <td class="optional-col">dependencies</td>
+        <td><a href="https://npmx.dev/search?q=%40radix-ui%2Freact-tabs" target="_blank" rel="noopener noreferrer">@radix-ui/react-tabs</a></td>
+        <td>added</td>
+        <td class="optional-col"></td>
+        <td class="optional-col">^1.1.13</td>
+        <td></td>
+        <td>1.1.13</td>
+        <td class="date-col">2025-11-21</td>
+        <td class="date-col"></td>
+        <td><a href="https://github.com/rocicorp/zero-docs/commit/44bd66347c00d618adc99cee9cb7896a1c4a4b5a" target="_blank" rel="noopener noreferrer">44bd66347c00</a></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td>docs: added initial add to existing and codegroup fixes</td>
+      </tr>
+
+      <tr class="vuln-row" data-row-type="active" data-is-fixed="true">
+        <td><a href="https://github.com/rocicorp/zero-docs/commit/ad9ef9f5138d9bd7e3657ef979e767db83d621b3" target="_blank" rel="noopener noreferrer">ad9ef9f5138d</a></td>
+        <td class="date-col">2025-11-19</td>
+        <td class="optional-col">package-lock.json</td>
+        <td class="optional-col">.</td>
+        <td class="optional-col">dependencies</td>
+        <td><a href="https://npmx.dev/search?q=next" target="_blank" rel="noopener noreferrer">next</a></td>
+        <td>updated</td>
+        <td class="optional-col">^15.4.6</td>
+        <td class="optional-col">^15.5.6</td>
+        <td>15.5.6</td>
+        <td>15.5.6</td>
+        <td class="date-col">2025-11-19</td>
+        <td class="date-col">2025-12-08</td>
+        <td><a href="https://github.com/rocicorp/zero-docs/commit/ad9ef9f5138d9bd7e3657ef979e767db83d621b3" target="_blank" rel="noopener noreferrer">ad9ef9f5138d</a></td>
+        <td><a href="https://github.com/rocicorp/zero-docs/commit/bccb49bfa3d7d274113b8a01702274cdee01bcf5" target="_blank" rel="noopener noreferrer">bccb49bfa3d7</a></td>
+        <td><a href="https://github.com/advisories/GHSA-267c-6grr-h53f" target="_blank" rel="noopener noreferrer">GHSA-267c-6grr-h53f</a><br><a href="https://github.com/advisories/GHSA-26hh-7cqf-hhc6" target="_blank" rel="noopener noreferrer">GHSA-26hh-7cqf-hhc6</a><br><a href="https://github.com/advisories/GHSA-36qx-fr4f-26g5" target="_blank" rel="noopener noreferrer">GHSA-36qx-fr4f-26g5</a><br><a href="https://github.com/advisories/GHSA-3g8h-86w9-wvmq" target="_blank" rel="noopener noreferrer">GHSA-3g8h-86w9-wvmq</a><br><a href="https://github.com/advisories/GHSA-3x4c-7xq6-9pq8" target="_blank" rel="noopener noreferrer">GHSA-3x4c-7xq6-9pq8</a><br><a href="https://github.com/advisories/GHSA-492v-c6pp-mqqv" target="_blank" rel="noopener noreferrer">GHSA-492v-c6pp-mqqv</a><br><a href="https://github.com/advisories/GHSA-8h8q-6873-q5fj" target="_blank" rel="noopener noreferrer">GHSA-8h8q-6873-q5fj</a><br><a href="https://github.com/advisories/GHSA-9g9p-9gw9-jx7f" target="_blank" rel="noopener noreferrer">GHSA-9g9p-9gw9-jx7f</a><br><a href="https://github.com/advisories/GHSA-9qr9-h5gf-34mp" target="_blank" rel="noopener noreferrer">GHSA-9qr9-h5gf-34mp</a><br><a href="https://github.com/advisories/GHSA-c4j6-fc7j-m34r" target="_blank" rel="noopener noreferrer">GHSA-c4j6-fc7j-m34r</a><br><a href="https://github.com/advisories/GHSA-ffhc-5mcf-pf4q" target="_blank" rel="noopener noreferrer">GHSA-ffhc-5mcf-pf4q</a><br><a href="https://github.com/advisories/GHSA-ggv3-7p47-pfv8" target="_blank" rel="noopener noreferrer">GHSA-ggv3-7p47-pfv8</a><br><a href="https://github.com/advisories/GHSA-gx5p-jg67-6x7h" target="_blank" rel="noopener noreferrer">GHSA-gx5p-jg67-6x7h</a><br><a href="https://github.com/advisories/GHSA-h25m-26qc-wcjf" target="_blank" rel="noopener noreferrer">GHSA-h25m-26qc-wcjf</a><br><a href="https://github.com/advisories/GHSA-h64f-5h5j-jqjh" target="_blank" rel="noopener noreferrer">GHSA-h64f-5h5j-jqjh</a><br><a href="https://github.com/advisories/GHSA-mg66-mrh9-m8jx" target="_blank" rel="noopener noreferrer">GHSA-mg66-mrh9-m8jx</a><br><a href="https://github.com/advisories/GHSA-mwv6-3258-q52c" target="_blank" rel="noopener noreferrer">GHSA-mwv6-3258-q52c</a><br><a href="https://github.com/advisories/GHSA-q4gf-8mx6-v5v3" target="_blank" rel="noopener noreferrer">GHSA-q4gf-8mx6-v5v3</a><br><a href="https://github.com/advisories/GHSA-vfv6-92ff-j949" target="_blank" rel="noopener noreferrer">GHSA-vfv6-92ff-j949</a><br><a href="https://github.com/advisories/GHSA-w37m-7fhw-fmv9" target="_blank" rel="noopener noreferrer">GHSA-w37m-7fhw-fmv9</a><br><a href="https://github.com/advisories/GHSA-wfc6-r584-vfw7" target="_blank" rel="noopener noreferrer">GHSA-wfc6-r584-vfw7</a></td>
+        <td><a href="https://github.com/advisories/GHSA-267c-6grr-h53f" target="_blank" rel="noopener noreferrer">GHSA-267c-6grr-h53f</a><br><a href="https://github.com/advisories/GHSA-26hh-7cqf-hhc6" target="_blank" rel="noopener noreferrer">GHSA-26hh-7cqf-hhc6</a><br><a href="https://github.com/advisories/GHSA-36qx-fr4f-26g5" target="_blank" rel="noopener noreferrer">GHSA-36qx-fr4f-26g5</a><br><a href="https://github.com/advisories/GHSA-3g8h-86w9-wvmq" target="_blank" rel="noopener noreferrer">GHSA-3g8h-86w9-wvmq</a><br><a href="https://github.com/advisories/GHSA-3x4c-7xq6-9pq8" target="_blank" rel="noopener noreferrer">GHSA-3x4c-7xq6-9pq8</a><br><a href="https://github.com/advisories/GHSA-492v-c6pp-mqqv" target="_blank" rel="noopener noreferrer">GHSA-492v-c6pp-mqqv</a><br><a href="https://github.com/advisories/GHSA-8h8q-6873-q5fj" target="_blank" rel="noopener noreferrer">GHSA-8h8q-6873-q5fj</a><br><a href="https://github.com/advisories/GHSA-9g9p-9gw9-jx7f" target="_blank" rel="noopener noreferrer">GHSA-9g9p-9gw9-jx7f</a><br><a href="https://github.com/advisories/GHSA-9qr9-h5gf-34mp" target="_blank" rel="noopener noreferrer">GHSA-9qr9-h5gf-34mp</a><br><a href="https://github.com/advisories/GHSA-c4j6-fc7j-m34r" target="_blank" rel="noopener noreferrer">GHSA-c4j6-fc7j-m34r</a><br><a href="https://github.com/advisories/GHSA-ffhc-5mcf-pf4q" target="_blank" rel="noopener noreferrer">GHSA-ffhc-5mcf-pf4q</a><br><a href="https://github.com/advisories/GHSA-ggv3-7p47-pfv8" target="_blank" rel="noopener noreferrer">GHSA-ggv3-7p47-pfv8</a><br><a href="https://github.com/advisories/GHSA-gx5p-jg67-6x7h" target="_blank" rel="noopener noreferrer">GHSA-gx5p-jg67-6x7h</a><br><a href="https://github.com/advisories/GHSA-h25m-26qc-wcjf" target="_blank" rel="noopener noreferrer">GHSA-h25m-26qc-wcjf</a><br><a href="https://github.com/advisories/GHSA-h64f-5h5j-jqjh" target="_blank" rel="noopener noreferrer">GHSA-h64f-5h5j-jqjh</a><br><a href="https://github.com/advisories/GHSA-mg66-mrh9-m8jx" target="_blank" rel="noopener noreferrer">GHSA-mg66-mrh9-m8jx</a><br><a href="https://github.com/advisories/GHSA-mwv6-3258-q52c" target="_blank" rel="noopener noreferrer">GHSA-mwv6-3258-q52c</a><br><a href="https://github.com/advisories/GHSA-q4gf-8mx6-v5v3" target="_blank" rel="noopener noreferrer">GHSA-q4gf-8mx6-v5v3</a><br><a href="https://github.com/advisories/GHSA-vfv6-92ff-j949" target="_blank" rel="noopener noreferrer">GHSA-vfv6-92ff-j949</a><br><a href="https://github.com/advisories/GHSA-w37m-7fhw-fmv9" target="_blank" rel="noopener noreferrer">GHSA-w37m-7fhw-fmv9</a><br><a href="https://github.com/advisories/GHSA-wfc6-r584-vfw7" target="_blank" rel="noopener noreferrer">GHSA-wfc6-r584-vfw7</a></td>
+        <td>feat: added code group for tabbed code</td>
+      </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <script>
+    (() => {
+      const hideFixed = document.getElementById('hide-fixed');
+      const showAllDeps = document.getElementById('show-all-deps');
+      const showExtraColumns = document.getElementById('show-extra-columns');
+      const visibleRowCount = document.getElementById('visible-row-count');
+      const reportRoot = document.getElementById('report-root');
+      const rows = Array.from(document.querySelectorAll('tbody tr'));
+
+      const applyFilters = () => {
+        let visible = 0;
+
+        for (const row of rows) {
+          const rowType = row.getAttribute('data-row-type') ?? 'none';
+          const isFixed = row.getAttribute('data-is-fixed') === 'true';
+          let show = true;
+
+          if (!showAllDeps.checked && rowType === 'none') {
+            show = false;
+          }
+
+          if (hideFixed.checked && isFixed) {
+            show = false;
+          }
+
+          row.hidden = !show;
+          if (show) {
+            visible++;
+          }
+        }
+
+        visibleRowCount.textContent = String(visible);
+      };
+
+      hideFixed.addEventListener('change', applyFilters);
+      showAllDeps.addEventListener('change', applyFilters);
+      showExtraColumns.addEventListener('change', () => {
+        reportRoot.classList.toggle('show-extra-columns', showExtraColumns.checked);
+      });
+      applyFilters();
+    })();
+  </script>
+</body>
+</html>

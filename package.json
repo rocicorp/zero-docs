@@ -83,5 +83,6 @@
     "tsx": "^4.20.3",
     "typescript": "^5",
     "vitest": "^4.0.18"
-  }
+  },
+  "packageManager": "pnpm@11.1.3"
 }

@@ -1,3 +1,5 @@
+nodeLinker: hoisted
+
 allowBuilds:
   '@rocicorp/zero-sqlite3': true
   esbuild: true

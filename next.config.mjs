@@ -128,8 +128,16 @@ const nextConfig = {
         headers: [
           {
             key: 'Cache-Control',
-            value:
-              'public, max-age=86400, s-maxage=86400, stale-while-revalidate=43200',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      {
+        source: '/video/:path*.webp',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
           },
         ],
       },

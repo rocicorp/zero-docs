@@ -1,16 +1,12 @@
 'use client';
 
-import {
-  enterFullscreen,
-  exitFullscreen,
-  isCurrentlyFullscreen,
-} from '@/lib/fullscreen';
 import {parseMdx} from '@/lib/mdx';
 import Link from 'next/link';
 import {useEffect, useRef, useState} from 'react';
 import CodeGroup from './CodeGroup';
 import {useIsMobile} from './hooks/use-mobile';
 import RocicorpLogo from './logos/Rocicorp';
+import Video from './ui/Video';
 import CopyButtonListener from './ui/copy-button-listener';
 import {Popover, PopoverContent, PopoverTrigger} from './ui/popover';
 
@@ -27,9 +23,6 @@ export function IntroductionLanding({
   };
 }) {
   const isMobile = useIsMobile();
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [isVideoReady, setIsVideoReady] = useState(false);
   const mainRef = useRef<HTMLElement>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -42,53 +35,6 @@ export function IntroductionLanding({
     window.addEventListener('scroll', handleScroll, {passive: true});
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
-  const toggleVideoPlayPause = () => {
-    if (videoRef.current) {
-      if (videoRef.current.paused) {
-        videoRef.current.play();
-        setIsPlaying(true);
-      } else {
-        videoRef.current.pause();
-        setIsPlaying(false);
-      }
-    }
-  };
-
-  useEffect(() => {
-    const videoElement = videoRef.current;
-    if (!videoElement) return;
-
-    const updatePlaying = () => {
-      setIsPlaying(!videoElement.paused);
-    };
-    const onPlay = () => {
-      updatePlaying();
-      setIsVideoReady(true);
-    };
-    const onPause = () => updatePlaying();
-    const onCanPlay = () => setIsVideoReady(true);
-
-    videoElement.addEventListener('play', onPlay);
-    videoElement.addEventListener('pause', onPause);
-    videoElement.addEventListener('canplay', onCanPlay);
-
-    return () => {
-      videoElement.removeEventListener('play', onPlay);
-      videoElement.removeEventListener('pause', onPause);
-      videoElement.removeEventListener('canplay', onCanPlay);
-    };
-  }, []);
-
-  const toggleFullscreen = () => {
-    const videoContainer = videoRef.current;
-
-    if (!isCurrentlyFullscreen(videoContainer)) {
-      enterFullscreen(videoContainer);
-    } else {
-      exitFullscreen(videoContainer);
-    }
-  };
 
   const scrollToTop = () => {
     const start = window.scrollY;
@@ -233,68 +179,14 @@ export function IntroductionLanding({
         </section>
 
         <section className="section section-video" id="demo">
-          <div className="video-container">
-            <video
-              ref={videoRef}
-              className="video-player"
-              autoPlay
-              loop
-              muted
-              playsInline
-              preload="auto"
-              poster="/images/zbugs-demo-dkzx.webp"
-              onClick={toggleVideoPlayPause}
-              style={{cursor: 'pointer'}}
-            >
-              <source src="/video/zbugs-demo.mp4" type="video/mp4" />
-              Your browser does not support the video tag.
-            </video>
-            {isVideoReady ? (
-              <div className="video-controls">
-                <button
-                  className="video-control-btn video-play-pause"
-                  aria-label={isPlaying ? 'Pause' : 'Play'}
-                  onClick={toggleVideoPlayPause}
-                >
-                  {isPlaying ? (
-                    <svg
-                      className="video-icon"
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
-                    >
-                      <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
-                    </svg>
-                  ) : (
-                    <svg
-                      className="video-icon"
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
-                    >
-                      <path d="M8 5v14l11-7z" />
-                    </svg>
-                  )}
-                </button>
-                <button
-                  className="video-control-btn video-fullscreen"
-                  aria-label="Fullscreen"
-                  onClick={toggleFullscreen}
-                >
-                  <svg
-                    className="video-icon"
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                  >
-                    <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z" />
-                  </svg>
-                </button>
-              </div>
-            ) : (
-              <></>
-            )}
-          </div>
+          <Video
+            src="/video/zbugs-demo-v1.mp4"
+            alt="Gigabugs issue tracker demo"
+            animation
+            poster="/video/zbugs-demo-v1.webp"
+            preload="auto"
+            variant="landing"
+          />
           <p className="video-caption">
             <a href="https://gigabugs.rocicorp.dev/">Gigabugs</a> – Our 1.2
             million row issue tracker.

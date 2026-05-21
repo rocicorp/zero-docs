@@ -5,7 +5,7 @@ import {
   exitFullscreen,
   isCurrentlyFullscreen,
 } from '@/lib/fullscreen';
-import React, { useEffect, useRef, useState } from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 
 type VideoProps = {
   src?: `/${string}`; // Path to the video file
@@ -48,9 +48,16 @@ const docsIconStyle: React.CSSProperties = {
   width: '1.125rem',
 };
 
-const PlayIcon = ({className}: {className?: string}) => (
+const PlayIcon = ({
+  className,
+  style,
+}: {
+  className?: string;
+  style?: React.CSSProperties;
+}) => (
   <svg
     className={className}
+    style={style}
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="currentColor"
@@ -59,9 +66,16 @@ const PlayIcon = ({className}: {className?: string}) => (
   </svg>
 );
 
-const PauseIcon = ({className}: {className?: string}) => (
+const PauseIcon = ({
+  className,
+  style,
+}: {
+  className?: string;
+  style?: React.CSSProperties;
+}) => (
   <svg
     className={className}
+    style={style}
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
     fill="currentColor"
@@ -90,7 +104,8 @@ const FullscreenIcon = ({
 
 const Video: React.FC<VideoProps> = ({
   src,
-  alt, 
+  alt,
+  animation,
   poster,
   preload,
   variant = 'docs',
@@ -98,7 +113,8 @@ const Video: React.FC<VideoProps> = ({
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isVideoReady, setIsVideoReady] = useState(false);
-  const isLanding = variant === 'landing'; 
+  const isLanding = variant === 'landing';
+  const isAnimated = Boolean(animation);
 
   const toggleVideoPlayPause = () => {
     const videoElement = videoRef.current;
@@ -124,7 +140,7 @@ const Video: React.FC<VideoProps> = ({
   };
 
   useEffect(() => {
-    if (!isLanding) return;
+    if (!isLanding && isAnimated) return;
 
     const videoElement = videoRef.current;
     if (!videoElement) return;
@@ -134,12 +150,16 @@ const Video: React.FC<VideoProps> = ({
     };
     const onPlay = () => {
       updatePlaying();
-      setIsVideoReady(true);
+      if (isLanding) {
+        setIsVideoReady(true);
+      }
     };
     const onPause = () => updatePlaying();
     const onCanPlay = () => {
       updatePlaying();
-      setIsVideoReady(true);
+      if (isLanding) {
+        setIsVideoReady(true);
+      }
     };
 
     videoElement.addEventListener('play', onPlay);
@@ -151,7 +171,7 @@ const Video: React.FC<VideoProps> = ({
       videoElement.removeEventListener('pause', onPause);
       videoElement.removeEventListener('canplay', onCanPlay);
     };
-  }, [isLanding]);
+  }, [isAnimated, isLanding]);
 
   const handleVideoClick: React.MouseEventHandler<HTMLVideoElement> = event => {
     if (!isLanding) return;
@@ -161,9 +181,17 @@ const Video: React.FC<VideoProps> = ({
     toggleVideoPlayPause();
   };
 
-  const handlePlayPauseClick: React.MouseEventHandler<
-    HTMLButtonElement
+  const handlePlayPauseClick: React.MouseEventHandler<HTMLElement> = event => {
+    event.preventDefault();
+    event.stopPropagation();
+    toggleVideoPlayPause();
+  };
+
+  const handlePlayPauseKeyDown: React.KeyboardEventHandler<
+    HTMLSpanElement
   > = event => {
+    if (event.key !== 'Enter' && event.key !== ' ') return;
+
     event.preventDefault();
     event.stopPropagation();
     toggleVideoPlayPause();
@@ -187,7 +215,7 @@ const Video: React.FC<VideoProps> = ({
 
   const docsControlsStyle: React.CSSProperties = {
     alignItems: 'center',
-    bottom:   '0.75rem',
+    bottom: '0.75rem',
     display: 'flex',
     gap: '0.5rem',
     position: 'absolute',
@@ -195,7 +223,7 @@ const Video: React.FC<VideoProps> = ({
     zIndex: 1,
   };
 
-  const showControls = !isLanding || isVideoReady;
+  const showControls = isLanding ? isVideoReady : true;
 
   if (!src) {
     console.error("Video component requires a 'src' property.");
@@ -214,19 +242,19 @@ const Video: React.FC<VideoProps> = ({
 
   return (
     <div
-      className={isLanding ? 'video-container' : undefined}
+      className={isLanding ? 'video-container' : 'docs-video-container'}
       style={isLanding ? undefined : docsContainerStyle}
     >
       <video
         ref={videoRef}
-        className={isLanding ? 'video-player' : undefined}
+        className={isLanding ? 'video-player' : 'docs-video-player'}
         src={src}
         controls={false}
         style={isLanding ? {cursor: 'pointer'} : docsVideoStyle}
         aria-label={alt}
-        autoPlay={true}
-        loop={true}
-        muted={true}
+        autoPlay={isAnimated}
+        loop={isAnimated}
+        muted={isAnimated}
         playsInline
         preload={preload}
         poster={poster}
@@ -253,6 +281,21 @@ const Video: React.FC<VideoProps> = ({
                 <PlayIcon className="video-icon" />
               )}
             </button>
+          ) : !isAnimated ? (
+            <span
+              role="button"
+              tabIndex={0}
+              style={docsControlButtonStyle}
+              aria-label={isPlaying ? 'Pause' : 'Play'}
+              onClick={handlePlayPauseClick}
+              onKeyDown={handlePlayPauseKeyDown}
+            >
+              {isPlaying ? (
+                <PauseIcon style={docsIconStyle} />
+              ) : (
+                <PlayIcon style={docsIconStyle} />
+              )}
+            </span>
           ) : null}
           {isLanding ? (
             <button

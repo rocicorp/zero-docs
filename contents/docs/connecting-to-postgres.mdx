@@ -71,12 +71,438 @@ This configuration can cause problems like `slot has been invalidated because it
 
 ### PlanetScale for Postgres
 
-You should use the `default` role that PlanetScale provides, because PlanetScale user-defined roles cannot create replication slots.
-
 Planetscale Postgres defaults `max_connections` to 25, which can easily be exhausted by Zero's connection pools. This will result in an error like `remaining connection slots are reserved for roles with the SUPERUSER attribute`.
 You should increase this value in the Parameters section of the PlanetScale dashboard to 100 or more.
 
 Make sure to only use a direct connection for the `ZERO_UPSTREAM_DB`, and use pooled URLs for `ZERO_CVR_DB`, `ZERO_CHANGE_DB`, and your API (see [Deployment](/docs/self-host)).
+
+<Note type="note" heading="Optional hardening step">
+  You do not need role-scoped IP restrictions to use Zero with PlanetScale
+  Postgres. Zero works with a normal direct `ZERO_UPSTREAM_DB` connection and
+  the usual role and password setup.
+
+The rest of this section describes an optional hardening pattern that is
+especially useful for [Cloud Zero](/docs/cloud-zero), and can also be useful
+for self-hosted Zero when the database connection still crosses the public
+internet instead of a private path such as PrivateLink. The goal is to
+restrict the Zero upstream role to a small set of known egress IPs while
+preserving existing application access.
+
+For the smoothest rollout, get Zero working first, then add these hardening
+steps one layer at a time.
+
+</Note>
+
+#### Suggested order
+
+The easiest setup is to get Zero running first, then add security from lowest
+to highest operational overhead:
+
+1. During setup: get Zero working with a direct `ZERO_UPSTREAM_DB` connection
+   and the recommended role grants below.
+2. During setup or later: use a dedicated `zero` role instead of the
+   PlanetScale `default` role if you want cleaner credential rotation and
+   role-scoped IP restrictions.
+3. Later: add PlanetScale role-scoped IP restrictions so existing app roles can
+   stay open while `zero` is limited to Cloud Zero egress IPs.
+4. Later, and only if you want tighter least privilege: replace
+   `pg_read_all_data` with publication-scoped app-table grants and optionally
+   automate them with an admin-owned helper.
+
+#### Custom Zero roles
+
+You can use PlanetScale's `default` role for Zero if you want the simplest
+setup. For production, a dedicated `zero` role is usually better because it
+separates Zero from the rest of your application for credential rotation and
+role-scoped IP restrictions.
+
+A dedicated Zero role needs three things:
+
+- `LOGIN` and `REPLICATION` so it can connect and read the replication stream
+- read access to the application tables it replicates, because initial sync
+  copies rows with `COPY (SELECT ...)`
+- ownership or write access to Zero's internal `z_%` metadata schemas, because
+  tables like `replicas` track Zero state
+
+Zero's internal schema names are not fixed. Current deployments commonly use
+schemas named like `z_abcd1234` and `z_abcd1234_0`. If those metadata
+privileges are missing, Zero can still connect and read app tables but later
+fail with errors such as `permission denied for table replicas`.
+
+#### Recommended role setup
+
+If you want the low-maintenance setup, give the dedicated role replication
+access, broad read access for app tables, and the ability to create future
+internal schemas. `pg_read_all_data` is the simplest option because publication
+changes keep working without table-grant churn. `pg_read_all_settings` and
+`pg_read_all_stats` give Zero read-only visibility into the upstream database
+state it inspects during setup and operation. This is the best first setup. Get
+it working before you add IP restrictions or tighter app-data grants.
+
+```sql
+CREATE ROLE zero WITH LOGIN REPLICATION PASSWORD 'replace-me';
+
+GRANT CONNECT ON DATABASE "app" TO zero;
+GRANT CREATE ON DATABASE "app" TO zero;
+
+GRANT pg_read_all_data TO zero;
+GRANT pg_read_all_settings TO zero;
+GRANT pg_read_all_stats TO zero;
+```
+
+If the role already exists, use `ALTER ROLE` instead:
+
+```sql
+ALTER ROLE zero WITH LOGIN REPLICATION PASSWORD 'replace-me';
+```
+
+#### Existing `z_%` schemas
+
+If Zero has already run against this database and `z_%` schemas already exist,
+grant the role access to those current schemas and tables too. This gives Zero
+write access to existing metadata tables such as `replicas`. If the schemas do
+not exist yet, `zero` can create them later because it has database `CREATE`,
+but any existing `z_%` schemas still need this retroactive grant loop.
+
+```sql
+DO $$
+DECLARE
+  schema_name text;
+BEGIN
+  FOR schema_name IN
+    SELECT nspname
+    FROM pg_namespace
+    WHERE nspname LIKE 'z\_%' ESCAPE '\'
+    ORDER BY nspname
+  LOOP
+    EXECUTE format('GRANT USAGE, CREATE ON SCHEMA %I TO zero', schema_name);
+    EXECUTE format(
+      'GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA %I TO zero',
+      schema_name
+    );
+    EXECUTE format(
+      'GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA %I TO zero',
+      schema_name
+    );
+  END LOOP;
+END $$;
+```
+
+If Zero creates future `z_%` schemas itself, it owns them. If an admin role
+creates a future `z_%` schema instead, rerun the block. The publication-scoped
+helper below only manages app-table `SELECT`. It does not replace `REPLICATION`,
+database `CREATE`, `pg_read_all_settings`, `pg_read_all_stats`, or these
+retroactive `z_%` metadata grants.
+
+#### Optional: keep app data grants publication-scoped
+
+If you want tighter app-table reads than `pg_read_all_data`, grant `SELECT`
+only on the tables currently exposed by your app publications. PostgreSQL does
+not have a native `GRANT ... ON PUBLICATION`, so this path is generated from
+`pg_publication_tables` and must be rerun when publication membership changes.
+Treat this as a later hardening step after the recommended setup already works.
+
+```sql
+DO $$
+DECLARE
+  publication_names text[] := ARRAY[
+    'replace_with_app_publication',
+    'replace_with_another_publication'
+  ];
+  r record;
+BEGIN
+  FOR r IN
+    SELECT DISTINCT schemaname
+    FROM pg_catalog.pg_publication_tables
+    WHERE pubname = ANY (publication_names)
+  LOOP
+    EXECUTE format('GRANT USAGE ON SCHEMA %I TO zero', r.schemaname);
+  END LOOP;
+
+  FOR r IN
+    SELECT DISTINCT schemaname, tablename
+    FROM pg_catalog.pg_publication_tables
+    WHERE pubname = ANY (publication_names)
+  LOOP
+    EXECUTE format('GRANT SELECT ON TABLE %I.%I TO zero', r.schemaname, r.tablename);
+  END LOOP;
+END $$;
+```
+
+If you are migrating away from `pg_read_all_data`, the safe order is: generate
+the explicit publication grants first, validate that `zero` can still read the
+published app tables, then revoke `pg_read_all_data` in the same transaction.
+
+If you want to keep those grants in sync automatically, wrap the same logic in
+admin-owned automation. The helper must be owned by an admin or table-owner
+role with grant authority, not by `zero`, and `SECURITY DEFINER` should pin
+`search_path` to `pg_catalog`. A practical shape is to keep the helper in a
+dedicated admin-owned schema, track which table grants it manages, and revoke
+`SELECT` from tables that leave the publication later.
+
+```sql
+CREATE SCHEMA IF NOT EXISTS zero_publication_grants;
+
+CREATE TABLE IF NOT EXISTS zero_publication_grants.synced_tables (
+  schemaname text NOT NULL,
+  tablename text NOT NULL,
+  PRIMARY KEY (schemaname, tablename)
+);
+
+CREATE OR REPLACE FUNCTION zero_publication_grants.sync_zero_publication_read_grants()
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = pg_catalog
+AS $$
+DECLARE
+  publication_names text[] := ARRAY[
+    'replace_with_app_publication',
+    'replace_with_another_publication'
+  ];
+  r record;
+BEGIN
+  FOR r IN
+    SELECT DISTINCT schemaname
+    FROM pg_catalog.pg_publication_tables
+    WHERE pubname = ANY (publication_names)
+  LOOP
+    EXECUTE format('GRANT USAGE ON SCHEMA %I TO zero', r.schemaname);
+  END LOOP;
+
+  FOR r IN
+    SELECT DISTINCT schemaname, tablename
+    FROM pg_catalog.pg_publication_tables
+    WHERE pubname = ANY (publication_names)
+  LOOP
+    EXECUTE format('GRANT SELECT ON TABLE %I.%I TO zero', r.schemaname, r.tablename);
+  END LOOP;
+
+  FOR r IN
+    WITH current_tables AS (
+      SELECT DISTINCT schemaname, tablename
+      FROM pg_catalog.pg_publication_tables
+      WHERE pubname = ANY (publication_names)
+    )
+    SELECT
+      st.schemaname,
+      st.tablename,
+      EXISTS (
+        SELECT 1
+        FROM pg_catalog.pg_class AS c
+        JOIN pg_catalog.pg_namespace AS n ON n.oid = c.relnamespace
+        WHERE n.nspname = st.schemaname
+          AND c.relname = st.tablename
+          AND c.relkind IN ('r', 'p')
+      ) AS table_exists
+    FROM zero_publication_grants.synced_tables AS st
+    LEFT JOIN current_tables AS ct
+      ON ct.schemaname = st.schemaname
+     AND ct.tablename = st.tablename
+    WHERE ct.tablename IS NULL
+  LOOP
+    IF r.table_exists THEN
+      EXECUTE format('REVOKE SELECT ON TABLE %I.%I FROM zero', r.schemaname, r.tablename);
+    END IF;
+  END LOOP;
+
+  DELETE FROM zero_publication_grants.synced_tables AS st
+  WHERE NOT EXISTS (
+    SELECT 1
+    FROM pg_catalog.pg_publication_tables AS pt
+    WHERE pt.pubname = ANY (publication_names)
+      AND pt.schemaname = st.schemaname
+      AND pt.tablename = st.tablename
+  );
+
+  INSERT INTO zero_publication_grants.synced_tables (schemaname, tablename)
+  SELECT DISTINCT schemaname, tablename
+  FROM pg_catalog.pg_publication_tables
+  WHERE pubname = ANY (publication_names)
+  ON CONFLICT DO NOTHING;
+END;
+$$;
+
+SELECT zero_publication_grants.sync_zero_publication_read_grants();
+
+CREATE OR REPLACE FUNCTION zero_publication_grants.sync_zero_publication_read_grants_event()
+RETURNS event_trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = pg_catalog
+AS $$
+BEGIN
+  PERFORM zero_publication_grants.sync_zero_publication_read_grants();
+END;
+$$;
+
+CREATE EVENT TRIGGER sync_zero_publication_read_grants_trigger
+ON ddl_command_end
+WHEN TAG IN (
+  'CREATE TABLE',
+  'ALTER TABLE',
+  'DROP TABLE',
+  'CREATE PUBLICATION',
+  'ALTER PUBLICATION',
+  'DROP PUBLICATION',
+  'DROP SCHEMA'
+)
+EXECUTE FUNCTION zero_publication_grants.sync_zero_publication_read_grants_event();
+```
+
+This is optional operational machinery for teams that want tighter app-data
+reads than `pg_read_all_data`. The recommended default stays `pg_read_all_data`.
+Verify that your provider permits event triggers. If it does not, rerun the
+helper after publication changes from your deployment or migration step instead.
+If you use this path, revoke `EXECUTE` from `PUBLIC` on the helper functions.
+Also audit for existing grants to `PUBLIC`: those apply to every role,
+including `zero`, and sit outside this role-specific grant model.
+
+#### How PlanetScale IP restrictions behave
+
+Once the role and grants work, you can add network restrictions.
+
+PlanetScale Postgres IP restrictions are allow rules. Once a branch has any IP
+restriction, new connections must match at least one rule. A blank-role
+`0.0.0.0/0` rule allows every role, including `zero`, so it defeats a
+restricted Zero role while it exists.
+
+To keep existing application access unchanged while restricting only `zero`,
+add explicit role-scoped `0.0.0.0/0` rules for the app and user roles that
+should stay public, then add narrow CIDR rules only for `zero`.
+
+In PlanetScale, go to **Settings → IP restrictions** and create or edit rules
+there. Use the role username, not a descriptive label, and enter IPv4
+addresses as `/32` CIDRs such as `203.0.113.10/32`. If PlanetScale shows a
+username like `pscale_api_<suffix>.<branch_id>`, use only the first part,
+`pscale_api_<suffix>`.
+
+If you are using Cloud Zero, you can find the current egress IPs in the Cloud
+Zero dashboard under **Instances → Cluster → Egress IPs**. Use those addresses
+as `/32` CIDRs. This applies both to hosted Cloud Zero and AWS-managed
+instances. Keep that console-provided list current. During an egress IP change,
+temporarily allowing both the old and new listed addresses can prevent
+accidental breakage while you validate fresh connections. If you are
+self-hosting, use the public egress IPs of your own deployment.
+
+PlanetScale internal service roles are not usually part of your app role model.
+Do not add custom rules for internal `pscale_*` roles unless PlanetScale tells
+you to. The exception is app or automation roles you actually use, such as a
+`pscale_api_*` role that backs production automation.
+
+One common final rule layout looks like this:
+
+| Role                | CIDRs                                                   | Purpose                                                                          |
+| ------------------- | ------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| `app`               | `0.0.0.0/0`                                             | Keep the main application role publicly reachable                                |
+| `analytics`         | `0.0.0.0/0`                                             | Keep BI or human-operated access working                                         |
+| `pscale_api_abc123` | `0.0.0.0/0`                                             | Preserve a PlanetScale API-managed role that production automation actually uses |
+| `zero`              | `203.0.113.10/32`, `203.0.113.11/32`, `203.0.113.12/32` | Restrict Zero to the hosted egress IPs only                                      |
+
+#### Safe rollout for role-scoped restrictions
+
+Use this order to avoid accidental lockouts:
+
+1. Inventory the roles that still need public access, including any `pscale_api_*` roles your automation actually uses.
+2. If the branch currently has no IP rules and you want a bridge while assembling the final rules, add a temporary blank-role `0.0.0.0/0`.
+3. Add explicit role-scoped `0.0.0.0/0` rules for the existing app and user roles that should stay public, then validate fresh connections for those roles.
+4. Create or update the dedicated `zero` role and grants.
+5. Add the `zero` IP rule with only the Cloud Zero egress CIDRs.
+6. If you need to test from your laptop, temporarily append your operator `/32` to that same `zero` rule, validate, then remove it.
+7. Remove the temporary blank-role catchall last, then validate fresh app connections again and confirm that `zero` is blocked from a non-allowlisted IP.
+
+<Note
+  type="warning"
+  heading="Edit the Zero role rule, do not add a duplicate"
+>
+  PlanetScale may reject a second IP restriction record for
+  the same database and role. If you need to temporarily
+  allow an operator IP for testing, edit the existing Zero
+  rule and add one more CIDR, then remove it after testing.
+</Note>
+
+#### Practical validation checks
+
+After creating the role and applying the IP rule, validate it with a fresh
+`psql` connection as the `zero` role. Supply one replicated app table and check
+that the role can read app data, perform a no-op write against `replicas`
+inside a transaction, and create a temporary logical replication slot.
+
+```bash
+export ZERO_PROBE_DSN='postgres://zero:<password>@db.example.com:5432/app'
+export ZERO_PROBE_SCHEMA='public'
+export ZERO_PROBE_TABLE='some_replicated_table'
+
+slot_name="zero_probe_$(date +%s)"
+
+psql "$ZERO_PROBE_DSN" \
+  -X \
+  -v ON_ERROR_STOP=1 \
+  -v zero_probe_schema="$ZERO_PROBE_SCHEMA" \
+  -v zero_probe_table="$ZERO_PROBE_TABLE" \
+  -v zero_probe_slot="$slot_name" <<'SQL'
+SELECT current_user, inet_client_addr();
+SELECT has_database_privilege(current_user, current_database(), 'CREATE');
+
+SELECT format(
+  'SELECT 1 FROM %I.%I LIMIT 1',
+  :'zero_probe_schema',
+  :'zero_probe_table'
+)
+WHERE :'zero_probe_schema' <> '' AND :'zero_probe_table' <> '' \gexec
+
+BEGIN;
+SELECT format(
+  'UPDATE %I.%I SET version = version WHERE false',
+  n.nspname,
+  c.relname
+)
+FROM pg_class AS c
+JOIN pg_namespace AS n ON n.oid = c.relnamespace
+WHERE n.nspname LIKE 'z\_%' ESCAPE '\'
+  AND c.relname = 'replicas'
+  AND c.relkind IN ('r', 'p')
+ORDER BY n.nspname
+LIMIT 1 \gexec
+ROLLBACK;
+
+SELECT *
+FROM pg_create_logical_replication_slot(
+  :'zero_probe_slot',
+  'pgoutput',
+  true
+);
+SQL
+```
+
+PlanetScale currently supports PostgreSQL 17 and 18, so the third argument
+`true` form shown here is supported there. It requests a temporary logical
+replication slot. Choose a unique slot name.
+
+The no-op `UPDATE ... WHERE false` runs inside a transaction and rolls back, so
+it validates `replicas` write access without changing data.
+
+If no `z_%` schemas exist yet, that `UPDATE` check does nothing. Let Zero start
+once so it can create its own internal schemas, then rerun the script.
+
+Cleanup is automatic: the replication slot is temporary, so PostgreSQL drops it
+when the `psql` session ends.
+
+If you need to validate from a laptop, temporarily append your operator `/32` to the existing Zero role rule, run the script, then remove that `/32` and rerun the connection. The second run should fail before any SQL executes, which is the expected negative control.
+
+#### Common pitfalls
+
+- App-table `SELECT` alone is not enough. Zero also needs write access to its
+  internal `z_%` schemas or you may see errors like
+  `permission denied for table replicas`.
+- A blank-role `0.0.0.0/0` rule defeats a restricted `zero` role while it
+  exists.
+- Preserve existing app and user roles with explicit role-scoped `0.0.0.0/0`
+  rules before narrowing `zero`.
+- PlanetScale may reject duplicate restriction records for the same database
+  and role. Edit the existing `zero` rule instead.
+- Validate fresh connections after each change. Long-lived existing
+  connections are not enough to prove the rollout is safe.
 
 ### Neon
 

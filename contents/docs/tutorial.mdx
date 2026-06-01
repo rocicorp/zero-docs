@@ -180,15 +180,11 @@ pnpm add @rocicorp/zero zod pg
 pnpm add -D @types/pg
 
 # Note: pnpm disables postinstall scripts by default for security.
-# Approve @rocicorp/zero-sqlite3 before continuing:
-pnpm approve-builds
-
-# Or add to package.json, then rebuild the native packages:
-# "pnpm": {
-#   "onlyBuiltDependencies": [
-#     "@rocicorp/zero-sqlite3"
-#   ]
-# }
+# Create or update pnpm-workspace.yaml to allow the native package build:
+# https://pnpm.io/settings#allowbuilds
+# allowBuilds:
+#   '@rocicorp/zero-sqlite3': true
+pnpm rebuild @rocicorp/zero-sqlite3
 ```
 
 ```bash

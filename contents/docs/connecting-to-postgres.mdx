@@ -100,8 +100,7 @@ SHARD="0"
 
 if [ -z "$APP" ] || [ -z "$ORG" ] || [ -z "$DB" ]; then
   echo "Set APP, ORG, and DB first — nothing was sent."
-else
-pscale api -X PATCH "organizations/${ORG}/databases/${DB}/branches/${BRANCH}/changes" --input=- <<EOF
+elif pscale api -X PATCH "organizations/${ORG}/databases/${DB}/branches/${BRANCH}/changes" --input=- >/dev/null <<EOF
 {
   "parameters": {
     "patroni": {
@@ -122,6 +121,11 @@ pscale api -X PATCH "organizations/${ORG}/databases/${DB}/branches/${BRANCH}/cha
   }
 }
 EOF
+then
+  echo "Success. Confirm with:"
+  echo "  pscale api organizations/${ORG}/databases/${DB}/branches/${BRANCH}/parameters | grep -o '${APP}_${SHARD}_[a-z]'"
+else
+  echo "Failed — see the error above."
 fi
 ```
 

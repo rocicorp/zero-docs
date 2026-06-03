@@ -87,17 +87,49 @@ Make sure to only use a direct connection for the `ZERO_UPSTREAM_DB`, and use po
 
 PlanetScale Postgres can fail over to a standby during maintenance or an outage. By default a logical replication slot does **not** survive promotion of a standby, so after a failover zero-cache would find its slot missing and re-sync every replica from scratch.
 
-To avoid this, register Zero's replication slots with PlanetScale's failover-slot preservation, which is built on [Postgres 17 failover slots](https://www.postgresql.org/docs/current/logical-replication-failover.html). PlanetScale keeps a synced copy of each registered slot on the standby, so after a failover the slot is already present on the new primary and zero-cache reconnects without re-syncing.
+To avoid this, first, run `zero-cache` with [`ZERO_UPSTREAM_PG_REPLICATION_SLOT_FAILOVER=true`](/docs/zero-cache-config#pg-replication-slot-failover) so it creates failover-enabled slots.
 
-First, run `zero-cache` with [`ZERO_UPSTREAM_PG_REPLICATION_SLOT_FAILOVER=true`](/docs/zero-cache-config#pg-replication-slot-failover).
+Then, run the script below to register Zero's replication slots with PlanetScale and enable the two cluster parameters failover needs:
 
-Zero's slot names have the form `{ZERO_APP_ID}_{shard}_{a-z}`. [`ZERO_APP_ID`](/docs/zero-cache-config#app-id) defaults to `zero` when self-hosting (on Zero Cloud it's your instance ID), and the shard number is currently always `0` — so with the default app ID the slots are `zero_0_a` … `zero_0_z`.
+```bash
+APP=""        # your ZERO_APP_ID — on Zero Cloud this is your instance ID
+ORG=""        # PlanetScale organization
+DB=""         # PlanetScale database
+BRANCH="main"
+SHARD="0"
 
-In **Cluster configuration → Parameters** in the PlanetScale dashboard:
+if [ -z "$APP" ] || [ -z "$ORG" ] || [ -z "$DB" ]; then
+  echo "Set APP, ORG, and DB first — nothing was sent."
+else
+pscale api -X PATCH "organizations/${ORG}/databases/${DB}/branches/${BRANCH}/changes" --input=- <<EOF
+{
+  "parameters": {
+    "patroni": {
+      "slots": [
+        "${APP}_${SHARD}_a", "${APP}_${SHARD}_b", "${APP}_${SHARD}_c", "${APP}_${SHARD}_d",
+        "${APP}_${SHARD}_e", "${APP}_${SHARD}_f", "${APP}_${SHARD}_g", "${APP}_${SHARD}_h",
+        "${APP}_${SHARD}_i", "${APP}_${SHARD}_j", "${APP}_${SHARD}_k", "${APP}_${SHARD}_l",
+        "${APP}_${SHARD}_m", "${APP}_${SHARD}_n", "${APP}_${SHARD}_o", "${APP}_${SHARD}_p",
+        "${APP}_${SHARD}_q", "${APP}_${SHARD}_r", "${APP}_${SHARD}_s", "${APP}_${SHARD}_t",
+        "${APP}_${SHARD}_u", "${APP}_${SHARD}_v", "${APP}_${SHARD}_w", "${APP}_${SHARD}_x",
+        "${APP}_${SHARD}_y", "${APP}_${SHARD}_z"
+      ]
+    },
+    "pgconf": {
+      "sync_replication_slots": "on",
+      "hot_standby_feedback": "on"
+    }
+  }
+}
+EOF
+fi
+```
 
-1. Under the **Failover** section, add the full range of slot names as a comma-delimited list (e.g. `zero_0_a` … `zero_0_z` for the default app ID). The 26-name range covers slot rotation.
-2. Set `sync_replication_slots = on` and `hot_standby_feedback = on`.
-3. Apply the queued configuration changes.
+<Note type="note" emoji="🤔" heading="Why so many slots?">
+Zero only uses a few slots at a time. We register the full `a–z` range with PlanetScale out of conservatism to cover potential issues where a slot doesn't get cleaned up. It also prepares us for potential future Zero versions where multiple replication-managers can run in parallel.
+
+Registrations don't cost anything if there is no actual slot with the same name.
+</Note>
 
 ### Neon
 

@@ -147,6 +147,8 @@ This callback is called before sending WebSocket messages that trigger API serve
 | `total_lag`    | Gauge   | ms   | End-to-end replication latency. Grows as an estimate if the next report hasn't arrived |
 | `events`       | Counter |      | Number of replication events processed                                                 |
 | `transactions` | Counter |      | Count of replicated transactions                                                       |
+| `shadow-sync-runs`     | Counter   |    | Number of [shadow initial-sync](/docs/zero-cache-config#shadow-sync-enabled) runs. Has a `result` attribute: `success`, `error` |
+| `shadow-sync-duration` | Histogram | s  | Wall-clock duration of a shadow initial-sync run. Has a `result` attribute: `success`, `error`                                  |
 
 ### zero.sync
 

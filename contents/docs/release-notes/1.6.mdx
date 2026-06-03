@@ -1,6 +1,6 @@
 ---
 title: Zero 1.6
-description: Failover Support for PlanetScale
+description: PlanetScale Failover Support
 ---
 
 ## Installation
@@ -11,9 +11,9 @@ npm install @rocicorp/zero@1.6
 
 ## Upgrading
 
-### PlanetScale Replication Failover
+### PlanetScale Failover
 
-Previous Zero versions lost replication slots after a PlanetScale Postgres failover, forcing resync. Zero 1.6 fixes this problem. To enable support, run `zero-cache` with [`ZERO_UPSTREAM_PG_REPLICATION_SLOT_FAILOVER=true`](/docs/zero-cache-config#pg-replication-slot-failover). You must then do a resync, and register the full range of slots in PlanetScale's failover configuration. See [High Availability and Failover](/docs/connecting-to-postgres#high-availability-and-failover) for the full setup.
+Previous Zero versions lost replication slots after a PlanetScale Postgres failover, forcing resync. Zero 1.6 fixes this problem. To enable support, run `zero-cache` with [`ZERO_UPSTREAM_PG_REPLICATION_SLOT_FAILOVER=true`](/docs/zero-cache-config#pg-replication-slot-failover). You must then register the full range of slots in PlanetScale's failover configuration, then do a resync. See [High Availability and Failover](/docs/connecting-to-postgres#high-availability) for the full setup.
 
 ## Features
 

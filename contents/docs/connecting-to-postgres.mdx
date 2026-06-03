@@ -79,31 +79,25 @@ This configuration can cause problems like `slot has been invalidated because it
 
 Change `max_connections` to at least 100. The default is 25, which is too low for Zero in most configurations.
 
-#### Connections
+#### Pooling
 
 Make sure to only use a direct connection for the `ZERO_UPSTREAM_DB`, and use pooled URLs for `ZERO_CVR_DB`, `ZERO_CHANGE_DB`, and your API (see [Deployment](/docs/self-host)).
 
-#### High Availability and Failover
+#### High Availability
 
-PlanetScale Postgres can fail over to a standby (during maintenance, switchover, or an outage). By default a logical replication slot does **not** survive promotion of a standby, so after a failover zero-cache would find its slot missing and re-sync every replica from scratch.
+PlanetScale Postgres can fail over to a standby during maintenance or an outage. By default a logical replication slot does **not** survive promotion of a standby, so after a failover zero-cache would find its slot missing and re-sync every replica from scratch.
 
 To avoid this, register Zero's replication slots with PlanetScale's failover-slot preservation, which is built on [Postgres 17 failover slots](https://www.postgresql.org/docs/current/logical-replication-failover.html). PlanetScale keeps a synced copy of each registered slot on the standby, so after a failover the slot is already present on the new primary and zero-cache reconnects without re-syncing.
 
-First, run `zero-cache` with [`ZERO_UPSTREAM_PG_REPLICATION_SLOT_FAILOVER=true`](/docs/zero-cache-config#pg-replication-slot-failover) (Postgres 17+) so it creates replication slots with the Postgres `failover` flag set. Slots are only flagged when they are created, so if you are upgrading an existing deployment, see [PlanetScale Replication Failover](/docs/release-notes/1.6#planetscale-replication-failover) in the 1.6 release notes for how to roll this out.
+First, run `zero-cache` with [`ZERO_UPSTREAM_PG_REPLICATION_SLOT_FAILOVER=true`](/docs/zero-cache-config#pg-replication-slot-failover).
 
-Zero names its slots `{ZERO_APP_ID}_{shard}_a` through `_z` — for the default app ID and shard, that's `zero_0_a`, `zero_0_b`, … `zero_0_z`. In **Cluster configuration → Parameters** in the PlanetScale dashboard:
+Zero's slot names have the form `{ZERO_APP_ID}_{shard}_{a-z}`. [`ZERO_APP_ID`](/docs/zero-cache-config#app-id) defaults to `zero` when self-hosting (on Zero Cloud it's your instance ID), and the shard number is currently always `0` — so with the default app ID the slots are `zero_0_a` … `zero_0_z`.
 
-1. Under the **Failover** section, add Zero's slot names as a comma-delimited list. Registering the full `zero_0_a` … `zero_0_z` range covers slot rotation.
+In **Cluster configuration → Parameters** in the PlanetScale dashboard:
+
+1. Under the **Failover** section, add the full range of slot names as a comma-delimited list (e.g. `zero_0_a` … `zero_0_z` for the default app ID). The 26-name range covers slot rotation.
 2. Set `sync_replication_slots = on` and `hot_standby_feedback = on`.
 3. Apply the queued configuration changes.
-
-After zero-cache has connected, confirm the slots are marked for failover:
-
-```sql
-SELECT slot_name, failover, synced FROM pg_replication_slots;
-```
-
-`failover` should be `true` for Zero's active slot. A slot only becomes failover-eligible after its consumer has advanced it at least once while the standby is syncing, so a brand-new or idle slot can still be lost if a failover races it.
 
 ### Neon
 

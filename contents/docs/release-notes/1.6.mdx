@@ -1,0 +1,59 @@
+---
+title: Zero 1.6
+description: PlanetScale Failover Support
+---
+
+## Installation
+
+```bash
+npm install @rocicorp/zero@1.6
+```
+
+## Upgrading
+
+### PlanetScale Failover
+
+Previous Zero versions lost replication slots after a PlanetScale Postgres failover, forcing resync. Zero 1.6 fixes this problem. To enable support, see [High Availability and Failover](/docs/connecting-to-postgres#high-availability).
+
+## Features
+
+- [**Litestream Region:**](/docs/zero-cache-config#litestream-region) Added support for deployments in non-standard AWS partitions like GovCloud (thanks [@ericykim](https://github.com/ericykim)!).
+
+## Performance
+
+- [~5% CPU reduction in replication-manager benchmarks by reusing stringified payloads across subscribers](https://github.com/rocicorp/mono/pull/5900)
+- [Faster `EXISTS` subqueries via the new `Cap` operator — can turn exists-heavy queries that previously timed out into ones that complete in milliseconds](https://github.com/rocicorp/mono/pull/5943)
+- [Bulk-insertion optimization in Replicache via `putMany`, speeding up large sync patches (3-5x faster for typical sync batches, up to 50x+ for large preloads)](https://github.com/rocicorp/mono/pull/5380)
+- [Batch deletes/upserts in `SQLiteStore` writes (~8x faster on 1k-put commits)](https://github.com/rocicorp/mono/pull/5915)
+- [Batch concurrent `SQLiteStore` `get`/`has` reads into fewer database queries](https://github.com/rocicorp/mono/pull/5958)
+- [Parallelize I/O during pull and rebase](https://github.com/rocicorp/mono/pull/5926)
+- [Heap-based k-way merge in `fetchMergeSort` (O(log K) per row vs O(K))](https://github.com/rocicorp/mono/pull/5921)
+- [Initial sync progress reporting uses `pg_class` estimates instead of full scans](https://github.com/rocicorp/mono/pull/5932)
+- [De-dupe SQLite requests in flip-join when children want the same parent](https://github.com/rocicorp/mono/pull/5918)
+- [`zero-sqlite3` now gathers up to 128 STAT4 samples per index, improving SQLite query planning for skewed indexed data](https://github.com/rocicorp/mono/pull/5913)
+
+## Fixes
+
+- [Returning to an app after stale-tab GC or CVR purge caused a full page reload](https://github.com/rocicorp/mono/pull/5903)
+- [`"Row already exists"` assertion failures during poke processing](https://github.com/rocicorp/mono/pull/5923)
+- [Deadlock during post-initial-sync `changeLog` reset](https://github.com/rocicorp/mono/pull/5953)
+- [Zombie `ViewSyncer`s inflated `active-client-groups` metric](https://github.com/rocicorp/mono/pull/5907)
+- [`ConcurrentModificationException` now reconnects instead of erroring](https://github.com/rocicorp/mono/pull/5930)
+- [`zero-cache` startup errors during change-streamer init not published](https://github.com/rocicorp/mono/pull/5956)
+- [`TypeError: Expected string at context.query. Got null`](https://github.com/rocicorp/mono/pull/5944)
+- [Replication slots were lost after a PlanetScale Postgres failover](https://github.com/rocicorp/mono/pull/5934)
+- [Replication slot creation timeouts crashed the server during backfill retries](https://github.com/rocicorp/mono/pull/5901)
+- [Shadow sync threw when a synced table could not be queried by ZQL](https://github.com/rocicorp/mono/pull/5950)
+- [Shadow sync now reports metrics and logs verification-success counts](https://github.com/rocicorp/mono/pull/5941)
+- [WebSocket errors are now logged as warnings instead of errors](https://github.com/rocicorp/mono/pull/5842)
+- [Inspector now reports last query hydration time instead of histogram](https://github.com/rocicorp/mono/pull/5924)
+- [Query/mutator functions now allow omitting `args`](https://github.com/rocicorp/mono/pull/5945)
+- [Reoduce log volume at `INFO` level](https://github.com/rocicorp/mono/pull/5946)
+- [Reclassify common Postgres config errors as warnings instead of errors](https://github.com/rocicorp/mono/pull/5981)
+- [Union-fan-in queries could ignore reverse ordering](https://github.com/rocicorp/mono/pull/5980)
+- [Abort `zero-cache` when ChangeDB CDC tables go missing](https://github.com/rocicorp/mono/pull/5989)
+- [CVR purge failures retried immediately in a tight loop instead of backing off](https://github.com/rocicorp/mono/pull/5988)
+
+## Breaking Changes
+
+None.

@@ -71,12 +71,69 @@ This configuration can cause problems like `slot has been invalidated because it
 
 ### PlanetScale for Postgres
 
-You should use the `default` role that PlanetScale provides, because PlanetScale user-defined roles cannot create replication slots.
+#### Roles
 
-Planetscale Postgres defaults `max_connections` to 25, which can easily be exhausted by Zero's connection pools. This will result in an error like `remaining connection slots are reserved for roles with the SUPERUSER attribute`.
-You should increase this value in the Parameters section of the PlanetScale dashboard to 100 or more.
+`zero-cache` should connect using the `default` role that PlanetScale provides, because PlanetScale user-defined roles cannot create replication slots.
+
+#### Connection Limits
+
+Change `max_connections` to at least 100. The default is 25, which is too low for Zero in most configurations.
+
+#### Pooling
 
 Make sure to only use a direct connection for the `ZERO_UPSTREAM_DB`, and use pooled URLs for `ZERO_CVR_DB`, `ZERO_CHANGE_DB`, and your API (see [Deployment](/docs/self-host)).
+
+#### High Availability
+
+PlanetScale Postgres can fail over to a standby during maintenance or an outage. By default a logical replication slot does **not** survive promotion of a standby, so after a failover zero-cache would find its slot missing and re-sync every replica from scratch.
+
+To avoid this, first, run `zero-cache` with [`ZERO_UPSTREAM_PG_REPLICATION_SLOT_FAILOVER=true`](/docs/zero-cache-config#pg-replication-slot-failover) so it creates failover-enabled slots.
+
+Then, run the script below to register Zero's replication slots with PlanetScale and enable the two cluster parameters failover needs:
+
+```bash
+APP=""        # your ZERO_APP_ID — on Zero Cloud this is your instance ID
+ORG=""        # PlanetScale organization
+DB=""         # PlanetScale database
+BRANCH="main"
+SHARD="0"
+
+if [ -z "$APP" ] || [ -z "$ORG" ] || [ -z "$DB" ]; then
+  echo "Set APP, ORG, and DB first — nothing was sent."
+elif pscale api -X PATCH "organizations/${ORG}/databases/${DB}/branches/${BRANCH}/changes" --input=- >/dev/null <<EOF
+{
+  "parameters": {
+    "patroni": {
+      "slots": [
+        "${APP}_${SHARD}_a", "${APP}_${SHARD}_b", "${APP}_${SHARD}_c", "${APP}_${SHARD}_d",
+        "${APP}_${SHARD}_e", "${APP}_${SHARD}_f", "${APP}_${SHARD}_g", "${APP}_${SHARD}_h",
+        "${APP}_${SHARD}_i", "${APP}_${SHARD}_j", "${APP}_${SHARD}_k", "${APP}_${SHARD}_l",
+        "${APP}_${SHARD}_m", "${APP}_${SHARD}_n", "${APP}_${SHARD}_o", "${APP}_${SHARD}_p",
+        "${APP}_${SHARD}_q", "${APP}_${SHARD}_r", "${APP}_${SHARD}_s", "${APP}_${SHARD}_t",
+        "${APP}_${SHARD}_u", "${APP}_${SHARD}_v", "${APP}_${SHARD}_w", "${APP}_${SHARD}_x",
+        "${APP}_${SHARD}_y", "${APP}_${SHARD}_z"
+      ]
+    },
+    "pgconf": {
+      "sync_replication_slots": "on",
+      "hot_standby_feedback": "on"
+    }
+  }
+}
+EOF
+then
+  echo "Success. Confirm with:"
+  echo "  pscale api organizations/${ORG}/databases/${DB}/branches/${BRANCH}/parameters | grep -o '${APP}_${SHARD}_[a-z]'"
+else
+  echo "Failed — see the error above."
+fi
+```
+
+<Note type="note" emoji="🤔" heading="Why so many slots?">
+Zero only uses a few slots at a time. We register the full `a–z` range with PlanetScale out of conservatism to cover potential issues where a slot doesn't get cleaned up. It also prepares us for potential future Zero versions where multiple replication-managers can run in parallel.
+
+Registrations don't cost anything if there is no actual slot with the same name.
+</Note>
 
 ### Neon
 
@@ -151,6 +208,10 @@ difficult. [Hetzner](https://www.hetzner.com/) offers cheap hosted VPS that supp
 
 IPv4 addresses are only supported on the Pro plan and are an extra $4/month.
 
+#### High Availability
+
+Zero does not support Supabase's high-availability automatic failover. Supabase does not currently expose the replication-slot failover configuration Zero needs, so a promotion would orphan Zero's replication slot and force a full resync. If you need this, [reach out on Discord](https://discord.rocicorp.dev/).
+
 ### Render
 
 Render _can_ work with Zero, but requires admin/support-side setup, and does not support a few core Zero features.
@@ -160,6 +221,8 @@ App roles can't create [event triggers](#event-triggers), so schema changes will
 You also must ensure `wal_level=logical` by creating a Render support ticket.
 
 Render does not provide superuser access, but you can submit another support ticket to ask Render to create a publication with `FOR ALL TABLES` for you, and then set that publication in [App Publications](/docs/zero-cache-config#app-publications).
+
+Zero does not support Render's high availability (HA). Render's standby replicates asynchronously, so a failover can drop the most recent writes — which is incompatible with a sync engine like Zero that must never miss a change. Do not enable HA for a database used as a Zero upstream.
 
 ### Google Cloud SQL
 

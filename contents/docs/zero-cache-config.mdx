@@ -390,6 +390,13 @@ flag: `--litestream-port`<br/>
 env: `ZERO_LITESTREAM_PORT`<br/>
 default: `--port + 2`
 
+### Litestream Region
+
+The AWS region for the litestream backup bucket. Required for non-standard AWS partitions (e.g. GovCloud `us-gov-west-1`) where Litestream cannot auto-detect the region. The replication-manager and view-syncers must have the same region.
+
+flag: `--litestream-region`<br/>
+env: `ZERO_LITESTREAM_REGION`<br/>
+
 ### Litestream Restore Parallelism
 
 The number of WAL files to download in parallel when performing the initial restore of the replica from the backup.
@@ -521,6 +528,14 @@ The sliding window over which the perUserMutationLimitMax is enforced.
 flag: `--per-user-mutation-limit-window-ms`<br/>
 env: `ZERO_PER_USER_MUTATION_LIMIT_WINDOW_MS`<br/>
 default: `60000`
+
+### PG Replication Slot Failover
+
+For upstream Postgres 17+, creates replication slots with the `failover` flag enabled so they can be synchronized to a standby and survive a failover. This requires additional Postgres-side configuration on your provider; see [High Availability and Failover](/docs/connecting-to-postgres#high-availability-and-failover). Has no effect on Postgres versions before 17.
+
+flag: `--upstream-pg-replication-slot-failover`<br/>
+env: `ZERO_UPSTREAM_PG_REPLICATION_SLOT_FAILOVER`<br/>
+default: `false`
 
 ### Port
 

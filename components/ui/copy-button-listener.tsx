@@ -4,6 +4,26 @@ import {useEffect} from 'react';
 
 const shellLanguages = new Set(['bash', 'sh', 'shell', 'zsh']);
 
+// Strip shell comments so pasted snippets work in zsh (which doesn't treat
+// `#` as a comment in interactive mode by default). Full-line comments are
+// dropped; inline comments (a `#` preceded by whitespace, outside quotes —
+// i.e. bash's own comment rule) are trimmed off the end of the line. This
+// leaves `$#`, `${#arr}`, `url#frag`, and `"# in a string"` untouched.
+function stripShellComments(line: string): string | null {
+  if (line.trimStart().startsWith('#')) return null;
+  let inSingle = false;
+  let inDouble = false;
+  for (let i = 0; i < line.length; i++) {
+    const c = line[i];
+    if (c === "'" && !inDouble) inSingle = !inSingle;
+    else if (c === '"' && !inSingle) inDouble = !inDouble;
+    else if (c === '#' && !inSingle && !inDouble && /\s/.test(line[i - 1] ?? '')) {
+      return line.slice(0, i).replace(/\s+$/, '');
+    }
+  }
+  return line;
+}
+
 export default function CopyButtonListener() {
   useEffect(() => {
     const handleClick = (event: MouseEvent) => {
@@ -26,7 +46,8 @@ export default function CopyButtonListener() {
       const textToCopy = shellLanguages.has(language ?? '')
         ? codeBlock
             .split('\n')
-            .filter(line => !line.trimStart().startsWith('#'))
+            .map(stripShellComments)
+            .filter((line): line is string => line !== null)
             .join('\n')
         : codeBlock;
 

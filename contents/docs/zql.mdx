@@ -42,9 +42,10 @@ zql.issue
 This is a design tradeoff that allows Zero to better reuse the row locally for future queries. This also makes it easier to share types between different parts of the code.
 
 <Note type="note" emoji="🧑‍🏫" slug="immutability" heading="Data returned from ZQL should be considered immutable">
-This means you should not modify the data directly. Instead, clone the data and modify the clone.
 
-ZQL caches values and returns them multiple times. If you modify a value returned from ZQL, you will modify it everywhere it is used. This can lead to subtle bugs.
+Do not directly modify JavaScript values returned from ZQL queries.
+
+ZQL caches values across queries to improve performance and reduce re-renders in frameworks like React and Solid. If you modify a value returned from ZQL, you will modify it everywhere it is used. This can lead to subtle bugs.
 
 JavaScript and TypeScript lack true immutable types so we use `readonly` to help enforce it. But it's easy to cast away the `readonly` accidentally.
 

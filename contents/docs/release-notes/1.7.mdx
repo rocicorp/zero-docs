@@ -21,11 +21,15 @@ Zero 1.7 focuses on query correctness, performance, and operational safety. It i
 
 ## Performance
 
-We benchmarked `zero/v1.6.2` against `maint/zero/v1.7` (`2698272ca`) on an M3 Max MacBook Pro with 36 GB RAM, macOS 26.5.1, and Node 22.22.1. The run used 84 comparable `zql-benchmarks` cases with the same benchmark definitions on both refs.
+Zero 1.7 is broadly performance-neutral with Zero 1.6 across client and query-engine workloads, with most benchmarks staying within +/-5%.
 
-Overall, the median benchmark was 1% faster. The geometric mean was 3% slower including one severe planned-`exists` hydration outlier, or 1% faster excluding that single case. 30 of 84 benchmarks improved by at least 5%, while 22 regressed by at least 5%.
+The clearest improvements are in replication and storage, especially when Zero is processing changes from Postgres:
 
-Wins were concentrated in Chinook hydration (+38% geomean), manual flip-join cases (+16%), and in-memory IVM hot-path benchmarks (+5%). Regressions were concentrated in planner hydration, transaction-heavy ArrayView updates, and Chinook push workloads.
+| What improved                                      |       Result |
+| -------------------------------------------------- | -----------: |
+| Processing a continuous stream of Postgres changes | 1.86x faster |
+| Processing transactions that change many rows      | 1.73x faster |
+| Copying rows into Zero during initial sync         | 1.07x faster |
 
 ## Fixes
 

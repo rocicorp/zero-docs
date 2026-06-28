@@ -27,6 +27,8 @@ Zero 1.7 is a targeted performance win. It makes several important hot paths fas
 
 Zero 1.7 makes the replication path noticeably faster: change streams process about **1.7x-1.9x faster** than 1.6. Initial sync is also modestly faster.
 
+We have seen customer workloads max sustainable replication throughput increase from ~750 writes/second to ~2500.
+
 <BenchmarkComparisonChart
   title="Postgres Change Processing"
   description="Normalized throughput for Postgres replication and storage paths. Higher is better."

@@ -21,15 +21,171 @@ Zero 1.7 focuses on query correctness, performance, and operational safety. It i
 
 ## Performance
 
-Zero 1.7 is broadly performance-neutral with Zero 1.6 across client and query-engine workloads, with most benchmarks staying within +/-5%.
+Zero 1.7 is a targeted performance win. It makes several important hot paths faster in real applications: keeping up with busy Postgres databases, running relationship-heavy queries, and analyzing queries.
 
-The clearest improvements are in replication and storage, especially when Zero is processing changes from Postgres:
+### Postgres Change Processing
 
-| What improved                                      |       Result |
-| -------------------------------------------------- | -----------: |
-| Processing a continuous stream of Postgres changes | 1.86x faster |
-| Processing transactions that change many rows      | 1.73x faster |
-| Copying rows into Zero during initial sync         | 1.07x faster |
+Zero 1.7 makes the replication path noticeably faster: change streams process about **1.7x-1.9x faster** than 1.6. Initial sync is also modestly faster.
+
+<BenchmarkComparisonChart
+  title="Postgres Change Processing"
+  description="Normalized throughput for Postgres replication and storage paths. Higher is better."
+  previousLabel="Zero 1.6"
+  currentLabel="Zero 1.7"
+  precision={2}
+  data={[
+    {
+      name: 'Stream changes',
+      fullName:
+        'Processing a continuous stream of Postgres changes',
+      current: 1.86
+    },
+    {
+      name: 'Large transaction',
+      fullName:
+        'Processing transactions that change many rows',
+      current: 1.73
+    },
+    {
+      name: 'Initial sync',
+      fullName:
+        'Copying rows into Zero SQLite during initial sync',
+      current: 1.07
+    }
+  ]}
+/>
+
+### Flipped Joins
+
+Flipped joins help relationship and existence queries avoid work that used to scale poorly as result sets grew. In Zero 1.7, direct flipped-join batching is roughly **3x faster**, and large merge-shaped ZQL queries improve dramatically, reaching **109x faster** at 10,000 rows.
+
+<BenchmarkComparisonChart
+  title="Flipped Join Merge Scaling"
+  description="Normalized throughput for a merge-shaped flipped-join query. Higher is better."
+  previousLabel="Zero 1.6"
+  currentLabel="Zero 1.7"
+  precision={2}
+  height={340}
+  data={[
+    {
+      name: '100 rows',
+      current: 3.91
+    },
+    {
+      name: '500 rows',
+      current: 7.1
+    },
+    {
+      name: '1,000 rows',
+      current: 13.0
+    },
+    {
+      name: '2,500 rows',
+      current: 30.63
+    },
+    {
+      name: '5,000 rows',
+      current: 54.72
+    },
+    {
+      name: '10,000 rows',
+      current: 109.78
+    }
+  ]}
+/>
+
+<BenchmarkComparisonChart
+  title="Direct Flipped Join Batching"
+  description="Normalized throughput for direct flipped-join batching. Higher is better."
+  previousLabel="Zero 1.6"
+  currentLabel="Zero 1.7"
+  precision={2}
+  height={340}
+  data={[
+    {
+      name: '100 rows',
+      current: 3.3
+    },
+    {
+      name: '500 rows',
+      current: 2.76
+    },
+    {
+      name: '1,000 rows',
+      current: 2.87
+    },
+    {
+      name: '2,500 rows',
+      current: 3.23
+    },
+    {
+      name: '5,000 rows',
+      current: 2.98
+    },
+    {
+      name: '10,000 rows',
+      current: 2.87
+    }
+  ]}
+/>
+
+### Query Analysis and Logging
+
+Zero 1.7 also removes overhead from `analyze-query` and the inspector. Query analysis tools that record many vended rows avoid the old O(N²) cost, making `Debug.rowVended` up to **3,241x faster**. Logger context allocation is also **1.32x-1.59x faster**, reducing overhead in logging-heavy code paths.
+
+<BenchmarkComparisonChart
+  title="Debug.rowVended Scaling"
+  description="Normalized throughput for query-analysis/debug runs that record vended rows. Higher is better."
+  previousLabel="Zero 1.6"
+  currentLabel="Zero 1.7"
+  precision={2}
+  height={340}
+  data={[
+    {
+      name: '1,000 rows',
+      current: 20.82
+    },
+    {
+      name: '5,000 rows',
+      current: 170.23
+    },
+    {
+      name: '10,000 rows',
+      current: 467.19
+    },
+    {
+      name: '20,000 rows',
+      current: 3241.57
+    }
+  ]}
+/>
+
+<BenchmarkComparisonChart
+  title="Logger Allocation"
+  description="Normalized throughput for LogContext construction and withContext allocation. Higher is better."
+  previousLabel="Zero 1.6"
+  currentLabel="Zero 1.7"
+  precision={2}
+  height={280}
+  data={[
+    {
+      name: 'Debug context',
+      current: 1.59
+    },
+    {
+      name: 'Info context',
+      current: 1.58
+    },
+    {
+      name: 'Error context',
+      current: 1.32
+    },
+    {
+      name: 'withContext',
+      current: 1.43
+    }
+  ]}
+/>
 
 ## Fixes
 

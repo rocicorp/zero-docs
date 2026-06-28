@@ -10,6 +10,7 @@ import remarkGfm from 'remark-gfm';
 import {page_routes} from './routes-config';
 // Custom components for MDX
 import CodeGroup from '@/components/CodeGroup';
+import {BenchmarkComparisonChart} from '@/components/BenchmarkComparisonChart';
 import {
   InstallTableNameInput,
   InstallTableNameReplace,
@@ -31,6 +32,7 @@ const components = {
   ImageLightbox,
   Video,
   Button,
+  BenchmarkComparisonChart,
   CodeGroup,
   StartingPointCards,
   InstallTableNameInput,

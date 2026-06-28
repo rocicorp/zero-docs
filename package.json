@@ -44,6 +44,7 @@
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-hotkeys-hook": "^5.1.0",
+    "recharts": "^3.9.0",
     "rehype-autolink-headings": "^7.1.0",
     "rehype-code-titles": "^1.2.0",
     "rehype-pretty-code": "^0.14.1",

@@ -11,7 +11,7 @@ npm install @rocicorp/zero@1.7
 
 ## Overview
 
-Zero 1.7 focuses on query correctness, performance, and operational safety. It improves consistency with different encodings across Postgres, the SQLite replica, and the in-memory JS query engine, as well as performance improvements under load.
+Zero 1.7 includes improvements to query correctness, performance, and operational safety.
 
 ## Features
 
@@ -21,17 +21,17 @@ Zero 1.7 focuses on query correctness, performance, and operational safety. It i
 
 ## Performance
 
-Zero 1.7 is a targeted performance win. It makes several important hot paths faster in real applications: keeping up with busy Postgres databases, running relationship-heavy queries, and analyzing queries.
+Zero 1.7 improves the performance of replication and `exists` queries.
 
-### Postgres Change Processing
+### Replication
 
-Zero 1.7 makes the replication path noticeably faster: change streams process about **1.7x-1.9x faster** than 1.6. Initial sync is also modestly faster.
+Replication in Zero 1.7 is about **1.8x faster** than Zero 1.6 in benchmarks. Initial sync is also modestly faster.
 
-We have seen customer workloads max sustainable replication throughput increase from ~750 writes/second to ~2500.
+In real-world workloads we saw better results. One customer workload on Cloud Zero saw max sustainable replication increase from ~750 writes/second to ~2500 (> 3x faster).
 
 <BenchmarkComparisonChart
-  title="Postgres Change Processing"
-  description="Normalized throughput for Postgres replication and storage paths. Higher is better."
+  title="Replication"
+  description="Normalized replication throughput. Higher is better."
   previousLabel="Zero 1.6"
   currentLabel="Zero 1.7"
   precision={2}
@@ -57,48 +57,17 @@ We have seen customer workloads max sustainable replication throughput increase 
   ]}
 />
 
-### Flipped Joins
+### Flipped Exists Queries
 
-Flipped joins help relationship and existence queries avoid work that used to scale poorly as result sets grew. In Zero 1.7, direct flipped-join batching is roughly **3x faster**, and large merge-shaped ZQL queries improve dramatically, reaching **109x faster** at 10,000 rows.
+In a query like `doc.where("id", id).whereExists('comment').limit(10)`, the order that tables are considered matters for performance. If there are only a few child rows per parent, it's much faster to find children first, then find the corresponding parents, then sort and limit. Zero does this automatically using a process called _[join flipping](/docs/zql#manually-flipping-joins)_.
 
-<BenchmarkComparisonChart
-  title="Flipped Join Merge Scaling"
-  description="Normalized throughput for a merge-shaped flipped-join query. Higher is better."
-  previousLabel="Zero 1.6"
-  currentLabel="Zero 1.7"
-  precision={2}
-  height={340}
-  data={[
-    {
-      name: '100 rows',
-      current: 3.91
-    },
-    {
-      name: '500 rows',
-      current: 7.1
-    },
-    {
-      name: '1,000 rows',
-      current: 13.0
-    },
-    {
-      name: '2,500 rows',
-      current: 30.63
-    },
-    {
-      name: '5,000 rows',
-      current: 54.72
-    },
-    {
-      name: '10,000 rows',
-      current: 109.78
-    }
-  ]}
-/>
+Flipped joins are very common since `exists` is used in permissions, and in many systems each user has access to only a small subset of total rows.
+
+These kinds of queries got faster in Zero 1.7. In simple cases where each child has a unique parent (e.g., `doc -> comment`), Zero 1.7 is roughly 3x faster. In cases where each child has multiple parents (e.g., `user -> doc_acl`), Zero 1.7 is dramatically faster – reaching ~100x faster at 10k results.
 
 <BenchmarkComparisonChart
-  title="Direct Flipped Join Batching"
-  description="Normalized throughput for direct flipped-join batching. Higher is better."
+  title="Flipped Exist - Unique Parent"
+  description="Normalized throughput for flipped exists with unique parents. Higher is better."
   previousLabel="Zero 1.6"
   currentLabel="Zero 1.7"
   precision={2}
@@ -131,60 +100,37 @@ Flipped joins help relationship and existence queries avoid work that used to sc
   ]}
 />
 
-### Query Analysis and Logging
-
-Zero 1.7 also removes overhead from `analyze-query` and the inspector. Query analysis tools that record many vended rows avoid the old O(N²) cost, making `Debug.rowVended` up to **3,241x faster**. Logger context allocation is also **1.32x-1.59x faster**, reducing overhead in logging-heavy code paths.
-
 <BenchmarkComparisonChart
-  title="Debug.rowVended Scaling"
-  description="Normalized throughput for query-analysis/debug runs that record vended rows. Higher is better."
+  title="Flipped Exist - Non-Unique Parent"
+  description="Normalized throughput for flipped exists with non-unique parents. Higher is better."
   previousLabel="Zero 1.6"
   currentLabel="Zero 1.7"
   precision={2}
   height={340}
   data={[
     {
+      name: '100 rows',
+      current: 3.91
+    },
+    {
+      name: '500 rows',
+      current: 7.1
+    },
+    {
       name: '1,000 rows',
-      current: 20.82
+      current: 13.0
+    },
+    {
+      name: '2,500 rows',
+      current: 30.63
     },
     {
       name: '5,000 rows',
-      current: 170.23
+      current: 54.72
     },
     {
       name: '10,000 rows',
-      current: 467.19
-    },
-    {
-      name: '20,000 rows',
-      current: 3241.57
-    }
-  ]}
-/>
-
-<BenchmarkComparisonChart
-  title="Logger Allocation"
-  description="Normalized throughput for LogContext construction and withContext allocation. Higher is better."
-  previousLabel="Zero 1.6"
-  currentLabel="Zero 1.7"
-  precision={2}
-  height={280}
-  data={[
-    {
-      name: 'Debug context',
-      current: 1.59
-    },
-    {
-      name: 'Info context',
-      current: 1.58
-    },
-    {
-      name: 'Error context',
-      current: 1.32
-    },
-    {
-      name: 'withContext',
-      current: 1.43
+      current: 109.78
     }
   ]}
 />
@@ -203,6 +149,8 @@ Zero 1.7 also removes overhead from `analyze-query` and the inspector. Query ana
 - [SQLite replica `ILIKE` did not match non-ASCII case variants such as `MÜLLER` and `müller`.](https://github.com/rocicorp/mono/pull/6098)
 - [Litestream-backed deployments could purge change-log entries based on stale claimed backup progress rather than actual backup state.](https://github.com/rocicorp/mono/pull/6110) [#6123](https://github.com/rocicorp/mono/pull/6123)
 - [Query hydration and pipeline failures now include the query hash, transformation hash, and custom query name when available.](https://github.com/rocicorp/mono/pull/6128)
+- ["vended rows" inspector feature was slow for large numbers of rows](https://github.com/rocicorp/mono/pull/5991)
+- [Logging code created gc pressure throughout system](https://github.com/rocicorp/mono/pull/6125)
 
 ## Breaking Changes
 

@@ -42,9 +42,10 @@ zql.issue
 This is a design tradeoff that allows Zero to better reuse the row locally for future queries. This also makes it easier to share types between different parts of the code.
 
 <Note type="note" emoji="🧑‍🏫" slug="immutability" heading="Data returned from ZQL should be considered immutable">
-This means you should not modify the data directly. Instead, clone the data and modify the clone.
 
-ZQL caches values and returns them multiple times. If you modify a value returned from ZQL, you will modify it everywhere it is used. This can lead to subtle bugs.
+Do not directly modify JavaScript values returned from ZQL queries.
+
+ZQL caches values across queries to improve performance and reduce re-renders in frameworks like React and Solid. If you modify a value returned from ZQL, you will modify it everywhere it is used. This can lead to subtle bugs.
 
 JavaScript and TypeScript lack true immutable types so we use `readonly` to help enforce it. But it's easy to cast away the `readonly` accidentally.
 
@@ -211,25 +212,26 @@ The first parameter is always a column name from the table being queried. TypeSc
 
 ### Comparison Operators
 
-Where supports the following comparison operators:
+`where()` supports the following comparison operators:
 
 | Operator                                 | Allowed Operand Types         | Description                                                              |
 | ---------------------------------------- | ----------------------------- | ------------------------------------------------------------------------ |
 | `=` , `!=`                               | boolean, number, string       | JS strict equal (===) semantics                                          |
-| `<` , `<=`, `>`, `>=`                    | number                        | JS number compare semantics                                              |
+| `<` , `<=`, `>`, `>=`                    | number, string                | Numeric or string ordering                                               |
 | `LIKE`, `NOT LIKE`, `ILIKE`, `NOT ILIKE` | string                        | SQL-compatible `LIKE` / `ILIKE`                                          |
 | `IN` , `NOT IN`                          | boolean, number, string       | RHS must be array. Returns true if rhs contains lhs by JS strict equals. |
 | `IS` , `IS NOT`                          | boolean, number, string, null | Same as `=` but also works for `null`                                    |
 
 TypeScript will restrict you from using operators with types that don’t make sense – you can’t use `>` with `boolean` for example.
 
-<Note
-  type="note"
-  slug="adding-operators"
-  heading="Don't see the operator you need?"
->
-  [Let us know](https://discord.rocicorp.dev/)! Many are
-  easy to add.
+<Note type="note" slug="ilike-collation" heading="ILIKE and collation">
+
+Zero can evaluate an `ILIKE` filter in three places: in-memory on the client, in ZQLite against the replica, or as SQL in Postgres.
+
+ZQLite and the in-memory query engine use Unicode-aware lowercasing before matching. This means common non-ASCII case variants, such as `MÜLLER` and `müller`, match in both.
+
+If you need non-ASCII text in PG to work with `ILIKE`, use a Unicode-aware collation for those text columns, such as the database's default UTF-8 locale.
+
 </Note>
 
 ### Equals is the Default Comparison Operator

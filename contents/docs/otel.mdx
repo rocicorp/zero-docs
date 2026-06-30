@@ -131,12 +131,13 @@ This callback is called before sending WebSocket messages that trigger API serve
 
 ### zero.replica
 
-| Metric       | Type  | Unit  | Description                                                                                                             |
-| ------------ | ----- | ----- | ----------------------------------------------------------------------------------------------------------------------- |
-| `db_size`    | Gauge | bytes | Size of the replica's main db file (excludes WAL)                                                                       |
-| `wal_size`   | Gauge | bytes | Size of the replica's WAL file                                                                                          |
-| `wal2_size`  | Gauge | bytes | Size of the replica's WAL2 file (only if using wal2 mode)                                                               |
-| `backup_lag` | Gauge | ms    | Time since last litestream backup. Expected to sawtooth from 0 to `ZERO_LITESTREAM_INCREMENTAL_BACKUP_INTERVAL_MINUTES` |
+| Metric          | Type    | Unit  | Description                                                                                                             |
+| --------------- | ------- | ----- | ----------------------------------------------------------------------------------------------------------------------- |
+| `db_size`       | Gauge   | bytes | Size of the replica's main db file (excludes WAL)                                                                       |
+| `wal_size`      | Gauge   | bytes | Size of the replica's WAL file                                                                                          |
+| `wal2_size`     | Gauge   | bytes | Size of the replica's WAL2 file (only if using wal2 mode)                                                               |
+| `backup_lag`    | Gauge   | ms    | Time since last litestream backup. Expected to sawtooth from 0 to `ZERO_LITESTREAM_INCREMENTAL_BACKUP_INTERVAL_MINUTES` |
+| `purge_blocked` | Counter |       | Number of change-log purges blocked because the actual backup state could not be verified or is stale.                  |
 
 ### zero.replication
 
@@ -145,6 +146,7 @@ This callback is called before sending WebSocket messages that trigger API serve
 | `upstream_lag`         | Gauge     | ms   | Latency from sending a replication report to receiving it in the stream                                                         |
 | `replica_lag`          | Gauge     | ms   | Latency from receiving a replication report to it reaching the replica                                                          |
 | `total_lag`            | Gauge     | ms   | End-to-end replication latency. Grows as an estimate if the next report hasn't arrived                                          |
+| `last_total_lag`       | Gauge     | ms   | End-to-end latency of the most recently received report. Unlike `total_lag`, does not grow if reports stop arriving             |
 | `events`               | Counter   |      | Number of replication events processed                                                                                          |
 | `transactions`         | Counter   |      | Count of replicated transactions                                                                                                |
 | `shadow-sync-runs`     | Counter   |      | Number of [shadow initial-sync](/docs/zero-cache-config#shadow-sync-enabled) runs. Has a `result` attribute: `success`, `error` |

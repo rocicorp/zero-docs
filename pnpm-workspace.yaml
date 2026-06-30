@@ -17,9 +17,4 @@ overrides:
   semver@>=2.0.0-alpha <5.7.2: ^5.7.2
 
 minimumReleaseAgeExclude:
-  - robots-txt-guard@1.0.2
-  - semver@5.7.2
-  - '@opentelemetry/auto-instrumentations-node@0.75.0'
-  - '@opentelemetry/sdk-node@0.217.0'
-  - '@opentelemetry/exporter-prometheus@0.217.0'
-  - protobufjs@8.0.2
+  - '@rocicorp/zero'

@@ -30,23 +30,67 @@ Produce a release note draft that is intentionally over-inclusive so a human can
 ## Workflow
 
 1. Determine commit range between release tags:
-   - `git log --oneline --no-merges <prevTag>..<targetTag>`
-2. Classify commits using conventional commit prefixes:
+   - First list every non-merge commit in the raw range:
+     - `git log --reverse --oneline --no-merges <prevTag>..<targetTag>`
+   - Keep this as the audit source until the human has reviewed categorization.
+2. Remove commits already included in the previous release through cherry-picks:
+   - Find the common ancestor between previous release and target:
+     - `git merge-base <prevTag> <targetTag>`
+   - Inspect commits on the previous-release side after that ancestor:
+     - `git log --reverse --format='%h%x09%s%n%b%n---END---' <mergeBase>..<prevTag>`
+   - Look for `-x` cherry-pick trailers such as `(cherry picked from commit <sha>)`.
+   - Also use patch-equivalence to catch cherry-picks whose lockfiles or package-manager files differ:
+     - `git log --right-only --no-merges --cherry-mark --format='%m%x09%h%x09%s' <prevTag>...<targetTag>`
+   - Treat `=` commits as already present in the previous release and categorize them as `skip`, unless the target commit contains materially different user-facing changes.
+   - When a previous-release maintenance commit names a target commit in its cherry-pick trailer, categorize that target commit as `skip`.
+3. Run the protocol compatibility check immediately:
+   - Find protocol constants in mono before drafting any notes.
+   - Check both previous release and target values, for example:
+     - `git show <prevTag>:packages/zero-protocol/src/protocol-version.ts`
+     - `git show <targetTag>:packages/zero-protocol/src/protocol-version.ts`
+   - Ensure the target version's minimum supported sync protocol is `<=` the previous release's `PROTOCOL_VERSION`.
+   - If compatibility fails, this is a release-blocking breaking change. Record it loudly in `.releases/<major>.<minor>/commits.md` with `BREAKING`, and mark the responsible commit `BREAKING` if it can be identified.
+   - If compatibility passes, still record the result in `.releases/<major>.<minor>/commits.md` so later release reviews do not need to rediscover it.
+4. Categorize every commit and flag potential breaking changes before drafting. Use only these categories:
+   - `perf`
+   - `feature`
+   - `fix`
+   - `skip`
+   - Also identify potential breaking changes in every commit, including skipped/internal-looking commits.
+   - Look early for API renames/removals, env var/config changes, default behavior flips, migration requirements, protocol changes, package export/import changes, dependency/peer dependency changes that can affect install/runtime behavior, and commit text containing "breaking".
+   - Record breaking-change status separately from category.
+   - Use `-` for commits that are not believed breaking.
+   - Use `MAYBE` for commits that could be breaking and need human review; explain why in the note.
+   - If a commit is believed to be breaking, make it extremely visible with `BREAKING`. This should be rare; Zero release planning aims to avoid breaking changes.
+   - Treat breaking-change detection as an early warning system for ongoing release review, not something to defer until the final draft.
+5. Present the categorization to the human for review before writing release notes:
+   - Use a Markdown table with `Commit`, `Category`, `Breaking?`, and `Note`.
+   - The note should be a few sentences when useful: summarize what changed, why the category was chosen, whether it was skipped due to cherry-pick, revert, internal-only scope, or lack of user-facing impact, and why it is or is not a potential breaking change.
+   - Prefer `skip` for CI, release tooling, benchmark-only, sample-only, dependency hygiene with no identified user-facing effect, reverted changes, and commits already in the previous release.
+   - Use `fix` for customer-observable behavior even when the commit is labeled `chore`, e.g. packaging changes that prevent duplicate runtime dependencies from breaking checks like `Pool instanceof`.
+   - Use `perf` for fixes whose primary user-facing value is measured speed/CPU/allocation improvement.
+   - Use `feature` for new user/operator/debugging capability.
+   - Reclassify suspicious commits while building the table:
+     - Include `chore` commits that look user-facing, behavior-changing, protocol-affecting, package/export-affecting, or crash/fix related.
+     - Check dependency update commits when they affect runtime, install, protocol, query correctness, or performance-critical packages. Look at upstream changelogs when needed.
+   - Treat the `Breaking?` column as the breaking-change pass:
+     - Look for API renames/removals, env var/config changes, behavior flips, migration requirements, protocol changes, package export/import changes, dependency/peer dependency changes, and semantically breaking behavior even if unlabeled.
+     - Also scan commit text for "breaking".
+   - Flag performance follow-ups early for commits that change query compilation, index use, dependency implementations, hot loops, or runtime semantics. Put the performance concern in the note or open questions even if the commit category is `fix`.
+6. Save the reviewed categorization in the docs worktree before drafting:
+   - Use a stable release working-state directory under `.releases/<major>.<minor>/`, for example `.releases/1.7/commits.md`.
+   - Include release version, previous tag, target, merge base, the exact commands used, the reviewed table, potential breaking changes, and any unresolved questions.
+   - On later sessions, read this file first and evolve it instead of redoing the whole commit audit.
+7. After human review of the categorization, classify the non-skipped commits using conventional commit prefixes as a starting point:
    - `feat` -> Features
    - `fix` -> Fixes
    - `perf` -> Performance (if meaningful)
    - `chore` -> ignored by default
-3. Reclassify suspicious commits:
-   - Include chore commits that look user-facing, behavior-changing, protocol-affecting, or crash/fix related.
-   - Check dependency update commits (especially performance-critical packages like `compare-utf8`, `litestream`, etc.) - look at the upstream changelogs to see if they contain notable perf or fix items.
-4. Breaking change pass (separate from type labels):
-   - Look for API renames/removals, env var/config changes, behavior flips, migration requirements, protocol changes.
-   - Also scan commit text for "breaking" or semantically breaking behavior even if unlabeled.
-5. Protocol compatibility check:
-   - Find protocol constants in mono.
-   - Ensure `MIN_PROTOCOL_VERSION` in the version being documented is `<=` `PROTOCOL_VERSION` in the previous release version.
-   - Flag any mismatch in the draft.
-6. Build draft release notes in the latest format used in this repo:
+8. Before drafting, revisit the reviewed table:
+   - Confirm all non-skipped commits are represented or intentionally omitted.
+   - Re-check any `MAYBE` or `BREAKING` rows and summarize the decision in the draft or in the saved release state.
+   - Re-check any performance follow-ups recorded in `.releases/<major>.<minor>/commits.md`.
+9. Build draft release notes in the latest format used in this repo:
    - Before drafting, read `contents/docs/release-notes/0.26.mdx` as the canonical long-form style reference to avoid format drift.
    - Frontmatter with `title` and `description`
    - `## Installation`

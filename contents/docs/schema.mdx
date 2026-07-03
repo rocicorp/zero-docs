@@ -634,8 +634,26 @@ Zero handles both these cases through a process called _backfilling_.
 
 Zero backfills existing data to the replica in the background after detecting a new column. The new column is not exposed to the client until all data has been backfilled, which may take some time depending on the amount of data.
 
+<Note
+  type="warning"
+  heading="Wait for backfill before deploying code that uses the new data"
+  slug="wait-for-backfill"
+>
+  During backfill, the new column is hidden from the
+  replica. If you deploy app or API code that queries the
+  column before backfill completes, those queries can fail
+  even though the column exists in Postgres.
+</Note>
+
 ### Monitoring Backfill Progress
 
-To track backfill progress, check your `zero-cache` logs for messages about backfilling status.
+You can detect backfill status several ways:
 
-If you're using [Cloud Zero](https://zerosync.dev/#pricing), backfill progress is displayed directly in the dashboard.
+- **Cloud Zero**: Backfill progress is displayed directly in the dashboard.
+- **ChangeDB**: Query the `backfilling` table in the ChangeDB. When any rows are returned, Zero is still backfilling:
+
+  ```sql
+  SELECT * FROM "<app>/cdc"."backfilling" WHERE "schema" = 'public';
+  ```
+
+- **Client observation**: Observe rows synced to a client. After backfill completes, the new column is visible on each row's JavaScript value, regardless of whether the column is present in `schema.ts`.

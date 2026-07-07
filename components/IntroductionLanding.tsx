@@ -487,8 +487,7 @@ export function IntroductionLanding({
             <div className="testimonial-card">
               <div className="testimonial-quote">
                 <p>
-                  As a general sync engine, Zero lets us change our data model
-                  without touching infrastructure.
+                  Zero’s initial announcement inspired us to build our own sync engine. It worked, but was a lot to maintain. We switched to Zero itself and are happily shipping again.
                 </p>
               </div>
               <div className="testimonial-author">

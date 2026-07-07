@@ -484,10 +484,48 @@ export function IntroductionLanding({
           </h2>
 
           <div className="testimonials-grid">
-            <a
-              href="https://x.com/stolinski/status/1870127005510861202"
-              className="testimonial-card"
-            >
+            <div className="testimonial-card">
+              <div className="testimonial-quote">
+                <p>
+                  As a general sync engine, Zero lets us change our data model
+                  without touching infrastructure.
+                </p>
+              </div>
+              <div className="testimonial-author">
+                <img
+                  src="https://unavatar.io/x/steveruizok?fallback=false"
+                  alt="Steve Ruiz"
+                  className="testimonial-avatar"
+                />
+                <div className="testimonial-info">
+                  <div className="testimonial-name">Steve Ruiz</div>
+                  <div className="testimonial-title">Founder / CEO, tldraw</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="testimonial-card">
+              <div className="testimonial-quote">
+                <p>
+                  Zero makes apps really fast, but also simplifies their code.
+                  It&apos;s a wonderful abstraction for our engineers and their
+                  AI agents.
+                </p>
+              </div>
+              <div className="testimonial-author">
+                <img
+                  src="https://github.com/steobrien.png"
+                  alt="Stephen O'Brien"
+                  className="testimonial-avatar"
+                />
+                <div className="testimonial-info">
+                  <div className="testimonial-name">Stephen O&apos;Brien</div>
+                  <div className="testimonial-title">Product, Tines</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="testimonial-card">
               <div className="testimonial-quote">
                 <p>
                   Zero is a game changer. You will be shocked at how fast it is.
@@ -504,12 +542,9 @@ export function IntroductionLanding({
                   <div className="testimonial-title">Co-host of Syntax.fm</div>
                 </div>
               </div>
-            </a>
+            </div>
 
-            <a
-              href="https://x.com/thdxr/status/1869449253904679133"
-              className="testimonial-card"
-            >
+            <div className="testimonial-card">
               <div className="testimonial-quote">
                 <p>
                   Have been building with Zero for months. It&apos;s making me
@@ -524,15 +559,12 @@ export function IntroductionLanding({
                 />
                 <div className="testimonial-info">
                   <div className="testimonial-name">Dax Raad</div>
-                  <div className="testimonial-title">OpenCode, SST.dev</div>
+                  <div className="testimonial-title">Co-founder, OpenCode</div>
                 </div>
               </div>
-            </a>
+            </div>
 
-            <a
-              href="https://x.com/fleckensteyn/status/1998440074640314730"
-              className="testimonial-card"
-            >
+            <div className="testimonial-card">
               <div className="testimonial-quote">
                 <p>
                   We rebuilt Productlane from the ground up to make the fastest
@@ -551,12 +583,9 @@ export function IntroductionLanding({
                   <div className="testimonial-title">CEO, Productlane.com</div>
                 </div>
               </div>
-            </a>
+            </div>
 
-            <a
-              href="https://x.com/housecor/status/1945886895470157863"
-              className="testimonial-card"
-            >
+            <div className="testimonial-card">
               <div className="testimonial-quote">
                 <p>
                   One of my favorite features is custom mutators. I can run
@@ -578,12 +607,9 @@ export function IntroductionLanding({
                   </div>
                 </div>
               </div>
-            </a>
+            </div>
 
-            <a
-              href="https://x.com/kurt/status/2002441903812509939"
-              className="testimonial-card"
-            >
+            <div className="testimonial-card">
               <div className="testimonial-quote">
                 <p>
                   Rocicorp is making something that used to require an insane
@@ -593,7 +619,7 @@ export function IntroductionLanding({
               </div>
               <div className="testimonial-author">
                 <img
-                  src="https://pbs.twimg.com/profile_images/1241922871720652803/bOf1XH2y_400x400.jpg"
+                  src="https://unavatar.io/x/kurt?fallback=false"
                   alt="Kurt Schrader"
                   className="testimonial-avatar"
                 />
@@ -602,35 +628,9 @@ export function IntroductionLanding({
                   <div className="testimonial-title">CEO, Shortcut</div>
                 </div>
               </div>
-            </a>
+            </div>
 
-            <a
-              href="https://x.com/fforres/status/1968017796786425928"
-              className="testimonial-card"
-            >
-              <div className="testimonial-quote">
-                <p>
-                  If there&apos;s anything that has changed how we built
-                  software, it&apos;s this.
-                </p>
-              </div>
-              <div className="testimonial-author">
-                <img
-                  src="https://pbs.twimg.com/profile_images/721330013547663361/LWxIUO2u_400x400.jpg"
-                  alt="Felipe Torres"
-                  className="testimonial-avatar"
-                />
-                <div className="testimonial-info">
-                  <div className="testimonial-name">Felipe Torres</div>
-                  <div className="testimonial-title">Founder</div>
-                </div>
-              </div>
-            </a>
-
-            <a
-              href="https://x.com/GreveJoe/status/1984810258561450162"
-              className="testimonial-card"
-            >
+            <div className="testimonial-card">
               <div className="testimonial-quote">
                 <p>
                   Ranger now runs faster than <b>any</b> of our competitors
@@ -648,35 +648,9 @@ export function IntroductionLanding({
                   <div className="testimonial-title">CEO, Ranger Budget</div>
                 </div>
               </div>
-            </a>
+            </div>
 
-            <a
-              href="https://x.com/abraguilera/status/2008808256702194030"
-              className="testimonial-card"
-            >
-              <div className="testimonial-quote">
-                <p>
-                  Zero is making Plot feel instantaneous. Like blink and you
-                  miss it.
-                </p>
-              </div>
-              <div className="testimonial-author">
-                <img
-                  src="https://pbs.twimg.com/profile_images/2012194448239681536/Qr7Z55wS_400x400.jpg"
-                  alt="Abraham Aguilera"
-                  className="testimonial-avatar"
-                />
-                <div className="testimonial-info">
-                  <div className="testimonial-name">Abraham Aguilera</div>
-                  <div className="testimonial-title">Founder, Plot</div>
-                </div>
-              </div>
-            </a>
-
-            <a
-              href="https://x.com/cschmatzler/status/2004310059548135936"
-              className="testimonial-card"
-            >
+            <div className="testimonial-card">
               <div className="testimonial-quote">
                 <p>
                   Deployed it halfway across the world and literally can&apos;t
@@ -694,12 +668,9 @@ export function IntroductionLanding({
                   <div className="testimonial-title">Developer</div>
                 </div>
               </div>
-            </a>
+            </div>
 
-            <a
-              href="https://x.com/colmtuite/status/1941718639968649349"
-              className="testimonial-card"
-            >
+            <div className="testimonial-card">
               <div className="testimonial-quote">
                 <p>
                   Built a notes app yesterday and Zero blew my mind. Excited to
@@ -717,7 +688,7 @@ export function IntroductionLanding({
                   <div className="testimonial-title">Founder, Base UI</div>
                 </div>
               </div>
-            </a>
+            </div>
           </div>
         </section>
 

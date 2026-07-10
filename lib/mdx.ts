@@ -21,6 +21,7 @@ import Note from '@/components/note';
 import ImageLightbox from '@/components/ui/ImageLightbox';
 import Video from '@/components/ui/Video';
 import {Button} from '@/components/ui/button';
+import {Table} from '@/components/ui/table';
 import {getDocsTocEntries} from './docs-headings';
 import rehypePrettyCode from 'rehype-pretty-code';
 import {getLatestNpmVersions} from './get-latest-npm-versions';
@@ -32,6 +33,8 @@ const components = {
   ImageLightbox,
   Video,
   Button,
+  Table,
+  table: Table,
   BenchmarkComparisonChart,
   CodeGroup,
   StartingPointCards,

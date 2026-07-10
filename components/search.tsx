@@ -102,6 +102,10 @@ export default function Search() {
     }
   }, [trimmedInput]);
 
+  useEffect(() => {
+    setSelectedValue(searchResults[0]?.id ?? '');
+  }, [searchResults]);
+
   const handleFallbackSelect = () => {
     const firstResult = searchResults[0];
     if (!firstResult) return;

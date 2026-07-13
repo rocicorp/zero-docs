@@ -464,12 +464,26 @@ env: `ZERO_MUTATE_API_KEY`<br/>
 
 ### Mutate Allowed Client Headers
 
-Comma-separated list of custom request headers that zero-cache is allowed to forward to your mutate endpoint. Header names are matched case-insensitively.
+Comma-separated allowlist of client-provided custom headers to forward to your mutate endpoint. Header names are matched case-insensitively.
 
 By default, no client-provided custom headers are forwarded.
 
 flag: `--mutate-allowed-client-headers`<br/>
 env: `ZERO_MUTATE_ALLOWED_CLIENT_HEADERS`<br/>
+default: `none`
+
+### Mutate Allowed Request Headers
+
+Comma-separated allowlist of HTTP headers from the request that opened the WebSocket to forward to your mutate endpoint. Use this for proxy- or load-balancer-injected headers such as `x-forwarded-for` or `cf-ray`.
+
+Unlike [mutate allowed client headers](#mutate-allowed-client-headers), these values come from the request that established the connection. Header names are matched case-insensitively.
+
+Values are retained for the WebSocket's lifetime, so clients must reconnect to receive changes. The allowlist does not verify the header source - only allow headers that a trusted proxy overwrites or removes from untrusted requests.
+
+No request headers are forwarded by default.
+
+flag: `--mutate-allowed-request-headers`<br/>
+env: `ZERO_MUTATE_ALLOWED_REQUEST_HEADERS`<br/>
 default: `none`
 
 ### Mutate Forward Cookies
@@ -554,12 +568,26 @@ env: `ZERO_QUERY_API_KEY`<br/>
 
 ### Query Allowed Client Headers
 
-Comma-separated list of custom request headers that zero-cache is allowed to forward to your query endpoint. Header names are matched case-insensitively.
+Comma-separated allowlist of client-provided custom headers to forward to your query endpoint. Header names are matched case-insensitively.
 
 By default, no client-provided custom headers are forwarded.
 
 flag: `--query-allowed-client-headers`<br/>
 env: `ZERO_QUERY_ALLOWED_CLIENT_HEADERS`<br/>
+default: `none`
+
+### Query Allowed Request Headers
+
+Comma-separated allowlist of HTTP headers from the request that opened the WebSocket to forward to your query endpoint. Use this for proxy- or load-balancer-injected headers such as `x-forwarded-for` or `cf-ray`.
+
+Unlike [query allowed client headers](#query-allowed-client-headers), these values come from the request that established the connection. Header names are matched case-insensitively.
+
+Values are retained for the WebSocket's lifetime, so clients must reconnect to receive changes. The allowlist does not verify the header source - only allow headers that a trusted proxy overwrites or removes from untrusted requests.
+
+No request headers are forwarded by default.
+
+flag: `--query-allowed-request-headers`<br/>
+env: `ZERO_QUERY_ALLOWED_REQUEST_HEADERS`<br/>
 default: `none`
 
 ### Query Forward Cookies

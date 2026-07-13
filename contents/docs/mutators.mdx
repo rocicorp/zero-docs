@@ -1021,7 +1021,7 @@ const read2 = await zero.run(
 )
 ```
 
-You can also wait for the server write to succeed:
+You can also await `.server` for the server result:
 
 ```ts
 const write = zero.mutate(
@@ -1033,10 +1033,9 @@ const write = zero.mutate(
 
 const clientRes = await write.client
 if (clientRes.type === 'error') {
-  throw new Error(
-    `Mutator failed on client`,
-    clientRes.error
-  )
+  throw new Error(`Mutator failed on client`, {
+    cause: clientRes.error
+  })
 }
 
 // optimistic write guaranteed to be present here, but not
@@ -1045,25 +1044,23 @@ const read1 = await zero.run(
   queries.issue.byId('issue-123').one()
 )
 
-// Await server write – this involves a round-trip.
+// Await the server result/acknowledgment. This requires a round trip.
 const serverRes = await write.server
 if (serverRes.type === 'error') {
-  throw new Error(
-    `Mutator failed on server`,
-    serverRes.error
-  )
+  throw new Error(`Mutator failed on server`, {
+    cause: serverRes.error
+  })
 }
 
-// issue-123 is written to server and any results are
-// synced to this client.
-// read2 could potentially be undefined here, for example if the
-// server mutator rejected the write.
+// The server acknowledged the mutation, but its Postgres changes
+// may not have replicated to this client yet. This read can still
+// reflect optimistic rather than authoritative state.
 const read2 = await zero.run(
   queries.issue.byId('issue-123').one()
 )
 ```
 
-If the client-side mutator fails, the `.server` promise is also rejected with the same error. You don't have to listen to both promises, the server promise covers both cases.
+If the client-side mutator fails, `.server` also resolves to an error result. Awaiting `.server` therefore covers both client- and server-side failures.
 
 <Note
   heading="Returning data from mutators"

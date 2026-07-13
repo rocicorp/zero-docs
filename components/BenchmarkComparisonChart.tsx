@@ -18,6 +18,7 @@ import {
 type BenchmarkDatum = {
   name: string;
   fullName?: string;
+  previous?: number;
   current: number;
 };
 
@@ -28,32 +29,53 @@ type BenchmarkComparisonChartProps = {
   previousLabel?: string;
   currentLabel?: string;
   precision?: number;
+  valuePrecision?: number;
+  unit?: string;
+  higherIsBetter?: boolean;
   height?: number;
   className?: string;
 };
 
-function formatValue(value: unknown, precision: number) {
+function formatNumber(value: unknown, precision: number) {
   if (typeof value !== 'number' || !Number.isFinite(value)) {
     return String(value);
   }
 
-  return `${value.toLocaleString(undefined, {
+  return value.toLocaleString(undefined, {
     minimumFractionDigits: precision,
     maximumFractionDigits: precision,
-  })}x`;
+  });
 }
 
-function formatBenchmarkResult(point: BenchmarkDatum, precision: number) {
-  if (!Number.isFinite(point.current) || point.current <= 0) {
-    return formatValue(point.current, precision);
+function formatValue(value: unknown, precision: number, unit?: string) {
+  return `${formatNumber(value, precision)}${unit ? ` ${unit}` : 'x'}`;
+}
+
+function formatBenchmarkResult(
+  point: BenchmarkDatum,
+  precision: number,
+  higherIsBetter: boolean,
+) {
+  const previous = point.previous ?? 1;
+  if (
+    !Number.isFinite(previous) ||
+    !Number.isFinite(point.current) ||
+    previous <= 0 ||
+    point.current <= 0
+  ) {
+    return 'not comparable';
   }
 
-  if (point.current === 1) {
+  if (point.current === previous) {
     return 'flat';
   }
 
-  const result = point.current > 1 ? point.current : 1 / point.current;
-  return `${formatValue(result, precision)} ${point.current > 1 ? 'faster' : 'slower'}`;
+  const improvement = higherIsBetter
+    ? point.current / previous
+    : previous / point.current;
+  const faster = improvement > 1;
+  const result = faster ? improvement : 1 / improvement;
+  return `${formatValue(result, precision)} ${faster ? 'faster' : 'slower'}`;
 }
 
 export function BenchmarkComparisonChart({
@@ -63,17 +85,29 @@ export function BenchmarkComparisonChart({
   previousLabel = 'Previous',
   currentLabel = 'Current',
   precision = 2,
+  valuePrecision = precision,
+  unit,
+  higherIsBetter = true,
   height = 300,
   className,
 }: BenchmarkComparisonChartProps) {
-  const format = (value: unknown) => formatValue(value, precision);
-  const chartData = data.map(point => ({...point, previous: 1}));
+  const format = (value: unknown) => formatValue(value, valuePrecision, unit);
+  const chartData = data.map(point => ({
+    ...point,
+    previous: point.previous ?? 1,
+  }));
   const minChartWidth = 450;
   const chartHeight = Math.max(height, data.length * 54 + 76);
-  const currentBarFill = (point: BenchmarkDatum | undefined) =>
-    point && point.current < 1
-      ? 'hsl(var(--destructive))'
-      : 'hsl(var(--primary-highlight))';
+  const currentBarFill = (point: BenchmarkDatum | undefined) => {
+    if (!point) return 'hsl(var(--primary-highlight))';
+    const previous = point.previous ?? 1;
+    const improved = higherIsBetter
+      ? point.current >= previous
+      : point.current <= previous;
+    return improved
+      ? 'hsl(var(--primary-highlight))'
+      : 'hsl(var(--destructive))';
+  };
   const renderCurrentBar = (props: BarShapeProps) => {
     const {payload, ...rectangleProps} = props;
     const point = payload as BenchmarkDatum | undefined;
@@ -94,11 +128,18 @@ export function BenchmarkComparisonChart({
 
     return (
       <div className="rounded-lg border border-border bg-card px-2.5 py-2 text-xs leading-tight text-card-foreground shadow-sm">
-        <div className="max-w-72 text-muted-foreground">
-          {point.fullName ?? point.name}
-        </div>
+        {point.previous !== undefined && unit && (
+          <div className="space-y-0.5 text-muted-foreground">
+            <div>
+              {previousLabel}: {format(point.previous)}
+            </div>
+            <div>
+              {currentLabel}: {format(point.current)}
+            </div>
+          </div>
+        )}
         <div className="mt-1 font-medium">
-          {formatBenchmarkResult(point, precision)}
+          {formatBenchmarkResult(point, precision, higherIsBetter)}
         </div>
       </div>
     );

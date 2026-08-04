@@ -791,6 +791,29 @@ The replication-manager serves Zero's internal replication protocol. Keep it beh
 
 The external load balancer for view-syncers must support websockets, and can use the health check at `/keepalive` to verify view-syncers are healthy. The replication-manager should also have a `/keepalive` health check, but that check should run through private infrastructure rather than a public load balancer.
 
+### Reverse Proxy Header Buffers
+
+During connection, the Zero client sends its entire client schema (and auth token, if any) URL-encoded in the `Sec-WebSocket-Protocol` header, and the view-syncer echoes this header back in the `101 Switching Protocols` response. The header grows with your schema — an app with a few dozen synced tables and columns can exceed 4 KB.
+
+Reverse proxies buffer upstream response headers, and the defaults can be too small. nginx's `proxy_buffer_size` defaults to 4 KB; once the handshake outgrows it, nginx fails **every** sync connection with `502 Bad Gateway` (`upstream sent too big header` in the nginx error log). Nothing appears in `zero-cache` logs — the response dies at the proxy — and the client only sees a generic websocket failure. If sync worked and then broke after adding tables or columns to your schema, check for this.
+
+Raise the buffer to fix it:
+
+```nginx
+# nginx
+proxy_buffer_size 16k;
+```
+
+```yaml
+# Kubernetes ingress-nginx annotation
+nginx.ingress.kubernetes.io/proxy-buffer-size: "16k"
+```
+
+<Note heading="Request headers too" slug="request-header-buffers">
+The same header is also large on the way in. nginx's request-side limit (`large_client_header_buffers`, default 8 KB) is more generous, but a very large schema combined with a long auth JWT and cookies can eventually reach it as well. Other proxies and load balancers have equivalent limits.
+
+</Note>
+
 ### Sticky Sessions
 
 View syncers are designed to be disposable, but since they keep hydrated query pipelines in memory, it's important to try to keep clients connected to the same instance.

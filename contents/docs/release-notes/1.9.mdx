@@ -15,8 +15,8 @@ Zero 1.9 improves query/mutation correctness and reliability.
 
 ## Features
 
-- [**Litestream v5 restores:**](/docs/zero-cache-config#litestream-restore-using-v5) The official image now uses Litestream 0.5.15 for restores by default. It can restore legacy WAL or LTX backups, while Zero 1.9 continues writing legacy backups. [Legacy snapshots now retain the previous generation for six additional hours](/docs/zero-cache-config#litestream-snapshot-backup-interval-hours), preventing cleanup during an active restore. ([#6260](https://github.com/rocicorp/mono/pull/6260), [#6267](https://github.com/rocicorp/mono/pull/6267))
-- [**End-to-end serving lag:**](/docs/otel#zerosync) New metrics measure completed replicated work from the upstream transaction commit through `zero-cache` sync output. [Upstream clock-skew estimate](/docs/otel#zeroreplication) identifies measurements biased by clock differences. ([#6312](https://github.com/rocicorp/mono/pull/6312))
+- [**Litestream v5 restores:**](/docs/zero-cache-config#litestream-restore-using-v5) The official image now uses Litestream 0.5.15 for restores by default, which can handle legacy formats. The backup writes to S3 still use the legacy format. [Also, legacy snapshots now retain the previous generation for six additional hours](/docs/zero-cache-config#litestream-snapshot-backup-interval-hours), preventing cleanup during an active restore. ([#6260](https://github.com/rocicorp/mono/pull/6260), [#6267](https://github.com/rocicorp/mono/pull/6267))
+- [**End-to-end serving lag:**](/docs/otel#zerosync) `e2e_serving_lag` measures completed replicated work from the upstream transaction commit through `zero-cache` sync output. [Upstream clock-skew estimate](/docs/otel#zeroreplication) identifies measurements biased by clock differences. ([#6312](https://github.com/rocicorp/mono/pull/6312))
 
 ## Performance
 

@@ -59,15 +59,9 @@ psql -c 'SHOW wal_level'
 
 ### Socket Inactivity Timeout
 
-`zero-cache` monitors wire activity on its Postgres connections so it can recover when a proxy or network failure leaves a half-open socket. The watchdog samples each connection every 120,000 milliseconds by default and resets it after one to two intervals without any bytes read or written. In-flight queries on a reset connection are rejected and can recover through their normal retry or restart paths.
+`zero-cache` monitors wire activity on its Postgres connections so it can recover when a proxy or network failure leaves a half-open socket. The watchdog samples each connection every 120,000 milliseconds and resets it after one to two intervals without any bytes read or written. In-flight queries on a reset connection are rejected and can recover through their normal retry or restart paths.
 
-Wire activity resets the watchdog, so streaming operations such as `COPY` remain active. A statement that legitimately computes without sending any data for several minutes can be interrupted. Set `ZERO_PG_SOCKET_INACTIVITY_TIMEOUT` to a longer sampling interval in milliseconds when running such statements:
-
-```bash
-ZERO_PG_SOCKET_INACTIVITY_TIMEOUT=600000
-```
-
-Set the value to `0` to disable the watchdog.
+Wire activity resets the watchdog, so streaming operations such as `COPY` remain active. A statement that legitimately computes without sending any data for several minutes can be interrupted.
 
 ### WAL Sender Timeout
 

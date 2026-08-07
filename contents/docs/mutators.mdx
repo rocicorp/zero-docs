@@ -858,7 +858,7 @@ app.post('/api/zero/mutate', async c => {
 
 </CodeGroup>
 
-Mutate endpoint fetch failures and `5xx` responses get up to four total attempts. Exhausted retries and responses other than 200, 401, or 403 enter the [error state](/docs/connection#error).
+Responses other than 200, 401, or 403 enter the [error state](/docs/connection#error). `zero-cache` will retry on `5xx` up to four times before returning an error.
 
 If Zero receives HTTP 401 or 403, the client will enter the needs auth state and require a manual reconnect. Use `zero.connection.connect()` for cookie auth or `zero.connection.connect({auth: newToken})` for token auth, then Zero will retry all queued mutations.
 

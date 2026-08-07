@@ -545,7 +545,7 @@ default: `60000`
 
 ### PG Replication Slot Failover
 
-For upstream Postgres 17+, creates replication slots with the `failover` flag enabled so they can be synchronized to a standby and survive a failover. This requires additional Postgres-side configuration on your provider; see [High Availability and Failover](/docs/connecting-to-postgres#high-availability-and-failover). Has no effect on Postgres versions before 17.
+For upstream Postgres 17+, creates replication slots with the `failover` flag enabled so they can be synchronized to a standby and survive a failover. This requires additional Postgres-side configuration on your provider; see [High Availability](/docs/connecting-to-postgres#high-availability). Has no effect on Postgres versions before 17.
 
 flag: `--upstream-pg-replication-slot-failover`<br/>
 env: `ZERO_UPSTREAM_PG_REPLICATION_SLOT_FAILOVER`<br/>
@@ -651,7 +651,7 @@ env: `ZERO_REPLICA_VACUUM_INTERVAL_HOURS`<br/>
 
 ### Replication Lag Report Interval (ms)
 
-The minimum interval at which replication lag reports are written upstream and reported via the `zero.replication.total_lag` [OpenTelemetry metric](/docs/otel). Because replication lag reports are only issued after the previous one was received, the actual interval between reports may be longer when there is a backlog in the replication stream.
+The minimum interval at which replication lag reports are written upstream and reported via the `zero.replication.total_lag` [OpenTelemetry metric](/docs/otel). If an expected report is not received before the next interval, Zero emits a new report and increments `zero.replication.lag_report_retries`.
 
 This feature requires write access to upstream Postgres (uses `pg_logical_emit_message()`). For PostgreSQL 17+, lag measurements accurately reflect committed write latency (single-digit milliseconds). For PostgreSQL 16 and earlier, measurements may appear 50-100ms longer due to flush behavior. A negative or 0 value disables lag reporting.
 

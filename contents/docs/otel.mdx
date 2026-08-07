@@ -152,78 +152,84 @@ This callback is called before sending WebSocket messages that trigger API serve
 
 ### zero.replication
 
-| Metric                               | Type      | Unit  | Description                                                                                                         |
-| ------------------------------------ | --------- | ----- | ------------------------------------------------------------------------------------------------------------------- |
-| `upstream_lag`                       | Gauge     | ms    | Latency from sending a replication report to receiving it in the stream                                             |
-| `replica_lag`                        | Gauge     | ms    | Latency from receiving a replication report to it reaching the replica                                              |
-| `total_lag`                          | Gauge     | ms    | End-to-end replication latency. Grows as an estimate if the next report hasn't arrived                              |
-| `last_total_lag`                     | Gauge     | ms    | End-to-end latency of the most recently received report. Unlike `total_lag`, does not grow if reports stop arriving |
-| `events`                             | Counter   |       | Number of replication events processed                                                                              |
-| `transactions`                       | Counter   |       | Count of replicated transactions                                                                                    |
-| `changes`                            | Counter   |       | Count of replicated changes, including DML and DDL statements                                                       |
-| `slot_health`                        | Gauge     | 1     | One-hot status for the active logical replication slot: `ok`, `unreserved`, `lost`, `missing`, or `unknown`         |
-| `slot_retained_wal_bytes`            | Gauge     | bytes | WAL bytes retained by the active logical replication slot                                                           |
-| `slot_safe_wal_bytes`                | Gauge     | bytes | Remaining WAL capacity before the active logical replication slot is lost; omitted when Postgres reports no value   |
-| `initial_sync_runs`                  | Counter   |       | Number of initial-sync runs                                                                                         |
-| `initial_sync_duration`              | Histogram | s     | Wall-clock duration of an initial-sync run                                                                          |
-| `initial_sync_copy_duration`         | Histogram | s     | Wall-clock duration of the COPY phase for a successful initial-sync run                                             |
-| `initial_sync_copy_other_duration`   | Histogram | s     | Initial-sync duration excluding SQLite flush and index time for a successful run                                    |
-| `initial_sync_flush_duration`        | Histogram | s     | Total SQLite flush time for a successful initial-sync run                                                           |
-| `initial_sync_index_duration`        | Histogram | s     | SQLite index creation time for a successful initial-sync run                                                        |
-| `initial_sync_rows`                  | Counter   |       | Rows copied during successful initial-sync runs                                                                     |
-| `initial_sync_copy_stream`           | Counter   | bytes | PostgreSQL COPY stream bytes processed during initial sync, including in-progress and failed runs                   |
-| `initial_sync_completed_copy_stream` | Counter   | bytes | PostgreSQL COPY stream bytes processed during successful initial-sync runs                                          |
-| `initial_sync_copy_chunks`           | Counter   |       | PostgreSQL COPY stream chunks processed during initial sync                                                         |
-| `shadow-sync-runs`                   | Counter   |       | Number of [shadow initial-sync](/docs/zero-cache-config#shadow-sync-enabled) runs, labeled by `result`              |
-| `shadow-sync-duration`               | Histogram | s     | Wall-clock duration of a shadow initial-sync run, labeled by `result`                                               |
-| `flow_control.active_subscribers`    | Gauge     |       | Active change-stream subscribers receiving live changes                                                             |
-| `flow_control.queued_subscribers`    | Gauge     |       | Change-stream subscribers waiting for the current transaction to finish before activation                           |
-| `flow_control.pending_messages`      | Gauge     |       | Downstream change-stream messages not yet acknowledged by subscribers                                               |
-| `flow_control.backlog_messages`      | Gauge     |       | Live change-stream messages buffered while subscribers catch up                                                     |
-| `flow_control.backlog_bytes`         | Gauge     | bytes | Live change-stream bytes buffered while subscribers catch up                                                        |
-| `flow_control.max_backlog_bytes`     | Gauge     | bytes | Maximum live change-stream bytes buffered by a single subscriber                                                    |
-| `flow_control.waits`                 | Counter   |       | Completed flow-control checkpoints                                                                                  |
-| `flow_control.wait_duration`         | Histogram | s     | Time replication waits at flow-control checkpoints                                                                  |
+| Metric                               | Type      | Unit  | Description                                                                                                          |
+| ------------------------------------ | --------- | ----- | -------------------------------------------------------------------------------------------------------------------- |
+| `upstream_lag`                       | Gauge     | ms    | Latency from sending a replication report to receiving it in the stream                                              |
+| `replica_lag`                        | Gauge     | ms    | Latency from receiving a replication report to it reaching the replica                                               |
+| `total_lag`                          | Gauge     | ms    | Measured end-to-end latency of the most recently received replication report; does not grow if reports stop arriving |
+| `last_total_lag`                     | Gauge     | ms    | Alias of `total_lag`, retained for dashboards that explicitly use the non-extrapolated metric                        |
+| `lag_report_retries`                 | Counter   |       | Replication lag reports retried because an expected report did not arrive before the next report interval            |
+| `events`                             | Counter   |       | Number of replication events processed                                                                               |
+| `transactions`                       | Counter   |       | Count of replicated transactions                                                                                     |
+| `changes`                            | Counter   |       | Count of replicated changes, including DML and DDL statements                                                        |
+| `slot_health`                        | Gauge     | 1     | One-hot status for the active logical replication slot: `ok`, `unreserved`, `lost`, `missing`, or `unknown`          |
+| `slot_retained_wal_bytes`            | Gauge     | bytes | WAL bytes retained by the active logical replication slot                                                            |
+| `slot_safe_wal_bytes`                | Gauge     | bytes | Remaining WAL capacity before the active logical replication slot is lost; omitted when Postgres reports no value    |
+| `initial_sync_runs`                  | Counter   |       | Number of initial-sync runs                                                                                          |
+| `initial_sync_duration`              | Histogram | s     | Wall-clock duration of an initial-sync run                                                                           |
+| `initial_sync_copy_duration`         | Histogram | s     | Wall-clock duration of the COPY phase for a successful initial-sync run                                              |
+| `initial_sync_copy_other_duration`   | Histogram | s     | Initial-sync duration excluding SQLite flush and index time for a successful run                                     |
+| `initial_sync_flush_duration`        | Histogram | s     | Total SQLite flush time for a successful initial-sync run                                                            |
+| `initial_sync_index_duration`        | Histogram | s     | SQLite index creation time for a successful initial-sync run                                                         |
+| `initial_sync_rows`                  | Counter   |       | Rows copied during successful initial-sync runs                                                                      |
+| `initial_sync_copy_stream`           | Counter   | bytes | PostgreSQL COPY stream bytes processed during initial sync, including in-progress and failed runs                    |
+| `initial_sync_completed_copy_stream` | Counter   | bytes | PostgreSQL COPY stream bytes processed during successful initial-sync runs                                           |
+| `initial_sync_copy_chunks`           | Counter   |       | PostgreSQL COPY stream chunks processed during initial sync                                                          |
+| `shadow-sync-runs`                   | Counter   |       | Number of [shadow initial-sync](/docs/zero-cache-config#shadow-sync-enabled) runs, labeled by `result`               |
+| `shadow-sync-duration`               | Histogram | s     | Wall-clock duration of a shadow initial-sync run, labeled by `result`                                                |
+| `flow_control.active_subscribers`    | Gauge     |       | Active change-stream subscribers receiving live changes                                                              |
+| `flow_control.queued_subscribers`    | Gauge     |       | Change-stream subscribers waiting for the current transaction to finish before activation                            |
+| `flow_control.pending_messages`      | Gauge     |       | Downstream change-stream messages not yet acknowledged by subscribers                                                |
+| `flow_control.backlog_messages`      | Gauge     |       | Live change-stream messages buffered while subscribers catch up                                                      |
+| `flow_control.backlog_bytes`         | Gauge     | bytes | Live change-stream bytes buffered while subscribers catch up                                                         |
+| `flow_control.max_backlog_bytes`     | Gauge     | bytes | Maximum live change-stream bytes buffered by a single subscriber                                                     |
+| `flow_control.waits`                 | Counter   |       | Completed flow-control checkpoints                                                                                   |
+| `flow_control.wait_duration`         | Histogram | s     | Time replication waits at flow-control checkpoints                                                                   |
+
+`total_lag` and `last_total_lag` now report the same latest measured round trip and do not grow when reports stop arriving. Use `lag_report_retries` to detect a stalled or missing report stream.
 
 ### zero.sync
 
-| Metric                              | Type          | Unit | Description                                                                                                    |
-| ----------------------------------- | ------------- | ---- | -------------------------------------------------------------------------------------------------------------- |
-| `max-protocol-version`              | Gauge         |      | Highest sync protocol version seen from connecting clients                                                     |
-| `active-clients`                    | UpDownCounter |      | Number of currently connected sync clients                                                                     |
-| `active-client-groups`              | Gauge         |      | Number of active ViewSyncerService instances in a syncer worker                                                |
-| `queries`                           | Gauge         |      | Active IVM pipelines across all client groups in a syncer worker                                               |
-| `rows`                              | Gauge         |      | CVR-tracked rows across all client groups in a syncer worker                                                   |
-| `serving_lag`                       | Gauge         | ms   | Longest time locally ready replica changes have remained unserved across active ViewSyncer client groups       |
-| `serving_lag_stats`                 | Gauge         | ms   | Distribution of serving lag across active ViewSyncer client groups                                             |
-| `serving_lagging_client_groups`     | Gauge         |      | Active ViewSyncer client groups with locally ready replica changes not yet served to clients                   |
-| `view_syncer_lag`                   | Histogram     | s    | Time from replica changes becoming ready to ViewSyncer output, sampled once per minute per active client group |
-| `view_syncer_hydration`             | Histogram     | s    | Time from a ViewSyncer query sync requiring hydration until output, per client group                           |
-| `lock-wait-time`                    | Histogram     | s    | Time spent waiting to acquire the ViewSyncerService lock per operation                                         |
-| `pipeline-resets`                   | Counter       |      | Count of pipeline resets, labeled by `reason`                                                                  |
-| `hydration`                         | Counter       |      | Number of query hydrations                                                                                     |
-| `hydration-time`                    | Histogram     | s    | Time to hydrate a query                                                                                        |
-| `advance-time`                      | Histogram     | s    | Time to advance all queries for a client group after applying a transaction                                    |
-| `poke.time`                         | Histogram     | s    | Time per poke transaction (excludes canceled/noop pokes)                                                       |
-| `poke.transactions`                 | Counter       |      | Count of poke transactions                                                                                     |
-| `poke.rows`                         | Counter       |      | Count of poked rows                                                                                            |
-| `cvr.load_attempts`                 | Counter       |      | CVR load attempts                                                                                              |
-| `cvr.load_duration`                 | Histogram     | s    | Time to load a CVR                                                                                             |
-| `cvr.flush_attempts`                | Counter       |      | CVR flush attempts                                                                                             |
-| `cvr.flush-time`                    | Histogram     | s    | Time to flush a CVR transaction                                                                                |
-| `cvr.rows-flushed`                  | Counter       |      | Number of changed rows flushed to a CVR                                                                        |
-| `websocket.open_connections`        | UpDownCounter |      | Open client WebSocket connections                                                                              |
-| `websocket.connection_attempts`     | Counter       |      | Client WebSocket connection attempts                                                                           |
-| `websocket.connection_successes`    | Counter       |      | Client WebSocket connections successfully initialized                                                          |
-| `websocket.connection_failures`     | Counter       |      | Client WebSocket connection attempts that failed before initialization                                         |
-| `websocket.errors`                  | Counter       |      | Client WebSocket error events                                                                                  |
-| `ivm.advance-time`                  | Histogram     | s    | Time to advance IVM queries in response to a single change                                                     |
-| `ivm.conflict-rows-deleted`         | Counter       |      | Rows deleted because they conflicted with an added row                                                         |
-| `query.transformations`             | Counter       |      | Number of query transformations performed                                                                      |
-| `query.transformation-time`         | Histogram     | s    | Time to transform custom queries via API server                                                                |
-| `query.transformation-hash-changes` | Counter       |      | Times a query transformation hash changed                                                                      |
-| `query.transformation-no-ops`       | Counter       |      | Times a query transformation was a no-op                                                                       |
-| `query.row-set-signature-drifts`    | Counter       |      | Unchanged query rehydrations whose row-set signature differs from the CVR, forcing a config-version bump       |
+| Metric                                     | Type          | Unit | Description                                                                                               |
+| ------------------------------------------ | ------------- | ---- | --------------------------------------------------------------------------------------------------------- |
+| `max-protocol-version`                     | Gauge         |      | Highest sync protocol version seen from connecting clients                                                |
+| `active-clients`                           | UpDownCounter |      | Number of currently connected sync clients                                                                |
+| `active-client-groups`                     | Gauge         |      | Number of active ViewSyncerService instances in a syncer worker                                           |
+| `queries`                                  | Gauge         |      | Active IVM pipelines across all client groups in a syncer worker                                          |
+| `rows`                                     | Gauge         |      | CVR-tracked rows across all client groups in a syncer worker                                              |
+| `serving_lag`                              | Gauge         | ms   | Longest time locally ready replica changes have remained unserved across eligible active client groups    |
+| `serving_lag_stats`                        | Gauge         | ms   | Distribution of serving lag across eligible active client groups                                          |
+| `serving_lagging_client_groups`            | Gauge         |      | Eligible active client groups with locally ready replica changes not yet served to clients                |
+| `view_syncer_lag`                          | Histogram     | s    | Time from replica changes becoming ready to ViewSyncer output, sampled once per minute per eligible group |
+| `view_syncer_hydration`                    | Histogram     | s    | Time from a ViewSyncer query sync requiring hydration until output, per client group                      |
+| `lock-wait-time`                           | Histogram     | s    | Time spent waiting to acquire the ViewSyncerService lock per operation                                    |
+| `pipeline-resets`                          | Counter       |      | Count of pipeline resets, labeled by `reason`                                                             |
+| `hydration`                                | Counter       |      | Number of query hydrations                                                                                |
+| `hydration-time`                           | Histogram     | s    | Time to hydrate a query                                                                                   |
+| `advance-time`                             | Histogram     | s    | Time to advance all queries for a client group after applying a transaction                               |
+| `poke.time`                                | Histogram     | s    | Time per poke transaction (excludes canceled/noop pokes)                                                  |
+| `poke.transactions`                        | Counter       |      | Count of poke transactions                                                                                |
+| `poke.rows`                                | Counter       |      | Count of poked rows                                                                                       |
+| `cvr.load_attempts`                        | Counter       |      | CVR load attempts                                                                                         |
+| `cvr.load_duration`                        | Histogram     | s    | Time to load a CVR                                                                                        |
+| `cvr.flush_attempts`                       | Counter       |      | CVR flush attempts                                                                                        |
+| `cvr.flush-time`                           | Histogram     | s    | Time to flush a CVR transaction                                                                           |
+| `cvr.rows-flushed`                         | Counter       |      | Number of changed rows flushed to a CVR                                                                   |
+| `websocket.open_connections`               | UpDownCounter |      | Open client WebSocket connections                                                                         |
+| `websocket.connection_attempts`            | Counter       |      | Client WebSocket connection attempts                                                                      |
+| `websocket.connection_successes`           | Counter       |      | Client WebSocket connections successfully initialized                                                     |
+| `websocket.connection_failures`            | Counter       |      | Client WebSocket connection attempts that failed before initialization                                    |
+| `websocket.errors`                         | Counter       |      | Client WebSocket error events                                                                             |
+| `ivm.advance-time`                         | Histogram     | s    | Time to advance IVM queries in response to a single change                                                |
+| `ivm.conflict-rows-deleted`                | Counter       |      | Rows deleted because they conflicted with an added row                                                    |
+| `query.transformations`                    | Counter       |      | Number of query transformations performed                                                                 |
+| `query.transformation-time`                | Histogram     | s    | Time to transform custom queries via API server                                                           |
+| `query.transformation-hash-changes`        | Counter       |      | Times a query transformation hash changed                                                                 |
+| `query.transformation-no-ops`              | Counter       |      | Times a query transformation was a no-op                                                                  |
+| `query.row-set-signature-drifts`           | Counter       |      | Unchanged query rehydrations whose row-set signature differs from the CVR, forcing a config-version bump  |
+| `query.same-hash-rehydrations-forced-bump` | Counter       |      | Same-hash query rehydrations that force a config-version bump so changed rows are delivered               |
+
+Serving-lag metrics include only client groups with at least one connected client and a validated background connection context. Retained groups without an eligible connection do not contribute lag.
 
 ### zero.mutation
 

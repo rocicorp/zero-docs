@@ -1,0 +1,44 @@
+---
+title: Zero 1.9
+description: Query Correctness and Reliability
+---
+
+## Installation
+
+```bash
+npm install @rocicorp/zero@1.9
+```
+
+You can use `zero-cache` from Docker Hub or GHCR:
+
+```bash
+docker pull rocicorp/zero:1.9.0
+# or
+docker pull ghcr.io/rocicorp/zero:1.9.0
+```
+
+## Overview
+
+Zero 1.9 improves query correctness and `zero-cache` reliability.
+
+## Performance
+
+Deferred.
+
+## Fixes
+
+- [Ordered queries now paginate and maintain windows correctly when cursor fields contain `NULL`, including compound tie-break fields and reverse walks.](https://github.com/rocicorp/mono/pull/6121) This prevents skipped rows, empty windows, and related `Bound should be set` failures. (thanks [@YevheniiKotyrlo](https://github.com/YevheniiKotyrlo)!)
+- [Schema construction, CRUD mutators, and materialized views now preserve a key named `__proto__` as user data instead of invoking JavaScript's legacy prototype setter.](https://github.com/rocicorp/mono/pull/6185) (thanks [@tjenkinson](https://github.com/tjenkinson)!)
+- [Clients now receive changed rows after a server-side query is rebuilt, instead of retaining stale results in a rare rehydration case.](https://github.com/rocicorp/mono/pull/6196)
+- [`zero-cache` now bounds its SQLite prepared-statement caches with LRU eviction, preventing unbounded statement retention when applications generate many distinct query shapes.](https://github.com/rocicorp/mono/pull/6202)
+- [Replication lag reports now retry when an expected report is missing](https://github.com/rocicorp/mono/pull/6187), and [serving-lag metrics exclude disconnected or not-yet-validated client groups](https://github.com/rocicorp/mono/pull/6219). See the updated [OpenTelemetry metric descriptions](/docs/otel#zeroreplication).
+- [`zero-cache` now detects and resets PostgreSQL connections that stop carrying wire traffic](https://github.com/rocicorp/mono/pull/6220), [including over TLS](https://github.com/rocicorp/mono/pull/6221), allowing work to recover from proxy-created half-open sockets. See [Breaking Changes](#postgresql-socket-inactivity-timeout).
+- [`zero-cache` now releases custom-query caches when client groups stop, preventing inactive groups from retaining timers and transformed queries.](https://github.com/rocicorp/mono/pull/6228)
+
+## Breaking Changes
+
+### PostgreSQL Socket Inactivity Timeout
+
+`zero-cache` now monitors wire activity on its PostgreSQL connections. By default, it checks every two minutes and resets a connection after one to two inactive intervals. This recovers half-open connections, but can interrupt a long-running statement that legitimately produces no network traffic.
+
+If legitimate Postgres operations can remain silent for this long, set [`ZERO_PG_SOCKET_INACTIVITY_TIMEOUT`](/docs/connecting-to-postgres#socket-inactivity-timeout) on `zero-cache` to a longer interval in milliseconds. Set it to `0` to disable the watchdog.

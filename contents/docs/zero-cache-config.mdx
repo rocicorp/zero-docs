@@ -332,6 +332,31 @@ Path to the litestream executable. This must be built from the `rocicorp/litestr
 flag: `--litestream-executable`<br/>
 env: `ZERO_LITESTREAM_EXECUTABLE`<br/>
 
+### Litestream V5 Executable
+
+Path to the official Litestream v0.5.x executable used for restores when `ZERO_LITESTREAM_RESTORE_USING_V5` is enabled. Litestream v0.5.8 and later can restore both legacy WAL backups and LTX backups, choosing the format with the latest data. The official Zero Docker image includes Litestream 0.5.15 at this path.
+
+flag: `--litestream-executable-v5`<br/>
+env: `ZERO_LITESTREAM_EXECUTABLE_V5`<br/>
+
+### Litestream Restore Using V5
+
+Use `ZERO_LITESTREAM_EXECUTABLE_V5` for restores when that executable is configured. If it is unavailable, Zero falls back to the legacy executable. Set this to `false` to force legacy restore behavior.
+
+Litestream v0.5 cannot restore legacy backups encrypted with Age. Keep legacy restore enabled for those backups or migrate them before enabling v5 restore.
+
+flag: `--litestream-restore-using-v5`<br/>
+env: `ZERO_LITESTREAM_RESTORE_USING_V5`<br/>
+default: `true`
+
+### Litestream Backup Using V5
+
+Write LTX backups with Litestream v0.5.x. This is disabled by default to continue writing legacy WAL backups. Enabling it requires v5 restore and makes rollback difficult because older versions cannot restore an LTX-only backup.
+
+flag: `--litestream-backup-using-v5`<br/>
+env: `ZERO_LITESTREAM_BACKUP_USING_V5`<br/>
+default: `false`
+
 ### Litestream Incremental Backup Interval Minutes
 
 The interval between incremental backups of the replica. Shorter intervals reduce the amount of change history that needs to be replayed when catching up a new view-syncer, at the expense of increasing the number of files needed to download for the initial litestream restore.
@@ -407,7 +432,7 @@ default: `48`
 
 ### Litestream Snapshot Backup Interval Hours
 
-The interval between snapshot backups of the replica. Snapshot backups make a full copy of the database to a new litestream generation. This improves restore time at the expense of bandwidth. Applications with a large database and low write rate can increase this interval to reduce network usage for backups (litestream defaults to 24 hours).
+The interval between snapshot backups of the replica. Snapshot backups make a full copy of the database to a new litestream generation. Zero retains the previous generation for six additional hours so an active restore can finish before its snapshot and WAL files are removed. This improves restore time and safety at the expense of bandwidth and temporary backup storage. Applications with a large database and low write rate can increase this interval to reduce network usage for backups (litestream defaults to 24 hours).
 
 flag: `--litestream-snapshot-backup-interval-hours`<br/>
 env: `ZERO_LITESTREAM_SNAPSHOT_BACKUP_INTERVAL_HOURS`<br/>

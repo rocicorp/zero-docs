@@ -9,36 +9,62 @@ description: Query Correctness and Reliability
 npm install @rocicorp/zero@1.9
 ```
 
-You can use `zero-cache` from Docker Hub or GHCR:
-
-```bash
-docker pull rocicorp/zero:1.9.0
-# or
-docker pull ghcr.io/rocicorp/zero:1.9.0
-```
-
 ## Overview
 
-Zero 1.9 improves query correctness and `zero-cache` reliability.
+Zero 1.9 improves query/mutation correctness and reliability.
+
+## Features
+
+- [**Litestream v5 restores:**](/docs/zero-cache-config#litestream-restore-using-v5) The official image now uses Litestream 0.5.15 for restores by default. It can restore legacy WAL or LTX backups, while Zero 1.9 continues writing legacy backups. [Legacy snapshots now retain the previous generation for six additional hours](/docs/zero-cache-config#litestream-snapshot-backup-interval-hours), preventing cleanup during an active restore. ([#6260](https://github.com/rocicorp/mono/pull/6260), [#6267](https://github.com/rocicorp/mono/pull/6267))
+- [**End-to-end serving lag:**](/docs/otel#zerosync) New metrics measure completed replicated work from the upstream transaction commit through `zero-cache` sync output. [Upstream clock-skew estimate](/docs/otel#zeroreplication) identifies measurements biased by clock differences. ([#6312](https://github.com/rocicorp/mono/pull/6312))
 
 ## Performance
 
-Deferred.
+### First Mutation Latency
+
+On the first mutation, Zero Server fetches and caches PostgreSQL schema metadata. In benchmarks, that full request is **2.7x&nbsp;faster** (done in [#6292](https://github.com/rocicorp/mono/pull/6292), thanks [@diegopereira99](https://github.com/diegopereira99)!). This is most noticeable with cold-starts in serverless environments like AWS Lambda.
+
+<BenchmarkComparisonChart
+  title="Cold Mutation Latency"
+  description="Measured on M5 Pro. Lower is better."
+  previousLabel="Zero 1.8"
+  currentLabel="Zero 1.9"
+  precision={2}
+  valuePrecision={3}
+  unit="ms"
+  higherIsBetter={false}
+  height={160}
+  data={[
+    {
+      name: 'First mutation',
+      fullName:
+        'First mutation with uncached server-schema metadata',
+      previous: 20.973,
+      current: 7.645
+    }
+  ]}
+/>
 
 ## Fixes
 
-- [Ordered queries now paginate and maintain windows correctly when cursor fields contain `NULL`, including compound tie-break fields and reverse walks.](https://github.com/rocicorp/mono/pull/6121) This prevents skipped rows, empty windows, and related `Bound should be set` failures. (thanks [@YevheniiKotyrlo](https://github.com/YevheniiKotyrlo)!)
-- [Schema construction, CRUD mutators, and materialized views now preserve a key named `__proto__` as user data instead of invoking JavaScript's legacy prototype setter.](https://github.com/rocicorp/mono/pull/6185) (thanks [@tjenkinson](https://github.com/tjenkinson)!)
-- [Clients now receive changed rows after a server-side query is rebuilt, instead of retaining stale results in a rare rehydration case.](https://github.com/rocicorp/mono/pull/6196)
-- [`zero-cache` now bounds its SQLite prepared-statement caches with LRU eviction, preventing unbounded statement retention when applications generate many distinct query shapes.](https://github.com/rocicorp/mono/pull/6202)
-- [Replication lag reports now retry when an expected report is missing](https://github.com/rocicorp/mono/pull/6187), and [serving-lag metrics exclude disconnected or not-yet-validated client groups](https://github.com/rocicorp/mono/pull/6219). See the updated [OpenTelemetry metric descriptions](/docs/otel#zeroreplication).
-- [`zero-cache` now detects and resets PostgreSQL connections that stop carrying wire traffic](https://github.com/rocicorp/mono/pull/6220), [including over TLS](https://github.com/rocicorp/mono/pull/6221), allowing work to recover from proxy-created half-open sockets. See [Breaking Changes](#postgresql-socket-inactivity-timeout).
-- [`zero-cache` now releases custom-query caches when client groups stop, preventing inactive groups from retaining timers and transformed queries.](https://github.com/rocicorp/mono/pull/6228)
+- [Ordered queries now paginate and maintain windows correctly when cursor fields contain `NULL`, including compound tie-break fields and reverse walks.](https://github.com/rocicorp/mono/pull/6121) (thanks [@YevheniiKotyrlo](https://github.com/YevheniiKotyrlo)!)
+- [Rebuilt queries now deliver changed rows instead of occasionally leaving clients with stale results.](https://github.com/rocicorp/mono/pull/6196)
+- [Queries no longer drop rows or emit invalid SQL when given an inapplicable scalar hint, and scalar `NOT EXISTS` now handles empty or `NULL` results.](https://github.com/rocicorp/mono/pull/6306)
+- [Schema construction, CRUD mutators, and materialized views now preserve a key named `__proto__` as user data.](https://github.com/rocicorp/mono/pull/6185) (thanks [@tjenkinson](https://github.com/tjenkinson)!)
+- SQLite statement caches now [retain at most 1,000 idle entries each](https://github.com/rocicorp/mono/pull/6202), terminated client groups [release custom-query timers and caches](https://github.com/rocicorp/mono/pull/6228), and large replica transactions [can spill dirty pages to WAL instead of retaining the complete write set in native memory](https://github.com/rocicorp/mono/pull/6311).
+- [Missing replication-lag reports are retried and `total_lag` no longer grows when reports stop arriving](https://github.com/rocicorp/mono/pull/6187), while [serving-lag metrics exclude disconnected or not-yet-validated client groups](https://github.com/rocicorp/mono/pull/6219).
+- `zero-cache` now recovers from [half-open PostgreSQL sockets](https://github.com/rocicorp/mono/pull/6220), [including over TLS](https://github.com/rocicorp/mono/pull/6221), and [the official image applies the bundled postgres.js disconnect patch](https://github.com/rocicorp/mono/pull/6310).
+- [With PostgreSQL `wal_sender_timeout=0`, replication no longer enters a continuous reconnect loop.](https://github.com/rocicorp/mono/pull/6244) See [WAL Sender Timeout](/docs/connecting-to-postgres#wal-sender-timeout).
+- [Client connection attempts now time out across setup and the server handshake, abandon late sockets, and retry normally.](https://github.com/rocicorp/mono/pull/6299) [Reconnect confirmations no longer produce false slow-query warnings or inflated materialization metrics.](https://github.com/rocicorp/mono/pull/6308)
+- [Different integration versions in a pnpm workspace no longer create peer-qualified duplicate copies of `@rocicorp/zero`, fixing cross-package type and module-augmentation failures.](https://github.com/rocicorp/mono/pull/6231)
+- [Replicated PostgreSQL type and nullability changes now preserve compound-index column order in SQLite replicas.](https://github.com/rocicorp/mono/pull/6225) To repair an affected replica, resync it from Postgres or recreate the PostgreSQL index.
+- [Expected schema and replica resets now log warnings instead of errors](https://github.com/rocicorp/mono/pull/6248), and [`zero-cache` skips Litestream restore when backups are not configured](https://github.com/rocicorp/mono/pull/6259). (thanks [@asterikx](https://github.com/asterikx)!)
+- [Server CRUD updates and upserts no longer assign primary-key columns, avoiding PostgreSQL locks that could block concurrent foreign-key inserts.](https://github.com/rocicorp/mono/pull/6280) (thanks [@shayonj](https://github.com/shayonj)!)
+- [Mutation and query API calls now retry all `5xx` responses using the existing four-attempt limit and backoff; `4xx` responses still fail without retry.](https://github.com/rocicorp/mono/pull/6315) (thanks [@shayonj](https://github.com/shayonj)!)
+- [SQLite corruption failures now log bounded replica and integrity diagnostics and flush logs before exit.](https://github.com/rocicorp/mono/pull/6215) [Oversized replication updates now identify the transaction, affected column, and value type without logging the value.](https://github.com/rocicorp/mono/pull/6318)
 
 ## Breaking Changes
 
-### PostgreSQL Socket Inactivity Timeout
+### Existing Primary-Key Inserts
 
-`zero-cache` now monitors wire activity on its PostgreSQL connections. By default, it checks every two minutes and resets a connection after one to two inactive intervals. This recovers half-open connections, but can interrupt a long-running statement that legitimately produces no network traffic.
-
-If legitimate Postgres operations can remain silent for this long, set [`ZERO_PG_SOCKET_INACTIVITY_TIMEOUT`](/docs/connecting-to-postgres#socket-inactivity-timeout) on `zero-cache` to a longer interval in milliseconds. Set it to `0` to disable the watchdog.
+`insert` now succeeds without changing the row when its Zero primary key already exists; before 1.9, the server returned an error. A successful `insert` does not necessarily prove that a row was created.

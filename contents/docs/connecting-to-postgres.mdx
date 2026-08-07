@@ -69,6 +69,12 @@ ZERO_PG_SOCKET_INACTIVITY_TIMEOUT=600000
 
 Set the value to `0` to disable the watchdog.
 
+### WAL Sender Timeout
+
+`zero-cache` uses Postgres's `wal_sender_timeout` setting to monitor its replication connection. When the timeout is greater than `0`, Zero sends keepalives and reconnects if the replication stream stops responding.
+
+Setting `wal_sender_timeout` to `0` disables the timeout in Postgres and the related keepalive and reconnect checks in Zero. Other connection failure detection remains active.
+
 ### Bounding WAL Size
 
 For development databases, you can set a `max_slot_wal_keep_size` value in Postgres. This will help limit the amount of WAL kept around.

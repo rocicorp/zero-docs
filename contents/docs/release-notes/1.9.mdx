@@ -20,9 +20,9 @@ Zero 1.9 improves query/mutation correctness and reliability.
 
 ## Performance
 
-### First Mutation Latency
+### Cold Mutation Latency
 
-On the first mutation, Zero Server fetches and caches PostgreSQL schema metadata. In benchmarks, that full request is **2.7x&nbsp;faster** (done in [#6292](https://github.com/rocicorp/mono/pull/6292), thanks [@diegopereira99](https://github.com/diegopereira99)!). This is most noticeable with cold-starts in serverless environments like AWS Lambda.
+On the first mutation, Zero Server fetches and caches PostgreSQL schema metadata. The first mutation on startup is now **2.7x&nbsp;faster** in Zero 1.9 (done in [#6292](https://github.com/rocicorp/mono/pull/6292), thanks [@diegopereira99](https://github.com/diegopereira99)!). This is most noticeable with cold-starts in serverless environments like AWS Lambda.
 
 <BenchmarkComparisonChart
   title="Cold Mutation Latency"

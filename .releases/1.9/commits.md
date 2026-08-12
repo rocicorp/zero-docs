@@ -11,12 +11,12 @@ Status: audit and public draft updated through the reconstructed maintenance tar
 - Previous ref: `zero/v1.8.0`
 - Previous SHA: `cdc02598f137ab4e071878f5674fdc716dbbc69d`
 - Target ref: `origin/maint/zero/v1.9`, reconstructed and published maintenance target
-- Target SHA: `8223561de0895036bacdce5d2ea599c1a3e1e62d`
+- Target SHA: `342fc33d519fb5ca3ddab49eaf862b9a3a290cd0`
 - Merge base: `2279e783edd94aaa20fdcc8e067860ad0c21d95b`
 - Reconstruction base: `ef892a123a11461e74a59a4b59ad310ba23180b3`
-- Raw non-merge range: 65 commits
+- Raw non-merge range: 68 commits
 - Patch-equivalent commits already shipped in 1.8: 15
-- Unique 1.9 commits: 50
+- Unique 1.9 commits: 53
 
 Commands used:
 
@@ -30,7 +30,7 @@ git log --right-only --no-merges --cherry-mark --format='%m%x09%h%x09%s' zero/v1
 git log --left-only --no-merges --cherry-mark --format='%m%x09%h%x09%s' zero/v1.8.0...origin/maint/zero/v1.9
 git log --format='%H%x09%s%n%b' 2279e783edd94aaa20fdcc8e067860ad0c21d95b..zero/v1.8.0
 git show zero/v1.8.0:packages/zero-protocol/src/protocol-version.ts
-git show 8223561de0895036bacdce5d2ea599c1a3e1e62d:packages/zero-protocol/src/protocol-version.ts
+git show 342fc33d519fb5ca3ddab49eaf862b9a3a290cd0:packages/zero-protocol/src/protocol-version.ts
 ```
 
 ## Protocol Compatibility
@@ -72,9 +72,9 @@ The previous-release side contains no additional `cherry-pick -x` trailers namin
 
 ## Maintenance Reconstruction
 
-The target was rebuilt from shared mainline commit `ef892a123` by applying 22 selected, signed mainline commits in topological order with provenance trailers, then fast-forwarded with signed #6318 PR-head and #6312 canonical-main backports, a signed #6326 canonical-main backport, and the signed #6341 PR head. This removes the bulk-cherry-pick timestamps from the old maintenance line and makes every selected change independently traceable to its source.
+The target was rebuilt from shared mainline commit `ef892a123` by applying 22 selected, signed mainline commits in topological order with provenance trailers, then fast-forwarded with signed #6318 PR-head and #6312 canonical-main backports, a signed #6326 canonical-main backport, the signed #6341 PR head, canonical-main backports for #6339 and #6338, and a signed maintenance-only test adaptation for #6338. This removes the bulk-cherry-pick timestamps from the old maintenance line and makes every selected change independently traceable to its source.
 
-The old maintenance-only commits `e91f964a7` and `c073aa39e` are represented by reconstructed commit `49b13e3e5`, the canonical #6280 patch. The resulting production code and tests are byte-identical to main's #6280 tree. Reconstructed #6311 differs in patch ID only because the 1.9 parent infers an unchanged test callback parameter type where main's rmv2-era parent spells out `unknown`; the production change, new transaction tests, and resulting behavior are identical. #6318 similarly omits only an unrelated mainline rollback helper that is absent from 1.9; its oversized-binding diagnostics and regression test match the PR. #6312's entire `packages/zero-cache` patch is patch-equivalent to main; the backport omits only four generated API snapshots because 1.9 predates the #6239 snapshot infrastructure. #6326 applies cleanly; its patch ID differs because its change-processor cleanup overlaps the tailored #6318 backport already on the maintenance branch. #6341 omits only RMv2 change-log diagnostic registration absent from 1.9 and preserves the PR's behavior for every SQLite database used by this release.
+The old maintenance-only commits `e91f964a7` and `c073aa39e` are represented by reconstructed commit `49b13e3e5`, the canonical #6280 patch. The resulting production code and tests are byte-identical to main's #6280 tree. Reconstructed #6311 differs in patch ID only because the 1.9 parent infers an unchanged test callback parameter type where main's rmv2-era parent spells out `unknown`; the production change, new transaction tests, and resulting behavior are identical. #6318 similarly omits only an unrelated mainline rollback helper that is absent from 1.9; its oversized-binding diagnostics and regression test match the PR. #6312's entire `packages/zero-cache` patch is patch-equivalent to main; the backport omits only four generated API snapshots because 1.9 predates the #6239 snapshot infrastructure. #6326 applies cleanly; its patch ID differs because its change-processor cleanup overlaps the tailored #6318 backport already on the maintenance branch. #6341 omits only RMv2 change-log diagnostic registration absent from 1.9 and preserves the PR's behavior for every SQLite database used by this release. #6339 applies cleanly. #6338 omits RMv2-only purge and transaction-boundary bookkeeping while preserving source-termination handling for 1.9's Storer and subscriber flow-control waits.
 
 All other reconstructed commits are patch-equivalent to their named mainline source. Main-only rmv2 work, #6307's breaking scalar type enforcement, #6309's nullability-specific optimization, #6314's experimental Litestream update, and #6317's rmv2 test timeout remain excluded.
 
@@ -147,6 +147,9 @@ All other reconstructed commits are patch-equivalent to their named mainline sou
 | [`b90e79d8f`](https://github.com/rocicorp/mono/pull/6312) | feature     | -         | Measures end-to-end serving lag from an upstream commit through ViewSyncer output, reports upstream clock-skew estimates, and counts negative lag observations that were clamped to zero.                              | Include publicly as operator observability. The optional `commitTimeMs` field is additive and the change stream parses in passthrough mode, so old peers ignore it and new peers accept its absence. Tests cover protocol compatibility, notification coalescing, clock-skew estimation, lag completion, and clamp reporting.                                                                                                                                           |
 | [`daa5c9a32`](https://github.com/rocicorp/mono/pull/6326) | fix         | -         | Propagates fatal replica-writer failures through replication status and exits `zero-cache` with a failure code instead of allowing incremental replication to stop silently.                                           | Include publicly as an operator reliability fix. Tests cover error publication, rejection from incremental replication, and nonzero parent-process exit when workers terminate outside graceful drain. The published replication error remains generic and safe while detailed diagnostics stay in logs.                                                                                                                                                                |
 | [`8223561de`](https://github.com/rocicorp/mono/pull/6341) | fix         | -         | Keeps lightweight SQLite corruption diagnostics enabled but makes synchronous full-database `quick_check` and `integrity_check` scans opt-in, avoiding long delays before fatal failures propagate.                    | Include publicly with #6215. The hidden `ZERO_SQLITE_CORRUPTION_CHECKS` option defaults to false and is intentionally not promoted as supported configuration. Tests cover default-skipped and explicitly enabled checks, and the option is propagated to all 1.9 fatal diagnostic targets.                                                                                                                                                                             |
+| [`2a2972c37`](https://github.com/rocicorp/mono/pull/6339) | fix         | -         | Recognizes SQLite extended corruption result codes such as `SQLITE_CORRUPT_INDEX`, `SQLITE_CORRUPT_VTAB`, and `SQLITE_CORRUPT_SEQUENCE` as corruption regardless of message text.                                      | Include publicly with #6215 and #6341. Tests cover supported extended codes and reject unrelated prefixes. This broadens when existing corruption diagnostics and recovery handling activate; it does not change database contents or configuration.                                                                                                                                                                                                                    |
+| [`bd70c07ea`](https://github.com/rocicorp/mono/pull/6338) | fix         | -         | Exits the change-streamer when its PostgreSQL replication source terminates while Storer or subscriber flow control is blocked, allowing process replacement and recovery from durable state.                          | Include publicly as an operator reliability fix. The backport retains source-termination signaling, flow-control races, bounded cleanup, and incident regression coverage while omitting RMv2-only bookkeeping absent from 1.9. Intentional local cancellation remains nonfatal.                                                                                                                                                                                        |
+| `342fc33d5`                                               | skip        | -         | None; adapts #6338's new regression test to the older 1.9 `initializeStreamer` signature.                                                                                                                              | Omit as maintenance-only test plumbing. It removes a main-only constructor argument and does not change production behavior or the scenario under test.                                                                                                                                                                                                                                                                                                                 |
 
 ## Breaking-Change Review
 
@@ -196,6 +199,8 @@ Human review identified three breaking behavioral or operational changes: the Po
 - Oversized replication update failures reporting transaction, relation, table, column, type, and size context without customer values (#6318).
 - Fatal replica-writer failures surfacing through replication status and terminating `zero-cache` with a failure code (#6326).
 - SQLite corruption failures no longer running potentially long full-database checks by default (#6341).
+- Extended SQLite corruption errors activating diagnostics and recovery handling (#6339).
+- Recovery when PostgreSQL replication terminates during blocked flow control (#6338).
 
 ### Performance
 
@@ -235,7 +240,7 @@ Every non-skipped commit is represented or intentionally omitted above.
 - `contents/docs/self-host.mdx`: document the v5 reader/legacy writer rollout, rollback floor, opt-out, custom-config validation, and Age incompatibility.
 - `contents/docs/otel.mdx`: retain reviewed lag corrections; document batched initial-sync counters, the `litestream` restore label/default change, and #6312's end-to-end serving-lag, clamp, and clock-skew metrics.
 - `contents/docs/queries.mdx`: no change required; it already states the corrected `Zero.run` default and `{type: 'complete'}` behavior.
-- `contents/docs/release-notes/1.9.mdx`: include the reconstructed maintenance fixes, including #6326 and #6341, and the validated #6292 first-mutation benchmark without broadening it into a general startup claim.
+- `contents/docs/release-notes/1.9.mdx`: include the reconstructed maintenance fixes, including #6326, #6341, #6339, and #6338, and the validated #6292 first-mutation benchmark without broadening it into a general startup claim.
 - `contents/docs/release-notes/index.mdx`: no change required while the existing description remains unchanged.
 - Generated search and LLM artifacts: regenerate after product-doc edits.
 
@@ -266,6 +271,8 @@ Every non-skipped commit is represented or intentionally omitted above.
 - Include #6312 as additive operator observability and call out that upstream clock skew can bias end-to-end lag.
 - Include #6326 as an operator reliability fix so fatal replica-writer failures are visible and restartable.
 - Include #6341 with #6215 and keep its diagnostic opt-in hidden rather than promoting it as supported configuration.
+- Include #6339 with the SQLite corruption diagnostics fix.
+- Include #6338 as a replication recovery fix.
 - Include #6292 in the Performance section using the 10-run Zero 1.8 versus Zero 1.9 comparison, scoped to first mutation handling with uncached server-schema metadata.
 
 Remaining blockers:
@@ -280,10 +287,10 @@ Human review selected and published the reconstructed maintenance target, retain
 
 ## Validation
 
-- Audit coverage: PASS. All 65 raw-range commits have exactly one decision row; all 15 patch-equivalent 1.8 backports are recorded.
+- Audit coverage: PASS. All 68 raw-range commits have exactly one decision row; all 15 patch-equivalent 1.8 backports are recorded.
 - Protocol compatibility: PASS.
 - Placeholder links: PASS. No `TODO`, `TBD`, or `PLACEHOLDER` markers remain in the audit or release note.
-- Maintenance history: PASS. All 26 maintenance commits are signed. Twenty-one are patch-equivalent to main; #6311 differs only by an unchanged inferred test callback type, #6318 omits only an unrelated rollback helper absent from 1.9, #6312 omits generated API snapshots whose infrastructure is absent from 1.9, #6326 overlaps the tailored #6318 backport, and #6341 omits RMv2-only change-log registration. Their selected production changes and added tests match their sources.
+- Maintenance history: PASS. All 29 maintenance commits are signed. Twenty-two are patch-equivalent to main; #6311 differs only by an unchanged inferred test callback type, #6318 omits only an unrelated rollback helper absent from 1.9, #6312 omits generated API snapshots whose infrastructure is absent from 1.9, #6326 overlaps the tailored #6318 backport, #6341 omits RMv2-only change-log registration, and #6338 omits RMv2-only bookkeeping and has a maintenance-only test-signature adaptation. Their selected production changes and added tests match their sources.
 - Mono targeted tests: PASS. zero-client 645, selected zero-cache 150, zero-server 433, z2s 65, zqlite 192, and scalar PostgreSQL integration 5.
 - Mono full zero-cache test: PASS after #6312 with 4,012 passed and 32 skipped across 301 test files.
 - Mono static validation: PASS. All 42 typecheck/build tasks, formatting, dependency verification, and type-aware lint completed; lint reported 0 errors and 1,512 warnings.
@@ -291,6 +298,7 @@ Human review selected and published the reconstructed maintenance target, retain
 - #6312 validation: PASS. The complete zero-cache suite, zero-cache typecheck, formatting, and lint completed; lint reported 0 errors and 432 warnings. Its Zero Cache patch ID matches canonical main commit `0beb0ba76`.
 - #6326 validation: PASS. The 75 affected life-cycle, incremental-sync, and change-processor tests, zero-cache typecheck, and zero-cache formatting completed.
 - #6341 validation: PASS. The 8 affected SQLite-corruption and logging tests, zero-cache typecheck, and zero-cache formatting completed.
+- #6339 and #6338 validation: PASS. Five SQLite-corruption tests and 30 PostgreSQL 17 logical-replication/change-streamer tests passed, with one skipped; zero-cache typecheck and formatting completed.
 - Release image: PASS. `@rocicorp/zero@1.9.0` packed and the linux/amd64 Docker build completed with the relocated `postgres@3.4.7` patch copied and applied by the image's generated pnpm workspace.
 - Docs formatting: PASS with `pnpm check-format` after formatting the generated search index.
 - Docs types: PASS with `pnpm check-types`.

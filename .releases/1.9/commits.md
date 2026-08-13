@@ -11,12 +11,12 @@ Status: audit and public draft updated through the reconstructed maintenance tar
 - Previous ref: `zero/v1.8.0`
 - Previous SHA: `cdc02598f137ab4e071878f5674fdc716dbbc69d`
 - Target ref: `origin/maint/zero/v1.9`, reconstructed and published maintenance target
-- Target SHA: `dcbc14f0251d22c0ba4fed4c082f537db50b7875`
+- Target SHA: `1a0095a00ad21c0f156186d9eee833df85275b38`
 - Merge base: `2279e783edd94aaa20fdcc8e067860ad0c21d95b`
 - Reconstruction base: `ef892a123a11461e74a59a4b59ad310ba23180b3`
-- Raw non-merge range: 75 commits
+- Raw non-merge range: 76 commits
 - Patch-equivalent commits already shipped in 1.8: 15
-- Unique 1.9 commits: 60
+- Unique 1.9 commits: 61
 
 Commands used:
 
@@ -30,7 +30,7 @@ git log --right-only --no-merges --cherry-mark --format='%m%x09%h%x09%s' zero/v1
 git log --left-only --no-merges --cherry-mark --format='%m%x09%h%x09%s' zero/v1.8.0...origin/maint/zero/v1.9
 git log --format='%H%x09%s%n%b' 2279e783edd94aaa20fdcc8e067860ad0c21d95b..zero/v1.8.0
 git show zero/v1.8.0:packages/zero-protocol/src/protocol-version.ts
-git show dcbc14f0251d22c0ba4fed4c082f537db50b7875:packages/zero-protocol/src/protocol-version.ts
+git show 1a0095a00ad21c0f156186d9eee833df85275b38:packages/zero-protocol/src/protocol-version.ts
 ```
 
 ## Protocol Compatibility
@@ -72,7 +72,7 @@ The previous-release side contains no additional `cherry-pick -x` trailers namin
 
 ## Maintenance Reconstruction
 
-The target was rebuilt from shared mainline commit `ef892a123` by applying selected signed mainline commits with provenance trailers. Later maintenance updates add #6326, #6341, #6339, #6343, the final #6346/#6348 backpressure recovery after reverting #6338, #6347, #6349, and #6340. This removes the bulk-cherry-pick timestamps from the old maintenance line and makes every selected change independently traceable to its source.
+The target was rebuilt from shared mainline commit `ef892a123` by applying selected signed mainline commits with provenance trailers. Later maintenance updates add #6326, #6341, #6339, #6343, the final #6346/#6348 backpressure recovery after reverting #6338, #6347, #6349, #6340, and #6342. This removes the bulk-cherry-pick timestamps from the old maintenance line and makes every selected change independently traceable to its source.
 
 The old maintenance-only commits `e91f964a7` and `c073aa39e` are represented by reconstructed commit `49b13e3e5`, the canonical #6280 patch. #6311, #6318, #6312, #6326, #6341, and #6343 retain targeted differences required by 1.9's older code shape. #6338 and its maintenance-only test adaptation are superseded by #6345 and the final #6346/#6348 implementation. #6339, #6347, #6349, and #6340 apply without production changes beyond their source patches.
 
@@ -157,6 +157,7 @@ All other reconstructed commits are patch-equivalent to their named mainline sou
 | [`ad0c6dd3f`](https://github.com/rocicorp/mono/pull/6348) | fix         | -         | Treats queued downstream changes as evidence that the upstream connection is alive and adds an explicit timeout for a Storer that makes no progress under backpressure.                                                | Include publicly with #6346. This avoids destroying a healthy replication connection solely because downstream backpressure paused reads while still terminating genuinely wedged PostgreSQL writes.                                                                                                                                                                                                                                                                    |
 | [`f0d6fbe82`](https://github.com/rocicorp/mono/pull/6349) | fix         | -         | Upgrades `@rocicorp/zero-sqlite3` from 1.1.2 to 1.1.4 across Zero, zero-cache, ZQLite, and Replicache.                                                                                                                 | Omit from the public note. The commit expresses only a hope that the newer SQLite fixes observed corruption; there is no release-range evidence supporting a concrete user-facing claim. Record the raised package and peer dependency minimum privately.                                                                                                                                                                                                               |
 | [`dcbc14f02`](https://github.com/rocicorp/mono/pull/6340) | fix         | -         | Tracks sent mutation IDs per client rather than by one position in a reorderable client-group commit chain, preventing one tab from skipping another tab's pending mutations.                                          | Include publicly as a multi-tab mutation correctness fix. Tests cover reordered pending chains, contiguous mutation IDs, reconnect resends, and per-connection state reset.                                                                                                                                                                                                                                                                                             |
+| [`1a0095a00`](https://github.com/rocicorp/mono/pull/6342) | fix         | -         | After logging a write-worker SQLite corruption failure, best-effort deletes the replica database and sidecars so process replacement can restore or rebuild a clean replica instead of reopening the corrupt file.     | Include publicly with the existing corruption diagnostics. Deletion failures are warned and do not replace the original fatal error. This targets the write-worker replica path and does not delete upstream application data.                                                                                                                                                                                                                                          |
 
 ## Breaking-Change Review
 
@@ -207,6 +208,7 @@ Human review identified three breaking behavioral or operational changes: the Po
 - Fatal replica-writer failures surfacing through replication status and terminating `zero-cache` with a failure code (#6326).
 - SQLite corruption failures no longer running potentially long full-database checks by default (#6341).
 - Extended SQLite corruption errors activating diagnostics and recovery handling (#6339).
+- Corrupted write-worker replicas being deleted before exit so restart can restore or rebuild them (#6342).
 - Recovery from upstream disconnects and stalled PostgreSQL writes during blocked flow control (#6346 and #6348); #6338 is reverted by #6345.
 - Multi-tab client-group mutations no longer being skipped or sent out of order (#6340).
 
@@ -287,6 +289,7 @@ Every non-skipped commit is represented or intentionally omitted above.
 - Fold #6347 into the existing Litestream restore bullet.
 - Omit a speculative corruption claim for #6349.
 - Include #6340 as a multi-tab mutation ordering fix.
+- Include #6342 with the existing SQLite corruption diagnostics and recovery bullet.
 - Include #6292 in the Performance section using the 10-run Zero 1.8 versus Zero 1.9 comparison, scoped to first mutation handling with uncached server-schema metadata.
 
 Remaining blockers:
@@ -301,10 +304,10 @@ Human review selected and published the reconstructed maintenance target, retain
 
 ## Validation
 
-- Audit coverage: PASS. All 75 raw-range commits have exactly one decision row; all 15 patch-equivalent 1.8 backports are recorded.
+- Audit coverage: PASS. All 76 raw-range commits have exactly one decision row; all 15 patch-equivalent 1.8 backports are recorded.
 - Protocol compatibility: PASS.
 - Placeholder links: PASS. No `TODO`, `TBD`, or `PLACEHOLDER` markers remain in the audit or release note.
-- Maintenance history: PASS. All 36 maintenance commits are signed. Targeted backports retain documented differences required by the 1.9 code shape; #6338 is fully superseded by its revert and final #6346/#6348 replacement.
+- Maintenance history: PASS. All 37 maintenance commits are signed. Targeted backports retain documented differences required by the 1.9 code shape; #6338 is fully superseded by its revert and final #6346/#6348 replacement. #6342 preserves 1.9's existing diagnostic-target registration while adding the source deletion behavior.
 - Mono targeted tests: PASS. zero-client 645, selected zero-cache 150, zero-server 433, z2s 65, zqlite 192, and scalar PostgreSQL integration 5.
 - Mono full zero-cache test: PASS after #6312 with 4,012 passed and 32 skipped across 301 test files.
 - Mono static validation: PASS. All 42 typecheck/build tasks, formatting, dependency verification, and type-aware lint completed; lint reported 0 errors and 1,512 warnings.
@@ -315,6 +318,7 @@ Human review selected and published the reconstructed maintenance target, retain
 - #6339 and #6338 validation: PASS. Five SQLite-corruption tests and 30 PostgreSQL 17 logical-replication/change-streamer tests passed, with one skipped; zero-cache typecheck and formatting completed.
 - #6343 validation: PASS. All 15 Litestream command tests, zero-cache typecheck, and zero-cache formatting completed.
 - #6345 through #6349 and #6340 validation: PASS. The focused zero-client suite passed 124 tests; targeted zero-cache subscription, Litestream, logical-replication, Storer, and change-streamer suites passed 94 tests. Zero-client and zero-cache typechecks and formatting completed.
+- #6342 validation: PASS. All 11 focused write-worker and SQLite-corruption tests, zero-cache typecheck, and zero-cache formatting completed.
 - Release image: PASS. `@rocicorp/zero@1.9.0` packed and the linux/amd64 Docker build completed with the relocated `postgres@3.4.7` patch copied and applied by the image's generated pnpm workspace.
 - Docs formatting: PASS with `pnpm check-format` after formatting the generated search index.
 - Docs types: PASS with `pnpm check-types`.

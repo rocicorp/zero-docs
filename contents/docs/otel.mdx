@@ -106,129 +106,140 @@ This callback is called before sending WebSocket messages that trigger API serve
 ## Metrics Reference
 
 <Note type="note" heading="Histogram support">
-  `view_syncer_lag` and `view_syncer_hydration` require
-  OpenTelemetry exponential histogram support. Prometheus
-  users must enable native histograms. Use the existing
-  `serving_lag` gauges if your backend does not support
-  them.
+  `zero_sync_view_syncer_lag`,
+  `zero_sync_view_syncer_hydration`, and
+  `zero_sync_e2e_serving_lag` require OpenTelemetry
+  exponential histogram support. Prometheus users must
+  enable native histograms. Use the existing
+  `zero_sync_serving_lag` gauges if your backend does not
+  support them.
 </Note>
 
 <div className="metrics-reference" />
 
 ### zero.server
 
-| Metric                    | Type          | Unit | Description                                                                           |
-| ------------------------- | ------------- | ---- | ------------------------------------------------------------------------------------- |
-| `uptime`                  | Gauge         | s    | Cumulative uptime, starting from when requests are served                             |
-| `api.requests`            | Counter       |      | Calls to user mutate and query APIs, including cleanup and auth-validation operations |
-| `api.request_duration`    | Histogram     | s    | End-to-end user API request duration, including retries                               |
-| `api.attempts`            | Counter       |      | HTTP fetch attempts made while calling user API endpoints                             |
-| `api.attempt_duration`    | Histogram     | s    | Duration of each API HTTP attempt, excluding retry delays                             |
-| `api.in_flight`           | UpDownCounter |      | API requests currently in flight                                                      |
-| `startup_duration`        | Histogram     | s    | Time from starting `zero-cache` until it is ready                                     |
-| `worker_startup_duration` | Histogram     | s    | Time from starting a worker until it is ready                                         |
+| Metric                                | Type          | Unit | Description                                                                           |
+| ------------------------------------- | ------------- | ---- | ------------------------------------------------------------------------------------- |
+| `zero_server_uptime`                  | Gauge         | s    | Cumulative uptime, starting from when requests are served                             |
+| `zero_server_api_requests`            | Counter       |      | Calls to user mutate and query APIs, including cleanup and auth-validation operations |
+| `zero_server_api_request_duration`    | Histogram     | s    | End-to-end user API request duration, including retries                               |
+| `zero_server_api_attempts`            | Counter       |      | HTTP fetch attempts made while calling user API endpoints                             |
+| `zero_server_api_attempt_duration`    | Histogram     | s    | Duration of each API HTTP attempt, excluding retry delays                             |
+| `zero_server_api_in_flight`           | UpDownCounter |      | API requests currently in flight                                                      |
+| `zero_server_startup_duration`        | Histogram     | s    | Time from starting `zero-cache` until it is ready                                     |
+| `zero_server_worker_startup_duration` | Histogram     | s    | Time from starting a worker until it is ready                                         |
 
 ### zero.replica
 
-| Metric                                     | Type      | Unit  | Description                                                                                                             |
-| ------------------------------------------ | --------- | ----- | ----------------------------------------------------------------------------------------------------------------------- |
-| `db_size`                                  | Gauge     | bytes | Size of the replica's main db file (excludes WAL)                                                                       |
-| `wal_size`                                 | Gauge     | bytes | Size of the replica's WAL file                                                                                          |
-| `wal2_size`                                | Gauge     | bytes | Size of the replica's WAL2 file (only if using wal2 mode)                                                               |
-| `backup_lag`                               | Gauge     | ms    | Time since last litestream backup. Expected to sawtooth from 0 to `ZERO_LITESTREAM_INCREMENTAL_BACKUP_INTERVAL_MINUTES` |
-| `purge_blocked`                            | Counter   |       | Number of change-log purges blocked because the actual backup state could not be verified or is stale                   |
-| `litestream.restore.runs`                  | Counter   |       | Litestream restore runs                                                                                                 |
-| `litestream.restore.attempts`              | Counter   |       | Litestream restore subprocess attempts                                                                                  |
-| `litestream.restore.db_bytes`              | Counter   | bytes | SQLite database bytes restored by successful Litestream restores                                                        |
-| `litestream.restore.duration`              | Histogram | s     | Wall-clock duration of Litestream restore runs                                                                          |
-| `litestream.restore.wait_duration`         | Histogram | s     | Time spent waiting for replication-manager snapshot status before restoring                                             |
-| `litestream.restore.process_duration`      | Histogram | s     | Wall-clock duration of Litestream restore subprocesses                                                                  |
-| `litestream.restore.validation_duration`   | Histogram | s     | Time spent validating restored replica databases                                                                        |
-| `litestream.backup.process_runs`           | Counter   |       | Litestream backup process exits                                                                                         |
-| `litestream.backup.process_duration`       | Histogram | s     | Runtime of Litestream backup subprocesses before exit                                                                   |
-| `litestream.backup.list_duration`          | Histogram | s     | Time to list the Litestream backup destination                                                                          |
-| `litestream.backup.verification_duration`  | Histogram | s     | Time to verify backup state in the destination                                                                          |
-| `litestream.snapshot.reservation_duration` | Histogram | s     | Time snapshot reservations are held while view-syncers restore and subscribe                                            |
+| Metric                                                  | Type      | Unit  | Description                                                                                                             |
+| ------------------------------------------------------- | --------- | ----- | ----------------------------------------------------------------------------------------------------------------------- |
+| `zero_replica_db_size`                                  | Gauge     | bytes | Size of the replica's main db file (excludes WAL)                                                                       |
+| `zero_replica_wal_size`                                 | Gauge     | bytes | Size of the replica's WAL file                                                                                          |
+| `zero_replica_wal2_size`                                | Gauge     | bytes | Size of the replica's WAL2 file (only if using wal2 mode)                                                               |
+| `zero_replica_backup_lag`                               | Gauge     | ms    | Time since last litestream backup. Expected to sawtooth from 0 to `ZERO_LITESTREAM_INCREMENTAL_BACKUP_INTERVAL_MINUTES` |
+| `zero_replica_purge_blocked`                            | Counter   |       | Number of change-log purges blocked because the actual backup state could not be verified or is stale                   |
+| `zero_replica_litestream_restore_runs`                  | Counter   |       | Litestream restore runs                                                                                                 |
+| `zero_replica_litestream_restore_attempts`              | Counter   |       | Litestream restore subprocess attempts                                                                                  |
+| `zero_replica_litestream_restore_db_bytes`              | Counter   | bytes | SQLite database bytes restored by successful Litestream restores                                                        |
+| `zero_replica_litestream_restore_duration`              | Histogram | s     | Wall-clock duration of Litestream restore runs                                                                          |
+| `zero_replica_litestream_restore_wait_duration`         | Histogram | s     | Time spent waiting for replication-manager snapshot status before restoring                                             |
+| `zero_replica_litestream_restore_process_duration`      | Histogram | s     | Wall-clock duration of Litestream restore subprocesses                                                                  |
+| `zero_replica_litestream_restore_validation_duration`   | Histogram | s     | Time spent validating restored replica databases                                                                        |
+| `zero_replica_litestream_backup_process_runs`           | Counter   |       | Litestream backup process exits                                                                                         |
+| `zero_replica_litestream_backup_process_duration`       | Histogram | s     | Runtime of Litestream backup subprocesses before exit                                                                   |
+| `zero_replica_litestream_backup_list_duration`          | Histogram | s     | Time to list the Litestream backup destination                                                                          |
+| `zero_replica_litestream_backup_verification_duration`  | Histogram | s     | Time to verify backup state in the destination                                                                          |
+| `zero_replica_litestream_snapshot_reservation_duration` | Histogram | s     | Time snapshot reservations are held while view-syncers restore and subscribe                                            |
 
 ### zero.replication
 
-| Metric                               | Type      | Unit  | Description                                                                                                         |
-| ------------------------------------ | --------- | ----- | ------------------------------------------------------------------------------------------------------------------- |
-| `upstream_lag`                       | Gauge     | ms    | Latency from sending a replication report to receiving it in the stream                                             |
-| `replica_lag`                        | Gauge     | ms    | Latency from receiving a replication report to it reaching the replica                                              |
-| `total_lag`                          | Gauge     | ms    | End-to-end replication latency. Grows as an estimate if the next report hasn't arrived                              |
-| `last_total_lag`                     | Gauge     | ms    | End-to-end latency of the most recently received report. Unlike `total_lag`, does not grow if reports stop arriving |
-| `events`                             | Counter   |       | Number of replication events processed                                                                              |
-| `transactions`                       | Counter   |       | Count of replicated transactions                                                                                    |
-| `changes`                            | Counter   |       | Count of replicated changes, including DML and DDL statements                                                       |
-| `slot_health`                        | Gauge     | 1     | One-hot status for the active logical replication slot: `ok`, `unreserved`, `lost`, `missing`, or `unknown`         |
-| `slot_retained_wal_bytes`            | Gauge     | bytes | WAL bytes retained by the active logical replication slot                                                           |
-| `slot_safe_wal_bytes`                | Gauge     | bytes | Remaining WAL capacity before the active logical replication slot is lost; omitted when Postgres reports no value   |
-| `initial_sync_runs`                  | Counter   |       | Number of initial-sync runs                                                                                         |
-| `initial_sync_duration`              | Histogram | s     | Wall-clock duration of an initial-sync run                                                                          |
-| `initial_sync_copy_duration`         | Histogram | s     | Wall-clock duration of the COPY phase for a successful initial-sync run                                             |
-| `initial_sync_copy_other_duration`   | Histogram | s     | Initial-sync duration excluding SQLite flush and index time for a successful run                                    |
-| `initial_sync_flush_duration`        | Histogram | s     | Total SQLite flush time for a successful initial-sync run                                                           |
-| `initial_sync_index_duration`        | Histogram | s     | SQLite index creation time for a successful initial-sync run                                                        |
-| `initial_sync_rows`                  | Counter   |       | Rows copied during successful initial-sync runs                                                                     |
-| `initial_sync_copy_stream`           | Counter   | bytes | PostgreSQL COPY stream bytes processed during initial sync, including in-progress and failed runs                   |
-| `initial_sync_completed_copy_stream` | Counter   | bytes | PostgreSQL COPY stream bytes processed during successful initial-sync runs                                          |
-| `initial_sync_copy_chunks`           | Counter   |       | PostgreSQL COPY stream chunks processed during initial sync                                                         |
-| `shadow-sync-runs`                   | Counter   |       | Number of [shadow initial-sync](/docs/zero-cache-config#shadow-sync-enabled) runs, labeled by `result`              |
-| `shadow-sync-duration`               | Histogram | s     | Wall-clock duration of a shadow initial-sync run, labeled by `result`                                               |
-| `flow_control.active_subscribers`    | Gauge     |       | Active change-stream subscribers receiving live changes                                                             |
-| `flow_control.queued_subscribers`    | Gauge     |       | Change-stream subscribers waiting for the current transaction to finish before activation                           |
-| `flow_control.pending_messages`      | Gauge     |       | Downstream change-stream messages not yet acknowledged by subscribers                                               |
-| `flow_control.backlog_messages`      | Gauge     |       | Live change-stream messages buffered while subscribers catch up                                                     |
-| `flow_control.backlog_bytes`         | Gauge     | bytes | Live change-stream bytes buffered while subscribers catch up                                                        |
-| `flow_control.max_backlog_bytes`     | Gauge     | bytes | Maximum live change-stream bytes buffered by a single subscriber                                                    |
-| `flow_control.waits`                 | Counter   |       | Completed flow-control checkpoints                                                                                  |
-| `flow_control.wait_duration`         | Histogram | s     | Time replication waits at flow-control checkpoints                                                                  |
+| Metric                                                | Type      | Unit  | Description                                                                                                                    |
+| ----------------------------------------------------- | --------- | ----- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `zero_replication_upstream_lag`                       | Gauge     | ms    | Latency from sending a replication report to receiving it in the stream                                                        |
+| `zero_replication_replica_lag`                        | Gauge     | ms    | Latency from receiving a replication report to it reaching the replica                                                         |
+| `zero_replication_total_lag`                          | Gauge     | ms    | Measured end-to-end latency of the most recently received replication report; does not grow if reports stop arriving           |
+| `zero_replication_last_total_lag`                     | Gauge     | ms    | Alias of `zero_replication_total_lag`, retained for dashboards that explicitly use the non-extrapolated metric                 |
+| `zero_replication_upstream_clock_skew`                | Gauge     | ms    | Estimated offset of the upstream database clock relative to `zero-cache`; positive values mean upstream is ahead               |
+| `zero_replication_lag_report_retries`                 | Counter   |       | Replication lag reports retried because an expected report did not arrive before the next report interval                      |
+| `zero_replication_events`                             | Counter   |       | Number of replication events processed                                                                                         |
+| `zero_replication_transactions`                       | Counter   |       | Count of replicated transactions                                                                                               |
+| `zero_replication_changes`                            | Counter   |       | Count of replicated changes, including DML and DDL statements                                                                  |
+| `zero_replication_slot_health`                        | Gauge     | 1     | One-hot status for the active logical replication slot: `ok`, `unreserved`, `lost`, `missing`, or `unknown`                    |
+| `zero_replication_slot_retained_wal_bytes`            | Gauge     | bytes | WAL bytes retained by the active logical replication slot                                                                      |
+| `zero_replication_slot_safe_wal_bytes`                | Gauge     | bytes | Remaining WAL capacity before the active logical replication slot is lost; omitted when Postgres reports no value              |
+| `zero_replication_initial_sync_runs`                  | Counter   |       | Number of initial-sync runs                                                                                                    |
+| `zero_replication_initial_sync_duration`              | Histogram | s     | Wall-clock duration of an initial-sync run                                                                                     |
+| `zero_replication_initial_sync_copy_duration`         | Histogram | s     | Wall-clock duration of the COPY phase for a successful initial-sync run                                                        |
+| `zero_replication_initial_sync_copy_other_duration`   | Histogram | s     | Initial-sync duration excluding SQLite flush and index time for a successful run                                               |
+| `zero_replication_initial_sync_flush_duration`        | Histogram | s     | Total SQLite flush time for a successful initial-sync run                                                                      |
+| `zero_replication_initial_sync_index_duration`        | Histogram | s     | SQLite index creation time for a successful initial-sync run                                                                   |
+| `zero_replication_initial_sync_rows`                  | Counter   |       | Rows copied during successful initial-sync runs                                                                                |
+| `zero_replication_initial_sync_copy_stream`           | Counter   | bytes | PostgreSQL COPY stream bytes, including failed runs; reported in approximately 8 MiB batches and flushed when the stream ends  |
+| `zero_replication_initial_sync_completed_copy_stream` | Counter   | bytes | PostgreSQL COPY stream bytes processed during successful initial-sync runs                                                     |
+| `zero_replication_initial_sync_copy_chunks`           | Counter   |       | PostgreSQL COPY stream chunks processed during initial sync; batched with COPY-stream updates and flushed when the stream ends |
+| `zero_replication_shadow_sync_runs`                   | Counter   |       | Number of [shadow initial-sync](/docs/zero-cache-config#shadow-sync-enabled) runs, labeled by `result`                         |
+| `zero_replication_shadow_sync_duration`               | Histogram | s     | Wall-clock duration of a shadow initial-sync run, labeled by `result`                                                          |
+| `zero_replication_flow_control_active_subscribers`    | Gauge     |       | Active change-stream subscribers receiving live changes                                                                        |
+| `zero_replication_flow_control_queued_subscribers`    | Gauge     |       | Change-stream subscribers waiting for the current transaction to finish before activation                                      |
+| `zero_replication_flow_control_pending_messages`      | Gauge     |       | Downstream change-stream messages not yet acknowledged by subscribers                                                          |
+| `zero_replication_flow_control_backlog_messages`      | Gauge     |       | Live change-stream messages buffered while subscribers catch up                                                                |
+| `zero_replication_flow_control_backlog_bytes`         | Gauge     | bytes | Live change-stream bytes buffered while subscribers catch up                                                                   |
+| `zero_replication_flow_control_max_backlog_bytes`     | Gauge     | bytes | Maximum live change-stream bytes buffered by a single subscriber                                                               |
+| `zero_replication_flow_control_waits`                 | Counter   |       | Completed flow-control checkpoints                                                                                             |
+| `zero_replication_flow_control_wait_duration`         | Histogram | s     | Time replication waits at flow-control checkpoints                                                                             |
+
+`zero_replication_total_lag` and `zero_replication_last_total_lag` now report the same latest measured round trip and do not grow when reports stop arriving. Use `zero_replication_lag_report_retries` to detect a stalled or missing report stream.
 
 ### zero.sync
 
-| Metric                              | Type          | Unit | Description                                                                                                    |
-| ----------------------------------- | ------------- | ---- | -------------------------------------------------------------------------------------------------------------- |
-| `max-protocol-version`              | Gauge         |      | Highest sync protocol version seen from connecting clients                                                     |
-| `active-clients`                    | UpDownCounter |      | Number of currently connected sync clients                                                                     |
-| `active-client-groups`              | Gauge         |      | Number of active ViewSyncerService instances in a syncer worker                                                |
-| `queries`                           | Gauge         |      | Active IVM pipelines across all client groups in a syncer worker                                               |
-| `rows`                              | Gauge         |      | CVR-tracked rows across all client groups in a syncer worker                                                   |
-| `serving_lag`                       | Gauge         | ms   | Longest time locally ready replica changes have remained unserved across active ViewSyncer client groups       |
-| `serving_lag_stats`                 | Gauge         | ms   | Distribution of serving lag across active ViewSyncer client groups                                             |
-| `serving_lagging_client_groups`     | Gauge         |      | Active ViewSyncer client groups with locally ready replica changes not yet served to clients                   |
-| `view_syncer_lag`                   | Histogram     | s    | Time from replica changes becoming ready to ViewSyncer output, sampled once per minute per active client group |
-| `view_syncer_hydration`             | Histogram     | s    | Time from a ViewSyncer query sync requiring hydration until output, per client group                           |
-| `lock-wait-time`                    | Histogram     | s    | Time spent waiting to acquire the ViewSyncerService lock per operation                                         |
-| `pipeline-resets`                   | Counter       |      | Count of pipeline resets, labeled by `reason`                                                                  |
-| `hydration`                         | Counter       |      | Number of query hydrations                                                                                     |
-| `hydration-time`                    | Histogram     | s    | Time to hydrate a query                                                                                        |
-| `advance-time`                      | Histogram     | s    | Time to advance all queries for a client group after applying a transaction                                    |
-| `poke.time`                         | Histogram     | s    | Time per poke transaction (excludes canceled/noop pokes)                                                       |
-| `poke.transactions`                 | Counter       |      | Count of poke transactions                                                                                     |
-| `poke.rows`                         | Counter       |      | Count of poked rows                                                                                            |
-| `cvr.load_attempts`                 | Counter       |      | CVR load attempts                                                                                              |
-| `cvr.load_duration`                 | Histogram     | s    | Time to load a CVR                                                                                             |
-| `cvr.flush_attempts`                | Counter       |      | CVR flush attempts                                                                                             |
-| `cvr.flush-time`                    | Histogram     | s    | Time to flush a CVR transaction                                                                                |
-| `cvr.rows-flushed`                  | Counter       |      | Number of changed rows flushed to a CVR                                                                        |
-| `websocket.open_connections`        | UpDownCounter |      | Open client WebSocket connections                                                                              |
-| `websocket.connection_attempts`     | Counter       |      | Client WebSocket connection attempts                                                                           |
-| `websocket.connection_successes`    | Counter       |      | Client WebSocket connections successfully initialized                                                          |
-| `websocket.connection_failures`     | Counter       |      | Client WebSocket connection attempts that failed before initialization                                         |
-| `websocket.errors`                  | Counter       |      | Client WebSocket error events                                                                                  |
-| `ivm.advance-time`                  | Histogram     | s    | Time to advance IVM queries in response to a single change                                                     |
-| `ivm.conflict-rows-deleted`         | Counter       |      | Rows deleted because they conflicted with an added row                                                         |
-| `query.transformations`             | Counter       |      | Number of query transformations performed                                                                      |
-| `query.transformation-time`         | Histogram     | s    | Time to transform custom queries via API server                                                                |
-| `query.transformation-hash-changes` | Counter       |      | Times a query transformation hash changed                                                                      |
-| `query.transformation-no-ops`       | Counter       |      | Times a query transformation was a no-op                                                                       |
-| `query.row-set-signature-drifts`    | Counter       |      | Unchanged query rehydrations whose row-set signature differs from the CVR, forcing a config-version bump       |
+| Metric                                               | Type          | Unit | Description                                                                                               |
+| ---------------------------------------------------- | ------------- | ---- | --------------------------------------------------------------------------------------------------------- |
+| `zero_sync_max_protocol_version`                     | Gauge         |      | Highest sync protocol version seen from connecting clients                                                |
+| `zero_sync_active_clients`                           | UpDownCounter |      | Number of currently connected sync clients                                                                |
+| `zero_sync_active_client_groups`                     | Gauge         |      | Number of active ViewSyncerService instances in a syncer worker                                           |
+| `zero_sync_queries`                                  | Gauge         |      | Active IVM pipelines across all client groups in a syncer worker                                          |
+| `zero_sync_rows`                                     | Gauge         |      | CVR-tracked rows across all client groups in a syncer worker                                              |
+| `zero_sync_serving_lag`                              | Gauge         | ms   | Longest time locally ready replica changes have remained unserved across eligible active client groups    |
+| `zero_sync_serving_lag_stats`                        | Gauge         | ms   | Distribution of serving lag across eligible active client groups                                          |
+| `zero_sync_serving_lagging_client_groups`            | Gauge         |      | Eligible active client groups with locally ready replica changes not yet served to clients                |
+| `zero_sync_view_syncer_lag`                          | Histogram     | s    | Time from replica changes becoming ready to ViewSyncer output, sampled once per minute per eligible group |
+| `zero_sync_view_syncer_hydration`                    | Histogram     | s    | Time from a ViewSyncer query sync requiring hydration until output, per client group                      |
+| `zero_sync_e2e_serving_lag`                          | Histogram     | s    | Completion latency from the upstream transaction commit through ViewSyncer output                         |
+| `zero_sync_e2e_serving_lag_clamps`                   | Counter       |      | Negative end-to-end lag observations clamped to zero because the upstream clock was ahead                 |
+| `zero_sync_lock_wait_time`                           | Histogram     | s    | Time spent waiting to acquire the ViewSyncerService lock per operation                                    |
+| `zero_sync_pipeline_resets`                          | Counter       |      | Count of pipeline resets, labeled by `reason`                                                             |
+| `zero_sync_hydration`                                | Counter       |      | Number of query hydrations                                                                                |
+| `zero_sync_hydration_time`                           | Histogram     | s    | Time to hydrate a query                                                                                   |
+| `zero_sync_advance_time`                             | Histogram     | s    | Time to advance all queries for a client group after applying a transaction                               |
+| `zero_sync_poke_time`                                | Histogram     | s    | Time per poke transaction (excludes canceled/noop pokes)                                                  |
+| `zero_sync_poke_transactions`                        | Counter       |      | Count of poke transactions                                                                                |
+| `zero_sync_poke_rows`                                | Counter       |      | Count of poked rows                                                                                       |
+| `zero_sync_cvr_load_attempts`                        | Counter       |      | CVR load attempts                                                                                         |
+| `zero_sync_cvr_load_duration`                        | Histogram     | s    | Time to load a CVR                                                                                        |
+| `zero_sync_cvr_flush_attempts`                       | Counter       |      | CVR flush attempts                                                                                        |
+| `zero_sync_cvr_flush_time`                           | Histogram     | s    | Time to flush a CVR transaction                                                                           |
+| `zero_sync_cvr_rows_flushed`                         | Counter       |      | Number of changed rows flushed to a CVR                                                                   |
+| `zero_sync_websocket_open_connections`               | UpDownCounter |      | Open client WebSocket connections                                                                         |
+| `zero_sync_websocket_connection_attempts`            | Counter       |      | Client WebSocket connection attempts                                                                      |
+| `zero_sync_websocket_connection_successes`           | Counter       |      | Client WebSocket connections successfully initialized                                                     |
+| `zero_sync_websocket_connection_failures`            | Counter       |      | Client WebSocket connection attempts that failed before initialization                                    |
+| `zero_sync_websocket_errors`                         | Counter       |      | Client WebSocket error events                                                                             |
+| `zero_sync_ivm_advance_time`                         | Histogram     | s    | Time to advance IVM queries in response to a single change                                                |
+| `zero_sync_ivm_conflict_rows_deleted`                | Counter       |      | Rows deleted because they conflicted with an added row                                                    |
+| `zero_sync_query_transformations`                    | Counter       |      | Number of query transformations performed                                                                 |
+| `zero_sync_query_transformation_time`                | Histogram     | s    | Time to transform custom queries via API server                                                           |
+| `zero_sync_query_transformation_hash_changes`        | Counter       |      | Times a query transformation hash changed                                                                 |
+| `zero_sync_query_transformation_no_ops`              | Counter       |      | Times a query transformation was a no-op                                                                  |
+| `zero_sync_query_row_set_signature_drifts`           | Counter       |      | Unchanged query rehydrations whose row-set signature differs from the CVR, forcing a config-version bump  |
+| `zero_sync_query_same_hash_rehydrations_forced_bump` | Counter       |      | Same-hash query rehydrations that force a config-version bump so changed rows are delivered               |
+
+Serving-lag metrics include only client groups with at least one connected client and a validated background connection context. Retained groups without an eligible connection do not contribute lag.
 
 ### zero.mutation
 
-| Metric   | Type    | Unit | Description                          |
-| -------- | ------- | ---- | ------------------------------------ |
-| `crud`   | Counter |      | Number of CRUD mutations processed   |
-| `custom` | Counter |      | Number of custom mutations processed |
-| `pushes` | Counter |      | Number of pushes processed           |
+| Metric                 | Type    | Unit | Description                          |
+| ---------------------- | ------- | ---- | ------------------------------------ |
+| `zero_mutation_crud`   | Counter |      | Number of CRUD mutations processed   |
+| `zero_mutation_custom` | Counter |      | Number of custom mutations processed |
+| `zero_mutation_pushes` | Counter |      | Number of pushes processed           |

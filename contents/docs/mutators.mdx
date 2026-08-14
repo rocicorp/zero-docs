@@ -111,6 +111,8 @@ tx.mutate.user.insert({
 })
 ```
 
+If the Zero primary key already exists, `insert` will succeed without changing the row - use `upsert` to update an existing row.
+
 Optional fields can be set to `null` to explicitly set the new field to `null`. They can also be set to `undefined` to take the default value (which is often `null` but can also be some generated value server-side):
 
 ```tsx
@@ -856,7 +858,7 @@ app.post('/api/zero/mutate', async c => {
 
 </CodeGroup>
 
-If Zero receives any response from the mutate endpoint other than HTTP 200, 401, or 403, it will disconnect and enter the [error state](/docs/connection#error).
+Responses other than 200, 401, or 403 enter the [error state](/docs/connection#error). `zero-cache` will retry on `5xx` up to four times before returning an error.
 
 If Zero receives HTTP 401 or 403, the client will enter the needs auth state and require a manual reconnect. Use `zero.connection.connect()` for cookie auth or `zero.connection.connect({auth: newToken})` for token auth, then Zero will retry all queued mutations.
 

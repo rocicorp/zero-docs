@@ -183,9 +183,9 @@ Reads are allowed while `disconnected`, but writes are rejected and return an of
 
 ### Error
 
-If `zero-cache` itself crashes, or if the [mutate](/docs/mutators) or [query](/docs/queries) endpoints return a network or HTTP error, Zero transitions to the `error` state.
+If `zero-cache` crashes, or [mutate](/docs/mutators) or [query](/docs/queries) endpoints fail, Zero enters the `error` state. If the response code is `5xx`, `zero-cache` will retry up to four times.
 
-This type of error is unlikely to resolve just by retrying, so Zero doesn't try. The app can retry the connection manually by calling `zero.connection.connect()`.
+Zero does not retry from the `error` state. Call `zero.connection.connect()` to retry manually.
 
 Reads are allowed while in the `error` state, but writes are rejected.
 

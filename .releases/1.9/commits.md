@@ -11,12 +11,12 @@ Status: audit and public draft updated through the reconstructed maintenance tar
 - Previous ref: `zero/v1.8.0`
 - Previous SHA: `cdc02598f137ab4e071878f5674fdc716dbbc69d`
 - Target ref: `origin/maint/zero/v1.9`, reconstructed and published maintenance target
-- Target SHA: `2288320e77536ab2922d01917e0e59bc1a6f8601`
+- Target SHA: `7fb31b033738535c31d83ef476e57771b792474c`
 - Merge base: `2279e783edd94aaa20fdcc8e067860ad0c21d95b`
 - Reconstruction base: `ef892a123a11461e74a59a4b59ad310ba23180b3`
-- Raw non-merge range: 77 commits
+- Raw non-merge range: 78 commits
 - Patch-equivalent commits already shipped in 1.8: 15
-- Unique 1.9 commits: 62
+- Unique 1.9 commits: 63
 
 Commands used:
 
@@ -30,7 +30,7 @@ git log --right-only --no-merges --cherry-mark --format='%m%x09%h%x09%s' zero/v1
 git log --left-only --no-merges --cherry-mark --format='%m%x09%h%x09%s' zero/v1.8.0...origin/maint/zero/v1.9
 git log --format='%H%x09%s%n%b' 2279e783edd94aaa20fdcc8e067860ad0c21d95b..zero/v1.8.0
 git show zero/v1.8.0:packages/zero-protocol/src/protocol-version.ts
-git show 2288320e77536ab2922d01917e0e59bc1a6f8601:packages/zero-protocol/src/protocol-version.ts
+git show 7fb31b033738535c31d83ef476e57771b792474c:packages/zero-protocol/src/protocol-version.ts
 ```
 
 ## Protocol Compatibility
@@ -72,9 +72,9 @@ The previous-release side contains no additional `cherry-pick -x` trailers namin
 
 ## Maintenance Reconstruction
 
-The target was rebuilt from shared mainline commit `ef892a123` by applying selected signed mainline commits with provenance trailers. Later maintenance updates add #6326, #6341, #6339, #6343, the final #6346/#6348 backpressure recovery after reverting #6338, #6347, #6349, #6340, #6342, and #6355. This removes the bulk-cherry-pick timestamps from the old maintenance line and makes every selected change independently traceable to its source.
+The target was rebuilt from shared mainline commit `ef892a123` by applying selected signed mainline commits with provenance trailers. Later maintenance updates add #6326, #6341, #6339, #6343, the final #6346/#6348 backpressure recovery after reverting #6338, #6347, #6349, #6340, #6342, #6355, and #6351. This removes the bulk-cherry-pick timestamps from the old maintenance line and makes every selected change independently traceable to its source.
 
-The old maintenance-only commits `e91f964a7` and `c073aa39e` are represented by reconstructed commit `49b13e3e5`, the canonical #6280 patch. #6311, #6318, #6312, #6326, #6341, #6343, and #6355 retain targeted differences required by 1.9's older code shape. #6338 and its maintenance-only test adaptation are superseded by #6345 and the final #6346/#6348 implementation. #6339, #6347, #6349, and #6340 apply without production changes beyond their source patches.
+The old maintenance-only commits `e91f964a7` and `c073aa39e` are represented by reconstructed commit `49b13e3e5`, the canonical #6280 patch. #6311, #6318, #6312, #6326, #6341, #6343, #6355, and #6351 retain targeted differences required by 1.9's older code shape. #6338 and its maintenance-only test adaptation are superseded by #6345 and the final #6346/#6348 implementation. #6339, #6347, #6349, and #6340 apply without production changes beyond their source patches.
 
 All other reconstructed commits are patch-equivalent to their named mainline source. Main-only rmv2 work, #6307's breaking scalar type enforcement, #6309's nullability-specific optimization, #6314's experimental Litestream update, and #6317's rmv2 test timeout remain excluded.
 
@@ -159,6 +159,7 @@ All other reconstructed commits are patch-equivalent to their named mainline sou
 | [`dcbc14f02`](https://github.com/rocicorp/mono/pull/6340) | fix         | -         | Tracks sent mutation IDs per client rather than by one position in a reorderable client-group commit chain, preventing one tab from skipping another tab's pending mutations.                                          | Include publicly as a multi-tab mutation correctness fix. Tests cover reordered pending chains, contiguous mutation IDs, reconnect resends, and per-connection state reset.                                                                                                                                                                                                                                                                                             |
 | [`1a0095a00`](https://github.com/rocicorp/mono/pull/6342) | fix         | -         | After logging a write-worker SQLite corruption failure, best-effort deletes the replica database and sidecars so process replacement can restore or rebuild a clean replica instead of reopening the corrupt file.     | Include publicly with the existing corruption diagnostics. Deletion failures are warned and do not replace the original fatal error. This targets the write-worker replica path and does not delete upstream application data.                                                                                                                                                                                                                                          |
 | [`2288320e7`](https://github.com/rocicorp/mono/pull/6355) | fix         | -         | Removes Litestream temporary SQLite families and indexed staged WAL files before and after restore attempts so repeated failures do not accumulate files on the replica volume.                                        | Include publicly in the existing Litestream restore bullet. Final cleanup failures are warned without replacing the restore result, directory diagnostics are bounded to 100 entries, and the real replica family is preserved. The 1.9 adaptation uses its older restore configuration shape and omits an RMv2-only test-file update absent from this branch; all production behavior and applicable regression coverage are retained.                                 |
+| [`7fb31b033`](https://github.com/rocicorp/mono/pull/6351) | feature     | -         | Adds an optional replication-stream inbound timeout override so operators can widen Zero's client-side liveness threshold without changing PostgreSQL's `wal_sender_timeout`.                                          | Include publicly as a non-breaking operator control and credit [@gerardatkonvo](https://github.com/gerardatkonvo). Defaults and manual keepalive timing are unchanged; invalid overrides fall back to twice `wal_sender_timeout`, and `wal_sender_timeout=0` still disables liveness detection. The 1.9 adaptation preserves its older change-source initialization shape while retaining the canonical runtime behavior and tests.                                     |
 
 ## Breaking-Change Review
 
@@ -167,7 +168,7 @@ Human review identified three breaking behavioral or operational changes: the Po
 | Area                    | Finding                                                                                                                                                                                                                                                                                                                                                                                                                           | Required resolution                                                                                                                                                                                                                                                                |
 | ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Public API and exports  | No supported export is removed. The additive `head` release channel is intentionally omitted. `insert` signatures are unchanged, but authoritative duplicate-key behavior now matches the optimistic and protocol contract. #6312 adds an optional `commitTimeMs` field to the exported change protocol.                                                                                                                          | Document that `insert` is insert-if-absent by the Zero primary key and that success does not prove a row was created. Applications that require duplicate rejection need an explicit authoritative policy. The optional change-stream field is wire-compatible in both directions. |
-| Configuration           | #6182 adds internal `ZERO_ENABLE_QUERY_COVERING`; #6220 recognizes `ZERO_PG_SOCKET_INACTIVITY_TIMEOUT`; #6260 defaults `ZERO_LITESTREAM_RESTORE_USING_V5` to true when a v5 executable is available.                                                                                                                                                                                                                              | Keep query covering internal. Document the PostgreSQL timeout and disable value. Document the v5 executable, restore default, legacy writer, and `ZERO_LITESTREAM_RESTORE_USING_V5=false` opt-out.                                                                                 |
+| Configuration           | #6182 adds internal `ZERO_ENABLE_QUERY_COVERING`; #6220 recognizes `ZERO_PG_SOCKET_INACTIVITY_TIMEOUT`; #6260 defaults `ZERO_LITESTREAM_RESTORE_USING_V5` to true when a v5 executable is available; #6351 adds optional `ZERO_UPSTREAM_PG_STREAM_INBOUND_TIMEOUT_MS`.                                                                                                                                                            | Keep query covering internal. Document the PostgreSQL timeouts and disable behavior. Document the v5 executable, restore default, legacy writer, and `ZERO_LITESTREAM_RESTORE_USING_V5=false` opt-out.                                                                             |
 | Default behavior        | PostgreSQL connections reset after roughly two to four minutes without wire activity. Client connection setup now obeys its existing ten-second timeout. Statement caches retain at most 1,000 idle statements. Duplicate-primary-key inserts no-op. CRUD updates omit primary-key assignments. Official-image restores use Litestream v5. Serving writes use spillable immediate transactions. API-server `5xx` responses retry. | Classify the watchdog, duplicate-insert behavior, and v5 restore default as breaking. The connection-timeout enforcement, CRUD lock correction, spillable writer, and `5xx` retries restore intended reliability behavior and remain non-breaking.                                 |
 | Persisted data          | No source-database, replica-format, or protocol migration is introduced. Correctly preserving `__proto__` can trigger a normal client resync. #6225 prevents future compound-index reordering but does not repair replicas already affected. #6311 changes the serving transaction mode without changing stored data or snapshot isolation.                                                                                       | Tell affected #6225 deployments to resync the replica or recreate the index. No upstream application data migration is required.                                                                                                                                                   |
 | Protocol                | Sync `51`, minimum sync `30`, change-stream `6`, and DDL emitter `1` remain compatible. The DDL reader accepts future context-only v2 starts but this target still emits v1.                                                                                                                                                                                                                                                      | Resolved: compatible. Retain phase ordering and rollback constraints for the future v2 emitter in the private audit.                                                                                                                                                               |
@@ -181,6 +182,7 @@ Human review identified three breaking behavioral or operational changes: the Po
 
 - Default Litestream v5 restore with legacy backups still written in this release (#6260), including rollback and Age-encryption guidance, plus safe legacy snapshot retention (#6267).
 - End-to-end serving lag, clock-skew estimates, and clamp diagnostics (#6312).
+- Independent replication-stream inbound timeout configuration (#6351).
 
 ### Fixes
 
@@ -306,10 +308,10 @@ Human review selected and published the reconstructed maintenance target, retain
 
 ## Validation
 
-- Audit coverage: PASS. All 77 raw-range commits have exactly one decision row; all 15 patch-equivalent 1.8 backports are recorded.
+- Audit coverage: PASS. All 78 raw-range commits have exactly one decision row; all 15 patch-equivalent 1.8 backports are recorded.
 - Protocol compatibility: PASS.
 - Placeholder links: PASS. No `TODO`, `TBD`, or `PLACEHOLDER` markers remain in the audit or release note.
-- Maintenance history: PASS. All 38 maintenance commits are signed. Targeted backports retain documented differences required by the 1.9 code shape; #6338 is fully superseded by its revert and final #6346/#6348 replacement. #6342 preserves 1.9's existing diagnostic-target registration while adding the source deletion behavior. #6355 retains the canonical cleanup behavior through 1.9's older restore configuration shape.
+- Maintenance history: PASS. All 39 maintenance commits are signed. Targeted backports retain documented differences required by the 1.9 code shape; #6338 is fully superseded by its revert and final #6346/#6348 replacement. #6342 preserves 1.9's existing diagnostic-target registration while adding the source deletion behavior. #6355 retains the canonical cleanup behavior through 1.9's older restore configuration shape. #6351 preserves the older change-source initialization shape while adding the canonical timeout override.
 - Mono targeted tests: PASS. zero-client 645, selected zero-cache 150, zero-server 433, z2s 65, zqlite 192, and scalar PostgreSQL integration 5.
 - Mono full zero-cache test: PASS after #6312 with 4,012 passed and 32 skipped across 301 test files.
 - Mono static validation: PASS. All 42 typecheck/build tasks, formatting, dependency verification, and type-aware lint completed; lint reported 0 errors and 1,512 warnings.
@@ -322,6 +324,7 @@ Human review selected and published the reconstructed maintenance target, retain
 - #6345 through #6349 and #6340 validation: PASS. The focused zero-client suite passed 124 tests; targeted zero-cache subscription, Litestream, logical-replication, Storer, and change-streamer suites passed 94 tests. Zero-client and zero-cache typechecks and formatting completed.
 - #6342 validation: PASS. All 11 focused write-worker and SQLite-corruption tests, zero-cache typecheck, and zero-cache formatting completed.
 - #6355 validation: PASS. All 20 Litestream command tests, zero-cache typecheck, focused formatting, and whitespace checks completed.
+- #6351 validation: PASS. All 21 focused logical-replication stream and configuration tests, zero-cache typecheck, and focused formatting completed.
 - Release image: PASS. `@rocicorp/zero@1.9.0` packed and the linux/amd64 Docker build completed with the relocated `postgres@3.4.7` patch copied and applied by the image's generated pnpm workspace.
 - Docs formatting: PASS with `pnpm check-format` after formatting the generated search index.
 - Docs types: PASS with `pnpm check-types`.

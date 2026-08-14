@@ -1,6 +1,6 @@
 ---
 title: Zero 1.9
-description: Query Correctness and Reliability
+description: Stability and Query Correctness
 ---
 
 ## Installation
@@ -16,6 +16,7 @@ Zero 1.9 improves query/mutation correctness and contains numerous reliability i
 ## Features
 
 - [`zero_sync_e2e_serving_lag`](/docs/otel#zerosync) measures completed replicated work from the upstream transaction commit through view-syncer poke. [`zero_replication_upstream_clock_skew`](/docs/otel#zeroreplication) tries to identify measurements biased by clock differences. ([#6312](https://github.com/rocicorp/mono/pull/6312))
+- Zero's replication-stream inbound timeout can now be [configured separately from PostgreSQL's `wal_sender_timeout`](/docs/connecting-to-postgres#wal-sender-timeout), avoiding unnecessary reconnects during long gaps in WAL output. ([#6351](https://github.com/rocicorp/mono/pull/6351), thanks [@gerardatkonvo](https://github.com/gerardatkonvo)!)
 
 ## Performance
 

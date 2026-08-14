@@ -759,6 +759,17 @@ flag: `--upstream-pg-replication-slot-failover`<br/>
 env: `ZERO_UPSTREAM_PG_REPLICATION_SLOT_FAILOVER`<br/>
 default: `false`
 
+### Upstream PG Stream Inbound Timeout
+
+The time, in milliseconds, without an inbound message from the upstream WAL sender after which `zero-cache` tears down the replication stream to force a reconnect. By default, the threshold is twice the server's `wal_sender_timeout`.
+
+Increase this value when a healthy WAL sender can remain silent while decoding unpublished WAL or assembling a large transaction. This changes only Zero's inbound timeout; keepalive timing remains derived from `wal_sender_timeout`. The option has no effect when `wal_sender_timeout` is `0`, which disables inbound liveness detection.
+
+See [WAL Sender Timeout](/docs/connecting-to-postgres#wal-sender-timeout).
+
+flag: `--upstream-pg-stream-inbound-timeout-ms`<br/>
+env: `ZERO_UPSTREAM_PG_STREAM_INBOUND_TIMEOUT_MS`<br/>
+
 ### Websocket Compression
 
 Enable WebSocket per-message deflate compression. Compression can reduce bandwidth usage for sync traffic but increases CPU usage on both client and server. Disabled by default. See: https://github.com/websockets/ws#websocket-compression

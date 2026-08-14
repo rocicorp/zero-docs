@@ -65,9 +65,11 @@ Wire activity resets the watchdog, so streaming operations such as `COPY` remain
 
 ### WAL Sender Timeout
 
-`zero-cache` uses Postgres's `wal_sender_timeout` setting to monitor its replication connection. When the timeout is greater than `0`, Zero sends keepalives and reconnects if the replication stream stops responding.
+`zero-cache` uses Postgres's `wal_sender_timeout` setting to monitor its replication connection. When the timeout is greater than `0`, Zero sends keepalives and reconnects if the replication stream stops responding. The inbound timeout defaults to twice `wal_sender_timeout`.
 
-Setting `wal_sender_timeout` to `0` disables the timeout in Postgres and the related keepalive and reconnect checks in Zero. Other connection failure detection remains active.
+A healthy WAL sender can sometimes remain silent longer than this while decoding WAL from unpublished tables or assembling a large transaction. Set [`ZERO_UPSTREAM_PG_STREAM_INBOUND_TIMEOUT_MS`](/docs/zero-cache-config#upstream-pg-stream-inbound-timeout) to widen Zero's inbound threshold without changing the server's timeout. Manual keepalive timing remains derived from `wal_sender_timeout`.
+
+Setting `wal_sender_timeout` to `0` disables the timeout in Postgres and the related keepalive and reconnect checks in Zero, even when an inbound timeout override is configured. Other connection failure detection remains active.
 
 ### Bounding WAL Size
 

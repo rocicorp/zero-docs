@@ -46,7 +46,7 @@ Before running mutations, Zero Server fetches and caches PostgreSQL schema metad
 
 ## Fixes
 
-- [Restores now use Litestream 0.5.15 for legacy-format compatibility](/docs/zero-cache-config#litestream-restore-using-v5), [retry transient failures](https://github.com/rocicorp/mono/pull/6347), [clean up temporary databases and staged WAL files after failed or interrupted attempts](https://github.com/rocicorp/mono/pull/6355), and [retain the previous snapshot generation during active restores](/docs/zero-cache-config#litestream-snapshot-backup-interval-hours). ([#6260](https://github.com/rocicorp/mono/pull/6260), [#6267](https://github.com/rocicorp/mono/pull/6267))
+- [Restores now use Litestream 0.5.15 for legacy-format compatibility](https://github.com/rocicorp/mono/pull/6260), [retry transient failures](https://github.com/rocicorp/mono/pull/6347), [clean up temporary databases and staged WAL files after failed or interrupted attempts](https://github.com/rocicorp/mono/pull/6355), and [retain the previous snapshot generation during active restores](https://github.com/rocicorp/mono/pull/6267).
 - [`insert` now succeeds without changing the row when its Zero primary key already exists; before 1.9, the server returned an error.](https://github.com/rocicorp/mono/pull/6251)
 - [Ordered queries now return correct results when cursor fields contain `NULL`.](https://github.com/rocicorp/mono/pull/6121) (thanks [@YevheniiKotyrlo](https://github.com/YevheniiKotyrlo)!)
 - [Rebuilt queries now deliver changed rows instead of occasionally leaving clients with stale results.](https://github.com/rocicorp/mono/pull/6196)

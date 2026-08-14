@@ -11,11 +11,11 @@ npm install @rocicorp/zero@1.9
 
 ## Overview
 
-Zero 1.9 improves query/mutation correctness and reliability.
+Zero 1.9 improves query/mutation correctness and contains numerous reliability improvements.
 
 ## Features
 
-- [**End-to-end serving lag:**](/docs/otel#zerosync) `e2e_serving_lag` measures completed replicated work from the upstream transaction commit through view-syncer poke. [Upstream clock-skew estimate](/docs/otel#zeroreplication) tries to identify measurements biased by clock differences. ([#6312](https://github.com/rocicorp/mono/pull/6312))
+- [`zero_sync_e2e_serving_lag`](/docs/otel#zerosync) measures completed replicated work from the upstream transaction commit through view-syncer poke. [`zero_replication_upstream_clock_skew`](/docs/otel#zeroreplication) tries to identify measurements biased by clock differences. ([#6312](https://github.com/rocicorp/mono/pull/6312))
 
 ## Performance
 

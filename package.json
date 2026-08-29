@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "npm run build:search && npm run build:llms && next build",
     "build:search": "tsx lib/generateSearchIndex.ts",
-    "build:llms": "npx --yes tsdown lib/generate-llms.ts --outDir dist --skipLibCheck && node dist/generate-llms.mjs",
+    "build:llms": "tsx lib/generate-llms.ts",
     "start": "npm run build:search && next start",
     "format": "prettier --write **/*.{ts,tsx,js,json,md,mdx}",
     "check-format": "prettier --check **/*.{ts,tsx,js,json,md,mdx}",

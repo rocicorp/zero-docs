@@ -57,11 +57,11 @@ After your server restarts, show the `wal_level` again to ensure it has changed:
 psql -c 'SHOW wal_level'
 ```
 
-### Socket Inactivity Timeout
+### Change Database Stall Detection
 
-`zero-cache` monitors wire activity on its Postgres connections so it can recover when a proxy or network failure leaves a half-open socket. The watchdog samples each connection every 120,000 milliseconds and resets it after one to two intervals without any bytes read or written. In-flight queries on a reset connection are rejected and can recover through their normal retry or restart paths.
+`zero-cache` monitors operations against `ZERO_CHANGE_DB` so it can recover when a proxy or network failure leaves a half-open connection and a query that never completes. It treats completed operations and batches as progress. If an operation makes no progress within the timeout, `zero-cache` stops so its process supervisor can restart it.
 
-Wire activity resets the watchdog, so streaming operations such as `COPY` remain active. A statement that legitimately computes without sending any data for several minutes can be interrupted.
+This differs from Postgres's `statement_timeout`: it also handles pathological cases where Postgres considers a connection idle but never returns a response. The default no-progress timeout is 30 seconds. Periodically monitored operations can be detected between one and two timeout intervals after their last progress.
 
 ### WAL Sender Timeout
 
@@ -283,6 +283,6 @@ ALTER PUBLICATION zero_pub ADD TABLE ...;
 COMMENT ON PUBLICATION zero_pub IS 'anything';
 ```
 
-It is still supported, but was replaced by `update_schemas()` because the latter is catches changes to any DDL, not just publication changes.
+`COMMENT ON PUBLICATION` remains supported, but `update_schemas()` is preferred because it detects any DDL change, not just publication changes. Either hook causes Zero to [backfill existing rows](/docs/schema#backfill) for tables or columns newly added to the publication.
 
 </Note>

@@ -223,6 +223,25 @@ const user = table('user')
   .primaryKey('orgID', 'userID')
 ```
 
+#### Unique Keys
+
+Use `unique` to declare a unique index or constraint that already exists in the database. Pass every column for a compound unique key, and call `unique` once for each index:
+
+```ts
+const user = table('user')
+  .columns({
+    id: string(),
+    email: string(),
+    orgID: string(),
+    handle: string()
+  })
+  .primaryKey('id')
+  .unique('email')
+  .unique('orgID', 'handle')
+```
+
+This declaration lets Zero's type system recognize queries that constrain at most one row, including [scalar subqueries](/docs/zql#scalar-subqueries). It does not create or enforce a database constraint, so it must match a real unique index or constraint upstream.
+
 ### Relationships
 
 Use the `relationships` function to define relationships between tables. Use the `one` and `many` helpers to define singular and plural relationships, respectively:

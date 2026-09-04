@@ -132,25 +132,25 @@ This callback is called before sending WebSocket messages that trigger API serve
 
 ### zero.replica
 
-| Metric                                                  | Type      | Unit  | Description                                                                                                             |
-| ------------------------------------------------------- | --------- | ----- | ----------------------------------------------------------------------------------------------------------------------- |
-| `zero_replica_db_size`                                  | Gauge     | bytes | Size of the replica's main db file (excludes WAL)                                                                       |
-| `zero_replica_wal_size`                                 | Gauge     | bytes | Size of the replica's WAL file                                                                                          |
-| `zero_replica_wal2_size`                                | Gauge     | bytes | Size of the replica's WAL2 file (only if using wal2 mode)                                                               |
-| `zero_replica_backup_lag`                               | Gauge     | ms    | Time since last litestream backup. Expected to sawtooth from 0 to `ZERO_LITESTREAM_INCREMENTAL_BACKUP_INTERVAL_MINUTES` |
-| `zero_replica_purge_blocked`                            | Counter   |       | Number of change-log purges blocked because the actual backup state could not be verified or is stale                   |
-| `zero_replica_litestream_restore_runs`                  | Counter   |       | Litestream restore runs                                                                                                 |
-| `zero_replica_litestream_restore_attempts`              | Counter   |       | Litestream restore subprocess attempts                                                                                  |
-| `zero_replica_litestream_restore_db_bytes`              | Counter   | bytes | SQLite database bytes restored by successful Litestream restores                                                        |
-| `zero_replica_litestream_restore_duration`              | Histogram | s     | Wall-clock duration of Litestream restore runs                                                                          |
-| `zero_replica_litestream_restore_wait_duration`         | Histogram | s     | Time spent waiting for replication-manager snapshot status before restoring                                             |
-| `zero_replica_litestream_restore_process_duration`      | Histogram | s     | Wall-clock duration of Litestream restore subprocesses                                                                  |
-| `zero_replica_litestream_restore_validation_duration`   | Histogram | s     | Time spent validating restored replica databases                                                                        |
-| `zero_replica_litestream_backup_process_runs`           | Counter   |       | Litestream backup process exits                                                                                         |
-| `zero_replica_litestream_backup_process_duration`       | Histogram | s     | Runtime of Litestream backup subprocesses before exit                                                                   |
-| `zero_replica_litestream_backup_list_duration`          | Histogram | s     | Time to list the Litestream backup destination                                                                          |
-| `zero_replica_litestream_backup_verification_duration`  | Histogram | s     | Time to verify backup state in the destination                                                                          |
-| `zero_replica_litestream_snapshot_reservation_duration` | Histogram | s     | Time snapshot reservations are held while view-syncers restore and subscribe                                            |
+| Metric                                                  | Type      | Unit  | Description                                                                                                  |
+| ------------------------------------------------------- | --------- | ----- | ------------------------------------------------------------------------------------------------------------ |
+| `zero_replica_db_size`                                  | Gauge     | bytes | Size of the replica's main db file (excludes WAL)                                                            |
+| `zero_replica_wal_size`                                 | Gauge     | bytes | Size of the replica's WAL file                                                                               |
+| `zero_replica_wal2_size`                                | Gauge     | bytes | Size of the replica's WAL2 file (only if using wal2 mode)                                                    |
+| `zero_replica_backup_lag`                               | Gauge     | ms    | Time since last Litestream backup; expected to sawtooth according to the configured v3 or v5 backup interval |
+| `zero_replica_purge_blocked`                            | Counter   |       | Number of change-log purges blocked because the actual backup state could not be verified or is stale        |
+| `zero_replica_litestream_restore_runs`                  | Counter   |       | Litestream restore runs                                                                                      |
+| `zero_replica_litestream_restore_attempts`              | Counter   |       | Litestream restore subprocess attempts                                                                       |
+| `zero_replica_litestream_restore_db_bytes`              | Counter   | bytes | SQLite database bytes restored by successful Litestream restores                                             |
+| `zero_replica_litestream_restore_duration`              | Histogram | s     | Wall-clock duration of Litestream restore runs                                                               |
+| `zero_replica_litestream_restore_wait_duration`         | Histogram | s     | Time spent waiting for replication-manager snapshot status before restoring                                  |
+| `zero_replica_litestream_restore_process_duration`      | Histogram | s     | Wall-clock duration of Litestream restore subprocesses                                                       |
+| `zero_replica_litestream_restore_validation_duration`   | Histogram | s     | Time spent validating restored replica databases                                                             |
+| `zero_replica_litestream_backup_process_runs`           | Counter   |       | Litestream backup process exits                                                                              |
+| `zero_replica_litestream_backup_process_duration`       | Histogram | s     | Runtime of Litestream backup subprocesses before exit                                                        |
+| `zero_replica_litestream_backup_list_duration`          | Histogram | s     | Time to list the Litestream backup destination                                                               |
+| `zero_replica_litestream_backup_verification_duration`  | Histogram | s     | Time to verify backup state in the destination                                                               |
+| `zero_replica_litestream_snapshot_reservation_duration` | Histogram | s     | Time snapshot reservations are held while view-syncers restore and subscribe                                 |
 
 ### zero.replication
 
@@ -189,7 +189,7 @@ This callback is called before sending WebSocket messages that trigger API serve
 | `zero_replication_flow_control_waits`                 | Counter   |       | Completed flow-control checkpoints                                                                                             |
 | `zero_replication_flow_control_wait_duration`         | Histogram | s     | Time replication waits at flow-control checkpoints                                                                             |
 
-`zero_replication_total_lag` and `zero_replication_last_total_lag` now report the same latest measured round trip and do not grow when reports stop arriving. Use `zero_replication_lag_report_retries` to detect a stalled or missing report stream.
+`zero_replication_total_lag` and `zero_replication_last_total_lag` report the same latest measured round trip and do not grow when reports stop arriving. Use `zero_replication_lag_report_retries` to detect a stalled or missing report stream.
 
 ### zero.sync
 
@@ -234,7 +234,7 @@ This callback is called before sending WebSocket messages that trigger API serve
 | `zero_sync_query_row_set_signature_drifts`           | Counter       |      | Unchanged query rehydrations whose row-set signature differs from the CVR, forcing a config-version bump  |
 | `zero_sync_query_same_hash_rehydrations_forced_bump` | Counter       |      | Same-hash query rehydrations that force a config-version bump so changed rows are delivered               |
 
-Serving-lag metrics include only client groups with at least one connected client and a validated background connection context. Retained groups without an eligible connection do not contribute lag.
+Serving-lag metrics include only client groups with at least one connected client and a validated background connection context. Retained groups without an eligible connection do not contribute lag. A client group also does not accumulate serving lag for a transaction that does not affect its queries.
 
 ### zero.mutation
 

@@ -456,7 +456,8 @@ You can manually flip just one or a few of the `whereExists` clauses in a query,
 
 Scalar subqueries are an optimization for `exists` queries. Instead of doing a join at query time, Zero pre-resolves the subquery and rewrites it as a simple equality check.
 
-To use scalar subqueries, add `{scalar: true}` to your `whereExists` call:
+To use scalar subqueries, add a unique index in Postgres and [declare it as unique in the Zero schema](/docs/schema#unique-keys), then add `{scalar: true}` to your
+`whereExists` call:
 
 ```tsx
 // Instead of joining to find issues where project.name = 'zero'
@@ -491,7 +492,8 @@ The query needs to be "rehydrated" (re-run) whenever the scalar subquery result 
 
 This is fine for relatively stable lookup data like user IDs or project IDs, but you probably wouldn't want it for rapidly-changing data.
 
-Also, scalar subqueries only work when the subquery is guaranteed to return at most one row (hence "scalar"). Zero checks that your subquery constrains a unique index and will throw an error if it doesn't.
+Scalar subqueries only work when the subquery is guaranteed to return at most one row. The callback must constrain every column of a primary key or a key [declared with `.unique(...)`](/docs/schema#unique-keys) using equality. Compound keys require an equality constraint for every column.
+They also only support one-hop relationships, not junctions.
 
 ### Future Work
 

@@ -1,0 +1,56 @@
+---
+title: Zero 1.10
+description: Unique Keys and More Reliable Replication
+---
+
+## Installation
+
+```bash
+npm install @rocicorp/zero@1.10
+```
+
+<Note type="warning">
+  [Deploy `zero-cache` before updating
+  clients](/docs/self-host#rolling-updates). Zero 1.10
+  clients cannot connect to an older server.
+</Note>
+
+## Overview
+
+Zero 1.10 catches invalid scalar queries during type checking and makes replication, backups, and recovery more reliable.
+
+## Features
+
+- TypeScript now checks that [`{scalar: true}` subqueries](/docs/zql#scalar-subqueries) match a full primary or unique key. Schemas can declare unique Postgres indexes with [`.unique(...)`](/docs/schema#unique-keys). ([#6307](https://github.com/rocicorp/mono/pull/6307))
+- [Replication](/docs/zero-cache-config#change-streamer-flow-control-consensus-timeout-proportion) now adapts to slow view-syncers. It restarts serving replicas that stay behind and prevents a backup replica that is still catching up from slowing down healthy replicas. ([#6357](https://github.com/rocicorp/mono/pull/6357), [#6358](https://github.com/rocicorp/mono/pull/6358), [#6451](https://github.com/rocicorp/mono/pull/6451))
+- After initial sync or a backup destination change, Zero [waits for a usable backup](/docs/self-host#startup-and-shutdown-grace-periods) before reporting ready or taking over replication. Incremental backups now run every 5 minutes and snapshots every 4 hours, down from 15 minutes and 12 hours. Set explicit intervals to keep the old schedule. ([#6313](https://github.com/rocicorp/mono/pull/6313), [#6319](https://github.com/rocicorp/mono/pull/6319), [#6401](https://github.com/rocicorp/mono/pull/6401))
+
+## Fixes
+
+### Queries and Connections
+
+- Large query results are now sent to 1.10 clients in 1 MiB chunks. Older clients keep the existing format. ([#6328](https://github.com/rocicorp/mono/pull/6328))
+- Complex queries with relationships, `OR`, `limit()`, and optimistic updates no longer miss changes or show stale rows. ([#6380](https://github.com/rocicorp/mono/pull/6380), [#6381](https://github.com/rocicorp/mono/pull/6381))
+- The [Inspector](/docs/debug/inspector#analyzing-arbitrary-zql) and [Analyze Query CLI](/docs/debug/analyze-query-cli) now show `zero-cache` errors and support server-side `NOT EXISTS`. Client-side execution remains unsupported. ([#6447](https://github.com/rocicorp/mono/pull/6447))
+- Stalled WebSocket sends now fail after ten seconds, and concurrent first connections to a new client group no longer conflict. ([#6329](https://github.com/rocicorp/mono/pull/6329), [#6389](https://github.com/rocicorp/mono/pull/6389))
+
+### Replication and Backfills
+
+- Postgres `NOT NULL` changes no longer rebuild SQLite tables. Failed initial sync no longer leaves a replication slot retaining WAL. ([#6309](https://github.com/rocicorp/mono/pull/6309), [#6335](https://github.com/rocicorp/mono/pull/6335))
+- Backfills no longer pause or stop during long copies. [Supabase publication hooks](/docs/connecting-to-postgres#schema-change-hooks) include existing rows, large backfills share write time with the replica, and later writes are recognized. ([#6439](https://github.com/rocicorp/mono/pull/6439), [#6440](https://github.com/rocicorp/mono/pull/6440), [#6453](https://github.com/rocicorp/mono/pull/6453), [#6454](https://github.com/rocicorp/mono/pull/6454), [#6459](https://github.com/rocicorp/mono/pull/6459))
+- Lag metrics no longer spike after restart or grow for unaffected client groups. ([#6279](https://github.com/rocicorp/mono/pull/6279), [#6367](https://github.com/rocicorp/mono/pull/6367))
+- Replication recovers from stalled database work, and concurrent operations use separate Postgres connections. ([#6419](https://github.com/rocicorp/mono/pull/6419), [#6445](https://github.com/rocicorp/mono/pull/6445))
+
+### Backups and Startup
+
+- Legacy backups now handle WAL resets, large database files, and temporary invalid backup metadata. ([#6359](https://github.com/rocicorp/mono/pull/6359), [#6428](https://github.com/rocicorp/mono/pull/6428), [#6425](https://github.com/rocicorp/mono/pull/6425))
+- Large replicas skip a potentially long, full SQLite optimization when starting after a schema change. ([#6426](https://github.com/rocicorp/mono/pull/6426))
+- Failed initial sync no longer leaves a partial replica that blocks backup restore. Shutdown errors preserve the current replica for validation after restart. ([#6427](https://github.com/rocicorp/mono/pull/6427), [#6452](https://github.com/rocicorp/mono/pull/6452))
+
+## Breaking Changes
+
+Although these are technically breaking changes, we think they are unlikely to affect any real apps:
+
+- If you use `{scalar: true}`, the subquery must match every column of a primary or declared unique key using equality. Otherwise, remove the hint or [declare a unique key](/docs/schema#unique-keys). ([#6307](https://github.com/rocicorp/mono/pull/6307))
+- If you set `ZERO_CHANGE_STREAMER_FLOW_CONTROL_CONSENSUS_PADDING_SECONDS`, replace it with [`ZERO_CHANGE_STREAMER_FLOW_CONTROL_CONSENSUS_TIMEOUT_PROPORTION`](/docs/zero-cache-config#change-streamer-flow-control-consensus-timeout-proportion). The new value is a ratio, not seconds. Slow serving replicas now restart after 30 seconds by default; set `ZERO_CHANGE_STREAMER_FLOW_CONTROL_SLOW_SUBSCRIBER_GRACE_PERIOD_SECONDS=0` to disable this. ([#6357](https://github.com/rocicorp/mono/pull/6357), [#6358](https://github.com/rocicorp/mono/pull/6358))
+- If your database limits connections, allow at least five ChangeDB connections plus one per view-syncer. `ZERO_CHANGE_MAX_CONNS` no longer limits this usage. See [Change DB](/docs/zero-cache-config#change-db). ([#6445](https://github.com/rocicorp/mono/pull/6445))

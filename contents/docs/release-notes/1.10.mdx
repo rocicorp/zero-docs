@@ -47,7 +47,9 @@ Zero 1.10 catches invalid scalar queries during type checking and makes replicat
 - Large replicas skip a potentially long, full SQLite optimization when starting after a schema change. ([#6426](https://github.com/rocicorp/mono/pull/6426))
 - Failed initial sync no longer leaves a partial replica that blocks backup restore. Shutdown errors preserve the current replica for validation after restart. ([#6427](https://github.com/rocicorp/mono/pull/6427), [#6452](https://github.com/rocicorp/mono/pull/6452))
 
-## Upgrade Notes
+## Breaking changes
+
+Although these are technically breaking changes, we think they are unlikely to affect any real apps:
 
 - If you use `{scalar: true}`, the subquery must match every column of a primary or declared unique key using equality. Otherwise, remove the hint or [declare a unique key](/docs/schema#unique-keys). ([#6307](https://github.com/rocicorp/mono/pull/6307))
 - If you set `ZERO_CHANGE_STREAMER_FLOW_CONTROL_CONSENSUS_PADDING_SECONDS`, replace it with [`ZERO_CHANGE_STREAMER_FLOW_CONTROL_CONSENSUS_TIMEOUT_PROPORTION`](/docs/zero-cache-config#change-streamer-flow-control-consensus-timeout-proportion). The new value is a ratio, not seconds. Slow serving replicas now restart after 30 seconds by default; set `ZERO_CHANGE_STREAMER_FLOW_CONTROL_SLOW_SUBSCRIBER_GRACE_PERIOD_SECONDS=0` to disable this. ([#6357](https://github.com/rocicorp/mono/pull/6357), [#6358](https://github.com/rocicorp/mono/pull/6358))

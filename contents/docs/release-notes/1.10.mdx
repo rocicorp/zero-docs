@@ -47,7 +47,7 @@ Zero 1.10 catches invalid scalar queries during type checking and makes replicat
 - Large replicas skip a potentially long, full SQLite optimization when starting after a schema change. ([#6426](https://github.com/rocicorp/mono/pull/6426))
 - Failed initial sync no longer leaves a partial replica that blocks backup restore. Shutdown errors preserve the current replica for validation after restart. ([#6427](https://github.com/rocicorp/mono/pull/6427), [#6452](https://github.com/rocicorp/mono/pull/6452))
 
-## Breaking changes
+## Breaking Changes
 
 Although these are technically breaking changes, we think they are unlikely to affect any real apps:
 

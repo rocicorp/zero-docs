@@ -201,9 +201,11 @@ env: `ZERO_CVR_DB`<br/>
 
 The duration after which an inactive CVR is eligible for garbage collection. Garbage collection is incremental and periodic, so eligible CVRs are not necessarily purged immediately.
 
+Purging a CVR forces the next connection from that client group to re-sync from scratch, so this should comfortably exceed how long a typical user goes between sessions.
+
 flag: `--cvr-garbage-collection-inactivity-threshold-hours`<br/>
 env: `ZERO_CVR_GARBAGE_COLLECTION_INACTIVITY_THRESHOLD_HOURS`<br/>
-default: `48`
+default: `168` (one week)
 
 ### CVR Garbage Collection Initial Batch Size
 

@@ -51,7 +51,4 @@ Zero 1.10 catches invalid scalar queries during type checking and makes replicat
 
 - If you use `{scalar: true}`, the subquery must match every column of a primary or declared unique key using equality. Otherwise, remove the hint or [declare a unique key](/docs/schema#unique-keys). ([#6307](https://github.com/rocicorp/mono/pull/6307))
 - If you set `ZERO_CHANGE_STREAMER_FLOW_CONTROL_CONSENSUS_PADDING_SECONDS`, replace it with [`ZERO_CHANGE_STREAMER_FLOW_CONTROL_CONSENSUS_TIMEOUT_PROPORTION`](/docs/zero-cache-config#change-streamer-flow-control-consensus-timeout-proportion). The new value is a ratio, not seconds. Slow serving replicas now restart after 30 seconds by default; set `ZERO_CHANGE_STREAMER_FLOW_CONTROL_SLOW_SUBSCRIBER_GRACE_PERIOD_SECONDS=0` to disable this. ([#6357](https://github.com/rocicorp/mono/pull/6357), [#6358](https://github.com/rocicorp/mono/pull/6358))
-
-## Breaking Changes
-
 - If your database limits connections, allow at least five ChangeDB connections plus one per view-syncer. `ZERO_CHANGE_MAX_CONNS` no longer limits this usage. See [Change DB](/docs/zero-cache-config#change-db). ([#6445](https://github.com/rocicorp/mono/pull/6445))

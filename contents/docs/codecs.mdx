@@ -1,0 +1,137 @@
+---
+title: Column Codecs
+description: Store data in one format, use it in another
+---
+
+Codecs let you store a column in one format (the _storage type_) while exposing it as a different type (the _app type_) to your application code. Zero automatically decodes values coming out of queries and encodes values going into writes and filters.
+
+This is useful when your database stores data in a primitive format — epoch milliseconds, JSON blobs, serialized strings — but your app wants to work with richer types like `Temporal.Instant` objects or custom classes.
+
+## The `.codec()` API
+
+Attach a codec to any column in your schema with the `.codec()` builder method. A codec is an object with two functions:
+
+- `decode` — converts a storage value to an app value (used when reading)
+- `encode` — converts an app value back to a storage value (used when writing and filtering)
+
+```ts
+import {table, string, number} from '@rocicorp/zero';
+
+const issue = table('issue')
+  .columns({
+    id: string(),
+    title: string(),
+    createdAt: number().codec<Temporal.Instant>({
+      decode: (ms: number) => Temporal.Instant.fromEpochMilliseconds(ms),
+      encode: (t: Temporal.Instant) => t.epochMilliseconds,
+    }),
+  })
+  .primaryKey('id');
+```
+
+The type parameter on `.codec<Temporal.Instant>()` is the app-side type. TypeScript will enforce that `decode` returns this type and `encode` accepts it.
+
+`null` and `undefined` are never passed to `decode` or `encode` — they pass through unchanged. This means your codec functions only need to handle real values, and a codec composes cleanly with `.optional()`.
+
+## Custom Codec Examples
+
+### JSON column as a class instance
+
+```ts
+type LatLngJson = {lat: number; lng: number};
+
+class GeoPoint {
+  readonly lat: number;
+  readonly lng: number;
+  constructor(lat: number, lng: number) { /* ... */ }
+  distanceTo(other: GeoPoint) { /* ... */ }
+  toJSON() {
+    return {lat: this.lat, lng: this.lng};
+  }
+  static fromJSON(j: LatLngJson) {
+    return new GeoPoint(j.lat, j.lng);
+  }
+}
+
+const location = table('location')
+  .columns({
+    id: string(),
+    coords: json<LatLngJson>().codec<GeoPoint>({
+      decode: GeoPoint.fromJSON,
+      encode: (p: GeoPoint) => p.toJSON(),
+    }),
+  })
+  .primaryKey('id');
+```
+
+## Using Zod Codecs
+
+If you use [Zod 4.1+](https://zod.dev/codecs), you can use Zod's `z.codec()` to define your encode/decode logic and pass it directly to Zero's `.codec()`. Zod codecs have `.decode()` and `.encode()` methods that match Zero's expected interface.
+
+```ts
+import {z} from 'zod';
+import {table, string} from '@rocicorp/zero';
+
+const stringToBigInt = z.codec(z.string(), z.bigint(), {
+  decode: (str) => BigInt(str),
+  encode: (n) => n.toString(),
+});
+
+const account = table('account')
+  .columns({
+    id: string(),
+    balance: string().codec<bigint>(stringToBigInt),
+  })
+  .primaryKey('id');
+```
+
+This works because a Zod codec is an object with `decode` and `encode` methods — the same shape Zero expects. As a bonus, Zod validates inputs during encode/decode, so malformed data surfaces as a `ZodError` rather than silently producing garbage.
+
+## Decoded Types in Query Results
+
+Codecs are applied automatically. When you read data with `useQuery` (React/Solid) or `.run()`, every row's codec columns are already decoded to their app type. No manual conversion is needed.
+
+```ts
+const [issues] = useQuery(z.query.issue.orderBy('createdAt', 'desc'));
+
+for (const issue of issues) {
+  // issue.createdAt is a Temporal.Instant, not a number
+  console.log(issue.createdAt.toLocaleString());
+}
+```
+
+The TypeScript type of the query result reflects the decoded type — `issue.createdAt` is `Temporal.Instant`, not `number`.
+
+## Filtering and Ordering
+
+`where()` accepts app-side (decoded) values. Zero encodes them back to storage values internally before running the comparison.
+
+```ts
+// Pass a Temporal.Instant — Zero encodes it to epoch-ms for the filter
+z.query.issue.where('createdAt', '>', Temporal.Instant.from('2024-01-01T00:00:00Z'));
+```
+
+`orderBy()` sorts on the raw storage values. For codecs where the storage order matches the app-type order (e.g., epoch milliseconds and `Date`), this just works. But if your codec's storage representation doesn't sort the same way as the decoded type, be aware that ordering reflects storage, not app values.
+
+```ts
+// Sorts by the underlying epoch-ms number, which gives
+// chronological order — the same order you'd expect from Temporal.Instant
+z.query.issue.orderBy('createdAt', 'desc');
+```
+
+## Mutations
+
+When writing data, pass the app-side value. Zero encodes it before persisting.
+
+```ts
+z.mutate.issue.create({
+  id: 'issue-1',
+  title: 'Fix bug',
+  createdAt: Temporal.Now.instant(), // Zero encodes to epoch-ms
+});
+
+z.mutate.issue.update({
+  id: 'issue-1',
+  createdAt: Temporal.Now.instant(), // same here
+});
+```

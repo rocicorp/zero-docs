@@ -1145,10 +1145,7 @@ const addToReadingList = defineMutator(
 )
 ```
 
-- Server only. Register before anything that can fail.
-- Return a promise to back off. Keep delays short: the push waits.
-- The predicate runs after the transaction ends, so it can't use `tx`.
-- At most 5 runs. Only use it for mutators that are safe to re-run.
+Call `tx.retryOn()` at the top of the mutator, before anything that can fail. It's only available on the server, and the predicate runs after the transaction has finished, so it can't use `tx`. Returning a promise lets you back off, but keep delays short since the rest of the push waits for it. Zero runs a mutator at most five times per push, and you should only use this for mutators that are safe to run more than once.
 
 ## Notifications and Async Work
 

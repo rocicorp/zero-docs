@@ -1145,19 +1145,6 @@ const addToReadingList = defineMutator(
     }
   }
 )
-
-function isTransient(error: unknown) {
-  // Serialization failure, deadlock, or unique violation.
-  // Check what your database driver throws.
-  const code = (error as {code?: unknown} | null)?.code
-  return (
-    code === '40001' || code === '40P01' || code === '23505'
-  )
-}
-
-function sleep(ms: number) {
-  return new Promise(resolve => setTimeout(resolve, ms))
-}
 ```
 
 When the re-run reads `readingList`, it finds the row the winner inserted and skips the insert, so the mutation succeeds instead of failing.

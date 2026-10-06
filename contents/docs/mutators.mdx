@@ -1115,9 +1115,7 @@ See [ZQL on the Server](/docs/server-zql) for more information.
 
 ## Retrying Mutators
 
-Some server failures go away if the mutator just runs again. The common case is losing a race with a concurrent write: under `REPEATABLE READ` or `SERIALIZABLE` isolation, Postgres aborts the loser with a serialization failure (`40001`), and an insert that violates a unique constraint because another mutation just committed a matching row fails with a unique violation (`23505`). By default these are [recorded as errors](#handling-errors) like any other failure.
-
-A server mutator can instead register a predicate with `tx.retryOn()`. If the run fails, Zero asks the predicate whether to run the mutator again. On yes, it runs the mutator again in a fresh transaction, which sees what the winner committed:
+Some failures, like losing a race with a concurrent write (`40001`, `23505`), go away if the mutator just runs again. Register a predicate with `tx.retryOn()`: if the run fails, including at `COMMIT`, Zero asks it whether to run the mutator again in a fresh transaction.
 
 ```ts
 const addToReadingList = defineMutator(
@@ -1147,19 +1145,10 @@ const addToReadingList = defineMutator(
 )
 ```
 
-When the re-run reads `readingList`, it finds the row the winner inserted and skips the insert, so the mutation succeeds instead of failing.
-
-The predicate sees any failure of the run, including errors that Postgres raises at `COMMIT`, after the mutator has returned. Under `SERIALIZABLE`, serialization failures often surface there, and so do violations of deferred constraints. The mutator body can't catch these, which is why the decision is registered up front.
-
-- `tx.retryOn()` exists only on the server transaction, so check `tx.location === 'server'` first. On the client, a mutator runs against local data, and running it again would give the same result.
-- Register the predicate before anything that can fail. It covers only the run that registered it; the re-run runs the mutator body again, which registers it again.
-- `attempt` is the number of the re-run being decided: `1` after the first failure. Use it to cap retries and compute a backoff.
-- To back off, return a promise. Zero waits for it after the transaction has rolled back, so no connection or lock is held while waiting. The push request does stay open, and later mutations in the same push wait behind it, so keep delays short. A delay that outlasts your API server's request timeout gets the push sent again, starting over at attempt `1`.
-- Calls add up: each `tx.retryOn()` in a run adds a predicate. When the run fails, they are all asked at once, the first to answer yes starts the re-run, and the other answers are ignored.
-- A predicate that throws counts as no. If no predicate says yes, the error is recorded as the mutation's error.
-- The predicate runs after the run's transaction is over, so it can't use `tx`: reading, writing or reaching `tx.dbTransaction` through it throws.
-- Everything the failed run wrote is rolled back, but nothing outside the database is. Only retry mutators that are safe to run again.
-- Within one push, the mutator runs at most 5 times.
+- Server only. Register before anything that can fail.
+- Return a promise to back off. Keep delays short: the push waits.
+- The predicate runs after the transaction ends, so it can't use `tx`.
+- At most 5 runs. Only use it for mutators that are safe to re-run.
 
 ## Notifications and Async Work
 

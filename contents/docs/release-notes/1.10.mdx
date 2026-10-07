@@ -9,10 +9,10 @@ description: Unique Keys and More Reliable Replication
 npm install @rocicorp/zero@1.10
 ```
 
-<Note type="warning">
-  [Deploy `zero-cache` before updating
-  clients](/docs/self-host#rolling-updates). Zero 1.10
-  clients cannot connect to an older server.
+<Note type="note">
+  Zero 1.10 clients also work with 1.9 servers, so you can
+  update clients and `zero-cache` in either order and roll
+  either one back.
 </Note>
 
 ## Overview
@@ -23,13 +23,14 @@ Zero 1.10 catches invalid scalar queries during type checking and makes replicat
 
 - TypeScript now checks that [`{scalar: true}` subqueries](/docs/zql#scalar-subqueries) match a full primary or unique key. Schemas can declare unique Postgres indexes with [`.unique(...)`](/docs/schema#unique-keys). ([#6307](https://github.com/rocicorp/mono/pull/6307))
 - [Replication](/docs/zero-cache-config#change-streamer-flow-control-consensus-timeout-proportion) now adapts to slow view-syncers. It restarts serving replicas that stay behind and prevents a backup replica that is still catching up from slowing down healthy replicas. ([#6357](https://github.com/rocicorp/mono/pull/6357), [#6358](https://github.com/rocicorp/mono/pull/6358), [#6451](https://github.com/rocicorp/mono/pull/6451))
-- After initial sync or a backup destination change, Zero [waits for a usable backup](/docs/self-host#startup-and-shutdown-grace-periods) before reporting ready or taking over replication. Incremental backups now run every 5 minutes and snapshots every 4 hours, down from 15 minutes and 12 hours. Set explicit intervals to keep the old schedule. ([#6313](https://github.com/rocicorp/mono/pull/6313), [#6319](https://github.com/rocicorp/mono/pull/6319), [#6401](https://github.com/rocicorp/mono/pull/6401))
+- After initial sync or a backup destination change, Zero [waits for a usable backup](/docs/self-host#startup-and-shutdown-grace-periods) before reporting ready or taking over replication. ([#6313](https://github.com/rocicorp/mono/pull/6313), [#6401](https://github.com/rocicorp/mono/pull/6401))
 
 ## Fixes
 
 ### Queries and Connections
 
-- Large query results are now sent to 1.10 clients in 1 MiB chunks. Older clients keep the existing format. ([#6328](https://github.com/rocicorp/mono/pull/6328))
+- Large query results are now sent in parts of about 1 MiB of row data. 1.10 clients receive them as binary chunks from 1.10 and later servers; older clients keep the JSON format. ([#6328](https://github.com/rocicorp/mono/pull/6328))
+- Mutations now settle normally when a newer `zero-cache` adds fields to mutation results.
 - Complex queries with relationships, `OR`, `limit()`, and optimistic updates no longer miss changes or show stale rows. ([#6380](https://github.com/rocicorp/mono/pull/6380), [#6381](https://github.com/rocicorp/mono/pull/6381))
 - The [Inspector](/docs/debug/inspector#analyzing-arbitrary-zql) and [Analyze Query CLI](/docs/debug/analyze-query-cli) now show `zero-cache` errors and support server-side `NOT EXISTS`. Client-side execution remains unsupported. ([#6447](https://github.com/rocicorp/mono/pull/6447))
 - Stalled WebSocket sends now fail after ten seconds, and concurrent first connections to a new client group no longer conflict. ([#6329](https://github.com/rocicorp/mono/pull/6329), [#6389](https://github.com/rocicorp/mono/pull/6389))

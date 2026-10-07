@@ -30,7 +30,6 @@ Zero 1.10 catches invalid scalar queries during type checking and makes replicat
 ### Queries and Connections
 
 - Large query results are now sent in parts of about 1 MiB of row data. 1.10 clients receive them as binary chunks from 1.10 and later servers; older clients keep the JSON format. ([#6328](https://github.com/rocicorp/mono/pull/6328))
-- Mutations now settle normally when a newer `zero-cache` adds fields to mutation results.
 - Complex queries with relationships, `OR`, `limit()`, and optimistic updates no longer miss changes or show stale rows. ([#6380](https://github.com/rocicorp/mono/pull/6380), [#6381](https://github.com/rocicorp/mono/pull/6381))
 - The [Inspector](/docs/debug/inspector#analyzing-arbitrary-zql) and [Analyze Query CLI](/docs/debug/analyze-query-cli) now show `zero-cache` errors and support server-side `NOT EXISTS`. Client-side execution remains unsupported. ([#6447](https://github.com/rocicorp/mono/pull/6447))
 - Stalled WebSocket sends now fail after ten seconds, and concurrent first connections to a new client group no longer conflict. ([#6329](https://github.com/rocicorp/mono/pull/6329), [#6389](https://github.com/rocicorp/mono/pull/6389))

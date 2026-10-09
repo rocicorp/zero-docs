@@ -7,8 +7,9 @@ mono-internal#133 after `14a1c8eb4`. The partial-index reapply and #6467 after
 changes: mono-internal#170 reverts mono-internal#131 and #152, and the tree at
 `9790d8c22` equals `e38505174` plus #133. 1.10 clients send protocol 52 again,
 so the server-first rollout requirement below applies.
-`zero/v1.10.0-canary.27` is the first canary with mono-internal#170 and the
-release candidate. Re-audit the final tag before publication.
+`zero/v1.10.0-canary.27` is the first canary with mono-internal#170. Zero
+1.10.0 was published on 2026-10-09 from `905d08516` itself, and its npm tarball
+matches canary.27's except for the version string.
 
 ## Release Source
 
@@ -22,6 +23,11 @@ release candidate. Re-audit the final tag before publication.
 | Current maintenance head        | `9790d8c22`; `905d08516` on `rocicorp/mono`        |
 | Latest maintenance canary       | `zero/v1.10.0-canary.27` (`7f284b356`)             |
 | Canary.27 source parent         | `905d08516`, version-only child                    |
+| Published tag                   | `zero/v1.10.0` at `905d08516`, no version commit   |
+| Stable release workflow         | `37920091073`, attempt 2                           |
+| Published npm integrity         | `sha512-u+0mrWEP...Er5y7W6utj+Vjg==`               |
+| Published OCI index digest      | `sha256:745c80f13eb53f5b...4229b03800d58437`       |
+| Promote workflow                | `37924665748`                                      |
 | Rejected canary                 | `zero/v1.10.0-canary.15`                           |
 | Rejected canary SHA             | `2c6f76e2a8860eeefa34fc50324b062e987a65fa`         |
 | Rejected canary source parent   | `fb9195c1100c86bb19aaa113080378c7f7f47b73`         |
@@ -614,3 +620,11 @@ remote maintenance branch.
   `33685579981` is publishing a replacement candidate. Verify its source parent
   is `14a1c8eb4`, refresh npm/OCI evidence, rerun the #6459 regression, and roll
   companion-package validation to the new exact canary.
+- Final artifact: PASS. Release workflow `37920091073` tagged `zero/v1.10.0` at
+  `905d08516` without a version commit, staged npm 1.10.0 with provenance, and
+  published Docker Hub/GHCR multi-architecture images under OCI digest
+  `sha256:745c80f13eb53f5b74e5423d9051269aaa26cd32333fc8da4229b03800d58437`. Its
+  first attempt crashed building the arm64 image under QEMU and published
+  nothing. The npm tarball has the same 2,371 files as `1.10.0-canary.27`; four
+  differ, only in the version string. On 2026-10-09 promote workflow
+  `37924665748` moved Docker and git `latest`, and npm `latest` moved to 1.10.0.

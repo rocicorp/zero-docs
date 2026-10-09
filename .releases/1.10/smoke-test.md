@@ -2,6 +2,11 @@
 
 Updated: 2026-09-02
 
+**Superseded on 2026-10-09.** These results are for `1.10.0-canary.13`
+(source `14a1c8eb4`). The release candidate is now `1.10.0-canary.27`
+(maintenance head `9790d8c22`), so rerun the companion-package checks against
+the final `1.10.0` before publishing the adapters.
+
 ## Release Metadata
 
 | Item                       | Value                                                                |
@@ -9,7 +14,7 @@ Updated: 2026-09-02
 | Zero source target         | `14a1c8eb4846b92948a8006cec8b331612085288`                           |
 | Companion test artifact    | `@rocicorp/zero@1.10.0-canary.13`                                    |
 | Rejected artifact          | `@rocicorp/zero@1.10.0-canary.15`; contains reverted, unstable #6460 |
-| Replacement candidate      | Pending from the current source target                              |
+| Replacement candidate      | Pending from the current source target                               |
 | Replacement workflow       | `33685579981`                                                        |
 | Stable artifact            | Pending; npm `latest` remains `1.9.0`                                |
 | Adapter publication policy | Stable releases only; do not publish against a canary                |
@@ -23,10 +28,10 @@ canary is available.
 
 ## Repository Status
 
-| Repository              | Base                | Branch               | Previous package | Target package | Status                                                                 |
-| ----------------------- | ------------------- | -------------------- | ---------------- | -------------- | ---------------------------------------------------------------------- |
+| Repository              | Base                | Branch               | Previous package | Target package | Status                                                                                                                   |
+| ----------------------- | ------------------- | -------------------- | ---------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------ |
 | `rocicorp/drizzle-zero` | `main` at `7fd3817` | `0xcadams/zero-1.10` | `0.20.0`         | `0.21.0`       | [Draft #295](https://github.com/rocicorp/drizzle-zero/pull/295); canary.13 validation passes; current-head rerun pending |
-| `rocicorp/prisma-zero`  | `main` at `acc39f1` | `0xcadams/zero-1.10` | `0.2.1`          | `0.3.0`        | [Draft #23](https://github.com/rocicorp/prisma-zero/pull/23); canary.13 validation passes; current-head rerun pending  |
+| `rocicorp/prisma-zero`  | `main` at `acc39f1` | `0xcadams/zero-1.10` | `0.2.1`          | `0.3.0`        | [Draft #23](https://github.com/rocicorp/prisma-zero/pull/23); canary.13 validation passes; current-head rerun pending    |
 
 The existing `0xcadams/zero-1.9` branches are superseded rather than merged.
 

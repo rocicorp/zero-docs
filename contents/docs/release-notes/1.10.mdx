@@ -24,6 +24,7 @@ Zero 1.10 catches invalid scalar queries during type checking and makes replicat
 - TypeScript now checks that [`{scalar: true}` subqueries](/docs/zql#scalar-subqueries) match a full primary or unique key. Schemas can declare unique Postgres indexes with [`.unique(...)`](/docs/schema#unique-keys). ([#6307](https://github.com/rocicorp/mono/pull/6307))
 - [Replication](/docs/zero-cache-config#change-streamer-flow-control-consensus-timeout-proportion) now adapts to slow view-syncers. It restarts serving replicas that stay behind and prevents a backup replica that is still catching up from slowing down healthy replicas. ([#6357](https://github.com/rocicorp/mono/pull/6357), [#6358](https://github.com/rocicorp/mono/pull/6358), [#6451](https://github.com/rocicorp/mono/pull/6451))
 - After initial sync or a backup destination change, Zero [waits for a usable backup](/docs/self-host#startup-and-shutdown-grace-periods) before reporting ready or taking over replication. ([#6313](https://github.com/rocicorp/mono/pull/6313), [#6401](https://github.com/rocicorp/mono/pull/6401))
+- Opt-in [Litestream v5 backups](/docs/zero-cache-config#litestream-backup-using-v5) give each replica its own backup path, and Zero acknowledges upstream changes only once they are confirmed in backup storage. Zero 1.9 can't read these paths, so rolling back to 1.9 with v5 backups enabled resyncs the replica. ([#6368](https://github.com/rocicorp/mono/pull/6368), [#6394](https://github.com/rocicorp/mono/pull/6394))
 
 ## Fixes
 

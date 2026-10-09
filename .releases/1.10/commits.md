@@ -160,7 +160,8 @@ On 2026-10-07, the public note replaced the server-first rollout warning with
 a compatibility callout (mono-internal#131) and dropped the legacy backup
 interval change, which #6553 reverts. By human direction, it leaves out the
 mutation-result fix (mono-internal#133). On 2026-10-09, after
-mono-internal#170 reverted #131, the server-first warning was restored.
+mono-internal#170 reverted #131, the server-first warning was restored and the
+note gained the opt-in Litestream v5 backup feature from this selection.
 
 ### Features and Operator Changes
 

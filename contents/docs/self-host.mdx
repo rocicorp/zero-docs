@@ -731,7 +731,7 @@ spec:
 
 </CodeGroup>
 
-In multi-node deployments, keep `ZERO_LITESTREAM_BACKUP_URL` on the `replication-manager` only and point it at an AWS S3 bucket.
+In multi-node deployments, keep `ZERO_LITESTREAM_BACKUP_URL` on the `replication-manager` only and point it at an AWS S3 bucket. If you enable [Litestream v5 backups](/docs/zero-cache-config#litestream-backup-using-v5), end the URL with `/`, for example `s3://acme-zero-backups/v1/`.
 
 The view-syncers in the multi-node topology can be horizontally scaled as needed.
 

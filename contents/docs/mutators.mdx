@@ -814,6 +814,8 @@ const result = await handleMutateRequest({
 
 `handleMutateRequest` catches such errors and turns them into a structured response that gets sent back to the client. You can [recover the errors](#waiting-for-results) and show UI if you want.
 
+If a failure is transient, such as losing a race with a concurrent write, the mutator can ask to be run again instead. See [Retrying Mutators](#retrying-mutators).
+
 It is also of course possible for the entire push endpoint to return an HTTP error, or to not reply at all:
 
 <CodeGroup
@@ -1110,6 +1112,40 @@ const markAllAsRead = defineMutator(
 ```
 
 See [ZQL on the Server](/docs/server-zql) for more information.
+
+## Retrying Mutators
+
+Some failures, like losing a race with a concurrent write (`40001`, `23505`), go away if the mutator just runs again. Register a predicate with `tx.retryOn()`: if the run fails, including at `COMMIT`, Zero asks it whether to run the mutator again in a fresh transaction.
+
+```ts
+const addToReadingList = defineMutator(
+  z.object({bookID: z.string()}),
+  async ({tx, ctx: {userID}, args: {bookID}}) => {
+    if (tx.location === 'server') {
+      tx.retryOn(async (error, attempt) => {
+        if (attempt > 2 || !isTransient(error)) {
+          return false
+        }
+        // Back off 100ms, then 200ms.
+        await sleep(50 * 2 ** attempt)
+        return true
+      })
+    }
+
+    const existing = await tx.run(
+      zql.readingList
+        .where('userID', userID)
+        .where('bookID', bookID)
+        .one()
+    )
+    if (!existing) {
+      await tx.mutate.readingList.insert({userID, bookID})
+    }
+  }
+)
+```
+
+Call `tx.retryOn()` at the top of the mutator, before anything that can fail. It's only available on the server, and the predicate runs after the transaction has finished, so it can't use `tx`. Returning a promise lets you back off, but keep delays short since the rest of the push waits for it. Zero runs a mutator at most five times per push, and you should only use this for mutators that are safe to run more than once.
 
 ## Notifications and Async Work
 

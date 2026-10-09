@@ -9,10 +9,11 @@ description: Unique Keys and More Reliable Replication
 npm install @rocicorp/zero@1.10
 ```
 
-<Note type="note">
-  Zero 1.10 clients also work with 1.9 servers, so you can
-  update clients and `zero-cache` in either order and roll
-  either one back.
+<Note type="warning">
+  [Deploy `zero-cache` before updating
+  clients](/docs/self-host#rolling-updates). Zero 1.10
+  clients cannot connect to an older server, so roll clients
+  back before rolling `zero-cache` back to 1.9.
 </Note>
 
 ## Overview

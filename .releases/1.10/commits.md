@@ -1,13 +1,14 @@
 # Zero 1.10 Release Audit
 
 Status: The base audit was human-approved on 2026-08-24. The Zero 1.10
-maintenance delta is audited through `47ff46ff6`, which adds #6479, #6553 and
-the compatibility changes from mono-internal#131 and mono-internal#133 after
-`14a1c8eb4`. The partial-index reapply and #6467 after `14a1c8eb4` are reverted
-and have no net tree effect. Since mono-internal#131, 1.10 clients work with 1.9
-servers, so the server-first rollout requirement below no longer applies.
-`zero/v1.10.0-canary.19` predates mono-internal#131 and #133, so the stable tag
-needs a new build. Re-audit the final tag before publication.
+maintenance delta is audited through `9790d8c22`, which adds #6479, #6553 and
+mono-internal#133 after `14a1c8eb4`. The partial-index reapply and #6467 after
+`14a1c8eb4` are reverted and have no net tree effect. So are the protocol-flag
+changes: mono-internal#170 reverts mono-internal#131 and #152, and the tree at
+`9790d8c22` equals `e38505174` plus #133. 1.10 clients send protocol 52 again,
+so the server-first rollout requirement below applies.
+`zero/v1.10.0-canary.27` is the first canary with mono-internal#170 and the
+release candidate. Re-audit the final tag before publication.
 
 ## Release Source
 
@@ -18,9 +19,9 @@ needs a new build. Re-audit the final tag before publication.
 | Previous SHA                    | `7fb31b033738535c31d83ef476e57771b792474c`         |
 | Target ref                      | `maint/zero/v1.10` snapshot selected on 2026-08-24 |
 | Target SHA                      | `23da5f1cbb8a3a5dc3101517b1d32bf2a842809c`         |
-| Current maintenance head        | `47ff46ff6`; `ef44a55cb` on `rocicorp/mono`        |
-| Latest maintenance canary       | `zero/v1.10.0-canary.19` (`3490efdd1`)             |
-| Canary.19 source parent         | `5367602e5` (#6553), version-only child            |
+| Current maintenance head        | `9790d8c22`; `905d08516` on `rocicorp/mono`        |
+| Latest maintenance canary       | `zero/v1.10.0-canary.27` (`7f284b356`)             |
+| Canary.27 source parent         | `905d08516`, version-only child                    |
 | Rejected canary                 | `zero/v1.10.0-canary.15`                           |
 | Rejected canary SHA             | `2c6f76e2a8860eeefa34fc50324b062e987a65fa`         |
 | Rejected canary source parent   | `fb9195c1100c86bb19aaa113080378c7f7f47b73`         |
@@ -92,25 +93,23 @@ git ls-remote --tags origin 'refs/tags/zero/v1.10.0-canary.*'
 
 | Protocol                             | Zero 1.9 |  Target | Result                             |
 | ------------------------------------ | -------: | ------: | ---------------------------------- |
-| Public sync `PROTOCOL_VERSION`       |       51 |      52 | Highest server accepts; compatible |
-| Client-sent sync protocol            |       51 |      51 | Compatible with 1.9 servers        |
+| Public sync `PROTOCOL_VERSION`       |       51 |      52 | Compatible version branch retained |
+| Client-sent sync protocol            |       51 |      52 | Rejected by 1.9 servers            |
 | `MIN_SERVER_SUPPORTED_SYNC_PROTOCOL` |       30 |      30 | Compatible                         |
 | RM/view-syncer current protocol      |        6 |       6 | Compatible                         |
 | RM/view-syncer minimum protocol      |        1 |       4 | Zero 1.9 sends 6                   |
 | Emitted DDL protocol                 |        1 |       1 | Compatible                         |
 | Accepted DDL protocol                |  1 and 2 | 1 and 2 | Compatible                         |
 
-Result: **PASS**. The target minimum supported sync protocol, 30, is less than
-or equal to the previous release's protocol, 51. Since mono-internal#131, 1.10
-clients send protocol 51 (`CLIENT_PROTOCOL_VERSION`) and ask for binary poke
-chunks with the `PokeChunk` feature flag in the connect URL's `f` parameter. A
-1.9 server ignores the parameter and sends JSON `pokePart` messages, which 1.10
-clients still handle, so clients and servers can be deployed and rolled back in
-either order. A 1.10 server sends binary chunks to clients that set the flag or
-send protocol 52 (canaries before mono-internal#131) and JSON to the rest.
-Before mono-internal#131, 1.10 clients sent protocol 52 and could not connect to
-a 1.9 server. mono-internal#131 is the only change after `14a1c8eb4` that
-touches protocol constants or wire schemas.
+Result: **PASS**. The target minimum supported sync protocol, 30, is less
+than or equal to the previous release's protocol, 51. Protocol 52 clients use
+bounded binary poke chunks, while the target server retains JSON `pokePart`
+messages for protocol 51 and older clients. Deploy 1.10 servers before 1.10
+clients; a 1.10 client cannot connect to a rolled-back 1.9 server, so roll
+clients back before rolling `zero-cache` back. mono-internal#131 and #152 made
+clients send protocol 51 plus a feature flag instead; mono-internal#170 reverts
+both, so the tree delta through `9790d8c22` does not change protocol constants
+or wire schemas.
 
 ## Backport Detection
 
@@ -144,7 +143,7 @@ All `MAYBE` classifications are resolved.
 | Backup readiness           | After initial sync or a change to the destination backup path, a replication manager waits for its first recoverable backup before reporting ready or starting takeover delay. | Ensure startup-probe budgets cover initial sync and the first backup upload. Treat failure to become ready as a backup configuration or storage failure.                                                         |
 | Backup defaults            | #6319 changed legacy incremental backups to every 5 minutes and snapshots to every 4 hours; #6553 reverted that before release.                                                | None. The defaults stay 15 minutes and 12 hours.                                                                                                                                                                 |
 | Litestream v5 backup       | New and opt-in. Replica-specific backup paths are not readable by Zero 1.9's old path selection.                                                                               | Keep v5 backup disabled when immediate rollback to 1.9 is required, or expect rollback to perform a full resync. Apply an object-store lifecycle policy because old replica paths are not automatically removed. |
-| Client/server rollout      | Since mono-internal#131, 1.10 clients send protocol 51 plus a feature flag and work with 1.9 servers.                                                                          | None. Deploy and roll back clients and `zero-cache` in either order.                                                                                                                                             |
+| Client/server rollout      | **UPGRADE NOTE.** 1.10 clients send protocol 52, which 1.9 servers reject.                                                                                                     | Deploy `zero-cache` before updating clients; roll clients back before `zero-cache`. A client upgraded from 1.9 opens a new local database, so writes it had not synced are not sent.                             |
 | Persisted data             | Replica schema 13 -> 17 and upstream shard schema 23 -> 25 are additive/internal and have no new rollback floor for 1.9.                                                       | No application-data migration is required. The sidecar SQLite change log is disposable and off by default.                                                                                                       |
 | Public API and exports     | `.unique(...)`, optional `uniqueKeys`, and an internal/defaulted query generic are additive. No package export is removed.                                                     | No migration except for invalid `scalar: true` usage described above.                                                                                                                                            |
 | Dependencies               | Node remains `>=22`; the published Zero package has no net consumer dependency or peer-dependency change from 1.9.                                                             | No application install migration. Custom image and Litestream operators must follow the Docker and backup guidance above.                                                                                        |
@@ -158,18 +157,18 @@ Human review approved the base selection on 2026-08-24. The latest maintenance
 additions were reviewed and their documentation implementation was requested on
 2026-09-01. The #6459 addition and #6460 omission were directed on 2026-09-02.
 On 2026-10-07, the public note replaced the server-first rollout warning with
-the compatibility callout (mono-internal#131) and dropped the legacy backup
+a compatibility callout (mono-internal#131) and dropped the legacy backup
 interval change, which #6553 reverts. By human direction, it leaves out the
-mutation-result fix (mono-internal#133).
+mutation-result fix (mono-internal#133). On 2026-10-09, after
+mono-internal#170 reverted #131, the server-first warning was restored with a
+sentence on rolling back.
 
 ### Features and Operator Changes
 
 - Type-safe scalar subqueries and `.unique(...)` schema declarations (#6307),
   with upgrade guidance.
-- Binary poke chunks bound large result delivery to 1 MiB frames (#6328).
-  Since mono-internal#131, 1.10 clients ask for them with a feature flag
-  instead of protocol 52, so they also work with 1.9 servers; the note says so
-  in its installation callout.
+- Protocol-52 binary poke chunks bound large result delivery to 1 MiB frames
+  while retaining the old protocol for older clients (#6328).
 - Event-driven proportional replication flow control, reset of chronically
   slow serving subscribers, and backup-replica participation after catch-up
   (#6357, #6358, and #6451), including the configuration migration.
@@ -269,9 +268,9 @@ environment details under `.releases/1.10/benchmarks/`.
   slow-subscriber grace period, and v5 backup/VFS settings. Remove the old
   consensus-padding setting, deprecate `ZERO_CHANGE_MAX_CONNS`, document
   ChangeDB capacity, and describe the backup exception to laggard handling.
-- `contents/docs/self-host.mdx`: first-backup readiness, v5 rollback and
-  object-store lifecycle guidance, and the named Docker build context. Add
-  ChangeDB connection sizing and startup replica validation.
+- `contents/docs/self-host.mdx`: server-first rollout, first-backup readiness,
+  v5 rollback and object-store lifecycle guidance, and the named Docker build
+  context. Add ChangeDB connection sizing and startup replica validation.
 - `contents/docs/otel.mdx`: historical-lag suppression, serving-lag
   corrections, and slow-subscriber interpretation.
 - `contents/docs/debug/replication.mdx`: temporary backfill slots, backup/VFS
@@ -352,11 +351,10 @@ environment details under `.releases/1.10/benchmarks/`.
 - Server-first rollout passed with published artifacts: a 1.9 client queried
   and mutated through canary.3. The reverse pairing returned the expected
   `VersionNotSupported` response and used controlled exponential reload
-  backoff without server restarts or writes. That reverse result applies to
-  clients sending protocol 52. Since mono-internal#131, a 1.10 client connects
-  to a 1.9 server and gets JSON pokes; this was checked on 2026-10-07 in
-  Chromium against 1.9.0 with a pre-merge build of mono-internal#131, and
-  `integration.pg.test.ts` covers protocol 51 with and without the flag.
+  backoff without server restarts or writes. On 2026-10-09 the same held for
+  `1.10.0-canary.27` in Chromium: 1.9.0 rejected its client, a 1.9.0 client got
+  JSON pokes from canary.27, and a canary.27 client got binary pokes from
+  canary.27 and from `1.11.0-canary.32`.
 
 ## Commit Audit
 
@@ -488,7 +486,7 @@ environment details under `.releases/1.10/benchmarks/`.
 | `45caf3acb` (#6383) | skip        | -         | Opt-in diagnostic tests only.                                                                                                       | Skip. The sweep harness is disabled in normal CI.                                                                                           |
 | `1be1334de` (#6389) | fix         | -         | Concurrent first connections for a new client group cannot both commit conflicting CVR state.                                       | Propose public inclusion. A PostgreSQL test proves one concurrent flush is rejected.                                                        |
 | `796ad1f3e` (#6378) | skip        | -         | Hidden RMv2 serve mode.                                                                                                             | Skip. Applies only to non-default SQLite change-log serving.                                                                                |
-| `341590823` (#6328) | fix         | -         | Large or wide query results use bounded chunks instead of arbitrarily large WebSocket messages.                                     | Propose public inclusion. 1 MiB binary chunks for clients sending the `PokeChunk` flag (mono-internal#131) or protocol 52; JSON otherwise.  |
+| `341590823` (#6328) | fix         | -         | Large or wide query results use bounded chunks instead of arbitrarily large WebSocket messages.                                     | Propose public inclusion. Protocol 52 uses 1 MiB binary chunks; protocols through 51 retain JSON messages.                                  |
 | `118bb0f65` (#6391) | skip        | -         | Internal backup-monitor robustness.                                                                                                 | Skip standalone. Ignores duplicate or backward watermark observations.                                                                      |
 | `7bb2df549` (#6390) | fix         | -         | Four permission, CRUD SQL, custom-query transformation, and PostgreSQL notice log sites omit app-data fields.                       | Include publicly with the four sites scoped explicitly; other logging paths are unchanged.                                                  |
 | `824a5a7b2` (#6392) | skip        | -         | Internal helper not yet integrated in this commit.                                                                                  | Skip. Adds standalone `vfs-query`; integration follows.                                                                                     |
@@ -506,7 +504,7 @@ environment details under `.releases/1.10/benchmarks/`.
 
 ## Maintenance Delta Audit
 
-These 35 commits follow the immutable 141-commit target snapshot and are on the
+These 37 commits follow the immutable 141-commit target snapshot and are on the
 remote maintenance branch.
 
 | Commit              | Category | Breaking? | Public impact                                                                                                     | Decision and evidence                                                                                                               |
@@ -544,8 +542,10 @@ remote maintenance branch.
 | `261c968c2` (#6479) | fix      | -         | Rolling back to 1.9 and forward again no longer fails on the unshipped v14 replica migration.                     | Omit publicly; no released version has the bug. `-x` cherry-pick of main `c4d99d0c0`; tests cover rollforward from v13.             |
 | `5367602e5` (#6553) | skip     | -         | Restores the 1.9 legacy backup intervals, 15 minutes and 12 hours.                                                | Skip. Removes #6319's interval change; the note and config docs keep the old defaults. Canary.19 is a child.                        |
 | `e38505174`         | skip     | -         | Release-branch sync tooling only.                                                                                 | Skip. mono-internal#70 publishes this branch to `rocicorp/mono`.                                                                    |
-| `d982b59c1`         | fix      | -         | 1.10 clients send protocol 51 plus a feature flag, so they work with 1.9 servers and roll back in either order.   | Include as the install callout (mono-internal#131). Tests cover 51 (JSON), 51 with the flag and 52 (binary), 53 (rejected).         |
+| `d982b59c1`         | skip     | -         | Temporarily made 1.10 clients send protocol 51 plus a feature flag (mono-internal#131).                           | Skip. Reverted by `9790d8c22` (mono-internal#170).                                                                                  |
 | `47ff46ff6`         | fix      | -         | Mutations settle when a newer `zero-cache` adds fields to stored mutation results.                                | Omit publicly by human direction on 2026-10-07 (mono-internal#133). Tests cover a result with an unknown field.                     |
+| `352ac31d0`         | skip     | -         | Temporarily sent the feature flags as a bit set (mono-internal#152).                                              | Skip. Reverted by `9790d8c22` (mono-internal#170).                                                                                  |
+| `9790d8c22`         | skip     | -         | Reverts mono-internal#131 and #152; 1.10 clients send protocol 52 again.                                          | Skip as the other half of the revert pair (mono-internal#170). Its tree equals `e38505174` plus #133. Canary.27 is a child.         |
 
 ## Audit Validation
 
@@ -554,10 +554,10 @@ remote maintenance branch.
 - Post-target maintenance delta: PASS. All 26 commits after `23da5f1cb` through
   `14a1c8eb4` have decisions above. Nine latest PR backports retain source
   provenance; eight have stable patch IDs, and #6447 is an adapted signed `-x`
-  backport. #6460 and its revert have no net tree effect. The nine commits
-  after `14a1c8eb4` through `47ff46ff6` also have decisions; the #6460 reapply,
-  #6467 and their reverts have no net tree effect.
-- Protocol compatibility: PASS, rechecked after mono-internal#131.
+  backport. #6460 and its revert have no net tree effect. The eleven commits
+  after `14a1c8eb4` through `9790d8c22` also have decisions; the #6460 reapply,
+  #6467, mono-internal#131 and #152, and their reverts have no net tree effect.
+- Protocol compatibility: PASS, rechecked after mono-internal#170 reverted #131.
 - Backport reconciliation: PASS, 38 raw commits already shipped in 1.9.
 - Breaking review: PASS, no unresolved `MAYBE` rows. ChangeDB connection sizing
   is documented as an upgrade requirement.

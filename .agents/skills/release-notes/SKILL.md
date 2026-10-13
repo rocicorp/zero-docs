@@ -56,7 +56,7 @@ Create or update `.releases/<major>.<minor>/commits.md`. Do not redo completed r
 Record:
 
 - Release refs, SHAs, merge base, and commands used.
-- Protocol compatibility result.
+- Protocol compatibility and local database results.
 - A row for every commit in the raw range.
 - Potential breaking changes and their resolution.
 - Performance candidates, benchmark status, and whether coverage is original-suite or targeted/backported.
@@ -85,6 +85,21 @@ Present the completed audit to the human for review before drafting public notes
 Check protocol constants on both refs before drafting. The target's minimum supported sync protocol must be less than or equal to the previous release's protocol version.
 
 Record passing and failing results. An incompatible result is release-blocking; mark the responsible audit row `BREAKING` when identifiable.
+
+Zero supports one rollout order:
+
+- Deploy `zero-cache` before updating clients. A server accepts sync protocols from `MIN_SERVER_SUPPORTED_SYNC_PROTOCOL` through its own `PROTOCOL_VERSION` and closes connections from newer clients with `VersionNotSupported`.
+- Roll clients back before rolling `zero-cache` back, for the same reason.
+
+When `PROTOCOL_VERSION` changed in the range, the release notes must state this order.
+
+### Local Database
+
+The client's local database is named with `STORAGE_VERSION` from `packages/zero-client/src/client/storage-version.ts`, not with `PROTOCOL_VERSION`, so a protocol bump no longer moves it. Through Zero 1.10, every protocol bump did.
+
+Compare `STORAGE_VERSION` on both refs. When it changed, a client moving between the two releases, in either direction, opens a different local database, and the mutations it hasn't pushed stay behind in the one it left. Mark the responsible audit row `BREAKING` and name the affected versions under Breaking Changes.
+
+`storage-version.test.ts` pins what a client stores and fails when that changes. When its expected values changed in the range, confirm that `STORAGE_VERSION` changed with them, or that the PR explains why both versions can read what the other stores.
 
 ### Breaking Changes
 
@@ -240,7 +255,7 @@ Before presenting the final draft, confirm:
 - Every public item maps to evidence.
 - Every performance claim maps to saved benchmark results.
 - Performance prose is no broader than its chart.
-- Protocol compatibility is recorded.
+- Protocol compatibility and the `STORAGE_VERSION` comparison are recorded.
 - Breaking risks are resolved.
 - No draft TODO links remain.
 - Required product docs and release index are updated.

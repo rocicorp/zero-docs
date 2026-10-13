@@ -161,11 +161,12 @@ The agent owns setup, logs, and diagnosis. The human owns visual judgment, API-d
 
 1. Select an internal stack that exercises the published package or image.
 2. Capture the current version and a basic health baseline.
-3. Upgrade to the canary and verify sync, mutations, queries, reconnects, startup, and telemetry.
-4. Roll back to the previous version and verify compatibility and recovery.
+3. Upgrade `zero-cache` to the canary, then clients, and verify sync, mutations, queries, reconnects, startup, and telemetry.
+4. Roll clients back to the previous version, then `zero-cache`, and verify compatibility and recovery.
 5. Upgrade to the canary again and repeat the reduced health check.
-6. Record timing, errors, data correctness, metrics, and operator observations.
-7. Treat rollback failure, protocol incompatibility, data loss, or unrecoverable stale state as a release blocker.
+6. When `STORAGE_VERSION` is unchanged, check that mutations made offline survive each client upgrade and rollback: write while the server is unreachable, close the app, open the other version in the same browser or device, and confirm the write reaches the upstream database.
+7. Record timing, errors, data correctness, metrics, and operator observations.
+8. Treat rollback failure, protocol incompatibility, data loss, or unrecoverable stale state as a release blocker.
 
 Never perform a production or CloudZero rollout without explicit human approval. Follow the operational repository's incident and deployment instructions.
 

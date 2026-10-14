@@ -12,6 +12,8 @@ Zero manages a persistent connection to `zero-cache` with the following lifecycl
   invert="light"
 />
 
+Before this lifecycle starts, Zero is in the [`initializing`](#initializing) state while it loads local data. It then moves to `connecting` and never returns to `initializing`.
+
 ## Usage
 
 The current connection state is available in the `zero.connection.state` property. This is subscribable and also has reactive hooks for React and SolidJS:
@@ -40,6 +42,8 @@ function ConnectionStatus() {
   const state = useConnectionState()
 
   switch (state.name) {
+    case 'initializing':
+      return <div>Loading...</div>
     case 'connecting':
       return <div title={state.reason}>Connecting...</div>
     case 'connected':
@@ -64,6 +68,10 @@ function ConnectionStatus() {
 
   return (
     <Switch>
+      <Match when={state().name === 'initializing'}>
+        <div>Loading...</div>
+      </Match>
+
       <Match when={state().name === 'connecting'}>
         <div title={state().reason}>Connecting...</div>
       </Match>
@@ -91,6 +99,9 @@ function ConnectionStatus() {
 ```ts
 zero.connection.state.subscribe(state => {
   switch (state.name) {
+    case 'initializing':
+      console.log('Loading local data...')
+      break
     case 'connecting':
       console.log(`Connecting... ${state.reason}`)
       break
@@ -120,6 +131,7 @@ Zero [does not support offline writes](#why-zero-doesnt-support-offline-writes).
 
 | State          | Reads | Writes      |
 | -------------- | ----- | ----------- |
+| `initializing` | ✅    | ✅ (queued) |
 | `connecting`   | ✅    | ✅ (queued) |
 | `connected`    | ✅    | ✅          |
 | `disconnected` | ✅    | ❌          |
@@ -137,11 +149,25 @@ The easiest way to implement this is with a modal overlay that covers the entire
 
 ## Details
 
+### Initializing
+
+Zero starts in the `initializing` state. While `initializing`, Zero loads its local data. It has not contacted `zero-cache` yet.
+
+How long this takes depends on the device and the amount of local data, not on the network. On a slow device with a lot of local data, it can take tens of seconds.
+
+Once the local data is loaded, Zero transitions to `connecting`. Zero is only `initializing` once, right after it is created. When Zero reconnects later, it goes straight to `connecting`.
+
+Show a loading indicator while `initializing`, not an offline or error message. If your app warns the user when Zero takes too long to connect, start that timer when Zero enters `connecting`, not when you create Zero.
+
+There is no timeout while `initializing`, and the time spent here does not count against `disconnectTimeoutMs`. If the local data never finishes loading, Zero stays in `initializing`. To limit this, add your own timeout.
+
+Reads and writes are allowed while `initializing`. Queries return results once the local data is loaded. Writes are queued and are sent when Zero connects.
+
 ### Connecting
 
-Zero starts in the `connecting` state.
+Zero enters the `connecting` state after [`initializing`](#initializing).
 
-While `connecting`, Zero repeatedly tries to connect to `zero-cache`. After 1 minute of failed attempts, it transitions to `disconnected`. This timeout can be configured with the `disconnectTimeoutMs` constructor parameter:
+While `connecting`, Zero repeatedly tries to connect to `zero-cache`. After 1 minute of failed attempts, it transitions to `disconnected`. Time spent `initializing` does not count toward this minute. This timeout can be configured with the `disconnectTimeoutMs` constructor parameter:
 
 ```tsx
 const opts: ZeroOptions = {

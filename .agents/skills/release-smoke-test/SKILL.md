@@ -195,6 +195,7 @@ After the final non-canary release exists:
 6. Merge sample and docs changes only after the release manager confirms promotion timing.
 7. Release selected companion packages after their final Zero compatibility pass.
 8. In `rocicorp/mono-internal`, point `@rocicorp/zero-previous` in `packages/zql-integration-tests/package.json` at the new release (`npm:@rocicorp/zero@X.Y.Z`), so `previous-client.pg.test.ts` runs that client against zero-cache from `main`. If pnpm rejects the version as too new, add it to `minimumReleaseAgeExclude` in `pnpm-workspace.yaml`.
+9. In `zero-docs`, point the "API Reference" link in `lib/routes-config.ts` at the new release (`https://npmx.dev/package-docs/@rocicorp/zero/v/X.Y.Z#class-Zero`), and check that the page loads.
 
 ## Output Checklist
 
@@ -209,3 +210,4 @@ After the final non-canary release exists:
 - Canary rollover history.
 - Final-version replacement status.
 - Previous-release client test bumped to the final version.
+- API Reference link bumped to the final version.

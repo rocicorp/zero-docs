@@ -145,7 +145,7 @@ console.log(queries.posts.all.queryName)
 
 Query parameters are supplied by the client application and passed to the server automatically by Zero. This makes them unsuitable for credentials, since the user could modify them.
 
-For this reason, Zero queries also support the concept of a [`context` object](/docs/auth#context).
+For this reason, Zero queries also support the concept of a [`context` object](/docs/auth#define-the-context-type).
 
 Access your context with the `ctx` parameter to your query:
 
@@ -163,7 +163,7 @@ const myPostsQuery = defineQuery(({ctx: {userID}}) => {
   slug="without-default-types"
 >
 
-If you don't want to register your [Context](/docs/auth#context) and [Schema](/docs/schema#register-schema-type) types globally, you can use `defineQueryWithType` and `defineQueriesWithType`:
+If you don't want to register your [Context](/docs/auth#define-the-context-type) and [Schema](/docs/schema#register-schema-type) types globally, you can use `defineQueryWithType` and `defineQueriesWithType`:
 
 ```ts
 import {

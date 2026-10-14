@@ -260,7 +260,7 @@ When a mutator runs on the client (`tx.location === "client"`), ZQL reads only r
 
 Mutator parameters are supplied by the client application and passed to the server automatically by Zero. This makes them unsuitable for credentials, since the user could modify them.
 
-For this reason, Zero mutators also support the concept of a [`context` object](/docs/auth#context).
+For this reason, Zero mutators also support the concept of a [`context` object](/docs/auth#define-the-context-type).
 
 Access your context with the `ctx` parameter to your mutator:
 
@@ -285,7 +285,7 @@ const createIssue = defineMutator(
   slug="without-default-types"
 >
 
-If you don't want to register your [Context](/docs/auth#context) and [Schema](/docs/schema#register-schema-type) types globally, you can use `defineMutatorWithType` and `defineMutatorsWithType`:
+If you don't want to register your [Context](/docs/auth#define-the-context-type) and [Schema](/docs/schema#register-schema-type) types globally, you can use `defineMutatorWithType` and `defineMutatorsWithType`:
 
 <CodeGroup
   labels={[

@@ -327,7 +327,7 @@ To compare to a literal value, use the `cmpLit` helper:
 zql.issue.where(cmpLit('foobar', 'foo' + 'bar'))
 ```
 
-This is particularly useful for implementing [permissions](/docs/auth#read-permissions), because the first parameter can be a field of your [context](/docs/auth#context):
+This is particularly useful for implementing [permissions](/docs/auth#read-permissions), because the first parameter can be a field of your [context](/docs/auth#define-the-context-type):
 
 ```ts
 zql.issue.where(cmpLit(ctx.role, 'admin'))

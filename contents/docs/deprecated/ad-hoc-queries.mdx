@@ -23,6 +23,8 @@ const schema = createSchema({
 })
 ```
 
+Ad-hoc queries send their query ASTs directly to `zero-cache`, which rejects them by default. To allow them, also set [`ZERO_ALLOW_LEGACY_QUERIES`](/docs/zero-cache-config#allow-legacy-queries) to `true` on `zero-cache`.
+
 Once enabled, queries are available at `z.query.<tablename>`.
 
 ```tsx

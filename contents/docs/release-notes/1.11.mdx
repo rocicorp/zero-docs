@@ -41,6 +41,31 @@ Zero 1.11 shows cached query results sooner, recovers from client storage failur
 
 ## Performance
 
+### Client Cold Start
+
+Apps usually register their queries before Zero has loaded local data, for example when `useQuery` runs during startup. Zero 1.10 then pushed every loaded row through every registered query. Zero 1.11 waits until the data has loaded and hydrates each query once ([#6472](https://github.com/rocicorp/mono/pull/6472)). With 13 queries and about 30,000 local rows, startup is about **7x faster**, and about **8x faster** on React Native.
+
+<BenchmarkComparisonChart
+  title="Client Cold Start"
+  description="Measured on M5 Pro. Lower is better."
+  previousLabel="Zero 1.10"
+  currentLabel="Zero 1.11"
+  precision={2}
+  valuePrecision={0}
+  unit="ms"
+  higherIsBetter={false}
+  height={160}
+  data={[
+    {
+      name: '13 queries, 30,000 rows',
+      fullName:
+        '13 queries registered before 30,255 local rows load',
+      previous: 369.365,
+      current: 50.493
+    }
+  ]}
+/>
+
 ### Server-Side Incremental Updates
 
 When a transaction replicates, `zero-cache` brings every client group's queries up to date with it. Zero 1.11 does this about **2.5x faster**: with 100 client groups on one sync worker, each syncing a query with a related subquery, advancing through a transaction takes about 2.5x less CPU.
@@ -72,34 +97,59 @@ When a transaction replicates, `zero-cache` brings every client group's queries 
   ]}
 />
 
-### Client Cold Start
+### React Native
 
-Apps usually register their queries before Zero has loaded local data, for example when `useQuery` runs during startup. Zero 1.10 then pushed every loaded row through every registered query. Zero 1.11 waits until the data has loaded and hydrates each query once ([#6472](https://github.com/rocicorp/mono/pull/6472)). With 13 queries and about 30,000 local rows, startup is about **7x faster**.
+On React Native, Zero's query engine is about **1.6x faster** in Zero 1.11. Across 56 query engine benchmarks on Hermes, the geometric mean speedup is 1.63x and 48 benchmarks are more than 5% faster. Hydrating queries is 1.6x to 4.8x faster, and applying changes 1.2x to 2.2x faster.
 
 <BenchmarkComparisonChart
-  title="Client Cold Start"
-  description="Measured on M5 Pro. Lower is better."
+  title="React Native Query Engine"
+  description="Measured on M5 Pro in the iPhone 17 Pro simulator, release build. Lower is better."
   previousLabel="Zero 1.10"
   currentLabel="Zero 1.11"
   precision={2}
   valuePrecision={0}
   unit="ms"
   higherIsBetter={false}
-  height={160}
   data={[
     {
-      name: '13 queries, 30,000 rows',
+      name: 'Hydrate with relationships',
       fullName:
-        '13 queries registered before 30,255 local rows load',
-      previous: 369.365,
-      current: 50.493
+        'Hydrate issues with their creator and comments',
+      previous: 1124.004,
+      current: 683.86
+    },
+    {
+      name: 'Hydrate heavy query',
+      fullName: 'Hydrate a wide and deep query, limit 50',
+      previous: 1467.347,
+      current: 802.557
+    },
+    {
+      name: 'Add to heavy view',
+      fullName: 'Add an issue to a relationship-heavy view',
+      previous: 76.844,
+      current: 43.575
+    },
+    {
+      name: 'Edit in heavy view',
+      fullName:
+        'Edit an issue title in a relationship-heavy view',
+      previous: 65.902,
+      current: 49.895
+    },
+    {
+      name: '100 edits, 1,000 rows',
+      fullName:
+        'One transaction of 100 edits to a 1,000-row list',
+      previous: 303.702,
+      current: 142.456
     }
   ]}
 />
 
 ### Building and Hashing Queries
 
-Components build their queries on every render, and Zero hashes each query to identify it. Building the same query now returns the same object with its hash already computed ([#6469](https://github.com/rocicorp/mono/pull/6469)), so building and hashing a query is about **7x to 17x faster**, depending on its size.
+Components build their queries on every render, and Zero hashes each query to identify it. Building the same query again usually returns the same object, with its hash already computed ([#6469](https://github.com/rocicorp/mono/pull/6469)), so building and hashing a query is about **7x to 17x faster**, depending on its size.
 
 <BenchmarkComparisonChart
   title="Building and Hashing Queries"
@@ -133,8 +183,6 @@ Components build their queries on every render, and Zero hashes each query to id
     }
   ]}
 />
-
-{/* TODO: React Native benchmark results. */}
 
 ### Slower in Zero 1.11: Client Writes With Many Joined Queries
 

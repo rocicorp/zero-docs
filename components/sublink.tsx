@@ -6,9 +6,9 @@ import {
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
 import {SheetClose} from '@/components/ui/sheet';
-import {EachRoute} from '@/lib/routes-config';
+import {EachRoute, isExternalHref} from '@/lib/routes-config';
 import {cn} from '@/lib/utils';
-import {ChevronRight} from 'lucide-react';
+import {ArrowUpRight, ChevronRight} from 'lucide-react';
 import {usePathname} from 'next/navigation';
 import {useEffect, useMemo, useState} from 'react';
 import Anchor from './anchor';
@@ -30,6 +30,7 @@ export default function SubLink({
   );
 
   const [isOpen, setIsOpen] = useState(level == 0);
+  const isExternal = isExternalHref(href);
 
   useEffect(() => {
     if (itemsIncludesPath) {
@@ -42,8 +43,10 @@ export default function SubLink({
       className="flex items-center hover:text-primary"
       activeClassName="text-primary font-semibold"
       href={href ?? ''}
+      {...(isExternal && {target: '_blank', rel: 'noopener noreferrer'})}
     >
       <span>{title}</span>
+      {isExternal && <ArrowUpRight className="ml-0.5 h-3.5 w-3.5" />}
       {isNew && (
         <span className="new-badge ml-2 rounded px-1 py-0.5 text-xs font-semibold border">
           NEW
@@ -106,7 +109,9 @@ export default function SubLink({
             {items?.map(innerLink => {
               const modifiedItems = {
                 ...innerLink,
-                href: `${href ?? ''}${innerLink.href ?? ''}`,
+                href: isExternalHref(innerLink.href)
+                  ? innerLink.href
+                  : `${href ?? ''}${innerLink.href ?? ''}`,
                 level: level + 1,
                 isSheet,
                 noLink: innerLink.href === null,

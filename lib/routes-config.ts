@@ -46,6 +46,10 @@ export const ROUTES = [
       {title: 'ZQL on the Server', href: '/server-zql'},
       {title: 'Connection Status', href: '/connection'},
       {title: 'REST APIs', href: '/rest'},
+      {
+        title: 'API Reference',
+        href: 'https://npmx.dev/package-docs/@rocicorp/zero/v/1.10.0#class-Zero',
+      },
     ],
   },
 
@@ -134,6 +138,10 @@ export const ROUTES = [
   },
 ] as const satisfies EachRoute[];
 
+export function isExternalHref(href: string | null | undefined) {
+  return !!href && /^https?:\/\//.test(href);
+}
+
 type Page = {title: string; href: string};
 export type LlmSection = {title: string; pages: Page[]};
 
@@ -143,6 +151,8 @@ function getRecursiveAllLinks(node: EachRoute) {
     ans.push({title: node.title, href: node.href});
   }
   node.items?.forEach(subNode => {
+    // External links only appear in the sidebar, not in pagination or llms.txt.
+    if (isExternalHref(subNode.href)) return;
     const temp = {...subNode, href: `${node.href ?? ''}${subNode.href ?? ''}`};
     ans.push(...getRecursiveAllLinks(temp));
   });

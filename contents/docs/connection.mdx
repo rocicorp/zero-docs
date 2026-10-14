@@ -255,6 +255,63 @@ Most applications will never call `close()`, and even if they do, they should no
 
 Reads and writes are both rejected while Zero is in the `closed` state.
 
+## Storage Failures
+
+Zero saves synced data on the device: in IndexedDB in the browser, or in SQLite on [React Native](/docs/react-native). This storage can fail. For example, the device can run out of space, or the database can fail to open.
+
+When this happens, Zero calls `onStorageFailure` once with a `StorageFailureError`. Its `kind` says what failed:
+
+| `kind`        | Meaning                                 |
+| ------------- | --------------------------------------- |
+| `full`        | The device is out of space.             |
+| `cannot-open` | The database can't be opened.           |
+| `io-error`    | A read or write to the database failed. |
+
+In the browser, Zero reports a storage failure only when IndexedDB fails to open: `full` if the browser says the disk is full, otherwise `cannot-open`.
+
+Zero keeps working after a storage failure:
+
+- **If storage fails while Zero is starting**, Zero runs in memory for the rest of the session, as if you had set `kvStore: 'mem'`. Nothing is saved on the device.
+- **If storage fails later**, Zero stops saving data on the device. Queries and mutations keep working on the data in memory, and mutations are still sent to `zero-cache`. A read that needs data Zero hasn't loaded into memory can still fail.
+
+Zero tries the device's storage again only when the app creates a new `Zero` instance, for example after a restart.
+
+By default, Zero only logs the failure. Use `onStorageFailure` to tell the user what to do:
+
+```ts
+import type {ZeroOptions} from '@rocicorp/zero'
+
+const opts: ZeroOptions = {
+  // ...
+  onStorageFailure: failure => {
+    // showBanner stands in for your app's own UI.
+    if (failure.kind === 'full') {
+      showBanner(
+        'Your device is out of space. Free up some space, then restart the app.'
+      )
+    } else {
+      showBanner(
+        'Data could not be saved on this device. Restart the app to try again.'
+      )
+    }
+  }
+}
+```
+
+`StorageFailureError` is exported from `@rocicorp/zero`. Its `cause` is the original error from the browser or the SQLite driver. A custom `kvStore` can throw a `StorageFailureError` to get the same handling.
+
+### Checking the Store
+
+`zero.kvStore.kind` tells you which storage Zero is using: `'idb'`, `'mem'`, `'expo-sqlite'`, or `'op-sqlite'`. A custom store reports its own `kind`, if it sets one.
+
+```ts
+if (zero.kvStore.kind === 'mem') {
+  // Data is not saved on this device.
+}
+```
+
+Without IndexedDB, `kind` is `'mem'` from the start and `onStorageFailure` isn't called. When IndexedDB fails to open, `kind` changes to `'mem'` only when Zero first reads or writes the store, so check `kind` when you need it, not once at startup.
+
 ## Why Zero Doesn't Support Offline Writes
 
 Supporting offline writes in collaborative applications is inherently difficult, and no sync engine or CRDT algorithm can automatically solve it for you. Despite what their marketing says 😉.

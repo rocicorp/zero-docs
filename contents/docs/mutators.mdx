@@ -866,9 +866,9 @@ If you want a different behavior, it is possible to [implement the mutate endpoi
 
 ### Retrying Mutators
 
-Some errors go away if you try again. For example, at the `repeatable read` or `serializable` [isolation level](/docs/server-zql#isolation-level), Postgres can abort a transaction that conflicts with a concurrent one. The error is a serialization failure, code `40001`.
+Some errors go away on a second try. At the `repeatable read` and `serializable` [isolation levels](/docs/server-zql#isolation-level), for example, Postgres can abort a transaction that conflicts with a concurrent one. It fails with a serialization failure, code `40001`.
 
-Call `tx.retryOn()` in a server mutator to have Zero run the mutator again, in a fresh transaction, when it fails with an error you choose:
+To have Zero run a server mutator again in a fresh transaction when it fails with an error like that, call `tx.retryOn()`:
 
 ```ts
 function isSerializationFailure(error: unknown) {
@@ -911,14 +911,13 @@ tx.retryOn(async (error, attempt) => {
 })
 ```
 
-A few things to know:
+`retryOn()` only applies to the current run. The re-run starts the mutator from the top and calls `retryOn()` again, so call it before anything that can fail. You can call it more than once, and Zero runs the mutator again if any predicate returns `true`.
 
-- `retryOn()` covers only the current run. The re-run calls it again because it runs the mutator again. Call it before anything that can fail.
-- You can call `retryOn()` more than once. Zero runs the mutator again if any predicate returns `true`.
-- Zero runs a mutator at most 5 times per mutation in each request to your mutate endpoint. If the last run fails, Zero records the error.
-- The predicate runs after the transaction has ended, so it can't use `tx`. Reading or writing through `tx` there throws.
-- Only retry mutators that are safe to run more than once. Work outside the database, such as sending an email, isn't rolled back.
-- `retryOn()` is only available on the server, when `tx.location === 'server'`.
+Zero runs a mutator at most 5 times per mutation in each request to your mutate endpoint. If the last run also fails, Zero records the error.
+
+The predicate runs after the transaction has ended, so it can't use `tx`: reading or writing through `tx` there throws.
+
+Only retry mutators that are safe to run more than once. Work outside the database, such as sending an email, isn't rolled back. `retryOn()` only exists on the server, when `tx.location === 'server'`.
 
 <Note
   heading="Custom `Database` implementations"
@@ -1159,7 +1158,7 @@ const createIssue = defineMutator(
 )
 ```
 
-The `data` of the `.client` result is what the client run returned. The `data` of the `.server` result is what the server run returned:
+The `.client` result's `data` is what the client run returned, and the `.server` result's `data` is what the server run returned:
 
 ```ts
 const write = zero.mutate(
@@ -1179,12 +1178,9 @@ if (serverRes.type === 'success') {
 }
 ```
 
-A few things to know:
+`data` is typed as `ReadonlyJSONValue | undefined` rather than as the mutator's return type, so check its shape before you use it. A mutator that returns nothing gives `undefined`.
 
-- `data` is typed as `ReadonlyJSONValue | undefined`, not as the mutator's return type. Check its shape before you use it.
-- If the mutator returns nothing, `data` is `undefined`.
-- The server value only reaches the client if your [mutate handler](#implementing-the-endpoint) returns the mutator's result, as `return mutator.fn({args, tx})` does in the examples above.
-- Zero saves the server's return value in your database along with the mutation's result, so the client still gets it if the response from your mutate endpoint is lost. A mutator that returns nothing doesn't write this.
+The server's value only reaches the client if your [mutate handler](#implementing-the-endpoint) returns the mutator's result, as `return mutator.fn({args, tx})` does in the examples above. Zero also saves that value in your database with the mutation's result, so the client still gets it if the response from your mutate endpoint is lost. Nothing is saved for a mutator that returns nothing.
 
 ## Permissions
 

@@ -584,7 +584,7 @@ const results = await zero.run(
 )
 ```
 
-To also accept a result the server confirmed during a previous session, pass `{type: 'cached'}`. It resolves as soon as the result is [`cached`](#cached-results) or `complete`, so it doesn't wait for the server when the client already stores a confirmed result:
+Pass `{type: 'cached'}` to also accept a result the server confirmed in an earlier session. It resolves as soon as the result is [`cached`](#cached-results) or `complete`, so it can return without waiting for the server:
 
 ```tsx
 const results = await zero.run(
@@ -610,7 +610,7 @@ zero.preload(
 )
 ```
 
-`preload()` returns `cleanup`, which ends the preload (Zero keeps its rows for the query's [TTL](#ttls)), and two promises: `complete` resolves once the server has returned the result, and `cached` resolves once the result is [`cached`](#cached-results) or `complete`.
+`preload()` returns three things. `cleanup` ends the preload, and Zero keeps the rows for the query's [TTL](#ttls). `complete` is a promise that resolves once the server returns the result, and `cached` resolves once the result is [`cached`](#cached-results) or `complete`.
 
 ## Missing Data
 
@@ -778,7 +778,7 @@ view.addListener((issues, resultType) => {
 
 The possible values of `result.type` are:
 
-- `unknown`: the data Zero has on the client. Some of it may be missing.
+- `unknown`: whatever data the client has right now, which may be incomplete.
 - `cached`: the client stores a result that the server confirmed during a previous session. See [Cached Results](#cached-results).
 - `complete`: the server has returned the result during this session.
 - `error`: the query failed. See [Handling Errors](#handling-errors).
@@ -787,9 +787,11 @@ The `complete` value is currently only returned when Zero has received the serve
 
 ### Cached Results
 
-When Zero stores data on the client (in IndexedDB, or SQLite on React Native), it also remembers which query results the server confirmed. If the client still holds such a result when the app starts again, the query starts as `cached` instead of `unknown`, and becomes `complete` once the server returns the result in this session. If Zero evicts the stored result before then, the query goes back to `unknown`.
+Along with the data it stores on the client (IndexedDB in the browser, SQLite on React Native), Zero remembers which query results the server has confirmed. When the app starts again and the client still has one of those results, the query starts out `cached` instead of `unknown`. It becomes `complete` once the server sends the result again. If Zero evicts the stored result first, the query drops back to `unknown`.
 
-A `cached` result was complete when the server sent it, but it may be out of date. Use it where a previous session's answer is good enough, for example to show stored data or an empty state without waiting for the server, which also works while offline. Wait for `complete` where the data must be current:
+A `cached` result was complete when the server sent it, but it may be stale by now. It's good for showing stored data, or an empty state, without waiting for the server, and that works offline too. If the data has to be current, wait for `complete`.
+
+For example, to show an empty inbox without waiting for the server:
 
 <CodeGroup
   labels={[
@@ -847,7 +849,7 @@ view.addListener((issues, resultType) => {
 
 </CodeGroup>
 
-`zero.run(query, {type: 'cached'})` and the `cached` promise from `zero.preload()` resolve on a `cached` or `complete` result. `{type: 'complete'}` and the `complete` promise still wait for the server.
+`zero.run()` and `zero.preload()` can also return as soon as a result is `cached`: pass `{type: 'cached'}` to `run()`, or wait on the `cached` promise that `preload()` returns.
 
 ## Handling Errors
 

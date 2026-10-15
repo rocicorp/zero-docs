@@ -148,11 +148,9 @@ This example passes ZQL to `useQuery` directly, so it runs [only on the client](
 
 Calls to [registered queries](/docs/queries#query-registries) work a little differently. Each call like `queries.posts.byStatus({status})` returns a new object. You can still pass it inline: `useQuery` sees that it's the same query with the same arguments and reuses its previous work. But don't use the returned object as a dependency. Use its arguments instead.
 
-Keep in mind:
+Identity follows the order you build a query in. `zql.issue.where('status', 'open').where('priority', 'high')` and `zql.issue.where('priority', 'high').where('status', 'open')` return the same rows but can be different objects. A different value, such as another ID in `where()`, always gives a different object.
 
-- Identity follows how you build a query. `zql.issue.where('status', 'open').where('priority', 'high')` and `zql.issue.where('priority', 'high').where('status', 'open')` return the same rows, but they can be different objects.
-- A different value, such as a different ID in `where()`, gives a different object.
-- Identity is an optimization, not a promise. Zero can hand back a new object for a query it has built before. When that happens, an effect or memo that depends on the query just runs again, so make sure that's safe.
+Zero doesn't guarantee identity, though. It can hand back a new object for a query it has built before. When that happens, an effect or memo that depends on the query runs again, so make sure that's safe.
 
 ## Examples
 

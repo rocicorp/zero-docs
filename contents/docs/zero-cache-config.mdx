@@ -568,7 +568,7 @@ env: `ZERO_NUM_SYNC_WORKERS`<br/>
 
 ### Operator Password
 
-A password that grants access only to the diagnostic endpoints that cannot expose application data. People who operate `zero-cache` can use it to diagnose the server without being able to read the data it serves. These endpoints are:
+A password for the diagnostic endpoints that can't expose application data, so the people who run `zero-cache` can debug it without being able to read the data it serves. It grants access to:
 
 - `/profz` and `/profrmz`: CPU profiles. Profiles served for the operator password have the source of every regular expression redacted, since those can contain `LIKE` patterns from client queries.
 - `/statz`: counts and sizes.

@@ -12,7 +12,7 @@ Zero manages a persistent connection to `zero-cache` with the following lifecycl
   invert="light"
 />
 
-Before this lifecycle starts, Zero is in the [`initializing`](#initializing) state while it loads local data. It then moves to `connecting` and never returns to `initializing`.
+Before any of this, Zero is [`initializing`](#initializing) while it loads local data. After that it moves to `connecting` and never goes back.
 
 ## Usage
 
@@ -151,17 +151,15 @@ The easiest way to implement this is with a modal overlay that covers the entire
 
 ### Initializing
 
-Zero starts in the `initializing` state. While `initializing`, Zero loads its local data. It has not contacted `zero-cache` yet.
+Zero starts in the `initializing` state, where it loads its local data. It hasn't contacted `zero-cache` yet, so the network plays no part. How long this takes depends on the device and on how much data is stored locally. On a slow device with a lot of data, it can take tens of seconds.
 
-How long this takes depends on the device and the amount of local data, not on the network. On a slow device with a lot of local data, it can take tens of seconds.
+When the data is loaded, Zero moves to `connecting`. This only happens once, right after Zero is created. Later reconnects go straight to `connecting`.
 
-Once the local data is loaded, Zero transitions to `connecting`. Zero is only `initializing` once, right after it is created. When Zero reconnects later, it goes straight to `connecting`.
+While `initializing`, show a loading indicator rather than an offline or error message. If your app warns the user when Zero takes too long to connect, start that timer when Zero enters `connecting`.
 
-Show a loading indicator while `initializing`, not an offline or error message. If your app warns the user when Zero takes too long to connect, start that timer when Zero enters `connecting`, not when you create Zero.
+There is no timeout while `initializing`, and the time doesn't count against `disconnectTimeoutMs`. If the local data never finishes loading, Zero stays in `initializing`, so add your own timeout if you need one.
 
-There is no timeout while `initializing`, and the time spent here does not count against `disconnectTimeoutMs`. If the local data never finishes loading, Zero stays in `initializing`. To limit this, add your own timeout.
-
-Reads and writes are allowed while `initializing`. Queries return results once the local data is loaded. Writes are queued and are sent when Zero connects.
+Reads and writes are allowed. Queries return results once the local data is loaded, and writes are queued until Zero connects.
 
 ### Connecting
 
@@ -257,9 +255,9 @@ Reads and writes are both rejected while Zero is in the `closed` state.
 
 ## Storage Failures
 
-Zero saves synced data on the device: in IndexedDB in the browser, or in SQLite on [React Native](/docs/react-native). This storage can fail. For example, the device can run out of space, or the database can fail to open.
+Zero stores synced data on the device, in IndexedDB in the browser or SQLite on [React Native](/docs/react-native). Sometimes that fails: the device runs out of space, or the database won't open.
 
-When this happens, Zero calls `onStorageFailure` once with a `StorageFailureError`. Its `kind` says what failed:
+When it does, Zero calls `onStorageFailure` once with a `StorageFailureError`. Its `kind` says what went wrong:
 
 | `kind`        | Meaning                                 |
 | ------------- | --------------------------------------- |
@@ -269,12 +267,9 @@ When this happens, Zero calls `onStorageFailure` once with a `StorageFailureErro
 
 In the browser, Zero reports a storage failure only when IndexedDB fails to open: `full` if the browser says the disk is full, otherwise `cannot-open`.
 
-Zero keeps working after a storage failure:
+Zero keeps working either way. If storage fails while Zero is starting, Zero runs in memory for the rest of the session, as if you had set `kvStore: 'mem'`, and nothing is saved on the device. If it fails later, Zero stops saving to the device. Queries and mutations keep working on the data in memory and mutations are still sent to `zero-cache`, but a read that needs data Zero hasn't loaded into memory can still fail.
 
-- **If storage fails while Zero is starting**, Zero runs in memory for the rest of the session, as if you had set `kvStore: 'mem'`. Nothing is saved on the device.
-- **If storage fails later**, Zero stops saving data on the device. Queries and mutations keep working on the data in memory, and mutations are still sent to `zero-cache`. A read that needs data Zero hasn't loaded into memory can still fail.
-
-Zero tries the device's storage again only when the app creates a new `Zero` instance, for example after a restart.
+Zero only tries the device's storage again when the app creates a new `Zero` instance, for example after a restart.
 
 By default, Zero only logs the failure. Use `onStorageFailure` to tell the user what to do:
 

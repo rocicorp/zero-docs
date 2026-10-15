@@ -68,7 +68,7 @@ Apps usually register queries before Zero has finished loading local data, for e
 
 ### Server-Side Incremental Updates
 
-When a transaction replicates, `zero-cache` has to bring every client group's queries up to date. Zero 1.11 does this with about **2.5x \*\***less CPU\*\*. We measured 100 client groups on one sync worker, each syncing a query with a related subquery.
+When a transaction replicates, `zero-cache` has to bring every client group's queries up to date. Zero 1.11 does this with about **2.5x less CPU**. We measured 100 client groups on one sync worker, each syncing a query with a related subquery.
 
 <BenchmarkComparisonChart
   title="Server-Side Incremental Updates"

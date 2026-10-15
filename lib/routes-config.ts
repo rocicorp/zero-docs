@@ -39,6 +39,7 @@ export const ROUTES = [
     href: null,
     items: [
       {title: 'Schema', href: '/schema'},
+      {title: 'Column Codecs', href: '/codecs'},
       {title: 'Authentication', href: '/auth'},
       {title: 'Reading Data', href: '/queries'},
       {title: 'Writing Data', href: '/mutators'},

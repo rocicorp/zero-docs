@@ -48,7 +48,7 @@ export const ROUTES = [
       {title: 'REST APIs', href: '/rest'},
       {
         title: 'API Reference',
-        href: 'https://npmx.dev/package-docs/@rocicorp/zero/v/1.10.0#class-Zero',
+        href: 'https://npmx.dev/package-docs/@rocicorp/zero/v/1.11.0#class-Zero',
       },
     ],
   },

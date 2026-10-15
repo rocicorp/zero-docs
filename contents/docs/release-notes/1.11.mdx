@@ -99,7 +99,7 @@ When a transaction replicates, `zero-cache` has to bring every client group's qu
 
 ### React Native
 
-Zero's query engine is about **1.6x faster** on React Native. That's the geometric mean of 56 query engine benchmarks on Hermes, and 48 of them got more than 5% faster. Hydrating queries is 1.6x to 4.8x faster, and applying changes 1.2x to 2.2x faster.
+Zero's query engine is about **1.7x faster** on React Native. That's the geometric mean of 53 query engine benchmarks on Hermes, and 48 of them got more than 5% faster. Hydrating queries is 1.6x to 4.8x faster, and applying changes 1.2x to 2.2x faster.
 
 <BenchmarkComparisonChart
   title="React Native Query Engine"
@@ -265,7 +265,7 @@ This is the one benchmark that got slower. With 300 open queries, each joining t
 
 - **Legacy queries:** `zero-cache` now rejects queries sent directly by clients. If you still use legacy queries, set [`ZERO_ALLOW_LEGACY_QUERIES=true`](/docs/zero-cache-config#allow-legacy-queries) or move to [custom queries](/docs/queries). ([#6399](https://github.com/rocicorp/mono/pull/6399))
 - **New states:** if your code switches over every result type or connection state, handle `'cached'` and `'initializing'`. Treat `'cached'` like `'unknown'`: the data may be out of date. ([#6578](https://github.com/rocicorp/mono/pull/6578), [#6561](https://github.com/rocicorp/mono/pull/6561))
-- **Litestream v5 by default:** remove the `ZERO_LITESTREAM_VFS_*` options; they no longer exist. Each replication-manager backs up to its own folder under the backup URL, so end the URL with `/` and add a lifecycle policy to your bucket. To keep v4 backups, set `ZERO_LITESTREAM_BACKUP_USING_V5=false`. If you set `ZERO_LITESTREAM_EXECUTABLE_V5`, use a Litestream build with `-fork-to-url`. ([fb536f686](https://github.com/rocicorp/mono/commit/fb536f686), [c1a586810](https://github.com/rocicorp/mono/commit/c1a586810))
+- **Litestream v5 by default:** remove the `ZERO_LITESTREAM_VFS_*` options; they no longer exist. Each replication-manager backs up to its own folder under the backup URL, so end the URL with `/` and add a lifecycle policy to your bucket. To keep writing legacy WAL backups with Litestream v0.3, set `ZERO_LITESTREAM_BACKUP_USING_V5=false`. If you set `ZERO_LITESTREAM_EXECUTABLE_V5`, use a Litestream build with `-fork-to-url`. ([fb536f686](https://github.com/rocicorp/mono/commit/fb536f686), [c1a586810](https://github.com/rocicorp/mono/commit/c1a586810))
 - **Changed defaults:** inactive client groups are kept for 168 hours (was 48), replication lag is reported every 10 seconds (was 30), and `ZERO_CHANGE_STREAMER_FLOW_CONTROL_CONSENSUS_TIMEOUT_PROPORTION` is 4 (was 2). Startup can take longer while `zero-cache` waits for a backup and for replication to catch up, so give readiness probes more time. ([#6484](https://github.com/rocicorp/mono/pull/6484), [1c5ddcdb4](https://github.com/rocicorp/mono/commit/1c5ddcdb4), [#6521](https://github.com/rocicorp/mono/pull/6521), [#6465](https://github.com/rocicorp/mono/pull/6465))
 - **Server mutators:** return values must be JSON. A custom `Database` must pass `addRetryPredicate` on to the transaction it creates, or `tx.retryOn()` won't work. Using `tx` after its transaction has ended now throws. ([7756eb9bb](https://github.com/rocicorp/mono/commit/7756eb9bb), [4fe91c0d8](https://github.com/rocicorp/mono/commit/4fe91c0d8))
 - **`ZQLDatabase.run()`** no longer wraps reads in a transaction, so per-transaction settings such as `SET LOCAL` don't apply to it. ([#6577](https://github.com/rocicorp/mono/pull/6577))

@@ -151,7 +151,7 @@ The easiest way to implement this is with a modal overlay that covers the entire
 
 ### Initializing
 
-Zero starts in the `initializing` state, where it loads its local data. It hasn't contacted `zero-cache` yet, so the network plays no part. How long this takes depends on the device and on how much data is stored locally. On a slow device with a lot of data, it can take tens of seconds.
+Zero starts in the `initializing` state, where it loads its local data. It hasn't contacted `zero-cache` yet, so the network plays no part. How long this takes depends on the device and on how much data is stored locally. On a slow device with a lot of data, it can take many seconds.
 
 When the data is loaded, Zero moves to `connecting`. This only happens once, right after Zero is created. Later reconnects go straight to `connecting`.
 

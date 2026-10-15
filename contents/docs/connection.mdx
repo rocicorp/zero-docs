@@ -201,7 +201,7 @@ Once Zero connects to `zero-cache` and syncs the first time, it transitions to t
 
 After the `disconnectTimeoutMs` elapses while in the `connecting` state, Zero transitions to `disconnected`. Zero also transitions to `disconnected` when the tab is hidden for `hiddenTabDisconnectDelay` (default 5 minutes).
 
-While `disconnected`, Zero continues to try to reconnect to `zero-cache` every 5 seconds.
+While `disconnected`, Zero continues to try to reconnect to `zero-cache` every 5 seconds. After a hidden-tab disconnect, Zero instead waits until the tab is visible again, then goes back to `connecting`.
 
 Reads are allowed while `disconnected`, but writes are rejected and return an offline error. See [Offline](#offline) for more information.
 

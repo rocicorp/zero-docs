@@ -20,11 +20,11 @@ npm install @rocicorp/zero@1.11
 
 ## Overview
 
-Zero 1.11 can show cached query results right away, keeps working when local storage fails, and makes Litestream v5 the default for backups. Client cold start is about 7x faster in our benchmarks. There are also a lot of fixes, especially in queries and replication.
+Zero 1.11 tells you when local query results were already confirmed by the server, keeps working when local storage fails, and makes Litestream v5 the default for backups. Client cold start is about 7x faster in our benchmarks. There are also a lot of fixes, especially in queries and replication.
 
 ## Features
 
-- Queries can now start with results that a previous session saved on the device. These come back with the new [`'cached'` result type](/docs/queries#cached-results), so you can show them right away and still tell them apart from data the server has confirmed. ([#6578](https://github.com/rocicorp/mono/pull/6578)) (thanks [@pawarren](https://github.com/pawarren)!)
+- Queries now tell you when their local data is a result the server confirmed in an earlier session: they start with the new [`'cached'` result type](/docs/queries#cached-results) instead of `'unknown'`. That's enough to show stored data or an empty state without waiting for the server, even offline. ([#6578](https://github.com/rocicorp/mono/pull/6578)) (thanks [@pawarren](https://github.com/pawarren)!)
 - Building the same query again usually gives you the same `Query` object. `useQuery` no longer rebuilds and rehashes its query on every render, and queries built inline work as [React dependencies](/docs/react#query-identity). ([#6469](https://github.com/rocicorp/mono/pull/6469), [#6496](https://github.com/rocicorp/mono/pull/6496)) (thanks [@charpeni](https://github.com/charpeni)!)
 - Zero starts in a new [`'initializing'` connection state](/docs/connection#initializing) while it loads local data, and slow loading doesn't count against the connect timeout anymore. ([#6561](https://github.com/rocicorp/mono/pull/6561))
 - If local storage can't be opened, fills up, or hits I/O errors, Zero reports it once through the new [`onStorageFailure`](/docs/connection#storage-failures) option and keeps running in memory. `zero.kvStore` tells you which store is in use. ([#6585](https://github.com/rocicorp/mono/pull/6585), [#6657](https://github.com/rocicorp/mono/pull/6657), [#6686](https://github.com/rocicorp/mono/pull/6686)) (thanks [@pawarren](https://github.com/pawarren) and [@Karavil](https://github.com/Karavil)!)

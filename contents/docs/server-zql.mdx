@@ -287,6 +287,84 @@ export const mutators = defineMutators({
 
 </CodeGroup>
 
+### Isolation Level
+
+By default, each transaction starts with a plain `BEGIN`, so Postgres uses its default isolation level. On a stock Postgres, that is `read committed`.
+
+To use a different level, pass `isolationLevel` in the options argument of the adapter factory. It can be `'read committed'`, `'repeatable read'`, or `'serializable'`:
+
+<CodeGroup
+  labels={[
+    {
+      text: 'Drizzle',
+      sync: {pgClient: 'drizzle'},
+    },
+    {
+      text: 'Kysely',
+      sync: {pgClient: 'kysely'},
+    },
+    {
+      text: 'Prisma',
+      sync: {pgClient: 'prisma'},
+    },
+    {
+      text: 'node-postgres',
+      sync: {pgClient: 'node-postgres'},
+    },
+    {
+      text: 'postgres.js',
+      sync: {pgClient: 'postgres-js'},
+    },
+  ]}
+>
+
+```ts
+export const dbProvider = zeroDrizzle(
+  schema,
+  drizzleClient,
+  {
+    isolationLevel: 'serializable'
+  }
+)
+```
+
+```ts
+export const dbProvider = zeroKysely(schema, kysely, {
+  isolationLevel: 'serializable'
+})
+```
+
+```ts
+// Use the Postgres spelling, not Prisma's 'Serializable'.
+export const dbProvider = zeroPrisma(schema, prisma, {
+  isolationLevel: 'serializable'
+})
+```
+
+```ts
+// The third argument is an optional logger.
+export const dbProvider = zeroNodePg(
+  schema,
+  pool,
+  undefined,
+  {
+    isolationLevel: 'serializable'
+  }
+)
+```
+
+```ts
+export const dbProvider = zeroPostgresJS(schema, sql, {
+  isolationLevel: 'serializable'
+})
+```
+
+</CodeGroup>
+
+Every transaction the adapter opens uses this level, including the ones your mutators run in. The `TransactionOptions` and `IsolationLevel` types are exported from `@rocicorp/zero/server`.
+
+At `repeatable read` and `serializable`, Postgres can abort a transaction that conflicts with a concurrent one. Use [`tx.retryOn()`](/docs/mutators#retrying-mutators) to run the mutator again when that happens.
+
 ### Custom Database
 
 To implement support for some other Postgres bindings library, you will implement the `DBConnection` interface.

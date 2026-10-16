@@ -22,11 +22,23 @@ A password used to administer zero-cache server, for example to access the `/sta
 
 This is required in production (when `NODE_ENV=production`) because we want all Zero servers to be debuggable using admin tools by default, without needing a restart. But we also don't want to expose sensitive data using them.
 
+The admin password also grants access to everything that the [operator password](#operator-password) does.
+
 flag: `--admin-password`<br/>
 env: `ZERO_ADMIN_PASSWORD`<br/>
 required: in production (when `NODE_ENV=production`)
 
 ## Optional Flags
+
+### Allow Legacy Queries
+
+Allows clients to send query ASTs directly to `zero-cache`. [Ad-hoc queries](/docs/deprecated/ad-hoc-queries) (also called legacy queries) work this way.
+
+When this is `false`, `zero-cache` rejects client-sent ASTs without parsing them and closes the connection with an error. Keep it disabled when you use [queries](/docs/queries).
+
+flag: `--allow-legacy-queries`<br/>
+env: `ZERO_ALLOW_LEGACY_QUERIES`<br/>
+default: `false`
 
 ### App ID
 
@@ -82,7 +94,7 @@ Use this to bound how long already-open connections can continue after logout, s
 
 flag: `--auth-revalidate-interval-seconds`<br/>
 env: `ZERO_AUTH_REVALIDATE_INTERVAL_SECONDS`<br/>
-default: `unset`
+default: `300`
 
 ### Auth Retransform Interval Seconds
 
@@ -96,7 +108,7 @@ If clients already call `updateAuth` whenever auth changes, this mainly serves a
 
 flag: `--auth-retransform-interval-seconds`<br/>
 env: `ZERO_AUTH_RETRANSFORM_INTERVAL_SECONDS`<br/>
-default: `unset`
+default: `300`
 
 ### Auto Reset
 
@@ -131,13 +143,13 @@ default: `0.04`
 
 During periodic flow-control checks, this is the amount of additional time to wait after the majority of serving replicas have acknowledged a checkpoint, expressed as a proportion of the time the majority took. Replication continues after that timeout even if some serving replicas have not acknowledged the checkpoint. A backup replica that is still catching up does not delay caught-up serving replicas; once caught up, the backup must acknowledge the checkpoint before replication continues.
 
-For example, if the majority responds in 2.5 ms, a proportion of `2` waits up to another 5 ms. The default lets a subscriber take roughly three times as long as the majority before early release. This bounds the effect of a lagging or unresponsive subscriber while allowing for normal processing-time variance.
+For example, if the majority responds in 2.5 ms, a proportion of `2` waits up to another 5 ms. The default lets a subscriber take roughly five times as long as the majority before early release. This bounds the effect of a lagging or unresponsive subscriber while allowing for normal processing-time variance.
 
 This value is a ratio, not a duration in seconds. Set it to a negative number to disable early releases and wait for all subscribers.
 
 flag: `--change-streamer-flow-control-consensus-timeout-proportion`<br/>
 env: `ZERO_CHANGE_STREAMER_FLOW_CONTROL_CONSENSUS_TIMEOUT_PROPORTION`<br/>
-default: `2`
+default: `4`
 
 ### Change Streamer Flow Control Slow Subscriber Grace Period Seconds
 
@@ -150,26 +162,6 @@ Set this to `0` or a negative number to disable slow-subscriber resets.
 flag: `--change-streamer-flow-control-slow-subscriber-grace-period-seconds`<br/>
 env: `ZERO_CHANGE_STREAMER_FLOW_CONTROL_SLOW_SUBSCRIBER_GRACE_PERIOD_SECONDS`<br/>
 default: `30`
-
-### Change Streamer Mode
-
-The mode for running or connecting to the change-streamer:
-
-- `dedicated`: runs the change-streamer and shuts down when another
-  change-streamer takes over the replication slot. This is appropriate in a
-  single-node configuration, or for the replication-manager in a
-  multi-node configuration.
-- `discover`: connects to the change-streamer as internally advertised in the
-  change-db. This is appropriate for the view-syncers in a multi-node setup.
-  This may not work in all networking configurations (e.g., some private
-  networking or port forwarding setups). Using `ZERO_CHANGE_STREAMER_URI` with
-  an explicit routable hostname is recommended instead.
-
-This option is ignored if `ZERO_CHANGE_STREAMER_URI` is set.
-
-flag: `--change-streamer-mode`<br/>
-env: `ZERO_CHANGE_STREAMER_MODE`<br/>
-default: `dedicated`
 
 ### Change Streamer Port
 
@@ -205,9 +197,11 @@ env: `ZERO_CVR_DB`<br/>
 
 The duration after which an inactive CVR is eligible for garbage collection. Garbage collection is incremental and periodic, so eligible CVRs are not necessarily purged immediately.
 
+Purging a CVR forces the next connection from that client group to sync from scratch. Set this well above how long a typical user goes between sessions.
+
 flag: `--cvr-garbage-collection-inactivity-threshold-hours`<br/>
 env: `ZERO_CVR_GARBAGE_COLLECTION_INACTIVITY_THRESHOLD_HOURS`<br/>
-default: `48`
+default: `168` (one week)
 
 ### CVR Garbage Collection Initial Batch Size
 
@@ -296,7 +290,7 @@ The location of the litestream backup, usually an s3:// URL. This is only consul
 
 In multi-node deployments, this is required on the replication-manager so view-syncers can reserve snapshots; in single-node deployments it is optional.
 
-When enabling Litestream v5 backups, configure this as a folder URL ending in `/`, for example `s3://acme-zero-backups/v1/`. Zero resolves each replica-specific backup path relative to this URL; without the trailing slash, URL resolution replaces the final path segment instead of nesting the replica backup under it.
+With Litestream v5 backups (the default), configure this as a folder URL ending in `/`, for example `s3://acme-zero-backups/v1/`. Zero resolves each replica-specific backup path relative to this URL; without the trailing slash, URL resolution replaces the final path segment instead of nesting the replica backup under it.
 
 flag: `--litestream-backup-url`<br/>
 env: `ZERO_LITESTREAM_BACKUP_URL`<br/>
@@ -312,7 +306,7 @@ env: `ZERO_LITESTREAM_ENDPOINT`<br/>
 
 ### Litestream Checkpoint Threshold MB
 
-The size of the WAL file at which to perform an SQLite checkpoint to apply the writes in the WAL to the main database file. Each checkpoint creates a new WAL segment file that will be backed up by Litestream v3. Smaller thresholds may improve read performance, at the expense of creating more files to download when restoring the replica from the backup. This setting is ignored when backing up with Litestream v5.
+The size of the WAL file at which Litestream performs background (PASSIVE) SQLite checkpoints to apply the writes in the WAL to the main database file. Each checkpoint creates new files (WAL segments with Litestream v3, LTX files with v5) that are then backed up. PASSIVE checkpoints are skipped while a write is in progress, so high write rates can make the WAL grow.
 
 flag: `--litestream-checkpoint-threshold-mb`<br/>
 env: `ZERO_LITESTREAM_CHECKPOINT_THRESHOLD_MB`<br/>
@@ -348,14 +342,14 @@ env: `ZERO_LITESTREAM_EXECUTABLE`<br/>
 
 ### Litestream V5 Executable
 
-Path to the official Litestream v0.5.x executable used for v5 restores and backups. Litestream v0.5.8 and later can restore both legacy WAL backups and LTX backups, choosing the format with the latest data. When a backup URL is configured and `ZERO_LITESTREAM_RESTORE_USING_V5` is enabled, this executable is required. The official Zero Docker image includes Litestream 0.5.16.
+Path to the official Litestream v0.5.x executable used for v5 restores and backups. Litestream v0.5.8 and later can restore both legacy WAL backups and LTX backups, choosing the format with the latest data. When a backup URL is configured and `ZERO_LITESTREAM_RESTORE_USING_V5` or `ZERO_LITESTREAM_BACKUP_USING_V5` is enabled (both are by default), this executable is required. The official Zero Docker image includes Rocicorp's Litestream build `0.5.18-zero.16`. Restores fork the source backup with `litestream restore -fork-to-url`, so a custom executable must support that flag.
 
 flag: `--litestream-executable-v5`<br/>
 env: `ZERO_LITESTREAM_EXECUTABLE_V5`<br/>
 
 ### Litestream Restore Using V5
 
-Use `ZERO_LITESTREAM_EXECUTABLE_V5` for restores. Set this to `false` to force legacy restore behavior. When a backup URL is configured, disabling this option is also the way to run without a v5 executable.
+Use `ZERO_LITESTREAM_EXECUTABLE_V5` for restores. Set this to `false` to force legacy restore behavior. Because v5 backups require v5 restore, running without a v5 executable when a backup URL is configured requires setting both this option and `ZERO_LITESTREAM_BACKUP_USING_V5` to `false`.
 
 Litestream v0.5 cannot restore legacy backups encrypted with Age. Keep legacy restore enabled for those backups or migrate them before enabling v5 restore.
 
@@ -365,43 +359,15 @@ default: `true`
 
 ### Litestream Backup Using V5
 
-Write LTX backups with Litestream v0.5.x. This is disabled by default to continue writing legacy WAL backups. Enabling it requires v5 restore and `ZERO_LITESTREAM_VFS_QUERY_EXECUTABLE`.
+Write LTX backups with Litestream v0.5.x. Set this to `false` to write legacy WAL backups with Litestream v0.3.x instead. This requires `ZERO_LITESTREAM_RESTORE_USING_V5`, which is enabled by default.
 
-With v5 backup enabled, Zero acknowledges upstream changes only after they are applied to the replica and confirmed in the backup. Each replica uses a distinct backup subpath under the folder URL configured by `ZERO_LITESTREAM_BACKUP_URL`. Configure an object-store lifecycle policy to remove old subpaths; Zero does not delete them automatically. Rolling back to a server that does not understand replica-specific paths can require a full resync.
+Zero requests an incremental backup every `ZERO_LITESTREAM_INCREMENTAL_BACKUP_INTERVAL_SECONDS`, and acknowledges upstream changes only after a backup containing them has completed.
+
+Each replication-manager backs up to its own subfolder of the folder URL configured by `ZERO_LITESTREAM_BACKUP_URL`. Zero does not delete subfolders left by previous replication-managers. The simplest way to remove them is an object-store lifecycle expiration rule. Every file a restore needs is at most about `ZERO_LITESTREAM_SNAPSHOT_BACKUP_INTERVAL_HOURS` old, so an expiration of at least twice that interval is safe. Rolling back to a server that does not understand replica-specific paths can require a full resync.
 
 flag: `--litestream-backup-using-v5`<br/>
 env: `ZERO_LITESTREAM_BACKUP_USING_V5`<br/>
-default: `false`
-
-### Litestream VFS Query Executable
-
-Path to the `vfs-query` executable used to monitor Litestream v5 backup progress. This is required when `ZERO_LITESTREAM_BACKUP_USING_V5` is enabled. The official Zero Docker image includes this executable.
-
-flag: `--litestream-vfs-query-executable`<br/>
-env: `ZERO_LITESTREAM_VFS_QUERY_EXECUTABLE`<br/>
-
-### Litestream VFS Poll Interval (ms)
-
-How often the Litestream VFS polls backup storage for the latest backup. This controls how quickly Zero can confirm a backup and acknowledge the corresponding upstream changes.
-
-flag: `--litestream-vfs-poll-interval-ms`<br/>
-env: `ZERO_LITESTREAM_VFS_POLL_INTERVAL_MS`<br/>
-default: `15000`
-
-### Litestream VFS Poll Timeout (ms)
-
-Reserved for configuring request timeouts to the Litestream VFS poller. In this release, `vfs-query` uses its internal 30-second timeout regardless of this value.
-
-flag: `--litestream-vfs-poll-timeout-ms`<br/>
-env: `ZERO_LITESTREAM_VFS_POLL_TIMEOUT_MS`<br/>
-default: `10000`
-
-### Litestream VFS Log File
-
-Reserved for redirecting Litestream VFS logs. In this release, `vfs-query` writes logs to the child process's standard error regardless of this value.
-
-flag: `--litestream-vfs-log-file`<br/>
-env: `ZERO_LITESTREAM_VFS_LOG_FILE`<br/>
+default: `true`
 
 ### Litestream Incremental Backup Interval Minutes
 
@@ -427,21 +393,14 @@ flag: `--litestream-max-checkpoint-page-count`<br/>
 env: `ZERO_LITESTREAM_MAX_CHECKPOINT_PAGE_COUNT`<br/>
 default: `minCheckpointPageCount * 10`<br/>
 
-### Litestream Minimum Checkpoint Page Count
-
-The WAL page count at which SQLite attempts a PASSIVE checkpoint, which transfers pages to the main database file without blocking writers. Defaults to `checkpointThresholdMB * 250` (since SQLite page size is 4KB). This setting is ignored when backing up with Litestream v5.
-
-flag: `--litestream-min-checkpoint-page-count`<br/>
-env: `ZERO_LITESTREAM_MIN_CHECKPOINT_PAGE_COUNT`<br/>
-default: `checkpointThresholdMB * 250`<br/>
-
 ### Litestream Multipart Concurrency
 
 The number of parts (of size --litestream-multipart-size bytes) to upload or download in parallel when backing up or restoring the snapshot.
 
+Leave this unset to use `48`, lowered as needed so that the parts fit in a quarter of the memory available to the container.
+
 flag: `--litestream-multipart-concurrency`<br/>
 env: `ZERO_LITESTREAM_MULTIPART_CONCURRENCY`<br/>
-default: `48`
 
 ### Litestream Multipart Size
 
@@ -607,6 +566,23 @@ The number of processes to use for view syncing. Leave this unset to use `max(1,
 flag: `--num-sync-workers`<br/>
 env: `ZERO_NUM_SYNC_WORKERS`<br/>
 
+### Operator Password
+
+A password for the diagnostic endpoints that can't expose application data, so the people who run `zero-cache` can debug it without being able to read the data it serves. It grants access to:
+
+- `/profz` and `/profrmz`: CPU profiles. Profiles served for the operator password have the source of every regular expression redacted, since those can contain `LIKE` patterns from client queries.
+- `/statz`: counts and sizes.
+- `/plannerz`: the replica's schema and planner statistics.
+
+The other protected endpoints, the [inspector](/docs/debug/inspector) and `/heapz`, still require the [admin password](#admin-password).
+
+For `/profrmz` in a multi-node deployment, the replication-manager must be configured with the same operator password.
+
+If the operator password is the same as the admin password, it grants admin access.
+
+flag: `--operator-password`<br/>
+env: `ZERO_OPERATOR_PASSWORD`<br/>
+
 ### Per User Mutation Limit Max
 
 The maximum mutations per user within the specified windowMs.
@@ -728,17 +704,39 @@ Performs a VACUUM at server startup if the specified number of hours has elapsed
 flag: `--replica-vacuum-interval-hours`<br/>
 env: `ZERO_REPLICA_VACUUM_INTERVAL_HOURS`<br/>
 
+### Replication Lag Initial Readiness Threshold (ms)
+
+The maximum replication lag that a server can have before it reports that it is ready to serve clients. This keeps a server that is starting up from serving stale data.
+
+This only applies at startup. Once a server is ready, it keeps serving even if replication lag later goes above this threshold.
+
+When [lag reporting](#replication-lag-report-interval-ms) is disabled, readiness does not wait for replication lag.
+
+flag: `--replication-lag-initial-readiness-threshold-ms`<br/>
+env: `ZERO_REPLICATION_LAG_INITIAL_READINESS_THRESHOLD_MS`<br/>
+default: `1000`
+
+### Replication Lag Max Readiness Delay (ms)
+
+The maximum time that a server waits for replication lag to fall below [`ZERO_REPLICATION_LAG_INITIAL_READINESS_THRESHOLD_MS`](#replication-lag-initial-readiness-threshold-ms) before it reports ready anyway. This keeps a server from waiting forever, for example when the upstream database is under heavy load or there is a network partition.
+
+flag: `--replication-lag-max-readiness-delay-ms`<br/>
+env: `ZERO_REPLICATION_LAG_MAX_READINESS_DELAY_MS`<br/>
+default: `600000` (10 minutes)
+
 ### Replication Lag Report Interval (ms)
 
-The minimum interval at which replication lag reports are written upstream and reported via the `zero.replication.total_lag` [OpenTelemetry metric](/docs/otel). If an expected report is not received before the next interval, Zero emits a new report and increments `zero.replication.lag_report_retries`.
+The approximate interval at which replication lag reports are written upstream and reported via the `zero.replication.total_lag` [OpenTelemetry metric](/docs/otel). If an expected report is not received before the next interval, Zero emits a new report and increments `zero.replication.lag_report_retries`.
 
-This feature requires write access to upstream Postgres (uses `pg_logical_emit_message()`). For PostgreSQL 17+, lag measurements accurately reflect committed write latency (single-digit milliseconds). For PostgreSQL 16 and earlier, measurements may appear 50-100ms longer due to flush behavior. A negative or 0 value disables lag reporting.
+Lag reports are also used at startup: a new server waits for replication lag to fall below [`ZERO_REPLICATION_LAG_INITIAL_READINESS_THRESHOLD_MS`](#replication-lag-initial-readiness-threshold-ms) before it reports ready. This interval sets how long the server waits for the next report.
+
+This feature requires write access to upstream Postgres (uses `pg_logical_emit_message()`). For PostgreSQL 17+, lag measurements accurately reflect committed write latency (single-digit milliseconds). For PostgreSQL 16 and earlier, measurements may appear 50-100ms longer due to flush behavior. A negative or 0 value disables lag reporting and the readiness wait.
 
 Even if otel is not enabled, info and warn-level logs are emitted for large lag values.
 
 flag: `--replication-lag-report-interval-ms`<br/>
 env: `ZERO_REPLICATION_LAG_REPORT_INTERVAL_MS`<br/>
-default: `30_000`
+default: `10000`
 
 ### Server Version
 
@@ -824,6 +822,30 @@ See [WAL Sender Timeout](/docs/connecting-to-postgres#wal-sender-timeout).
 flag: `--upstream-pg-stream-inbound-timeout-ms`<br/>
 env: `ZERO_UPSTREAM_PG_STREAM_INBOUND_TIMEOUT_MS`<br/>
 
+### View Syncer Hydration Budget (ms)
+
+A soft time limit for hydrating [inactive (cached) queries](/docs/queries#query-caching) when a view-syncer hydrates a client group's queries, for example after a client reconnects.
+
+Active queries always finish. Inactive queries are hydrated after them, starting with the ones whose TTL expires last. Once the budget is spent, the inactive queries that were not reached are removed, along with the remaining TTL that would have kept them cached. The budget is only checked between queries, so a query that has started is not cut short by it. Time spent waiting on your [query endpoint](#query-url) does not count toward the budget.
+
+A value of `0` disables the budget.
+
+flag: `--view-syncer-hydration-budget-ms`<br/>
+env: `ZERO_VIEW_SYNCER_HYDRATION_BUDGET_MS`<br/>
+default: `0`
+
+### View Syncer Query Hydration Timeout (ms)
+
+The maximum processing time that a view-syncer spends hydrating a single query. Time spent yielding to other work is not counted.
+
+If hydrating a query takes longer than this, the hydration is aborted and the query is removed from the client's view. Clients that use the query receive an error for it (see [Handling Errors](/docs/queries#handling-errors)). For the next five minutes, the query is rejected without being run again. After that, it can be retried.
+
+A value of `0` disables the limit.
+
+flag: `--view-syncer-query-hydration-timeout-ms`<br/>
+env: `ZERO_VIEW_SYNCER_QUERY_HYDRATION_TIMEOUT_MS`<br/>
+default: `0`
+
 ### Websocket Compression
 
 Enable WebSocket per-message deflate compression. Compression can reduce bandwidth usage for sync traffic but increases CPU usage on both client and server. Disabled by default. See: https://github.com/websockets/ws#websocket-compression
@@ -863,6 +885,37 @@ default: `10`
 
 flag: `--change-max-conns`<br/>
 env: `ZERO_CHANGE_MAX_CONNS`<br/>
+
+### Change Streamer Mode
+
+`ZERO_CHANGE_STREAMER_MODE` is deprecated. Set [`ZERO_CHANGE_STREAMER_URI`](#change-streamer-uri) on view-syncers instead.
+
+The mode for running or connecting to the change-streamer:
+
+- `dedicated`: runs the change-streamer and shuts down when another
+  change-streamer takes over the replication slot. This is appropriate in a
+  single-node configuration, or for the replication-manager in a
+  multi-node configuration.
+- `discover`: connects to the change-streamer as internally advertised in the
+  change-db. This is appropriate for the view-syncers in a multi-node setup.
+  This may not work in all networking configurations (e.g., some private
+  networking or port forwarding setups).
+
+This option is ignored if `ZERO_CHANGE_STREAMER_URI` is set.
+
+flag: `--change-streamer-mode`<br/>
+env: `ZERO_CHANGE_STREAMER_MODE`<br/>
+default: `dedicated`
+
+### Litestream Minimum Checkpoint Page Count
+
+`ZERO_LITESTREAM_MIN_CHECKPOINT_PAGE_COUNT` is deprecated. Use [`ZERO_LITESTREAM_CHECKPOINT_THRESHOLD_MB`](#litestream-checkpoint-threshold-mb) instead.
+
+The WAL page count at which SQLite attempts a PASSIVE checkpoint. If unset, it is derived from the checkpoint threshold as `checkpointThresholdMB * 256` (4 KiB pages).
+
+flag: `--litestream-min-checkpoint-page-count`<br/>
+env: `ZERO_LITESTREAM_MIN_CHECKPOINT_PAGE_COUNT`<br/>
+default: `checkpointThresholdMB * 256`
 
 ### Auth JWK
 

@@ -1,0 +1,277 @@
+---
+title: Zero 1.11
+description: Cached Results and Sturdier Client Storage
+---
+
+## Installation
+
+```bash
+npm install @rocicorp/zero@1.11
+```
+
+<Note type="warning">
+  [Deploy `zero-cache` before updating
+  clients](/docs/self-host#rolling-updates). Zero 1.11
+  clients cannot connect to an older server. To roll back,
+  roll back clients first. In multi-node deployments,
+  upgrade the replication-manager before the view-syncers,
+  and roll back the view-syncers first.
+</Note>
+
+## Overview
+
+Zero 1.11 tells you when local query results were already confirmed by the server, keeps working when local storage fails, and makes Litestream v5 the default for backups. Client cold start is about 7x faster in our benchmarks. There are also a lot of fixes, especially in queries and replication.
+
+## Features
+
+- Queries now tell you when their local data is a result the server confirmed in an earlier session: they start with the new [`'cached'` result type](/docs/queries#cached-results) instead of `'unknown'`. That's enough to show stored data or an empty state without waiting for the server, even offline. ([#6578](https://github.com/rocicorp/mono/pull/6578)) (thanks [@pawarren](https://github.com/pawarren)!)
+- Building the same query again usually gives you the same `Query` object. `useQuery` no longer rebuilds and rehashes its query on every render, and queries built inline work as [React dependencies](/docs/react#query-identity). ([#6469](https://github.com/rocicorp/mono/pull/6469), [#6496](https://github.com/rocicorp/mono/pull/6496)) (thanks [@charpeni](https://github.com/charpeni)!)
+- Zero starts in a new [`'initializing'` connection state](/docs/connection#initializing) while it loads local data, and slow loading doesn't count against the connect timeout anymore. ([#6561](https://github.com/rocicorp/mono/pull/6561))
+- If local storage can't be opened, fills up, or hits I/O errors, Zero reports it once through the new [`onStorageFailure`](/docs/connection#storage-failures) option and keeps running in memory. `zero.kvStore` tells you which store is in use. ([#6585](https://github.com/rocicorp/mono/pull/6585), [#6657](https://github.com/rocicorp/mono/pull/6657), [#6686](https://github.com/rocicorp/mono/pull/6686)) (thanks [@pawarren](https://github.com/pawarren) and [@Karavil](https://github.com/Karavil)!)
+- Clients upgrading from 1.10 keep their local data and pending mutations. Future protocol changes won't reset clients to an empty local database either. ([d597c69e8](https://github.com/rocicorp/mono/commit/d597c69e8), [28e581483](https://github.com/rocicorp/mono/commit/28e581483))
+- Server mutators can [return a JSON value](/docs/mutators#returning-data) to the client, [run again](/docs/mutators#retrying-mutators) in a new transaction when `tx.retryOn()` accepts the error, and run at a chosen [transaction isolation level](/docs/server-zql#isolation-level). ([7756eb9bb](https://github.com/rocicorp/mono/commit/7756eb9bb), [4fe91c0d8](https://github.com/rocicorp/mono/commit/4fe91c0d8), [cb2821f3a](https://github.com/rocicorp/mono/commit/cb2821f3a)) (thanks [@pawarren](https://github.com/pawarren)!)
+- [Litestream v5 backups](/docs/zero-cache-config#litestream-backup-using-v5) are now the default. A replica restored from another replica's backup continues that backup incrementally. Periodic snapshots keep backups compact, and the replica's WAL stays bounded. ([fb536f686](https://github.com/rocicorp/mono/commit/fb536f686), [c1a586810](https://github.com/rocicorp/mono/commit/c1a586810), [#6476](https://github.com/rocicorp/mono/pull/6476), [#6539](https://github.com/rocicorp/mono/pull/6539), [#6717](https://github.com/rocicorp/mono/pull/6717))
+- A `zero-cache` that comes online now [waits for replication to catch up](/docs/zero-cache-config#replication-lag-initial-readiness-threshold-ms) before it reports ready. ([1c5ddcdb4](https://github.com/rocicorp/mono/commit/1c5ddcdb4))
+- Inactive client groups are kept for [7 days instead of 48 hours](/docs/zero-cache-config#cvr-garbage-collection-inactivity-threshold-hours), so users who come back within a week don't need a full resync. ([#6484](https://github.com/rocicorp/mono/pull/6484))
+- `zero-cache` now logs slow queries with the reason and suggested indexes, and periodically logs per-query statistics. A new [operator password](/docs/zero-cache-config#operator-password) gives access to CPU profiles (`/profz`) and replica planner statistics (`/plannerz`) without the admin password. ([#6446](https://github.com/rocicorp/mono/pull/6446), [#6639](https://github.com/rocicorp/mono/pull/6639), [#6673](https://github.com/rocicorp/mono/pull/6673), [#6675](https://github.com/rocicorp/mono/pull/6675), [#6699](https://github.com/rocicorp/mono/pull/6699))
+- A new [hydration budget](/docs/zero-cache-config#view-syncer-hydration-budget-ms) caps the time a view-syncer spends re-hydrating a reconnecting client's inactive queries, and a [per-query hydration timeout](/docs/zero-cache-config#view-syncer-query-hydration-timeout-ms) aborts any query that takes too long to hydrate. Both are off by default. ([#6477](https://github.com/rocicorp/mono/pull/6477), [#6499](https://github.com/rocicorp/mono/pull/6499))
+- New [OpenTelemetry metrics](/docs/otel) track WAL usage. Replication status events now include index-build progress, and a new view-syncer status event reports restore progress. ([#6591](https://github.com/rocicorp/mono/pull/6591), [#6621](https://github.com/rocicorp/mono/pull/6621), [#6714](https://github.com/rocicorp/mono/pull/6714))
+- Server mutations can send their logs to your own `LogSink`. ([#6677](https://github.com/rocicorp/mono/pull/6677)) (thanks [@pawarren](https://github.com/pawarren)!)
+- The `zero` Docker image is down to 807 MB from about 1.09 GB. ([#6695](https://github.com/rocicorp/mono/pull/6695))
+
+## Performance
+
+### Client Cold Start
+
+Apps usually register queries before Zero has finished loading local data, for example when `useQuery` runs at startup. Zero 1.10 then pushed every loaded row through every registered query. Zero 1.11 waits for the data to load and hydrates each query once ([#6472](https://github.com/rocicorp/mono/pull/6472)). With 13 queries and about 30,000 local rows, startup is about **7x faster**, and about **8x faster** on React Native.
+
+<BenchmarkComparisonChart
+  title="Client Cold Start"
+  description="Measured on M5 Pro. Lower is better."
+  previousLabel="Zero 1.10"
+  currentLabel="Zero 1.11"
+  precision={2}
+  valuePrecision={0}
+  unit="ms"
+  higherIsBetter={false}
+  height={160}
+  data={[
+    {
+      name: '13 queries, 30,000 rows',
+      fullName:
+        '13 queries registered before 30,255 local rows load',
+      previous: 369.365,
+      current: 50.493
+    }
+  ]}
+/>
+
+### Server-Side Incremental Updates
+
+When a transaction replicates, `zero-cache` has to bring every client group's queries up to date. Zero 1.11 does this with about **2.5x less CPU**. We measured 100 client groups on one sync worker, each syncing a query with a related subquery.
+
+<BenchmarkComparisonChart
+  title="Server-Side Incremental Updates"
+  description="Measured on M5 Pro. Lower is better."
+  previousLabel="Zero 1.10"
+  currentLabel="Zero 1.11"
+  precision={2}
+  valuePrecision={1}
+  unit="ms"
+  higherIsBetter={false}
+  data={[
+    {
+      name: '10-change transaction',
+      fullName:
+        'CPU to advance 100 client groups through a 10-change transaction',
+      previous: 17.446,
+      current: 7.02
+    },
+    {
+      name: '100-change transaction',
+      fullName:
+        'CPU to advance 100 client groups through a 100-change transaction',
+      previous: 134.402,
+      current: 50.348
+    }
+  ]}
+/>
+
+### React Native
+
+Zero's query engine is about **1.7x faster** on React Native. That's the geometric mean of 53 query engine benchmarks on Hermes, and 48 of them got more than 5% faster. Hydrating queries is 1.6x to 4.8x faster, and applying changes 1.2x to 2.2x faster.
+
+<BenchmarkComparisonChart
+  title="React Native Query Engine"
+  description="Measured on M5 Pro in the iPhone 17 Pro simulator, release build. Lower is better."
+  previousLabel="Zero 1.10"
+  currentLabel="Zero 1.11"
+  precision={2}
+  valuePrecision={0}
+  unit="ms"
+  higherIsBetter={false}
+  data={[
+    {
+      name: 'Hydrate with relationships',
+      fullName:
+        'Hydrate issues with their creator and comments',
+      previous: 1124.004,
+      current: 683.86
+    },
+    {
+      name: 'Hydrate heavy query',
+      fullName: 'Hydrate a wide and deep query, limit 50',
+      previous: 1467.347,
+      current: 802.557
+    },
+    {
+      name: 'Add to heavy view',
+      fullName: 'Add an issue to a relationship-heavy view',
+      previous: 76.844,
+      current: 43.575
+    },
+    {
+      name: 'Edit in heavy view',
+      fullName:
+        'Edit an issue title in a relationship-heavy view',
+      previous: 65.902,
+      current: 49.895
+    },
+    {
+      name: '100 edits, 1,000 rows',
+      fullName:
+        'One transaction of 100 edits to a 1,000-row list',
+      previous: 303.702,
+      current: 142.456
+    }
+  ]}
+/>
+
+### Building and Hashing Queries
+
+Components rebuild their queries on every render, and Zero hashes each query to identify it. Building the same query again now usually returns the same object, with its hash already computed ([#6469](https://github.com/rocicorp/mono/pull/6469)). That makes building and hashing a query about **7x to 17x faster**, depending on its size.
+
+<BenchmarkComparisonChart
+  title="Building and Hashing Queries"
+  description="Measured on M5 Pro. Lower is better."
+  previousLabel="Zero 1.10"
+  currentLabel="Zero 1.11"
+  precision={2}
+  valuePrecision={0}
+  unit="ns"
+  higherIsBetter={false}
+  data={[
+    {
+      name: 'Small',
+      fullName: 'One row by primary key',
+      previous: 1171,
+      current: 68.6
+    },
+    {
+      name: 'Medium',
+      fullName:
+        'Two filters, two relationships, ordered and limited',
+      previous: 3917,
+      current: 378.5
+    },
+    {
+      name: 'Large',
+      fullName:
+        'One exists, ten nested relationships, ordered and limited',
+      previous: 13146,
+      current: 1782
+    }
+  ]}
+/>
+
+### Client Writes With Many Joined Queries Got Slower
+
+This is the one benchmark that got slower. With 300 open queries, each joining the same four tables, applying one write in the client's query engine takes about **1.2x longer**. Joins now keep an index of their parent rows so they can skip changes no parent can see ([#6645](https://github.com/rocicorp/mono/pull/6645), [#6708](https://github.com/rocicorp/mono/pull/6708)). In this benchmark every change reaches some parent, so keeping the index up to date is pure overhead.
+
+<BenchmarkComparisonChart
+  title="Client Writes With 300 Joined Queries"
+  description="Measured on M5 Pro. Lower is better."
+  previousLabel="Zero 1.10"
+  currentLabel="Zero 1.11"
+  precision={2}
+  valuePrecision={1}
+  unit="ms"
+  higherIsBetter={false}
+  height={160}
+  data={[
+    {
+      name: 'One write, 300 queries',
+      fullName:
+        'Push one logical write (3 row changes) through 300 queries and update their views',
+      previous: 27.081,
+      current: 31.477
+    }
+  ]}
+/>
+
+## Fixes
+
+### Query Results
+
+- Queries using `or` with a flipped `exists` could return wrong rows. ([#6636](https://github.com/rocicorp/mono/pull/6636))
+- Joins could leave a deleted row on clients, keep a stale row in a `limit()` query, or fail with `node does not exist`. ([#6660](https://github.com/rocicorp/mono/pull/6660))
+- Rows behind an `exists` inside a [scalar subquery](/docs/zql#scalar-subqueries) weren't synced, and changes to them didn't propagate. ([913c0665f](https://github.com/rocicorp/mono/commit/913c0665f))
+- Catching up a client after a large update could fail with `Missing row`, and a schema change during rehydration could fail with `table has no column named`. ([#6662](https://github.com/rocicorp/mono/pull/6662), [#6616](https://github.com/rocicorp/mono/pull/6616))
+- A SQLite plan that nests one multi-index `OR` inside another could crash `zero-cache` in a loop. ([6ea17bfcd](https://github.com/rocicorp/mono/commit/6ea17bfcd)) (thanks [@robertoborgone](https://github.com/robertoborgone)!)
+- `zero-cache` called [`ZERO_QUERY_URL`](/docs/queries#custom-query-url) again for unchanged custom queries whenever it rebuilt its query pipelines. A permission change still re-transforms every query. ([#6601](https://github.com/rocicorp/mono/pull/6601))
+- In React and SolidJS, two custom queries with the same query but different names or arguments could share one view, and a SolidJS view rebuilt after its query changed kept the old TTL. ([#6461](https://github.com/rocicorp/mono/pull/6461), [#6497](https://github.com/rocicorp/mono/pull/6497))
+- In mutators, a row inserted without its optional columns didn't read those columns back as `null`. ([d4816752c](https://github.com/rocicorp/mono/commit/d4816752c))
+
+### Clients and React Native
+
+- SQLite-backed stores (expo-sqlite, op-sqlite) could return corrupted data under concurrent reads, hang after a failed transaction, or keep part of a failed commit. ([#6495](https://github.com/rocicorp/mono/pull/6495), [#6655](https://github.com/rocicorp/mono/pull/6655), [#6683](https://github.com/rocicorp/mono/pull/6683)) (thanks [@pawarren](https://github.com/pawarren)!)
+- Healthy clients logged `ChunkNotFoundError` during persist. A write that would corrupt the local store now fails instead. ([#6670](https://github.com/rocicorp/mono/pull/6670), [#6559](https://github.com/rocicorp/mono/pull/6559)) (thanks [@pawarren](https://github.com/pawarren)!)
+- With op-sqlite and a custom `location` or `encryptionKey`, dropping the database didn't delete the right file. ([#6656](https://github.com/rocicorp/mono/pull/6656)) (thanks [@pawarren](https://github.com/pawarren)!)
+- Clients could go offline after the app resumed from the background or the computer woke from sleep, and React Native connect timeouts left the client stuck in an error state instead of retrying. ([#6510](https://github.com/rocicorp/mono/pull/6510), [#6485](https://github.com/rocicorp/mono/pull/6485)) (thanks [@pawarren](https://github.com/pawarren)!)
+- Slow local startup could make a healthy server look unreachable. ([#6475](https://github.com/rocicorp/mono/pull/6475))
+- A mutator that threw while being replayed disconnected the client in a loop. The client now stays connected, and the mutation is still sent to the server. ([#6555](https://github.com/rocicorp/mono/pull/6555))
+- Client memory grew with every query used in a session. ([#6474](https://github.com/rocicorp/mono/pull/6474))
+- `useSuspenseQuery` with an options object and no `suspendUntil` didn't suspend until the first rows arrived, contrary to the docs (see Breaking Changes). ([ffe67b23a](https://github.com/rocicorp/mono/commit/ffe67b23a)) (thanks [@charpeni](https://github.com/charpeni)!)
+- Routine reconnects, auth errors and server rebalancing were logged as errors. They're now warnings or info, and fatal errors include their cause. ([#6581](https://github.com/rocicorp/mono/pull/6581), [#6692](https://github.com/rocicorp/mono/pull/6692), [#6498](https://github.com/rocicorp/mono/pull/6498), [#6682](https://github.com/rocicorp/mono/pull/6682), [#6691](https://github.com/rocicorp/mono/pull/6691), [42316d521](https://github.com/rocicorp/mono/commit/42316d521), [075b4215e](https://github.com/rocicorp/mono/commit/075b4215e), [79adc09fb](https://github.com/rocicorp/mono/commit/79adc09fb)) (thanks [@pawarren](https://github.com/pawarren)!)
+
+### zero-cache Reliability
+
+- `zero-cache` leaked memory and other resources around closed connections, stopped view-syncers, abandoned hydrations, and inspector and profiling requests. ([#6500](https://github.com/rocicorp/mono/pull/6500), [#6514](https://github.com/rocicorp/mono/pull/6514), [#6515](https://github.com/rocicorp/mono/pull/6515), [#6516](https://github.com/rocicorp/mono/pull/6516), [#6525](https://github.com/rocicorp/mono/pull/6525), [#6526](https://github.com/rocicorp/mono/pull/6526), [#6527](https://github.com/rocicorp/mono/pull/6527), [#6528](https://github.com/rocicorp/mono/pull/6528), [#6540](https://github.com/rocicorp/mono/pull/6540), [#6541](https://github.com/rocicorp/mono/pull/6541), [#6542](https://github.com/rocicorp/mono/pull/6542), [#6698](https://github.com/rocicorp/mono/pull/6698))
+- View-syncers could crash or return `Internal error` when another view-syncer advanced the same client group, when a client connection was missing, or when a push arrived on a closing connection. ([#6481](https://github.com/rocicorp/mono/pull/6481), [#6530](https://github.com/rocicorp/mono/pull/6530), [#6600](https://github.com/rocicorp/mono/pull/6600), [#6614](https://github.com/rocicorp/mono/pull/6614), [#6631](https://github.com/rocicorp/mono/pull/6631), [d545bc7e2](https://github.com/rocicorp/mono/commit/d545bc7e2)) (thanks [@jdnvn](https://github.com/jdnvn)!)
+- Servers using `zeroNodePg` crashed when Postgres closed a pooled connection. ([1b220fa07](https://github.com/rocicorp/mono/commit/1b220fa07)) (thanks [@pawarren](https://github.com/pawarren)!)
+- Analyzing a query in the [Inspector](/docs/debug/inspector) could run a view-syncer out of memory on large tables. ([#6596](https://github.com/rocicorp/mono/pull/6596))
+- Error messages could include row values, query literals and mutation arguments. ([#6413](https://github.com/rocicorp/mono/pull/6413))
+
+### Replication, Backfills, and Backups
+
+- Replication could roll back or stop after an interrupted stream, and a replication-manager whose slot was invalidated crash-looped instead of resyncing. ([#6562](https://github.com/rocicorp/mono/pull/6562), [#6590](https://github.com/rocicorp/mono/pull/6590))
+- Backfills could apply rows before replication had caught up to them, didn't resume when a view-syncer moved to another replication-manager, and leaked a Postgres connection that held back vacuum. ([#6685](https://github.com/rocicorp/mono/pull/6685), [#6684](https://github.com/rocicorp/mono/pull/6684), [#6513](https://github.com/rocicorp/mono/pull/6513))
+- Replication slots are more robust. Slot creation retries while long transactions block it, slots stay active during long initial syncs, slots dropped outside Zero are handled, and inactive slots are cleaned up. ([25a9ea1ac](https://github.com/rocicorp/mono/commit/25a9ea1ac), [f3bba7d73](https://github.com/rocicorp/mono/commit/f3bba7d73), [7a998b566](https://github.com/rocicorp/mono/commit/7a998b566), [caf79b161](https://github.com/rocicorp/mono/commit/caf79b161), [#6568](https://github.com/rocicorp/mono/pull/6568))
+- Replication lag was measured wrong on Aurora. ([e6a2590db](https://github.com/rocicorp/mono/commit/e6a2590db))
+- After initial sync, the replication-manager could serve before a backup covered its replica, so restoring view-syncers fell back to Postgres. It now waits for that backup. ([#6465](https://github.com/rocicorp/mono/pull/6465))
+- Query pipelines were reset more often than needed, and dropping an upstream index didn't refresh table schemas. ([4341cdcbd](https://github.com/rocicorp/mono/commit/4341cdcbd), [89787f827](https://github.com/rocicorp/mono/commit/89787f827), [bb71cc931](https://github.com/rocicorp/mono/commit/bb71cc931))
+- View-syncers now fail fast when the replication-manager is unreachable, and a slow handshake is no longer mistaken for a missed heartbeat. ([0af1a7109](https://github.com/rocicorp/mono/commit/0af1a7109), [#6598](https://github.com/rocicorp/mono/pull/6598))
+- During a resync, the old replication-manager now keeps serving until the new one takes over. ([21f349135](https://github.com/rocicorp/mono/commit/21f349135))
+- Change-database connections leaked after a failed catch-up, and a change-database reset could hang. ([#6529](https://github.com/rocicorp/mono/pull/6529), [#6632](https://github.com/rocicorp/mono/pull/6632))
+- Litestream could run out of memory in small containers. Its upload concurrency now scales with available memory. ([240c05730](https://github.com/rocicorp/mono/commit/240c05730))
+- Configuration values that start with a dash, such as some shard IDs, were parsed wrong. ([81e6ac570](https://github.com/rocicorp/mono/commit/81e6ac570))
+- In the `zero` Docker image, initial sync and backfills could leave a stalled Postgres connection open after copying a table. Other installs keep the 1.10 behavior. ([3f139f52a](https://github.com/rocicorp/mono/commit/3f139f52a), [22fa3c27e](https://github.com/rocicorp/mono/commit/22fa3c27e))
+
+### Type Checking
+
+- A rejected `whereExists(..., {scalar: true})` now explains why, and a misspelled relationship name lists the valid ones. ([cc020b368](https://github.com/rocicorp/mono/commit/cc020b368), [12a36dcfe](https://github.com/rocicorp/mono/commit/12a36dcfe))
+
+## Breaking Changes
+
+- **Legacy queries:** `zero-cache` now rejects queries sent directly by clients. If you still use legacy queries, set [`ZERO_ALLOW_LEGACY_QUERIES=true`](/docs/zero-cache-config#allow-legacy-queries) or move to [custom queries](/docs/queries). ([#6399](https://github.com/rocicorp/mono/pull/6399))
+- **New states:** if your code switches over every result type or connection state, handle `'cached'` and `'initializing'`. Treat `'cached'` like `'unknown'`: the data may be out of date. ([#6578](https://github.com/rocicorp/mono/pull/6578), [#6561](https://github.com/rocicorp/mono/pull/6561))
+- **Litestream v5 by default:** remove the `ZERO_LITESTREAM_VFS_*` options; they no longer exist. Each replication-manager backs up to its own folder under the backup URL, so end the URL with `/` and add a lifecycle policy to your bucket. To keep writing legacy WAL backups with Litestream v0.3, set `ZERO_LITESTREAM_BACKUP_USING_V5=false`. If you set `ZERO_LITESTREAM_EXECUTABLE_V5`, use a Litestream build with `-fork-to-url`. ([fb536f686](https://github.com/rocicorp/mono/commit/fb536f686), [c1a586810](https://github.com/rocicorp/mono/commit/c1a586810))
+- **Changed defaults:** inactive client groups are kept for 168 hours (was 48), replication lag is reported every 10 seconds (was 30), and `ZERO_CHANGE_STREAMER_FLOW_CONTROL_CONSENSUS_TIMEOUT_PROPORTION` is 4 (was 2). Startup can take longer while `zero-cache` waits for a backup and for replication to catch up, so give readiness probes more time. ([#6484](https://github.com/rocicorp/mono/pull/6484), [1c5ddcdb4](https://github.com/rocicorp/mono/commit/1c5ddcdb4), [#6521](https://github.com/rocicorp/mono/pull/6521), [#6465](https://github.com/rocicorp/mono/pull/6465))
+- **Server mutators:** return values must be JSON. A custom `Database` must pass `addRetryPredicate` on to the transaction it creates, or `tx.retryOn()` won't work. Using `tx` after its transaction has ended now throws. ([7756eb9bb](https://github.com/rocicorp/mono/commit/7756eb9bb), [4fe91c0d8](https://github.com/rocicorp/mono/commit/4fe91c0d8))
+- **`ZQLDatabase.run()`** no longer wraps reads in a transaction, so per-transaction settings such as `SET LOCAL` don't apply to it. ([#6577](https://github.com/rocicorp/mono/pull/6577))
+- **`useSuspenseQuery`** with an options object and no `suspendUntil` now suspends until the first rows arrive, as documented. Pass `suspendUntil: 'complete'` for the old behavior. ([ffe67b23a](https://github.com/rocicorp/mono/commit/ffe67b23a))
+- **Upgrading from 1.9 or earlier:** clients start with a new local database, and mutations they hadn't sent yet are lost. Clients upgrading from 1.10 keep theirs. ([d597c69e8](https://github.com/rocicorp/mono/commit/d597c69e8), [28e581483](https://github.com/rocicorp/mono/commit/28e581483))
+- **Client storage:** a client whose local store is corrupt now deletes it and calls `onClientStateNotFound`. Unsent mutations are lost. ([#6558](https://github.com/rocicorp/mono/pull/6558))
+- **One-time query reload:** queries are identified differently in 1.11, so after upgrading, and again after a rollback, `zero-cache` transforms and hydrates each client's queries once more. Expect a burst of requests to `ZERO_QUERY_URL`. ([#6450](https://github.com/rocicorp/mono/pull/6450), [#6462](https://github.com/rocicorp/mono/pull/6462))
+- **Deprecated:** `ZERO_CHANGE_STREAMER_MODE`. Use [`ZERO_CHANGE_STREAMER_URI`](/docs/zero-cache-config#change-streamer-uri) instead. ([698286b55](https://github.com/rocicorp/mono/commit/698286b55))
+- **Events:** there's a new `zero/events/status/view-syncer/v1` event type. Event consumers that reject unknown types must accept it. ([#6621](https://github.com/rocicorp/mono/pull/6621))

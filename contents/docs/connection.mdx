@@ -7,10 +7,12 @@ title: Connection Status
 Zero manages a persistent connection to `zero-cache` with the following lifecycle:
 
 <ImageLightbox
-  src="/images/connection-state/lifecycle.png"
+  src="/images/connection-state/lifecycle.svg"
   caption="Zero's connection lifecycle"
   invert="light"
 />
+
+Before any of this, Zero is [`initializing`](#initializing) while it loads local data. After that it moves to `connecting` and never goes back.
 
 ## Usage
 
@@ -40,6 +42,8 @@ function ConnectionStatus() {
   const state = useConnectionState()
 
   switch (state.name) {
+    case 'initializing':
+      return <div>Loading...</div>
     case 'connecting':
       return <div title={state.reason}>Connecting...</div>
     case 'connected':
@@ -64,6 +68,10 @@ function ConnectionStatus() {
 
   return (
     <Switch>
+      <Match when={state().name === 'initializing'}>
+        <div>Loading...</div>
+      </Match>
+
       <Match when={state().name === 'connecting'}>
         <div title={state().reason}>Connecting...</div>
       </Match>
@@ -91,6 +99,9 @@ function ConnectionStatus() {
 ```ts
 zero.connection.state.subscribe(state => {
   switch (state.name) {
+    case 'initializing':
+      console.log('Loading local data...')
+      break
     case 'connecting':
       console.log(`Connecting... ${state.reason}`)
       break
@@ -120,6 +131,7 @@ Zero [does not support offline writes](#why-zero-doesnt-support-offline-writes).
 
 | State          | Reads | Writes      |
 | -------------- | ----- | ----------- |
+| `initializing` | ✅    | ✅ (queued) |
 | `connecting`   | ✅    | ✅ (queued) |
 | `connected`    | ✅    | ✅          |
 | `disconnected` | ✅    | ❌          |
@@ -137,11 +149,23 @@ The easiest way to implement this is with a modal overlay that covers the entire
 
 ## Details
 
+### Initializing
+
+Zero starts in the `initializing` state, where it loads its local data. It hasn't contacted `zero-cache` yet, so the network plays no part. How long this takes depends on the device and on how much data is stored locally. On a slow device with a lot of data, it can take many seconds.
+
+When the data is loaded, Zero moves to `connecting`. This only happens once, right after Zero is created. Later reconnects go straight to `connecting`.
+
+While `initializing`, show a loading indicator rather than an offline or error message. If your app warns the user when Zero takes too long to connect, start that timer when Zero enters `connecting`.
+
+There is no timeout while `initializing`, and the time doesn't count against `disconnectTimeoutMs`. If the local data never finishes loading, Zero stays in `initializing`, so add your own timeout if you need one.
+
+Reads and writes are allowed. Queries return results once the local data is loaded, and writes are queued until Zero connects.
+
 ### Connecting
 
-Zero starts in the `connecting` state.
+Zero enters the `connecting` state after [`initializing`](#initializing).
 
-While `connecting`, Zero repeatedly tries to connect to `zero-cache`. After 1 minute of failed attempts, it transitions to `disconnected`. This timeout can be configured with the `disconnectTimeoutMs` constructor parameter:
+While `connecting`, Zero repeatedly tries to connect to `zero-cache`. After 1 minute of failed attempts, it transitions to `disconnected`. Time spent `initializing` does not count toward this minute. This timeout can be configured with the `disconnectTimeoutMs` constructor parameter:
 
 ```tsx
 const opts: ZeroOptions = {
@@ -177,7 +201,7 @@ Once Zero connects to `zero-cache` and syncs the first time, it transitions to t
 
 After the `disconnectTimeoutMs` elapses while in the `connecting` state, Zero transitions to `disconnected`. Zero also transitions to `disconnected` when the tab is hidden for `hiddenTabDisconnectDelay` (default 5 minutes).
 
-While `disconnected`, Zero continues to try to reconnect to `zero-cache` every 5 seconds.
+While `disconnected`, Zero continues to try to reconnect to `zero-cache` every 5 seconds. After a hidden-tab disconnect, Zero instead waits until the tab is visible again, then goes back to `connecting`.
 
 Reads are allowed while `disconnected`, but writes are rejected and return an offline error. See [Offline](#offline) for more information.
 
@@ -228,6 +252,60 @@ Zero transitions to the `closed` state when you call `zero.close()`.
 Most applications will never call `close()`, and even if they do, they should not still be using Zero at that time. So in practice, you should never see this state in a running application.
 
 Reads and writes are both rejected while Zero is in the `closed` state.
+
+## Storage Failures
+
+Zero stores synced data on the device, in IndexedDB in the browser or SQLite on [React Native](/docs/react-native). Sometimes that fails: the device runs out of space, or the database won't open.
+
+When it does, Zero calls `onStorageFailure` once with a `StorageFailureError`. Its `kind` says what went wrong:
+
+| `kind`        | Meaning                                 |
+| ------------- | --------------------------------------- |
+| `full`        | The device is out of space.             |
+| `cannot-open` | The database can't be opened.           |
+| `io-error`    | A read or write to the database failed. |
+
+In the browser, Zero reports a storage failure only when IndexedDB fails to open: `full` if the browser says the disk is full, otherwise `cannot-open`.
+
+Zero keeps working either way. If storage fails while Zero is starting, Zero runs in memory for the rest of the session, as if you had set `kvStore: 'mem'`, and nothing is saved on the device. If it fails later, Zero stops saving to the device. Queries and mutations keep working on the data in memory and mutations are still sent to `zero-cache`, but a read that needs data Zero hasn't loaded into memory can still fail.
+
+Zero only tries the device's storage again when the app creates a new `Zero` instance, for example after a restart.
+
+By default, Zero only logs the failure. Use `onStorageFailure` to tell the user what to do:
+
+```ts
+import type {ZeroOptions} from '@rocicorp/zero'
+
+const opts: ZeroOptions = {
+  // ...
+  onStorageFailure: failure => {
+    // showBanner stands in for your app's own UI.
+    if (failure.kind === 'full') {
+      showBanner(
+        'Your device is out of space. Free up some space, then restart the app.'
+      )
+    } else {
+      showBanner(
+        'Data could not be saved on this device. Restart the app to try again.'
+      )
+    }
+  }
+}
+```
+
+`StorageFailureError` is exported from `@rocicorp/zero`. Its `cause` is the original error from the browser or the SQLite driver. A custom `kvStore` can throw a `StorageFailureError` to get the same handling.
+
+### Checking the Store
+
+`zero.kvStore.kind` tells you which storage Zero is using: `'idb'`, `'mem'`, `'expo-sqlite'`, or `'op-sqlite'`. A custom store reports its own `kind`, if it sets one.
+
+```ts
+if (zero.kvStore.kind === 'mem') {
+  // Data is not saved on this device.
+}
+```
+
+Without IndexedDB, `kind` is `'mem'` from the start and `onStorageFailure` isn't called. When IndexedDB fails to open, `kind` changes to `'mem'` only when Zero first reads or writes the store, so check `kind` when you need it, not once at startup.
 
 ## Why Zero Doesn't Support Offline Writes
 

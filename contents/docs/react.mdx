@@ -115,6 +115,43 @@ const [issues] = useSuspenseQuery(issueQuery, {
 
 Use the `suspendUntil` parameter to control how long to suspend for. The value `complete` suspends until authoritative results from the server are received. The `partial` value suspends until any non-empty data is received, or for a empty result that is `complete`.
 
+## Query Identity
+
+You don't need to memoize queries. Build them inline, where you use them, and pass them straight to `useQuery`.
+
+Zero caches the queries you build with [ZQL](/docs/zql). Build the same query again and you usually get back the same `Query` object, even when it has `related()` or `whereExists()` callbacks written inline. So rebuilding a query on every render is cheap. You can also use a query as a dependency of `useEffect` or `useMemo`, or pass it as a prop to a component wrapped in `React.memo`:
+
+```tsx
+import {useEffect} from 'react'
+import {useQuery} from '@rocicorp/zero/react'
+import {zql} from 'schema.ts'
+
+function IssueSearch({text}: {text: string}) {
+  // Rebuilt on every render. No useMemo needed.
+  const query = zql.issue
+    .where('title', 'ILIKE', `%${text}%`)
+    .orderBy('created', 'desc')
+  const [issues] = useQuery(query)
+
+  // Scroll back to the top when the search changes.
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [query])
+
+  return issues.map(issue => (
+    <div key={issue.id}>{issue.title}</div>
+  ))
+}
+```
+
+This example passes ZQL to `useQuery` directly, so it runs [only on the client](/docs/queries#local-only-queries).
+
+Calls to [registered queries](/docs/queries#query-registries) work a little differently. Each call like `queries.posts.byStatus({status})` returns a new object. You can still pass it inline: `useQuery` sees that it's the same query with the same arguments and reuses its previous work. But don't use the returned object as a dependency. Use its arguments instead.
+
+Identity follows the order you build a query in. `zql.issue.where('status', 'open').where('priority', 'high')` and `zql.issue.where('priority', 'high').where('status', 'open')` return the same rows but can be different objects. A different value, such as another ID in `where()`, always gives a different object.
+
+Zero doesn't guarantee identity, though. It can hand back a new object for a query it has built before. When that happens, an effect or memo that depends on the query runs again, so make sure that's safe.
+
 ## Examples
 
 See [the sample directory](/docs/samples) for more complete React examples.

@@ -362,7 +362,7 @@ If the column has a [custom JSON type](/docs/schema#custom-json-types), TypeScri
 
 #### Comparisons Are Type-Strict
 
-A JSON value doesn't have a fixed type the way a column does, so comparisons follow JS strict equal (===) semantics. A value of a different type than the one you compare against never matches a positive operator and always matches a negated one:
+A JSON value doesn't have a fixed type the way a column does, so comparisons follow JS strict equal (===) semantics. A non-null value of a different type than the one you compare against never matches a positive operator and always matches a negated one:
 
 | Value at path | Filter    | Result  |
 | ------------- | --------- | ------- |
@@ -372,7 +372,7 @@ A JSON value doesn't have a fixed type the way a column does, so comparisons fol
 | `true`        | `= 1`     | `false` |
 | `'abc'`       | `> 5`     | `false` |
 
-`LIKE` and `ILIKE` only match string values. Only strings, numbers, and booleans can be compared. You can't compare a whole object or array.
+`LIKE` and `ILIKE` only match string values. Values can be compared against strings, numbers, and booleans, and against `null` with `IS` and `IS NOT` (see [Missing Values](#missing-values)). You can't compare a whole object or array.
 
 The array passed to `IN` and `NOT IN` must contain values of a single type:
 

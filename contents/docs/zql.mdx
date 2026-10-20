@@ -333,6 +333,67 @@ This is particularly useful for implementing [permissions](/docs/auth#read-permi
 zql.issue.where(cmpLit(ctx.role, 'admin'))
 ```
 
+### JSON Filters
+
+You can filter on a value inside a [`json()` column](/docs/schema#custom-json-types) with the `json` helper. Pass it the column name followed by a path into the value:
+
+```tsx
+// Find issues whose metadata.priority is 'high'
+zql.issue.where(({cmp, json}) =>
+  cmp(json('metadata', 'priority'), 'high')
+)
+```
+
+`json` can only be used inside a callback, as the first argument to `cmp`. It works with all the comparison operators, and it can be combined with `and`, `or`, `not`, and `exists` like any other `cmp`.
+
+Path segments are applied left to right. A string segment reads a key of an object and a number segment reads an index of an array:
+
+```tsx
+// metadata.address.zip
+cmp(json('metadata', 'address', 'zip'), '94110')
+
+// The first element of metadata.tags
+cmp(json('metadata', 'tags', 0), 'bug')
+```
+
+Array indexes must be non-negative integers. A string never indexes an array and a number never reads an object key, so `json('metadata', 'tags', '0')` doesn't match anything.
+
+If the column has a [custom JSON type](/docs/schema#custom-json-types), TypeScript completes the path segments and types the value you compare against. A column declared with plain `json()` accepts any path.
+
+#### Comparisons Are Type-Strict
+
+A JSON value doesn't have a fixed type the way a column does, so comparisons follow JS strict equal (===) semantics. A value of a different type than the one you compare against never matches a positive operator and always matches a negated one:
+
+| Value at path | Filter    | Result  |
+| ------------- | --------- | ------- |
+| `42`          | `= 42`    | `true`  |
+| `42`          | `= '42'`  | `false` |
+| `42`          | `!= '42'` | `true`  |
+| `true`        | `= 1`     | `false` |
+| `'abc'`       | `> 5`     | `false` |
+
+`LIKE` and `ILIKE` only match string values. Only strings, numbers, and booleans can be compared. You can't compare a whole object or array.
+
+The array passed to `IN` and `NOT IN` must contain values of a single type:
+
+```tsx
+cmp(json('metadata', 'priority'), 'IN', [
+  'high',
+  'critical'
+])
+```
+
+#### Missing Values
+
+A path that doesn't exist and a JSON `null` both read as `null`. As with columns, they never match `=`, `!=`, or the other value operators. Use `IS` and `IS NOT` to find them:
+
+```tsx
+// Issues with no metadata.priority (missing or null)
+zql.issue.where(({cmp, json}) =>
+  cmp(json('metadata', 'priority'), 'IS', null)
+)
+```
+
 ### Relationship Filters
 
 Your filter can also test properties of relationships. Currently the only supported test is existence:

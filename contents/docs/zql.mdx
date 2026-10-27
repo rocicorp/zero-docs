@@ -372,6 +372,29 @@ zql.issue.where({cmp, or, exists} =>
 )
 ```
 
+## Aggregates
+
+You can compute `count()`, `sum()`, `avg()`, `min()`, or `max()` over a query. Instead of rows, the query returns a single value:
+
+```tsx
+// The number of high priority issues
+zql.issue.where('priority', 'high').count()
+
+// The most votes any issue has
+zql.issue.max('numVotes')
+```
+
+Aggregates also work on relationships. Each row then gets the aggregate value in place of the array of related rows:
+
+```tsx
+// Each issue has a `comments` field holding its number of comments
+zql.issue.related('comments', q => q.count())
+```
+
+Zero computes aggregates on the server and syncs only the result, so counting thousands of comments doesn't download them. The value stays up to date as rows change. `where()`, `start()`, and `limit()` apply before the aggregate, just like in SQL, so `zql.issue.orderBy('created', 'desc').limit(10).avg('numVotes')` averages the ten newest issues.
+
+`sum()` and `avg()` take numeric columns, while `min()` and `max()` also accept string columns. Over no rows, `count()` returns `0` and the others return `null`. When a mutator adds or removes related rows, relationship counts, sums, and averages update right away; other aggregates update once the server has run the mutation.
+
 ## Type Helpers
 
 You can get the TypeScript type of the result of a query using the `QueryResultType` helper:

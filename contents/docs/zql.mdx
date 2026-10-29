@@ -356,7 +356,7 @@ cmp(json('metadata', 'address', 'zip'), '94110')
 cmp(json('metadata', 'tags', 0), 'bug')
 ```
 
-Array indexes must be non-negative integers. A string never indexes an array and a number never reads an object key, so `json('metadata', 'tags', '0')` doesn't match anything.
+Array indexes must be non-negative integers. A string never indexes an array and a number never reads an object key, so `json('metadata', 'tags', '0')` reads as a missing value (see [Missing Values](#missing-values)).
 
 If the column has a [custom JSON type](/docs/schema#custom-json-types), TypeScript completes the path segments and types the value you compare against. A column declared with plain `json()` accepts any path.
 

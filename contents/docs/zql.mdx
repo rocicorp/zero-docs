@@ -391,9 +391,21 @@ Aggregates also work on relationships. Each row then gets the aggregate value in
 zql.issue.related('comments', q => q.count())
 ```
 
-Zero computes aggregates on the server and syncs only the result, so counting thousands of comments doesn't download them. The value stays up to date as rows change. `where()`, `start()`, and `limit()` apply before the aggregate, just like in SQL, so `zql.issue.orderBy('created', 'desc').limit(10).avg('numVotes')` averages the ten newest issues.
+Zero computes aggregates on the server and syncs only the result, so counting thousands of comments doesn't download them. The value stays up to date as rows change. `where()`, `start()`, and `limit()` apply before the aggregate, just like in SQL, so they have to come before it: `zql.issue.orderBy('created', 'desc').limit(10).avg('numVotes')` averages the ten newest issues.
 
-`sum()` and `avg()` take numeric columns, while `min()` and `max()` also accept string columns. Over no rows, `count()` returns `0` and the others return `null`. When a mutator adds or removes related rows, relationship counts, sums, and averages update right away; other aggregates update once the server has run the mutation.
+`sum()` and `avg()` take numeric columns, while `min()` and `max()` also accept string columns. Over no rows, `count()` returns `0` and the others return `null`.
+
+To aggregate a query defined with [`defineQuery()`](./queries), put the aggregate in its definition. Adding one to the query it returns, as in `queries.issues().count()`, throws:
+
+```ts
+export const queries = defineQueries({
+  highPriorityCount: defineQuery(() =>
+    zql.issue.where('priority', 'high').count()
+  )
+})
+```
+
+When a mutator adds or removes related rows, a relationship's count, sum, or average updates right away, as long as the relationship doesn't go through a junction table or use `limit()`, `start()`, or `whereExists()`. Other aggregates update once the server has run the mutation. Inside a mutator, `tx.run()` reads an aggregate's synced value if the app also syncs that query, and otherwise computes it from the rows on the client, which can be fewer than the server has.
 
 ## Type Helpers
 

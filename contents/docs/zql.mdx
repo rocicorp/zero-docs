@@ -407,6 +407,44 @@ export const queries = defineQueries({
 
 When a mutator adds or removes related rows, a relationship's count, sum, or average updates right away, as long as the relationship doesn't go through a junction table or use `limit()`, `start()`, or `whereExists()`. Other aggregates update once the server has run the mutation. Inside a mutator, `tx.run()` reads an aggregate's synced value if the app also syncs that query, and otherwise computes it from the rows on the client, which can be fewer than the server has.
 
+### Distinct
+
+`distinct()` returns one row for each distinct combination of the columns you name, as SQL's `SELECT DISTINCT` does. The rows have only those columns. Following it with `count()` counts the combinations instead:
+
+```tsx
+// The people who created a high priority issue: [{creatorID: 'u1'}, …]
+zql.issue.where('priority', 'high').distinct('creatorID')
+
+// How many of them there are
+zql.issue
+  .where('priority', 'high')
+  .distinct('creatorID')
+  .count()
+```
+
+`null` is a value like any other: issues with no creator give one row with `creatorID: null`, and `count()` counts it as one value. That differs from SQL's `COUNT(DISTINCT creatorID)`, which skips `NULL`, but it always matches the number of rows `distinct()` returns. The rows are ordered by the distinct columns, ascending unless `orderBy()` says otherwise, and `orderBy()` can only name those columns.
+
+### Group By
+
+`groupBy()` computes an aggregate for each group of rows that share the values of the columns you name, as SQL's `GROUP BY` does. It has to be followed by `count()`, `sum()`, `avg()`, `min()`, or `max()`, and each row holds the group's columns and the aggregate's value under the function's name:
+
+```tsx
+// [{creatorID: 'u1', count: 12}, {creatorID: null, count: 3}, …]
+zql.issue
+  .where('priority', 'high')
+  .groupBy('creatorID')
+  .count()
+
+// [{creatorID: 'u1', priority: 'high', sum: 40}, …]
+zql.issue.groupBy('creatorID', 'priority').sum('numVotes')
+```
+
+The aggregates work as they do without `groupBy()`, and a group whose values are all `null` gets `null` from `sum()`, `avg()`, `min()`, and `max()`. As with `distinct()`, rows with a `null` value form a group of their own, and the rows can only be ordered by the grouped columns. Ordering groups by their aggregate, such as the creators with the most issues first, isn't supported yet.
+
+Neither `distinct()` nor `groupBy()` can be combined with `limit()`, `start()`, `one()`, `related()`, or another aggregate yet, and neither can group by a JSON column. They can't be used inside `related()` or `whereExists()` either, so counting each issue's distinct commenters isn't possible yet. As with other aggregates, a query defined with `defineQuery()` has to include them in its definition.
+
+When a mutator changes rows, the rows of a `distinct()` and the values of a `groupBy()` with `count()`, `sum()`, or `avg()` update right away, as long as the query's `where()` doesn't use `whereExists()`. A `groupBy()` with `min()` or `max()`, and `distinct().count()`, update once the server has run the mutation.
+
 ## Type Helpers
 
 You can get the TypeScript type of the result of a query using the `QueryResultType` helper:

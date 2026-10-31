@@ -171,6 +171,17 @@ flag: `--change-streamer-port`<br/>
 env: `ZERO_CHANGE_STREAMER_PORT`<br/>
 default: `--port + 1`<br/>
 
+### Change Streamer Secret
+
+A shared secret that authenticates view-syncers to the change-streamer. View-syncers present it when connecting to the replication-manager, which refuses replication connections that do not present it. Set it to the same value on the replication-manager and on every view-syncer.
+
+In a single-node configuration zero-cache generates a secret for its own workers, so no value is needed. In a multi-node configuration it should always be set: while it is unset, the replication-manager accepts replication connections from anything that can reach its [change-streamer port](#change-streamer-port), and logs a warning on startup.
+
+To add the secret to an existing multi-node deployment, set it on the view-syncers before setting it on the replication-manager. A replication-manager without a secret accepts connections both with and without one, so the rollout needs no downtime.
+
+flag: `--change-streamer-secret`<br/>
+env: `ZERO_CHANGE_STREAMER_SECRET`<br/>
+
 ### Change Streamer Startup Delay (ms)
 
 The delay to wait before the change-streamer takes over the replication stream (i.e. the handoff during replication-manager updates), to allow load balancers to register the task as healthy based on healthcheck parameters. If a change stream request is received during this interval, the delay will be canceled and the takeover will happen immediately, since the incoming request indicates that the task is registered as a target.

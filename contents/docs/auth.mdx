@@ -703,7 +703,9 @@ or leaked in logs.
 Passing the server-verified `userID` to
 `handleMutateRequest` and `handleQueryRequest` lets Zero
 enforce that only tabs belonging to the same user can be
-in the same client group.
+in the same client group. To refuse a `userID` the client
+claims when your endpoint doesn't return one, turn on
+[`ZERO_AUTH_REQUIRE_SERVER_USER_ID`](/docs/zero-cache-config#auth-require-server-user-id).
 
 </Note>
 

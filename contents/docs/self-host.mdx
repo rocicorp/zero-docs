@@ -323,6 +323,7 @@ services:
       ZERO_CHANGE_DB: postgres://postgres:pass@upstream-db:5432/zero
       ZERO_REPLICA_FILE: /data/replica.db
       ZERO_ADMIN_PASSWORD: pickanewpassword
+      ZERO_CHANGE_STREAMER_SECRET: pickanewsecret
       ZERO_NUM_SYNC_WORKERS: 0
       ZERO_LITESTREAM_BACKUP_URL: s3://acme-zero-backups/v1
     volumes:
@@ -350,6 +351,7 @@ services:
       ZERO_MUTATE_URL: https://api.example.com/api/zero/mutate
       ZERO_ENABLE_CRUD_MUTATIONS: 'false'
       ZERO_CHANGE_STREAMER_URI: ws://replication-manager:4849/
+      ZERO_CHANGE_STREAMER_SECRET: pickanewsecret
     volumes:
       - view-syncer-data:/data
     healthcheck:
@@ -404,6 +406,7 @@ kill_timeout = 300
   ZERO_CVR_DB = "postgresql://postgres:pass@pgbouncer.internal:5432/zero"
   ZERO_CHANGE_DB = "postgresql://postgres:pass@pgbouncer.internal:5432/zero"
   ZERO_ADMIN_PASSWORD = "pickanewpassword"
+  ZERO_CHANGE_STREAMER_SECRET = "pickanewsecret"
   ZERO_REPLICA_FILE = "/data/replica.db"
   ZERO_NUM_SYNC_WORKERS = "0"
   ZERO_LITESTREAM_BACKUP_URL = "s3://acme-zero-backups/v1"
@@ -447,6 +450,7 @@ kill_timeout = 300
   ZERO_ENABLE_CRUD_MUTATIONS = "false"
   ZERO_REPLICA_FILE = "/data/replica.db"
   ZERO_CHANGE_STREAMER_URI = "ws://zero-replication-manager.internal:4849/"
+  ZERO_CHANGE_STREAMER_SECRET = "pickanewsecret"
 ```
 
 ```ts
@@ -476,6 +480,7 @@ export default $config({
       ZERO_CHANGE_DB:
         'postgresql://postgres:pass@pgbouncer:5432/zero',
       ZERO_ADMIN_PASSWORD: 'pickanewpassword',
+      ZERO_CHANGE_STREAMER_SECRET: 'pickanewsecret',
       ZERO_REPLICA_FILE: 'replica.db'
     }
 
@@ -605,6 +610,8 @@ spec:
               value: postgresql://postgres:pass@pgbouncer:5432/zero
             - name: ZERO_ADMIN_PASSWORD
               value: pickanewpassword
+            - name: ZERO_CHANGE_STREAMER_SECRET
+              value: pickanewsecret
             - name: ZERO_REPLICA_FILE
               value: /data/replica.db
             - name: ZERO_NUM_SYNC_WORKERS
@@ -687,6 +694,8 @@ spec:
               value: /data/replica.db
             - name: ZERO_CHANGE_STREAMER_URI
               value: ws://replication-manager-service:4849/
+            - name: ZERO_CHANGE_STREAMER_SECRET
+              value: pickanewsecret
           lifecycle:
             preStop:
               exec:
@@ -788,6 +797,8 @@ View syncers must be publicly reachable by clients on port 4848. The replication
 The replication-manager serves Zero's internal replication protocol. Keep it behind private networking such as a private service address, internal load balancer, or Kubernetes `ClusterIP` service.
 
 </Note>
+
+Also set [`ZERO_CHANGE_STREAMER_SECRET`](/docs/zero-cache-config#change-streamer-secret) to the same value on the replication-manager and on every view-syncer. The replication-manager then refuses replication connections that do not present the secret. Without it, anything that can reach port 4849 can read the replication stream, and the replication-manager logs a warning on startup. A single-node `zero-cache` generates its own secret, so this only applies to multi-node deployments.
 
 The external load balancer for view-syncers must support websockets, and can use the health check at `/keepalive` to verify view-syncers are healthy. The replication-manager should also have a `/keepalive` health check, but that check should run through private infrastructure rather than a public load balancer.
 

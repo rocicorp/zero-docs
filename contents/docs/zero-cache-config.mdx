@@ -84,6 +84,18 @@ flag: `--app-publications`<br/>
 env: `ZERO_APP_PUBLICATIONS`<br/>
 default: `_{app-id}_public_0`
 
+### Auth Require Server User ID
+
+Refuse a connection that claims a `userID` unless your `/query` or `/mutate` endpoint confirmed it.
+
+Your endpoints confirm the user by returning the validated `userID` in their response, or `null` for logged-out callers. `handleQueryRequest` and `handleMutateRequest` do this when you pass `userID` to their object form. A `userID` verified by [`ZERO_AUTH_SECRET`](#auth-secret), [`ZERO_AUTH_JWK`](#auth-jwk) or [`ZERO_AUTH_JWKS_URL`](#auth-jwks-url) is accepted either way.
+
+With this off, `zero-cache` trusts the `userID` the client claims when your endpoint doesn't return one, and logs a warning. Turn it on once your endpoints return the `userID`.
+
+flag: `--auth-require-server-user-id`<br/>
+env: `ZERO_AUTH_REQUIRE_SERVER_USER_ID`<br/>
+default: `false`
+
 ### Auth Revalidate Interval Seconds
 
 How often `zero-cache` re-checks that each live connection is still authorized to use your `/query` endpoint.
@@ -171,6 +183,17 @@ flag: `--change-streamer-port`<br/>
 env: `ZERO_CHANGE_STREAMER_PORT`<br/>
 default: `--port + 1`<br/>
 
+### Change Streamer Secret
+
+A shared secret that authenticates view-syncers to the change-streamer. View-syncers present it when connecting to the replication-manager, which refuses replication connections that do not present it. Set it to the same value on the replication-manager and on every view-syncer.
+
+In a single-node configuration zero-cache generates a secret for its own workers, so no value is needed. In a multi-node configuration it should always be set: while it is unset, the replication-manager accepts replication connections from anything that can reach its [change-streamer port](#change-streamer-port), and logs a warning on startup.
+
+To add the secret to an existing multi-node deployment, set it on the view-syncers before setting it on the replication-manager. A replication-manager without a secret accepts connections both with and without one, so the rollout needs no downtime.
+
+flag: `--change-streamer-secret`<br/>
+env: `ZERO_CHANGE_STREAMER_SECRET`<br/>
+
 ### Change Streamer Startup Delay (ms)
 
 The delay to wait before the change-streamer takes over the replication stream (i.e. the handoff during replication-manager updates), to allow load balancers to register the task as healthy based on healthcheck parameters. If a change stream request is received during this interval, the delay will be canceled and the takeover will happen immediately, since the incoming request indicates that the task is registered as a target.
@@ -228,6 +251,16 @@ Note that this number must allow for at least one connection per sync worker, or
 flag: `--cvr-max-conns`<br/>
 env: `ZERO_CVR_MAX_CONNS`<br/>
 default: `30`
+
+### Enable Heapz
+
+Serve heap snapshots of the `zero-cache` process at `/heapz`, protected by the [admin password](#admin-password).
+
+A heap snapshot contains everything the process holds in memory, including the auth tokens, cookies and API keys of connected clients. If you don't use heap snapshots, set this to `false`. That turns off `/heapz` and keeps the other diagnostic endpoints and the inspector.
+
+flag: `--enable-heapz`<br/>
+env: `ZERO_ENABLE_HEAPZ`<br/>
+default: `true`
 
 ### Enable Query Planner
 

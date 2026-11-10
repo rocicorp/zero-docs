@@ -57,6 +57,14 @@ For a complete example, see [zslack](./samples#zslack).
 
 To handle a full disk or a database that fails to open, see [Storage Failures](./connection#storage-failures).
 
+Zero generates the IDs of clients, client groups and connections with `crypto.getRandomValues`, which React Native's Hermes engine doesn't provide. Install [`react-native-get-random-values`](https://github.com/LinusU/react-native-get-random-values) and import it first in your app's entry file:
+
+```ts
+import 'react-native-get-random-values'
+```
+
+Without it, Zero falls back to `Math.random`, which makes the IDs easier to guess, and logs a warning.
+
 <Note
   emoji="🤓"
   type="warning"

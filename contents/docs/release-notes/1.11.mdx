@@ -51,25 +51,25 @@ The fix for client-claimed user IDs is off until you turn it on. See [Server-Val
 1. Return the validated `userID` from your `/query` and `/mutate` endpoints, or `null` for logged-out callers. `handleQueryRequest` and `handleMutateRequest` do this when you [pass them `userID`](/docs/auth#authenticated-client-groups), as recommended since 1.5.
 2. Set [`ZERO_AUTH_REQUIRE_SERVER_USER_ID=true`](/docs/zero-cache-config#auth-require-server-user-id).
 
-Until you do, `zero-cache` trusts the `userID` the client claims and logs a warning. Apps that verify tokens with `ZERO_AUTH_SECRET`, `ZERO_AUTH_JWK` or `ZERO_AUTH_JWKS_URL` don't need this: the token already verifies the `userID`. ([#310](https://github.com/rocicorp/mono-internal/pull/310), [#360](https://github.com/rocicorp/mono-internal/pull/360))
+Until you do, `zero-cache` trusts the `userID` the client claims and logs a warning. Apps that verify tokens with `ZERO_AUTH_SECRET`, `ZERO_AUTH_JWK` or `ZERO_AUTH_JWKS_URL` don't need this: the token already verifies the `userID`. ([83efa9462](https://github.com/rocicorp/mono/commit/83efa9462), [c22b300d1](https://github.com/rocicorp/mono/commit/c22b300d1))
 
 #### Multi-Node Deployments
 
 1.11.5 adds [`ZERO_CHANGE_STREAMER_SECRET`](/docs/zero-cache-config#change-streamer-secret), a secret that view-syncers present to the replication-manager. Set it to the same value on every node: on the view-syncers first, then on the replication-manager. A replication-manager without the secret still accepts view-syncers, but warns at startup.
 
-If your replication-manager also runs its own sync workers, set the secret before you upgrade. Without it, that node generates a secret for its own workers and refuses your other view-syncers. ([#307](https://github.com/rocicorp/mono-internal/pull/307))
+If your replication-manager also runs its own sync workers, set the secret before you upgrade. Without it, that node generates a secret for its own workers and refuses your other view-syncers. ([b2b8f68e4](https://github.com/rocicorp/mono/commit/b2b8f68e4))
 
 ### Breaking Changes in 1.11.5
 
-- **`userID` needs a token:** when `ZERO_AUTH_SECRET`, `ZERO_AUTH_JWK` or `ZERO_AUTH_JWKS_URL` is set, a connection that passes a `userID` without an `auth` token is refused with `Unauthorized`. Omit `userID` for logged-out users; the deprecated `userID: 'anon'` without `auth` is refused too. ([#315](https://github.com/rocicorp/mono-internal/pull/315))
+- **`userID` needs a token:** when `ZERO_AUTH_SECRET`, `ZERO_AUTH_JWK` or `ZERO_AUTH_JWKS_URL` is set, a connection that passes a `userID` without an `auth` token is refused with `Unauthorized`. Omit `userID` for logged-out users; the deprecated `userID: 'anon'` without `auth` is refused too. ([522688120](https://github.com/rocicorp/mono/commit/522688120))
 
 ### Fixes in 1.11.5
 
-- A `numeric`, `float4` or `float8` value between about 2^63 and 1e21 stopped replication with a `RangeError`, and a `numeric` between 2^53 and 2^63 was stored as the wrong integer, with no error. Both are now stored correctly. ([#330](https://github.com/rocicorp/mono-internal/pull/330))
-- A `NULL` element in an array column could stop replication or be stored with the wrong value. Rows already stored keep a wrong value until they change or you [re-sync the replica](/docs/debug/replication#resetting). ([#331](https://github.com/rocicorp/mono-internal/pull/331))
-- A schema-change or lag-report message on the replication stream that `zero-cache` could not parse stopped replication. Such messages, and schema-change messages that its own upstream functions didn't emit, are now skipped. ([#313](https://github.com/rocicorp/mono-internal/pull/313), [#335](https://github.com/rocicorp/mono-internal/pull/335), [#338](https://github.com/rocicorp/mono-internal/pull/338))
-- Client, client group and connection IDs now come from `crypto.getRandomValues` when available instead of `Math.random`. ([#304](https://github.com/rocicorp/mono-internal/pull/304))
-- `zero-cache` logs and traces show a hash of the `clientGroupID` instead of the ID. ([#321](https://github.com/rocicorp/mono-internal/pull/321), [#327](https://github.com/rocicorp/mono-internal/pull/327))
+- A `numeric`, `float4` or `float8` value between about 2^63 and 1e21 stopped replication with a `RangeError`, and a `numeric` between 2^53 and 2^63 was stored as the wrong integer, with no error. Both are now stored correctly. ([340215ab5](https://github.com/rocicorp/mono/commit/340215ab5))
+- A `NULL` element in an array column could stop replication or be stored with the wrong value. Rows already stored keep a wrong value until they change or you [re-sync the replica](/docs/debug/replication#resetting). ([fe4bc732a](https://github.com/rocicorp/mono/commit/fe4bc732a))
+- A schema-change or lag-report message on the replication stream that `zero-cache` could not parse stopped replication. Such messages, and schema-change messages that its own upstream functions didn't emit, are now skipped. ([08c634549](https://github.com/rocicorp/mono/commit/08c634549), [f6010bb34](https://github.com/rocicorp/mono/commit/f6010bb34), [9757e9c52](https://github.com/rocicorp/mono/commit/9757e9c52))
+- Client, client group and connection IDs now come from `crypto.getRandomValues` when available instead of `Math.random`. ([e80d6305c](https://github.com/rocicorp/mono/commit/e80d6305c))
+- `zero-cache` logs and traces show a hash of the `clientGroupID` instead of the ID. ([adfce3301](https://github.com/rocicorp/mono/commit/adfce3301), [de9121d99](https://github.com/rocicorp/mono/commit/de9121d99))
 
 ## Overview
 

@@ -1,0 +1,289 @@
+---
+title: Zero 1.12
+description: Synced Aggregates and JSON Path Filters
+---
+
+## Installation
+
+```bash
+npm install @rocicorp/zero@1.12
+```
+
+<Note type="warning">
+  [Deploy `zero-cache` before updating
+  clients](/docs/self-host#rolling-updates). Zero 1.12
+  clients cannot connect to an older server. To roll back,
+  roll back clients first. In multi-node deployments,
+  upgrade the replication-manager before the view-syncers,
+  and roll back the view-syncers first. Then set
+  [`ZERO_CHANGE_STREAMER_SECRET`](/docs/zero-cache-config#change-streamer-secret)
+  on the view-syncers, and after that on the
+  replication-manager.
+</Note>
+
+## Overview
+
+Zero 1.12 syncs aggregates like `count()` and `sum()`, groups rows with `groupBy()` and `distinct()`, and can filter on values inside JSON columns. `zero-cache` hydrates queries and applies updates up to 1.8x faster in our benchmarks, React Native apps start about 3x faster, and each replication-manager now gets its own replication slot. This release also fixes twelve security vulnerabilities, along with a lot of other fixes, especially in replication and connection handling.
+
+## Security
+
+Zero 1.12 includes the fixes for the twelve security vulnerabilities fixed in 1.11.5. See the [1.11.5 release notes](/docs/release-notes/1.11#1115) for the advisories. We recommend that everyone upgrade. The fix for client-claimed user IDs is off until you turn it on. See [Server-Validated User IDs](#server-validated-user-ids).
+
+Some of these fixes change how Zero behaves, so read [Breaking Changes](#breaking-changes) before you upgrade, especially the entries on `userID` and the change-streamer secret.
+
+## Upgrading
+
+### Server-Validated User IDs
+
+`zero-cache` can now refuse a `userID` that your API didn't confirm. To use it:
+
+1. Return the validated `userID` from your `/query` and `/mutate` endpoints, or `null` for logged-out callers. `handleQueryRequest` and `handleMutateRequest` do this when you [pass them `userID`](/docs/auth#authenticated-client-groups), as recommended since 1.5.
+2. Set [`ZERO_AUTH_REQUIRE_SERVER_USER_ID=true`](/docs/zero-cache-config#auth-require-server-user-id).
+
+Until you do, `zero-cache` trusts the `userID` the client claims and logs a warning. Apps that verify tokens with `ZERO_AUTH_SECRET`, `ZERO_AUTH_JWK` or `ZERO_AUTH_JWKS_URL` don't need this: the token already verifies the `userID`. ([83efa9462](https://github.com/rocicorp/mono/commit/83efa9462), [c1f36d79e](https://github.com/rocicorp/mono/commit/c1f36d79e))
+
+## RMv2: Replication-Manager Slots
+
+We're reworking how replication-managers replicate from Postgres, so that several can run side by side and one can take over from another without a pause. We call this RMv2. Zero 1.12 ships the first step and turns it on by default: each replication-manager now gets its own replication slot.
+
+A new replication-manager restores its replica from the backup, catches up on its own slot while the old one keeps serving, and then takes over. Slots of replication-managers that are gone are dropped automatically. ([49607b8b3](https://github.com/rocicorp/mono/commit/49607b8b3))
+
+A new replication-manager also starts about 20 seconds faster, once both the old and the new one are on 1.12. The new `zero.replication.server_start` metric shows where the start time goes. ([522d2ce57](https://github.com/rocicorp/mono/commit/522d2ce57), [9aca1b0ab](https://github.com/rocicorp/mono/commit/9aca1b0ab))
+
+This needs [Litestream v5 backups](/docs/zero-cache-config#litestream-backup-using-v5), the default since 1.11. Expect one slot per running replication-manager in Postgres, each holding WAL until it is consumed. To go back to a shared slot, set [`ZERO_UPSTREAM_PG_REPLICATION_SLOT_PER_REPLICA=false`](/docs/zero-cache-config#upstream-pg-replication-slot-per-replica). That doesn't need a resync.
+
+Running several replication-managers at once will come in a later release.
+
+## Features
+
+- Queries can return a single [aggregate](/docs/zql#aggregates): `zql.issue.where('open', true).count()`, or `zql.issue.max('numVotes')`. A relationship can be reduced the same way, so `related('comments', q => q.count())` gives each issue its number of comments instead of the comments. Only the result is synced, and it stays up to date as rows change. Counts, sums and averages of direct relationships update optimistically when a mutator changes the related rows. `sum()`, `avg()`, `min()` and `max()` can also reduce a value inside a JSON column. ([c9d1b15fc](https://github.com/rocicorp/mono/commit/c9d1b15fc), [e2ecf69ce](https://github.com/rocicorp/mono/commit/e2ecf69ce), [642aece86](https://github.com/rocicorp/mono/commit/642aece86), [523d3b97e](https://github.com/rocicorp/mono/commit/523d3b97e), [8b716b3fe](https://github.com/rocicorp/mono/commit/8b716b3fe))
+- [`distinct()`](/docs/zql#distinct) returns the distinct combinations of some columns, and [`groupBy()`](/docs/zql#group-by) computes an aggregate per group: `zql.issue.groupBy('assigneeID').count()`. Groups appear and disappear optimistically for `count()`, `sum()` and `avg()`. ([effd2da27](https://github.com/rocicorp/mono/commit/effd2da27), [5493ba549](https://github.com/rocicorp/mono/commit/5493ba549), [fe168e640](https://github.com/rocicorp/mono/commit/fe168e640))
+- `where()` can compare a value inside a `json()` column: `cmp(json('metadata', 'priority'), 'high')`. Paths can go through object keys and array indices, comparisons are type-strict, and TypeScript checks the path of a typed JSON column. [JSON path filters](/docs/zql#json-filters) run on the client, in SQLite and in Postgres. ([0a1a0f3d4](https://github.com/rocicorp/mono/commit/0a1a0f3d4))
+- Draining behind a load balancer: a new [`ZERO_PRE_DRAIN_DELAY_MS`](/docs/zero-cache-config#pre-drain-delay-ms) makes `zero-cache` fail its readiness check for a while after `SIGTERM` while still serving, so the load balancer stops routing to it before the drain starts. With sticky sessions, set [`ZERO_AFFINITY_COOKIE_NAME`](/docs/zero-cache-config#affinity-cookie-name) and `zero-cache` expires the cookie on connections it turns away while draining. A new `zero.sync.drain-time` metric estimates how long a view-syncer's drain will take. ([f22ec09b6](https://github.com/rocicorp/mono/commit/f22ec09b6), [f77997349](https://github.com/rocicorp/mono/commit/f77997349), [9a74d2d3c](https://github.com/rocicorp/mono/commit/9a74d2d3c), [04a27634b](https://github.com/rocicorp/mono/commit/04a27634b))
+- Clients retry a failed connection sooner: after 250–500 ms the first time, backing off to the usual 5 seconds by the fifth failure, with jitter so clients that lost the same server don't retry together. A draining `zero-cache` also tells new connections to retry within a second instead of after 5 seconds. ([06622e6ec](https://github.com/rocicorp/mono/commit/06622e6ec), [a5a940321](https://github.com/rocicorp/mono/commit/a5a940321))
+- Replication status events are republished when the replica grows by 1 GiB or 5%, so consumers that size storage from `replicaSize` see growth from ordinary writes. ([76a0a1bd1](https://github.com/rocicorp/mono/commit/76a0a1bd1))
+- Multi-node deployments can authenticate view-syncers to the replication-manager with a shared [`ZERO_CHANGE_STREAMER_SECRET`](/docs/zero-cache-config#change-streamer-secret). A single-node `zero-cache` generates its own. ([b2b8f68e4](https://github.com/rocicorp/mono/commit/b2b8f68e4))
+- [`ZERO_ENABLE_HEAPZ=false`](/docs/zero-cache-config#enable-heapz) turns off the `/heapz` heap-snapshot endpoint while keeping the other diagnostic endpoints and the inspector. ([ea3105333](https://github.com/rocicorp/mono/commit/ea3105333))
+
+## Performance
+
+### Server-Side Hydration
+
+When a client connects or adds a query, `zero-cache` has to hydrate it: run it against the replica and send the results. In Zero 1.12 this takes about **1.2x less CPU**, and about **1.8x less** for queries with `whereExists`, which are common because permissions use them. We measured 100 client groups on one sync worker, each hydrating its user's top issues with their latest comments. ([6563d5751](https://github.com/rocicorp/mono/commit/6563d5751), [70c771950](https://github.com/rocicorp/mono/commit/70c771950), [c2882cba0](https://github.com/rocicorp/mono/commit/c2882cba0), [5a5fb1af1](https://github.com/rocicorp/mono/commit/5a5fb1af1), [c9c34d145](https://github.com/rocicorp/mono/commit/c9c34d145), [f7233246c](https://github.com/rocicorp/mono/commit/f7233246c), [ae794cc0e](https://github.com/rocicorp/mono/commit/ae794cc0e))
+
+<BenchmarkComparisonChart
+  title="Server-Side Hydration"
+  description="Measured on M5 Pro. Lower is better."
+  previousLabel="Zero 1.11"
+  currentLabel="Zero 1.12"
+  precision={2}
+  valuePrecision={2}
+  unit="ms"
+  higherIsBetter={false}
+  data={[
+    {
+      name: 'Issues with comments',
+      fullName:
+        "CPU to hydrate one client group's query: top 20 issues with their 3 latest comments",
+      previous: 0.839,
+      current: 0.682
+    },
+    {
+      name: 'With whereExists',
+      fullName:
+        'The same query, keeping only issues that have a comment',
+      previous: 1.879,
+      current: 1.035
+    }
+  ]}
+/>
+
+### Server-Side Incremental Updates
+
+When a transaction replicates, `zero-cache` has to bring every client group's queries up to date. Zero 1.12 does this with about **1.4x to 1.7x less CPU** than 1.11, which was already 2.5x better than 1.10. We measured the same workload as last release: 100 client groups on one sync worker, each syncing a query with a related subquery. Pushing one write through 300 open queries is about **1.6x faster** too. ([6563d5751](https://github.com/rocicorp/mono/commit/6563d5751), [a35b628ea](https://github.com/rocicorp/mono/commit/a35b628ea), [018a90f86](https://github.com/rocicorp/mono/commit/018a90f86), [f5d11d924](https://github.com/rocicorp/mono/commit/f5d11d924), [8702aea45](https://github.com/rocicorp/mono/commit/8702aea45), [fd30e6437](https://github.com/rocicorp/mono/commit/fd30e6437))
+
+<BenchmarkComparisonChart
+  title="Server-Side Incremental Updates"
+  description="Measured on M5 Pro. Lower is better."
+  previousLabel="Zero 1.11"
+  currentLabel="Zero 1.12"
+  precision={2}
+  valuePrecision={1}
+  unit="ms"
+  higherIsBetter={false}
+  data={[
+    {
+      name: '10-change transaction',
+      fullName:
+        'CPU to advance 100 client groups through a 10-change transaction',
+      previous: 6.648,
+      current: 4.627
+    },
+    {
+      name: '100-change transaction',
+      fullName:
+        'CPU to advance 100 client groups through a 100-change transaction',
+      previous: 49.133,
+      current: 29.257
+    },
+    {
+      name: 'One write, 300 queries',
+      fullName:
+        'Push one logical write (3 row changes) through 300 queries over SQLite and update their views',
+      previous: 78.086,
+      current: 48.46
+    }
+  ]}
+/>
+
+### React Native Cold Start
+
+When a React Native app starts, Zero loads the rows it has stored on the device into memory and runs the app's queries over them before anything renders. In Zero 1.12 this is about **3x faster**. Hermes, the JavaScript engine React Native uses, was spending most of that time sorting rows that were already in order. We measured an app with 180,000 stored rows and 21 queries, on the Android emulator and the iOS simulator. ([bfc7e8c24](https://github.com/rocicorp/mono/commit/bfc7e8c24), [e7f8a1d91](https://github.com/rocicorp/mono/commit/e7f8a1d91), [8c21e7960](https://github.com/rocicorp/mono/commit/8c21e7960), [ea4560f4e](https://github.com/rocicorp/mono/commit/ea4560f4e), [e058bfca2](https://github.com/rocicorp/mono/commit/e058bfca2), [6375eeb84](https://github.com/rocicorp/mono/commit/6375eeb84), [855c495b1](https://github.com/rocicorp/mono/commit/855c495b1))
+
+<BenchmarkComparisonChart
+  title="React Native Cold Start"
+  description="Release builds, measured on M5 Pro. Lower is better."
+  previousLabel="Zero 1.11"
+  currentLabel="Zero 1.12"
+  precision={1}
+  valuePrecision={0}
+  unit="ms"
+  higherIsBetter={false}
+  data={[
+    {
+      name: 'Android',
+      fullName:
+        'Load 180,000 rows and hydrate 21 queries, Android emulator',
+      previous: 2127,
+      current: 678
+    },
+    {
+      name: 'iOS',
+      fullName:
+        'Load 180,000 rows and hydrate 21 queries, iOS simulator',
+      previous: 2404,
+      current: 738
+    }
+  ]}
+/>
+
+### Query Planning
+
+Before `zero-cache` hydrates a query with `whereExists`, it plans which way to run each join. With three to five `whereExists`, or nested ones, planning now takes about **2x to 10x less time**. ([9215b24b2](https://github.com/rocicorp/mono/commit/9215b24b2))
+
+<BenchmarkComparisonChart
+  title="Query Planning"
+  description="Measured on M5 Pro. Lower is better."
+  previousLabel="Zero 1.11"
+  currentLabel="Zero 1.12"
+  precision={1}
+  valuePrecision={2}
+  unit="ms"
+  higherIsBetter={false}
+  data={[
+    {
+      name: '3 whereExists (or)',
+      fullName:
+        'Plan a query with three whereExists combined with or',
+      previous: 0.438,
+      current: 0.141
+    },
+    {
+      name: '5 whereExists',
+      fullName: 'Plan a query with five whereExists',
+      previous: 1.465,
+      current: 0.357
+    },
+    {
+      name: '5 whereExists (or)',
+      fullName:
+        'Plan a query with five whereExists combined with or',
+      previous: 2.785,
+      current: 0.28
+    },
+    {
+      name: 'Nested 4 levels',
+      fullName:
+        'Plan a query with whereExists nested four levels deep',
+      previous: 0.623,
+      current: 0.189
+    }
+  ]}
+/>
+
+### Many Connections
+
+Every change `zero-cache` syncs reaches each connected client as a poke. In 1.11, every poke allocated a fresh 1 MiB buffer, so with many clients connected the garbage collector was busy cleaning up after them. Zero 1.12 keeps a small buffer per connection and reuses it. With 600 clients connected and 100 writes per second on one sync worker, the sync worker now uses about **1.9x less CPU**. ([ac45c279f](https://github.com/rocicorp/mono/commit/ac45c279f))
+
+<BenchmarkComparisonChart
+  title="Many Connections"
+  description="Measured on M5 Pro. Lower is better."
+  previousLabel="Zero 1.11"
+  currentLabel="Zero 1.12"
+  precision={1}
+  valuePrecision={2}
+  unit="cores"
+  higherIsBetter={false}
+  data={[
+    {
+      name: 'Sync worker',
+      fullName:
+        'CPU of the sync worker serving 600 connected clients at 100 writes per second',
+      previous: 2.11,
+      current: 1.11
+    },
+    {
+      name: 'All of zero-cache',
+      fullName:
+        'CPU of all zero-cache processes in the same workload',
+      previous: 2.31,
+      current: 1.31
+    }
+  ]}
+/>
+
+## Fixes
+
+### Queries and Mutations
+
+- Server mutators and queries read `time with time zone` columns as negative milliseconds when the zone offset was positive, and a `ServerSchema` written by hand with the short `timestamptz` name read a timestamp as a time of day. ([9a08f1e40](https://github.com/rocicorp/mono/commit/9a08f1e40))
+- Server mutators and queries failed with `type "..." does not exist` for enum and other user-defined Postgres types outside the `public` schema. Casts are now schema-qualified. ([8166580b0](https://github.com/rocicorp/mono/commit/8166580b0)) (thanks [@jschaf](https://github.com/jschaf)!)
+- A push that failed at the API server could put other tabs of the same client group into the `Error` state, or fail a socket the client had already replaced. A failed push now affects only the socket that sent it, and that socket's queued pushes are re-sent on the next connection. ([945ce6192](https://github.com/rocicorp/mono/commit/945ce6192)) (thanks [@pawarren](https://github.com/pawarren)!)
+- `runAnalyzeCLI --query` no longer evaluates the query text as JavaScript. It accepts query builder calls, literals and arrow functions, and rejects anything else with its position. ([02b6c1bbd](https://github.com/rocicorp/mono/commit/02b6c1bbd))
+
+### Clients and React Native
+
+- On React Native, client garbage collection failed every 5 minutes, and queries whose `related()` entries weren't in alias order threw during normalization, because Hermes lacks `Array.prototype.toSorted`. ([b62ded385](https://github.com/rocicorp/mono/commit/b62ded385)) (thanks [@wikil](https://github.com/wikil)!)
+- A SQLite-backed store whose `close()` threw blocked every later `Zero` instance with the same name from opening, and two overlapping `close()` calls could close a shared SQLite connection under another store. ([dee69dc9d](https://github.com/rocicorp/mono/commit/dee69dc9d), [cc861e8f6](https://github.com/rocicorp/mono/commit/cc861e8f6)) (thanks [@wikil](https://github.com/wikil)!)
+- An app that refreshed its auth token while the first connection of a new client group was still being validated could be refused for good with `The initConnection message for a new client group must include client schema`. ([874e1ec9d](https://github.com/rocicorp/mono/commit/874e1ec9d)) (thanks [@YevheniiKotyrlo](https://github.com/YevheniiKotyrlo)!)
+- After `zero-cache` was rolled back, a client group holding a query the older server could not parse was stuck in an error state until the server rolled forward. The group is now reset and the client starts a fresh one. ([dbf677638](https://github.com/rocicorp/mono/commit/dbf677638))
+- A write that put keys from both the upper Basic Multilingual Plane (U+E000 to U+FFFF) and above it (such as emoji) into the same B-tree node failed with `putMany entries must be sorted and unique`, and a diff could report such a key as removed and re-added instead of changed. ([0e15506e8](https://github.com/rocicorp/mono/commit/0e15506e8)) (thanks [@natew](https://github.com/natew)!)
+- Client garbage collection left a store open for every database it inspected. With SQLite, closing `Zero` then no longer closed its database connection, and a custom `StoreProvider` whose `drop` refuses an open store failed every collection. ([bd436ef0d](https://github.com/rocicorp/mono/commit/bd436ef0d)) (thanks [@wikil](https://github.com/wikil)!)
+- Client, client group and connection IDs now come from `crypto.getRandomValues` when available instead of `Math.random`. ([e80d6305c](https://github.com/rocicorp/mono/commit/e80d6305c), [c2ebe3df5](https://github.com/rocicorp/mono/commit/c2ebe3df5))
+
+### zero-cache Reliability
+
+- A view-syncer that reloaded a client group's state after an error kept stale row records and query pipelines, which could crash it with `Query … is not in the CVR` or `Unexpected undefined value`, or leave rows that never reached the client. ([1137280b6](https://github.com/rocicorp/mono/commit/1137280b6), [bb348961f](https://github.com/rocicorp/mono/commit/bb348961f), [9e0e85b62](https://github.com/rocicorp/mono/commit/9e0e85b62))
+- With a `statement_timeout` on the CVR database, connecting a client group with many rows could fail with `canceling statement due to statement timeout`. ([892fa553b](https://github.com/rocicorp/mono/commit/892fa553b))
+- View-syncers on slow or throttled disks spent up to a minute inside a single commit running SQLite checkpoints, and were dropped by the replication-manager as slow subscribers. Serving replicas are now checkpointed by a separate process. ([fbdb27ed5](https://github.com/rocicorp/mono/commit/fbdb27ed5))
+- Clients were disabled and reloaded with `SchemaVersionNotSupported` while an upstream migration backfilled a table or column. They now retry with backoff until the backfill is done. ([8280af82f](https://github.com/rocicorp/mono/commit/8280af82f))
+- Malformed client messages, such as a second `initConnection` on a socket, an invalid `baseCookie` or an invalid query registration, were logged as internal errors. They are now client errors logged at `warn`. ([e1c39de03](https://github.com/rocicorp/mono/commit/e1c39de03), [f452e99b5](https://github.com/rocicorp/mono/commit/f452e99b5), [512baff4b](https://github.com/rocicorp/mono/commit/512baff4b))
+- A client group stays with the user it was first opened for across view-syncer restarts; a connection as a different user is refused the same way it already was while the group was live. ([8d9466b13](https://github.com/rocicorp/mono/commit/8d9466b13))
+- Inspector authentication is per connection, and the 1.12 client remembers a password the server accepted, so it doesn't prompt again after reconnecting. Repeated wrong admin or operator passwords are now rate limited, on the inspector and on the HTTP diagnostic endpoints. ([e186c0d59](https://github.com/rocicorp/mono/commit/e186c0d59), [c767ac31c](https://github.com/rocicorp/mono/commit/c767ac31c), [65375a770](https://github.com/rocicorp/mono/commit/65375a770))
+- `zero-cache` logs and traces show a hash of the `clientGroupID` instead of the ID. ([adfce3301](https://github.com/rocicorp/mono/commit/adfce3301), [de9121d99](https://github.com/rocicorp/mono/commit/de9121d99))
+
+### Replication
+
+- A `numeric`, `float4` or `float8` value between about 2^63 and 1e21 stopped replication with a `RangeError`, a `numeric` between 2^53 and 2^63 was stored as the wrong integer, and such a value in a row key or query literal failed the client group after a reload. These values now replicate as doubles. ([340215ab5](https://github.com/rocicorp/mono/commit/340215ab5))
+- A `NULL` element in a `timestamp[]`, `json[]` or `int8[]` column stopped replication, and in text, enum, boolean and numeric arrays it was stored as `"NULL"`, `false` or `null`. Array columns are now parsed correctly, including arrays with explicit bounds. Rows already stored keep their old values until they change. ([fe4bc732a](https://github.com/rocicorp/mono/commit/fe4bc732a))
+- A schema-change or lag-report message on the replication stream that `zero-cache` could not parse stopped replication. Such messages, and schema-change messages that its own upstream functions didn't emit, are now skipped. ([08c634549](https://github.com/rocicorp/mono/commit/08c634549), [f6010bb34](https://github.com/rocicorp/mono/commit/f6010bb34))
+- With [Litestream v5 backups](/docs/zero-cache-config#litestream-backup-using-v5) on Google Cloud Storage or Azure, backup files were never compacted, so old ones were never deleted and the backup kept growing. ([e2f030e63](https://github.com/rocicorp/mono/commit/e2f030e63))
+
+## Breaking Changes
+
+- **`analyze-query` bin removed:** `npx analyze-query` is gone. Use a script that calls [`runAnalyzeCLI`](/docs/debug/analyze-query-cli). `@rocicorp/zero` now depends on `oxc-parser`, which installs a native binding for your platform. ([a3932f51e](https://github.com/rocicorp/mono/commit/a3932f51e), [02b6c1bbd](https://github.com/rocicorp/mono/commit/02b6c1bbd))
+- **`userID` needs a token:** when `ZERO_AUTH_SECRET`, `ZERO_AUTH_JWK` or `ZERO_AUTH_JWKS_URL` is set, a connection that passes a `userID` without an `auth` token is refused with `Unauthorized`. Omit `userID` for logged-out users; the deprecated `userID: 'anon'` without `auth` is refused too. ([522688120](https://github.com/rocicorp/mono/commit/522688120))
+- **Changed defaults:** [`ZERO_UPSTREAM_PG_REPLICATION_SLOT_PER_REPLICA`](/docs/zero-cache-config#upstream-pg-replication-slot-per-replica) is on. It needs Litestream v5 backups, the default since 1.11, and each replication-manager holds its own slot while it runs. Turning it off doesn't resync. ([49607b8b3](https://github.com/rocicorp/mono/commit/49607b8b3))
+- **Multi-node secret:** set [`ZERO_CHANGE_STREAMER_SECRET`](/docs/zero-cache-config#change-streamer-secret) on the view-syncers first, then on the replication-manager. Until you do, the replication-manager still accepts view-syncers without it, but warns at startup. If one of your nodes runs sync workers and is also the replication-manager for other view-syncers, it now makes up its own secret, so set the secret on every node. ([b2b8f68e4](https://github.com/rocicorp/mono/commit/b2b8f68e4))
+- **Legacy CRUD mutations** are keyed by the primary key of the replica's table, not by the key the client sends. This only matters if your client schema declares a different primary key than the table has in Postgres. ([f24fddae7](https://github.com/rocicorp/mono/commit/f24fddae7))
+- **Rollback:** clients keep their local database and unsent mutations when moving between 1.11 and 1.12 in either direction. One exception: a client group that registered an aggregate, `groupBy`, `distinct` or JSON path query is reset when `zero-cache` is rolled back to 1.11, and its unsent mutations are lost. ([8b716b3fe](https://github.com/rocicorp/mono/commit/8b716b3fe), [dbf677638](https://github.com/rocicorp/mono/commit/dbf677638))

@@ -30,6 +30,32 @@ required: in production (when `NODE_ENV=production`)
 
 ## Optional Flags
 
+### Affinity Cookie Name
+
+The name of your load balancer's session affinity (sticky session) cookie. When a draining `zero-cache` turns away a new connection, it expires this cookie in the WebSocket upgrade response, so the client's next attempt can be routed to a different instance.
+
+Without it, a draining `zero-cache` still tells the client to reconnect, but leaves its cookies alone, and a load balancer with sticky sessions can keep sending the client back to the instance that is shutting down.
+
+The name, [path](#affinity-cookie-path) and [domain](#affinity-cookie-domain) must match the cookie your load balancer sets. The cookie is expired with `Secure` and `SameSite=None`, so that it also works for clients on another site over HTTPS.
+
+flag: `--affinity-cookie-name`<br/>
+env: `ZERO_AFFINITY_COOKIE_NAME`<br/>
+
+### Affinity Cookie Path
+
+The path of the [affinity cookie](#affinity-cookie-name) to expire while draining.
+
+flag: `--affinity-cookie-path`<br/>
+env: `ZERO_AFFINITY_COOKIE_PATH`<br/>
+default: `/`
+
+### Affinity Cookie Domain
+
+The domain of the [affinity cookie](#affinity-cookie-name) to expire while draining. Leave it unset for a host-only cookie.
+
+flag: `--affinity-cookie-domain`<br/>
+env: `ZERO_AFFINITY_COOKIE_DOMAIN`<br/>
+
 ### Allow Legacy Queries
 
 Allows clients to send query ASTs directly to `zero-cache`. [Ad-hoc queries](/docs/deprecated/ad-hoc-queries) (also called legacy queries) work this way.
@@ -647,6 +673,18 @@ flag: `--port`<br/>
 env: `ZERO_PORT`<br/>
 default: `4848`
 
+### Pre-Drain Delay (ms)
+
+The time between receiving a `SIGTERM` (or `SIGINT`) and starting to drain.
+
+During this time `zero-cache` fails its readiness check at `/`, so load balancers stop routing to it, while it keeps accepting and serving connections as usual. The liveness check at `/keepalive` keeps succeeding.
+
+This takes the place of a pre-stop delay. Set it longer than the time your load balancer needs to notice the failed readiness check, and keep it within your container runner's termination grace period. With the default of `0`, draining starts immediately.
+
+flag: `--pre-drain-delay-ms`<br/>
+env: `ZERO_PRE_DRAIN_DELAY_MS`<br/>
+default: `0`
+
 ### Query API Key
 
 An optional secret used to authorize zero-cache to call the API server handling queries. This is sent from zero-cache to your query endpoint in an `X-Api-Key` header.
@@ -843,6 +881,20 @@ See the PostgreSQL docs for details: https://www.postgresql.org/docs/current/log
 flag: `--upstream-pg-replication-slot-failover`<br/>
 env: `ZERO_UPSTREAM_PG_REPLICATION_SLOT_FAILOVER`<br/>
 default: `false`
+
+### Upstream PG Replication Slot Per Replica
+
+Create a dedicated replication slot for each replication-manager, instead of having a new replication-manager take over the slot of the one it replaces.
+
+A new replication-manager restores its replica from the backup, creates its own slot, and catches up while the previous replication-manager keeps serving. It takes over once it has caught up. Expect one slot per running replication-manager in Postgres, each holding WAL until it is consumed.
+
+This requires [Litestream v5 backups](#litestream-backup-using-v5). The backup and the change DB stay compatible with a shared slot, so setting this to `false` does not cause a resync.
+
+This is the first step towards a high-availability mode in which several replication-managers run at the same time. Running more than one replication-manager is not supported yet.
+
+flag: `--upstream-pg-replication-slot-per-replica`<br/>
+env: `ZERO_UPSTREAM_PG_REPLICATION_SLOT_PER_REPLICA`<br/>
+default: `true`
 
 ### Upstream PG Stream Inbound Timeout
 

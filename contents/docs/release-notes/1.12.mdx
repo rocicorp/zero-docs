@@ -23,11 +23,11 @@ npm install @rocicorp/zero@1.12
 
 ## Overview
 
-Zero 1.12 syncs aggregates like `count()` and `sum()`, groups rows with `groupBy()` and `distinct()`, and can filter on values inside JSON columns. `zero-cache` hydrates queries and applies updates up to 1.8x faster in our benchmarks, React Native apps start about 3x faster, and each replication-manager now gets its own replication slot. This release also fixes eleven security vulnerabilities, along with a lot of other fixes, especially in replication and connection handling.
+Zero 1.12 syncs aggregates like `count()` and `sum()`, groups rows with `groupBy()` and `distinct()`, and can filter on values inside JSON columns. `zero-cache` hydrates queries and applies updates up to 1.8x faster in our benchmarks, React Native apps start about 3x faster, and each replication-manager now gets its own replication slot. This release also fixes twelve security vulnerabilities, along with a lot of other fixes, especially in replication and connection handling.
 
 ## Security
 
-Zero 1.12 includes the fixes for the eleven security vulnerabilities fixed in 1.11.5. See the [1.11.5 release notes](/docs/release-notes/1.11#1115) for the advisories. We recommend that everyone upgrade. The fix for client-claimed user IDs is off until you turn it on. See [Server-Validated User IDs](#server-validated-user-ids).
+Zero 1.12 includes the fixes for the twelve security vulnerabilities fixed in 1.11.5. See the [1.11.5 release notes](/docs/release-notes/1.11#1115) for the advisories. We recommend that everyone upgrade. The fix for client-claimed user IDs is off until you turn it on. See [Server-Validated User IDs](#server-validated-user-ids).
 
 Some of these fixes change how Zero behaves, so read [Breaking Changes](#breaking-changes) before you upgrade, especially the entries on `userID` and the change-streamer secret.
 

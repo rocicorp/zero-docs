@@ -6019,7 +6019,7 @@
     "title": "Zero 1.12",
     "searchTitle": "Zero 1.12",
     "url": "/docs/release-notes/1.12",
-    "content": "Installation npm install @rocicorp/zero@1.12 Deploy zero-cache before updating clients. Zero 1.12 clients cannot connect to an older server. To roll back, roll back clients first. In multi-node deployments, upgrade the replication-manager before the view-syncers, and roll back the view-syncers first. Then set ZERO_CHANGE_STREAMER_SECRET on the view-syncers, and after that on the replication-manager. Overview Zero 1.12 syncs aggregates like count() and sum(), groups rows with groupBy() and distinct(), and can filter on values inside JSON columns. zero-cache hydrates queries and applies updates up to 1.8x faster in our benchmarks, React Native apps start about 3x faster, and each replication-manager now gets its own replication slot. This release also fixes eleven security vulnerabilities, along with a lot of other fixes, especially in replication and connection handling. Security Zero 1.12 includes the fixes for the eleven security vulnerabilities fixed in 1.11.5. See the 1.11.5 release notes for the advisories. We recommend that everyone upgrade. The fix for client-claimed user IDs is off until you turn it on. See Server-Validated User IDs. Some of these fixes change how Zero behaves, so read Breaking Changes before you upgrade, especially the entries on userID and the change-streamer secret. Upgrading Server-Validated User IDs zero-cache can now refuse a userID that your API didn't confirm. To use it: Return the validated userID from your /query and /mutate endpoints, or null for logged-out callers. handleQueryRequest and handleMutateRequest do this when you pass them userID, as recommended since 1.5. Set ZERO_AUTH_REQUIRE_SERVER_USER_ID=true. Until you do, zero-cache trusts the userID the client claims and logs a warning. Apps that verify tokens with ZERO_AUTH_SECRET, ZERO_AUTH_JWK or ZERO_AUTH_JWKS_URL don't need this: the token already verifies the userID. (83efa9462, c1f36d79e) RMv2: Replication-Manager Slots We're reworking how replication-managers replicate from Postgres, so that several can run side by side and one can take over from another without a pause. We call this RMv2. Zero 1.12 ships the first step and turns it on by default: each replication-manager now gets its own replication slot. A new replication-manager restores its replica from the backup, catches up on its own slot while the old one keeps serving, and then takes over. Slots of replication-managers that are gone are dropped automatically. (49607b8b3) A new replication-manager also starts about 20 seconds faster, once both the old and the new one are on 1.12. The new zero.replication.server_start metric shows where the start time goes. (522d2ce57, 9aca1b0ab) This needs Litestream v5 backups, the default since 1.11. Expect one slot per running replication-manager in Postgres, each holding WAL until it is consumed. To go back to a shared slot, set ZERO_UPSTREAM_PG_REPLICATION_SLOT_PER_REPLICA=false. That doesn't need a resync. Running several replication-managers at once will come in a later release. Features Queries can return a single aggregate: zql.issue.where('open', true).count(), or zql.issue.max('numVotes'). A relationship can be reduced the same way, so related('comments', q => q.count()) gives each issue its number of comments instead of the comments. Only the result is synced, and it stays up to date as rows change. Counts, sums and averages of direct relationships update optimistically when a mutator changes the related rows. sum(), avg(), min() and max() can also reduce a value inside a JSON column. (c9d1b15fc, e2ecf69ce, 642aece86, 523d3b97e, 8b716b3fe) distinct() returns the distinct combinations of some columns, and groupBy() computes an aggregate per group: zql.issue.groupBy('assigneeID').count(). Groups appear and disappear optimistically for count(), sum() and avg(). (effd2da27, 5493ba549, fe168e640) where() can compare a value inside a json() column: cmp(json('metadata', 'priority'), 'high'). Paths can go through object keys and array indices, comparisons are type-strict, and TypeScript checks the path of a typed JSON column. JSON path filters run on the client, in SQLite and in Postgres. (0a1a0f3d4) Draining behind a load balancer: a new ZERO_PRE_DRAIN_DELAY_MS makes zero-cache fail its readiness check for a while after SIGTERM while still serving, so the load balancer stops routing to it before the drain starts. With sticky sessions, set ZERO_AFFINITY_COOKIE_NAME and zero-cache expires the cookie on connections it turns away while draining. A new zero.sync.drain-time metric estimates how long a view-syncer's drain will take. (f22ec09b6, f77997349, 9a74d2d3c, 04a27634b) Clients retry a failed connection sooner: after 250–500 ms the first time, backing off to the usual 5 seconds by the fifth failure, with jitter so clients that lost the same server don't retry together. A draining zero-cache also tells new connections to retry within a second instead of after 5 seconds. (06622e6ec, a5a940321) Replication status events are republished when the replica grows by 1 GiB or 5%, so consumers that size storage from replicaSize see growth from ordinary writes. (76a0a1bd1) Multi-node deployments can authenticate view-syncers to the replication-manager with a shared ZERO_CHANGE_STREAMER_SECRET. A single-node zero-cache generates its own. (b2b8f68e4) ZERO_ENABLE_HEAPZ=false turns off the /heapz heap-snapshot endpoint while keeping the other diagnostic endpoints and the inspector. (ea3105333) Performance Server-Side Hydration When a client connects or adds a query, zero-cache has to hydrate it: run it against the replica and send the results. In Zero 1.12 this takes about 1.2x less CPU, and about 1.8x less for queries with whereExists, which are common because permissions use them. We measured 100 client groups on one sync worker, each hydrating its user's top issues with their latest comments. (6563d5751, 70c771950, c2882cba0, 5a5fb1af1, c9c34d145, f7233246c, ae794cc0e) Server-Side Incremental Updates When a transaction replicates, zero-cache has to bring every client group's queries up to date. Zero 1.12 does this with about 1.4x to 1.7x less CPU than 1.11, which was already 2.5x better than 1.10. We measured the same workload as last release: 100 client groups on one sync worker, each syncing a query with a related subquery. Pushing one write through 300 open queries is about 1.6x faster too. (6563d5751, a35b628ea, 018a90f86, f5d11d924, 8702aea45, fd30e6437) React Native Cold Start When a React Native app starts, Zero loads the rows it has stored on the device into memory and runs the app's queries over them before anything renders. In Zero 1.12 this is about 3x faster. Hermes, the JavaScript engine React Native uses, was spending most of that time sorting rows that were already in order. We measured an app with 180,000 stored rows and 21 queries, on the Android emulator and the iOS simulator. (bfc7e8c24, e7f8a1d91, 8c21e7960, ea4560f4e, e058bfca2, 6375eeb84, 855c495b1) Query Planning Before zero-cache hydrates a query with whereExists, it plans which way to run each join. With three to five whereExists, or nested ones, planning now takes about 2x to 10x less time. (9215b24b2) Fixes Queries and Mutations Server mutators and queries read time with time zone columns as negative milliseconds when the zone offset was positive, and a ServerSchema written by hand with the short timestamptz name read a timestamp as a time of day. (9a08f1e40) Server mutators and queries failed with type \"...\" does not exist for enum and other user-defined Postgres types outside the public schema. Casts are now schema-qualified. (8166580b0) (thanks @jschaf!) A push that failed at the API server could put other tabs of the same client group into the Error state, or fail a socket the client had already replaced. A failed push now affects only the socket that sent it, and that socket's queued pushes are re-sent on the next connection. (945ce6192) (thanks @pawarren!) runAnalyzeCLI --query no longer evaluates the query text as JavaScript. It accepts query builder calls, literals and arrow functions, and rejects anything else with its position. (02b6c1bbd) Clients and React Native On React Native, client garbage collection failed every 5 minutes, and queries whose related() entries weren't in alias order threw during normalization, because Hermes lacks Array.prototype.toSorted. (b62ded385) (thanks @wikil!) A SQLite-backed store whose close() threw blocked every later Zero instance with the same name from opening, and two overlapping close() calls could close a shared SQLite connection under another store. (dee69dc9d, cc861e8f6) (thanks @wikil!) An app that refreshed its auth token while the first connection of a new client group was still being validated could be refused for good with The initConnection message for a new client group must include client schema. (874e1ec9d) (thanks @YevheniiKotyrlo!) After zero-cache was rolled back, a client group holding a query the older server could not parse was stuck in an error state until the server rolled forward. The group is now reset and the client starts a fresh one. (dbf677638) A write that put keys from both the upper Basic Multilingual Plane (U+E000 to U+FFFF) and above it (such as emoji) into the same B-tree node failed with putMany entries must be sorted and unique, and a diff could report such a key as removed and re-added instead of changed. (0e15506e8) (thanks @natew!) Client garbage collection left a store open for every database it inspected. With SQLite, closing Zero then no longer closed its database connection, and a custom StoreProvider whose drop refuses an open store failed every collection. (bd436ef0d) (thanks @wikil!) Client, client group and connection IDs now come from crypto.getRandomValues when available instead of Math.random. (e80d6305c, c2ebe3df5) zero-cache Reliability A view-syncer that reloaded a client group's state after an error kept stale row records and query pipelines, which could crash it with Query … is not in the CVR or Unexpected undefined value, or leave rows that never reached the client. (1137280b6, bb348961f, 9e0e85b62) With a statement_timeout on the CVR database, connecting a client group with many rows could fail with canceling statement due to statement timeout. (892fa553b) View-syncers on slow or throttled disks spent up to a minute inside a single commit running SQLite checkpoints, and were dropped by the replication-manager as slow subscribers. Serving replicas are now checkpointed by a separate process. (fbdb27ed5) Clients were disabled and reloaded with SchemaVersionNotSupported while an upstream migration backfilled a table or column. They now retry with backoff until the backfill is done. (8280af82f) Malformed client messages, such as a second initConnection on a socket, an invalid baseCookie or an invalid query registration, were logged as internal errors. They are now client errors logged at warn. (e1c39de03, f452e99b5, 512baff4b) A client group stays with the user it was first opened for across view-syncer restarts; a connection as a different user is refused the same way it already was while the group was live. (8d9466b13) Inspector authentication is per connection, and the 1.12 client remembers a password the server accepted, so it doesn't prompt again after reconnecting. Repeated wrong admin or operator passwords are now rate limited, on the inspector and on the HTTP diagnostic endpoints. (e186c0d59, c767ac31c, 65375a770) zero-cache logs and traces show a hash of the clientGroupID instead of the ID. (adfce3301, de9121d99) Replication A numeric, float4 or float8 value between about 2^63 and 1e21 stopped replication with a RangeError, a numeric between 2^53 and 2^63 was stored as the wrong integer, and such a value in a row key or query literal failed the client group after a reload. These values now replicate as doubles. (340215ab5) A NULL element in a timestamp[], json[] or int8[] column stopped replication, and in text, enum, boolean and numeric arrays it was stored as \"NULL\", false or null. Array columns are now parsed correctly, including arrays with explicit bounds. Rows already stored keep their old values until they change. (fe4bc732a) A schema-change or lag-report message on the replication stream that zero-cache could not parse stopped replication. Such messages, and schema-change messages that its own upstream functions didn't emit, are now skipped. (08c634549, f6010bb34) With Litestream v5 backups on Google Cloud Storage or Azure, backup files were never compacted, so old ones were never deleted and the backup kept growing. (e2f030e63) Breaking Changes analyze-query bin removed: npx analyze-query is gone. Use a script that calls runAnalyzeCLI. @rocicorp/zero now depends on oxc-parser, which installs a native binding for your platform. (a3932f51e, 02b6c1bbd) userID needs a token: when ZERO_AUTH_SECRET, ZERO_AUTH_JWK or ZERO_AUTH_JWKS_URL is set, a connection that passes a userID without an auth token is refused with Unauthorized. Omit userID for logged-out users; the deprecated userID: 'anon' without auth is refused too. (522688120) Changed defaults: ZERO_UPSTREAM_PG_REPLICATION_SLOT_PER_REPLICA is on. It needs Litestream v5 backups, the default since 1.11, and each replication-manager holds its own slot while it runs. Turning it off doesn't resync. (49607b8b3) Multi-node secret: set ZERO_CHANGE_STREAMER_SECRET on the view-syncers first, then on the replication-manager. Until you do, the replication-manager still accepts view-syncers without it, but warns at startup. If one of your nodes runs sync workers and is also the replication-manager for other view-syncers, it now makes up its own secret, so set the secret on every node. (b2b8f68e4) Legacy CRUD mutations are keyed by the primary key of the replica's table, not by the key the client sends. This only matters if your client schema declares a different primary key than the table has in Postgres. (f24fddae7) Rollback: clients keep their local database and unsent mutations when moving between 1.11 and 1.12 in either direction. One exception: a client group that registered an aggregate, groupBy, distinct or JSON path query is reset when zero-cache is rolled back to 1.11, and its unsent mutations are lost. (8b716b3fe, dbf677638)",
+    "content": "Installation npm install @rocicorp/zero@1.12 Deploy zero-cache before updating clients. Zero 1.12 clients cannot connect to an older server. To roll back, roll back clients first. In multi-node deployments, upgrade the replication-manager before the view-syncers, and roll back the view-syncers first. Then set ZERO_CHANGE_STREAMER_SECRET on the view-syncers, and after that on the replication-manager. Overview Zero 1.12 syncs aggregates like count() and sum(), groups rows with groupBy() and distinct(), and can filter on values inside JSON columns. zero-cache hydrates queries and applies updates up to 1.8x faster in our benchmarks, React Native apps start about 3x faster, and each replication-manager now gets its own replication slot. This release also fixes eleven security vulnerabilities, along with a lot of other fixes, especially in replication and connection handling. Security Zero 1.12 includes the fixes for the eleven security vulnerabilities fixed in 1.11.5. See the 1.11.5 release notes for the advisories. We recommend that everyone upgrade. The fix for client-claimed user IDs is off until you turn it on. See Server-Validated User IDs. Some of these fixes change how Zero behaves, so read Breaking Changes before you upgrade, especially the entries on userID and the change-streamer secret. Upgrading Server-Validated User IDs zero-cache can now refuse a userID that your API didn't confirm. To use it: Return the validated userID from your /query and /mutate endpoints, or null for logged-out callers. handleQueryRequest and handleMutateRequest do this when you pass them userID, as recommended since 1.5. Set ZERO_AUTH_REQUIRE_SERVER_USER_ID=true. Until you do, zero-cache trusts the userID the client claims and logs a warning. Apps that verify tokens with ZERO_AUTH_SECRET, ZERO_AUTH_JWK or ZERO_AUTH_JWKS_URL don't need this: the token already verifies the userID. (83efa9462, c1f36d79e) RMv2: Replication-Manager Slots We're reworking how replication-managers replicate from Postgres, so that several can run side by side and one can take over from another without a pause. We call this RMv2. Zero 1.12 ships the first step and turns it on by default: each replication-manager now gets its own replication slot. A new replication-manager restores its replica from the backup, catches up on its own slot while the old one keeps serving, and then takes over. Slots of replication-managers that are gone are dropped automatically. (49607b8b3) A new replication-manager also starts about 20 seconds faster, once both the old and the new one are on 1.12. The new zero.replication.server_start metric shows where the start time goes. (522d2ce57, 9aca1b0ab) This needs Litestream v5 backups, the default since 1.11. Expect one slot per running replication-manager in Postgres, each holding WAL until it is consumed. To go back to a shared slot, set ZERO_UPSTREAM_PG_REPLICATION_SLOT_PER_REPLICA=false. That doesn't need a resync. Running several replication-managers at once will come in a later release. Features Queries can return a single aggregate: zql.issue.where('open', true).count(), or zql.issue.max('numVotes'). A relationship can be reduced the same way, so related('comments', q => q.count()) gives each issue its number of comments instead of the comments. Only the result is synced, and it stays up to date as rows change. Counts, sums and averages of direct relationships update optimistically when a mutator changes the related rows. sum(), avg(), min() and max() can also reduce a value inside a JSON column. (c9d1b15fc, e2ecf69ce, 642aece86, 523d3b97e, 8b716b3fe) distinct() returns the distinct combinations of some columns, and groupBy() computes an aggregate per group: zql.issue.groupBy('assigneeID').count(). Groups appear and disappear optimistically for count(), sum() and avg(). (effd2da27, 5493ba549, fe168e640) where() can compare a value inside a json() column: cmp(json('metadata', 'priority'), 'high'). Paths can go through object keys and array indices, comparisons are type-strict, and TypeScript checks the path of a typed JSON column. JSON path filters run on the client, in SQLite and in Postgres. (0a1a0f3d4) Draining behind a load balancer: a new ZERO_PRE_DRAIN_DELAY_MS makes zero-cache fail its readiness check for a while after SIGTERM while still serving, so the load balancer stops routing to it before the drain starts. With sticky sessions, set ZERO_AFFINITY_COOKIE_NAME and zero-cache expires the cookie on connections it turns away while draining. A new zero.sync.drain-time metric estimates how long a view-syncer's drain will take. (f22ec09b6, f77997349, 9a74d2d3c, 04a27634b) Clients retry a failed connection sooner: after 250–500 ms the first time, backing off to the usual 5 seconds by the fifth failure, with jitter so clients that lost the same server don't retry together. A draining zero-cache also tells new connections to retry within a second instead of after 5 seconds. (06622e6ec, a5a940321) Replication status events are republished when the replica grows by 1 GiB or 5%, so consumers that size storage from replicaSize see growth from ordinary writes. (76a0a1bd1) Multi-node deployments can authenticate view-syncers to the replication-manager with a shared ZERO_CHANGE_STREAMER_SECRET. A single-node zero-cache generates its own. (b2b8f68e4) ZERO_ENABLE_HEAPZ=false turns off the /heapz heap-snapshot endpoint while keeping the other diagnostic endpoints and the inspector. (ea3105333) Performance Server-Side Hydration When a client connects or adds a query, zero-cache has to hydrate it: run it against the replica and send the results. In Zero 1.12 this takes about 1.2x less CPU, and about 1.8x less for queries with whereExists, which are common because permissions use them. We measured 100 client groups on one sync worker, each hydrating its user's top issues with their latest comments. (6563d5751, 70c771950, c2882cba0, 5a5fb1af1, c9c34d145, f7233246c, ae794cc0e) Server-Side Incremental Updates When a transaction replicates, zero-cache has to bring every client group's queries up to date. Zero 1.12 does this with about 1.4x to 1.7x less CPU than 1.11, which was already 2.5x better than 1.10. We measured the same workload as last release: 100 client groups on one sync worker, each syncing a query with a related subquery. Pushing one write through 300 open queries is about 1.6x faster too. (6563d5751, a35b628ea, 018a90f86, f5d11d924, 8702aea45, fd30e6437) React Native Cold Start When a React Native app starts, Zero loads the rows it has stored on the device into memory and runs the app's queries over them before anything renders. In Zero 1.12 this is about 3x faster. Hermes, the JavaScript engine React Native uses, was spending most of that time sorting rows that were already in order. We measured an app with 180,000 stored rows and 21 queries, on the Android emulator and the iOS simulator. (bfc7e8c24, e7f8a1d91, 8c21e7960, ea4560f4e, e058bfca2, 6375eeb84, 855c495b1) Query Planning Before zero-cache hydrates a query with whereExists, it plans which way to run each join. With three to five whereExists, or nested ones, planning now takes about 2x to 10x less time. (9215b24b2) Many Connections Every change zero-cache syncs reaches each connected client as a poke. In 1.11, every poke allocated a fresh 1 MiB buffer, so with many clients connected the garbage collector was busy cleaning up after them. Zero 1.12 keeps a small buffer per connection and reuses it. With 600 clients connected and 100 writes per second on one sync worker, the sync worker now uses about 1.9x less CPU. (ac45c279f) Fixes Queries and Mutations Server mutators and queries read time with time zone columns as negative milliseconds when the zone offset was positive, and a ServerSchema written by hand with the short timestamptz name read a timestamp as a time of day. (9a08f1e40) Server mutators and queries failed with type \"...\" does not exist for enum and other user-defined Postgres types outside the public schema. Casts are now schema-qualified. (8166580b0) (thanks @jschaf!) A push that failed at the API server could put other tabs of the same client group into the Error state, or fail a socket the client had already replaced. A failed push now affects only the socket that sent it, and that socket's queued pushes are re-sent on the next connection. (945ce6192) (thanks @pawarren!) runAnalyzeCLI --query no longer evaluates the query text as JavaScript. It accepts query builder calls, literals and arrow functions, and rejects anything else with its position. (02b6c1bbd) Clients and React Native On React Native, client garbage collection failed every 5 minutes, and queries whose related() entries weren't in alias order threw during normalization, because Hermes lacks Array.prototype.toSorted. (b62ded385) (thanks @wikil!) A SQLite-backed store whose close() threw blocked every later Zero instance with the same name from opening, and two overlapping close() calls could close a shared SQLite connection under another store. (dee69dc9d, cc861e8f6) (thanks @wikil!) An app that refreshed its auth token while the first connection of a new client group was still being validated could be refused for good with The initConnection message for a new client group must include client schema. (874e1ec9d) (thanks @YevheniiKotyrlo!) After zero-cache was rolled back, a client group holding a query the older server could not parse was stuck in an error state until the server rolled forward. The group is now reset and the client starts a fresh one. (dbf677638) A write that put keys from both the upper Basic Multilingual Plane (U+E000 to U+FFFF) and above it (such as emoji) into the same B-tree node failed with putMany entries must be sorted and unique, and a diff could report such a key as removed and re-added instead of changed. (0e15506e8) (thanks @natew!) Client garbage collection left a store open for every database it inspected. With SQLite, closing Zero then no longer closed its database connection, and a custom StoreProvider whose drop refuses an open store failed every collection. (bd436ef0d) (thanks @wikil!) Client, client group and connection IDs now come from crypto.getRandomValues when available instead of Math.random. (e80d6305c, c2ebe3df5) zero-cache Reliability A view-syncer that reloaded a client group's state after an error kept stale row records and query pipelines, which could crash it with Query … is not in the CVR or Unexpected undefined value, or leave rows that never reached the client. (1137280b6, bb348961f, 9e0e85b62) With a statement_timeout on the CVR database, connecting a client group with many rows could fail with canceling statement due to statement timeout. (892fa553b) View-syncers on slow or throttled disks spent up to a minute inside a single commit running SQLite checkpoints, and were dropped by the replication-manager as slow subscribers. Serving replicas are now checkpointed by a separate process. (fbdb27ed5) Clients were disabled and reloaded with SchemaVersionNotSupported while an upstream migration backfilled a table or column. They now retry with backoff until the backfill is done. (8280af82f) Malformed client messages, such as a second initConnection on a socket, an invalid baseCookie or an invalid query registration, were logged as internal errors. They are now client errors logged at warn. (e1c39de03, f452e99b5, 512baff4b) A client group stays with the user it was first opened for across view-syncer restarts; a connection as a different user is refused the same way it already was while the group was live. (8d9466b13) Inspector authentication is per connection, and the 1.12 client remembers a password the server accepted, so it doesn't prompt again after reconnecting. Repeated wrong admin or operator passwords are now rate limited, on the inspector and on the HTTP diagnostic endpoints. (e186c0d59, c767ac31c, 65375a770) zero-cache logs and traces show a hash of the clientGroupID instead of the ID. (adfce3301, de9121d99) Replication A numeric, float4 or float8 value between about 2^63 and 1e21 stopped replication with a RangeError, a numeric between 2^53 and 2^63 was stored as the wrong integer, and such a value in a row key or query literal failed the client group after a reload. These values now replicate as doubles. (340215ab5) A NULL element in a timestamp[], json[] or int8[] column stopped replication, and in text, enum, boolean and numeric arrays it was stored as \"NULL\", false or null. Array columns are now parsed correctly, including arrays with explicit bounds. Rows already stored keep their old values until they change. (fe4bc732a) A schema-change or lag-report message on the replication stream that zero-cache could not parse stopped replication. Such messages, and schema-change messages that its own upstream functions didn't emit, are now skipped. (08c634549, f6010bb34) With Litestream v5 backups on Google Cloud Storage or Azure, backup files were never compacted, so old ones were never deleted and the backup kept growing. (e2f030e63) Breaking Changes analyze-query bin removed: npx analyze-query is gone. Use a script that calls runAnalyzeCLI. @rocicorp/zero now depends on oxc-parser, which installs a native binding for your platform. (a3932f51e, 02b6c1bbd) userID needs a token: when ZERO_AUTH_SECRET, ZERO_AUTH_JWK or ZERO_AUTH_JWKS_URL is set, a connection that passes a userID without an auth token is refused with Unauthorized. Omit userID for logged-out users; the deprecated userID: 'anon' without auth is refused too. (522688120) Changed defaults: ZERO_UPSTREAM_PG_REPLICATION_SLOT_PER_REPLICA is on. It needs Litestream v5 backups, the default since 1.11, and each replication-manager holds its own slot while it runs. Turning it off doesn't resync. (49607b8b3) Multi-node secret: set ZERO_CHANGE_STREAMER_SECRET on the view-syncers first, then on the replication-manager. Until you do, the replication-manager still accepts view-syncers without it, but warns at startup. If one of your nodes runs sync workers and is also the replication-manager for other view-syncers, it now makes up its own secret, so set the secret on every node. (b2b8f68e4) Legacy CRUD mutations are keyed by the primary key of the replica's table, not by the key the client sends. This only matters if your client schema declares a different primary key than the table has in Postgres. (f24fddae7) Rollback: clients keep their local database and unsent mutations when moving between 1.11 and 1.12 in either direction. One exception: a client group that registered an aggregate, groupBy, distinct or JSON path query is reset when zero-cache is rolled back to 1.11, and its unsent mutations are lost. (8b716b3fe, dbf677638)",
     "headings": [
       {
         "text": "Installation",
@@ -6068,6 +6068,10 @@
       {
         "text": "Query Planning",
         "id": "query-planning"
+      },
+      {
+        "text": "Many Connections",
+        "id": "many-connections"
       },
       {
         "text": "Fixes",
@@ -6173,7 +6177,7 @@
     "sectionTitle": "Performance",
     "sectionId": "performance",
     "url": "/docs/release-notes/1.12",
-    "content": "Server-Side Hydration When a client connects or adds a query, zero-cache has to hydrate it: run it against the replica and send the results. In Zero 1.12 this takes about 1.2x less CPU, and about 1.8x less for queries with whereExists, which are common because permissions use them. We measured 100 client groups on one sync worker, each hydrating its user's top issues with their latest comments. (6563d5751, 70c771950, c2882cba0, 5a5fb1af1, c9c34d145, f7233246c, ae794cc0e) Server-Side Incremental Updates When a transaction replicates, zero-cache has to bring every client group's queries up to date. Zero 1.12 does this with about 1.4x to 1.7x less CPU than 1.11, which was already 2.5x better than 1.10. We measured the same workload as last release: 100 client groups on one sync worker, each syncing a query with a related subquery. Pushing one write through 300 open queries is about 1.6x faster too. (6563d5751, a35b628ea, 018a90f86, f5d11d924, 8702aea45, fd30e6437) React Native Cold Start When a React Native app starts, Zero loads the rows it has stored on the device into memory and runs the app's queries over them before anything renders. In Zero 1.12 this is about 3x faster. Hermes, the JavaScript engine React Native uses, was spending most of that time sorting rows that were already in order. We measured an app with 180,000 stored rows and 21 queries, on the Android emulator and the iOS simulator. (bfc7e8c24, e7f8a1d91, 8c21e7960, ea4560f4e, e058bfca2, 6375eeb84, 855c495b1) Query Planning Before zero-cache hydrates a query with whereExists, it plans which way to run each join. With three to five whereExists, or nested ones, planning now takes about 2x to 10x less time. (9215b24b2)",
+    "content": "Server-Side Hydration When a client connects or adds a query, zero-cache has to hydrate it: run it against the replica and send the results. In Zero 1.12 this takes about 1.2x less CPU, and about 1.8x less for queries with whereExists, which are common because permissions use them. We measured 100 client groups on one sync worker, each hydrating its user's top issues with their latest comments. (6563d5751, 70c771950, c2882cba0, 5a5fb1af1, c9c34d145, f7233246c, ae794cc0e) Server-Side Incremental Updates When a transaction replicates, zero-cache has to bring every client group's queries up to date. Zero 1.12 does this with about 1.4x to 1.7x less CPU than 1.11, which was already 2.5x better than 1.10. We measured the same workload as last release: 100 client groups on one sync worker, each syncing a query with a related subquery. Pushing one write through 300 open queries is about 1.6x faster too. (6563d5751, a35b628ea, 018a90f86, f5d11d924, 8702aea45, fd30e6437) React Native Cold Start When a React Native app starts, Zero loads the rows it has stored on the device into memory and runs the app's queries over them before anything renders. In Zero 1.12 this is about 3x faster. Hermes, the JavaScript engine React Native uses, was spending most of that time sorting rows that were already in order. We measured an app with 180,000 stored rows and 21 queries, on the Android emulator and the iOS simulator. (bfc7e8c24, e7f8a1d91, 8c21e7960, ea4560f4e, e058bfca2, 6375eeb84, 855c495b1) Query Planning Before zero-cache hydrates a query with whereExists, it plans which way to run each join. With three to five whereExists, or nested ones, planning now takes about 2x to 10x less time. (9215b24b2) Many Connections Every change zero-cache syncs reaches each connected client as a poke. In 1.11, every poke allocated a fresh 1 MiB buffer, so with many clients connected the garbage collector was busy cleaning up after them. Zero 1.12 keeps a small buffer per connection and reuses it. With 600 clients connected and 100 writes per second on one sync worker, the sync worker now uses about 1.9x less CPU. (ac45c279f)",
     "kind": "section"
   },
   {
@@ -6217,7 +6221,17 @@
     "kind": "section"
   },
   {
-    "id": "482-release-notes/1.12#fixes",
+    "id": "482-release-notes/1.12#many-connections",
+    "title": "Zero 1.12",
+    "searchTitle": "Many Connections",
+    "sectionTitle": "Many Connections",
+    "sectionId": "many-connections",
+    "url": "/docs/release-notes/1.12",
+    "content": "Every change zero-cache syncs reaches each connected client as a poke. In 1.11, every poke allocated a fresh 1 MiB buffer, so with many clients connected the garbage collector was busy cleaning up after them. Zero 1.12 keeps a small buffer per connection and reuses it. With 600 clients connected and 100 writes per second on one sync worker, the sync worker now uses about 1.9x less CPU. (ac45c279f)",
+    "kind": "section"
+  },
+  {
+    "id": "483-release-notes/1.12#fixes",
     "title": "Zero 1.12",
     "searchTitle": "Fixes",
     "sectionTitle": "Fixes",
@@ -6227,7 +6241,7 @@
     "kind": "section"
   },
   {
-    "id": "483-release-notes/1.12#queries-and-mutations",
+    "id": "484-release-notes/1.12#queries-and-mutations",
     "title": "Zero 1.12",
     "searchTitle": "Queries and Mutations",
     "sectionTitle": "Queries and Mutations",
@@ -6237,7 +6251,7 @@
     "kind": "section"
   },
   {
-    "id": "484-release-notes/1.12#clients-and-react-native",
+    "id": "485-release-notes/1.12#clients-and-react-native",
     "title": "Zero 1.12",
     "searchTitle": "Clients and React Native",
     "sectionTitle": "Clients and React Native",
@@ -6247,7 +6261,7 @@
     "kind": "section"
   },
   {
-    "id": "485-release-notes/1.12#zero-cache-reliability",
+    "id": "486-release-notes/1.12#zero-cache-reliability",
     "title": "Zero 1.12",
     "searchTitle": "zero-cache Reliability",
     "sectionTitle": "zero-cache Reliability",
@@ -6257,7 +6271,7 @@
     "kind": "section"
   },
   {
-    "id": "486-release-notes/1.12#replication",
+    "id": "487-release-notes/1.12#replication",
     "title": "Zero 1.12",
     "searchTitle": "Replication",
     "sectionTitle": "Replication",
@@ -6267,7 +6281,7 @@
     "kind": "section"
   },
   {
-    "id": "487-release-notes/1.12#breaking-changes",
+    "id": "488-release-notes/1.12#breaking-changes",
     "title": "Zero 1.12",
     "searchTitle": "Breaking Changes",
     "sectionTitle": "Breaking Changes",
@@ -6307,7 +6321,7 @@
     "kind": "page"
   },
   {
-    "id": "488-release-notes/1.2#installation",
+    "id": "489-release-notes/1.2#installation",
     "title": "Zero 1.2",
     "searchTitle": "Installation",
     "sectionTitle": "Installation",
@@ -6317,7 +6331,7 @@
     "kind": "section"
   },
   {
-    "id": "489-release-notes/1.2#features",
+    "id": "490-release-notes/1.2#features",
     "title": "Zero 1.2",
     "searchTitle": "Features",
     "sectionTitle": "Features",
@@ -6327,7 +6341,7 @@
     "kind": "section"
   },
   {
-    "id": "490-release-notes/1.2#performance",
+    "id": "491-release-notes/1.2#performance",
     "title": "Zero 1.2",
     "searchTitle": "Performance",
     "sectionTitle": "Performance",
@@ -6337,7 +6351,7 @@
     "kind": "section"
   },
   {
-    "id": "491-release-notes/1.2#fixes",
+    "id": "492-release-notes/1.2#fixes",
     "title": "Zero 1.2",
     "searchTitle": "Fixes",
     "sectionTitle": "Fixes",
@@ -6347,7 +6361,7 @@
     "kind": "section"
   },
   {
-    "id": "492-release-notes/1.2#breaking-changes",
+    "id": "493-release-notes/1.2#breaking-changes",
     "title": "Zero 1.2",
     "searchTitle": "Breaking Changes",
     "sectionTitle": "Breaking Changes",
@@ -6387,7 +6401,7 @@
     "kind": "page"
   },
   {
-    "id": "493-release-notes/1.3#installation",
+    "id": "494-release-notes/1.3#installation",
     "title": "Zero 1.3",
     "searchTitle": "Installation",
     "sectionTitle": "Installation",
@@ -6397,7 +6411,7 @@
     "kind": "section"
   },
   {
-    "id": "494-release-notes/1.3#features",
+    "id": "495-release-notes/1.3#features",
     "title": "Zero 1.3",
     "searchTitle": "Features",
     "sectionTitle": "Features",
@@ -6407,7 +6421,7 @@
     "kind": "section"
   },
   {
-    "id": "495-release-notes/1.3#performance",
+    "id": "496-release-notes/1.3#performance",
     "title": "Zero 1.3",
     "searchTitle": "Performance",
     "sectionTitle": "Performance",
@@ -6417,7 +6431,7 @@
     "kind": "section"
   },
   {
-    "id": "496-release-notes/1.3#fixes",
+    "id": "497-release-notes/1.3#fixes",
     "title": "Zero 1.3",
     "searchTitle": "Fixes",
     "sectionTitle": "Fixes",
@@ -6427,7 +6441,7 @@
     "kind": "section"
   },
   {
-    "id": "497-release-notes/1.3#breaking-changes",
+    "id": "498-release-notes/1.3#breaking-changes",
     "title": "Zero 1.3",
     "searchTitle": "Breaking Changes",
     "sectionTitle": "Breaking Changes",
@@ -6475,7 +6489,7 @@
     "kind": "page"
   },
   {
-    "id": "498-release-notes/1.4#installation",
+    "id": "499-release-notes/1.4#installation",
     "title": "Zero 1.4",
     "searchTitle": "Installation",
     "sectionTitle": "Installation",
@@ -6485,7 +6499,7 @@
     "kind": "section"
   },
   {
-    "id": "499-release-notes/1.4#upgrading",
+    "id": "500-release-notes/1.4#upgrading",
     "title": "Zero 1.4",
     "searchTitle": "Upgrading",
     "sectionTitle": "Upgrading",
@@ -6495,7 +6509,7 @@
     "kind": "section"
   },
   {
-    "id": "500-release-notes/1.4#userid-anon",
+    "id": "501-release-notes/1.4#userid-anon",
     "title": "Zero 1.4",
     "searchTitle": "userID: \"anon\"",
     "sectionTitle": "userID: \"anon\"",
@@ -6505,7 +6519,7 @@
     "kind": "section"
   },
   {
-    "id": "501-release-notes/1.4#features",
+    "id": "502-release-notes/1.4#features",
     "title": "Zero 1.4",
     "searchTitle": "Features",
     "sectionTitle": "Features",
@@ -6515,7 +6529,7 @@
     "kind": "section"
   },
   {
-    "id": "502-release-notes/1.4#performance",
+    "id": "503-release-notes/1.4#performance",
     "title": "Zero 1.4",
     "searchTitle": "Performance",
     "sectionTitle": "Performance",
@@ -6525,7 +6539,7 @@
     "kind": "section"
   },
   {
-    "id": "503-release-notes/1.4#fixes",
+    "id": "504-release-notes/1.4#fixes",
     "title": "Zero 1.4",
     "searchTitle": "Fixes",
     "sectionTitle": "Fixes",
@@ -6535,7 +6549,7 @@
     "kind": "section"
   },
   {
-    "id": "504-release-notes/1.4#breaking-changes",
+    "id": "505-release-notes/1.4#breaking-changes",
     "title": "Zero 1.4",
     "searchTitle": "Breaking Changes",
     "sectionTitle": "Breaking Changes",
@@ -6587,7 +6601,7 @@
     "kind": "page"
   },
   {
-    "id": "505-release-notes/1.5#installation",
+    "id": "506-release-notes/1.5#installation",
     "title": "Zero 1.5",
     "searchTitle": "Installation",
     "sectionTitle": "Installation",
@@ -6597,7 +6611,7 @@
     "kind": "section"
   },
   {
-    "id": "506-release-notes/1.5#upgrading",
+    "id": "507-release-notes/1.5#upgrading",
     "title": "Zero 1.5",
     "searchTitle": "Upgrading",
     "sectionTitle": "Upgrading",
@@ -6607,7 +6621,7 @@
     "kind": "section"
   },
   {
-    "id": "507-release-notes/1.5#authenticated-client-groups",
+    "id": "508-release-notes/1.5#authenticated-client-groups",
     "title": "Zero 1.5",
     "searchTitle": "Authenticated Client Groups",
     "sectionTitle": "Authenticated Client Groups",
@@ -6617,7 +6631,7 @@
     "kind": "section"
   },
   {
-    "id": "508-release-notes/1.5#deploy-order",
+    "id": "509-release-notes/1.5#deploy-order",
     "title": "Zero 1.5",
     "searchTitle": "Deploy Order",
     "sectionTitle": "Deploy Order",
@@ -6627,7 +6641,7 @@
     "kind": "section"
   },
   {
-    "id": "509-release-notes/1.5#features",
+    "id": "510-release-notes/1.5#features",
     "title": "Zero 1.5",
     "searchTitle": "Features",
     "sectionTitle": "Features",
@@ -6637,7 +6651,7 @@
     "kind": "section"
   },
   {
-    "id": "510-release-notes/1.5#performance",
+    "id": "511-release-notes/1.5#performance",
     "title": "Zero 1.5",
     "searchTitle": "Performance",
     "sectionTitle": "Performance",
@@ -6647,7 +6661,7 @@
     "kind": "section"
   },
   {
-    "id": "511-release-notes/1.5#fixes",
+    "id": "512-release-notes/1.5#fixes",
     "title": "Zero 1.5",
     "searchTitle": "Fixes",
     "sectionTitle": "Fixes",
@@ -6657,7 +6671,7 @@
     "kind": "section"
   },
   {
-    "id": "512-release-notes/1.5#breaking-changes",
+    "id": "513-release-notes/1.5#breaking-changes",
     "title": "Zero 1.5",
     "searchTitle": "Breaking Changes",
     "sectionTitle": "Breaking Changes",
@@ -6705,7 +6719,7 @@
     "kind": "page"
   },
   {
-    "id": "513-release-notes/1.6#installation",
+    "id": "514-release-notes/1.6#installation",
     "title": "Zero 1.6",
     "searchTitle": "Installation",
     "sectionTitle": "Installation",
@@ -6715,7 +6729,7 @@
     "kind": "section"
   },
   {
-    "id": "514-release-notes/1.6#upgrading",
+    "id": "515-release-notes/1.6#upgrading",
     "title": "Zero 1.6",
     "searchTitle": "Upgrading",
     "sectionTitle": "Upgrading",
@@ -6725,7 +6739,7 @@
     "kind": "section"
   },
   {
-    "id": "515-release-notes/1.6#planetscale-failover",
+    "id": "516-release-notes/1.6#planetscale-failover",
     "title": "Zero 1.6",
     "searchTitle": "PlanetScale Failover",
     "sectionTitle": "PlanetScale Failover",
@@ -6735,7 +6749,7 @@
     "kind": "section"
   },
   {
-    "id": "516-release-notes/1.6#features",
+    "id": "517-release-notes/1.6#features",
     "title": "Zero 1.6",
     "searchTitle": "Features",
     "sectionTitle": "Features",
@@ -6745,7 +6759,7 @@
     "kind": "section"
   },
   {
-    "id": "517-release-notes/1.6#performance",
+    "id": "518-release-notes/1.6#performance",
     "title": "Zero 1.6",
     "searchTitle": "Performance",
     "sectionTitle": "Performance",
@@ -6755,7 +6769,7 @@
     "kind": "section"
   },
   {
-    "id": "518-release-notes/1.6#fixes",
+    "id": "519-release-notes/1.6#fixes",
     "title": "Zero 1.6",
     "searchTitle": "Fixes",
     "sectionTitle": "Fixes",
@@ -6765,7 +6779,7 @@
     "kind": "section"
   },
   {
-    "id": "519-release-notes/1.6#breaking-changes",
+    "id": "520-release-notes/1.6#breaking-changes",
     "title": "Zero 1.6",
     "searchTitle": "Breaking Changes",
     "sectionTitle": "Breaking Changes",
@@ -6817,7 +6831,7 @@
     "kind": "page"
   },
   {
-    "id": "520-release-notes/1.7#installation",
+    "id": "521-release-notes/1.7#installation",
     "title": "Zero 1.7",
     "searchTitle": "Installation",
     "sectionTitle": "Installation",
@@ -6827,7 +6841,7 @@
     "kind": "section"
   },
   {
-    "id": "521-release-notes/1.7#overview",
+    "id": "522-release-notes/1.7#overview",
     "title": "Zero 1.7",
     "searchTitle": "Overview",
     "sectionTitle": "Overview",
@@ -6837,7 +6851,7 @@
     "kind": "section"
   },
   {
-    "id": "522-release-notes/1.7#features",
+    "id": "523-release-notes/1.7#features",
     "title": "Zero 1.7",
     "searchTitle": "Features",
     "sectionTitle": "Features",
@@ -6847,7 +6861,7 @@
     "kind": "section"
   },
   {
-    "id": "523-release-notes/1.7#performance",
+    "id": "524-release-notes/1.7#performance",
     "title": "Zero 1.7",
     "searchTitle": "Performance",
     "sectionTitle": "Performance",
@@ -6857,7 +6871,7 @@
     "kind": "section"
   },
   {
-    "id": "524-release-notes/1.7#replication",
+    "id": "525-release-notes/1.7#replication",
     "title": "Zero 1.7",
     "searchTitle": "Replication",
     "sectionTitle": "Replication",
@@ -6867,7 +6881,7 @@
     "kind": "section"
   },
   {
-    "id": "525-release-notes/1.7#flipped-exists-queries",
+    "id": "526-release-notes/1.7#flipped-exists-queries",
     "title": "Zero 1.7",
     "searchTitle": "Flipped Exists Queries",
     "sectionTitle": "Flipped Exists Queries",
@@ -6877,7 +6891,7 @@
     "kind": "section"
   },
   {
-    "id": "526-release-notes/1.7#fixes",
+    "id": "527-release-notes/1.7#fixes",
     "title": "Zero 1.7",
     "searchTitle": "Fixes",
     "sectionTitle": "Fixes",
@@ -6887,7 +6901,7 @@
     "kind": "section"
   },
   {
-    "id": "527-release-notes/1.7#breaking-changes",
+    "id": "528-release-notes/1.7#breaking-changes",
     "title": "Zero 1.7",
     "searchTitle": "Breaking Changes",
     "sectionTitle": "Breaking Changes",
@@ -6943,7 +6957,7 @@
     "kind": "page"
   },
   {
-    "id": "528-release-notes/1.8#installation",
+    "id": "529-release-notes/1.8#installation",
     "title": "Zero 1.8",
     "searchTitle": "Installation",
     "sectionTitle": "Installation",
@@ -6953,7 +6967,7 @@
     "kind": "section"
   },
   {
-    "id": "529-release-notes/1.8#overview",
+    "id": "530-release-notes/1.8#overview",
     "title": "Zero 1.8",
     "searchTitle": "Overview",
     "sectionTitle": "Overview",
@@ -6963,7 +6977,7 @@
     "kind": "section"
   },
   {
-    "id": "530-release-notes/1.8#features",
+    "id": "531-release-notes/1.8#features",
     "title": "Zero 1.8",
     "searchTitle": "Features",
     "sectionTitle": "Features",
@@ -6973,7 +6987,7 @@
     "kind": "section"
   },
   {
-    "id": "531-release-notes/1.8#performance",
+    "id": "532-release-notes/1.8#performance",
     "title": "Zero 1.8",
     "searchTitle": "Performance",
     "sectionTitle": "Performance",
@@ -6983,7 +6997,7 @@
     "kind": "section"
   },
   {
-    "id": "532-release-notes/1.8#replicating-large-transactions",
+    "id": "533-release-notes/1.8#replicating-large-transactions",
     "title": "Zero 1.8",
     "searchTitle": "Replicating Large Transactions",
     "sectionTitle": "Replicating Large Transactions",
@@ -6993,7 +7007,7 @@
     "kind": "section"
   },
   {
-    "id": "533-release-notes/1.8#maintaining-limit-queries",
+    "id": "534-release-notes/1.8#maintaining-limit-queries",
     "title": "Zero 1.8",
     "searchTitle": "Maintaining limit() Queries",
     "sectionTitle": "Maintaining limit() Queries",
@@ -7003,7 +7017,7 @@
     "kind": "section"
   },
   {
-    "id": "534-release-notes/1.8#client-side-hydration",
+    "id": "535-release-notes/1.8#client-side-hydration",
     "title": "Zero 1.8",
     "searchTitle": "Client-Side Hydration",
     "sectionTitle": "Client-Side Hydration",
@@ -7013,7 +7027,7 @@
     "kind": "section"
   },
   {
-    "id": "535-release-notes/1.8#fixes",
+    "id": "536-release-notes/1.8#fixes",
     "title": "Zero 1.8",
     "searchTitle": "Fixes",
     "sectionTitle": "Fixes",
@@ -7023,7 +7037,7 @@
     "kind": "section"
   },
   {
-    "id": "536-release-notes/1.8#breaking-changes",
+    "id": "537-release-notes/1.8#breaking-changes",
     "title": "Zero 1.8",
     "searchTitle": "Breaking Changes",
     "sectionTitle": "Breaking Changes",
@@ -7067,7 +7081,7 @@
     "kind": "page"
   },
   {
-    "id": "537-release-notes/1.9#installation",
+    "id": "538-release-notes/1.9#installation",
     "title": "Zero 1.9",
     "searchTitle": "Installation",
     "sectionTitle": "Installation",
@@ -7077,7 +7091,7 @@
     "kind": "section"
   },
   {
-    "id": "538-release-notes/1.9#overview",
+    "id": "539-release-notes/1.9#overview",
     "title": "Zero 1.9",
     "searchTitle": "Overview",
     "sectionTitle": "Overview",
@@ -7087,7 +7101,7 @@
     "kind": "section"
   },
   {
-    "id": "539-release-notes/1.9#features",
+    "id": "540-release-notes/1.9#features",
     "title": "Zero 1.9",
     "searchTitle": "Features",
     "sectionTitle": "Features",
@@ -7097,7 +7111,7 @@
     "kind": "section"
   },
   {
-    "id": "540-release-notes/1.9#performance",
+    "id": "541-release-notes/1.9#performance",
     "title": "Zero 1.9",
     "searchTitle": "Performance",
     "sectionTitle": "Performance",
@@ -7107,7 +7121,7 @@
     "kind": "section"
   },
   {
-    "id": "541-release-notes/1.9#cold-mutation-latency",
+    "id": "542-release-notes/1.9#cold-mutation-latency",
     "title": "Zero 1.9",
     "searchTitle": "Cold Mutation Latency",
     "sectionTitle": "Cold Mutation Latency",
@@ -7117,7 +7131,7 @@
     "kind": "section"
   },
   {
-    "id": "542-release-notes/1.9#fixes",
+    "id": "543-release-notes/1.9#fixes",
     "title": "Zero 1.9",
     "searchTitle": "Fixes",
     "sectionTitle": "Fixes",
@@ -7154,7 +7168,7 @@
     "kind": "page"
   },
   {
-    "id": "543-reporting-bugs#zbugs",
+    "id": "544-reporting-bugs#zbugs",
     "title": "Reporting Bugs",
     "searchTitle": "zbugs",
     "sectionTitle": "zbugs",
@@ -7164,7 +7178,7 @@
     "kind": "section"
   },
   {
-    "id": "544-reporting-bugs#discord",
+    "id": "545-reporting-bugs#discord",
     "title": "Reporting Bugs",
     "searchTitle": "Discord",
     "sectionTitle": "Discord",
@@ -7200,7 +7214,7 @@
     "kind": "page"
   },
   {
-    "id": "545-rest#pattern",
+    "id": "546-rest#pattern",
     "title": "REST",
     "searchTitle": "Pattern",
     "sectionTitle": "Pattern",
@@ -7210,7 +7224,7 @@
     "kind": "section"
   },
   {
-    "id": "546-rest#tanstack-start-example",
+    "id": "547-rest#tanstack-start-example",
     "title": "REST",
     "searchTitle": "TanStack Start Example",
     "sectionTitle": "TanStack Start Example",
@@ -7220,7 +7234,7 @@
     "kind": "section"
   },
   {
-    "id": "547-rest#openapi-generation",
+    "id": "548-rest#openapi-generation",
     "title": "REST",
     "searchTitle": "OpenAPI Generation",
     "sectionTitle": "OpenAPI Generation",
@@ -7230,7 +7244,7 @@
     "kind": "section"
   },
   {
-    "id": "548-rest#full-working-example",
+    "id": "549-rest#full-working-example",
     "title": "REST",
     "searchTitle": "Full Working Example",
     "sectionTitle": "Full Working Example",
@@ -7258,7 +7272,7 @@
     "kind": "page"
   },
   {
-    "id": "549-roadmap#q4-2025",
+    "id": "550-roadmap#q4-2025",
     "title": "Roadmap",
     "searchTitle": "Q4 2025",
     "sectionTitle": "Q4 2025",
@@ -7268,7 +7282,7 @@
     "kind": "section"
   },
   {
-    "id": "550-roadmap#beyond",
+    "id": "551-roadmap#beyond",
     "title": "Roadmap",
     "searchTitle": "Beyond",
     "sectionTitle": "Beyond",
@@ -7304,7 +7318,7 @@
     "kind": "page"
   },
   {
-    "id": "551-samples#gigabugs",
+    "id": "552-samples#gigabugs",
     "title": "Samples",
     "searchTitle": "Gigabugs",
     "sectionTitle": "Gigabugs",
@@ -7314,7 +7328,7 @@
     "kind": "section"
   },
   {
-    "id": "552-samples#ztunes",
+    "id": "553-samples#ztunes",
     "title": "Samples",
     "searchTitle": "ztunes",
     "sectionTitle": "ztunes",
@@ -7324,7 +7338,7 @@
     "kind": "section"
   },
   {
-    "id": "553-samples#zslack",
+    "id": "554-samples#zslack",
     "title": "Samples",
     "searchTitle": "zslack",
     "sectionTitle": "zslack",
@@ -7334,7 +7348,7 @@
     "kind": "section"
   },
   {
-    "id": "554-samples#zero-music",
+    "id": "555-samples#zero-music",
     "title": "Samples",
     "searchTitle": "zero-music",
     "sectionTitle": "zero-music",
@@ -7474,7 +7488,7 @@
     "kind": "page"
   },
   {
-    "id": "555-schema#generating-from-database",
+    "id": "556-schema#generating-from-database",
     "title": "Zero Schema",
     "searchTitle": "Generating from Database",
     "sectionTitle": "Generating from Database",
@@ -7484,7 +7498,7 @@
     "kind": "section"
   },
   {
-    "id": "556-schema#writing-by-hand",
+    "id": "557-schema#writing-by-hand",
     "title": "Zero Schema",
     "searchTitle": "Writing by Hand",
     "sectionTitle": "Writing by Hand",
@@ -7494,7 +7508,7 @@
     "kind": "section"
   },
   {
-    "id": "557-schema#table-schemas",
+    "id": "558-schema#table-schemas",
     "title": "Zero Schema",
     "searchTitle": "Table Schemas",
     "sectionTitle": "Table Schemas",
@@ -7504,7 +7518,7 @@
     "kind": "section"
   },
   {
-    "id": "558-schema#name-mapping",
+    "id": "559-schema#name-mapping",
     "title": "Zero Schema",
     "searchTitle": "Name Mapping",
     "sectionTitle": "Name Mapping",
@@ -7514,7 +7528,7 @@
     "kind": "section"
   },
   {
-    "id": "559-schema#multiple-schemas",
+    "id": "560-schema#multiple-schemas",
     "title": "Zero Schema",
     "searchTitle": "Multiple Schemas",
     "sectionTitle": "Multiple Schemas",
@@ -7524,7 +7538,7 @@
     "kind": "section"
   },
   {
-    "id": "560-schema#optional-columns",
+    "id": "561-schema#optional-columns",
     "title": "Zero Schema",
     "searchTitle": "Optional Columns",
     "sectionTitle": "Optional Columns",
@@ -7534,7 +7548,7 @@
     "kind": "section"
   },
   {
-    "id": "561-schema#enumerations",
+    "id": "562-schema#enumerations",
     "title": "Zero Schema",
     "searchTitle": "Enumerations",
     "sectionTitle": "Enumerations",
@@ -7544,7 +7558,7 @@
     "kind": "section"
   },
   {
-    "id": "562-schema#custom-json-types",
+    "id": "563-schema#custom-json-types",
     "title": "Zero Schema",
     "searchTitle": "Custom JSON Types",
     "sectionTitle": "Custom JSON Types",
@@ -7554,7 +7568,7 @@
     "kind": "section"
   },
   {
-    "id": "563-schema#compound-primary-keys",
+    "id": "564-schema#compound-primary-keys",
     "title": "Zero Schema",
     "searchTitle": "Compound Primary Keys",
     "sectionTitle": "Compound Primary Keys",
@@ -7564,7 +7578,7 @@
     "kind": "section"
   },
   {
-    "id": "564-schema#unique-keys",
+    "id": "565-schema#unique-keys",
     "title": "Zero Schema",
     "searchTitle": "Unique Keys",
     "sectionTitle": "Unique Keys",
@@ -7574,7 +7588,7 @@
     "kind": "section"
   },
   {
-    "id": "565-schema#relationships",
+    "id": "566-schema#relationships",
     "title": "Zero Schema",
     "searchTitle": "Relationships",
     "sectionTitle": "Relationships",
@@ -7584,7 +7598,7 @@
     "kind": "section"
   },
   {
-    "id": "566-schema#many-to-many-relationships",
+    "id": "567-schema#many-to-many-relationships",
     "title": "Zero Schema",
     "searchTitle": "Many-to-Many Relationships",
     "sectionTitle": "Many-to-Many Relationships",
@@ -7594,7 +7608,7 @@
     "kind": "section"
   },
   {
-    "id": "567-schema#compound-keys-relationships",
+    "id": "568-schema#compound-keys-relationships",
     "title": "Zero Schema",
     "searchTitle": "Compound Keys Relationships",
     "sectionTitle": "Compound Keys Relationships",
@@ -7604,7 +7618,7 @@
     "kind": "section"
   },
   {
-    "id": "568-schema#circular-relationships",
+    "id": "569-schema#circular-relationships",
     "title": "Zero Schema",
     "searchTitle": "Circular Relationships",
     "sectionTitle": "Circular Relationships",
@@ -7614,7 +7628,7 @@
     "kind": "section"
   },
   {
-    "id": "569-schema#database-schemas",
+    "id": "570-schema#database-schemas",
     "title": "Zero Schema",
     "searchTitle": "Database Schemas",
     "sectionTitle": "Database Schemas",
@@ -7624,7 +7638,7 @@
     "kind": "section"
   },
   {
-    "id": "570-schema#register-schema-type",
+    "id": "571-schema#register-schema-type",
     "title": "Zero Schema",
     "searchTitle": "Register Schema Type",
     "sectionTitle": "Register Schema Type",
@@ -7634,7 +7648,7 @@
     "kind": "section"
   },
   {
-    "id": "571-schema#schema-changes",
+    "id": "572-schema#schema-changes",
     "title": "Zero Schema",
     "searchTitle": "Schema Changes",
     "sectionTitle": "Schema Changes",
@@ -7644,7 +7658,7 @@
     "kind": "section"
   },
   {
-    "id": "572-schema#development",
+    "id": "573-schema#development",
     "title": "Zero Schema",
     "searchTitle": "Development",
     "sectionTitle": "Development",
@@ -7654,7 +7668,7 @@
     "kind": "section"
   },
   {
-    "id": "573-schema#production",
+    "id": "574-schema#production",
     "title": "Zero Schema",
     "searchTitle": "Production",
     "sectionTitle": "Production",
@@ -7664,7 +7678,7 @@
     "kind": "section"
   },
   {
-    "id": "574-schema#expand-changes",
+    "id": "575-schema#expand-changes",
     "title": "Zero Schema",
     "searchTitle": "Expand Changes",
     "sectionTitle": "Expand Changes",
@@ -7674,7 +7688,7 @@
     "kind": "section"
   },
   {
-    "id": "575-schema#contract-changes",
+    "id": "576-schema#contract-changes",
     "title": "Zero Schema",
     "searchTitle": "Contract Changes",
     "sectionTitle": "Contract Changes",
@@ -7684,7 +7698,7 @@
     "kind": "section"
   },
   {
-    "id": "576-schema#compound-changes",
+    "id": "577-schema#compound-changes",
     "title": "Zero Schema",
     "searchTitle": "Compound Changes",
     "sectionTitle": "Compound Changes",
@@ -7694,7 +7708,7 @@
     "kind": "section"
   },
   {
-    "id": "577-schema#examples",
+    "id": "578-schema#examples",
     "title": "Zero Schema",
     "searchTitle": "Examples",
     "sectionTitle": "Examples",
@@ -7704,7 +7718,7 @@
     "kind": "section"
   },
   {
-    "id": "578-schema#adding-a-column",
+    "id": "579-schema#adding-a-column",
     "title": "Zero Schema",
     "searchTitle": "Adding a Column",
     "sectionTitle": "Adding a Column",
@@ -7714,7 +7728,7 @@
     "kind": "section"
   },
   {
-    "id": "579-schema#removing-a-column",
+    "id": "580-schema#removing-a-column",
     "title": "Zero Schema",
     "searchTitle": "Removing a Column",
     "sectionTitle": "Removing a Column",
@@ -7724,7 +7738,7 @@
     "kind": "section"
   },
   {
-    "id": "580-schema#renaming-a-column",
+    "id": "581-schema#renaming-a-column",
     "title": "Zero Schema",
     "searchTitle": "Renaming a Column",
     "sectionTitle": "Renaming a Column",
@@ -7734,7 +7748,7 @@
     "kind": "section"
   },
   {
-    "id": "581-schema#making-a-column-optional",
+    "id": "582-schema#making-a-column-optional",
     "title": "Zero Schema",
     "searchTitle": "Making a Column Optional",
     "sectionTitle": "Making a Column Optional",
@@ -7744,7 +7758,7 @@
     "kind": "section"
   },
   {
-    "id": "582-schema#quick-reference",
+    "id": "583-schema#quick-reference",
     "title": "Zero Schema",
     "searchTitle": "Quick Reference",
     "sectionTitle": "Quick Reference",
@@ -7754,7 +7768,7 @@
     "kind": "section"
   },
   {
-    "id": "583-schema#backfill",
+    "id": "584-schema#backfill",
     "title": "Zero Schema",
     "searchTitle": "Backfill",
     "sectionTitle": "Backfill",
@@ -7764,7 +7778,7 @@
     "kind": "section"
   },
   {
-    "id": "584-schema#monitoring-backfill-progress",
+    "id": "585-schema#monitoring-backfill-progress",
     "title": "Zero Schema",
     "searchTitle": "Monitoring Backfill Progress",
     "sectionTitle": "Monitoring Backfill Progress",
@@ -7836,7 +7850,7 @@
     "kind": "page"
   },
   {
-    "id": "585-self-host#docker-images",
+    "id": "586-self-host#docker-images",
     "title": "Self-Hosting Zero",
     "searchTitle": "Docker Images",
     "sectionTitle": "Docker Images",
@@ -7846,7 +7860,7 @@
     "kind": "section"
   },
   {
-    "id": "586-self-host#minimum-viable-strategy",
+    "id": "587-self-host#minimum-viable-strategy",
     "title": "Self-Hosting Zero",
     "searchTitle": "Minimum Viable Strategy",
     "sectionTitle": "Minimum Viable Strategy",
@@ -7856,7 +7870,7 @@
     "kind": "section"
   },
   {
-    "id": "587-self-host#maximal-strategy",
+    "id": "588-self-host#maximal-strategy",
     "title": "Self-Hosting Zero",
     "searchTitle": "Maximal Strategy",
     "sectionTitle": "Maximal Strategy",
@@ -7866,7 +7880,7 @@
     "kind": "section"
   },
   {
-    "id": "588-self-host#replica-lifecycle",
+    "id": "589-self-host#replica-lifecycle",
     "title": "Self-Hosting Zero",
     "searchTitle": "Replica Lifecycle",
     "sectionTitle": "Replica Lifecycle",
@@ -7876,7 +7890,7 @@
     "kind": "section"
   },
   {
-    "id": "589-self-host#performance",
+    "id": "590-self-host#performance",
     "title": "Self-Hosting Zero",
     "searchTitle": "Performance",
     "sectionTitle": "Performance",
@@ -7886,7 +7900,7 @@
     "kind": "section"
   },
   {
-    "id": "590-self-host#hydration",
+    "id": "591-self-host#hydration",
     "title": "Self-Hosting Zero",
     "searchTitle": "Hydration",
     "sectionTitle": "Hydration",
@@ -7896,7 +7910,7 @@
     "kind": "section"
   },
   {
-    "id": "591-self-host#ivm-advancement",
+    "id": "592-self-host#ivm-advancement",
     "title": "Self-Hosting Zero",
     "searchTitle": "IVM advancement",
     "sectionTitle": "IVM advancement",
@@ -7906,7 +7920,7 @@
     "kind": "section"
   },
   {
-    "id": "592-self-host#system-level",
+    "id": "593-self-host#system-level",
     "title": "Self-Hosting Zero",
     "searchTitle": "System-level",
     "sectionTitle": "System-level",
@@ -7916,7 +7930,7 @@
     "kind": "section"
   },
   {
-    "id": "593-self-host#networking",
+    "id": "594-self-host#networking",
     "title": "Self-Hosting Zero",
     "searchTitle": "Networking",
     "sectionTitle": "Networking",
@@ -7926,7 +7940,7 @@
     "kind": "section"
   },
   {
-    "id": "594-self-host#sticky-sessions",
+    "id": "595-self-host#sticky-sessions",
     "title": "Self-Hosting Zero",
     "searchTitle": "Sticky Sessions",
     "sectionTitle": "Sticky Sessions",
@@ -7936,7 +7950,7 @@
     "kind": "section"
   },
   {
-    "id": "595-self-host#rolling-updates",
+    "id": "596-self-host#rolling-updates",
     "title": "Self-Hosting Zero",
     "searchTitle": "Rolling Updates",
     "sectionTitle": "Rolling Updates",
@@ -7946,7 +7960,7 @@
     "kind": "section"
   },
   {
-    "id": "596-self-host#clientserver-version-compatibility",
+    "id": "597-self-host#clientserver-version-compatibility",
     "title": "Self-Hosting Zero",
     "searchTitle": "Client/Server Version Compatibility",
     "sectionTitle": "Client/Server Version Compatibility",
@@ -7956,7 +7970,7 @@
     "kind": "section"
   },
   {
-    "id": "597-self-host#configuration",
+    "id": "598-self-host#configuration",
     "title": "Self-Hosting Zero",
     "searchTitle": "Configuration",
     "sectionTitle": "Configuration",
@@ -7996,7 +8010,7 @@
     "kind": "page"
   },
   {
-    "id": "598-server-zql#creating-a-database",
+    "id": "599-server-zql#creating-a-database",
     "title": "ZQL on the Server",
     "searchTitle": "Creating a Database",
     "sectionTitle": "Creating a Database",
@@ -8006,7 +8020,7 @@
     "kind": "section"
   },
   {
-    "id": "599-server-zql#isolation-level",
+    "id": "600-server-zql#isolation-level",
     "title": "ZQL on the Server",
     "searchTitle": "Isolation Level",
     "sectionTitle": "Isolation Level",
@@ -8016,7 +8030,7 @@
     "kind": "section"
   },
   {
-    "id": "600-server-zql#custom-database",
+    "id": "601-server-zql#custom-database",
     "title": "ZQL on the Server",
     "searchTitle": "Custom Database",
     "sectionTitle": "Custom Database",
@@ -8026,7 +8040,7 @@
     "kind": "section"
   },
   {
-    "id": "601-server-zql#running-zql",
+    "id": "602-server-zql#running-zql",
     "title": "ZQL on the Server",
     "searchTitle": "Running ZQL",
     "sectionTitle": "Running ZQL",
@@ -8036,7 +8050,7 @@
     "kind": "section"
   },
   {
-    "id": "602-server-zql#ssr",
+    "id": "603-server-zql#ssr",
     "title": "ZQL on the Server",
     "searchTitle": "SSR",
     "sectionTitle": "SSR",
@@ -8068,7 +8082,7 @@
     "kind": "page"
   },
   {
-    "id": "603-solidjs#setup",
+    "id": "604-solidjs#setup",
     "title": "SolidJS",
     "searchTitle": "Setup",
     "sectionTitle": "Setup",
@@ -8078,7 +8092,7 @@
     "kind": "section"
   },
   {
-    "id": "604-solidjs#usage",
+    "id": "605-solidjs#usage",
     "title": "SolidJS",
     "searchTitle": "Usage",
     "sectionTitle": "Usage",
@@ -8088,7 +8102,7 @@
     "kind": "section"
   },
   {
-    "id": "605-solidjs#examples",
+    "id": "606-solidjs#examples",
     "title": "SolidJS",
     "searchTitle": "Examples",
     "sectionTitle": "Examples",
@@ -8124,7 +8138,7 @@
     "kind": "page"
   },
   {
-    "id": "606-status#breaking-changes",
+    "id": "607-status#breaking-changes",
     "title": "Project Status",
     "searchTitle": "Breaking Changes",
     "sectionTitle": "Breaking Changes",
@@ -8134,7 +8148,7 @@
     "kind": "section"
   },
   {
-    "id": "607-status#roadmap",
+    "id": "608-status#roadmap",
     "title": "Project Status",
     "searchTitle": "Roadmap",
     "sectionTitle": "Roadmap",
@@ -8144,7 +8158,7 @@
     "kind": "section"
   },
   {
-    "id": "608-status#2026",
+    "id": "609-status#2026",
     "title": "Project Status",
     "searchTitle": "2026",
     "sectionTitle": "2026",
@@ -8154,7 +8168,7 @@
     "kind": "section"
   },
   {
-    "id": "609-status#soon",
+    "id": "610-status#soon",
     "title": "Project Status",
     "searchTitle": "Soon",
     "sectionTitle": "Soon",
@@ -8186,7 +8200,7 @@
     "kind": "page"
   },
   {
-    "id": "610-sync#problem",
+    "id": "611-sync#problem",
     "title": "What is Sync?",
     "searchTitle": "Problem",
     "sectionTitle": "Problem",
@@ -8196,7 +8210,7 @@
     "kind": "section"
   },
   {
-    "id": "611-sync#solution",
+    "id": "612-sync#solution",
     "title": "What is Sync?",
     "searchTitle": "Solution",
     "sectionTitle": "Solution",
@@ -8206,7 +8220,7 @@
     "kind": "section"
   },
   {
-    "id": "612-sync#history-of-sync",
+    "id": "613-sync#history-of-sync",
     "title": "What is Sync?",
     "searchTitle": "History of Sync",
     "sectionTitle": "History of Sync",
@@ -8290,7 +8304,7 @@
     "kind": "page"
   },
   {
-    "id": "613-tutorial#setup",
+    "id": "614-tutorial#setup",
     "title": "Tutorial",
     "searchTitle": "Setup",
     "sectionTitle": "Setup",
@@ -8300,7 +8314,7 @@
     "kind": "section"
   },
   {
-    "id": "614-tutorial#create-a-project",
+    "id": "615-tutorial#create-a-project",
     "title": "Tutorial",
     "searchTitle": "Create a Project",
     "sectionTitle": "Create a Project",
@@ -8310,7 +8324,7 @@
     "kind": "section"
   },
   {
-    "id": "615-tutorial#set-up-your-database",
+    "id": "616-tutorial#set-up-your-database",
     "title": "Tutorial",
     "searchTitle": "Set Up Your Database",
     "sectionTitle": "Set Up Your Database",
@@ -8320,7 +8334,7 @@
     "kind": "section"
   },
   {
-    "id": "616-tutorial#install-and-run-zero-cache",
+    "id": "617-tutorial#install-and-run-zero-cache",
     "title": "Tutorial",
     "searchTitle": "Install and Run Zero-Cache",
     "sectionTitle": "Install and Run Zero-Cache",
@@ -8330,7 +8344,7 @@
     "kind": "section"
   },
   {
-    "id": "617-tutorial#integrate-zero",
+    "id": "618-tutorial#integrate-zero",
     "title": "Tutorial",
     "searchTitle": "Integrate Zero",
     "sectionTitle": "Integrate Zero",
@@ -8340,7 +8354,7 @@
     "kind": "section"
   },
   {
-    "id": "618-tutorial#set-up-your-zero-schema",
+    "id": "619-tutorial#set-up-your-zero-schema",
     "title": "Tutorial",
     "searchTitle": "Set Up Your Zero Schema",
     "sectionTitle": "Set Up Your Zero Schema",
@@ -8350,7 +8364,7 @@
     "kind": "section"
   },
   {
-    "id": "619-tutorial#set-up-the-zero-client",
+    "id": "620-tutorial#set-up-the-zero-client",
     "title": "Tutorial",
     "searchTitle": "Set Up the Zero Client",
     "sectionTitle": "Set Up the Zero Client",
@@ -8360,7 +8374,7 @@
     "kind": "section"
   },
   {
-    "id": "620-tutorial#sync-data",
+    "id": "621-tutorial#sync-data",
     "title": "Tutorial",
     "searchTitle": "Sync Data",
     "sectionTitle": "Sync Data",
@@ -8370,7 +8384,7 @@
     "kind": "section"
   },
   {
-    "id": "621-tutorial#define-query",
+    "id": "622-tutorial#define-query",
     "title": "Tutorial",
     "searchTitle": "Define Query",
     "sectionTitle": "Define Query",
@@ -8380,7 +8394,7 @@
     "kind": "section"
   },
   {
-    "id": "622-tutorial#add-query-endpoint",
+    "id": "623-tutorial#add-query-endpoint",
     "title": "Tutorial",
     "searchTitle": "Add Query Endpoint",
     "sectionTitle": "Add Query Endpoint",
@@ -8390,7 +8404,7 @@
     "kind": "section"
   },
   {
-    "id": "623-tutorial#invoke-query",
+    "id": "624-tutorial#invoke-query",
     "title": "Tutorial",
     "searchTitle": "Invoke Query",
     "sectionTitle": "Invoke Query",
@@ -8400,7 +8414,7 @@
     "kind": "section"
   },
   {
-    "id": "624-tutorial#mutate-data",
+    "id": "625-tutorial#mutate-data",
     "title": "Tutorial",
     "searchTitle": "Mutate Data",
     "sectionTitle": "Mutate Data",
@@ -8410,7 +8424,7 @@
     "kind": "section"
   },
   {
-    "id": "625-tutorial#define-mutators",
+    "id": "626-tutorial#define-mutators",
     "title": "Tutorial",
     "searchTitle": "Define Mutators",
     "sectionTitle": "Define Mutators",
@@ -8420,7 +8434,7 @@
     "kind": "section"
   },
   {
-    "id": "626-tutorial#add-mutate-endpoint",
+    "id": "627-tutorial#add-mutate-endpoint",
     "title": "Tutorial",
     "searchTitle": "Add Mutate Endpoint",
     "sectionTitle": "Add Mutate Endpoint",
@@ -8430,7 +8444,7 @@
     "kind": "section"
   },
   {
-    "id": "627-tutorial#invoke-mutators",
+    "id": "628-tutorial#invoke-mutators",
     "title": "Tutorial",
     "searchTitle": "Invoke Mutators",
     "sectionTitle": "Invoke Mutators",
@@ -8440,7 +8454,7 @@
     "kind": "section"
   },
   {
-    "id": "628-tutorial#next-steps",
+    "id": "629-tutorial#next-steps",
     "title": "Tutorial",
     "searchTitle": "Next Steps",
     "sectionTitle": "Next Steps",
@@ -8516,7 +8530,7 @@
     "kind": "page"
   },
   {
-    "id": "629-when-to-use#zero-might-be-a-good-fit",
+    "id": "630-when-to-use#zero-might-be-a-good-fit",
     "title": "When To Use Zero",
     "searchTitle": "Zero Might be a Good Fit",
     "sectionTitle": "Zero Might be a Good Fit",
@@ -8526,7 +8540,7 @@
     "kind": "section"
   },
   {
-    "id": "630-when-to-use#you-want-to-sync-only-a-small-subset-of-data-to-client",
+    "id": "631-when-to-use#you-want-to-sync-only-a-small-subset-of-data-to-client",
     "title": "When To Use Zero",
     "searchTitle": "You want to sync only a small subset of data to client",
     "sectionTitle": "You want to sync only a small subset of data to client",
@@ -8536,7 +8550,7 @@
     "kind": "section"
   },
   {
-    "id": "631-when-to-use#you-need-fine-grained-read-or-write-permissions",
+    "id": "632-when-to-use#you-need-fine-grained-read-or-write-permissions",
     "title": "When To Use Zero",
     "searchTitle": "You need fine-grained read or write permissions",
     "sectionTitle": "You need fine-grained read or write permissions",
@@ -8546,7 +8560,7 @@
     "kind": "section"
   },
   {
-    "id": "632-when-to-use#you-are-building-a-traditional-client-server-web-app",
+    "id": "633-when-to-use#you-are-building-a-traditional-client-server-web-app",
     "title": "When To Use Zero",
     "searchTitle": "You are building a traditional client-server web app",
     "sectionTitle": "You are building a traditional client-server web app",
@@ -8556,7 +8570,7 @@
     "kind": "section"
   },
   {
-    "id": "633-when-to-use#you-use-postgresql",
+    "id": "634-when-to-use#you-use-postgresql",
     "title": "When To Use Zero",
     "searchTitle": "You use PostgreSQL",
     "sectionTitle": "You use PostgreSQL",
@@ -8566,7 +8580,7 @@
     "kind": "section"
   },
   {
-    "id": "634-when-to-use#your-app-is-broadly-like-linear",
+    "id": "635-when-to-use#your-app-is-broadly-like-linear",
     "title": "When To Use Zero",
     "searchTitle": "Your app is broadly \"like Linear\"",
     "sectionTitle": "Your app is broadly \"like Linear\"",
@@ -8576,7 +8590,7 @@
     "kind": "section"
   },
   {
-    "id": "635-when-to-use#interaction-performance-is-very-important-to-you",
+    "id": "636-when-to-use#interaction-performance-is-very-important-to-you",
     "title": "When To Use Zero",
     "searchTitle": "Interaction performance is very important to you",
     "sectionTitle": "Interaction performance is very important to you",
@@ -8586,7 +8600,7 @@
     "kind": "section"
   },
   {
-    "id": "636-when-to-use#zero-might-not-be-a-good-fit",
+    "id": "637-when-to-use#zero-might-not-be-a-good-fit",
     "title": "When To Use Zero",
     "searchTitle": "Zero Might Not be a Good Fit",
     "sectionTitle": "Zero Might Not be a Good Fit",
@@ -8596,7 +8610,7 @@
     "kind": "section"
   },
   {
-    "id": "637-when-to-use#you-need-the-privacy-or-data-ownership-benefits-of-local-first",
+    "id": "638-when-to-use#you-need-the-privacy-or-data-ownership-benefits-of-local-first",
     "title": "When To Use Zero",
     "searchTitle": "You need the privacy or data ownership benefits of local-first",
     "sectionTitle": "You need the privacy or data ownership benefits of local-first",
@@ -8606,7 +8620,7 @@
     "kind": "section"
   },
   {
-    "id": "638-when-to-use#you-need-to-support-offline-writes-or-long-periods-offline",
+    "id": "639-when-to-use#you-need-to-support-offline-writes-or-long-periods-offline",
     "title": "When To Use Zero",
     "searchTitle": "You need to support offline writes or long periods offline",
     "sectionTitle": "You need to support offline writes or long periods offline",
@@ -8616,7 +8630,7 @@
     "kind": "section"
   },
   {
-    "id": "639-when-to-use#you-are-building-a-native-mobile-app",
+    "id": "640-when-to-use#you-are-building-a-native-mobile-app",
     "title": "When To Use Zero",
     "searchTitle": "You are building a native mobile app",
     "sectionTitle": "You are building a native mobile app",
@@ -8626,7 +8640,7 @@
     "kind": "section"
   },
   {
-    "id": "640-when-to-use#the-total-backend-dataset-is--100gb",
+    "id": "641-when-to-use#the-total-backend-dataset-is--100gb",
     "title": "When To Use Zero",
     "searchTitle": "The total backend dataset is > ~100GB",
     "sectionTitle": "The total backend dataset is > ~100GB",
@@ -8636,7 +8650,7 @@
     "kind": "section"
   },
   {
-    "id": "641-when-to-use#zero-might-not-be-a-good-fit-yet",
+    "id": "642-when-to-use#zero-might-not-be-a-good-fit-yet",
     "title": "When To Use Zero",
     "searchTitle": "Zero Might Not be a Good Fit Yet",
     "sectionTitle": "Zero Might Not be a Good Fit Yet",
@@ -8646,7 +8660,7 @@
     "kind": "section"
   },
   {
-    "id": "642-when-to-use#alternatives",
+    "id": "643-when-to-use#alternatives",
     "title": "When To Use Zero",
     "searchTitle": "Alternatives",
     "sectionTitle": "Alternatives",
@@ -9082,7 +9096,7 @@
     "kind": "page"
   },
   {
-    "id": "643-zero-cache-config#required-flags",
+    "id": "644-zero-cache-config#required-flags",
     "title": "zero-cache Config",
     "searchTitle": "Required Flags",
     "sectionTitle": "Required Flags",
@@ -9092,7 +9106,7 @@
     "kind": "section"
   },
   {
-    "id": "644-zero-cache-config#upstream-db",
+    "id": "645-zero-cache-config#upstream-db",
     "title": "zero-cache Config",
     "searchTitle": "Upstream DB",
     "sectionTitle": "Upstream DB",
@@ -9102,7 +9116,7 @@
     "kind": "section"
   },
   {
-    "id": "645-zero-cache-config#admin-password",
+    "id": "646-zero-cache-config#admin-password",
     "title": "zero-cache Config",
     "searchTitle": "Admin Password",
     "sectionTitle": "Admin Password",
@@ -9112,7 +9126,7 @@
     "kind": "section"
   },
   {
-    "id": "646-zero-cache-config#optional-flags",
+    "id": "647-zero-cache-config#optional-flags",
     "title": "zero-cache Config",
     "searchTitle": "Optional Flags",
     "sectionTitle": "Optional Flags",
@@ -9122,7 +9136,7 @@
     "kind": "section"
   },
   {
-    "id": "647-zero-cache-config#affinity-cookie-name",
+    "id": "648-zero-cache-config#affinity-cookie-name",
     "title": "zero-cache Config",
     "searchTitle": "Affinity Cookie Name",
     "sectionTitle": "Affinity Cookie Name",
@@ -9132,7 +9146,7 @@
     "kind": "section"
   },
   {
-    "id": "648-zero-cache-config#affinity-cookie-path",
+    "id": "649-zero-cache-config#affinity-cookie-path",
     "title": "zero-cache Config",
     "searchTitle": "Affinity Cookie Path",
     "sectionTitle": "Affinity Cookie Path",
@@ -9142,7 +9156,7 @@
     "kind": "section"
   },
   {
-    "id": "649-zero-cache-config#affinity-cookie-domain",
+    "id": "650-zero-cache-config#affinity-cookie-domain",
     "title": "zero-cache Config",
     "searchTitle": "Affinity Cookie Domain",
     "sectionTitle": "Affinity Cookie Domain",
@@ -9152,7 +9166,7 @@
     "kind": "section"
   },
   {
-    "id": "650-zero-cache-config#allow-legacy-queries",
+    "id": "651-zero-cache-config#allow-legacy-queries",
     "title": "zero-cache Config",
     "searchTitle": "Allow Legacy Queries",
     "sectionTitle": "Allow Legacy Queries",
@@ -9162,7 +9176,7 @@
     "kind": "section"
   },
   {
-    "id": "651-zero-cache-config#app-id",
+    "id": "652-zero-cache-config#app-id",
     "title": "zero-cache Config",
     "searchTitle": "App ID",
     "sectionTitle": "App ID",
@@ -9172,7 +9186,7 @@
     "kind": "section"
   },
   {
-    "id": "652-zero-cache-config#app-publications",
+    "id": "653-zero-cache-config#app-publications",
     "title": "zero-cache Config",
     "searchTitle": "App Publications",
     "sectionTitle": "App Publications",
@@ -9182,7 +9196,7 @@
     "kind": "section"
   },
   {
-    "id": "653-zero-cache-config#auth-require-server-user-id",
+    "id": "654-zero-cache-config#auth-require-server-user-id",
     "title": "zero-cache Config",
     "searchTitle": "Auth Require Server User ID",
     "sectionTitle": "Auth Require Server User ID",
@@ -9192,7 +9206,7 @@
     "kind": "section"
   },
   {
-    "id": "654-zero-cache-config#auth-revalidate-interval-seconds",
+    "id": "655-zero-cache-config#auth-revalidate-interval-seconds",
     "title": "zero-cache Config",
     "searchTitle": "Auth Revalidate Interval Seconds",
     "sectionTitle": "Auth Revalidate Interval Seconds",
@@ -9202,7 +9216,7 @@
     "kind": "section"
   },
   {
-    "id": "655-zero-cache-config#auth-retransform-interval-seconds",
+    "id": "656-zero-cache-config#auth-retransform-interval-seconds",
     "title": "zero-cache Config",
     "searchTitle": "Auth Retransform Interval Seconds",
     "sectionTitle": "Auth Retransform Interval Seconds",
@@ -9212,7 +9226,7 @@
     "kind": "section"
   },
   {
-    "id": "656-zero-cache-config#auto-reset",
+    "id": "657-zero-cache-config#auto-reset",
     "title": "zero-cache Config",
     "searchTitle": "Auto Reset",
     "sectionTitle": "Auto Reset",
@@ -9222,7 +9236,7 @@
     "kind": "section"
   },
   {
-    "id": "657-zero-cache-config#change-db",
+    "id": "658-zero-cache-config#change-db",
     "title": "zero-cache Config",
     "searchTitle": "Change DB",
     "sectionTitle": "Change DB",
@@ -9232,7 +9246,7 @@
     "kind": "section"
   },
   {
-    "id": "658-zero-cache-config#change-streamer-back-pressure-limit-heap-proportion",
+    "id": "659-zero-cache-config#change-streamer-back-pressure-limit-heap-proportion",
     "title": "zero-cache Config",
     "searchTitle": "Change Streamer Back Pressure Limit Heap Proportion",
     "sectionTitle": "Change Streamer Back Pressure Limit Heap Proportion",
@@ -9242,7 +9256,7 @@
     "kind": "section"
   },
   {
-    "id": "659-zero-cache-config#change-streamer-flow-control-consensus-timeout-proportion",
+    "id": "660-zero-cache-config#change-streamer-flow-control-consensus-timeout-proportion",
     "title": "zero-cache Config",
     "searchTitle": "Change Streamer Flow Control Consensus Timeout Proportion",
     "sectionTitle": "Change Streamer Flow Control Consensus Timeout Proportion",
@@ -9252,7 +9266,7 @@
     "kind": "section"
   },
   {
-    "id": "660-zero-cache-config#change-streamer-flow-control-slow-subscriber-grace-period-seconds",
+    "id": "661-zero-cache-config#change-streamer-flow-control-slow-subscriber-grace-period-seconds",
     "title": "zero-cache Config",
     "searchTitle": "Change Streamer Flow Control Slow Subscriber Grace Period Seconds",
     "sectionTitle": "Change Streamer Flow Control Slow Subscriber Grace Period Seconds",
@@ -9262,7 +9276,7 @@
     "kind": "section"
   },
   {
-    "id": "661-zero-cache-config#change-streamer-port",
+    "id": "662-zero-cache-config#change-streamer-port",
     "title": "zero-cache Config",
     "searchTitle": "Change Streamer Port",
     "sectionTitle": "Change Streamer Port",
@@ -9272,7 +9286,7 @@
     "kind": "section"
   },
   {
-    "id": "662-zero-cache-config#change-streamer-secret",
+    "id": "663-zero-cache-config#change-streamer-secret",
     "title": "zero-cache Config",
     "searchTitle": "Change Streamer Secret",
     "sectionTitle": "Change Streamer Secret",
@@ -9282,7 +9296,7 @@
     "kind": "section"
   },
   {
-    "id": "663-zero-cache-config#change-streamer-startup-delay-ms",
+    "id": "664-zero-cache-config#change-streamer-startup-delay-ms",
     "title": "zero-cache Config",
     "searchTitle": "Change Streamer Startup Delay (ms)",
     "sectionTitle": "Change Streamer Startup Delay (ms)",
@@ -9292,7 +9306,7 @@
     "kind": "section"
   },
   {
-    "id": "664-zero-cache-config#change-streamer-uri",
+    "id": "665-zero-cache-config#change-streamer-uri",
     "title": "zero-cache Config",
     "searchTitle": "Change Streamer URI",
     "sectionTitle": "Change Streamer URI",
@@ -9302,7 +9316,7 @@
     "kind": "section"
   },
   {
-    "id": "665-zero-cache-config#cvr-db",
+    "id": "666-zero-cache-config#cvr-db",
     "title": "zero-cache Config",
     "searchTitle": "CVR DB",
     "sectionTitle": "CVR DB",
@@ -9312,7 +9326,7 @@
     "kind": "section"
   },
   {
-    "id": "666-zero-cache-config#cvr-garbage-collection-inactivity-threshold-hours",
+    "id": "667-zero-cache-config#cvr-garbage-collection-inactivity-threshold-hours",
     "title": "zero-cache Config",
     "searchTitle": "CVR Garbage Collection Inactivity Threshold Hours",
     "sectionTitle": "CVR Garbage Collection Inactivity Threshold Hours",
@@ -9322,7 +9336,7 @@
     "kind": "section"
   },
   {
-    "id": "667-zero-cache-config#cvr-garbage-collection-initial-batch-size",
+    "id": "668-zero-cache-config#cvr-garbage-collection-initial-batch-size",
     "title": "zero-cache Config",
     "searchTitle": "CVR Garbage Collection Initial Batch Size",
     "sectionTitle": "CVR Garbage Collection Initial Batch Size",
@@ -9332,7 +9346,7 @@
     "kind": "section"
   },
   {
-    "id": "668-zero-cache-config#cvr-garbage-collection-initial-interval-seconds",
+    "id": "669-zero-cache-config#cvr-garbage-collection-initial-interval-seconds",
     "title": "zero-cache Config",
     "searchTitle": "CVR Garbage Collection Initial Interval Seconds",
     "sectionTitle": "CVR Garbage Collection Initial Interval Seconds",
@@ -9342,7 +9356,7 @@
     "kind": "section"
   },
   {
-    "id": "669-zero-cache-config#cvr-max-connections",
+    "id": "670-zero-cache-config#cvr-max-connections",
     "title": "zero-cache Config",
     "searchTitle": "CVR Max Connections",
     "sectionTitle": "CVR Max Connections",
@@ -9352,7 +9366,7 @@
     "kind": "section"
   },
   {
-    "id": "670-zero-cache-config#enable-heapz",
+    "id": "671-zero-cache-config#enable-heapz",
     "title": "zero-cache Config",
     "searchTitle": "Enable Heapz",
     "sectionTitle": "Enable Heapz",
@@ -9362,7 +9376,7 @@
     "kind": "section"
   },
   {
-    "id": "671-zero-cache-config#enable-query-planner",
+    "id": "672-zero-cache-config#enable-query-planner",
     "title": "zero-cache Config",
     "searchTitle": "Enable Query Planner",
     "sectionTitle": "Enable Query Planner",
@@ -9372,7 +9386,7 @@
     "kind": "section"
   },
   {
-    "id": "672-zero-cache-config#enable-crud-mutations",
+    "id": "673-zero-cache-config#enable-crud-mutations",
     "title": "zero-cache Config",
     "searchTitle": "Enable CRUD Mutations",
     "sectionTitle": "Enable CRUD Mutations",
@@ -9382,7 +9396,7 @@
     "kind": "section"
   },
   {
-    "id": "673-zero-cache-config#enable-telemetry",
+    "id": "674-zero-cache-config#enable-telemetry",
     "title": "zero-cache Config",
     "searchTitle": "Enable Telemetry",
     "sectionTitle": "Enable Telemetry",
@@ -9392,7 +9406,7 @@
     "kind": "section"
   },
   {
-    "id": "674-zero-cache-config#initial-sync-table-copy-workers",
+    "id": "675-zero-cache-config#initial-sync-table-copy-workers",
     "title": "zero-cache Config",
     "searchTitle": "Initial Sync Table Copy Workers",
     "sectionTitle": "Initial Sync Table Copy Workers",
@@ -9402,7 +9416,7 @@
     "kind": "section"
   },
   {
-    "id": "675-zero-cache-config#lazy-startup",
+    "id": "676-zero-cache-config#lazy-startup",
     "title": "zero-cache Config",
     "searchTitle": "Lazy Startup",
     "sectionTitle": "Lazy Startup",
@@ -9412,7 +9426,7 @@
     "kind": "section"
   },
   {
-    "id": "676-zero-cache-config#litestream-backup-url",
+    "id": "677-zero-cache-config#litestream-backup-url",
     "title": "zero-cache Config",
     "searchTitle": "Litestream Backup URL",
     "sectionTitle": "Litestream Backup URL",
@@ -9422,7 +9436,7 @@
     "kind": "section"
   },
   {
-    "id": "677-zero-cache-config#litestream-endpoint",
+    "id": "678-zero-cache-config#litestream-endpoint",
     "title": "zero-cache Config",
     "searchTitle": "Litestream Endpoint",
     "sectionTitle": "Litestream Endpoint",
@@ -9432,7 +9446,7 @@
     "kind": "section"
   },
   {
-    "id": "678-zero-cache-config#litestream-checkpoint-threshold-mb",
+    "id": "679-zero-cache-config#litestream-checkpoint-threshold-mb",
     "title": "zero-cache Config",
     "searchTitle": "Litestream Checkpoint Threshold MB",
     "sectionTitle": "Litestream Checkpoint Threshold MB",
@@ -9442,7 +9456,7 @@
     "kind": "section"
   },
   {
-    "id": "679-zero-cache-config#litestream-config-path",
+    "id": "680-zero-cache-config#litestream-config-path",
     "title": "zero-cache Config",
     "searchTitle": "Litestream Config Path",
     "sectionTitle": "Litestream Config Path",
@@ -9452,7 +9466,7 @@
     "kind": "section"
   },
   {
-    "id": "680-zero-cache-config#litestream-config-path-v5",
+    "id": "681-zero-cache-config#litestream-config-path-v5",
     "title": "zero-cache Config",
     "searchTitle": "Litestream Config Path V5",
     "sectionTitle": "Litestream Config Path V5",
@@ -9462,7 +9476,7 @@
     "kind": "section"
   },
   {
-    "id": "681-zero-cache-config#litestream-executable",
+    "id": "682-zero-cache-config#litestream-executable",
     "title": "zero-cache Config",
     "searchTitle": "Litestream Executable",
     "sectionTitle": "Litestream Executable",
@@ -9472,7 +9486,7 @@
     "kind": "section"
   },
   {
-    "id": "682-zero-cache-config#litestream-v5-executable",
+    "id": "683-zero-cache-config#litestream-v5-executable",
     "title": "zero-cache Config",
     "searchTitle": "Litestream V5 Executable",
     "sectionTitle": "Litestream V5 Executable",
@@ -9482,7 +9496,7 @@
     "kind": "section"
   },
   {
-    "id": "683-zero-cache-config#litestream-restore-using-v5",
+    "id": "684-zero-cache-config#litestream-restore-using-v5",
     "title": "zero-cache Config",
     "searchTitle": "Litestream Restore Using V5",
     "sectionTitle": "Litestream Restore Using V5",
@@ -9492,7 +9506,7 @@
     "kind": "section"
   },
   {
-    "id": "684-zero-cache-config#litestream-backup-using-v5",
+    "id": "685-zero-cache-config#litestream-backup-using-v5",
     "title": "zero-cache Config",
     "searchTitle": "Litestream Backup Using V5",
     "sectionTitle": "Litestream Backup Using V5",
@@ -9502,7 +9516,7 @@
     "kind": "section"
   },
   {
-    "id": "685-zero-cache-config#litestream-incremental-backup-interval-minutes",
+    "id": "686-zero-cache-config#litestream-incremental-backup-interval-minutes",
     "title": "zero-cache Config",
     "searchTitle": "Litestream Incremental Backup Interval Minutes",
     "sectionTitle": "Litestream Incremental Backup Interval Minutes",
@@ -9512,7 +9526,7 @@
     "kind": "section"
   },
   {
-    "id": "686-zero-cache-config#litestream-incremental-backup-interval-seconds",
+    "id": "687-zero-cache-config#litestream-incremental-backup-interval-seconds",
     "title": "zero-cache Config",
     "searchTitle": "Litestream Incremental Backup Interval Seconds",
     "sectionTitle": "Litestream Incremental Backup Interval Seconds",
@@ -9522,7 +9536,7 @@
     "kind": "section"
   },
   {
-    "id": "687-zero-cache-config#litestream-maximum-checkpoint-page-count",
+    "id": "688-zero-cache-config#litestream-maximum-checkpoint-page-count",
     "title": "zero-cache Config",
     "searchTitle": "Litestream Maximum Checkpoint Page Count",
     "sectionTitle": "Litestream Maximum Checkpoint Page Count",
@@ -9532,7 +9546,7 @@
     "kind": "section"
   },
   {
-    "id": "688-zero-cache-config#litestream-multipart-concurrency",
+    "id": "689-zero-cache-config#litestream-multipart-concurrency",
     "title": "zero-cache Config",
     "searchTitle": "Litestream Multipart Concurrency",
     "sectionTitle": "Litestream Multipart Concurrency",
@@ -9542,7 +9556,7 @@
     "kind": "section"
   },
   {
-    "id": "689-zero-cache-config#litestream-multipart-size",
+    "id": "690-zero-cache-config#litestream-multipart-size",
     "title": "zero-cache Config",
     "searchTitle": "Litestream Multipart Size",
     "sectionTitle": "Litestream Multipart Size",
@@ -9552,7 +9566,7 @@
     "kind": "section"
   },
   {
-    "id": "690-zero-cache-config#litestream-log-level",
+    "id": "691-zero-cache-config#litestream-log-level",
     "title": "zero-cache Config",
     "searchTitle": "Litestream Log Level",
     "sectionTitle": "Litestream Log Level",
@@ -9562,7 +9576,7 @@
     "kind": "section"
   },
   {
-    "id": "691-zero-cache-config#litestream-port",
+    "id": "692-zero-cache-config#litestream-port",
     "title": "zero-cache Config",
     "searchTitle": "Litestream Port",
     "sectionTitle": "Litestream Port",
@@ -9572,7 +9586,7 @@
     "kind": "section"
   },
   {
-    "id": "692-zero-cache-config#litestream-region",
+    "id": "693-zero-cache-config#litestream-region",
     "title": "zero-cache Config",
     "searchTitle": "Litestream Region",
     "sectionTitle": "Litestream Region",
@@ -9582,7 +9596,7 @@
     "kind": "section"
   },
   {
-    "id": "693-zero-cache-config#litestream-restore-parallelism",
+    "id": "694-zero-cache-config#litestream-restore-parallelism",
     "title": "zero-cache Config",
     "searchTitle": "Litestream Restore Parallelism",
     "sectionTitle": "Litestream Restore Parallelism",
@@ -9592,7 +9606,7 @@
     "kind": "section"
   },
   {
-    "id": "694-zero-cache-config#litestream-snapshot-backup-interval-hours",
+    "id": "695-zero-cache-config#litestream-snapshot-backup-interval-hours",
     "title": "zero-cache Config",
     "searchTitle": "Litestream Snapshot Backup Interval Hours",
     "sectionTitle": "Litestream Snapshot Backup Interval Hours",
@@ -9602,7 +9616,7 @@
     "kind": "section"
   },
   {
-    "id": "695-zero-cache-config#log-format",
+    "id": "696-zero-cache-config#log-format",
     "title": "zero-cache Config",
     "searchTitle": "Log Format",
     "sectionTitle": "Log Format",
@@ -9612,7 +9626,7 @@
     "kind": "section"
   },
   {
-    "id": "696-zero-cache-config#log-ivm-sampling",
+    "id": "697-zero-cache-config#log-ivm-sampling",
     "title": "zero-cache Config",
     "searchTitle": "Log IVM Sampling",
     "sectionTitle": "Log IVM Sampling",
@@ -9622,7 +9636,7 @@
     "kind": "section"
   },
   {
-    "id": "697-zero-cache-config#log-level",
+    "id": "698-zero-cache-config#log-level",
     "title": "zero-cache Config",
     "searchTitle": "Log Level",
     "sectionTitle": "Log Level",
@@ -9632,7 +9646,7 @@
     "kind": "section"
   },
   {
-    "id": "698-zero-cache-config#log-slow-hydrate-threshold",
+    "id": "699-zero-cache-config#log-slow-hydrate-threshold",
     "title": "zero-cache Config",
     "searchTitle": "Log Slow Hydrate Threshold",
     "sectionTitle": "Log Slow Hydrate Threshold",
@@ -9642,7 +9656,7 @@
     "kind": "section"
   },
   {
-    "id": "699-zero-cache-config#log-slow-row-threshold",
+    "id": "700-zero-cache-config#log-slow-row-threshold",
     "title": "zero-cache Config",
     "searchTitle": "Log Slow Row Threshold",
     "sectionTitle": "Log Slow Row Threshold",
@@ -9652,7 +9666,7 @@
     "kind": "section"
   },
   {
-    "id": "700-zero-cache-config#mutate-api-key",
+    "id": "701-zero-cache-config#mutate-api-key",
     "title": "zero-cache Config",
     "searchTitle": "Mutate API Key",
     "sectionTitle": "Mutate API Key",
@@ -9662,7 +9676,7 @@
     "kind": "section"
   },
   {
-    "id": "701-zero-cache-config#mutate-allowed-client-headers",
+    "id": "702-zero-cache-config#mutate-allowed-client-headers",
     "title": "zero-cache Config",
     "searchTitle": "Mutate Allowed Client Headers",
     "sectionTitle": "Mutate Allowed Client Headers",
@@ -9672,7 +9686,7 @@
     "kind": "section"
   },
   {
-    "id": "702-zero-cache-config#mutate-allowed-request-headers",
+    "id": "703-zero-cache-config#mutate-allowed-request-headers",
     "title": "zero-cache Config",
     "searchTitle": "Mutate Allowed Request Headers",
     "sectionTitle": "Mutate Allowed Request Headers",
@@ -9682,7 +9696,7 @@
     "kind": "section"
   },
   {
-    "id": "703-zero-cache-config#mutate-forward-cookies",
+    "id": "704-zero-cache-config#mutate-forward-cookies",
     "title": "zero-cache Config",
     "searchTitle": "Mutate Forward Cookies",
     "sectionTitle": "Mutate Forward Cookies",
@@ -9692,7 +9706,7 @@
     "kind": "section"
   },
   {
-    "id": "704-zero-cache-config#mutate-url",
+    "id": "705-zero-cache-config#mutate-url",
     "title": "zero-cache Config",
     "searchTitle": "Mutate URL",
     "sectionTitle": "Mutate URL",
@@ -9702,7 +9716,7 @@
     "kind": "section"
   },
   {
-    "id": "705-zero-cache-config#number-of-sync-workers",
+    "id": "706-zero-cache-config#number-of-sync-workers",
     "title": "zero-cache Config",
     "searchTitle": "Number of Sync Workers",
     "sectionTitle": "Number of Sync Workers",
@@ -9712,7 +9726,7 @@
     "kind": "section"
   },
   {
-    "id": "706-zero-cache-config#operator-password",
+    "id": "707-zero-cache-config#operator-password",
     "title": "zero-cache Config",
     "searchTitle": "Operator Password",
     "sectionTitle": "Operator Password",
@@ -9722,7 +9736,7 @@
     "kind": "section"
   },
   {
-    "id": "707-zero-cache-config#per-user-mutation-limit-max",
+    "id": "708-zero-cache-config#per-user-mutation-limit-max",
     "title": "zero-cache Config",
     "searchTitle": "Per User Mutation Limit Max",
     "sectionTitle": "Per User Mutation Limit Max",
@@ -9732,7 +9746,7 @@
     "kind": "section"
   },
   {
-    "id": "708-zero-cache-config#per-user-mutation-limit-window-ms",
+    "id": "709-zero-cache-config#per-user-mutation-limit-window-ms",
     "title": "zero-cache Config",
     "searchTitle": "Per User Mutation Limit Window (ms)",
     "sectionTitle": "Per User Mutation Limit Window (ms)",
@@ -9742,7 +9756,7 @@
     "kind": "section"
   },
   {
-    "id": "709-zero-cache-config#pg-replication-slot-failover",
+    "id": "710-zero-cache-config#pg-replication-slot-failover",
     "title": "zero-cache Config",
     "searchTitle": "PG Replication Slot Failover",
     "sectionTitle": "PG Replication Slot Failover",
@@ -9752,7 +9766,7 @@
     "kind": "section"
   },
   {
-    "id": "710-zero-cache-config#port",
+    "id": "711-zero-cache-config#port",
     "title": "zero-cache Config",
     "searchTitle": "Port",
     "sectionTitle": "Port",
@@ -9762,7 +9776,7 @@
     "kind": "section"
   },
   {
-    "id": "711-zero-cache-config#pre-drain-delay-ms",
+    "id": "712-zero-cache-config#pre-drain-delay-ms",
     "title": "zero-cache Config",
     "searchTitle": "Pre-Drain Delay (ms)",
     "sectionTitle": "Pre-Drain Delay (ms)",
@@ -9772,7 +9786,7 @@
     "kind": "section"
   },
   {
-    "id": "712-zero-cache-config#query-api-key",
+    "id": "713-zero-cache-config#query-api-key",
     "title": "zero-cache Config",
     "searchTitle": "Query API Key",
     "sectionTitle": "Query API Key",
@@ -9782,7 +9796,7 @@
     "kind": "section"
   },
   {
-    "id": "713-zero-cache-config#query-allowed-client-headers",
+    "id": "714-zero-cache-config#query-allowed-client-headers",
     "title": "zero-cache Config",
     "searchTitle": "Query Allowed Client Headers",
     "sectionTitle": "Query Allowed Client Headers",
@@ -9792,7 +9806,7 @@
     "kind": "section"
   },
   {
-    "id": "714-zero-cache-config#query-allowed-request-headers",
+    "id": "715-zero-cache-config#query-allowed-request-headers",
     "title": "zero-cache Config",
     "searchTitle": "Query Allowed Request Headers",
     "sectionTitle": "Query Allowed Request Headers",
@@ -9802,7 +9816,7 @@
     "kind": "section"
   },
   {
-    "id": "715-zero-cache-config#query-forward-cookies",
+    "id": "716-zero-cache-config#query-forward-cookies",
     "title": "zero-cache Config",
     "searchTitle": "Query Forward Cookies",
     "sectionTitle": "Query Forward Cookies",
@@ -9812,7 +9826,7 @@
     "kind": "section"
   },
   {
-    "id": "716-zero-cache-config#query-hydration-stats",
+    "id": "717-zero-cache-config#query-hydration-stats",
     "title": "zero-cache Config",
     "searchTitle": "Query Hydration Stats",
     "sectionTitle": "Query Hydration Stats",
@@ -9822,7 +9836,7 @@
     "kind": "section"
   },
   {
-    "id": "717-zero-cache-config#query-url",
+    "id": "718-zero-cache-config#query-url",
     "title": "zero-cache Config",
     "searchTitle": "Query URL",
     "sectionTitle": "Query URL",
@@ -9832,7 +9846,7 @@
     "kind": "section"
   },
   {
-    "id": "718-zero-cache-config#replica-file",
+    "id": "719-zero-cache-config#replica-file",
     "title": "zero-cache Config",
     "searchTitle": "Replica File",
     "sectionTitle": "Replica File",
@@ -9842,7 +9856,7 @@
     "kind": "section"
   },
   {
-    "id": "719-zero-cache-config#replica-vacuum-interval-hours",
+    "id": "720-zero-cache-config#replica-vacuum-interval-hours",
     "title": "zero-cache Config",
     "searchTitle": "Replica Vacuum Interval Hours",
     "sectionTitle": "Replica Vacuum Interval Hours",
@@ -9852,7 +9866,7 @@
     "kind": "section"
   },
   {
-    "id": "720-zero-cache-config#replication-lag-initial-readiness-threshold-ms",
+    "id": "721-zero-cache-config#replication-lag-initial-readiness-threshold-ms",
     "title": "zero-cache Config",
     "searchTitle": "Replication Lag Initial Readiness Threshold (ms)",
     "sectionTitle": "Replication Lag Initial Readiness Threshold (ms)",
@@ -9862,7 +9876,7 @@
     "kind": "section"
   },
   {
-    "id": "721-zero-cache-config#replication-lag-max-readiness-delay-ms",
+    "id": "722-zero-cache-config#replication-lag-max-readiness-delay-ms",
     "title": "zero-cache Config",
     "searchTitle": "Replication Lag Max Readiness Delay (ms)",
     "sectionTitle": "Replication Lag Max Readiness Delay (ms)",
@@ -9872,7 +9886,7 @@
     "kind": "section"
   },
   {
-    "id": "722-zero-cache-config#replication-lag-report-interval-ms",
+    "id": "723-zero-cache-config#replication-lag-report-interval-ms",
     "title": "zero-cache Config",
     "searchTitle": "Replication Lag Report Interval (ms)",
     "sectionTitle": "Replication Lag Report Interval (ms)",
@@ -9882,7 +9896,7 @@
     "kind": "section"
   },
   {
-    "id": "723-zero-cache-config#server-version",
+    "id": "724-zero-cache-config#server-version",
     "title": "zero-cache Config",
     "searchTitle": "Server Version",
     "sectionTitle": "Server Version",
@@ -9892,7 +9906,7 @@
     "kind": "section"
   },
   {
-    "id": "724-zero-cache-config#shadow-sync-enabled",
+    "id": "725-zero-cache-config#shadow-sync-enabled",
     "title": "zero-cache Config",
     "searchTitle": "Shadow Sync Enabled",
     "sectionTitle": "Shadow Sync Enabled",
@@ -9902,7 +9916,7 @@
     "kind": "section"
   },
   {
-    "id": "725-zero-cache-config#shadow-sync-interval-hours",
+    "id": "726-zero-cache-config#shadow-sync-interval-hours",
     "title": "zero-cache Config",
     "searchTitle": "Shadow Sync Interval Hours",
     "sectionTitle": "Shadow Sync Interval Hours",
@@ -9912,7 +9926,7 @@
     "kind": "section"
   },
   {
-    "id": "726-zero-cache-config#shadow-sync-sample-rate",
+    "id": "727-zero-cache-config#shadow-sync-sample-rate",
     "title": "zero-cache Config",
     "searchTitle": "Shadow Sync Sample Rate",
     "sectionTitle": "Shadow Sync Sample Rate",
@@ -9922,7 +9936,7 @@
     "kind": "section"
   },
   {
-    "id": "727-zero-cache-config#shadow-sync-max-rows-per-table",
+    "id": "728-zero-cache-config#shadow-sync-max-rows-per-table",
     "title": "zero-cache Config",
     "searchTitle": "Shadow Sync Max Rows Per Table",
     "sectionTitle": "Shadow Sync Max Rows Per Table",
@@ -9932,7 +9946,7 @@
     "kind": "section"
   },
   {
-    "id": "728-zero-cache-config#storage-db-temp-dir",
+    "id": "729-zero-cache-config#storage-db-temp-dir",
     "title": "zero-cache Config",
     "searchTitle": "Storage DB Temp Dir",
     "sectionTitle": "Storage DB Temp Dir",
@@ -9942,7 +9956,7 @@
     "kind": "section"
   },
   {
-    "id": "729-zero-cache-config#task-id",
+    "id": "730-zero-cache-config#task-id",
     "title": "zero-cache Config",
     "searchTitle": "Task ID",
     "sectionTitle": "Task ID",
@@ -9952,7 +9966,7 @@
     "kind": "section"
   },
   {
-    "id": "730-zero-cache-config#upstream-max-connections",
+    "id": "731-zero-cache-config#upstream-max-connections",
     "title": "zero-cache Config",
     "searchTitle": "Upstream Max Connections",
     "sectionTitle": "Upstream Max Connections",
@@ -9962,7 +9976,7 @@
     "kind": "section"
   },
   {
-    "id": "731-zero-cache-config#upstream-pg-replication-slot-failover",
+    "id": "732-zero-cache-config#upstream-pg-replication-slot-failover",
     "title": "zero-cache Config",
     "searchTitle": "Upstream PG Replication Slot Failover",
     "sectionTitle": "Upstream PG Replication Slot Failover",
@@ -9972,7 +9986,7 @@
     "kind": "section"
   },
   {
-    "id": "732-zero-cache-config#upstream-pg-replication-slot-per-replica",
+    "id": "733-zero-cache-config#upstream-pg-replication-slot-per-replica",
     "title": "zero-cache Config",
     "searchTitle": "Upstream PG Replication Slot Per Replica",
     "sectionTitle": "Upstream PG Replication Slot Per Replica",
@@ -9982,7 +9996,7 @@
     "kind": "section"
   },
   {
-    "id": "733-zero-cache-config#upstream-pg-stream-inbound-timeout",
+    "id": "734-zero-cache-config#upstream-pg-stream-inbound-timeout",
     "title": "zero-cache Config",
     "searchTitle": "Upstream PG Stream Inbound Timeout",
     "sectionTitle": "Upstream PG Stream Inbound Timeout",
@@ -9992,7 +10006,7 @@
     "kind": "section"
   },
   {
-    "id": "734-zero-cache-config#view-syncer-hydration-budget-ms",
+    "id": "735-zero-cache-config#view-syncer-hydration-budget-ms",
     "title": "zero-cache Config",
     "searchTitle": "View Syncer Hydration Budget (ms)",
     "sectionTitle": "View Syncer Hydration Budget (ms)",
@@ -10002,7 +10016,7 @@
     "kind": "section"
   },
   {
-    "id": "735-zero-cache-config#view-syncer-query-hydration-timeout-ms",
+    "id": "736-zero-cache-config#view-syncer-query-hydration-timeout-ms",
     "title": "zero-cache Config",
     "searchTitle": "View Syncer Query Hydration Timeout (ms)",
     "sectionTitle": "View Syncer Query Hydration Timeout (ms)",
@@ -10012,7 +10026,7 @@
     "kind": "section"
   },
   {
-    "id": "736-zero-cache-config#websocket-compression",
+    "id": "737-zero-cache-config#websocket-compression",
     "title": "zero-cache Config",
     "searchTitle": "Websocket Compression",
     "sectionTitle": "Websocket Compression",
@@ -10022,7 +10036,7 @@
     "kind": "section"
   },
   {
-    "id": "737-zero-cache-config#websocket-compression-options",
+    "id": "738-zero-cache-config#websocket-compression-options",
     "title": "zero-cache Config",
     "searchTitle": "Websocket Compression Options",
     "sectionTitle": "Websocket Compression Options",
@@ -10032,7 +10046,7 @@
     "kind": "section"
   },
   {
-    "id": "738-zero-cache-config#websocket-max-payload-bytes",
+    "id": "739-zero-cache-config#websocket-max-payload-bytes",
     "title": "zero-cache Config",
     "searchTitle": "Websocket Max Payload Bytes",
     "sectionTitle": "Websocket Max Payload Bytes",
@@ -10042,7 +10056,7 @@
     "kind": "section"
   },
   {
-    "id": "739-zero-cache-config#yield-threshold-ms",
+    "id": "740-zero-cache-config#yield-threshold-ms",
     "title": "zero-cache Config",
     "searchTitle": "Yield Threshold (ms)",
     "sectionTitle": "Yield Threshold (ms)",
@@ -10052,7 +10066,7 @@
     "kind": "section"
   },
   {
-    "id": "740-zero-cache-config#deprecated-flags",
+    "id": "741-zero-cache-config#deprecated-flags",
     "title": "zero-cache Config",
     "searchTitle": "Deprecated Flags",
     "sectionTitle": "Deprecated Flags",
@@ -10062,7 +10076,7 @@
     "kind": "section"
   },
   {
-    "id": "741-zero-cache-config#change-max-connections",
+    "id": "742-zero-cache-config#change-max-connections",
     "title": "zero-cache Config",
     "searchTitle": "Change Max Connections",
     "sectionTitle": "Change Max Connections",
@@ -10072,7 +10086,7 @@
     "kind": "section"
   },
   {
-    "id": "742-zero-cache-config#change-streamer-mode",
+    "id": "743-zero-cache-config#change-streamer-mode",
     "title": "zero-cache Config",
     "searchTitle": "Change Streamer Mode",
     "sectionTitle": "Change Streamer Mode",
@@ -10082,7 +10096,7 @@
     "kind": "section"
   },
   {
-    "id": "743-zero-cache-config#litestream-minimum-checkpoint-page-count",
+    "id": "744-zero-cache-config#litestream-minimum-checkpoint-page-count",
     "title": "zero-cache Config",
     "searchTitle": "Litestream Minimum Checkpoint Page Count",
     "sectionTitle": "Litestream Minimum Checkpoint Page Count",
@@ -10092,7 +10106,7 @@
     "kind": "section"
   },
   {
-    "id": "744-zero-cache-config#auth-jwk",
+    "id": "745-zero-cache-config#auth-jwk",
     "title": "zero-cache Config",
     "searchTitle": "Auth JWK",
     "sectionTitle": "Auth JWK",
@@ -10102,7 +10116,7 @@
     "kind": "section"
   },
   {
-    "id": "745-zero-cache-config#auth-jwks-url",
+    "id": "746-zero-cache-config#auth-jwks-url",
     "title": "zero-cache Config",
     "searchTitle": "Auth JWKS URL",
     "sectionTitle": "Auth JWKS URL",
@@ -10112,7 +10126,7 @@
     "kind": "section"
   },
   {
-    "id": "746-zero-cache-config#auth-secret",
+    "id": "747-zero-cache-config#auth-secret",
     "title": "zero-cache Config",
     "searchTitle": "Auth Secret",
     "sectionTitle": "Auth Secret",
@@ -10256,7 +10270,7 @@
     "kind": "page"
   },
   {
-    "id": "747-zql#create-a-builder",
+    "id": "748-zql#create-a-builder",
     "title": "ZQL",
     "searchTitle": "Create a Builder",
     "sectionTitle": "Create a Builder",
@@ -10266,7 +10280,7 @@
     "kind": "section"
   },
   {
-    "id": "748-zql#select",
+    "id": "749-zql#select",
     "title": "ZQL",
     "searchTitle": "Select",
     "sectionTitle": "Select",
@@ -10276,7 +10290,7 @@
     "kind": "section"
   },
   {
-    "id": "749-zql#ordering",
+    "id": "750-zql#ordering",
     "title": "ZQL",
     "searchTitle": "Ordering",
     "sectionTitle": "Ordering",
@@ -10286,7 +10300,7 @@
     "kind": "section"
   },
   {
-    "id": "750-zql#limit",
+    "id": "751-zql#limit",
     "title": "ZQL",
     "searchTitle": "Limit",
     "sectionTitle": "Limit",
@@ -10296,7 +10310,7 @@
     "kind": "section"
   },
   {
-    "id": "751-zql#paging",
+    "id": "752-zql#paging",
     "title": "ZQL",
     "searchTitle": "Paging",
     "sectionTitle": "Paging",
@@ -10306,7 +10320,7 @@
     "kind": "section"
   },
   {
-    "id": "752-zql#getting-a-single-result",
+    "id": "753-zql#getting-a-single-result",
     "title": "ZQL",
     "searchTitle": "Getting a Single Result",
     "sectionTitle": "Getting a Single Result",
@@ -10316,7 +10330,7 @@
     "kind": "section"
   },
   {
-    "id": "753-zql#relationships",
+    "id": "754-zql#relationships",
     "title": "ZQL",
     "searchTitle": "Relationships",
     "sectionTitle": "Relationships",
@@ -10326,7 +10340,7 @@
     "kind": "section"
   },
   {
-    "id": "754-zql#refining-relationships",
+    "id": "755-zql#refining-relationships",
     "title": "ZQL",
     "searchTitle": "Refining Relationships",
     "sectionTitle": "Refining Relationships",
@@ -10336,7 +10350,7 @@
     "kind": "section"
   },
   {
-    "id": "755-zql#nested-relationships",
+    "id": "756-zql#nested-relationships",
     "title": "ZQL",
     "searchTitle": "Nested Relationships",
     "sectionTitle": "Nested Relationships",
@@ -10346,7 +10360,7 @@
     "kind": "section"
   },
   {
-    "id": "756-zql#where",
+    "id": "757-zql#where",
     "title": "ZQL",
     "searchTitle": "Where",
     "sectionTitle": "Where",
@@ -10356,7 +10370,7 @@
     "kind": "section"
   },
   {
-    "id": "757-zql#comparison-operators",
+    "id": "758-zql#comparison-operators",
     "title": "ZQL",
     "searchTitle": "Comparison Operators",
     "sectionTitle": "Comparison Operators",
@@ -10366,7 +10380,7 @@
     "kind": "section"
   },
   {
-    "id": "758-zql#equals-is-the-default-comparison-operator",
+    "id": "759-zql#equals-is-the-default-comparison-operator",
     "title": "ZQL",
     "searchTitle": "Equals is the Default Comparison Operator",
     "sectionTitle": "Equals is the Default Comparison Operator",
@@ -10376,7 +10390,7 @@
     "kind": "section"
   },
   {
-    "id": "759-zql#comparing-to-null",
+    "id": "760-zql#comparing-to-null",
     "title": "ZQL",
     "searchTitle": "Comparing to null",
     "sectionTitle": "Comparing to null",
@@ -10386,7 +10400,7 @@
     "kind": "section"
   },
   {
-    "id": "760-zql#comparing-to-undefined",
+    "id": "761-zql#comparing-to-undefined",
     "title": "ZQL",
     "searchTitle": "Comparing to undefined",
     "sectionTitle": "Comparing to undefined",
@@ -10396,7 +10410,7 @@
     "kind": "section"
   },
   {
-    "id": "761-zql#compound-filters",
+    "id": "762-zql#compound-filters",
     "title": "ZQL",
     "searchTitle": "Compound Filters",
     "sectionTitle": "Compound Filters",
@@ -10406,7 +10420,7 @@
     "kind": "section"
   },
   {
-    "id": "762-zql#comparing-literal-values",
+    "id": "763-zql#comparing-literal-values",
     "title": "ZQL",
     "searchTitle": "Comparing Literal Values",
     "sectionTitle": "Comparing Literal Values",
@@ -10416,7 +10430,7 @@
     "kind": "section"
   },
   {
-    "id": "763-zql#json-filters",
+    "id": "764-zql#json-filters",
     "title": "ZQL",
     "searchTitle": "JSON Filters",
     "sectionTitle": "JSON Filters",
@@ -10426,7 +10440,7 @@
     "kind": "section"
   },
   {
-    "id": "764-zql#comparisons-are-type-strict",
+    "id": "765-zql#comparisons-are-type-strict",
     "title": "ZQL",
     "searchTitle": "Comparisons Are Type-Strict",
     "sectionTitle": "Comparisons Are Type-Strict",
@@ -10436,7 +10450,7 @@
     "kind": "section"
   },
   {
-    "id": "765-zql#missing-values",
+    "id": "766-zql#missing-values",
     "title": "ZQL",
     "searchTitle": "Missing Values",
     "sectionTitle": "Missing Values",
@@ -10446,7 +10460,7 @@
     "kind": "section"
   },
   {
-    "id": "766-zql#relationship-filters",
+    "id": "767-zql#relationship-filters",
     "title": "ZQL",
     "searchTitle": "Relationship Filters",
     "sectionTitle": "Relationship Filters",
@@ -10456,7 +10470,7 @@
     "kind": "section"
   },
   {
-    "id": "767-zql#aggregates",
+    "id": "768-zql#aggregates",
     "title": "ZQL",
     "searchTitle": "Aggregates",
     "sectionTitle": "Aggregates",
@@ -10466,7 +10480,7 @@
     "kind": "section"
   },
   {
-    "id": "768-zql#distinct",
+    "id": "769-zql#distinct",
     "title": "ZQL",
     "searchTitle": "Distinct",
     "sectionTitle": "Distinct",
@@ -10476,7 +10490,7 @@
     "kind": "section"
   },
   {
-    "id": "769-zql#group-by",
+    "id": "770-zql#group-by",
     "title": "ZQL",
     "searchTitle": "Group By",
     "sectionTitle": "Group By",
@@ -10486,7 +10500,7 @@
     "kind": "section"
   },
   {
-    "id": "770-zql#type-helpers",
+    "id": "771-zql#type-helpers",
     "title": "ZQL",
     "searchTitle": "Type Helpers",
     "sectionTitle": "Type Helpers",
@@ -10496,7 +10510,7 @@
     "kind": "section"
   },
   {
-    "id": "771-zql#planning",
+    "id": "772-zql#planning",
     "title": "ZQL",
     "searchTitle": "Planning",
     "sectionTitle": "Planning",
@@ -10506,7 +10520,7 @@
     "kind": "section"
   },
   {
-    "id": "772-zql#inspecting-query-plans",
+    "id": "773-zql#inspecting-query-plans",
     "title": "ZQL",
     "searchTitle": "Inspecting Query Plans",
     "sectionTitle": "Inspecting Query Plans",
@@ -10516,7 +10530,7 @@
     "kind": "section"
   },
   {
-    "id": "773-zql#manually-flipping-joins",
+    "id": "774-zql#manually-flipping-joins",
     "title": "ZQL",
     "searchTitle": "Manually Flipping Joins",
     "sectionTitle": "Manually Flipping Joins",
@@ -10526,7 +10540,7 @@
     "kind": "section"
   },
   {
-    "id": "774-zql#scalar-subqueries",
+    "id": "775-zql#scalar-subqueries",
     "title": "ZQL",
     "searchTitle": "Scalar Subqueries",
     "sectionTitle": "Scalar Subqueries",
@@ -10536,7 +10550,7 @@
     "kind": "section"
   },
   {
-    "id": "775-zql#why-it-matters",
+    "id": "776-zql#why-it-matters",
     "title": "ZQL",
     "searchTitle": "Why It Matters",
     "sectionTitle": "Why It Matters",
@@ -10546,7 +10560,7 @@
     "kind": "section"
   },
   {
-    "id": "776-zql#trade-offs",
+    "id": "777-zql#trade-offs",
     "title": "ZQL",
     "searchTitle": "Trade-offs",
     "sectionTitle": "Trade-offs",
@@ -10556,7 +10570,7 @@
     "kind": "section"
   },
   {
-    "id": "777-zql#future-work",
+    "id": "778-zql#future-work",
     "title": "ZQL",
     "searchTitle": "Future Work",
     "sectionTitle": "Future Work",

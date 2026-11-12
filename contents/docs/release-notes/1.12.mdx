@@ -211,7 +211,36 @@ Before `zero-cache` hydrates a query with `whereExists`, it plans which way to r
   ]}
 />
 
-{/* TODO: CPU with many connections (poke buffer reuse), benchmark still running. */}
+### Many Connections
+
+Every change `zero-cache` syncs reaches each connected client as a poke. In 1.11, every poke allocated a fresh 1 MiB buffer, so with many clients connected the garbage collector was busy cleaning up after them. Zero 1.12 keeps a small buffer per connection and reuses it. With 600 clients connected and 100 writes per second on one sync worker, the sync worker now uses about **1.9x less CPU**. ([ac45c279f](https://github.com/rocicorp/mono/commit/ac45c279f))
+
+<BenchmarkComparisonChart
+  title="Many Connections"
+  description="Measured on M5 Pro. Lower is better."
+  previousLabel="Zero 1.11"
+  currentLabel="Zero 1.12"
+  precision={1}
+  valuePrecision={2}
+  unit="cores"
+  higherIsBetter={false}
+  data={[
+    {
+      name: 'Sync worker',
+      fullName:
+        'CPU of the sync worker serving 600 connected clients at 100 writes per second',
+      previous: 2.11,
+      current: 1.11
+    },
+    {
+      name: 'All of zero-cache',
+      fullName:
+        'CPU of all zero-cache processes in the same workload',
+      previous: 2.31,
+      current: 1.31
+    }
+  ]}
+/>
 
 ## Fixes
 

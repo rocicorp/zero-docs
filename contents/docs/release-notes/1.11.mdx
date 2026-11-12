@@ -24,12 +24,13 @@ npm install @rocicorp/zero@1.11
 npm install @rocicorp/zero@1.11.5
 ```
 
-Zero 1.11.5 fixes eleven security vulnerabilities and two ways a single row could stop replication. We recommend that everyone upgrade. Some of the fixes change how Zero behaves, so read [Upgrading](#upgrading-to-1115) and [Breaking Changes](#breaking-changes-in-1115) first.
+Zero 1.11.5 fixes twelve security vulnerabilities and one other way a single row could stop replication. We recommend that everyone upgrade. Some of the fixes change how Zero behaves, so read [Upgrading](#upgrading-to-1115) and [Breaking Changes](#breaking-changes-in-1115) first.
 
 ### Security
 
 - [zero-cache trusts unauthenticated schema-change messages from any Postgres login, allowing SQL execution in its replica](https://github.com/rocicorp/mono/security/advisories/GHSA-jqpm-w35c-vp2w) (Critical)
 - [zero-cache change-streamer accepts replication connections without authentication](https://github.com/rocicorp/mono/security/advisories/GHSA-5mv3-647j-j599) (Critical)
+- [Out-of-int64 numeric value crash-loops zero-cache replication](https://github.com/rocicorp/mono/security/advisories/GHSA-j2rg-cf6r-pw56) (High)
 - [zero-cache skips the client group's user check when credentials change during connection setup](https://github.com/rocicorp/mono/security/advisories/GHSA-2mcx-4658-ghhm) (Medium)
 - [Malformed replication lag report from any Postgres login halts zero-cache replication](https://github.com/rocicorp/mono/security/advisories/GHSA-25xq-3g62-39qr) (Medium)
 - [zero-cache can send a client group's data to a new connection before validating its credentials](https://github.com/rocicorp/mono/security/advisories/GHSA-q99x-5xqv-fm73) (Medium)
